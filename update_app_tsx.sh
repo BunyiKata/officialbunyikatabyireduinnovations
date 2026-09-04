@@ -1,0 +1,10 @@
+sed -i 's/className="neo-btn bg-red cara-belajar-btn"/className="neo-btn bg-red cara-belajar-btn untuk-huruf"/g' src/App.tsx
+sed -i 's/className="neo-btn bg-purple cara-belajar-btn"/className="neo-btn bg-purple cara-belajar-btn untuk-huruf"/g' src/App.tsx
+sed -i 's/className="neo-btn bg-blue cara-belajar-btn"/className="neo-btn bg-blue cara-belajar-btn untuk-huruf"/g' src/App.tsx
+sed -i 's/className="neo-btn bg-green cara-belajar-btn"/className="neo-btn bg-green cara-belajar-btn untuk-huruf"/g' src/App.tsx
+
+# Add Tanduk Kata to standard view
+awk '/<button className="neo-btn bg-green cara-belajar-btn untuk-huruf" onClick={\(e\) => { window.bukaARABC && window.bukaARABC\(\) }}><i className="fa-solid fa-camera"><\/i> <span className="cara-belajar-btn-text-full">AR ABC<\/span><span className="cara-belajar-btn-text-short">AR<\/span><\/button>/{print; print "                <button className=\"neo-btn bg-pink cara-belajar-btn untuk-sukukata\" onClick={(e) => { window.bukaTandukKata && window.bukaTandukKata() }}><i className=\"fa-solid fa-gamepad\"></i> <span className=\"cara-belajar-btn-text-full\">Tanduk Kata</span><span className=\"cara-belajar-btn-text-short\">Tanduk</span></button>"; next}1' src/App.tsx > temp.tsx && mv temp.tsx src/App.tsx
+
+# Add Tanduk Kata to floating dial
+awk '/<button className="neo-btn bg-green cara-belajar-btn untuk-huruf" onClick={\(e\) => { setIsDialOpen\(false\); window.bukaARABC && window.bukaARABC\(\) }}>/{print; print "                    <span className=\"cara-belajar-btn-text-short\">AR ABC</span>"; print "                    <i className=\"fa-solid fa-camera\"></i>"; print "                </button>"; print "                <button className=\"neo-btn bg-pink cara-belajar-btn untuk-sukukata\" onClick={(e) => { setIsDialOpen(false); window.bukaTandukKata && window.bukaTandukKata() }}>"; print "                    <span className=\"cara-belajar-btn-text-short\">Tanduk Kata</span>"; print "                    <i className=\"fa-solid fa-gamepad\"></i>"; print "                </button>"; next}1' src/App.tsx > temp.tsx && mv temp.tsx src/App.tsx

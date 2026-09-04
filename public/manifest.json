@@ -1,0 +1,22 @@
+{
+  "name": "Bunyi Kata - Pembelajaran Interaktif",
+  "short_name": "Bunyi Kata",
+  "description": "Aplikasi Pembelajaran Interaktif Bahasa Melayu untuk Murid Sekolah Dasar",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#3b82f6",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/images/sampingan/logo-login-screen.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/sampingan/logo-login-screen.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+sed -i "s/const lockedClass = isLockedForUser ? 'locked' : '';/const lockedClass = isLockedForUser ? 'locked' : '';\n                const activeClass = (!isLockedForUser && moduleIndex === unlockedIndex) ? 'active-level' : '';\n                const completedClass = (!isLockedForUser && moduleIndex < unlockedIndex) ? 'completed-level' : '';/" public/app.js
+sed -i 's/class="island-node ${lockedClass}"/class="island-node ${lockedClass} ${activeClass} ${completedClass}"/' public/app.js
