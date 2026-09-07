@@ -988,7 +988,7 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
 
     const getAvatarSrc = () => {
         const studentName = (window as any).namaMuridAktif || 'Murid';
-        return (window as any).studentData?.[studentName]?.avatar || (window as any).selectedAvatarIcon || 'https://i.postimg.cc/bNscvjR5/Copy-of-BUNYI-KATA-APPS-(1).png';
+        return (window as any).studentData?.[studentName]?.avatar || (window as any).selectedAvatarIcon || '/images/avatar/avatar1.png';
     };
     const [currentAvatar, setCurrentAvatar] = useState(getAvatarSrc);
 
@@ -2057,38 +2057,22 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
                                     </div>
                                 </div>
 
-                                {/* Bottom 3 Buttons */}
-                                <div style={{ display: 'flex', gap: '10px', width: '100%', marginTop: '4px' }}>
+                                {/* Bottom 2 Buttons */}
+                                <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '4px' }}>
                                     <button
-                                        className="neo-btn bg-purple"
-                                        title="Koleksi Lencana"
-                                        aria-label="Koleksi Lencana"
-                                        onClick={() => {
-                                            setShowGameOver(false);
-                                            setGameState('idle');
-                                            onClose();
-                                            if (typeof (window as any).paparSkrin === 'function') {
-                                                (window as any).paparSkrin('lencana-screen');
-                                            }
-                                        }}
-                                        style={{ padding: '12px 16px', fontSize: '1.35rem', flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', backgroundColor: '#9333ea', color: '#ffffff' }}
-                                    >
-                                        <i className="fa-solid fa-award"></i>
-                                    </button>
-                                    <button
-                                        className="neo-btn bg-red"
+                                        className="neo-btn bg-red cursor-pointer"
                                         title="Main Semula"
                                         aria-label="Main Semula"
                                         onClick={() => {
                                             setShowGameOver(false);
                                             startGame(selectedCategory || 'KV');
                                         }}
-                                        style={{ padding: '12px 16px', fontSize: '1.35rem', flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                        style={{ padding: '14px 20px', fontSize: '1.4rem', flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                     >
                                         <i className="fa-solid fa-rotate-right"></i>
                                     </button>
                                     <button
-                                        className="neo-btn bg-orange"
+                                        className="neo-btn bg-orange cursor-pointer"
                                         title="Menu Seterusnya"
                                         aria-label="Menu Seterusnya"
                                         onClick={() => {
@@ -2103,7 +2087,7 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
                                                 onClose();
                                             }
                                         }}
-                                        style={{ padding: '12px 16px', fontSize: '1.35rem', flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                        style={{ padding: '14px 20px', fontSize: '1.4rem', flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                     >
                                         <i className="fa-solid fa-bars"></i>
                                     </button>

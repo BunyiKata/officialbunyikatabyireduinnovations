@@ -17,7 +17,7 @@ export interface FonikAbcGameProps {
   initialMode?: PhonicsMode;
 }
 
-export const VOWELS_SET = new Set(['a', 'e', 'i', 'o', 'u']);
+export const VOWELS_SET = new Set(['a', 'e', 'é', 'i', 'o', 'u']);
 export const isVowelLetter = (letter: string) => VOWELS_SET.has(letter.toLowerCase());
 
 export interface ModeConfig {
@@ -81,6 +81,20 @@ export interface PhonicsItem {
   bgColor: string;
 }
 
+export const getPhonicsAudio = (letter: string): string => {
+  const l = (letter || '').toLowerCase().trim();
+  if (l === 'é' || l === 'e taling' || l === 'e tailing') {
+    return '/audio/fonik/fonik e tailing.MP3';
+  }
+  if (l === 'e' || l === 'e pepet') {
+    return '/audio/fonik/fonik e.MP3';
+  }
+  if (l === 'w') {
+    return '/audio/abc/w.mp3';
+  }
+  return `/audio/fonik/fonik ${l}.MP3`;
+};
+
 export const PHONICS_DATABASE: PhonicsItem[] = [
   {
     letter: 'a',
@@ -134,12 +148,24 @@ export const PHONICS_DATABASE: PhonicsItem[] = [
     letter: 'e',
     uppercase: 'E',
     soundAudio: '/audio/abc/e.mp3',
+    word: 'enam',
+    syllables: ['e', 'nam'],
+    image: '/images/sukukata/enam.png',
+    wordAudio: '/audio/sukukata/enam.mp3',
+    sampleWords: ['enam', 'emak', 'emas'],
+    color: '#10b981',
+    bgColor: '#d1fae5'
+  },
+  {
+    letter: 'é',
+    uppercase: 'É',
+    soundAudio: '/audio/fonik/fonik e tailing.MP3',
     word: 'epal',
     syllables: ['e', 'pal'],
     image: '/images/sukukata/epal.png',
     wordAudio: '/audio/sukukata/epal.mp3',
-    sampleWords: ['epal', 'enam', 'ekor'],
-    color: '#10b981',
+    sampleWords: ['epal', 'ekor', 'elok'],
+    color: '#059669',
     bgColor: '#d1fae5'
   },
   {
@@ -172,8 +198,8 @@ export const PHONICS_DATABASE: PhonicsItem[] = [
     soundAudio: '/audio/abc/h.mp3',
     word: 'harimau',
     syllables: ['ha', 'ri', 'mau'],
-    image: '/images/sukukata/rusa.png',
-    wordAudio: '/audio/abc/h.mp3',
+    image: '/images/sukukata/harimau.png',
+    wordAudio: '/audio/sukukata/harimau.mp3',
     sampleWords: ['harimau', 'helang', 'hujan'],
     color: '#f97316',
     bgColor: '#ffedd5'
@@ -280,8 +306,8 @@ export const PHONICS_DATABASE: PhonicsItem[] = [
     soundAudio: '/audio/abc/q.mp3',
     word: 'qari',
     syllables: ['qa', 'ri'],
-    image: '/images/sukukata/buku.png',
-    wordAudio: '/audio/abc/q.mp3',
+    image: '/images/sukukata/qari.png',
+    wordAudio: '/audio/sukukata/qari.mp3',
     sampleWords: ['qari', 'quran', 'qasidah'],
     color: '#8b5cf6',
     bgColor: '#ede9fe'
@@ -362,11 +388,11 @@ export const PHONICS_DATABASE: PhonicsItem[] = [
     letter: 'x',
     uppercase: 'X',
     soundAudio: '/audio/abc/x.mp3',
-    word: 'xilofon',
-    syllables: ['xi', 'lo', 'fon'],
-    image: '/images/sukukata/gitar.png',
-    wordAudio: '/audio/abc/x.mp3',
-    sampleWords: ['xilofon', 'x-ray'],
+    word: 'xray',
+    syllables: ['x', 'ray'],
+    image: '/images/sukukata/xray.png',
+    wordAudio: '/audio/sukukata/xray.mp3',
+    sampleWords: ['xray', 'xilofon'],
     color: '#14b8a6',
     bgColor: '#ccfbf1'
   },
@@ -376,8 +402,8 @@ export const PHONICS_DATABASE: PhonicsItem[] = [
     soundAudio: '/audio/abc/y.mp3',
     word: 'yoyo',
     syllables: ['yo', 'yo'],
-    image: '/images/sukukata/belon.png',
-    wordAudio: '/audio/abc/y.mp3',
+    image: '/images/sukukata/yoyo.png',
+    wordAudio: '/audio/sukukata/yoyo.mp3',
     sampleWords: ['yoyo', 'yogurt', 'yis'],
     color: '#f43f5e',
     bgColor: '#ffe4e6'
@@ -578,7 +604,7 @@ function GlobalTerbaikPopup({ show }: { show: boolean }) {
             exit={{ y: -35, opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
             style={{
-              fontSize: 'clamp(2.6rem, 8vw, 4.4rem)',
+              fontSize: 'clamp(2.4rem, 7.5vw, 4.2rem)',
               fontFamily: 'AtlantaRoundedBlack, "Century Gothic", Poppins, sans-serif',
               fontWeight: 900,
               color: '#fbbf24',
@@ -587,7 +613,7 @@ function GlobalTerbaikPopup({ show }: { show: boolean }) {
               userSelect: 'none'
             }}
           >
-            Terbaik! 🌟
+            +1 Bintang! 🌟
           </motion.div>
         </div>
       )}
@@ -709,9 +735,25 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
       } catch (e) { }
       return updated;
     });
+
+    // Auto-update student profile stars immediately (+1 Bintang)
+    if (typeof (window as any).tambahBintangGlobal === 'function') {
+      (window as any).tambahBintangGlobal(`fonik_${mode}_${letter}_act${actIndex + 1}`, 1);
+    }
   };
 
-  const currentPhonics = PHONICS_DATABASE[selectedLetterIndex] || PHONICS_DATABASE[0];
+  const rawPhonics = PHONICS_DATABASE[selectedLetterIndex] || PHONICS_DATABASE[0];
+  const currentPhonics = React.useMemo(() => {
+    if (mode === 'fonik_abc') {
+      return {
+        ...rawPhonics,
+        soundAudio: getPhonicsAudio(rawPhonics.letter)
+      };
+    }
+    return rawPhonics;
+  }, [rawPhonics, mode]);
+
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Find the first letter index that is NOT yet fully completed
   const nextTargetIndex = PHONICS_DATABASE.findIndex(p => {
@@ -722,10 +764,22 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
 
   const playSound = (src: string, onEnd?: () => void) => {
     try {
+      if (activeAudioRef.current) {
+        try {
+          activeAudioRef.current.pause();
+          activeAudioRef.current.currentTime = 0;
+        } catch (e) {}
+        activeAudioRef.current = null;
+      }
       const audio = new Audio(src);
-      if (onEnd) audio.onended = onEnd;
+      activeAudioRef.current = audio;
+      audio.onended = () => {
+        if (activeAudioRef.current === audio) activeAudioRef.current = null;
+        if (onEnd) onEnd();
+      };
       audio.play().catch(err => {
         console.warn("Audio notice:", src, err);
+        if (activeAudioRef.current === audio) activeAudioRef.current = null;
         if (onEnd) onEnd();
       });
     } catch (e) {
@@ -1993,7 +2047,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
           }}>
             <div style={{
               height: '100%',
-              width: `${(PHONICS_DATABASE.filter(p => progress[p.letter]?.every(Boolean)).length / 26) * 100}%`,
+              width: `${(PHONICS_DATABASE.filter(p => (mode !== 'kenali_huruf' || p.letter !== 'é') && progress[p.letter]?.every(Boolean)).length / (mode === 'kenali_huruf' ? 26 : PHONICS_DATABASE.length)) * 100}%`,
               backgroundColor: currentConfig.bannerProgressColor,
               borderRadius: '999px',
               transition: 'width 0.4s ease'
@@ -2082,6 +2136,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
         boxSizing: 'border-box'
       }}>
         {PHONICS_DATABASE.filter(item => {
+          if (mode === 'kenali_huruf' && item.letter === 'é') return false;
           if (mode !== 'vokal_konsonan') return true;
           const isV = isVowelLetter(item.letter);
           return filterCategory === 'vokal' ? isV : !isV;

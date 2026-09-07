@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { ATLANTA_ROUNDED_SVG_STYLE } from '../utils/atlantaFontBase64';
 
 // Word Card Interface for Reading Shelves
 export interface WordCard {
@@ -703,8 +704,9 @@ function makeLibrarySideWallSvg() {
 
 function makeVrHeaderSvg(title: string, textColor: string, bgColor: string, width = 720, height = 130) {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+        ${ATLANTA_ROUNDED_SVG_STYLE}
         <rect x="5" y="5" width="${width - 10}" height="${height - 10}" fill="${bgColor}" rx="20" stroke="#fbbf24" stroke-width="4"/>
-        <text x="50%" y="54%" font-family="AtlantaRounded, 'AtlantaRoundedBlack', sans-serif" font-weight="900" font-size="34px" fill="${textColor}" text-anchor="middle" dominant-baseline="middle" letter-spacing="2">${title.toUpperCase()}</text>
+        <text x="50%" y="54%" font-family="AtlantaRounded, AtlantaRoundedBlack, sans-serif" font-weight="900" font-size="34px" fill="${textColor}" text-anchor="middle" dominant-baseline="middle" letter-spacing="2">${title.toUpperCase()}</text>
     </svg>`;
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
 }
@@ -815,6 +817,7 @@ function makeSukuKataPlaqueSvg(word: string, themeColor: string) {
     const cleanWord = (word || '').toLowerCase();
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="120" viewBox="0 0 460 120">
         <defs>
+            ${ATLANTA_ROUNDED_SVG_STYLE}
             <linearGradient id="plaqGrad_${cleanWord.replace(/[^a-zA-Z0-9]/g, '_')}" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stop-color="${themeColor || '#0284c7'}"/>
                 <stop offset="100%" stop-color="#0f172a"/>
@@ -828,7 +831,7 @@ function makeSukuKataPlaqueSvg(word: string, themeColor: string) {
         <!-- Room theme color inner badge -->
         <rect x="10" y="10" width="440" height="100" rx="22" fill="url(#plaqGrad_${cleanWord.replace(/[^a-zA-Z0-9]/g, '_')})" stroke="#fef08a" stroke-width="2.5" filter="url(#pShadow)"/>
         <!-- Suku Kata in lowercase Atlanta Rounded font -->
-        <text x="50%" y="62%" font-family="AtlantaRounded, 'AtlantaRoundedBlack', Arial, sans-serif" font-weight="900" font-size="52px" fill="#ffffff" text-anchor="middle" dominant-baseline="middle" letter-spacing="1.5px">
+        <text x="50%" y="62%" font-family="AtlantaRounded, AtlantaRoundedBlack, sans-serif" font-weight="900" font-size="52px" fill="#ffffff" text-anchor="middle" dominant-baseline="middle" letter-spacing="1.5px">
             ${cleanWord}
         </text>
     </svg>`;
@@ -1481,11 +1484,22 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                         this.shelfCooldown = 5.0; // 5-second initial grace cooldown on spawn/respawn
                         this.lastStationId = null;
 
+                        this._getAudioCtx = () => {
+                            if (!(window as any)._sharedPerpAudioCtx) {
+                                const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+                                if (AudioCtx) (window as any)._sharedPerpAudioCtx = new AudioCtx();
+                            }
+                            const ctx = (window as any)._sharedPerpAudioCtx;
+                            if (ctx && ctx.state === 'suspended') {
+                                ctx.resume().catch(() => {});
+                            }
+                            return ctx;
+                        };
+
                         this._playFootstep = () => {
                             try {
-                                const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-                                if (AudioCtx) {
-                                    const ctx = new AudioCtx();
+                                const ctx = this._getAudioCtx();
+                                if (ctx) {
                                     const osc = ctx.createOscillator();
                                     const gain = ctx.createGain();
                                     osc.type = 'sine';
@@ -1513,10 +1527,10 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
 
                         const modalActive = document.querySelector('.vr-station-popup-overlay') || document.querySelector('.vr-guide-modal-overlay') || document.querySelector('.perpustakaan-countdown-overlay');
                         if (modalActive) {
-                            if (this.legLeft) this.legLeft.setAttribute('rotation', '0 0 0');
-                            if (this.legRight) this.legRight.setAttribute('rotation', '0 0 0');
-                            if (this.armLeft) this.armLeft.setAttribute('rotation', '0 0 0');
-                            if (this.armRight) this.armRight.setAttribute('rotation', '0 0 0');
+                            if (this.legLeft && this.legLeft.object3D) this.legLeft.object3D.rotation.x = 0;
+                            if (this.legRight && this.legRight.object3D) this.legRight.object3D.rotation.x = 0;
+                            if (this.armLeft && this.armLeft.object3D) this.armLeft.object3D.rotation.x = 0;
+                            if (this.armRight && this.armRight.object3D) this.armRight.object3D.rotation.x = 0;
                             return;
                         }
 
@@ -1590,22 +1604,25 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                             this.charPos.y += (targetGroundY - this.charPos.y) * 0.25;
 
                             this.charRotation = Math.atan2(worldX, worldZ) * (180 / Math.PI);
-                            this.el.setAttribute('position', `${this.charPos.x} ${this.charPos.y} ${this.charPos.z}`);
-                            this.el.setAttribute('rotation', `0 ${this.charRotation} 0`);
+                            if (this.el.object3D) {
+                                this.el.object3D.position.set(this.charPos.x, this.charPos.y, this.charPos.z);
+                                this.el.object3D.rotation.y = this.charRotation * (Math.PI / 180);
+                            }
 
                             this.animTime += dt * 14;
                             const swing = Math.sin(this.animTime) * 26;
+                            const swingRad = swing * (Math.PI / 180);
                             const bob = Math.abs(Math.sin(this.animTime)) * 0.05;
 
-                            if (this.legLeft) this.legLeft.setAttribute('rotation', `${swing} 0 0`);
-                            if (this.legRight) this.legRight.setAttribute('rotation', `${-swing} 0 0`);
-                            if (this.armLeft) this.armLeft.setAttribute('rotation', `${-swing * 0.75} 0 0`);
-                            if (this.armRight) this.armRight.setAttribute('rotation', `${swing * 0.75} 0 0`);
+                            if (this.legLeft && this.legLeft.object3D) this.legLeft.object3D.rotation.x = swingRad;
+                            if (this.legRight && this.legRight.object3D) this.legRight.object3D.rotation.x = -swingRad;
+                            if (this.armLeft && this.armLeft.object3D) this.armLeft.object3D.rotation.x = -swingRad * 0.75;
+                            if (this.armRight && this.armRight.object3D) this.armRight.object3D.rotation.x = swingRad * 0.75;
 
                             const bodyMesh = document.getElementById('vr-player-body');
-                            if (bodyMesh) {
+                            if (bodyMesh && bodyMesh.object3D) {
                                 bodyMesh.removeAttribute('animation');
-                                bodyMesh.setAttribute('position', `0 ${0.72 + bob} 0`);
+                                bodyMesh.object3D.position.y = 0.72 + bob;
                             }
 
                             this._footstepTimer += dt;
@@ -1615,10 +1632,10 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                             }
                             this._wasMoving = true;
                         } else {
-                            if (this.legLeft) this.legLeft.setAttribute('rotation', '0 0 0');
-                            if (this.legRight) this.legRight.setAttribute('rotation', '0 0 0');
-                            if (this.armLeft) this.armLeft.setAttribute('rotation', '0 0 0');
-                            if (this.armRight) this.armRight.setAttribute('rotation', '0 0 0');
+                            if (this.legLeft && this.legLeft.object3D) this.legLeft.object3D.rotation.x = 0;
+                            if (this.legRight && this.legRight.object3D) this.legRight.object3D.rotation.x = 0;
+                            if (this.armLeft && this.armLeft.object3D) this.armLeft.object3D.rotation.x = 0;
+                            if (this.armRight && this.armRight.object3D) this.armRight.object3D.rotation.x = 0;
 
                             if (this._wasMoving) {
                                 const bodyMesh = document.getElementById('vr-player-body');
@@ -1631,18 +1648,15 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                         }
 
                         // Follower Camera
-                        if (this.cameraRig) {
+                        if (this.cameraRig && this.cameraRig.object3D) {
                             const followDist = 2.6;
                             const targetCamX = this.charPos.x + followDist * Math.sin(camYaw);
                             const targetCamZ = this.charPos.z + followDist * Math.cos(camYaw);
                             const targetCamY = this.charPos.y + 1.95 - camPitch * 0.8;
 
-                            const curPos = this.cameraRig.getAttribute('position') || { x: 0, y: 1.95, z: 2.6 };
-                            const smoothX = curPos.x + (targetCamX - curPos.x) * 0.25;
-                            const smoothZ = curPos.z + (targetCamZ - curPos.z) * 0.25;
-                            const smoothY = curPos.y + (targetCamY - curPos.y) * 0.25;
-
-                            this.cameraRig.setAttribute('position', `${smoothX} ${smoothY} ${smoothZ}`);
+                            this.cameraRig.object3D.position.x += (targetCamX - this.cameraRig.object3D.position.x) * 0.25;
+                            this.cameraRig.object3D.position.z += (targetCamZ - this.cameraRig.object3D.position.z) * 0.25;
+                            this.cameraRig.object3D.position.y += (targetCamY - this.cameraRig.object3D.position.y) * 0.25;
                         }
 
                         // Trigger Zones
@@ -1712,11 +1726,6 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                 const pedimentSvg = makeVrHeaderSvg('PERPUSTAKAAN BUNYI KATA', '#fbbf24', '#0f172a', 800, 160);
                 const busSignSvg = makeVrHeaderSvg('HENTIAN BAS PERPUSTAKAAN', '#ffffff', '#0284c7', 600, 120);
 
-                const bldgNavyTexture = makeBuildingTextureSvg('#0f172a', '#38bdf8', true);
-                const bldgEmeraldTexture = makeBuildingTextureSvg('#064e3b', '#34d399', true);
-                const bldgSlateTexture = makeBuildingTextureSvg('#1e293b', '#fef08a', true);
-                const bldgAmberTexture = makeBuildingTextureSvg('#451a03', '#fbbf24', true);
-
                 const startX = 0;
                 const startZ = 4.5;
 
@@ -1726,13 +1735,13 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                         <a-light type="directional" color="#ffffff" intensity="0.95" position="15 30 10"></a-light>
 
                         <a-entity id="camera-rig" position="${startX} 1.95 ${startZ + 2.6}">
-                            <a-camera position="0 0 0" near="0.3" far="220" look-controls="enabled: false;" wasd-controls="enabled: false"></a-camera>
+                            <a-camera position="0 0 0" near="0.2" far="300" look-controls="enabled: false;" wasd-controls="enabled: false"></a-camera>
                         </a-entity>
 
                         ${build3DPlayerCharacterHTML(studentName, avatarSrc, nameBadgeSvg, startX, startZ, 'exterior')}
 
                         <a-sky color="#bae6fd"></a-sky>
-                        <a-plane position="0 0 0" rotation="-90 0 0" width="80" height="80" material="src: url(${floorSvg}); repeat: 80 80;"></a-plane>
+                        <a-plane position="0 0 0" rotation="-90 0 0" width="80" height="80" segments-width="12" segments-height="12" material="src: url(${floorSvg}); repeat: 80 80; side: double;"></a-plane>
 
                         <!-- Solid 3D Neoclassical Building Structure -->
                         <a-box position="0 6.0 -12" width="38" height="12" depth="1.2" material="src: url(${creamWallTexture}); repeat: 10 3;"></a-box>
@@ -1808,18 +1817,27 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
 
                         ${vr3DTransitBus(14, 0, 16.5, 90)}
 
-                        <!-- Off-Road Textured High-Rise Buildings -->
-                        <a-box position="-28 16 -28" width="12" height="32" depth="12" material="src: url(${bldgNavyTexture}); repeat: 4 6;"></a-box>
-                        <a-box position="-28 32.2 -28" width="12.4" height="0.4" depth="12.4" color="#fbbf24"></a-box>
+                        <!-- Real 3D Exterior City Buildings & Architecture (GLB) -->
+                        <!-- North-West Apartment Tower (Left of Library) -->
+                        <a-gltf-model src="/models/bangunan/apartment-block-01.glb" position="-28 16.75 -26" scale="2.2 2.5 2.2" rotation="0 35 0"></a-gltf-model>
 
-                        <a-box position="28 18 -28" width="12" height="36" depth="12" material="src: url(${bldgEmeraldTexture}); repeat: 4 7;"></a-box>
-                        <a-box position="28 36.2 -28" width="12.4" height="0.4" depth="12.4" color="#fbbf24"></a-box>
+                        <!-- North-East Apartment Tower (Right of Library) -->
+                        <a-gltf-model src="/models/bangunan/apartment-block-01.glb" position="28 16.75 -26" scale="2.2 2.5 2.2" rotation="0 -35 0"></a-gltf-model>
 
-                        <a-box position="-28 16 28" width="14" height="32" depth="12" material="src: url(${bldgSlateTexture}); repeat: 4 6;"></a-box>
-                        <a-box position="-28 32.2 28" width="14.4" height="0.4" depth="12.4" color="#d4a574"></a-box>
+                        <!-- Side Wings Apartment Towers (Flanking the Plaza) -->
+                        <a-gltf-model src="/models/bangunan/apartment-block-01.glb" position="-36 14.74 4" scale="2.0 2.2 2.0" rotation="0 85 0"></a-gltf-model>
+                        <a-gltf-model src="/models/bangunan/apartment-block-01.glb" position="36 14.74 4" scale="2.0 2.2 2.0" rotation="0 -85 0"></a-gltf-model>
 
-                        <a-box position="28 17 28" width="14" height="34" depth="12" material="src: url(${bldgAmberTexture}); repeat: 4 6;"></a-box>
-                        <a-box position="28 34.2 28" width="14.4" height="0.4" depth="12.4" color="#fbbf24"></a-box>
+                        <!-- Street-Side Real Commercial Shops (Across the Road, Z = 24.5) -->
+                        <!-- Convenience Store (Left Side across Road) -->
+                        <a-gltf-model src="/models/bangunan/convenience-store-01.glb" position="-11 3.89 24.5" scale="1.35 1.35 1.35" rotation="0 180 0"></a-gltf-model>
+
+                        <!-- Corner Store (Right Side across Road) -->
+                        <a-gltf-model src="/models/bangunan/corner-store-01.glb" position="9 4.84 24.5" scale="1.25 1.25 1.25" rotation="0 180 0"></a-gltf-model>
+
+                        <!-- South-West & South-East Background Skyline Apartment Towers (Behind the Shops) -->
+                        <a-gltf-model src="/models/bangunan/apartment-block-01.glb" position="-26 16.75 32" scale="2.2 2.5 2.2" rotation="0 15 0"></a-gltf-model>
+                        <a-gltf-model src="/models/bangunan/apartment-block-01.glb" position="26 16.75 32" scale="2.2 2.5 2.2" rotation="0 -15 0"></a-gltf-model>
                     </a-scene>
                 `;
             } else {
@@ -1933,14 +1951,17 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                         <a-light type="directional" color="#ffffff" intensity="0.85" position="0 14 0"></a-light>
 
                         <a-entity id="camera-rig" position="${spawnX} 1.95 ${spawnZ + 2.6}">
-                            <a-camera position="0 0 0" near="0.3" far="220" look-controls="enabled: false;" wasd-controls="enabled: false"></a-camera>
+                            <a-camera position="0 0 0" near="0.2" far="300" look-controls="enabled: false;" wasd-controls="enabled: false"></a-camera>
                         </a-entity>
 
                         ${build3DPlayerCharacterHTML(studentName, avatarSrc, nameBadgeSvg, spawnX, spawnZ, 'interior')}
 
+                        <!-- Ambient backdrop sky prevents any black void -->
+                        <a-sky color="#fefce8"></a-sky>
+
                         <!-- Grand Palace Floor & Ceiling (80m x 80m) -->
-                        <a-plane position="0 0 0" rotation="-90 0 0" width="80" height="80" material="src: url(${floorSvg}); repeat: 80 80;"></a-plane>
-                        <a-plane position="0 8.5 0" rotation="90 0 0" width="80" height="80" material="src: url(${ceilingSvg}); repeat: 40 40; roughness: 0.8;"></a-plane>
+                        <a-plane position="0 0 0" rotation="-90 0 0" width="80" height="80" segments-width="12" segments-height="12" material="src: url(${floorSvg}); repeat: 80 80; side: double;"></a-plane>
+                        <a-plane position="0 8.5 0" rotation="90 0 0" width="80" height="80" segments-width="12" segments-height="12" material="src: url(${ceilingSvg}); repeat: 40 40; roughness: 0.8; side: double;"></a-plane>
 
                         <!-- Outer Perimeter Walls (80m) -->
                         <a-plane position="0 4.25 -39.8" width="80" height="8.5" material="src: url(${creamWallTexture}); repeat: 20 2; roughness: 0.85;"></a-plane>
@@ -2277,6 +2298,10 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
             if (sceneEl) {
                 const onLoaded = () => {
                     if ((sceneEl as any).resize) (sceneEl as any).resize();
+                    if ((sceneEl as any).renderer) {
+                        const isMobile = /Android|iPhone|iPad|iPod|Tablet/i.test(navigator.userAgent) || window.innerWidth <= 1024;
+                        (sceneEl as any).renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.25 : 1.75));
+                    }
                     window.dispatchEvent(new Event('resize'));
                 };
                 if ((sceneEl as any).hasLoaded) {

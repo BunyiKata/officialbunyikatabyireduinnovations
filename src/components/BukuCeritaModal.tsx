@@ -79,11 +79,11 @@ export const KOLEKSI_BUKU_CERITA: StoryBook[] = [
     synopsis: 'Kisah Ali Anak yang Rajin',
     pages: [
       { pageNumber: 0, image: '/images/buku/b3coverpage.jpg', text: '' },
-      { pageNumber: 1, image: '/images/buku/b3page1.jpg', text: 'Pada pagi Sabtu yang cerah, Ali teruja mengikut Ibu pergi ke pasar.' },
+      { pageNumber: 1, image: '/images/buku/b3page1.jpg', text: 'Pada pagi Sabtu yang cerah, Ali teruja mengikut ibu pergi ke pasar.' },
       { pageNumber: 2, image: '/images/buku/b3page2.jpg', text: 'Wah, meriahnya pasar! Mereka memilih sayur hijau dan buah-buahan yang manis.' },
-      { pageNumber: 3, image: '/images/buku/b3page3.jpg', text: 'Seterusnya, Ali dan Ibu pergi ke gerai ikan untuk membeli ikan yang segar.' },
-      { pageNumber: 4, image: '/images/buku/b3page4.jpg', text: '“Biar Ali tolong bawa beg ini, Ibu!” Ali memegang beg barang dengan cermat.' },
-      { pageNumber: 5, image: '/images/buku/b3page5.jpg', text: 'Ali dan Ibu berjalan pulang ke rumah dengan hati yang sangat gembira!' }
+      { pageNumber: 3, image: '/images/buku/b3page3.jpg', text: 'Seterusnya, Ali dan ibu pergi ke gerai ikan untuk membeli ikan yang segar.' },
+      { pageNumber: 4, image: '/images/buku/b3page4.jpg', text: '“Biar Ali tolong bawa beg ini, ibu!” Ali memegang beg barang dengan cermat.' },
+      { pageNumber: 5, image: '/images/buku/b3page5.jpg', text: 'Ali dan ibu berjalan pulang ke rumah dengan hati yang sangat gembira!' }
     ]
   },
   {
@@ -133,12 +133,12 @@ export const KOLEKSI_BUKU_CERITA: StoryBook[] = [
 // Exact dictionary mapping for perfect Malay suku kata syllable breakdown
 const SYLLABLE_DICTIONARY: Record<string, string[]> = {
   // Common & B1
-  'ini': ['I', 'ni'],
-  'ali': ['A', 'li'],
+  'ini': ['i', 'ni'],
+  'ali': ['a', 'li'],
   'ada': ['a', 'da'],
   'kucing': ['ku', 'cing'],
   'comel': ['co', 'mel'],
-  'ialah': ['i', 'a', 'lah'],
+  'ialah': ['ia', 'lah'],
   'anak': ['a', 'nak'],
   'yang': ['yang'],
   'sangat': ['sa', 'ngat'],
@@ -150,17 +150,17 @@ const SYLLABLE_DICTIONARY: Record<string, string[]> = {
   'sebuah': ['se', 'bu', 'ah'],
   'rumah': ['ru', 'mah'],
   'cantik': ['can', 'tik'],
-  'setiap': ['Se', 'ti', 'ap'],
+  'setiap': ['se', 'tiap'],
   'pagi': ['pa', 'gi'],
   'berlari': ['ber', 'la', 'ri'],
-  'riang': ['ri', 'ang'],
+  'riang': ['riang'],
   'halaman': ['ha', 'la', 'man'],
   'suka': ['su', 'ka'],
   'bermain': ['ber', 'ma', 'in'],
   'melompat': ['me', 'lom', 'pat'],
   'mengejar': ['me', 'nge', 'jar'],
   'rama-rama': ['ra', 'ma', '-', 'ra', 'ma'],
-  'miau': ['Miau'],
+  'miau': ['miau'],
   'sudah': ['su', 'dah'],
   'lapar': ['la', 'par'],
   'meletakkan': ['me', 'le', 'tak', 'kan'],
@@ -170,7 +170,7 @@ const SYLLABLE_DICTIONARY: Record<string, string[]> = {
   'susu': ['su', 'su'],
   'putih': ['pu', 'tih'],
   'lazat': ['la', 'zat'],
-  'slurp': ['Slurp'],
+  'slurp': ['slurp'],
   'makan': ['ma', 'kan'],
   'sampai': ['sam', 'pai'],
   'kenyang': ['ke', 'nyang'],
@@ -190,32 +190,33 @@ const SYLLABLE_DICTIONARY: Record<string, string[]> = {
   'baiknya': ['ba', 'ik', 'nya'],
 
   // B2
-  'hari': ['Ha', 'ri'],
+  'hari': ['ha', 'ri'],
   'sukan': ['su', 'kan'],
   'sekolah': ['se', 'ko', 'lah'],
-  'padang': ['Pa', 'dang'],
-  'meriah': ['me', 'ri', 'ah'],
+  'padang': ['pa', 'dang'],
+  'meriah': ['me', 'riah'],
   'khemah': ['khe', 'mah'],
   'bendera': ['ben', 'de', 'ra'],
   'berwarna-warni': ['ber', 'war', 'na', '-', 'war', 'ni'],
-  'murid-murid': ['Mu', 'rid', '-', 'mu', 'rid'],
+  'murid-murid': ['mu', 'rid', '-', 'mu', 'rid'],
   'memakai': ['me', 'ma', 'kai'],
   'baju': ['ba', 'ju'],
-  'ani': ['A', 'ni'],
+  'ani': ['a', 'ni'],
   'bersedia': ['ber', 'se', 'di', 'a'],
   'garisan': ['ga', 'ri', 'san'],
   'mula': ['mu', 'la'],
   'penuh': ['pe', 'nuh'],
   'semangat': ['se', 'ma', 'ngat'],
-  'prriittt': ['Prri', 'ittt'],
-  'wisel': ['Wi', 'sel'],
+  'prriittt': ['prriittt'],
+  'priiit': ['priiit'],
+  'wisel': ['wi', 'sel'],
   'berbunyi': ['ber', 'bu', 'nyi'],
   'pantas': ['pan', 'tas'],
   'bagai': ['ba', 'gai'],
   'angin': ['a', 'ngin'],
   'menuju': ['me', 'nu', 'ju'],
   'penamat': ['pe', 'na', 'mat'],
-  'yay': ['Yay'],
+  'yay': ['yay'],
   'berjaya': ['ber', 'ja', 'ya'],
   'menjadi': ['men', 'ja', 'di'],
   'juara': ['ju', 'a', 'ra'],
@@ -224,7 +225,7 @@ const SYLLABLE_DICTIONARY: Record<string, string[]> = {
   'pingat': ['pi', 'ngat'],
   'emas': ['e', 'mas'],
   'berkilat': ['ber', 'ki', 'lat'],
-  'semua': ['Se', 'mu', 'a'],
+  'semua': ['se', 'mu', 'a'],
   'kawan': ['ka', 'wan'],
   'bertepuk': ['ber', 'te', 'puk'],
   'tangan': ['ta', 'ngan'],
@@ -235,26 +236,27 @@ const SYLLABLE_DICTIONARY: Record<string, string[]> = {
   'seronok': ['se', 'ro', 'nok'],
 
   // B3
-  'sabtu': ['Sab', 'tu'],
+  'sabtu': ['sab', 'tu'],
   'cerah': ['ce', 'rah'],
   'teruja': ['te', 'ru', 'ja'],
-  'mengikut': ['meng', 'i', 'kut'],
-  'ibu': ['I', 'bu'],
+  'mengikut': ['me', 'ngi', 'kut'],
+  'ibu': ['i', 'bu'],
   'pergi': ['per', 'gi'],
   'ke': ['ke'],
   'pasar': ['pa', 'sar'],
-  'wah': ['Wah'],
-  'meriahnya': ['me', 'ri', 'ah', 'nya'],
+  'wah': ['wah'],
+  'meriahnya': ['me', 'riah', 'nya'],
   'mereka': ['me', 're', 'ka'],
   'memilih': ['me', 'mi', 'lih'],
   'sayur': ['sa', 'yur'],
   'hijau': ['hi', 'jau'],
-  'buah-buahan': ['bu', 'ah', '-', 'bu', 'a', 'han'],
+  'buah': ['buah'],
+  'buah-buahan': ['buah', '-', 'bua', 'han'],
   'manis': ['ma', 'nis'],
-  'seterusnya': ['Se', 'te', 'rus', 'nya'],
+  'seterusnya': ['se', 'te', 'rus', 'nya'],
   'gerai': ['ge', 'rai'],
   'membeli': ['mem', 'be', 'li'],
-  'biar': ['Bi', 'ar'],
+  'biar': ['bi', 'ar'],
   'tolong': ['to', 'long'],
   'bawa': ['ba', 'wa'],
   'beg': ['beg'],
@@ -266,7 +268,7 @@ const SYLLABLE_DICTIONARY: Record<string, string[]> = {
   'hati': ['ha', 'ti'],
 
   // B4
-  'amir': ['A', 'mir'],
+  'amir': ['a', 'mir'],
   'sebatang': ['se', 'ba', 'tang'],
   'pokok': ['po', 'kok'],
   'mangga': ['mang', 'ga'],
@@ -277,23 +279,22 @@ const SYLLABLE_DICTIONARY: Record<string, string[]> = {
   'lebat': ['le', 'bat'],
   'membantu': ['mem', 'ban', 'tu'],
   'memetik': ['me', 'me', 'tik'],
-  'buah': ['bu', 'ah'],
   'masak': ['ma', 'sak'],
   'ranum': ['ra', 'num'],
   'dapur': ['da', 'pur'],
   'membuat': ['mem', 'bu', 'at'],
   'jeruk': ['je', 'ruk'],
   'sedap': ['se', 'dap'],
-  'sekeluarga': ['Se', 'ke', 'lu', 'ar', 'ga'],
+  'sekeluarga': ['se', 'ke', 'lu', 'ar', 'ga'],
   'menikmati': ['me', 'nik', 'ma', 'ti'],
   'hidangan': ['hi', 'da', 'ngan'],
   'bersama-sama': ['ber', 'sa', 'ma', '-', 'sa', 'ma'],
   'anjung': ['an', 'jung'],
 
   // B5
-  'cikgu': ['Cik', 'gu'],
-  'nur': ['Nur'],
-  'mengajar': ['meng', 'a', 'jar'],
+  'cikgu': ['cik', 'gu'],
+  'nur': ['nur'],
+  'mengajar': ['me', 'nga', 'jar'],
   'kelas': ['ke', 'las'],
   'prasekolah': ['pra', 'se', 'ko', 'lah'],
   'mesra': ['mes', 'ra'],
@@ -302,7 +303,7 @@ const SYLLABLE_DICTIONARY: Record<string, string[]> = {
   'buku': ['bu', 'ku'],
   'sudut': ['su', 'dut'],
   'bacaan': ['ba', 'ca', 'an'],
-  'sentiasa': ['sen', 'ti', 'a', 'sa'],
+  'sentiasa': ['sen', 'tia', 'sa'],
   'sabar': ['sa', 'bar'],
   'lemah-lembut': ['le', 'mah', '-', 'lem', 'but'],
   'membimbing': ['mem', 'bim', 'bing'],
@@ -330,7 +331,7 @@ function parseStoryWord(rawWord: string): ParsedWord {
   const [, prefix, cleanWord, suffix] = match;
 
   const key = cleanWord.toLowerCase();
-  const isAllBlack = key === 'miau' || key === 'slurp';
+  const isAllBlack = key === 'miau' || key === 'slurp' || key === 'yay' || key === 'prriittt' || key === 'priiit' || key === 'pritt';
 
   let parts: string[] = [];
 
@@ -400,6 +401,8 @@ function SukuKataStoryText({ text }: { text: string }) {
     .replace(/"/g, '”');
 
   const words = normalizedText.split(' ');
+  let isRed = false;
+
   return (
     <span style={{ display: 'inline' }}>
       {words.map((w, wIdx) => {
@@ -412,14 +415,30 @@ function SukuKataStoryText({ text }: { text: string }) {
                 {prefix}
               </span>
             )}
-            {/* Suku kata: hitam & merah berselang-seli (kecuali perkataan seperti "miau" yang sentiasa hitam sepenuhnya) */}
+            {/* Suku kata: hitam & merah berselang-seli secara berterusan merentasi perkataan */}
             {syllables.map((syl, sIdx) => {
-              const isRed = !isAllBlack && sIdx % 2 === 1;
+              if (syl === '-') {
+                return (
+                  <span
+                    key={sIdx}
+                    style={{
+                      color: '#1e293b',
+                      fontWeight: 900
+                    }}
+                  >
+                    -
+                  </span>
+                );
+              }
+              const color = !isAllBlack && isRed ? '#dc2626' : '#1e293b';
+              if (!isAllBlack) {
+                isRed = !isRed;
+              }
               return (
                 <span
                   key={sIdx}
                   style={{
-                    color: isRed ? '#dc2626' : '#1e293b',
+                    color,
                     fontWeight: 900
                   }}
                 >
@@ -522,6 +541,9 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
     playNavSound();
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
+    }
+    if (typeof (window as any).hentikanAudioSemasa === 'function') {
+      (window as any).hentikanAudioSemasa();
     }
     setIsNarrating(false);
     setDirection(newIndex > currentPageIndex ? 1 : -1);

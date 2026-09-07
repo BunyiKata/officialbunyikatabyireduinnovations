@@ -6,11 +6,15 @@ import { TandukKataGame } from "./components/TandukKataGame";
 import { PerpustakaanGame } from "./components/PerpustakaanGame";
 import { CabaranSukuKataGame } from "./components/CabaranSukuKataGame";
 import { PuzzleSukuKataGame } from "./components/PuzzleSukuKataGame";
+import { CantumKataGame } from "./components/CantumKataGame";
 import { FonikAbcGame } from "./components/FonikAbcGame";
 import { NomborGame } from "./components/NomborGame";
 import { KadImbasanNomborGame, KadImbasanNomborMode } from "./components/KadImbasanNomborGame";
 import { SukuKataPuzzleBar } from "./components/SukuKataPuzzleBar";
 import { BukuCeritaModal } from "./components/BukuCeritaModal";
+import { CubaSebutGame } from "./components/CubaSebutGame";
+import { AdminSijilManager } from "./components/AdminSijilManager";
+import "./utils/sijilGenerator";
 import "./index.css";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -181,7 +185,7 @@ function PirateAvatar3DSwiper({
           zIndex: 30,
         }}
       />
-      
+
       <div
         className="neo-box"
         style={{
@@ -217,350 +221,350 @@ function PirateAvatar3DSwiper({
           pointerEvents: "none"
         }} />
 
-      {/* 3D Swiper Stage */}
-      <div
-        onTouchStart={(e) => handlePointerStart(e.touches[0].clientX)}
-        onTouchEnd={(e) => handlePointerEnd(e.changedTouches[0].clientX)}
-        onMouseDown={(e) => handlePointerStart(e.clientX)}
-        onMouseUp={(e) => handlePointerEnd(e.clientX)}
-        style={{
-          position: "relative",
-          zIndex: 5,
-          height: "200px",
-          width: "100%",
-          perspective: "800px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: "10px",
-          userSelect: "none",
-          touchAction: "pan-y",
-        }}
-      >
-        {/* Left Arrow */}
-        <button
-          type="button"
-          onClick={handlePrev}
-          disabled={activeIndex === 0}
+        {/* 3D Swiper Stage */}
+        <div
+          onTouchStart={(e) => handlePointerStart(e.touches[0].clientX)}
+          onTouchEnd={(e) => handlePointerEnd(e.changedTouches[0].clientX)}
+          onMouseDown={(e) => handlePointerStart(e.clientX)}
+          onMouseUp={(e) => handlePointerEnd(e.clientX)}
           style={{
-            position: "absolute",
-            left: "4px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            zIndex: 35,
-            width: "40px",
-            height: "40px",
-            borderRadius: "50%",
-            backgroundColor:
-              activeIndex === 0 ? "rgba(255,255,255,0.3)" : "#f59e0b",
-            border: "2px solid white",
-            color: activeIndex === 0 ? "#cbd5e1" : "#000",
-            fontWeight: "900",
-            fontSize: "1.2rem",
-            cursor: activeIndex === 0 ? "default" : "pointer",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+            position: "relative",
+            zIndex: 5,
+            height: "200px",
+            width: "100%",
+            perspective: "800px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            transition: "all 0.2s ease",
+            marginBottom: "10px",
+            userSelect: "none",
+            touchAction: "pan-y",
           }}
         >
-          <i className="fa-solid fa-chevron-left"></i>
-        </button>
+          {/* Left Arrow */}
+          <button
+            type="button"
+            onClick={handlePrev}
+            disabled={activeIndex === 0}
+            style={{
+              position: "absolute",
+              left: "4px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 35,
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              backgroundColor:
+                activeIndex === 0 ? "rgba(255,255,255,0.3)" : "#f59e0b",
+              border: "2px solid white",
+              color: activeIndex === 0 ? "#cbd5e1" : "#000",
+              fontWeight: "900",
+              fontSize: "1.2rem",
+              cursor: activeIndex === 0 ? "default" : "pointer",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.2s ease",
+            }}
+          >
+            <i className="fa-solid fa-chevron-left"></i>
+          </button>
 
-        {/* Right Arrow */}
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={activeIndex === characters.length - 1}
-          style={{
-            position: "absolute",
-            right: "4px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            zIndex: 35,
-            width: "40px",
-            height: "40px",
-            borderRadius: "50%",
-            backgroundColor:
-              activeIndex === characters.length - 1
-                ? "rgba(255,255,255,0.3)"
-                : "#f59e0b",
-            border: "2px solid white",
-            color: activeIndex === characters.length - 1 ? "#cbd5e1" : "#000",
-            fontWeight: "900",
-            fontSize: "1.2rem",
-            cursor:
-              activeIndex === characters.length - 1 ? "default" : "pointer",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "all 0.2s ease",
-          }}
-        >
-          <i className="fa-solid fa-chevron-right"></i>
-        </button>
+          {/* Right Arrow */}
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={activeIndex === characters.length - 1}
+            style={{
+              position: "absolute",
+              right: "4px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 35,
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              backgroundColor:
+                activeIndex === characters.length - 1
+                  ? "rgba(255,255,255,0.3)"
+                  : "#f59e0b",
+              border: "2px solid white",
+              color: activeIndex === characters.length - 1 ? "#cbd5e1" : "#000",
+              fontWeight: "900",
+              fontSize: "1.2rem",
+              cursor:
+                activeIndex === characters.length - 1 ? "default" : "pointer",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.2s ease",
+            }}
+          >
+            <i className="fa-solid fa-chevron-right"></i>
+          </button>
 
-        {/* Cards */}
-        {characters.map((char, idx) => {
-          const offset = idx - activeIndex;
-          const absOffset = Math.abs(offset);
+          {/* Cards */}
+          {characters.map((char, idx) => {
+            const offset = idx - activeIndex;
+            const absOffset = Math.abs(offset);
 
-          let xPos = offset * 110;
-          let rotateY = offset * -28;
-          let scale = 1 - absOffset * 0.2;
-          let opacity = 1 - absOffset * 0.45;
-          let zIndex = 25 - absOffset * 5;
+            let xPos = offset * 110;
+            let rotateY = offset * -28;
+            let scale = 1 - absOffset * 0.2;
+            let opacity = 1 - absOffset * 0.45;
+            let zIndex = 25 - absOffset * 5;
 
-          if (absOffset > 2) {
-            opacity = 0;
-          }
+            if (absOffset > 2) {
+              opacity = 0;
+            }
 
-          const isSelected =
-            char.icon === selectedAvatar &&
-            char.unlocked &&
-            activeIndex === idx;
+            const isSelected =
+              char.icon === selectedAvatar &&
+              char.unlocked &&
+              activeIndex === idx;
 
-          return (
-            <div
-              key={char.id}
-              className={isSelected ? "gaming-card-glow" : ""}
-              onClick={() => handleSelectIndex(idx)}
-              style={{
-                position: "absolute",
-                width: "135px",
-                height: "170px",
-                borderRadius: "18px",
-                backgroundColor: isSelected ? "#fffdf7" : "#f7f4eb",
-                backgroundImage: isSelected
-                  ? "radial-gradient(#e5dec9 0.75px, transparent 0.75px), linear-gradient(135deg, #ffffff 0%, #fffdf7 50%, #f5eee0 100%)"
-                  : "radial-gradient(#dcd5c0 0.75px, transparent 0.75px), linear-gradient(135deg, #f7f4eb 0%, #ebe4d5 100%)",
-                backgroundSize: "10px 10px, 100% 100%",
-                border: isSelected
-                  ? "4px solid #f59e0b"
-                  : char.unlocked
-                    ? "3px solid #10b981"
-                    : "3px solid #64748b",
-                boxShadow: isSelected
-                  ? "0 0 16px rgba(245, 158, 11, 0.8), 0 8px 20px rgba(0,0,0,0.25)"
-                  : "0 8px 20px rgba(0,0,0,0.2), inset 0 0 10px rgba(180, 160, 120, 0.12)",
-                transform: `translateX(${xPos}px) rotateY(${rotateY}deg) scale(${scale})`,
-                transformStyle: "preserve-3d",
-                transition: "all 0.35s cubic-bezier(0.25, 1, 0.5, 1)",
-                opacity: Math.max(0, opacity),
-                zIndex: zIndex,
-                cursor: "pointer",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "10px 6px",
-                boxSizing: "border-box",
-                overflow: "hidden",
-              }}
-            >
-              {/* Paper Card Texture & Grain Overlay for Unlocked */}
-              {char.unlocked && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    borderRadius: "18px",
-                    backgroundImage:
-                      "linear-gradient(0deg, rgba(160, 140, 100, 0.05) 1px, transparent 1px)",
-                    backgroundSize: "100% 3px",
-                    pointerEvents: "none",
-                    zIndex: 1,
-                    border: "1px solid rgba(210, 190, 160, 0.45)",
-                  }}
-                />
-              )}
-
-              {/* Shine Sweep Glint Loop Animation for Selected Card */}
-              {isSelected && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    borderRadius: "18px",
-                    overflow: "hidden",
-                    pointerEvents: "none",
-                    zIndex: 12,
-                  }}
-                >
+            return (
+              <div
+                key={char.id}
+                className={isSelected ? "gaming-card-glow" : ""}
+                onClick={() => handleSelectIndex(idx)}
+                style={{
+                  position: "absolute",
+                  width: "135px",
+                  height: "170px",
+                  borderRadius: "18px",
+                  backgroundColor: isSelected ? "#fffdf7" : "#f7f4eb",
+                  backgroundImage: isSelected
+                    ? "radial-gradient(#e5dec9 0.75px, transparent 0.75px), linear-gradient(135deg, #ffffff 0%, #fffdf7 50%, #f5eee0 100%)"
+                    : "radial-gradient(#dcd5c0 0.75px, transparent 0.75px), linear-gradient(135deg, #f7f4eb 0%, #ebe4d5 100%)",
+                  backgroundSize: "10px 10px, 100% 100%",
+                  border: isSelected
+                    ? "4px solid #f59e0b"
+                    : char.unlocked
+                      ? "3px solid #10b981"
+                      : "3px solid #64748b",
+                  boxShadow: isSelected
+                    ? "0 0 16px rgba(245, 158, 11, 0.8), 0 8px 20px rgba(0,0,0,0.25)"
+                    : "0 8px 20px rgba(0,0,0,0.2), inset 0 0 10px rgba(180, 160, 120, 0.12)",
+                  transform: `translateX(${xPos}px) rotateY(${rotateY}deg) scale(${scale})`,
+                  transformStyle: "preserve-3d",
+                  transition: "all 0.35s cubic-bezier(0.25, 1, 0.5, 1)",
+                  opacity: Math.max(0, opacity),
+                  zIndex: zIndex,
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "10px 6px",
+                  boxSizing: "border-box",
+                  overflow: "hidden",
+                }}
+              >
+                {/* Paper Card Texture & Grain Overlay for Unlocked */}
+                {char.unlocked && (
                   <div
                     style={{
                       position: "absolute",
-                      top: "-50%",
-                      left: "-150%",
-                      width: "60%",
-                      height: "200%",
-                      background:
-                        "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.85) 50%, transparent 100%)",
-                      transform: "rotate(25deg)",
-                      animation: "shineSweepLoop 3s infinite ease-in-out",
-                    }}
-                  />
-                </div>
-              )}
-
-              {/* Unlocked Card Image Content */}
-              {char.unlocked ? (
-                <div
-                  style={{
-                    position: "relative",
-                    width: "110px",
-                    height: "140px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    zIndex: 5,
-                  }}
-                >
-                  <img
-                    src={char.icon}
-                    alt="Avatar"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                      filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.12))",
-                    }}
-                  />
-                </div>
-              ) : (
-                /* Locked Card: Inner Dark Slate Box Framed by White/Cream Border */
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    triggerProNotice(char.name);
-                  }}
-                  style={{
-                    position: "absolute",
-                    inset: "4px",
-                    borderRadius: "13px",
-                    backgroundColor: "#1e293b",
-                    backgroundImage: "linear-gradient(150deg, #222b3d 0%, #111827 100%)",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "8px 6px",
-                    boxSizing: "border-box",
-                    zIndex: 5,
-                    overflow: "hidden",
-                  }}
-                >
-                  {/* Silhouette background avatar */}
-                  <img
-                    src={char.icon}
-                    alt="Avatar Locked"
-                    style={{
-                      position: "absolute",
-                      width: "90%",
-                      height: "90%",
-                      objectFit: "contain",
-                      filter: "brightness(20%) opacity(0.35)",
+                      inset: 0,
+                      borderRadius: "18px",
+                      backgroundImage:
+                        "linear-gradient(0deg, rgba(160, 140, 100, 0.05) 1px, transparent 1px)",
+                      backgroundSize: "100% 3px",
                       pointerEvents: "none",
+                      zIndex: 1,
+                      border: "1px solid rgba(210, 190, 160, 0.45)",
                     }}
                   />
+                )}
 
-                  {/* Lock Icon */}
-                  <i
-                    className="fa-solid fa-lock"
-                    style={{
-                      fontSize: "1.9rem",
-                      color: "#ffffff",
-                      filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.85))",
-                      position: "relative",
-                      zIndex: 6,
-                      marginBottom: "6px",
-                    }}
-                  ></i>
-
-                  {/* Red Versi Pro Badge */}
+                {/* Shine Sweep Glint Loop Animation for Selected Card */}
+                {isSelected && (
                   <div
                     style={{
-                      position: "relative",
-                      zIndex: 6,
-                      fontSize: "0.78rem",
-                      fontWeight: "800",
-                      color: "#ffffff",
-                      backgroundColor: "#dc2626",
-                      border: "1.5px solid #ef4444",
-                      borderRadius: "10px",
-                      padding: "5px 12px",
-                      textAlign: "center",
-                      lineHeight: "1.2",
-                      boxShadow: "0 3px 8px rgba(0,0,0,0.45)",
-                      letterSpacing: "0.2px",
+                      position: "absolute",
+                      inset: 0,
+                      borderRadius: "18px",
+                      overflow: "hidden",
+                      pointerEvents: "none",
+                      zIndex: 12,
                     }}
                   >
-                    Versi Pro
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "-50%",
+                        left: "-150%",
+                        width: "60%",
+                        height: "200%",
+                        background:
+                          "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.85) 50%, transparent 100%)",
+                        transform: "rotate(25deg)",
+                        animation: "shineSweepLoop 3s infinite ease-in-out",
+                      }}
+                    />
                   </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                )}
 
-      {/* Pagination Dots */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 10,
-          display: "flex",
-          justifyContent: "center",
-          gap: "8px",
-          marginBottom: "14px",
-        }}
-      >
-        {characters.map((char, idx) => (
-          <div
-            key={idx}
-            onClick={() => handleSelectIndex(idx)}
-            style={{
-              width: activeIndex === idx ? "22px" : "8px",
-              height: "8px",
-              borderRadius: "4px",
-              backgroundColor:
-                activeIndex === idx ? "#f59e0b" : "rgba(255,255,255,0.4)",
-              transition: "all 0.25s ease",
-              cursor: "pointer",
-            }}
-          />
-        ))}
-      </div>
+                {/* Unlocked Card Image Content */}
+                {char.unlocked ? (
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "110px",
+                      height: "140px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 5,
+                    }}
+                  >
+                    <img
+                      src={char.icon}
+                      alt="Avatar"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.12))",
+                      }}
+                    />
+                  </div>
+                ) : (
+                  /* Locked Card: Inner Dark Slate Box Framed by White/Cream Border */
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      triggerProNotice(char.name);
+                    }}
+                    style={{
+                      position: "absolute",
+                      inset: "4px",
+                      borderRadius: "13px",
+                      backgroundColor: "#1e293b",
+                      backgroundImage: "linear-gradient(150deg, #222b3d 0%, #111827 100%)",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "8px 6px",
+                      boxSizing: "border-box",
+                      zIndex: 5,
+                      overflow: "hidden",
+                    }}
+                  >
+                    {/* Silhouette background avatar */}
+                    <img
+                      src={char.icon}
+                      alt="Avatar Locked"
+                      style={{
+                        position: "absolute",
+                        width: "90%",
+                        height: "90%",
+                        objectFit: "contain",
+                        filter: "brightness(20%) opacity(0.35)",
+                        pointerEvents: "none",
+                      }}
+                    />
 
-      {/* Start Button ("Mula") */}
-      <button
-        id="btn-mula-login"
-        type="button"
-        className="neo-btn bg-yellow mula-start-btn"
-        style={{
-          position: "relative",
-          zIndex: 10,
-          width: "min(75%, 230px)",
-          margin: "0 auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "1.2rem",
-          padding: "10px 16px",
-          color: "var(--color-dark)",
-          border: "3px solid #000",
-          textTransform: "uppercase",
-          fontWeight: "900",
-          letterSpacing: "0.5px",
-          animation: "mulaBtnGoldPulse 2.2s infinite ease-in-out !important",
-        }}
-        onClick={handleStartGame}
-      >
-        <i className="fa-solid fa-play" style={{ marginRight: "8px" }}></i>
-        Mula
-      </button>
+                    {/* Lock Icon */}
+                    <i
+                      className="fa-solid fa-lock"
+                      style={{
+                        fontSize: "1.9rem",
+                        color: "#ffffff",
+                        filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.85))",
+                        position: "relative",
+                        zIndex: 6,
+                        marginBottom: "6px",
+                      }}
+                    ></i>
+
+                    {/* Red Versi Pro Badge */}
+                    <div
+                      style={{
+                        position: "relative",
+                        zIndex: 6,
+                        fontSize: "0.78rem",
+                        fontWeight: "800",
+                        color: "#ffffff",
+                        backgroundColor: "#dc2626",
+                        border: "1.5px solid #ef4444",
+                        borderRadius: "10px",
+                        padding: "5px 12px",
+                        textAlign: "center",
+                        lineHeight: "1.2",
+                        boxShadow: "0 3px 8px rgba(0,0,0,0.45)",
+                        letterSpacing: "0.2px",
+                      }}
+                    >
+                      Versi Pro
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Pagination Dots */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            display: "flex",
+            justifyContent: "center",
+            gap: "8px",
+            marginBottom: "14px",
+          }}
+        >
+          {characters.map((char, idx) => (
+            <div
+              key={idx}
+              onClick={() => handleSelectIndex(idx)}
+              style={{
+                width: activeIndex === idx ? "22px" : "8px",
+                height: "8px",
+                borderRadius: "4px",
+                backgroundColor:
+                  activeIndex === idx ? "#f59e0b" : "rgba(255,255,255,0.4)",
+                transition: "all 0.25s ease",
+                cursor: "pointer",
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Start Button ("Mula") */}
+        <button
+          id="btn-mula-login"
+          type="button"
+          className="neo-btn bg-yellow mula-start-btn"
+          style={{
+            position: "relative",
+            zIndex: 10,
+            width: "min(75%, 230px)",
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "1.2rem",
+            padding: "10px 16px",
+            color: "var(--color-dark)",
+            border: "3px solid #000",
+            textTransform: "uppercase",
+            fontWeight: "900",
+            letterSpacing: "0.5px",
+            animation: "mulaBtnGoldPulse 2.2s infinite ease-in-out !important",
+          }}
+          onClick={handleStartGame}
+        >
+          <i className="fa-solid fa-play" style={{ marginRight: "8px" }}></i>
+          Mula
+        </button>
       </div>
     </div>
   );
@@ -573,7 +577,7 @@ function Lencana3DSwiper() {
       petaId: 1,
       title: "Penjelajah Alfabet",
       displayTitle: "Penjelajah Alfabet",
-      desc: "Selesaikan semua cabaran Kenal Huruf",
+      desc: "Dapatkan 3 bintang dalam sekurang-kurangnya 3 aktiviti Cabaran Kenal Huruf",
       image: "/images/lencana/lencana-penjelajah-alfabet.png",
       mapName: "Cabaran Kenal Huruf",
     },
@@ -582,7 +586,7 @@ function Lencana3DSwiper() {
       petaId: 2,
       title: "Pemburu Suku Kata",
       displayTitle: "Pemburu Suku Kata",
-      desc: "Selesaikan semua cabaran Suku Kata Asas",
+      desc: "Dapatkan 3 bintang dalam sekurang-kurangnya 3 aktiviti Cabaran Suku Kata Asas",
       image: "/images/lencana/lencana-pemburu-suku-kata.png",
       mapName: "Cabaran Suku Kata Asas",
     },
@@ -591,7 +595,7 @@ function Lencana3DSwiper() {
       petaId: 3,
       title: "Wira Pulau",
       displayTitle: "Wira Pulau",
-      desc: "Selesaikan semua cabaran Suku Kata Hero",
+      desc: "Dapatkan 3 bintang dalam sekurang-kurangnya 3 aktiviti Cabaran Suku Kata Hero",
       image: "/images/lencana/lencana-wira-pulau.png",
       mapName: "Cabaran Suku Kata Hero",
     },
@@ -600,7 +604,7 @@ function Lencana3DSwiper() {
       petaId: 4,
       title: "Naib Raja Bacaan",
       displayTitle: "Naib Raja Bacaan",
-      desc: "Selesaikan semua cabaran Bacaan Bergred",
+      desc: "Dapatkan 3 bintang dalam sekurang-kurangnya 3 aktiviti Cabaran Bacaan Bergred",
       image: "/images/lencana/lencana-naib-raja-bacaan.png",
       mapName: "Cabaran Bacaan Bergred",
     },
@@ -609,9 +613,9 @@ function Lencana3DSwiper() {
       petaId: "all",
       title: "Kapten Harta Karun",
       displayTitle: "Kapten Harta Karun",
-      desc: "Sijil Pencapaian (Semua 4 Peta Siap)",
+      desc: "Buka kesemua 4 lencana utama untuk memperoleh Sijil Pencapaian",
       image: "/images/lencana/lencana-kapten-harta-karun.png",
-      mapName: "Koleksi Semua Peta",
+      mapName: "Koleksi Semua Cabaran",
     },
   ];
 
@@ -641,7 +645,7 @@ function Lencana3DSwiper() {
 
     FIVE_BADGES.forEach((b) => {
       let isUnlocked = false;
-      if (typeof (window as any).isPetaCompleted === 'function' && (window as any).isPetaCompleted(b.petaId)) {
+      if (typeof (window as any).isPetaCompleted === 'function' && (window as any).isPetaCompleted(b.petaId, data)) {
         isUnlocked = true;
       }
       if (data && data.badges && data.badges.includes(b.id)) {
@@ -651,6 +655,28 @@ function Lencana3DSwiper() {
     });
 
     setBadgeStatus(status);
+
+    const all4Unlocked = Boolean(
+      (typeof (window as any).isPetaCompleted === 'function' && (window as any).isPetaCompleted('all', data)) ||
+      (status['badge_peta_1'] && status['badge_peta_2'] && status['badge_peta_3'] && status['badge_peta_4'])
+    );
+
+    const sijilBtn = document.getElementById('sijil-btn') as HTMLButtonElement | null;
+    const lockIcon = document.getElementById('sijil-lock-icon');
+    const mainIcon = document.getElementById('sijil-main-icon');
+    if (sijilBtn) {
+      if (all4Unlocked) {
+        sijilBtn.classList.remove('is-locked');
+        sijilBtn.classList.add('is-unlocked');
+        if (lockIcon) lockIcon.style.display = 'none';
+        if (mainIcon) mainIcon.style.display = 'inline-block';
+      } else {
+        sijilBtn.classList.remove('is-unlocked');
+        sijilBtn.classList.add('is-locked');
+        if (lockIcon) lockIcon.style.display = 'inline-block';
+        if (mainIcon) mainIcon.style.display = 'none';
+      }
+    }
   };
 
   React.useEffect(() => {
@@ -658,9 +684,21 @@ function Lencana3DSwiper() {
     const handleUpdate = () => checkBadgeStatus();
     window.addEventListener("kemaskini-profil", handleUpdate);
     window.addEventListener("storage", handleUpdate);
+
+    // Auto popup maklumat lencana setiap kali masuk skrin Lencana Saya
+    const timer = setTimeout(() => {
+      const screen = document.getElementById("lencana-screen");
+      if (screen && screen.classList.contains("active")) {
+        if (typeof (window as any).bukaModalInfoLencana === "function") {
+          (window as any).bukaModalInfoLencana();
+        }
+      }
+    }, 350);
+
     return () => {
       window.removeEventListener("kemaskini-profil", handleUpdate);
       window.removeEventListener("storage", handleUpdate);
+      clearTimeout(timer);
     };
   }, []);
 
@@ -689,7 +727,7 @@ function Lencana3DSwiper() {
         osc.start(now);
         osc.stop(now + 0.09);
       }
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleNext = () => {
@@ -734,7 +772,11 @@ function Lencana3DSwiper() {
         (window as any).bukaDetailLencana(b.title, b.desc, b.image, b.mapName, b.petaId === 'all');
       }
     } else {
-      alert(`Lencana "${b.title}" masih terkunci! Selesaikan semua modul dalam ${b.mapName} untuk membuka lencana ini.`);
+      if (b.petaId === 'all') {
+        alert(`Lencana "${b.title}" masih terkunci! Selesaikan sekurang-kurangnya 3 aktiviti (skor 3 bintang penuh) dalam setiap 4 cabaran utama untuk membuka lencana ini dan Sijil Pencapaian.`);
+      } else {
+        alert(`Lencana "${b.title}" masih terkunci! Dapatkan 3 bintang (skor penuh) dalam sekurang-kurangnya 3 aktiviti ${b.mapName} untuk membuka lencana ini.`);
+      }
     }
   };
 
@@ -1058,7 +1100,7 @@ const toggleExerciseTooltip = (e: React.MouseEvent) => {
 
   if (!isActive) {
     popover.classList.add("is-active");
-}
+  }
 };
 
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
@@ -1076,7 +1118,7 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
           (window as any)._globalAudioCtx = ctx;
         }
         if (ctx.state === "suspended") {
-          ctx.resume().catch(() => {});
+          ctx.resume().catch(() => { });
         }
 
         audioPlayedRef.current = true;
@@ -1328,6 +1370,7 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
   );
 }
 
+
 export default function App() {
   const [showSplash, setShowSplash] = React.useState(true);
   React.useEffect(() => {
@@ -1380,6 +1423,16 @@ export default function App() {
   const [initialBukuCeritaId, setInitialBukuCeritaId] = React.useState<string | null>(null);
   const [isPerpustakaanOpen, setIsPerpustakaanOpen] = React.useState(false);
   const [isPerpustakaanHeroMode, setIsPerpustakaanHeroMode] = React.useState(false);
+  const [showCubaSebut, setShowCubaSebut] = React.useState(false);
+  const [cubaSebutConfig, setCubaSebutConfig] = React.useState<{
+    key: string;
+    label: string;
+    mode: 'sebut' | 'baca';
+  }>({
+    key: 'kvkv',
+    label: 'KV + KV',
+    mode: 'sebut'
+  });
 
   React.useEffect(() => {
     (window as any).showARGuideModal = () => setShowARGuideModal(true);
@@ -1423,10 +1476,24 @@ export default function App() {
         if (active) {
           setIsPerpustakaanHeroMode((window as any).currentPeta === 3);
           setIsPerpustakaanOpen(true);
+        } else {
+          setIsPerpustakaanOpen(false);
         }
       });
       observer.observe(el, { attributes: true, attributeFilter: ['class', 'style'] });
     }
+
+    const handleBukaCubaSebutEvent = (e: any) => {
+      if (e?.detail) {
+        setCubaSebutConfig({
+          key: e.detail.key || 'kvkv',
+          label: e.detail.label || 'KV + KV',
+          mode: e.detail.mode || 'sebut'
+        });
+        setShowCubaSebut(true);
+      }
+    };
+    window.addEventListener('buka-cuba-sebut', handleBukaCubaSebutEvent);
 
     (window as any).bukaBukuCeritaModal = (bookId?: string) => {
       setInitialBukuCeritaId(bookId || null);
@@ -1439,6 +1506,7 @@ export default function App() {
       delete (window as any).setARKiraJariModeReact;
       delete (window as any).showVRGuideModal;
       delete (window as any).bukaBukuCeritaModal;
+      window.removeEventListener('buka-cuba-sebut', handleBukaCubaSebutEvent);
     };
   }, []);
 
@@ -1461,7 +1529,7 @@ export default function App() {
         );
         setEditAvatarTemp(
           localStorage.getItem("bunyiKataSekolahAvatar") ||
-            "https://api.dicebear.com/7.x/shapes/svg?seed=school&backgroundColor=ffffff",
+          "https://api.dicebear.com/7.x/shapes/svg?seed=school&backgroundColor=ffffff",
         );
         setEditKodTemp(
           (localStorage.getItem("bunyiKataKodAdmin") || "ADMIN#01").toUpperCase(),
@@ -1474,7 +1542,7 @@ export default function App() {
         setEditSekolahTemp((localStorage.getItem("bunyiKataNamaSekolah") || "").toUpperCase());
         setEditAvatarTemp(
           localStorage.getItem("bunyiKataSekolahAvatar") ||
-            "https://api.dicebear.com/7.x/shapes/svg?seed=school&backgroundColor=ffffff",
+          "https://api.dicebear.com/7.x/shapes/svg?seed=school&backgroundColor=ffffff",
         );
         setEditKelasTemp(
           (localStorage.getItem("bunyiKataNamaKelas") || "1 CEMERLANG").toUpperCase(),
@@ -1509,6 +1577,7 @@ export default function App() {
 
   const [isReportDialOpen, setIsReportDialOpen] = React.useState(false);
   const [showExportModal, setShowExportModal] = React.useState(false);
+  const [showGuruSijilModal, setShowGuruSijilModal] = React.useState(false);
   const [selectedExportPeta, setSelectedExportPeta] = React.useState<'all' | '1' | '2' | '3' | '4'>('all');
   const [exportSchoolInput, setExportSchoolInput] = React.useState(() => localStorage.getItem('pdf_sekolah') || 'SK BUKIT BERUANG');
   const [exportClassInput, setExportClassInput] = React.useState(() => localStorage.getItem('bunyiKataNamaKelas') || localStorage.getItem('pdf_kelas') || '1 Cemerlang');
@@ -1521,8 +1590,12 @@ export default function App() {
       setExportTeacherInput(localStorage.getItem('pdf_guru') || 'MUHAMMAD IZZAT BIN RAZAK');
       setShowExportModal(true);
     };
+    (window as any).bukaModalSijilGuru = () => {
+      setShowGuruSijilModal(true);
+    };
     return () => {
       delete (window as any).bukaModalExport;
+      delete (window as any).bukaModalSijilGuru;
     };
   }, []);
   const [isModeMenuOpen, setIsModeMenuOpen] = React.useState(false);
@@ -1593,8 +1666,13 @@ export default function App() {
   const [joinCode, setJoinCode] = React.useState("");
   const [showLoginModal, setShowLoginModal] = React.useState(false);
   const [pendingLoginMode, setPendingLoginMode] = React.useState("");
+  const [authModalTab, setAuthModalTab] = React.useState<"login" | "register">("login");
   const [loginEmail, setLoginEmail] = React.useState("");
   const [loginPassword, setLoginPassword] = React.useState("");
+  const [regGuruNama, setRegGuruNama] = React.useState("");
+  const [regGuruSekolah, setRegGuruSekolah] = React.useState("");
+  const [regNamaKeluarga, setRegNamaKeluarga] = React.useState("");
+  const [authModalError, setAuthModalError] = React.useState("");
   const [editKodTemp, setEditKodTemp] = React.useState("");
   const [editKelasTemp, setEditKelasTemp] = React.useState("");
   const [editSekolahTemp, setEditSekolahTemp] = React.useState("");
@@ -1612,6 +1690,10 @@ export default function App() {
   );
   const [isMandatorySetup, setIsMandatorySetup] = React.useState(false);
   const [editModalError, setEditModalError] = React.useState("");
+  const [isChangingPassword, setIsChangingPassword] = React.useState(false);
+  const [newPasswordInput, setNewPasswordInput] = React.useState("");
+  const [showPasswordConfirmModal, setShowPasswordConfirmModal] = React.useState(false);
+  const [passwordToast, setPasswordToast] = React.useState("");
 
   // Helper untuk elakkan pertindihan kod antara Mod Guru, Ibu Bapa & Admin
   const checkIsCodeAlreadyUsed = (
@@ -1654,8 +1736,8 @@ export default function App() {
           reg[code] === "guru"
             ? "Mod Guru (Kod Kelas)"
             : reg[code] === "ibubapa"
-            ? "Mod Ibu Bapa (Kod Keluarga)"
-            : "Akaun Admin";
+              ? "Mod Ibu Bapa (Kod Keluarga)"
+              : "Akaun Admin";
         return { isUsed: true, usedBy: roleLabel };
       }
     } catch (e) {
@@ -1811,6 +1893,24 @@ export default function App() {
       if (modal) modal.style.display = "none";
       (window as any).pendingAppInfoMode = "";
     };
+    (window as any).bukaModalInfoLencana = () => {
+      const modal = document.getElementById("modal-info-lencana");
+      if (modal) {
+        modal.style.display = "flex";
+        if (typeof (window as any).playBubble === "function") {
+          (window as any).playBubble();
+        }
+      }
+    };
+    (window as any).tutupModalInfoLencana = () => {
+      const modal = document.getElementById("modal-info-lencana");
+      if (modal) {
+        modal.style.display = "none";
+        if (typeof (window as any).playBubble === "function") {
+          (window as any).playBubble();
+        }
+      }
+    };
     // Initial active screen on startup if none is active
     const loginEl = document.getElementById("login-screen");
     if (loginEl && !document.querySelector(".screen.active")) {
@@ -1829,7 +1929,7 @@ export default function App() {
 
     const surihScript = document.createElement("script");
     surihScript.src = `/surih-logic.js?v=${v}`;
-    
+
     // Load surih-nombor-logic.js
     const surihNomborScript = document.createElement("script");
     surihNomborScript.src = `/surih-nombor-logic.js?v=${v}`;
@@ -2204,18 +2304,13 @@ export default function App() {
           <i className="fa-solid fa-table-list"></i> <span>Dashboard</span>
         </button>
         <button
-          className="neo-btn bg-white nav-btn-statistik"
+          className="neo-btn bg-white nav-btn-statistik nav-btn-sijil"
           onClick={(e) => {
-            paparSkrin("admin-dashboard");
-            const sel = document.getElementById("admin-table-selector") as HTMLSelectElement;
-            if (sel) {
-              sel.value = "feedback";
-              (window as any).renderAdminTable && (window as any).renderAdminTable("feedback");
-            }
+            paparSkrin("admin-sijil");
           }}
-          title="Statistik"
+          title="Urus Sijil"
         >
-          <i className="fa-solid fa-chart-line"></i> <span>Statistik</span>
+          <i className="fa-solid fa-certificate"></i> <span>Sijil</span>
         </button>
         <button
           className="neo-btn bg-white nav-btn-urus"
@@ -2580,58 +2675,34 @@ export default function App() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "12px",
+              justifyContent: "center",
               marginBottom: "16px",
               borderBottom: "2px solid var(--color-gray)",
               paddingBottom: "12px",
             }}
           >
             <div
+              className="neo-btn bg-orange century-gothic-font"
               style={{
-                background: "#8b5cf6",
                 color: "white",
-                width: "42px",
-                height: "42px",
-                borderRadius: "12px",
-                display: "flex",
+                backgroundColor: "var(--color-orange, #ea580c)",
+                pointerEvents: "none",
+                fontSize: "clamp(0.95rem, 3.8vw, 1.2rem)",
+                fontWeight: "900",
+                textAlign: "center",
+                padding: "8px 24px",
+                borderRadius: "14px",
+                border: "3px solid var(--color-dark, #10182f)",
+                boxShadow: "0 4px 0 var(--color-dark, #10182f)",
+                display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "1.3rem",
-                boxShadow: "0 2px 0 var(--color-dark)",
-                border: "2px solid var(--color-dark)",
-                flexShrink: "0",
+                boxSizing: "border-box",
+                whiteSpace: "nowrap",
               }}
             >
-              <i className="fa-solid fa-chart-pie"></i>
-            </div>
-            <div style={{ textAlign: "left", flex: "1", minWidth: "0" }}>
-              <h2
-                className="modal-title-main"
-                style={{
-                  fontSize: "1.05rem",
-                  margin: "0",
-                  color: "var(--color-dark)",
-                  fontWeight: "bold",
-                  lineHeight: "1.2",
-                  paddingRight: "28px",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                Statistik &amp; Diagnostik AI Kelas
-              </h2>
-              <p
-                style={{
-                  fontSize: "0.72rem",
-                  margin: "1px 0 0 0",
-                  color: "#475569",
-                  fontWeight: "bold",
-                  lineHeight: "1.25",
-                }}
-              >
-                Analisis pintar prestasi murid, cabaran, dan status pembelajaran
-              </p>
+              <i className="fa-solid fa-chart-pie" style={{ marginRight: "8px" }}></i>
+              Statistik Kelas
             </div>
           </div>
 
@@ -3761,48 +3832,48 @@ export default function App() {
           <div
             className="logo-besar"
             id="login-logo-container"
-          style={{
-            padding: "0",
-            background: "transparent",
-            boxShadow: "none",
-            border: "none",
-            transform: "none",
-            marginTop: "10px",
-            marginBottom: "10px",
-            textAlign: "center",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <img
-            referrerPolicy="no-referrer"
-            src="/images/sampingan/logo-login-screen.png"
-            alt="Bunyi Kata"
-            className="glitch-logo"
-            style={{ maxWidth: "100%", height: "auto", maxHeight: "190px" }}
-          />
-        </div>
+            style={{
+              padding: "0",
+              background: "transparent",
+              boxShadow: "none",
+              border: "none",
+              transform: "none",
+              marginTop: "10px",
+              marginBottom: "10px",
+              textAlign: "center",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <img
+              referrerPolicy="no-referrer"
+              src="/images/sampingan/logo-login-screen.png"
+              alt="Bunyi Kata"
+              className="glitch-logo"
+              style={{ maxWidth: "100%", height: "auto", maxHeight: "190px" }}
+            />
+          </div>
 
-        <div
-          id="mode-buttons-container"
-          className="mode-buttons-container"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginBottom: "20px",
-            width: "100%",
-          }}
-        >
-          <PirateAvatar3DSwiper
-            onStart={() => {
-              (window as any).bukaModalAppInfo &&
-                (window as any).bukaModalAppInfo("murid");
+          <div
+            id="mode-buttons-container"
+            className="mode-buttons-container"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "20px",
+              width: "100%",
             }}
-            onOpenProPackage={() => {
-              setIsModeMenuOpen(true);
-            }}
-          />
-        </div>
+          >
+            <PirateAvatar3DSwiper
+              onStart={() => {
+                (window as any).bukaModalAppInfo &&
+                  (window as any).bukaModalAppInfo("murid");
+              }}
+              onOpenProPackage={() => {
+                setIsModeMenuOpen(true);
+              }}
+            />
+          </div>
         </div>
         <div
           className="neo-box"
@@ -4115,6 +4186,10 @@ export default function App() {
                 alert("Sila pilih nama dalam senarai!");
                 return;
               }
+              (window as any).namaMuridAktif = select.value;
+              localStorage.setItem("muridAktif", select.value);
+              localStorage.setItem("bunyiKataCurrentMurid", select.value);
+              localStorage.setItem("bunyiKataNamaMurid", select.value);
               (window as any).bukaModalAppInfo &&
                 (window as any).bukaModalAppInfo("murid");
             }}
@@ -4362,7 +4437,7 @@ export default function App() {
               whiteSpace: "nowrap",
             }}
           >
-            PETA KEMBARA 1
+            Peta Kembara 1
           </div>
           <div></div>
         </div>
@@ -4389,17 +4464,6 @@ export default function App() {
             <i className="fa-solid fa-wand-magic-sparkles"></i> Cara Belajar
           </h2>
           <div className="cara-belajar-btn-container">
-            <button
-              className="neo-btn bg-red cara-belajar-btn untuk-huruf"
-              onClick={(e) => {
-                document.getElementById("modal-video-abc").style.display =
-                  "flex";
-              }}
-            >
-              <i className="fa-brands fa-youtube"></i>{" "}
-              <span className="cara-belajar-btn-text-full">Lagu ABC</span>
-              <span className="cara-belajar-btn-text-short">Lagu</span>
-            </button>
             <button
               className="neo-btn bg-purple cara-belajar-btn untuk-huruf"
               onClick={(e) => {
@@ -4455,16 +4519,6 @@ export default function App() {
               <span className="cara-belajar-btn-text-short">Tanduk</span>
             </button>
             <button
-              className="neo-btn bg-green cara-belajar-btn untuk-sukukata"
-              onClick={(e) => {
-                if (window.showARSukuKataModal) window.showARSukuKataModal(); else { const m = document.getElementById("modal-pilih-ar-sukukata"); if(m) m.style.display="flex"; }
-              }}
-            >
-              <i className="fa-solid fa-camera"></i>{" "}
-              <span className="cara-belajar-btn-text-full">AR Suku Kata</span>
-              <span className="cara-belajar-btn-text-short">AR</span>
-            </button>
-            <button
               className="neo-btn cara-belajar-btn untuk-sukukata"
               style={{ backgroundColor: "#f59e0b", color: "white" }}
               onClick={(e) => {
@@ -4475,6 +4529,18 @@ export default function App() {
               <i className="fa-solid fa-puzzle-piece"></i>{" "}
               <span className="cara-belajar-btn-text-full">Puzzle</span>
               <span className="cara-belajar-btn-text-short">Puzzle</span>
+            </button>
+            <button
+              className="neo-btn cara-belajar-btn untuk-sukukata cursor-pointer"
+              style={{ backgroundColor: "#8b5cf6", color: "white" }}
+              onClick={(e) => {
+                if ((window as any).showCantumKataModal) (window as any).showCantumKataModal();
+                else if ((window as any).bukaCantumKata) (window as any).bukaCantumKata();
+              }}
+            >
+              <i className="fa-solid fa-puzzle-piece"></i>{" "}
+              <span className="cara-belajar-btn-text-full">Cantum Kata</span>
+              <span className="cara-belajar-btn-text-short">Cantum</span>
             </button>
             <button
               className="neo-btn bg-cyan cara-belajar-btn untuk-sukukata"
@@ -4488,6 +4554,18 @@ export default function App() {
                 Teroka Perpustakaan
               </span>
               <span className="cara-belajar-btn-text-short">Perpustakaan</span>
+            </button>
+            <button
+              className="neo-btn cara-belajar-btn untuk-sukukata cursor-pointer"
+              onClick={(e) => {
+                if ((window as any).showCubaSebutModal) (window as any).showCubaSebutModal();
+                else { const m = document.getElementById("modal-pilih-cuba-sebut-sukukata"); if (m) m.style.display = "flex"; }
+              }}
+              style={{ backgroundColor: "#ff751f", color: "white" }}
+            >
+              <i className="fa-solid fa-microphone-lines"></i>{" "}
+              <span className="cara-belajar-btn-text-full">Cuba Sebut</span>
+              <span className="cara-belajar-btn-text-short">Sebut</span>
             </button>
             <button
               className="neo-btn bg-yellow cara-belajar-btn untuk-bacaan"
@@ -4510,6 +4588,18 @@ export default function App() {
               <i className="fa-solid fa-cube"></i>{" "}
               <span className="cara-belajar-btn-text-full">3D Bacaan Bergred</span>
               <span className="cara-belajar-btn-text-short">3D</span>
+            </button>
+            <button
+              className="neo-btn cara-belajar-btn untuk-bacaan cursor-pointer"
+              onClick={(e) => {
+                if ((window as any).showCubaBacaModal) (window as any).showCubaBacaModal();
+                else { const m = document.getElementById("modal-pilih-cuba-baca"); if (m) m.style.display = "flex"; }
+              }}
+              style={{ backgroundColor: "#10b981", color: "white" }}
+            >
+              <i className="fa-solid fa-book-open-reader"></i>{" "}
+              <span className="cara-belajar-btn-text-full">Cuba Baca</span>
+              <span className="cara-belajar-btn-text-short">Baca</span>
             </button>
           </div>
         </div>
@@ -4550,12 +4640,12 @@ export default function App() {
               alignItems: "center",
               justifyContent: "center",
               pointerEvents: "none",
-              textTransform: "uppercase",
+              textTransform: "none",
               letterSpacing: "0.5px",
               zIndex: 5,
             }}
           >
-            CABARAN TAMBAHAN
+            Cabaran Tambahan
           </div>
 
           {/* 3D Swiper Carousel */}
@@ -4587,1012 +4677,1003 @@ export default function App() {
           </div>
         </div>
 
-      {/* Modal Permainan Cabaran Lain */}
-      <div id="modal-cabaran-lain-game" className="modal-overlay" style={{ display: "none", zIndex: 4500, backgroundColor: "rgba(0,0,0,0.85)" }}>
-        <div className="modal-content cabaran-lain-game-modal" style={{ maxWidth: "460px", width: "92%", maxHeight: "92vh", overflowY: "auto", textAlign: "center", padding: "20px 18px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative", borderRadius: "24px", border: "4px solid var(--color-dark)", backgroundColor: "#ffffff", boxShadow: "0 10px 0 var(--color-dark)", boxSizing: "border-box" }}>
-          <button
-            className="neo-btn bg-red close-btn"
-            onClick={() => (window as any).closeCabaranLainGame && (window as any).closeCabaranLainGame()}
-            aria-label="Tutup"
-            style={{ position: "absolute", top: "12px", right: "12px", width: "38px", height: "38px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "12px" }}
-          >
-            <i className="fa-solid fa-xmark" style={{ fontSize: "1.2rem" }}></i>
-          </button>
-          
-          <h2 id="cabaran-lain-game-title" style={{ marginBottom: "12px", display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "1.15rem", padding: "6px 18px", borderRadius: "16px", border: "3px solid #1e1b4b", backgroundColor: "#8b5cf6", color: "white", boxShadow: "0 4px 0 #1e1b4b" }}>
-            <i className="fa-solid fa-gamepad"></i> Cabaran
-          </h2>
+        {/* Cabaran Tambahan Game View (Full Screen matching Cabaran Utama) */}
+        <div id="modal-cabaran-lain-game" className="cabaran-tambahan-fullscreen-screen" style={{ display: "none" }}>
+          {/* Top Bar matching Cabaran Utama */}
+          <div className="cabaran-tambahan-top-bar">
+            <button
+              className="neo-btn bg-purple back-icon-btn"
+              onClick={() => (window as any).closeCabaranLainGame && (window as any).closeCabaranLainGame()}
+              aria-label="Kembali"
+            >
+              <i className="fa-solid fa-arrow-left"></i>
+            </button>
+            <div id="cabaran-lain-game-title" className="neo-btn bg-purple page-title" style={{ pointerEvents: "none", fontSize: "1.2rem", whiteSpace: "nowrap" }}>
+              <i className="fa-solid fa-gamepad"></i> Cabaran
+            </div>
+            <div className="top-bar-spacer" style={{ width: "48px", height: "48px", visibility: "hidden" }}></div>
+          </div>
 
-          <div id="cabaran-lain-game-area" style={{ width: "100%", minHeight: "240px", boxSizing: "border-box" }}>
-            {/* Dynamic game content injected by JS */}
+          <div className="cabaran-tambahan-content-wrapper">
+            <div id="cabaran-lain-game-area" style={{ width: "100%", boxSizing: "border-box" }}>
+              {/* Dynamic game content injected by JS */}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Modal Pilih Surih */}
-      <div id="modal-pilih-surih" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-        <div className="modal-content" style={{ maxWidth: "480px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-          <button
-            className="neo-btn bg-red close-btn"
-            onClick={(e) => {
-              const modal = document.getElementById("modal-pilih-surih");
-              if (modal) modal.style.display = "none";
-            }}
-            aria-label="Tutup"
-          >
-            <i className="fa-solid fa-xmark"></i>
-          </button>
-          <h2 className="modal-title-orange-badge" style={{ marginBottom: "20px" }}>
-            <i className="fa-solid fa-pen"></i> Pilih Mod Surih
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "14px", width: "100%" }}>
-            {/* Card Surih Huruf */}
-            <div
-              className="neo-btn"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "20px 10px 16px",
-                cursor: "pointer",
-                borderRadius: "22px",
-                border: "3.5px solid var(--color-dark, #10182f)",
-                boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                transition: "all 0.15s ease",
-                background: "linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)",
-                gap: "14px",
-                boxSizing: "border-box"
-              }}
-              onClick={() => {
+        {/* Modal Pilih Surih */}
+        <div id="modal-pilih-surih" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
+          <div className="modal-content" style={{ maxWidth: "480px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
+            <button
+              className="neo-btn bg-red close-btn"
+              onClick={(e) => {
                 const modal = document.getElementById("modal-pilih-surih");
                 if (modal) modal.style.display = "none";
-                (window as any).bukaSurihHuruf && (window as any).bukaSurihHuruf();
               }}
+              aria-label="Tutup"
             >
-              {/* Animated A, B, C Logo Tiles with Stars */}
-              <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                {/* Sparkle Star 1 (Top-Left) */}
-                <motion.div
-                  animate={{
-                    scale: [0.85, 1.25, 0.85],
-                    rotate: [0, 90, 180, 270, 360],
-                    opacity: [0.75, 1, 0.75]
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: "-12px",
-                    left: "-10px",
-                    width: "19px",
-                    height: "19px",
-                    pointerEvents: "none",
-                    userSelect: "none",
-                    zIndex: 2,
-                    filter: "drop-shadow(0 2px 4px rgba(250, 204, 21, 0.8))"
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                    <path
-                      d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"
-                      fill="url(#sparkle-grad-surih-huruf-tl)"
-                    />
-                    <defs>
-                      <linearGradient id="sparkle-grad-surih-huruf-tl" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#fffbeb" />
-                        <stop offset="50%" stopColor="#fde047" />
-                        <stop offset="100%" stopColor="#f59e0b" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </motion.div>
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+            <h2 className="modal-title-orange-badge" style={{ marginBottom: "20px" }}>
+              <i className="fa-solid fa-pen"></i> Pilih Mod Surih
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "14px", width: "100%" }}>
+              {/* Card Surih Huruf */}
+              <div
+                className="neo-btn"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "20px 10px 16px",
+                  cursor: "pointer",
+                  borderRadius: "22px",
+                  border: "3.5px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
+                  transition: "all 0.15s ease",
+                  background: "linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)",
+                  gap: "14px",
+                  boxSizing: "border-box"
+                }}
+                onClick={() => {
+                  const modal = document.getElementById("modal-pilih-surih");
+                  if (modal) modal.style.display = "none";
+                  (window as any).bukaSurihHuruf && (window as any).bukaSurihHuruf();
+                }}
+              >
+                {/* Animated A, B, C Logo Tiles with Stars */}
+                <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
+                  {/* Sparkle Star 1 (Top-Left) */}
+                  <motion.div
+                    animate={{
+                      scale: [0.85, 1.25, 0.85],
+                      rotate: [0, 90, 180, 270, 360],
+                      opacity: [0.75, 1, 0.75]
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "-12px",
+                      left: "-10px",
+                      width: "19px",
+                      height: "19px",
+                      pointerEvents: "none",
+                      userSelect: "none",
+                      zIndex: 2,
+                      filter: "drop-shadow(0 2px 4px rgba(250, 204, 21, 0.8))"
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
+                      <path
+                        d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"
+                        fill="url(#sparkle-grad-surih-huruf-tl)"
+                      />
+                      <defs>
+                        <linearGradient id="sparkle-grad-surih-huruf-tl" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#fffbeb" />
+                          <stop offset="50%" stopColor="#fde047" />
+                          <stop offset="100%" stopColor="#f59e0b" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </motion.div>
 
-                {/* Sparkle Star 2 (Top-Right) */}
-                <motion.div
-                  animate={{
-                    scale: [1.2, 0.8, 1.2],
-                    rotate: [360, 270, 180, 90, 0],
-                    opacity: [1, 0.65, 1]
-                  }}
-                  transition={{
-                    duration: 3.2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: "-11px",
-                    right: "-8px",
-                    width: "17px",
-                    height: "17px",
-                    pointerEvents: "none",
-                    userSelect: "none",
-                    zIndex: 2,
-                    filter: "drop-shadow(0 2px 4px rgba(251, 113, 133, 0.8))"
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                    <path
-                      d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z"
-                      fill="url(#star-grad-surih-huruf-tr)"
-                      stroke="#1e293b"
-                      strokeWidth="1.6"
-                      strokeLinejoin="round"
-                    />
-                    <defs>
-                      <linearGradient id="star-grad-surih-huruf-tr" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#fff1f2" />
-                        <stop offset="40%" stopColor="#fda4af" />
-                        <stop offset="100%" stopColor="#f43f5e" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </motion.div>
+                  {/* Sparkle Star 2 (Top-Right) */}
+                  <motion.div
+                    animate={{
+                      scale: [1.2, 0.8, 1.2],
+                      rotate: [360, 270, 180, 90, 0],
+                      opacity: [1, 0.65, 1]
+                    }}
+                    transition={{
+                      duration: 3.2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "-11px",
+                      right: "-8px",
+                      width: "17px",
+                      height: "17px",
+                      pointerEvents: "none",
+                      userSelect: "none",
+                      zIndex: 2,
+                      filter: "drop-shadow(0 2px 4px rgba(251, 113, 133, 0.8))"
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
+                      <path
+                        d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z"
+                        fill="url(#star-grad-surih-huruf-tr)"
+                        stroke="#1e293b"
+                        strokeWidth="1.6"
+                        strokeLinejoin="round"
+                      />
+                      <defs>
+                        <linearGradient id="star-grad-surih-huruf-tr" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#fff1f2" />
+                          <stop offset="40%" stopColor="#fda4af" />
+                          <stop offset="100%" stopColor="#f43f5e" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </motion.div>
 
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                  className="popup-tile-1"
-                  style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  A
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                  className="popup-tile-2"
-                  style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  B
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                  className="popup-tile-3"
-                  style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  C
-                </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
+                    className="popup-tile-1"
+                    style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    A
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
+                    className="popup-tile-2"
+                    style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    B
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
+                    className="popup-tile-3"
+                    style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    C
+                  </motion.div>
+                </div>
+                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
+                  Surih Huruf
+                </span>
               </div>
-              <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                Surih Huruf
-              </span>
-            </div>
 
-            {/* Card Surih Nombor */}
-            <div
-              className="neo-btn"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "20px 10px 16px",
-                cursor: "pointer",
-                borderRadius: "22px",
-                border: "3.5px solid var(--color-dark, #10182f)",
-                boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                transition: "all 0.15s ease",
-                background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
-                gap: "14px",
-                boxSizing: "border-box"
-              }}
-              onClick={() => {
-                const modal = document.getElementById("modal-pilih-surih");
-                if (modal) modal.style.display = "none";
-                (window as any).bukaSurihNombor && (window as any).bukaSurihNombor();
-              }}
-            >
-              {/* Animated 1, 2, 3 Logo Tiles with Stars */}
-              <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                {/* Sparkle Star 1 (Top-Left) */}
-                <motion.div
-                  animate={{
-                    scale: [0.85, 1.25, 0.85],
-                    rotate: [0, 90, 180, 270, 360],
-                    opacity: [0.75, 1, 0.75]
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: "-12px",
-                    left: "-10px",
-                    width: "19px",
-                    height: "19px",
-                    pointerEvents: "none",
-                    userSelect: "none",
-                    zIndex: 2,
-                    filter: "drop-shadow(0 2px 4px rgba(250, 204, 21, 0.8))"
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                    <path
-                      d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"
-                      fill="url(#sparkle-grad-surih-nombor-tl)"
-                    />
-                    <defs>
-                      <linearGradient id="sparkle-grad-surih-nombor-tl" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#fffbeb" />
-                        <stop offset="50%" stopColor="#fde047" />
-                        <stop offset="100%" stopColor="#f59e0b" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </motion.div>
+              {/* Card Surih Nombor */}
+              <div
+                className="neo-btn"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "20px 10px 16px",
+                  cursor: "pointer",
+                  borderRadius: "22px",
+                  border: "3.5px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
+                  transition: "all 0.15s ease",
+                  background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+                  gap: "14px",
+                  boxSizing: "border-box"
+                }}
+                onClick={() => {
+                  const modal = document.getElementById("modal-pilih-surih");
+                  if (modal) modal.style.display = "none";
+                  (window as any).bukaSurihNombor && (window as any).bukaSurihNombor();
+                }}
+              >
+                {/* Animated 1, 2, 3 Logo Tiles with Stars */}
+                <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
+                  {/* Sparkle Star 1 (Top-Left) */}
+                  <motion.div
+                    animate={{
+                      scale: [0.85, 1.25, 0.85],
+                      rotate: [0, 90, 180, 270, 360],
+                      opacity: [0.75, 1, 0.75]
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "-12px",
+                      left: "-10px",
+                      width: "19px",
+                      height: "19px",
+                      pointerEvents: "none",
+                      userSelect: "none",
+                      zIndex: 2,
+                      filter: "drop-shadow(0 2px 4px rgba(250, 204, 21, 0.8))"
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
+                      <path
+                        d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"
+                        fill="url(#sparkle-grad-surih-nombor-tl)"
+                      />
+                      <defs>
+                        <linearGradient id="sparkle-grad-surih-nombor-tl" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#fffbeb" />
+                          <stop offset="50%" stopColor="#fde047" />
+                          <stop offset="100%" stopColor="#f59e0b" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </motion.div>
 
-                {/* Sparkle Star 2 (Top-Right) */}
-                <motion.div
-                  animate={{
-                    scale: [1.2, 0.8, 1.2],
-                    rotate: [360, 270, 180, 90, 0],
-                    opacity: [1, 0.65, 1]
-                  }}
-                  transition={{
-                    duration: 3.2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: "-11px",
-                    right: "-8px",
-                    width: "17px",
-                    height: "17px",
-                    pointerEvents: "none",
-                    userSelect: "none",
-                    zIndex: 2,
-                    filter: "drop-shadow(0 2px 4px rgba(251, 113, 133, 0.8))"
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                    <path
-                      d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z"
-                      fill="url(#star-grad-surih-nombor-tr)"
-                      stroke="#1e293b"
-                      strokeWidth="1.6"
-                      strokeLinejoin="round"
-                    />
-                    <defs>
-                      <linearGradient id="star-grad-surih-nombor-tr" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#fff1f2" />
-                        <stop offset="40%" stopColor="#fda4af" />
-                        <stop offset="100%" stopColor="#f43f5e" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </motion.div>
+                  {/* Sparkle Star 2 (Top-Right) */}
+                  <motion.div
+                    animate={{
+                      scale: [1.2, 0.8, 1.2],
+                      rotate: [360, 270, 180, 90, 0],
+                      opacity: [1, 0.65, 1]
+                    }}
+                    transition={{
+                      duration: 3.2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "-11px",
+                      right: "-8px",
+                      width: "17px",
+                      height: "17px",
+                      pointerEvents: "none",
+                      userSelect: "none",
+                      zIndex: 2,
+                      filter: "drop-shadow(0 2px 4px rgba(251, 113, 133, 0.8))"
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
+                      <path
+                        d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z"
+                        fill="url(#star-grad-surih-nombor-tr)"
+                        stroke="#1e293b"
+                        strokeWidth="1.6"
+                        strokeLinejoin="round"
+                      />
+                      <defs>
+                        <linearGradient id="star-grad-surih-nombor-tr" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#fff1f2" />
+                          <stop offset="40%" stopColor="#fda4af" />
+                          <stop offset="100%" stopColor="#f43f5e" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </motion.div>
 
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                  className="popup-tile-1"
-                  style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  1
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                  className="popup-tile-2"
-                  style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  2
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                  className="popup-tile-3"
-                  style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  3
-                </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
+                    className="popup-tile-1"
+                    style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    1
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
+                    className="popup-tile-2"
+                    style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    2
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
+                    className="popup-tile-3"
+                    style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    3
+                  </motion.div>
+                </div>
+                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
+                  Surih Nombor
+                </span>
               </div>
-              <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                Surih Nombor
-              </span>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Modal Pilih Kad Imbasan Nombor */}
-      <div id="modal-pilih-kad-imbasan-nombor" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-        <div className="modal-content" style={{ maxWidth: "480px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-          <button
-            className="neo-btn bg-red close-btn"
-            onClick={(e) => {
-              const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
-              if (modal) modal.style.display = "none";
-            }}
-            aria-label="Tutup"
-          >
-            <i className="fa-solid fa-xmark"></i>
-          </button>
-          <h2 className="modal-title-orange-badge" style={{ marginBottom: "20px" }}>
-            <i className="fa-solid fa-clone"></i> Kad Imbasan Nombor
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "14px", width: "100%" }}>
-            {/* Square Card Nombor 0-10 */}
-            <div
-              className="neo-btn"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "20px 10px 16px",
-                cursor: "pointer",
-                borderRadius: "22px",
-                border: "3.5px solid var(--color-dark, #10182f)",
-                boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                transition: "all 0.15s ease",
-                background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
-                gap: "14px",
-                boxSizing: "border-box"
-              }}
-              onClick={() => {
+        {/* Modal Pilih Kad Imbasan Nombor */}
+        <div id="modal-pilih-kad-imbasan-nombor" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
+          <div className="modal-content" style={{ maxWidth: "480px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
+            <button
+              className="neo-btn bg-red close-btn"
+              onClick={(e) => {
                 const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
                 if (modal) modal.style.display = "none";
-                setKadImbasanNomborMode("bilang_0_10");
-                if ((window as any).paparSkrin) (window as any).paparSkrin("view-kad-imbasan-nombor");
               }}
+              aria-label="Tutup"
             >
-              {/* Animated 1, 2, 3 Logo Tiles with Stars */}
-              <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                {/* Sparkle Star 1 (Top-Left) */}
-                <motion.div
-                  animate={{
-                    scale: [0.85, 1.25, 0.85],
-                    rotate: [0, 90, 180, 270, 360],
-                    opacity: [0.75, 1, 0.75]
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: "-12px",
-                    left: "-10px",
-                    width: "19px",
-                    height: "19px",
-                    pointerEvents: "none",
-                    userSelect: "none",
-                    zIndex: 2,
-                    filter: "drop-shadow(0 2px 4px rgba(250, 204, 21, 0.8))"
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                    <path
-                      d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"
-                      fill="url(#sparkle-grad-popup-0-10-tl)"
-                    />
-                    <defs>
-                      <linearGradient id="sparkle-grad-popup-0-10-tl" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#fffbeb" />
-                        <stop offset="50%" stopColor="#fde047" />
-                        <stop offset="100%" stopColor="#f59e0b" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </motion.div>
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+            <h2 className="modal-title-orange-badge" style={{ marginBottom: "20px" }}>
+              <i className="fa-solid fa-clone"></i> Kad Imbasan Nombor
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "14px", width: "100%" }}>
+              {/* Square Card Nombor 0-10 */}
+              <div
+                className="neo-btn"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "20px 10px 16px",
+                  cursor: "pointer",
+                  borderRadius: "22px",
+                  border: "3.5px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
+                  transition: "all 0.15s ease",
+                  background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
+                  gap: "14px",
+                  boxSizing: "border-box"
+                }}
+                onClick={() => {
+                  const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
+                  if (modal) modal.style.display = "none";
+                  setKadImbasanNomborMode("bilang_0_10");
+                  if ((window as any).paparSkrin) (window as any).paparSkrin("view-kad-imbasan-nombor");
+                }}
+              >
+                {/* Animated 1, 2, 3 Logo Tiles with Stars */}
+                <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
+                  {/* Sparkle Star 1 (Top-Left) */}
+                  <motion.div
+                    animate={{
+                      scale: [0.85, 1.25, 0.85],
+                      rotate: [0, 90, 180, 270, 360],
+                      opacity: [0.75, 1, 0.75]
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "-12px",
+                      left: "-10px",
+                      width: "19px",
+                      height: "19px",
+                      pointerEvents: "none",
+                      userSelect: "none",
+                      zIndex: 2,
+                      filter: "drop-shadow(0 2px 4px rgba(250, 204, 21, 0.8))"
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
+                      <path
+                        d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"
+                        fill="url(#sparkle-grad-popup-0-10-tl)"
+                      />
+                      <defs>
+                        <linearGradient id="sparkle-grad-popup-0-10-tl" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#fffbeb" />
+                          <stop offset="50%" stopColor="#fde047" />
+                          <stop offset="100%" stopColor="#f59e0b" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </motion.div>
 
-                {/* Sparkle Star 2 (Top-Right) */}
-                <motion.div
-                  animate={{
-                    scale: [1.2, 0.8, 1.2],
-                    rotate: [360, 270, 180, 90, 0],
-                    opacity: [1, 0.65, 1]
-                  }}
-                  transition={{
-                    duration: 3.2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: "-11px",
-                    right: "-8px",
-                    width: "17px",
-                    height: "17px",
-                    pointerEvents: "none",
-                    userSelect: "none",
-                    zIndex: 2,
-                    filter: "drop-shadow(0 2px 4px rgba(251, 113, 133, 0.8))"
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                    <path
-                      d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z"
-                      fill="url(#star-grad-popup-0-10-tr)"
-                      stroke="#1e293b"
-                      strokeWidth="1.6"
-                      strokeLinejoin="round"
-                    />
-                    <defs>
-                      <linearGradient id="star-grad-popup-0-10-tr" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#fff1f2" />
-                        <stop offset="40%" stopColor="#fda4af" />
-                        <stop offset="100%" stopColor="#f43f5e" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </motion.div>
+                  {/* Sparkle Star 2 (Top-Right) */}
+                  <motion.div
+                    animate={{
+                      scale: [1.2, 0.8, 1.2],
+                      rotate: [360, 270, 180, 90, 0],
+                      opacity: [1, 0.65, 1]
+                    }}
+                    transition={{
+                      duration: 3.2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "-11px",
+                      right: "-8px",
+                      width: "17px",
+                      height: "17px",
+                      pointerEvents: "none",
+                      userSelect: "none",
+                      zIndex: 2,
+                      filter: "drop-shadow(0 2px 4px rgba(251, 113, 133, 0.8))"
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
+                      <path
+                        d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z"
+                        fill="url(#star-grad-popup-0-10-tr)"
+                        stroke="#1e293b"
+                        strokeWidth="1.6"
+                        strokeLinejoin="round"
+                      />
+                      <defs>
+                        <linearGradient id="star-grad-popup-0-10-tr" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#fff1f2" />
+                          <stop offset="40%" stopColor="#fda4af" />
+                          <stop offset="100%" stopColor="#f43f5e" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </motion.div>
 
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                  className="popup-tile-1"
-                  style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  1
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                  className="popup-tile-2"
-                  style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  2
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                  className="popup-tile-3"
-                  style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  3
-                </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
+                    className="popup-tile-1"
+                    style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    1
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
+                    className="popup-tile-2"
+                    style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    2
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
+                    className="popup-tile-3"
+                    style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    3
+                  </motion.div>
+                </div>
+                {/* Ayat Nombor 0-10 di baris bawah */}
+                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
+                  Nombor 0-10
+                </span>
               </div>
-              {/* Ayat Nombor 0-10 di baris bawah */}
-              <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                Nombor 0-10
-              </span>
-            </div>
 
-            {/* Square Card Siri Nombor 10-100 */}
-            <div
-              className="neo-btn"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "20px 10px 16px",
-                cursor: "pointer",
-                borderRadius: "22px",
-                border: "3.5px solid var(--color-dark, #10182f)",
-                boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                transition: "all 0.15s ease",
-                background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-                gap: "14px",
-                boxSizing: "border-box"
-              }}
-              onClick={() => {
-                const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
-                if (modal) modal.style.display = "none";
-                setKadImbasanNomborMode("siri_nombor");
-                if ((window as any).paparSkrin) (window as any).paparSkrin("view-kad-imbasan-nombor");
-              }}
-            >
-              {/* Animated 10, 20, 30 Logo Tiles with Stars */}
-              <div style={{ position: "relative", display: "inline-flex", gap: "5px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                {/* Sparkle Star 1 (Top-Left) */}
-                <motion.div
-                  animate={{
-                    scale: [0.85, 1.25, 0.85],
-                    rotate: [0, 90, 180, 270, 360],
-                    opacity: [0.75, 1, 0.75]
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: "-12px",
-                    left: "-10px",
-                    width: "19px",
-                    height: "19px",
-                    pointerEvents: "none",
-                    userSelect: "none",
-                    zIndex: 2,
-                    filter: "drop-shadow(0 2px 4px rgba(250, 204, 21, 0.8))"
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                    <path
-                      d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"
-                      fill="url(#sparkle-grad-popup-10-100-tl)"
-                    />
-                    <defs>
-                      <linearGradient id="sparkle-grad-popup-10-100-tl" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#fffbeb" />
-                        <stop offset="50%" stopColor="#fde047" />
-                        <stop offset="100%" stopColor="#f59e0b" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </motion.div>
+              {/* Square Card Siri Nombor 10-100 */}
+              <div
+                className="neo-btn"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "20px 10px 16px",
+                  cursor: "pointer",
+                  borderRadius: "22px",
+                  border: "3.5px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
+                  transition: "all 0.15s ease",
+                  background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+                  gap: "14px",
+                  boxSizing: "border-box"
+                }}
+                onClick={() => {
+                  const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
+                  if (modal) modal.style.display = "none";
+                  setKadImbasanNomborMode("siri_nombor");
+                  if ((window as any).paparSkrin) (window as any).paparSkrin("view-kad-imbasan-nombor");
+                }}
+              >
+                {/* Animated 10, 20, 30 Logo Tiles with Stars */}
+                <div style={{ position: "relative", display: "inline-flex", gap: "5px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
+                  {/* Sparkle Star 1 (Top-Left) */}
+                  <motion.div
+                    animate={{
+                      scale: [0.85, 1.25, 0.85],
+                      rotate: [0, 90, 180, 270, 360],
+                      opacity: [0.75, 1, 0.75]
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "-12px",
+                      left: "-10px",
+                      width: "19px",
+                      height: "19px",
+                      pointerEvents: "none",
+                      userSelect: "none",
+                      zIndex: 2,
+                      filter: "drop-shadow(0 2px 4px rgba(250, 204, 21, 0.8))"
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
+                      <path
+                        d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"
+                        fill="url(#sparkle-grad-popup-10-100-tl)"
+                      />
+                      <defs>
+                        <linearGradient id="sparkle-grad-popup-10-100-tl" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#fffbeb" />
+                          <stop offset="50%" stopColor="#fde047" />
+                          <stop offset="100%" stopColor="#f59e0b" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </motion.div>
 
-                {/* Sparkle Star 2 (Top-Right) */}
-                <motion.div
-                  animate={{
-                    scale: [1.2, 0.8, 1.2],
-                    rotate: [360, 270, 180, 90, 0],
-                    opacity: [1, 0.65, 1]
-                  }}
-                  transition={{
-                    duration: 3.2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: "-11px",
-                    right: "-8px",
-                    width: "17px",
-                    height: "17px",
-                    pointerEvents: "none",
-                    userSelect: "none",
-                    zIndex: 2,
-                    filter: "drop-shadow(0 2px 4px rgba(251, 113, 133, 0.8))"
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                    <path
-                      d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z"
-                      fill="url(#star-grad-popup-10-100-tr)"
-                      stroke="#1e293b"
-                      strokeWidth="1.6"
-                      strokeLinejoin="round"
-                    />
-                    <defs>
-                      <linearGradient id="star-grad-popup-10-100-tr" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#fff1f2" />
-                        <stop offset="40%" stopColor="#fda4af" />
-                        <stop offset="100%" stopColor="#f43f5e" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </motion.div>
+                  {/* Sparkle Star 2 (Top-Right) */}
+                  <motion.div
+                    animate={{
+                      scale: [1.2, 0.8, 1.2],
+                      rotate: [360, 270, 180, 90, 0],
+                      opacity: [1, 0.65, 1]
+                    }}
+                    transition={{
+                      duration: 3.2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "-11px",
+                      right: "-8px",
+                      width: "17px",
+                      height: "17px",
+                      pointerEvents: "none",
+                      userSelect: "none",
+                      zIndex: 2,
+                      filter: "drop-shadow(0 2px 4px rgba(251, 113, 133, 0.8))"
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
+                      <path
+                        d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z"
+                        fill="url(#star-grad-popup-10-100-tr)"
+                        stroke="#1e293b"
+                        strokeWidth="1.6"
+                        strokeLinejoin="round"
+                      />
+                      <defs>
+                        <linearGradient id="star-grad-popup-10-100-tr" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#fff1f2" />
+                          <stop offset="40%" stopColor="#fda4af" />
+                          <stop offset="100%" stopColor="#f43f5e" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </motion.div>
 
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                  className="popup-tile-1"
-                  style={{ minWidth: "38px", height: "36px", padding: "0 4px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.0rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  10
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                  className="popup-tile-2"
-                  style={{ minWidth: "38px", height: "36px", padding: "0 4px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.0rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  20
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                  className="popup-tile-3"
-                  style={{ minWidth: "38px", height: "36px", padding: "0 4px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.0rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  30
-                </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
+                    className="popup-tile-1"
+                    style={{ minWidth: "38px", height: "36px", padding: "0 4px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.0rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    10
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
+                    className="popup-tile-2"
+                    style={{ minWidth: "38px", height: "36px", padding: "0 4px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.0rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    20
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
+                    className="popup-tile-3"
+                    style={{ minWidth: "38px", height: "36px", padding: "0 4px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.0rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    30
+                  </motion.div>
+                </div>
+                {/* Ayat Siri Nombor 10-100 di baris bawah */}
+                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
+                  Siri Nombor 10-100
+                </span>
               </div>
-              {/* Ayat Siri Nombor 10-100 di baris bawah */}
-              <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                Siri Nombor 10-100
-              </span>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Modal Pilih AR (Huruf / ABC & Nombor) */}
-      <div id="modal-pilih-ar" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-        <div className="modal-content" style={{ maxWidth: "520px", width: "92%", textAlign: "center", padding: "28px 18px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-          <button
-            className="neo-btn bg-red close-btn"
-            onClick={(e) => {
-              const modal = document.getElementById("modal-pilih-ar");
-              if (modal) modal.style.display = "none";
-            }}
-            aria-label="Tutup"
-          >
-            <i className="fa-solid fa-xmark"></i>
-          </button>
-          <h2 className="modal-title-orange-badge" style={{ marginBottom: "20px" }}>
-            <i className="fa-solid fa-camera"></i> Pilih Mod AR
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "14px", width: "100%" }}>
-            
-            {/* Card 1: AR ABC */}
-            <div
-              className="neo-btn"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "20px 8px 16px",
-                cursor: "pointer",
-                borderRadius: "22px",
-                border: "3.5px solid var(--color-dark, #10182f)",
-                boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                transition: "all 0.15s ease",
-                background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                gap: "12px",
-                boxSizing: "border-box",
-                position: "relative"
-              }}
-              onClick={() => {
+        {/* Modal Pilih AR (Huruf / ABC & Nombor) */}
+        <div id="modal-pilih-ar" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
+          <div className="modal-content" style={{ maxWidth: "520px", width: "92%", textAlign: "center", padding: "28px 18px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
+            <button
+              className="neo-btn bg-red close-btn"
+              onClick={(e) => {
                 const modal = document.getElementById("modal-pilih-ar");
                 if (modal) modal.style.display = "none";
-                if ((window as any).bukaARABC) (window as any).bukaARABC();
               }}
+              aria-label="Tutup"
             >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+            <h2 className="modal-title-orange-badge" style={{ marginBottom: "20px" }}>
+              <i className="fa-solid fa-camera"></i> Pilih Mod AR
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "14px", width: "100%" }}>
 
-              {/* Animated A, B, C Tiles with Sparkles */}
-              <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                <motion.div
-                  animate={{ scale: [0.85, 1.25, 0.85], rotate: [0, 90, 180, 270, 360], opacity: [0.75, 1, 0.75] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ position: "absolute", top: "-12px", left: "-10px", width: "18px", height: "18px", pointerEvents: "none", zIndex: 2 }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                    <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="#fef08a" />
-                  </svg>
-                </motion.div>
-                <motion.div
-                  animate={{ scale: [1.2, 0.8, 1.2], rotate: [360, 270, 180, 90, 0], opacity: [1, 0.65, 1] }}
-                  transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ position: "absolute", top: "-11px", right: "-8px", width: "16px", height: "16px", pointerEvents: "none", zIndex: 2 }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                    <path d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z" fill="#6ee7b7" stroke="#10182f" strokeWidth="1.5" strokeLinejoin="round" />
-                  </svg>
-                </motion.div>
+              {/* Card 2: AR Nombor */}
+              <div
+                className="neo-btn"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "20px 8px 16px",
+                  cursor: "pointer",
+                  borderRadius: "22px",
+                  border: "3.5px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
+                  transition: "all 0.15s ease",
+                  background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                  gap: "12px",
+                  boxSizing: "border-box",
+                  position: "relative"
+                }}
+                onClick={() => {
+                  const modal = document.getElementById("modal-pilih-ar");
+                  if (modal) modal.style.display = "none";
+                  setArKiraJariMode('nombor');
+                  if ((window as any).bukaARKiraJari) (window as any).bukaARKiraJari('nombor');
+                }}
+              >
 
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                  style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  A
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                  style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  B
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                  style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  C
-                </motion.div>
+                {/* Animated 1, 2, 3 Tiles with Sparkles */}
+                <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
+                  <motion.div
+                    animate={{ scale: [0.85, 1.25, 0.85], rotate: [0, 90, 180, 270, 360], opacity: [0.75, 1, 0.75] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    style={{ position: "absolute", top: "-12px", left: "-10px", width: "18px", height: "18px", pointerEvents: "none", zIndex: 2 }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
+                      <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="#fef08a" />
+                    </svg>
+                  </motion.div>
+                  <motion.div
+                    animate={{ scale: [1.2, 0.8, 1.2], rotate: [360, 270, 180, 90, 0], opacity: [1, 0.65, 1] }}
+                    transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+                    style={{ position: "absolute", top: "-11px", right: "-8px", width: "16px", height: "16px", pointerEvents: "none", zIndex: 2 }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
+                      <path d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z" fill="#fde047" stroke="#10182f" strokeWidth="1.5" strokeLinejoin="round" />
+                    </svg>
+                  </motion.div>
+
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
+                    style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    1
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
+                    style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    2
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
+                    style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    3
+                  </motion.div>
+                </div>
+
+                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
+                  AR Nombor
+                </span>
               </div>
 
-              <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                AR ABC
-              </span>
-            </div>
+              {/* Card 3: AR Tambah */}
+              <div
+                className="neo-btn"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "20px 8px 16px",
+                  cursor: "pointer",
+                  borderRadius: "22px",
+                  border: "3.5px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
+                  transition: "all 0.15s ease",
+                  background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
+                  gap: "12px",
+                  boxSizing: "border-box",
+                  position: "relative"
+                }}
+                onClick={() => {
+                  const modal = document.getElementById("modal-pilih-ar");
+                  if (modal) modal.style.display = "none";
+                  setArKiraJariMode('tambah');
+                  if ((window as any).bukaARKiraJari) (window as any).bukaARKiraJari('tambah');
+                }}
+              >
 
-            {/* Card 2: AR Nombor */}
-            <div
-              className="neo-btn"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "20px 8px 16px",
-                cursor: "pointer",
-                borderRadius: "22px",
-                border: "3.5px solid var(--color-dark, #10182f)",
-                boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                transition: "all 0.15s ease",
-                background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-                gap: "12px",
-                boxSizing: "border-box",
-                position: "relative"
-              }}
-              onClick={() => {
-                const modal = document.getElementById("modal-pilih-ar");
-                if (modal) modal.style.display = "none";
-                setArKiraJariMode('nombor');
-                if ((window as any).bukaARKiraJari) (window as any).bukaARKiraJari('nombor');
-              }}
-            >
+                {/* Animated 1, +, 1 Tiles with Sparkles */}
+                <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
+                  <motion.div
+                    animate={{ scale: [0.85, 1.25, 0.85], rotate: [0, 90, 180, 270, 360], opacity: [0.75, 1, 0.75] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    style={{ position: "absolute", top: "-12px", left: "-10px", width: "18px", height: "18px", pointerEvents: "none", zIndex: 2 }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
+                      <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="#fef08a" />
+                    </svg>
+                  </motion.div>
+                  <motion.div
+                    animate={{ scale: [1.2, 0.8, 1.2], rotate: [360, 270, 180, 90, 0], opacity: [1, 0.65, 1] }}
+                    transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+                    style={{ position: "absolute", top: "-11px", right: "-8px", width: "16px", height: "16px", pointerEvents: "none", zIndex: 2 }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
+                      <path d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z" fill="#fda4af" stroke="#10182f" strokeWidth="1.5" strokeLinejoin="round" />
+                    </svg>
+                  </motion.div>
 
-              {/* Animated 1, 2, 3 Tiles with Sparkles */}
-              <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                <motion.div
-                  animate={{ scale: [0.85, 1.25, 0.85], rotate: [0, 90, 180, 270, 360], opacity: [0.75, 1, 0.75] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ position: "absolute", top: "-12px", left: "-10px", width: "18px", height: "18px", pointerEvents: "none", zIndex: 2 }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                    <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="#fef08a" />
-                  </svg>
-                </motion.div>
-                <motion.div
-                  animate={{ scale: [1.2, 0.8, 1.2], rotate: [360, 270, 180, 90, 0], opacity: [1, 0.65, 1] }}
-                  transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ position: "absolute", top: "-11px", right: "-8px", width: "16px", height: "16px", pointerEvents: "none", zIndex: 2 }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                    <path d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z" fill="#fde047" stroke="#10182f" strokeWidth="1.5" strokeLinejoin="round" />
-                  </svg>
-                </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
+                    style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    1
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
+                    style={{ width: "36px", height: "36px", background: "#10b981", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #059669, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.35rem", fontWeight: 900, color: "#ffffff", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    +
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
+                    style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    1
+                  </motion.div>
+                </div>
 
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                  style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  1
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                  style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  2
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                  style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  3
-                </motion.div>
+                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
+                  AR Tambah
+                </span>
               </div>
 
-              <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                AR Nombor
-              </span>
-            </div>
+              {/* Card 4: AR Tolak */}
+              <div
+                className="neo-btn"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "20px 8px 16px",
+                  cursor: "pointer",
+                  borderRadius: "22px",
+                  border: "3.5px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
+                  transition: "all 0.15s ease",
+                  background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+                  gap: "12px",
+                  boxSizing: "border-box",
+                  position: "relative"
+                }}
+                onClick={() => {
+                  const modal = document.getElementById("modal-pilih-ar");
+                  if (modal) modal.style.display = "none";
+                  setArKiraJariMode('tolak');
+                  if ((window as any).bukaARKiraJari) (window as any).bukaARKiraJari('tolak');
+                }}
+              >
 
-            {/* Card 3: AR Tambah */}
-            <div
-              className="neo-btn"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "20px 8px 16px",
-                cursor: "pointer",
-                borderRadius: "22px",
-                border: "3.5px solid var(--color-dark, #10182f)",
-                boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                transition: "all 0.15s ease",
-                background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
-                gap: "12px",
-                boxSizing: "border-box",
-                position: "relative"
-              }}
-              onClick={() => {
-                const modal = document.getElementById("modal-pilih-ar");
-                if (modal) modal.style.display = "none";
-                setArKiraJariMode('tambah');
-                if ((window as any).bukaARKiraJari) (window as any).bukaARKiraJari('tambah');
-              }}
-            >
+                {/* Animated 2, -, 1 Tiles with Sparkles */}
+                <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
+                  <motion.div
+                    animate={{ scale: [0.85, 1.25, 0.85], rotate: [0, 90, 180, 270, 360], opacity: [0.75, 1, 0.75] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    style={{ position: "absolute", top: "-12px", left: "-10px", width: "18px", height: "18px", pointerEvents: "none", zIndex: 2 }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
+                      <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="#fef08a" />
+                    </svg>
+                  </motion.div>
+                  <motion.div
+                    animate={{ scale: [1.2, 0.8, 1.2], rotate: [360, 270, 180, 90, 0], opacity: [1, 0.65, 1] }}
+                    transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+                    style={{ position: "absolute", top: "-11px", right: "-8px", width: "16px", height: "16px", pointerEvents: "none", zIndex: 2 }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
+                      <path d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z" fill="#93c5fd" stroke="#10182f" strokeWidth="1.5" strokeLinejoin="round" />
+                    </svg>
+                  </motion.div>
 
-              {/* Animated 1, +, 1 Tiles with Sparkles */}
-              <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                <motion.div
-                  animate={{ scale: [0.85, 1.25, 0.85], rotate: [0, 90, 180, 270, 360], opacity: [0.75, 1, 0.75] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ position: "absolute", top: "-12px", left: "-10px", width: "18px", height: "18px", pointerEvents: "none", zIndex: 2 }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                    <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="#fef08a" />
-                  </svg>
-                </motion.div>
-                <motion.div
-                  animate={{ scale: [1.2, 0.8, 1.2], rotate: [360, 270, 180, 90, 0], opacity: [1, 0.65, 1] }}
-                  transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ position: "absolute", top: "-11px", right: "-8px", width: "16px", height: "16px", pointerEvents: "none", zIndex: 2 }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                    <path d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z" fill="#fda4af" stroke="#10182f" strokeWidth="1.5" strokeLinejoin="round" />
-                  </svg>
-                </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
+                    style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    2
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
+                    style={{ width: "36px", height: "36px", background: "#f43f5e", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #be123c, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.35rem", fontWeight: 900, color: "#ffffff", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    -
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
+                    style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
+                  >
+                    1
+                  </motion.div>
+                </div>
 
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                  style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  1
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                  style={{ width: "36px", height: "36px", background: "#10b981", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #059669, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.35rem", fontWeight: 900, color: "#ffffff", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  +
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                  style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  1
-                </motion.div>
+                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
+                  AR Tolak
+                </span>
               </div>
 
-              <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                AR Tambah
-              </span>
             </div>
-
-            {/* Card 4: AR Tolak */}
-            <div
-              className="neo-btn"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "20px 8px 16px",
-                cursor: "pointer",
-                borderRadius: "22px",
-                border: "3.5px solid var(--color-dark, #10182f)",
-                boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                transition: "all 0.15s ease",
-                background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-                gap: "12px",
-                boxSizing: "border-box",
-                position: "relative"
-              }}
-              onClick={() => {
-                const modal = document.getElementById("modal-pilih-ar");
-                if (modal) modal.style.display = "none";
-                setArKiraJariMode('tolak');
-                if ((window as any).bukaARKiraJari) (window as any).bukaARKiraJari('tolak');
-              }}
-            >
-
-              {/* Animated 2, -, 1 Tiles with Sparkles */}
-              <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                <motion.div
-                  animate={{ scale: [0.85, 1.25, 0.85], rotate: [0, 90, 180, 270, 360], opacity: [0.75, 1, 0.75] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ position: "absolute", top: "-12px", left: "-10px", width: "18px", height: "18px", pointerEvents: "none", zIndex: 2 }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                    <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="#fef08a" />
-                  </svg>
-                </motion.div>
-                <motion.div
-                  animate={{ scale: [1.2, 0.8, 1.2], rotate: [360, 270, 180, 90, 0], opacity: [1, 0.65, 1] }}
-                  transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ position: "absolute", top: "-11px", right: "-8px", width: "16px", height: "16px", pointerEvents: "none", zIndex: 2 }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                    <path d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z" fill="#93c5fd" stroke="#10182f" strokeWidth="1.5" strokeLinejoin="round" />
-                  </svg>
-                </motion.div>
-
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                  style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  2
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                  style={{ width: "36px", height: "36px", background: "#f43f5e", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #be123c, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.35rem", fontWeight: 900, color: "#ffffff", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  -
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                  style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                >
-                  1
-                </motion.div>
-              </div>
-
-              <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                AR Tolak
-              </span>
-            </div>
-
           </div>
         </div>
-      </div>
 
-      {/* Modal Pilih AR Suku Kata */}
-      <div id="modal-pilih-ar-sukukata" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-        <div className="modal-content" style={{ maxWidth: "450px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-          <button
-            className="neo-btn bg-red close-btn"
-            onClick={(e) => {
-              const modal = document.getElementById("modal-pilih-ar-sukukata");
-              if (modal) modal.style.display = "none";
-            }}
-            aria-label="Tutup"
-          >
-            <i className="fa-solid fa-xmark"></i>
-          </button>
-          <h2 className="modal-title-orange-badge" style={{ marginBottom: "12px" }}>
-            <i className="fa-solid fa-camera"></i> AR Suku Kata
-          </h2>
-          <p style={{ marginBottom: "20px", fontSize: "1rem", color: "#475569" }}>
-            Pilih kemahiran suku kata untuk mula bermain:
-          </p>
-          <div id="ar-sukukata-buttons-container" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", width: "100%" }}>
-            {/* Populated dynamically via window.showARSukuKataModal() */}
+        {/* Modal Pilih AR Suku Kata */}
+        <div id="modal-pilih-ar-sukukata" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
+          <div className="modal-content" style={{ maxWidth: "450px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
+            <button
+              className="neo-btn bg-red close-btn"
+              onClick={(e) => {
+                const modal = document.getElementById("modal-pilih-ar-sukukata");
+                if (modal) modal.style.display = "none";
+              }}
+              aria-label="Tutup"
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+            <h2 className="modal-title-orange-badge" style={{ marginBottom: "12px" }}>
+              <i className="fa-solid fa-camera"></i> AR Suku Kata
+            </h2>
+            <p style={{ marginBottom: "20px", fontSize: "1rem", color: "#475569" }}>
+              Pilih kemahiran suku kata untuk mula bermain:
+            </p>
+            <div id="ar-sukukata-buttons-container" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", width: "100%" }}>
+              {/* Populated dynamically via window.showARSukuKataModal() */}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Modal Pilih Puzzle Suku Kata */}
-      <div id="modal-pilih-puzzle-sukukata" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-        <div className="modal-content" style={{ maxWidth: "450px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-          <button
-            className="neo-btn bg-red close-btn cursor-pointer"
-            onClick={(e) => {
-              const modal = document.getElementById("modal-pilih-puzzle-sukukata");
-              if (modal) modal.style.display = "none";
-            }}
-            aria-label="Tutup"
-          >
-            <i className="fa-solid fa-xmark"></i>
-          </button>
-          <h2 className="modal-title-orange-badge" style={{ marginBottom: "12px" }}>
-            <i className="fa-solid fa-puzzle-piece"></i> Puzzle Suku Kata
-          </h2>
-          <p style={{ marginBottom: "20px", fontSize: "1rem", color: "#475569" }}>
-            Pilih kemahiran suku kata untuk mula bermain:
-          </p>
-          <div id="puzzle-sukukata-buttons-container" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", width: "100%" }}>
-            {/* Populated dynamically via window.showPuzzleSukuKataModal() */}
+        {/* Modal Pilih Puzzle Suku Kata */}
+        <div id="modal-pilih-puzzle-sukukata" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
+          <div className="modal-content" style={{ maxWidth: "450px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
+            <button
+              className="neo-btn bg-red close-btn cursor-pointer"
+              onClick={(e) => {
+                const modal = document.getElementById("modal-pilih-puzzle-sukukata");
+                if (modal) modal.style.display = "none";
+              }}
+              aria-label="Tutup"
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+            <h2 className="modal-title-orange-badge" style={{ marginBottom: "12px" }}>
+              <i className="fa-solid fa-puzzle-piece"></i> Puzzle Suku Kata
+            </h2>
+            <p style={{ marginBottom: "20px", fontSize: "1rem", color: "#475569" }}>
+              Pilih kemahiran suku kata untuk mula bermain:
+            </p>
+            <div id="puzzle-sukukata-buttons-container" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", width: "100%" }}>
+              {/* Populated dynamically via window.showPuzzleSukuKataModal() */}
+            </div>
           </div>
         </div>
-      </div>
-      {/* VR button now directly calls bukaVR() - no modal needed */}
+
+        {/* Modal Pilih Cantum Kata */}
+        <div id="modal-pilih-cantum-kata" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
+          <div className="modal-content" style={{ maxWidth: "450px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
+            <button
+              className="neo-btn bg-red close-btn cursor-pointer"
+              onClick={(e) => {
+                const modal = document.getElementById("modal-pilih-cantum-kata");
+                if (modal) modal.style.display = "none";
+              }}
+              aria-label="Tutup"
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+            <h2 className="modal-title-orange-badge" style={{ marginBottom: "12px", background: "#8b5cf6", color: "white" }}>
+              <i className="fa-solid fa-puzzle-piece"></i> Cantum Kata
+            </h2>
+            <p style={{ marginBottom: "20px", fontSize: "1rem", color: "#475569" }}>
+              Pilih kemahiran suku kata untuk mula bermain:
+            </p>
+            <div id="cantum-kata-buttons-container" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", width: "100%" }}>
+              {/* Populated dynamically via window.showCantumKataModal() */}
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Pilih Cuba Sebut (Suku Kata Asas & Hero) */}
+        <div id="modal-pilih-cuba-sebut-sukukata" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
+          <div className="modal-content" style={{ maxWidth: "460px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
+            <button
+              className="neo-btn bg-red close-btn cursor-pointer"
+              onClick={(e) => {
+                const modal = document.getElementById("modal-pilih-cuba-sebut-sukukata");
+                if (modal) modal.style.display = "none";
+              }}
+              aria-label="Tutup"
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+            <h2 className="modal-title-orange-badge" style={{ marginBottom: "12px", background: "#ff751f", color: "white" }}>
+              <i className="fa-solid fa-microphone-lines"></i> Cuba Sebut
+            </h2>
+            <p style={{ marginBottom: "20px", fontSize: "1rem", color: "#475569" }}>
+              Pilih kemahiran suku kata untuk mula belajar:
+            </p>
+            <div id="cuba-sebut-sukukata-buttons-container" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", width: "100%" }}>
+              {/* Populated dynamically via window.showCubaSebutModal() */}
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Pilih Cuba Baca (Bacaan Bergred) */}
+        <div id="modal-pilih-cuba-baca" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
+          <div className="modal-content" style={{ maxWidth: "460px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
+            <button
+              className="neo-btn bg-red close-btn cursor-pointer"
+              onClick={(e) => {
+                const modal = document.getElementById("modal-pilih-cuba-baca");
+                if (modal) modal.style.display = "none";
+              }}
+              aria-label="Tutup"
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+            <h2 className="modal-title-orange-badge" style={{ marginBottom: "12px", background: "#10b981", color: "white" }}>
+              <i className="fa-solid fa-book-open-reader"></i> Cuba Baca
+            </h2>
+            <p style={{ marginBottom: "20px", fontSize: "1rem", color: "#475569" }}>
+              Pilih kategori bacaan untuk mula belajar:
+            </p>
+            <div id="cuba-baca-buttons-container" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", width: "100%" }}>
+              {/* Populated dynamically via window.showCubaBacaModal() */}
+            </div>
+          </div>
+        </div>
+        {/* VR button now directly calls bukaVR() - no modal needed */}
 
         <div
           id="mobile-floating-dial-container"
           className={isDialOpen ? "open" : ""}
         >
           <div className="mobile-dial-options">
-            <button
-              className="neo-btn bg-red cara-belajar-btn untuk-huruf"
-              onClick={(e) => {
-                setIsDialOpen(false);
-                document.getElementById("modal-video-abc").style.display =
-                  "flex";
-              }}
-            >
-              <span className="cara-belajar-btn-text-short">Lagu ABC</span>
-              <i className="fa-brands fa-youtube"></i>
-            </button>
             <button
               className="neo-btn bg-purple cara-belajar-btn untuk-huruf"
               onClick={(e) => {
@@ -5648,16 +5729,6 @@ export default function App() {
               <i className="fa-solid fa-gamepad"></i>
             </button>
             <button
-              className="neo-btn bg-green cara-belajar-btn untuk-sukukata"
-              onClick={(e) => {
-                setIsDialOpen(false);
-                if (window.showARSukuKataModal) window.showARSukuKataModal(); else { const m = document.getElementById("modal-pilih-ar-sukukata"); if(m) m.style.display="flex"; }
-              }}
-            >
-              <span className="cara-belajar-btn-text-short">AR Suku Kata</span>
-              <i className="fa-solid fa-camera"></i>
-            </button>
-            <button
               className="neo-btn cara-belajar-btn untuk-sukukata"
               style={{ backgroundColor: "#f59e0b", color: "white" }}
               onClick={(e) => {
@@ -5670,6 +5741,18 @@ export default function App() {
               <i className="fa-solid fa-puzzle-piece"></i>
             </button>
             <button
+              className="neo-btn cara-belajar-btn untuk-sukukata cursor-pointer"
+              style={{ backgroundColor: "#8b5cf6", color: "white" }}
+              onClick={(e) => {
+                setIsDialOpen(false);
+                if ((window as any).showCantumKataModal) (window as any).showCantumKataModal();
+                else if ((window as any).bukaCantumKata) (window as any).bukaCantumKata();
+              }}
+            >
+              <span className="cara-belajar-btn-text-short">Cantum Kata</span>
+              <i className="fa-solid fa-puzzle-piece"></i>
+            </button>
+            <button
               className="neo-btn bg-cyan cara-belajar-btn untuk-sukukata"
               onClick={(e) => {
                 setIsDialOpen(false);
@@ -5679,6 +5762,18 @@ export default function App() {
             >
               <span className="cara-belajar-btn-text-short">Perpustakaan</span>
               <i className="fa-solid fa-book-open-reader"></i>
+            </button>
+            <button
+              className="neo-btn cara-belajar-btn untuk-sukukata cursor-pointer"
+              style={{ backgroundColor: "#ff751f", color: "white" }}
+              onClick={(e) => {
+                setIsDialOpen(false);
+                if ((window as any).showCubaSebutModal) (window as any).showCubaSebutModal();
+                else { const m = document.getElementById("modal-pilih-cuba-sebut-sukukata"); if (m) m.style.display = "flex"; }
+              }}
+            >
+              <span className="cara-belajar-btn-text-short">Cuba Sebut</span>
+              <i className="fa-solid fa-microphone-lines"></i>
             </button>
             <button
               className="neo-btn bg-yellow cara-belajar-btn untuk-bacaan"
@@ -5701,6 +5796,18 @@ export default function App() {
             >
               <span className="cara-belajar-btn-text-short">3D</span>
               <i className="fa-solid fa-cube"></i>
+            </button>
+            <button
+              className="neo-btn cara-belajar-btn untuk-bacaan cursor-pointer"
+              style={{ backgroundColor: "#10b981", color: "white" }}
+              onClick={(e) => {
+                setIsDialOpen(false);
+                if ((window as any).showCubaBacaModal) (window as any).showCubaBacaModal();
+                else { const m = document.getElementById("modal-pilih-cuba-baca"); if (m) m.style.display = "flex"; }
+              }}
+            >
+              <span className="cara-belajar-btn-text-short">Cuba Baca</span>
+              <i className="fa-solid fa-book-open-reader"></i>
             </button>
           </div>
 
@@ -6039,7 +6146,42 @@ export default function App() {
           >
             Lencana Saya
           </div>
-          <div></div>
+          <button
+            className="neo-btn bg-purple help-btn info-icon-btn"
+            id="btn-info-lencana"
+            onClick={() => {
+              if ((window as any).playBubble) (window as any).playBubble();
+              if (typeof (window as any).bukaModalInfoLencana === "function") {
+                (window as any).bukaModalInfoLencana();
+              }
+            }}
+            title="Panduan Lencana & Sijil"
+            aria-label="Panduan Lencana & Sijil"
+            style={{
+              position: "absolute",
+              right: "clamp(12px, 2.5vw, 24px)",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "46px",
+              height: "46px",
+              minWidth: "46px",
+              minHeight: "46px",
+              padding: "0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "1.3rem",
+              color: "white",
+              borderRadius: "50%",
+              backgroundColor: "var(--color-purple)",
+              border: "3px solid var(--color-dark, #10182f)",
+              boxShadow: "0 3.5px 0 var(--color-dark, #10182f)",
+              zIndex: 30,
+              cursor: "pointer",
+            }}
+          >
+            <i className="fa-solid fa-lightbulb"></i>
+          </button>
         </div>
 
         <div
@@ -6108,11 +6250,18 @@ export default function App() {
               color: "#10182f",
               fontWeight: "900",
               letterSpacing: "0.5px",
+              cursor: "pointer",
             }}
             onClick={(e) => {
+              const d = typeof (window as any).getCurrentProfileData === 'function' ? (window as any).getCurrentProfileData() : null;
+              const allDone = typeof (window as any).isPetaCompleted === 'function' ? (window as any).isPetaCompleted('all', d) : false;
+              const hasMaster = d && d.badges && d.badges.includes('badge_master');
+              if (!allDone && !hasMaster) {
+                alert("Sijil Pencapaian masih terkunci! Dapatkan sekurang-kurangnya 3 bintang (skor penuh) dalam 3 aktiviti untuk setiap 4 cabaran utama (Kenal Huruf, Suku Kata Asas, Suku Kata Hero, dan Bacaan Bergred) untuk membuka sijil ini.");
+                return;
+              }
               muatTurunSijil();
             }}
-            disabled
           >
             <i
               className="fa-solid fa-lock"
@@ -7437,6 +7586,11 @@ export default function App() {
         </div>
       </div>
 
+      {/* Mod Admin - Urus Sijil Bunyi Kata */}
+      <div id="admin-sijil" className="screen" style={{ paddingBottom: "100px" }}>
+        <AdminSijilManager />
+      </div>
+
       {/*  Mod Guru (Dashboard Live Tracking)  */}
       <div
         id="guru-dashboard"
@@ -7649,7 +7803,7 @@ export default function App() {
                 );
                 setEditAvatarTemp(
                   localStorage.getItem("bunyiKataSekolahAvatar") ||
-                    "https://api.dicebear.com/7.x/shapes/svg?seed=school&backgroundColor=ffffff",
+                  "https://api.dicebear.com/7.x/shapes/svg?seed=school&backgroundColor=ffffff",
                 );
                 setEditKelasTemp(
                   localStorage.getItem("bunyiKataNamaKelas") || "1 Cemerlang",
@@ -7903,6 +8057,7 @@ export default function App() {
           }}
         >
           <div
+            className="guru-prestasi-header-bar"
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -7936,19 +8091,11 @@ export default function App() {
                 Prestasi Murid &amp; Laporan
               </span>
             </div>
-            <div
-              className="guru-filter-container"
-              style={{
-                display: "flex",
-                gap: "8px",
-                alignItems: "center",
-                flexWrap: "wrap",
-              }}
-            >
+            <div className="guru-filter-container guru-prestasi-filter-container">
               {/* Filter Kelas: TIADA SEMUA KELAS */}
               <select
                 id="guru-dashboard-kelas-select"
-                className="neo-btn filter-select"
+                className="neo-btn filter-select guru-filter-kelas"
                 style={{
                   padding: "6px 28px 6px 10px",
                   fontSize: "0.85rem",
@@ -7973,142 +8120,144 @@ export default function App() {
                 {/* Dijana dinamik tanpa pilihan 'Semua Kelas' */}
               </select>
 
-              <select
-                id="guru-dashboard-tahap-select"
-                className="neo-btn filter-select"
-                style={{
-                  padding: "6px 28px 6px 10px",
-                  fontSize: "0.85rem",
-                  fontWeight: "bold",
-                  fontFamily:
-                    "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
-                  borderRadius: "10px",
-                  border: "2px solid var(--color-dark)",
-                  cursor: "pointer",
-                  margin: "0",
-                  backgroundColor: "#f1f5f9",
-                  color: "var(--color-dark)",
-                  boxSizing: "border-box",
-                }}
-                onChange={(e) => {
-                  (window as any).tahapFilter = e.target.value;
-                  (window as any).renderTeacherTable &&
-                    (window as any).renderTeacherTable();
-                }}
-              >
-                <option
-                  value="all"
+              <div className="guru-filter-secondary-group">
+                <select
+                  id="guru-dashboard-tahap-select"
+                  className="neo-btn filter-select"
                   style={{
-                    color: "var(--color-dark)",
-                    background: "white",
+                    padding: "6px 28px 6px 10px",
+                    fontSize: "0.85rem",
+                    fontWeight: "bold",
                     fontFamily:
                       "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
+                    borderRadius: "10px",
+                    border: "2px solid var(--color-dark)",
+                    cursor: "pointer",
+                    margin: "0",
+                    backgroundColor: "#f1f5f9",
+                    color: "var(--color-dark)",
+                    boxSizing: "border-box",
+                  }}
+                  onChange={(e) => {
+                    (window as any).tahapFilter = e.target.value;
+                    (window as any).renderTeacherTable &&
+                      (window as any).renderTeacherTable();
                   }}
                 >
-                  Semua Tahap
-                </option>
-                <option
-                  value="cemerlang"
+                  <option
+                    value="all"
+                    style={{
+                      color: "var(--color-dark)",
+                      background: "white",
+                      fontFamily:
+                        "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
+                    }}
+                  >
+                    Semua Tahap
+                  </option>
+                  <option
+                    value="cemerlang"
+                    style={{
+                      color: "var(--color-dark)",
+                      background: "white",
+                      fontFamily:
+                        "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
+                    }}
+                  >
+                    Cemerlang (Lencana &gt; 5)
+                  </option>
+                  <option
+                    value="sederhana"
+                    style={{
+                      color: "var(--color-dark)",
+                      background: "white",
+                      fontFamily:
+                        "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
+                    }}
+                  >
+                    Sederhana (Lencana 2-5)
+                  </option>
+                  <option
+                    value="lemah"
+                    style={{
+                      color: "var(--color-dark)",
+                      background: "white",
+                      fontFamily:
+                        "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
+                    }}
+                  >
+                    Perlu Bimbingan (Lencana &lt; 2)
+                  </option>
+                </select>
+                <select
+                  id="guru-dashboard-peta-select"
+                  className="neo-btn filter-select"
                   style={{
-                    color: "var(--color-dark)",
-                    background: "white",
+                    padding: "6px 28px 6px 10px",
+                    fontSize: "0.85rem",
+                    fontWeight: "bold",
                     fontFamily:
                       "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
-                  }}
-                >
-                  Cemerlang (Lencana &gt; 5)
-                </option>
-                <option
-                  value="sederhana"
-                  style={{
+                    borderRadius: "10px",
+                    border: "2px solid var(--color-dark)",
+                    cursor: "pointer",
+                    margin: "0",
+                    backgroundColor: "#f1f5f9",
                     color: "var(--color-dark)",
-                    background: "white",
-                    fontFamily:
-                      "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
+                    boxSizing: "border-box",
+                  }}
+                  onChange={(e) => {
+                    (window as any).petaFilter = e.target.value;
+                    (window as any).renderTeacherTable &&
+                      (window as any).renderTeacherTable();
                   }}
                 >
-                  Sederhana (Lencana 2-5)
-                </option>
-                <option
-                  value="lemah"
-                  style={{
-                    color: "var(--color-dark)",
-                    background: "white",
-                    fontFamily:
-                      "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
-                  }}
-                >
-                  Perlu Bimbingan (Lencana &lt; 2)
-                </option>
-              </select>
-              <select
-                id="guru-dashboard-peta-select"
-                className="neo-btn filter-select"
-                style={{
-                  padding: "6px 28px 6px 10px",
-                  fontSize: "0.85rem",
-                  fontWeight: "bold",
-                  fontFamily:
-                    "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
-                  borderRadius: "10px",
-                  border: "2px solid var(--color-dark)",
-                  cursor: "pointer",
-                  margin: "0",
-                  backgroundColor: "#f1f5f9",
-                  color: "var(--color-dark)",
-                  boxSizing: "border-box",
-                }}
-                onChange={(e) => {
-                  (window as any).petaFilter = e.target.value;
-                  (window as any).renderTeacherTable &&
-                    (window as any).renderTeacherTable();
-                }}
-              >
-                <option
-                  value="1"
-                  style={{
-                    color: "var(--color-dark)",
-                    background: "white",
-                    fontFamily:
-                      "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
-                  }}
-                >
-                  Cabaran Kenal Huruf
-                </option>
-                <option
-                  value="2"
-                  style={{
-                    color: "var(--color-dark)",
-                    background: "white",
-                    fontFamily:
-                      "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
-                  }}
-                >
-                  Cabaran Suku Kata Asas
-                </option>
-                <option
-                  value="3"
-                  style={{
-                    color: "var(--color-dark)",
-                    background: "white",
-                    fontFamily:
-                      "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
-                  }}
-                >
-                  Cabaran Suku Kata Hero
-                </option>
-                <option
-                  value="4"
-                  style={{
-                    color: "var(--color-dark)",
-                    background: "white",
-                    fontFamily:
-                      "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
-                  }}
-                >
-                  Cabaran Bacaan Bergred
-                </option>
-              </select>
+                  <option
+                    value="1"
+                    style={{
+                      color: "var(--color-dark)",
+                      background: "white",
+                      fontFamily:
+                        "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
+                    }}
+                  >
+                    Cabaran Kenal Huruf
+                  </option>
+                  <option
+                    value="2"
+                    style={{
+                      color: "var(--color-dark)",
+                      background: "white",
+                      fontFamily:
+                        "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
+                    }}
+                  >
+                    Cabaran Suku Kata Asas
+                  </option>
+                  <option
+                    value="3"
+                    style={{
+                      color: "var(--color-dark)",
+                      background: "white",
+                      fontFamily:
+                        "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
+                    }}
+                  >
+                    Cabaran Suku Kata Hero
+                  </option>
+                  <option
+                    value="4"
+                    style={{
+                      color: "var(--color-dark)",
+                      background: "white",
+                      fontFamily:
+                        "'AtlantaRounded', 'AtlantaRoundedBlack', AtlantaRoundedBlack, AtlantaRounded, sans-serif",
+                    }}
+                  >
+                    Cabaran Bacaan Bergred
+                  </option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -8153,36 +8302,84 @@ export default function App() {
         >
           <div className="mobile-dial-options">
             <button
+              className="neo-btn bg-yellow cara-belajar-btn"
+              onClick={() => {
+                setIsReportDialOpen(false);
+                setShowGuruSijilModal(true);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                fontWeight: "900",
+                fontSize: "0.85rem",
+                backgroundColor: "#f59e0b",
+                color: "#ffffff",
+                boxShadow: "0 4px 0 rgba(0,0,0,0.2)",
+                border: "2.5px solid var(--color-dark)",
+                whiteSpace: "nowrap",
+                minWidth: "160px",
+                justifyContent: "flex-end",
+                cursor: "pointer",
+              }}
+            >
+              <span>Sijil Pencapaian</span>
+              <i className="fa-solid fa-award"></i>
+            </button>
+
+            <button
               className="neo-btn bg-red cara-belajar-btn"
-              onClick={(e) => {
+              onClick={() => {
                 setIsReportDialOpen(false);
                 (window as any).bukaModalExport ? (window as any).bukaModalExport() : setShowExportModal(true);
               }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                fontWeight: "900",
+                fontSize: "0.85rem",
+                boxShadow: "0 4px 0 rgba(0,0,0,0.2)",
+                border: "2.5px solid var(--color-dark)",
+                whiteSpace: "nowrap",
+                minWidth: "160px",
+                justifyContent: "flex-end",
+                cursor: "pointer",
+              }}
             >
-              <span style={{ fontWeight: "bold", marginLeft: "4px" }}>Eksport</span>
+              <span>Eksport Laporan</span>
               <i className="fa-solid fa-file-export"></i>
             </button>
           </div>
 
           <button
             id="guru-floating-cta"
-            className="neo-btn bg-red"
-            onClick={(e) => {
-              (window as any).bukaModalExport ? (window as any).bukaModalExport() : setShowExportModal(true);
+            className="neo-btn bg-yellow"
+            onClick={() => {
+              setIsReportDialOpen((prev) => !prev);
             }}
-            aria-label="Eksport Laporan"
+            aria-label="Tindakan Guru"
             style={{
               width: "60px",
               height: "60px",
               borderRadius: "50%",
-              fontSize: "1.5rem",
-              animation: "red-glow 2s infinite alternate",
-              color: "white",
+              fontSize: "1.45rem",
+              backgroundColor: "#facc15",
+              color: "var(--color-dark)",
               border: "3px solid var(--color-dark)",
               boxShadow: "2px 4px 0 var(--color-dark)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
             }}
           >
-            <i className="fa-solid fa-file-export"></i>
+            <i className={`fa-solid ${isReportDialOpen ? 'fa-xmark' : 'fa-layer-group'}`}></i>
           </button>
         </div>
       </div>
@@ -8392,8 +8589,9 @@ export default function App() {
               <button
                 id="btn-tambah-kelas-guru"
                 type="button"
-                className="neo-btn bg-green"
+                className="neo-btn"
                 style={{
+                  backgroundColor: "#168f81",
                   color: "white",
                   height: "40px",
                   minHeight: "40px",
@@ -8724,52 +8922,34 @@ export default function App() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "12px",
+                justifyContent: "center",
                 marginBottom: "16px",
                 borderBottom: "2px solid var(--color-gray, #e2e8f0)",
                 paddingBottom: "12px",
-                paddingRight: "40px",
               }}
             >
               <div
+                className="neo-btn bg-orange century-gothic-font"
                 style={{
-                  width: "42px",
-                  height: "42px",
-                  borderRadius: "12px",
-                  backgroundColor: "#ffedd5",
-                  border: "2px solid var(--color-dark)",
-                  display: "flex",
+                  color: "white",
+                  backgroundColor: "var(--color-orange, #ea580c)",
+                  pointerEvents: "none",
+                  fontSize: "clamp(0.95rem, 3.8vw, 1.2rem)",
+                  fontWeight: "900",
+                  textAlign: "center",
+                  padding: "8px 24px",
+                  borderRadius: "14px",
+                  border: "3px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 4px 0 var(--color-dark, #10182f)",
+                  display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "1.25rem",
-                  color: "#ea580c",
-                  flexShrink: 0,
+                  boxSizing: "border-box",
+                  whiteSpace: "nowrap",
                 }}
               >
-                <i className="fa-solid fa-file-export"></i>
-              </div>
-              <div>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: "1.15rem",
-                    fontWeight: "900",
-                    color: "var(--color-dark)",
-                    fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
-                  }}
-                >
-                  Eksport Laporan Prestasi
-                </h3>
-                <p
-                  style={{
-                    margin: "2px 0 0 0",
-                    fontSize: "0.78rem",
-                    color: "#64748b",
-                    fontWeight: "500",
-                  }}
-                >
-                  Pilih cabaran dan format fail laporan
-                </p>
+                <i className="fa-solid fa-file-export" style={{ marginRight: "8px" }}></i>
+                Eksport Laporan Prestasi
               </div>
             </div>
 
@@ -8787,7 +8967,7 @@ export default function App() {
                 <i className="fa-solid fa-map-location-dot" style={{ marginRight: "6px", color: "#0284c7" }}></i>
                 Pilih Cabaran
               </label>
-              
+
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                 {[
                   { id: "all", label: "Semua Cabaran", icon: "fa-layer-group", color: "#f59e0b", fullWidth: true },
@@ -8882,11 +9062,9 @@ export default function App() {
                   marginBottom: "8px",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-between",
                 }}
               >
-                <span><i className="fa-solid fa-school" style={{ marginRight: "4px" }}></i> Maklumat Kop Laporan:</span>
-                <span style={{ fontSize: "0.7rem", color: "#94a3b8" }}>Boleh disunting terus</span>
+                <span><i className="fa-solid fa-school" style={{ marginRight: "4px" }}></i> Maklumat Laporan:</span>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "8px" }}>
                 <div>
@@ -8976,7 +9154,7 @@ export default function App() {
                     localStorage.setItem('pdf_kelas', exportClassInput);
                   }
                   if (exportTeacherInput) localStorage.setItem('pdf_guru', exportTeacherInput);
-                  
+
                   setShowExportModal(false);
                   (window as any).cetakLaporanPDF && (window as any).cetakLaporanPDF(selectedExportPeta);
                 }}
@@ -9010,7 +9188,7 @@ export default function App() {
                     localStorage.setItem('pdf_kelas', exportClassInput);
                   }
                   if (exportTeacherInput) localStorage.setItem('pdf_guru', exportTeacherInput);
-                  
+
                   setShowExportModal(false);
                   (window as any).muatTurunCSV && (window as any).muatTurunCSV(selectedExportPeta);
                 }}
@@ -9019,6 +9197,56 @@ export default function App() {
                 <span>CSV</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Sijil Pencapaian (Mod Guru) */}
+      {showGuruSijilModal && (
+        <div
+          id="modal-guru-sijil"
+          className="modal-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(15, 23, 42, 0.75)",
+            backdropFilter: "blur(5px)",
+            zIndex: 99999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "10px 8px",
+          }}
+          onClick={() => {
+            if ((window as any).playBubble) (window as any).playBubble();
+            setShowGuruSijilModal(false);
+          }}
+        >
+          <div
+            className="modal-content neo-box"
+            style={{
+              maxWidth: "1240px",
+              width: "100%",
+              maxHeight: "96vh",
+              overflowY: "auto",
+              borderRadius: "24px",
+              padding: "12px 8px",
+              position: "relative",
+              backgroundColor: "#fffdf8",
+              border: "3.5px solid var(--color-dark)",
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3), 8px 8px 0 var(--color-dark)",
+              backgroundImage: "radial-gradient(circle, rgba(16, 24, 47, 0.08) 1.5px, transparent 1.5px)",
+              backgroundSize: "16px 16px",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AdminSijilManager isGuruMode={true} onClose={() => {
+              if ((window as any).playBubble) (window as any).playBubble();
+              setShowGuruSijilModal(false);
+            }} />
           </div>
         </div>
       )}
@@ -9173,8 +9401,8 @@ export default function App() {
                 );
                 setEditNamaAnakTemp(
                   (window as any).anakTerpilih ||
-                    localStorage.getItem("ibubapaAnakTerpilih") ||
-                    "Ali Bin Abu",
+                  localStorage.getItem("ibubapaAnakTerpilih") ||
+                  "Ali Bin Abu",
                 );
                 setEditKodTemp(
                   localStorage.getItem("bunyiKataKodKeluarga") || "FAM@2026",
@@ -10182,10 +10410,11 @@ export default function App() {
             <i className="fa-solid fa-xmark"></i>
           </button>
           <h2
+            className="modal-title-green-badge"
             style={{
-              fontSize: "1.5rem",
-              marginBottom: "10px",
-              color: "var(--color-dark)",
+              backgroundColor: "#168f81",
+              color: "#ffffff",
+              marginBottom: "14px",
             }}
           >
             Edit Profil &amp; Avatar
@@ -10312,27 +10541,15 @@ export default function App() {
                 (window as any).paparSkrin?.("view-belajar-fonik");
               }}
               style={{
-                fontSize: "1.05rem",
-                padding: "10px",
+                fontSize: "1.15rem",
+                fontWeight: "bold",
+                padding: "16px 20px",
                 background: "white",
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
-                gap: "10px",
                 justifyContent: "center",
               }}
             >
-              <img
-                referrerPolicy="no-referrer"
-                src="https://i.postimg.cc/rpPgtwvW/BUTTON-ABC-NEW.png"
-                alt="Huruf Kecil"
-                style={{
-                  width: "100%",
-                  maxHeight: "80px",
-                  objectFit: "contain",
-                  borderRadius: "8px",
-                }}
-              />
               Huruf Kecil (a-z)
             </button>
             <button
@@ -10344,34 +10561,22 @@ export default function App() {
                 (window as any).paparSkrin?.("view-belajar-fonik");
               }}
               style={{
-                fontSize: "1.05rem",
-                padding: "10px",
+                fontSize: "1.15rem",
+                fontWeight: "bold",
+                padding: "16px 20px",
                 background: "white",
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
-                gap: "10px",
                 justifyContent: "center",
               }}
             >
-              <img
-                referrerPolicy="no-referrer"
-                src="https://i.postimg.cc/Gt0QqS3F/BUTTON-ABC-NEW-(1).png"
-                alt="Huruf Besar"
-                style={{
-                  width: "100%",
-                  maxHeight: "80px",
-                  objectFit: "contain",
-                  borderRadius: "8px",
-                }}
-              />
               Huruf Besar (A-Z)
             </button>
           </div>
         </div>
       </div>
 
-            {/* Modal Pilih Vokal / Konsonan */}
+      {/* Modal Pilih Vokal / Konsonan */}
       <div id="modal-pilih-vokal-konsonan" className="modal-overlay" style={{ display: "none", zIndex: 3000 }}>
         <div
           className="modal-content"
@@ -10783,9 +10988,9 @@ export default function App() {
           <button
             className="neo-btn bg-red close-btn"
             onClick={() =>
-              (document.getElementById(
-                "modal-pilih-tanduk-kata",
-              ).style.display = "none")
+            (document.getElementById(
+              "modal-pilih-tanduk-kata",
+            ).style.display = "none")
             }
             aria-label="Tutup"
           >
@@ -10855,9 +11060,9 @@ export default function App() {
           <button
             className="neo-btn bg-red close-btn"
             onClick={() =>
-              (document.getElementById(
-                "modal-pilih-suku-kata-hero",
-              ).style.display = "none")
+            (document.getElementById(
+              "modal-pilih-suku-kata-hero",
+            ).style.display = "none")
             }
             aria-label="Tutup"
           >
@@ -10909,81 +11114,6 @@ export default function App() {
                 {cat}
               </button>
             ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Modal Video Lagu ABC */}
-      <div
-        id="modal-video-abc"
-        className="modal-overlay"
-        style={{ display: "none", zIndex: 3000 }}
-      >
-        <div
-          className="modal-content"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-            padding: "50px 20px 20px",
-            width: "90%",
-          }}
-        >
-          <button
-            className="neo-btn bg-red close-btn"
-            onClick={(e) => {
-              document.getElementById("modal-video-abc").style.display = "none";
-              const iframe = document.getElementById("video-lagu-abc-iframe");
-              if (iframe) {
-                const src = iframe.src;
-                iframe.src = src; // Stop video
-              }
-            }}
-            aria-label="Tutup"
-          >
-            <i className="fa-solid fa-xmark"></i>
-          </button>
-          <div
-            className="neo-btn bg-yellow page-title"
-            style={{
-              position: "absolute",
-              top: "15px",
-              left: "15px",
-              pointerEvents: "none",
-              fontSize: "1.1rem",
-              padding: "8px 20px",
-              margin: "0",
-              border: "3px solid var(--color-dark)",
-            }}
-          >
-            Lagu ABC
-          </div>
-          <div
-            style={{
-              position: "relative",
-              paddingBottom: "56.25%",
-              height: "0",
-              overflow: "hidden",
-              borderRadius: "12px",
-              border: "3px solid var(--color-dark)",
-              marginTop: "10px",
-            }}
-          >
-            <iframe
-              id="video-lagu-abc-iframe"
-              style={{
-                position: "absolute",
-                top: "0",
-                left: "0",
-                width: "100%",
-                height: "100%",
-                border: "none",
-              }}
-              src="https://www.youtube.com/embed/CZ3BmywhIMQ?si=2VwGYEiTmKHw6KR0"
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            ></iframe>
           </div>
         </div>
       </div>
@@ -11448,6 +11578,28 @@ export default function App() {
         />
       </div>
 
+      {/* Cantum Kata Game */}
+      <div
+        id="view-cantum-kata"
+        className="screen"
+        style={{
+          padding: "16px",
+          height: "100vh",
+          width: "100vw",
+          overflow: "hidden",
+        }}
+      >
+        <CantumKataGame
+          onClose={() => {
+            const event = new CustomEvent("tukar-skrin", {
+              detail: { skrin: "map-screen" },
+            });
+            window.dispatchEvent(event);
+            if (window.paparSkrin) window.paparSkrin("map-screen");
+          }}
+        />
+      </div>
+
       {/* Cabaran Suku Kata Game */}
       <div
         id="view-cabaran-suku-kata"
@@ -11576,7 +11728,7 @@ export default function App() {
           >
             <i className="fa-solid fa-arrow-left"></i>
           </button>
-          
+
           <div
             id="vr-header-title"
             className="neo-btn bg-orange page-title"
@@ -12307,8 +12459,8 @@ export default function App() {
               </div>
             </div>
 
-            <div 
-              id="word_card_ar_sukukata" 
+            <div
+              id="word_card_ar_sukukata"
               className="ar-word-card neo-box border-orange-200 cursor-pointer"
               onClick={() => (window as any).sebutAudio && (window as any).currentARWord && (window as any).sebutAudio((window as any).currentARWord)}
               title="Klik untuk dengar sebutan"
@@ -12554,7 +12706,7 @@ export default function App() {
                             stream.getTracks().forEach(t => t.stop());
                           }
                         })
-                        .catch(() => {});
+                        .catch(() => { });
                     }
                     const startBtn = document.getElementById("start_btn_ar_sukukata");
                     if (startBtn && !(window as any).isARPlaying) {
@@ -12642,6 +12794,40 @@ export default function App() {
               <p className="text-xl font-bold">Memuatkan Sensor AR MediaPipe Hands...</p>
               <p className="text-xs text-gray-300 mt-1">Sila benarkan akses kamera peranti</p>
             </div>
+
+            {/* Button Tukar Filter AR di atas kamera sudut kanan atas (Laptop/Desktop) */}
+            <button
+              type="button"
+              id="btn_tukar_filter_camera_kirajari"
+              className="ar-camera-filter-btn neo-btn bg-yellow cursor-pointer hover:scale-110 transition-transform"
+              style={{
+                position: "absolute",
+                top: "14px",
+                right: "14px",
+                bottom: "auto",
+                left: "auto",
+                transform: "none",
+                width: "44px",
+                height: "44px",
+                minWidth: "44px",
+                minHeight: "44px",
+                borderRadius: "50%",
+                border: "3px solid #10182f",
+                boxShadow: "0 3px 0px #10182f",
+                backgroundColor: "#facc15",
+                color: "#10182f",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 30,
+                padding: 0,
+              }}
+              onClick={() => (window as any).tukarARFilter && (window as any).tukarARFilter()}
+              title="Tukar Filter AR"
+              aria-label="Tukar Filter AR"
+            >
+              <i className="fa-solid fa-rotate text-lg"></i>
+            </button>
             {/* Live Detected Fingers Badge (Neo-brutalist theme matching web app) */}
             <div
               id="ar_kirajari_live_badge"
@@ -12756,6 +12942,16 @@ export default function App() {
               </button>
               <button
                 type="button"
+                id="btn_tukar_filter_kirajari"
+                className="ar-filter-btn neo-btn bg-yellow cursor-pointer hover:scale-110 transition-transform"
+                onClick={() => (window as any).tukarARFilter && (window as any).tukarARFilter()}
+                title="Tukar Filter AR"
+                aria-label="Tukar Filter AR"
+              >
+                <i className="fa-solid fa-rotate text-lg"></i>
+              </button>
+              <button
+                type="button"
                 id="btn_refresh_kirajari"
                 className="ar-filter-btn neo-btn bg-yellow cursor-pointer hover:scale-110 transition-transform"
                 onClick={() => (window as any).nextARKiraJariQuestion && (window as any).nextARKiraJariQuestion()}
@@ -12836,8 +13032,8 @@ export default function App() {
                 {arKiraJariMode === 'tambah'
                   ? 'Kira ayat matematik tambah (1–10) dan tunjukkan bilangan jari jawapan ke arah kamera untuk mengumpul bintang ganjaran!'
                   : arKiraJariMode === 'tolak'
-                  ? 'Kira ayat matematik tolak (1–10) dan tunjukkan bilangan jari jawapan ke arah kamera untuk mengumpul bintang ganjaran!'
-                  : 'Kira objek yang dipaparkan (1–10) dan tunjukkan bilangan jari yang sama ke arah kamera untuk mengumpul bintang ganjaran!'}
+                    ? 'Kira ayat matematik tolak (1–10) dan tunjukkan bilangan jari jawapan ke arah kamera untuk mengumpul bintang ganjaran!'
+                    : 'Kira objek yang dipaparkan (1–10) dan tunjukkan bilangan jari yang sama ke arah kamera untuk mengumpul bintang ganjaran!'}
               </p>
 
               <div
@@ -12947,6 +13143,7 @@ export default function App() {
             className="neo-btn bg-orange back-icon-btn"
             onClick={(e) => {
               if (window.speechSynthesis) window.speechSynthesis.cancel();
+              if ((window as any).hentikanAudioSemasa) (window as any).hentikanAudioSemasa();
               (window as any).paparSkrin("map-screen");
             }}
             aria-label="Kembali"
@@ -13317,2569 +13514,4314 @@ export default function App() {
       {/* Modal Edit Maklumat Kelas */}
       {typeof document !== 'undefined' && createPortal(
         <>
-      {isEditModalOpen && (() => {
-        const isAdmin = !!(window as any).modAdminAktif;
-        const isParent = !isAdmin && !!(window as any).modIbuBapaAktif;
-        const isGuru = !isAdmin && !isParent;
+          {isEditModalOpen && (() => {
+            const isAdmin = !!(window as any).modAdminAktif;
+            const isParent = !isAdmin && !!(window as any).modIbuBapaAktif;
+            const isGuru = !isAdmin && !isParent;
 
-        const modalHeaderTitle = isAdmin
-          ? "Maklumat Admin"
-          : isParent
-          ? "Maklumat Keluarga"
-          : "Maklumat Guru";
+            const modalHeaderTitle = isAdmin
+              ? "Maklumat Admin"
+              : isParent
+                ? "Maklumat Keluarga"
+                : "Maklumat Guru";
 
-        const headerBgColor = isAdmin
-          ? "#168f81"
-          : isParent
-          ? "var(--color-blue)"
-          : "var(--color-orange)";
+            const headerBgColor = isAdmin
+              ? "#168f81"
+              : isParent
+                ? "var(--color-blue)"
+                : "var(--color-orange)";
 
-        const labelHighlightStyle: React.CSSProperties = {
-          backgroundColor: headerBgColor,
-          color: "#ffffff",
-          padding: "4px 14px",
-          borderRadius: "8px",
-          border: "2px solid #10182f",
-          fontWeight: "900",
-          fontSize: "0.88rem",
-          letterSpacing: "0.5px",
-          boxShadow: "0 3px 0 #10182f",
-          display: "inline-block",
-        };
+            const labelHighlightStyle: React.CSSProperties = {
+              backgroundColor: headerBgColor,
+              color: "#ffffff",
+              padding: "4px 14px",
+              borderRadius: "8px",
+              border: "2px solid #10182f",
+              fontWeight: "900",
+              fontSize: "0.88rem",
+              letterSpacing: "0.5px",
+              boxShadow: "0 3px 0 #10182f",
+              display: "inline-block",
+            };
 
-        return (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.6)",
-            zIndex: 10000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#fef9ec",
-              backgroundImage:
-                "radial-gradient(rgba(16, 24, 47, 0.1) 1.5px, transparent 1.5px)",
-              backgroundSize: "15px 15px",
-              borderRadius: "16px",
-              padding: "24px",
-              position: "relative",
-              width: "90%",
-              maxWidth: "500px",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              border: "3px solid var(--color-dark)",
-              boxShadow: "0 4px 0 var(--color-dark)",
-            }}
-          >
-            <button
-              className="neo-btn bg-red"
-              onClick={() => {
-                if (isMandatorySetup) {
-                  setEditModalError("Sila lengkapkan semua maklumat wajib bertanda (*) dan klik butang simpan.");
-                  return;
-                }
-                setIsEditModalOpen(false);
-                setEditModalError("");
-              }}
-              title="Tutup"
-              aria-label="Tutup"
-              style={{
-                position: "absolute",
-                top: "10px",
-                right: "10px",
-                width: "36px",
-                height: "36px",
-                padding: "0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 10,
-              }}
-            >
-              <i className="fa-solid fa-xmark"></i>
-            </button>
-            <div style={{ textAlign: "center", marginBottom: "20px" }}>
-              <div
-                className="neo-btn"
-                style={{
-                  backgroundColor: headerBgColor,
-                  color: "white",
-                  fontSize: "1.2rem",
-                  margin: "0 auto",
-                  whiteSpace: "normal",
-                  display: "inline-block",
-                  textAlign: "center",
-                  pointerEvents: "none",
-                  padding: "10px 20px",
-                }}
-              >
-                {modalHeaderTitle}
-              </div>
-            </div>
-
-            {/* Error Banner */}
-            {editModalError && (
+            return (
               <div
                 style={{
-                  backgroundColor: "#fee2e2",
-                  border: "2px solid #ef4444",
-                  color: "#b91c1c",
-                  padding: "10px 14px",
-                  borderRadius: "10px",
-                  fontSize: "0.85rem",
-                  fontWeight: "bold",
-                  marginBottom: "16px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  lineHeight: "1.4",
-                }}
-              >
-                <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: "1rem", flexShrink: 0 }}></i>
-                <span>{editModalError}</span>
-              </div>
-            )}
-
-            {isAdmin ? (
-              <>
-                <div style={{ marginBottom: "16px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    <span style={labelHighlightStyle}>Nama Sistem</span>
-                    <span style={{ position: "absolute", right: 0, color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="CTH: BUNYI KATA APP"
-                    value={editAdminNamaSistemTemp}
-                    onChange={(e) => {
-                      setEditAdminNamaSistemTemp(e.target.value.toUpperCase());
-                      if (editModalError) setEditModalError("");
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      borderRadius: "8px",
-                      border: "2px solid var(--color-dark)",
-                      fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
-                      fontFamily: "inherit",
-                      boxSizing: "border-box",
-                      textTransform: "uppercase",
-                      fontWeight: "bold",
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: "16px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    <span style={labelHighlightStyle}>Nama Admin</span>
-                    <span style={{ position: "absolute", right: 0, color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="CTH: IR EDUINNOVATIONS"
-                    value={editAdminNamaTemp}
-                    onChange={(e) => {
-                      setEditAdminNamaTemp(e.target.value.toUpperCase());
-                      if (editModalError) setEditModalError("");
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      borderRadius: "8px",
-                      border: "2px solid var(--color-dark)",
-                      fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
-                      fontFamily: "inherit",
-                      boxSizing: "border-box",
-                      textTransform: "uppercase",
-                      fontWeight: "bold",
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: "20px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    <span style={labelHighlightStyle}>Kod Admin</span>
-                    <span style={{ position: "absolute", right: 0, color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                  </div>
-                  <input
-                    type="text"
-                    maxLength={8}
-                    placeholder="CTH: ADMIN#01"
-                    value={editKodTemp}
-                    onChange={(e) => {
-                      setEditKodTemp(e.target.value.toUpperCase());
-                      if (editModalError) setEditModalError("");
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      borderRadius: "8px",
-                      border: "2px solid var(--color-dark)",
-                      fontSize: "1.1rem",
-                      fontFamily: "inherit",
-                      boxSizing: "border-box",
-                      letterSpacing: "1px",
-                      fontWeight: "bold",
-                      textTransform: "uppercase",
-                    }}
-                  />
-                  <span style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px", display: "block", textAlign: "center" }}>
-                    * Wajib 8 aksara & sekurang-kurangnya 1 simbol (Cth: ADMIN#01)
-                  </span>
-                </div>
-              </>
-            ) : isParent ? (
-              <>
-                <div style={{ marginBottom: "16px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    <span style={labelHighlightStyle}>Nama Keluarga</span>
-                    <span style={{ position: "absolute", right: 0, color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="CTH: KELUARGA RAZAK"
-                    value={editNamaKeluargaTemp}
-                    onChange={(e) => {
-                      setEditNamaKeluargaTemp(e.target.value.toUpperCase());
-                      if (editModalError) setEditModalError("");
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      borderRadius: "8px",
-                      border: "2px solid var(--color-dark)",
-                      fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
-                      fontFamily: "inherit",
-                      boxSizing: "border-box",
-                      textTransform: "uppercase",
-                      fontWeight: "bold",
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: "16px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    <span style={labelHighlightStyle}>Nama Anak</span>
-                    <span style={{ position: "absolute", right: 0, color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="CTH: ALI BIN ABU"
-                    value={editNamaAnakTemp}
-                    onChange={(e) => {
-                      setEditNamaAnakTemp(e.target.value.toUpperCase());
-                      if (editModalError) setEditModalError("");
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      borderRadius: "8px",
-                      border: "2px solid var(--color-dark)",
-                      fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
-                      fontFamily: "inherit",
-                      boxSizing: "border-box",
-                      textTransform: "uppercase",
-                      fontWeight: "bold",
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: "20px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    <span style={labelHighlightStyle}>Kod Keluarga</span>
-                    <span style={{ position: "absolute", right: 0, color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                  </div>
-                  <input
-                    type="text"
-                    maxLength={8}
-                    placeholder="CTH: FAM@2026"
-                    value={editKodTemp}
-                    onChange={(e) => {
-                      setEditKodTemp(e.target.value.toUpperCase());
-                      if (editModalError) setEditModalError("");
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      borderRadius: "8px",
-                      border: "2px solid var(--color-dark)",
-                      fontSize: "1.1rem",
-                      fontFamily: "inherit",
-                      boxSizing: "border-box",
-                      letterSpacing: "1px",
-                      fontWeight: "bold",
-                      textTransform: "uppercase",
-                    }}
-                  />
-                  <span style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px", display: "block", textAlign: "center" }}>
-                    * Wajib 8 aksara & sekurang-kurangnya 1 simbol (Cth: FAM@2026)
-                  </span>
-                </div>
-              </>
-            ) : (
-              <div style={{ width: "100%" }}>
-                <div style={{ marginBottom: "14px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                      marginBottom: "6px",
-                    }}
-                  >
-                    <span style={labelHighlightStyle}>Nama Sekolah</span>
-                    <span style={{ position: "absolute", right: 0, color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="CTH: SK BUKIT BERUANG"
-                    value={editSekolahTemp}
-                    onChange={(e) => {
-                      setEditSekolahTemp(e.target.value.toUpperCase());
-                      if (editModalError) setEditModalError("");
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      borderRadius: "8px",
-                      border: "2px solid var(--color-dark)",
-                      fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
-                      fontFamily: "inherit",
-                      boxSizing: "border-box",
-                      textTransform: "uppercase",
-                      fontWeight: "bold",
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: "14px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                      marginBottom: "6px",
-                    }}
-                  >
-                    <span style={labelHighlightStyle}>Nama Kelas</span>
-                    <span style={{ position: "absolute", right: 0, color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="CTH: 1 CEMERLANG"
-                    value={editKelasTemp}
-                    onChange={(e) => {
-                      setEditKelasTemp(e.target.value.toUpperCase());
-                      if (editModalError) setEditModalError("");
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      borderRadius: "8px",
-                      border: "2px solid var(--color-dark)",
-                      fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
-                      fontFamily: "inherit",
-                      boxSizing: "border-box",
-                      textTransform: "uppercase",
-                      fontWeight: "bold",
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: "14px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                      marginBottom: "6px",
-                    }}
-                  >
-                    <span style={labelHighlightStyle}>Nama Guru</span>
-                    <span style={{ position: "absolute", right: 0, color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="CTH: CIKGU SARAH"
-                    value={editGuruTemp}
-                    onChange={(e) => {
-                      setEditGuruTemp(e.target.value.toUpperCase());
-                      if (editModalError) setEditModalError("");
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      borderRadius: "8px",
-                      border: "2px solid var(--color-dark)",
-                      fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
-                      fontFamily: "inherit",
-                      boxSizing: "border-box",
-                      textTransform: "uppercase",
-                      fontWeight: "bold",
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: "16px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                      marginBottom: "6px",
-                    }}
-                  >
-                    <span style={labelHighlightStyle}>Kod Kelas</span>
-                    <span style={{ position: "absolute", right: 0, color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                  </div>
-                  <input
-                    type="text"
-                    maxLength={8}
-                    placeholder="CTH: KELAS#01"
-                    value={editKodTemp}
-                    onChange={(e) => {
-                      setEditKodTemp(e.target.value.toUpperCase());
-                      if (editModalError) setEditModalError("");
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      borderRadius: "8px",
-                      border: "2px solid var(--color-dark)",
-                      fontSize: "1.1rem",
-                      fontFamily: "inherit",
-                      boxSizing: "border-box",
-                      letterSpacing: "1px",
-                      fontWeight: "bold",
-                      textTransform: "uppercase",
-                    }}
-                  />
-                  <span style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px", display: "block", textAlign: "center" }}>
-                    * Wajib 8 aksara & sekurang-kurangnya 1 simbol (Cth: KELAS#01)
-                  </span>
-                </div>
-              </div>
-            )}
-
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "flex-end",
-                marginTop: "16px",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  if (isMandatorySetup) {
-                    setEditModalError("Sila lengkapkan semua maklumat wajib bertanda (*) dan klik butang simpan.");
-                    return;
-                  }
-                  setIsEditModalOpen(false);
-                  setEditModalError("");
-                }}
-                title="Batal"
-                aria-label="Batal"
-                className="neo-btn"
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "12px",
-                  backgroundColor: "#ef4444",
-                  border: "2.5px solid var(--color-dark)",
-                  boxShadow: "0 4px 0 var(--color-dark)",
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "rgba(0,0,0,0.6)",
+                  zIndex: 10000,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  cursor: "pointer",
-                  color: "white",
-                  fontSize: "1.3rem",
-                  padding: "0",
                 }}
               >
-                <i className="fa-solid fa-ban"></i>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const roleKey: "admin" | "ibubapa" | "guru" = isAdmin
-                    ? "admin"
-                    : isParent
-                    ? "ibubapa"
-                    : "guru";
-
-                  const codeTrimmed = editKodTemp.trim().toUpperCase();
-                  const hasSymbol = /[^a-zA-Z0-9\s]/.test(codeTrimmed);
-
-                  if (codeTrimmed.length !== 8 || !hasSymbol) {
-                    setEditModalError("Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#01 atau FAM@2026)!");
-                    return;
-                  }
-
-                  // Semak pertindihan kod
-                  const collisionCheck = checkIsCodeAlreadyUsed(codeTrimmed, roleKey);
-                  if (collisionCheck.isUsed) {
-                    setEditModalError(
-                      `Kod "${codeTrimmed}" telah digunakan oleh ${collisionCheck.usedBy}! Sila pilih kod lain yang unik agar tidak bertindan.`
-                    );
-                    return;
-                  }
-
-                  if (isAdmin) {
-                    if (!editAdminNamaSistemTemp.trim()) {
-                      setEditModalError("Sila lengkapkan ruangan Nama Sistem!");
-                      return;
-                    }
-                    if (!editAdminNamaTemp.trim()) {
-                      setEditModalError("Sila lengkapkan ruangan Nama Admin!");
-                      return;
-                    }
-
-                    const namaSistem = editAdminNamaSistemTemp.trim().toUpperCase();
-                    const namaAdmin = editAdminNamaTemp.trim().toUpperCase();
-
-                    localStorage.setItem("bunyiKataNamaSistem", namaSistem);
-                    localStorage.setItem("bunyiKataNamaAdmin", namaAdmin);
-                    localStorage.setItem("bunyiKataKodAdmin", codeTrimmed);
-                    registerCodeInRegistry(codeTrimmed, "admin");
-
-                    const kelasTitle = document.getElementById("admin-dashboard-nama-kelas-title");
-                    if (kelasTitle) kelasTitle.innerText = namaSistem;
-                    const guruTitle = document.getElementById("admin-dashboard-nama-guru-title");
-                    if (guruTitle) guruTitle.innerText = namaAdmin;
-                  } else if (isParent) {
-                    if (!editNamaKeluargaTemp.trim()) {
-                      setEditModalError("Sila lengkapkan ruangan Nama Keluarga!");
-                      return;
-                    }
-                    if (!editNamaAnakTemp.trim()) {
-                      setEditModalError("Sila lengkapkan ruangan Nama Anak!");
-                      return;
-                    }
-
-                    const namaKeluarga = editNamaKeluargaTemp.trim().toUpperCase();
-                    const namaAnak = editNamaAnakTemp.trim().toUpperCase();
-
-                    localStorage.setItem("bunyiKataNamaKeluarga", namaKeluarga);
-                    localStorage.setItem("bunyiKataKodKeluarga", codeTrimmed);
-                    localStorage.setItem("bunyiKataIbubapaSetupDone", "true");
-                    registerCodeInRegistry(codeTrimmed, "ibubapa");
-
-                    const oldName = (window as any).anakTerpilih;
-                    (window as any).anakTerpilih = namaAnak;
-                    localStorage.setItem("ibubapaAnakTerpilih", namaAnak);
-
-                    if (oldName && oldName !== namaAnak) {
-                      if ((window as any).studentNames) {
-                        const idx = (window as any).studentNames.indexOf(oldName);
-                        if (idx > -1) (window as any).studentNames[idx] = namaAnak;
+                <div
+                  style={{
+                    backgroundColor: "#fef9ec",
+                    backgroundImage:
+                      "radial-gradient(rgba(16, 24, 47, 0.1) 1.5px, transparent 1.5px)",
+                    backgroundSize: "15px 15px",
+                    borderRadius: "16px",
+                    padding: "24px",
+                    position: "relative",
+                    width: "90%",
+                    maxWidth: "500px",
+                    maxHeight: "90vh",
+                    overflowY: "auto",
+                    border: "3px solid var(--color-dark)",
+                    boxShadow: "0 4px 0 var(--color-dark)",
+                  }}
+                >
+                  <button
+                    className="neo-btn bg-red"
+                    onClick={() => {
+                      if (isMandatorySetup) {
+                        setEditModalError("Sila lengkapkan semua maklumat wajib bertanda (*) dan klik butang simpan.");
+                        return;
                       }
-                      if ((window as any).parentChildNames) {
-                        const idx = (window as any).parentChildNames.indexOf(oldName);
-                        if (idx > -1) (window as any).parentChildNames[idx] = namaAnak;
-                      }
-                      if ((window as any).studentData && (window as any).studentData[oldName]) {
-                        (window as any).studentData[namaAnak] = (window as any).studentData[oldName];
-                        delete (window as any).studentData[oldName];
-                      }
-                    }
+                      setIsEditModalOpen(false);
+                      setEditModalError("");
+                    }}
+                    title="Tutup"
+                    aria-label="Tutup"
+                    style={{
+                      position: "absolute",
+                      top: "10px",
+                      right: "10px",
+                      width: "36px",
+                      height: "36px",
+                      padding: "0",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 10,
+                    }}
+                  >
+                    <i className="fa-solid fa-xmark"></i>
+                  </button>
+                  <div style={{ textAlign: "center", marginBottom: "20px" }}>
+                    <div
+                      className="neo-btn"
+                      style={{
+                        backgroundColor: headerBgColor,
+                        color: "white",
+                        fontSize: "1.2rem",
+                        margin: "0 auto",
+                        whiteSpace: "normal",
+                        display: "inline-block",
+                        textAlign: "center",
+                        pointerEvents: "none",
+                        padding: "10px 20px",
+                      }}
+                    >
+                      {modalHeaderTitle}
+                    </div>
+                  </div>
 
-                    const kodIbu = document.getElementById("ibubapa-kod-keluarga-title");
-                    if (kodIbu) kodIbu.innerText = codeTrimmed;
-                    const famTitle = document.getElementById("ibubapa-nama-keluarga-title");
-                    if (famTitle) famTitle.innerText = namaKeluarga;
-                    const anakTitle = document.getElementById("ibubapa-nama-anak-title");
-                    if (anakTitle) anakTitle.innerText = namaAnak;
+                  {/* Error Banner */}
+                  {editModalError && (
+                    <div
+                      style={{
+                        backgroundColor: "#fee2e2",
+                        border: "2px solid #ef4444",
+                        color: "#b91c1c",
+                        padding: "10px 14px",
+                        borderRadius: "10px",
+                        fontSize: "0.85rem",
+                        fontWeight: "bold",
+                        marginBottom: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        lineHeight: "1.4",
+                      }}
+                    >
+                      <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: "1rem", flexShrink: 0 }}></i>
+                      <span>{editModalError}</span>
+                    </div>
+                  )}
 
-                    if (typeof (window as any).renderParentDashboard === "function") {
-                      (window as any).renderParentDashboard();
-                    }
-                  } else {
-                    if (!editSekolahTemp.trim()) {
-                      setEditModalError("Sila lengkapkan ruangan Nama Sekolah!");
-                      return;
-                    }
-                    if (!editKelasTemp.trim()) {
-                      setEditModalError("Sila lengkapkan ruangan Nama Kelas!");
-                      return;
-                    }
-                    if (!editGuruTemp.trim()) {
-                      setEditModalError("Sila lengkapkan ruangan Nama Guru!");
-                      return;
-                    }
+                  {/* Success Banner (Kata Laluan) */}
+                  {passwordToast && (
+                    <div
+                      style={{
+                        backgroundColor: "#dcfce7",
+                        border: "2px solid #22c55e",
+                        color: "#15803d",
+                        padding: "10px 14px",
+                        borderRadius: "10px",
+                        fontSize: "0.85rem",
+                        fontWeight: "bold",
+                        marginBottom: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        lineHeight: "1.4",
+                      }}
+                    >
+                      <i className="fa-solid fa-circle-check" style={{ fontSize: "1rem", flexShrink: 0 }}></i>
+                      <span>{passwordToast}</span>
+                    </div>
+                  )}
 
-                    const namaSekolah = editSekolahTemp.trim().toUpperCase();
-                    const namaKelas = editKelasTemp.trim().toUpperCase();
-                    const namaGuru = editGuruTemp.trim().toUpperCase();
+                  {isAdmin ? (
+                    <>
+                      <div style={{ marginBottom: "16px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "8px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Nama Sistem</span>
+                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="CTH: BUNYI KATA APP"
+                          value={editAdminNamaSistemTemp}
+                          onChange={(e) => {
+                            setEditAdminNamaSistemTemp(e.target.value.toUpperCase());
+                            if (editModalError) setEditModalError("");
+                          }}
+                          style={{
+                            width: "100%",
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: "2px solid var(--color-dark)",
+                            fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
+                            fontFamily: "inherit",
+                            boxSizing: "border-box",
+                            textTransform: "uppercase",
+                            fontWeight: "bold",
+                          }}
+                        />
+                      </div>
 
-                    localStorage.setItem("bunyiKataNamaSekolah", namaSekolah);
-                    localStorage.setItem("bunyiKataNamaKelas", namaKelas);
-                    localStorage.setItem("pdf_guru", namaGuru);
-                    localStorage.setItem("bunyiKataKodKelas", codeTrimmed);
-                    localStorage.setItem("bunyiKataGuruSetupDone", "true");
-                    registerCodeInRegistry(codeTrimmed, "guru");
+                      <div style={{ marginBottom: "16px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "8px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Nama Admin</span>
+                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="CTH: IR EDUINNOVATIONS"
+                          value={editAdminNamaTemp}
+                          onChange={(e) => {
+                            setEditAdminNamaTemp(e.target.value.toUpperCase());
+                            if (editModalError) setEditModalError("");
+                          }}
+                          style={{
+                            width: "100%",
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: "2px solid var(--color-dark)",
+                            fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
+                            fontFamily: "inherit",
+                            boxSizing: "border-box",
+                            textTransform: "uppercase",
+                            fontWeight: "bold",
+                          }}
+                        />
+                      </div>
 
-                    const el = document.getElementById("guru-dashboard-nama-kelas-title");
-                    if (el) el.innerText = namaKelas;
-                    const kodGuru = document.getElementById("guru-dashboard-kod-kelas-title");
-                    if (kodGuru) kodGuru.innerText = codeTrimmed;
-                    const guruEl = document.getElementById("guru-dashboard-nama-guru-title");
-                    if (guruEl) guruEl.innerText = namaGuru;
-                    const sekolahEl = document.getElementById("guru-dashboard-nama-sekolah-title");
-                    if (sekolahEl) sekolahEl.innerText = namaSekolah;
-                  }
+                      <div style={{ marginBottom: "16px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "8px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Kod Admin</span>
+                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                        </div>
+                        <input
+                          type="text"
+                          maxLength={8}
+                          placeholder="CTH: ADMIN#01"
+                          value={editKodTemp}
+                          onChange={(e) => {
+                            setEditKodTemp(e.target.value.toUpperCase());
+                            if (editModalError) setEditModalError("");
+                          }}
+                          style={{
+                            width: "100%",
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: "2px solid var(--color-dark)",
+                            fontSize: "1.1rem",
+                            fontFamily: "inherit",
+                            boxSizing: "border-box",
+                            letterSpacing: "1px",
+                            fontWeight: "bold",
+                            textTransform: "uppercase",
+                          }}
+                        />
+                        <span style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px", display: "block", textAlign: "left" }}>
+                          * Wajib 8 aksara & sekurang-kurangnya 1 simbol (Cth: ADMIN#01)
+                        </span>
+                      </div>
 
-                  setEditModalError("");
-                  setIsMandatorySetup(false);
-                  setIsEditModalOpen(false);
-                }}
-                title="Simpan"
-                aria-label="Simpan"
-                className="neo-btn"
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "12px",
-                  backgroundColor: headerBgColor,
-                  border: "2.5px solid var(--color-dark)",
-                  boxShadow: "0 4px 0 var(--color-dark)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  color: "white",
-                  fontSize: "1.3rem",
-                  padding: "0",
-                }}
-              >
-                <i className="fa-solid fa-floppy-disk"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        );
-      })()}
+                      {/* Ruangan Emel Admin (Read-only) */}
+                      <div style={{ marginBottom: "14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Emel Admin</span>
+                          <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "bold", marginLeft: "4px" }}>
+                            (Kekal / Tidak Boleh Diubah)
+                          </span>
+                        </div>
+                        <div style={{ position: "relative" }}>
+                          <input
+                            type="email"
+                            value={localStorage.getItem("bunyiKataAdminEmail") || "admin@ireduinnovations.com"}
+                            disabled
+                            readOnly
+                            style={{
+                              width: "100%",
+                              padding: "10px 12px 10px 36px",
+                              borderRadius: "8px",
+                              border: "2px solid #cbd5e1",
+                              backgroundColor: "#f1f5f9",
+                              color: "#475569",
+                              fontSize: "0.95rem",
+                              fontWeight: "bold",
+                              fontFamily: "inherit",
+                              boxSizing: "border-box",
+                              cursor: "not-allowed",
+                            }}
+                          />
+                          <i
+                            className="fa-solid fa-envelope"
+                            style={{
+                              position: "absolute",
+                              left: "12px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              color: "#94a3b8",
+                            }}
+                          ></i>
+                        </div>
+                      </div>
 
-        {/* Modal Panduan 3D Bunyi Kata */}
-        <AnimatePresence>
-          {showVRGuideModal && (() => {
-            const isBacaan = (window as any).vrCurrentMode === 'bacaan';
-            const modalTitle = isBacaan ? '3D BACAAN BERGRED' : '3D BUNYI KATA';
-            const modalDesc = isBacaan
-              ? 'Terokai Muzium Bacaan Bergred dalam mod 3D! Lawati 5 dewan pameran: Dewan Ayat Pendek, Dewan Ayat Panjang, Galeri Petikan Tahap 1 & 2, dan Pavilion Cerita Pendek. Gunakan joystick atau seret skrin untuk bergerak.'
-              : 'Terokai Muzium Bunyi Kata dalam mod 3D! Pusingkan peranti atau seret skrin untuk melihat 4 dinding pameran (Huruf Fonik, Huruf Kecil, Galeri Nombor Asas 0-10, dan Siri Nombor 10-100). Terokai pameran dengan gambar dan sebutan audio interaktif!';
-            const features = isBacaan
-              ? [
+                      {/* Ruangan Kata Laluan Admin */}
+                      <div style={{ marginBottom: "16px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Kata Laluan Admin</span>
+                        </div>
+                        {!isChangingPassword ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              width: "100%",
+                            }}
+                          >
+                            <div
+                              style={{
+                                flex: 1,
+                                padding: "10px 12px",
+                                borderRadius: "8px",
+                                border: "2px solid #cbd5e1",
+                                backgroundColor: "#f8fafc",
+                                color: "#64748b",
+                                fontSize: "1rem",
+                                letterSpacing: "3px",
+                                fontWeight: "bold",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                              }}
+                            >
+                              <i className="fa-solid fa-lock" style={{ fontSize: "0.85rem", color: "#94a3b8" }}></i>
+                              ••••••••••••
+                            </div>
+                            <button
+                              type="button"
+                              className="neo-btn"
+                              style={{
+                                padding: "9px 12px",
+                                fontSize: "0.86rem",
+                                backgroundColor: headerBgColor,
+                                color: "#ffffff",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                whiteSpace: "nowrap",
+                              }}
+                              onClick={() => {
+                                setIsChangingPassword(true);
+                                setNewPasswordInput("");
+                                setPasswordToast("");
+                              }}
+                            >
+                              <i className="fa-solid fa-key"></i> Tukar Kata Laluan
+                            </button>
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              backgroundColor: "rgba(255, 255, 255, 0.95)",
+                              border: "2px solid var(--color-dark)",
+                              borderRadius: "12px",
+                              padding: "12px",
+                              boxShadow: "0 3px 0 var(--color-dark)",
+                            }}
+                          >
+                            <div style={{ marginBottom: "10px" }}>
+                              <label style={{ fontSize: "0.82rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
+                                Masukkan Kata Laluan Baharu:
+                              </label>
+                              <input
+                                type="password"
+                                placeholder="Cipta kata laluan baharu anda"
+                                value={newPasswordInput}
+                                onChange={(e) => setNewPasswordInput(e.target.value)}
+                                style={{
+                                  width: "100%",
+                                  padding: "10px 12px",
+                                  borderRadius: "8px",
+                                  border: "2px solid var(--color-dark)",
+                                  fontSize: "0.95rem",
+                                  fontFamily: "inherit",
+                                  boxSizing: "border-box",
+                                }}
+                              />
+                            </div>
+                            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
+                              <button
+                                type="button"
+                                className="neo-btn"
+                                title="Batal"
+                                aria-label="Batal"
+                                style={{
+                                  width: "38px",
+                                  height: "38px",
+                                  minWidth: "38px",
+                                  padding: "0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: "#ef4444",
+                                  color: "#ffffff",
+                                  fontSize: "1rem",
+                                  borderRadius: "8px",
+                                  border: "2px solid var(--color-dark)",
+                                  boxShadow: "0 2px 0 var(--color-dark)",
+                                }}
+                                onClick={() => {
+                                  setIsChangingPassword(false);
+                                  setNewPasswordInput("");
+                                }}
+                              >
+                                <i className="fa-solid fa-xmark"></i>
+                              </button>
+                              <button
+                                type="button"
+                                className="neo-btn"
+                                title="Simpan Kata Laluan"
+                                aria-label="Simpan Kata Laluan"
+                                style={{
+                                  width: "38px",
+                                  height: "38px",
+                                  minWidth: "38px",
+                                  padding: "0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: headerBgColor,
+                                  color: "#ffffff",
+                                  fontSize: "1rem",
+                                  borderRadius: "8px",
+                                  border: "2px solid var(--color-dark)",
+                                  boxShadow: "0 2px 0 var(--color-dark)",
+                                }}
+                                onClick={() => {
+                                  if (!newPasswordInput.trim()) {
+                                    alert("Sila masukkan kata laluan baharu!");
+                                    return;
+                                  }
+                                  setShowPasswordConfirmModal(true);
+                                }}
+                              >
+                                <i className="fa-solid fa-check"></i>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : isParent ? (
+                    <>
+                      <div style={{ marginBottom: "14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Nama Keluarga</span>
+                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="CTH: KELUARGA RAZAK"
+                          value={editNamaKeluargaTemp}
+                          onChange={(e) => {
+                            setEditNamaKeluargaTemp(e.target.value.toUpperCase());
+                            if (editModalError) setEditModalError("");
+                          }}
+                          style={{
+                            width: "100%",
+                            padding: "10px 12px",
+                            borderRadius: "8px",
+                            border: "2px solid var(--color-dark)",
+                            fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
+                            fontFamily: "inherit",
+                            boxSizing: "border-box",
+                            textTransform: "uppercase",
+                            fontWeight: "bold",
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ marginBottom: "14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Nama Anak</span>
+                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="CTH: ALI BIN ABU"
+                          value={editNamaAnakTemp}
+                          onChange={(e) => {
+                            setEditNamaAnakTemp(e.target.value.toUpperCase());
+                            if (editModalError) setEditModalError("");
+                          }}
+                          style={{
+                            width: "100%",
+                            padding: "10px 12px",
+                            borderRadius: "8px",
+                            border: "2px solid var(--color-dark)",
+                            fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
+                            fontFamily: "inherit",
+                            boxSizing: "border-box",
+                            textTransform: "uppercase",
+                            fontWeight: "bold",
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ marginBottom: "14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Kod Keluarga</span>
+                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                        </div>
+                        <input
+                          type="text"
+                          maxLength={8}
+                          placeholder="CTH: FAM@2026"
+                          value={editKodTemp}
+                          onChange={(e) => {
+                            setEditKodTemp(e.target.value.toUpperCase());
+                            if (editModalError) setEditModalError("");
+                          }}
+                          style={{
+                            width: "100%",
+                            padding: "10px 12px",
+                            borderRadius: "8px",
+                            border: "2px solid var(--color-dark)",
+                            fontSize: "1.1rem",
+                            fontFamily: "inherit",
+                            boxSizing: "border-box",
+                            letterSpacing: "1px",
+                            fontWeight: "bold",
+                            textTransform: "uppercase",
+                          }}
+                        />
+                        <span style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px", display: "block", textAlign: "left" }}>
+                          * Wajib 8 aksara & sekurang-kurangnya 1 simbol (Cth: FAM@2026)
+                        </span>
+                      </div>
+
+                      {/* Ruangan Emel Ibu Bapa (Read-only) */}
+                      <div style={{ marginBottom: "14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Emel Ibu Bapa</span>
+                          <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "bold", marginLeft: "4px" }}>
+                            (Kekal / Tidak Boleh Diubah)
+                          </span>
+                        </div>
+                        <div style={{ position: "relative" }}>
+                          <input
+                            type="email"
+                            value={localStorage.getItem("bunyiKataIbubapaEmail") || "ibubapa@gmail.com"}
+                            disabled
+                            readOnly
+                            style={{
+                              width: "100%",
+                              padding: "10px 12px 10px 36px",
+                              borderRadius: "8px",
+                              border: "2px solid #cbd5e1",
+                              backgroundColor: "#f1f5f9",
+                              color: "#475569",
+                              fontSize: "0.95rem",
+                              fontWeight: "bold",
+                              fontFamily: "inherit",
+                              boxSizing: "border-box",
+                              cursor: "not-allowed",
+                            }}
+                          />
+                          <i
+                            className="fa-solid fa-envelope"
+                            style={{
+                              position: "absolute",
+                              left: "12px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              color: "#94a3b8",
+                            }}
+                          ></i>
+                        </div>
+                      </div>
+
+                      {/* Ruangan Kata Laluan Ibu Bapa */}
+                      <div style={{ marginBottom: "16px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Kata Laluan Ibu Bapa</span>
+                        </div>
+                        {!isChangingPassword ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              width: "100%",
+                            }}
+                          >
+                            <div
+                              style={{
+                                flex: 1,
+                                padding: "10px 12px",
+                                borderRadius: "8px",
+                                border: "2px solid #cbd5e1",
+                                backgroundColor: "#f8fafc",
+                                color: "#64748b",
+                                fontSize: "1rem",
+                                letterSpacing: "3px",
+                                fontWeight: "bold",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                              }}
+                            >
+                              <i className="fa-solid fa-lock" style={{ fontSize: "0.85rem", color: "#94a3b8" }}></i>
+                              ••••••••••••
+                            </div>
+                            <button
+                              type="button"
+                              className="neo-btn"
+                              style={{
+                                padding: "9px 12px",
+                                fontSize: "0.86rem",
+                                backgroundColor: headerBgColor,
+                                color: "#ffffff",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                whiteSpace: "nowrap",
+                              }}
+                              onClick={() => {
+                                setIsChangingPassword(true);
+                                setNewPasswordInput("");
+                                setPasswordToast("");
+                              }}
+                            >
+                              <i className="fa-solid fa-key"></i> Tukar Kata Laluan
+                            </button>
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              backgroundColor: "rgba(255, 255, 255, 0.95)",
+                              border: "2px solid var(--color-dark)",
+                              borderRadius: "12px",
+                              padding: "12px",
+                              boxShadow: "0 3px 0 var(--color-dark)",
+                            }}
+                          >
+                            <div style={{ marginBottom: "10px" }}>
+                              <label style={{ fontSize: "0.82rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
+                                Masukkan Kata Laluan Baharu:
+                              </label>
+                              <input
+                                type="password"
+                                placeholder="Cipta kata laluan baharu anda"
+                                value={newPasswordInput}
+                                onChange={(e) => setNewPasswordInput(e.target.value)}
+                                style={{
+                                  width: "100%",
+                                  padding: "10px 12px",
+                                  borderRadius: "8px",
+                                  border: "2px solid var(--color-dark)",
+                                  fontSize: "0.95rem",
+                                  fontFamily: "inherit",
+                                  boxSizing: "border-box",
+                                }}
+                              />
+                            </div>
+                            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
+                              <button
+                                type="button"
+                                className="neo-btn"
+                                title="Batal"
+                                aria-label="Batal"
+                                style={{
+                                  width: "38px",
+                                  height: "38px",
+                                  minWidth: "38px",
+                                  padding: "0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: "#ef4444",
+                                  color: "#ffffff",
+                                  fontSize: "1rem",
+                                  borderRadius: "8px",
+                                  border: "2px solid var(--color-dark)",
+                                  boxShadow: "0 2px 0 var(--color-dark)",
+                                }}
+                                onClick={() => {
+                                  setIsChangingPassword(false);
+                                  setNewPasswordInput("");
+                                }}
+                              >
+                                <i className="fa-solid fa-xmark"></i>
+                              </button>
+                              <button
+                                type="button"
+                                className="neo-btn"
+                                title="Simpan Kata Laluan"
+                                aria-label="Simpan Kata Laluan"
+                                style={{
+                                  width: "38px",
+                                  height: "38px",
+                                  minWidth: "38px",
+                                  padding: "0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: headerBgColor,
+                                  color: "#ffffff",
+                                  fontSize: "1rem",
+                                  borderRadius: "8px",
+                                  border: "2px solid var(--color-dark)",
+                                  boxShadow: "0 2px 0 var(--color-dark)",
+                                }}
+                                onClick={() => {
+                                  if (!newPasswordInput.trim()) {
+                                    alert("Sila masukkan kata laluan baharu!");
+                                    return;
+                                  }
+                                  setShowPasswordConfirmModal(true);
+                                }}
+                              >
+                                <i className="fa-solid fa-check"></i>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ width: "100%" }}>
+                      {/* Nama Sekolah & Nama Kelas Side-by-Side */}
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: "12px",
+                          marginBottom: "14px",
+                        }}
+                      >
+                        <div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-start",
+                              gap: "6px",
+                              marginBottom: "6px",
+                            }}
+                          >
+                            <span style={labelHighlightStyle}>Nama Sekolah</span>
+                            <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="CTH: SK BUKIT BERUANG"
+                            value={editSekolahTemp}
+                            onChange={(e) => {
+                              setEditSekolahTemp(e.target.value.toUpperCase());
+                              if (editModalError) setEditModalError("");
+                            }}
+                            style={{
+                              width: "100%",
+                              padding: "10px 12px",
+                              borderRadius: "8px",
+                              border: "2px solid var(--color-dark)",
+                              fontSize: "clamp(0.85rem, 2.5vw, 1rem)",
+                              fontFamily: "inherit",
+                              boxSizing: "border-box",
+                              textTransform: "uppercase",
+                              fontWeight: "bold",
+                            }}
+                          />
+                        </div>
+
+                        <div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-start",
+                              gap: "6px",
+                              marginBottom: "6px",
+                            }}
+                          >
+                            <span style={labelHighlightStyle}>Nama Kelas</span>
+                            <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="CTH: 1 CEMERLANG"
+                            value={editKelasTemp}
+                            onChange={(e) => {
+                              setEditKelasTemp(e.target.value.toUpperCase());
+                              if (editModalError) setEditModalError("");
+                            }}
+                            style={{
+                              width: "100%",
+                              padding: "10px 12px",
+                              borderRadius: "8px",
+                              border: "2px solid var(--color-dark)",
+                              fontSize: "clamp(0.85rem, 2.5vw, 1rem)",
+                              fontFamily: "inherit",
+                              boxSizing: "border-box",
+                              textTransform: "uppercase",
+                              fontWeight: "bold",
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: "14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Nama Guru</span>
+                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="CTH: CIKGU SARAH"
+                          value={editGuruTemp}
+                          onChange={(e) => {
+                            setEditGuruTemp(e.target.value.toUpperCase());
+                            if (editModalError) setEditModalError("");
+                          }}
+                          style={{
+                            width: "100%",
+                            padding: "10px 12px",
+                            borderRadius: "8px",
+                            border: "2px solid var(--color-dark)",
+                            fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
+                            fontFamily: "inherit",
+                            boxSizing: "border-box",
+                            textTransform: "uppercase",
+                            fontWeight: "bold",
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ marginBottom: "14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Kod Kelas</span>
+                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                        </div>
+                        <input
+                          type="text"
+                          maxLength={8}
+                          placeholder="CTH: KELAS#01"
+                          value={editKodTemp}
+                          onChange={(e) => {
+                            setEditKodTemp(e.target.value.toUpperCase());
+                            if (editModalError) setEditModalError("");
+                          }}
+                          style={{
+                            width: "100%",
+                            padding: "10px 12px",
+                            borderRadius: "8px",
+                            border: "2px solid var(--color-dark)",
+                            fontSize: "1.1rem",
+                            fontFamily: "inherit",
+                            boxSizing: "border-box",
+                            letterSpacing: "1px",
+                            fontWeight: "bold",
+                            textTransform: "uppercase",
+                          }}
+                        />
+                        <span style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px", display: "block", textAlign: "left" }}>
+                          * Wajib 8 aksara & sekurang-kurangnya 1 simbol (Cth: KELAS#01)
+                        </span>
+                      </div>
+
+                      {/* Ruangan Emel Guru (Read-only) */}
+                      <div style={{ marginBottom: "14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Emel Guru</span>
+                          <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "bold", marginLeft: "4px" }}>
+                            (Kekal / Tidak Boleh Diubah)
+                          </span>
+                        </div>
+                        <div style={{ position: "relative" }}>
+                          <input
+                            type="email"
+                            value={localStorage.getItem("bunyiKataGuruEmail") || "guru@moe.edu.my"}
+                            disabled
+                            readOnly
+                            style={{
+                              width: "100%",
+                              padding: "10px 12px 10px 36px",
+                              borderRadius: "8px",
+                              border: "2px solid #cbd5e1",
+                              backgroundColor: "#f1f5f9",
+                              color: "#475569",
+                              fontSize: "0.95rem",
+                              fontWeight: "bold",
+                              fontFamily: "inherit",
+                              boxSizing: "border-box",
+                              cursor: "not-allowed",
+                            }}
+                          />
+                          <i
+                            className="fa-solid fa-envelope"
+                            style={{
+                              position: "absolute",
+                              left: "12px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              color: "#94a3b8",
+                            }}
+                          ></i>
+                        </div>
+                      </div>
+
+                      {/* Ruangan Kata Laluan Guru */}
+                      <div style={{ marginBottom: "16px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Kata Laluan Guru</span>
+                        </div>
+                        {!isChangingPassword ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              width: "100%",
+                            }}
+                          >
+                            <div
+                              style={{
+                                flex: 1,
+                                padding: "10px 12px",
+                                borderRadius: "8px",
+                                border: "2px solid #cbd5e1",
+                                backgroundColor: "#f8fafc",
+                                color: "#64748b",
+                                fontSize: "1rem",
+                                letterSpacing: "3px",
+                                fontWeight: "bold",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                              }}
+                            >
+                              <i className="fa-solid fa-lock" style={{ fontSize: "0.85rem", color: "#94a3b8" }}></i>
+                              ••••••••••••
+                            </div>
+                            <button
+                              type="button"
+                              className="neo-btn"
+                              style={{
+                                padding: "9px 12px",
+                                fontSize: "0.86rem",
+                                backgroundColor: headerBgColor,
+                                color: "#ffffff",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                whiteSpace: "nowrap",
+                              }}
+                              onClick={() => {
+                                setIsChangingPassword(true);
+                                setNewPasswordInput("");
+                                setPasswordToast("");
+                              }}
+                            >
+                              <i className="fa-solid fa-key"></i> Tukar Kata Laluan
+                            </button>
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              backgroundColor: "rgba(255, 255, 255, 0.95)",
+                              border: "2px solid var(--color-dark)",
+                              borderRadius: "12px",
+                              padding: "12px",
+                              boxShadow: "0 3px 0 var(--color-dark)",
+                            }}
+                          >
+                            <div style={{ marginBottom: "10px" }}>
+                              <label style={{ fontSize: "0.82rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
+                                Masukkan Kata Laluan Baharu:
+                              </label>
+                              <input
+                                type="password"
+                                placeholder="Cipta kata laluan baharu anda"
+                                value={newPasswordInput}
+                                onChange={(e) => setNewPasswordInput(e.target.value)}
+                                style={{
+                                  width: "100%",
+                                  padding: "10px 12px",
+                                  borderRadius: "8px",
+                                  border: "2px solid var(--color-dark)",
+                                  fontSize: "0.95rem",
+                                  fontFamily: "inherit",
+                                  boxSizing: "border-box",
+                                }}
+                              />
+                            </div>
+                            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
+                              <button
+                                type="button"
+                                className="neo-btn"
+                                title="Batal"
+                                aria-label="Batal"
+                                style={{
+                                  width: "38px",
+                                  height: "38px",
+                                  minWidth: "38px",
+                                  padding: "0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: "#ef4444",
+                                  color: "#ffffff",
+                                  fontSize: "1rem",
+                                  borderRadius: "8px",
+                                  border: "2px solid var(--color-dark)",
+                                  boxShadow: "0 2px 0 var(--color-dark)",
+                                }}
+                                onClick={() => {
+                                  setIsChangingPassword(false);
+                                  setNewPasswordInput("");
+                                }}
+                              >
+                                <i className="fa-solid fa-xmark"></i>
+                              </button>
+                              <button
+                                type="button"
+                                className="neo-btn"
+                                title="Simpan Kata Laluan"
+                                aria-label="Simpan Kata Laluan"
+                                style={{
+                                  width: "38px",
+                                  height: "38px",
+                                  minWidth: "38px",
+                                  padding: "0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: headerBgColor,
+                                  color: "#ffffff",
+                                  fontSize: "1rem",
+                                  borderRadius: "8px",
+                                  border: "2px solid var(--color-dark)",
+                                  boxShadow: "0 2px 0 var(--color-dark)",
+                                }}
+                                onClick={() => {
+                                  if (!newPasswordInput.trim()) {
+                                    alert("Sila masukkan kata laluan baharu!");
+                                    return;
+                                  }
+                                  setShowPasswordConfirmModal(true);
+                                }}
+                              >
+                                <i className="fa-solid fa-check"></i>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pop up Pengesahan Tukar Kata Laluan */}
+                  {showPasswordConfirmModal && (
+                    <div
+                      style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        backgroundColor: "rgba(0,0,0,0.65)",
+                        zIndex: 100000,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "16px",
+                      }}
+                    >
+                      <div
+                        className="neo-box"
+                        style={{
+                          backgroundColor: "#fef9ec",
+                          maxWidth: "360px",
+                          width: "92%",
+                          padding: "24px 20px",
+                          borderRadius: "20px",
+                          textAlign: "center",
+                          border: "3px solid var(--color-dark)",
+                          boxShadow: "0 6px 0 var(--color-dark)",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            borderRadius: "50%",
+                            backgroundColor: headerBgColor,
+                            color: "#ffffff",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            margin: "0 auto 12px auto",
+                            fontSize: "1.3rem",
+                            border: "2px solid var(--color-dark)",
+                            boxShadow: "0 2px 0 var(--color-dark)",
+                          }}
+                        >
+                          <i className="fa-solid fa-key"></i>
+                        </div>
+                        <h4 style={{ margin: "0 0 8px 0", fontSize: "1.1rem", fontWeight: "900", color: "#1e293b" }}>
+                          Sahkan Kata Laluan
+                        </h4>
+                        <p style={{ margin: "0 0 18px 0", fontSize: "0.88rem", color: "#64748b", lineHeight: "1.4" }}>
+                          Adakah anda pasti mahu menyimpan kata laluan baharu ini?
+                        </p>
+                        <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                          <button
+                            type="button"
+                            className="neo-btn"
+                            style={{
+                              flex: 1,
+                              padding: "9px 12px",
+                              backgroundColor: "#f1f5f9",
+                              color: "#475569",
+                              fontSize: "0.9rem",
+                              justifyContent: "center",
+                            }}
+                            onClick={() => setShowPasswordConfirmModal(false)}
+                          >
+                            Batal
+                          </button>
+                          <button
+                            type="button"
+                            className="neo-btn"
+                            style={{
+                              flex: 1,
+                              padding: "9px 12px",
+                              backgroundColor: headerBgColor,
+                              color: "#ffffff",
+                              fontSize: "0.9rem",
+                              justifyContent: "center",
+                            }}
+                            onClick={() => {
+                              if (isAdmin) {
+                                localStorage.setItem("bunyiKataAdminPassword", newPasswordInput.trim());
+                              } else if (isParent) {
+                                localStorage.setItem("bunyiKataIbubapaPassword", newPasswordInput.trim());
+                              } else {
+                                localStorage.setItem("bunyiKataGuruPassword", newPasswordInput.trim());
+                              }
+                              setShowPasswordConfirmModal(false);
+                              setIsChangingPassword(false);
+                              setNewPasswordInput("");
+                              setPasswordToast("Kata laluan baharu berjaya disimpan!");
+                            }}
+                          >
+                            Ya, Simpan
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "12px",
+                      justifyContent: "flex-end",
+                      marginTop: "16px",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const roleKey: "admin" | "ibubapa" | "guru" = isAdmin
+                          ? "admin"
+                          : isParent
+                            ? "ibubapa"
+                            : "guru";
+
+                        const codeTrimmed = editKodTemp.trim().toUpperCase();
+                        const hasSymbol = /[^a-zA-Z0-9\s]/.test(codeTrimmed);
+
+                        if (codeTrimmed.length !== 8 || !hasSymbol) {
+                          setEditModalError("Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#01 atau FAM@2026)!");
+                          return;
+                        }
+
+                        // Semak pertindihan kod
+                        const collisionCheck = checkIsCodeAlreadyUsed(codeTrimmed, roleKey);
+                        if (collisionCheck.isUsed) {
+                          setEditModalError(
+                            `Kod "${codeTrimmed}" telah digunakan oleh ${collisionCheck.usedBy}! Sila pilih kod lain yang unik agar tidak bertindan.`
+                          );
+                          return;
+                        }
+
+                        if (isAdmin) {
+                          if (!editAdminNamaSistemTemp.trim()) {
+                            setEditModalError("Sila lengkapkan ruangan Nama Sistem!");
+                            return;
+                          }
+                          if (!editAdminNamaTemp.trim()) {
+                            setEditModalError("Sila lengkapkan ruangan Nama Admin!");
+                            return;
+                          }
+
+                          const namaSistem = editAdminNamaSistemTemp.trim().toUpperCase();
+                          const namaAdmin = editAdminNamaTemp.trim().toUpperCase();
+
+                          localStorage.setItem("bunyiKataNamaSistem", namaSistem);
+                          localStorage.setItem("bunyiKataNamaAdmin", namaAdmin);
+                          localStorage.setItem("bunyiKataKodAdmin", codeTrimmed);
+                          registerCodeInRegistry(codeTrimmed, "admin");
+
+                          const kelasTitle = document.getElementById("admin-dashboard-nama-kelas-title");
+                          if (kelasTitle) kelasTitle.innerText = namaSistem;
+                          const guruTitle = document.getElementById("admin-dashboard-nama-guru-title");
+                          if (guruTitle) guruTitle.innerText = namaAdmin;
+                        } else if (isParent) {
+                          if (!editNamaKeluargaTemp.trim()) {
+                            setEditModalError("Sila lengkapkan ruangan Nama Keluarga!");
+                            return;
+                          }
+                          if (!editNamaAnakTemp.trim()) {
+                            setEditModalError("Sila lengkapkan ruangan Nama Anak!");
+                            return;
+                          }
+
+                          const namaKeluarga = editNamaKeluargaTemp.trim().toUpperCase();
+                          const namaAnak = editNamaAnakTemp.trim().toUpperCase();
+
+                          localStorage.setItem("bunyiKataNamaKeluarga", namaKeluarga);
+                          localStorage.setItem("bunyiKataKodKeluarga", codeTrimmed);
+                          localStorage.setItem("bunyiKataIbubapaSetupDone", "true");
+                          registerCodeInRegistry(codeTrimmed, "ibubapa");
+
+                          const oldName = (window as any).anakTerpilih;
+                          (window as any).anakTerpilih = namaAnak;
+                          localStorage.setItem("ibubapaAnakTerpilih", namaAnak);
+
+                          if (oldName && oldName !== namaAnak) {
+                            if ((window as any).studentNames) {
+                              const idx = (window as any).studentNames.indexOf(oldName);
+                              if (idx > -1) (window as any).studentNames[idx] = namaAnak;
+                            }
+                            if ((window as any).parentChildNames) {
+                              const idx = (window as any).parentChildNames.indexOf(oldName);
+                              if (idx > -1) (window as any).parentChildNames[idx] = namaAnak;
+                            }
+                            if ((window as any).studentData && (window as any).studentData[oldName]) {
+                              (window as any).studentData[namaAnak] = (window as any).studentData[oldName];
+                              delete (window as any).studentData[oldName];
+                            }
+                          }
+
+                          const kodIbu = document.getElementById("ibubapa-kod-keluarga-title");
+                          if (kodIbu) kodIbu.innerText = codeTrimmed;
+                          const famTitle = document.getElementById("ibubapa-nama-keluarga-title");
+                          if (famTitle) famTitle.innerText = namaKeluarga;
+                          const anakTitle = document.getElementById("ibubapa-nama-anak-title");
+                          if (anakTitle) anakTitle.innerText = namaAnak;
+
+                          if (typeof (window as any).renderParentDashboard === "function") {
+                            (window as any).renderParentDashboard();
+                          }
+                        } else {
+                          if (!editSekolahTemp.trim()) {
+                            setEditModalError("Sila lengkapkan ruangan Nama Sekolah!");
+                            return;
+                          }
+                          if (!editKelasTemp.trim()) {
+                            setEditModalError("Sila lengkapkan ruangan Nama Kelas!");
+                            return;
+                          }
+                          if (!editGuruTemp.trim()) {
+                            setEditModalError("Sila lengkapkan ruangan Nama Guru!");
+                            return;
+                          }
+
+                          const namaSekolah = editSekolahTemp.trim().toUpperCase();
+                          const namaKelas = editKelasTemp.trim().toUpperCase();
+                          const namaGuru = editGuruTemp.trim().toUpperCase();
+
+                          localStorage.setItem("bunyiKataNamaSekolah", namaSekolah);
+                          localStorage.setItem("bunyiKataNamaKelas", namaKelas);
+                          localStorage.setItem("pdf_guru", namaGuru);
+                          localStorage.setItem("bunyiKataKodKelas", codeTrimmed);
+                          localStorage.setItem("bunyiKataGuruSetupDone", "true");
+                          registerCodeInRegistry(codeTrimmed, "guru");
+
+                          const el = document.getElementById("guru-dashboard-nama-kelas-title");
+                          if (el) el.innerText = namaKelas;
+                          const kodGuru = document.getElementById("guru-dashboard-kod-kelas-title");
+                          if (kodGuru) kodGuru.innerText = codeTrimmed;
+                          const guruEl = document.getElementById("guru-dashboard-nama-guru-title");
+                          if (guruEl) guruEl.innerText = namaGuru;
+                          const sekolahEl = document.getElementById("guru-dashboard-nama-sekolah-title");
+                          if (sekolahEl) sekolahEl.innerText = namaSekolah;
+                        }
+
+                        setEditModalError("");
+                        setIsMandatorySetup(false);
+                        setIsEditModalOpen(false);
+                      }}
+                      title="Simpan"
+                      aria-label="Simpan"
+                      className="neo-btn"
+                      style={{
+                        width: "48px",
+                        height: "48px",
+                        borderRadius: "12px",
+                        backgroundColor: headerBgColor,
+                        border: "2.5px solid var(--color-dark)",
+                        boxShadow: "0 4px 0 var(--color-dark)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        color: "white",
+                        fontSize: "1.3rem",
+                        padding: "0",
+                      }}
+                    >
+                      <i className="fa-solid fa-floppy-disk"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Modal Panduan 3D Bunyi Kata */}
+          <AnimatePresence>
+            {showVRGuideModal && (() => {
+              const isBacaan = (window as any).vrCurrentMode === 'bacaan';
+              const modalTitle = isBacaan ? '3D BACAAN BERGRED' : '3D BUNYI KATA';
+              const modalDesc = isBacaan
+                ? 'Terokai Muzium Bacaan Bergred dalam mod 3D! Lawati 5 dewan pameran: Dewan Ayat Pendek, Dewan Ayat Panjang, Galeri Petikan Tahap 1 & 2, dan Pavilion Cerita Pendek. Gunakan joystick atau seret skrin untuk bergerak.'
+                : 'Terokai Muzium Bunyi Kata dalam mod 3D! Pusingkan peranti atau seret skrin untuk melihat 4 dinding pameran (Huruf Fonik, Huruf Kecil, Galeri Nombor Asas 0-10, dan Siri Nombor 10-100). Terokai pameran dengan gambar dan sebutan audio interaktif!';
+              const features = isBacaan
+                ? [
                   { icon: 'fa-solid fa-book-open-reader', label: '5 Galeri Pameran' },
                   { icon: 'fa-solid fa-gamepad', label: 'Joystick / Seret' },
                   { icon: 'fa-solid fa-arrows-spin', label: 'Pusing 360\u00B0' },
                 ]
-              : [
+                : [
                   { icon: 'fa-solid fa-cube', label: 'Dunia 3D' },
                   { icon: 'fa-solid fa-volume-high', label: 'Sebut Audio' },
                   { icon: 'fa-solid fa-arrows-spin', label: 'Pusing 360\u00B0' },
                 ];
-            const accentColor = isBacaan ? '#7c3aed' : '#ea580c';
-            const borderColor = isBacaan ? '#6d28d9' : '#c2410c';
-            return (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{
-                position: "fixed",
-                inset: 0,
-                backgroundColor: "rgba(0,0,0,0.75)",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                zIndex: 99999,
-                padding: "16px",
-                fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
-              }}
-              onClick={() => setShowVRGuideModal(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: 20 }}
-                className="neo-box"
-                style={{
-                  backgroundColor: "#ffffff",
-                  backgroundImage:
-                    "radial-gradient(circle, rgba(16, 24, 47, 0.12) 1.5px, transparent 1.5px)",
-                  backgroundSize: "16px 16px",
-                  maxWidth: "520px",
-                  width: "100%",
-                  padding: "28px 24px",
-                  textAlign: "center",
-                  borderRadius: "24px",
-                  boxShadow: "0 25px 50px -12px rgba(0,0,0,0.35)",
-                  border: `4px solid ${accentColor}`,
-                  fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
-                  position: "relative",
-                }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h2
+              const accentColor = isBacaan ? '#7c3aed' : '#ea580c';
+              const borderColor = isBacaan ? '#6d28d9' : '#c2410c';
+              return (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   style={{
-                    fontSize: "1.6rem",
-                    color: "#ffffff",
-                    backgroundColor: accentColor,
-                    padding: "6px 24px",
-                    borderRadius: "16px",
-                    display: "inline-block",
-                    margin: "0 0 15px 0",
-                    fontWeight: "bold",
-                    fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
-                    border: `3px solid ${borderColor}`,
-                  }}
-                >
-                  {modalTitle}
-                </h2>
-
-                <p
-                  style={{
-                    fontSize: "0.95rem",
-                    color: "#1e293b",
-                    margin: "0 0 20px 0",
-                    lineHeight: 1.6,
-                    fontWeight: "bold",
-                    fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
-                  }}
-                >
-                  {modalDesc}
-                </p>
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                    gap: "12px",
-                    marginBottom: "24px",
-                    padding: "14px 10px",
-                    backgroundColor: "rgba(248, 250, 252, 0.9)",
-                    borderRadius: "16px",
-                    border: "2px solid #cbd5e1",
-                  }}
-                >
-                  {features.map((f, i) => (
-                    <div key={i} style={{ textAlign: "center" }}>
-                      <div style={{ marginBottom: "6px" }}>
-                        <i
-                          className={f.icon}
-                          style={{ fontSize: "1.6rem", color: accentColor }}
-                        ></i>
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "0.8rem",
-                          fontWeight: "bold",
-                          color: "#1e293b",
-                          fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
-                        }}
-                      >
-                        {f.label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  className="neo-btn"
-                  style={{
-                    backgroundColor: "#168f81",
-                    color: "#ffffff",
-                    fontSize: "1.1rem",
-                    padding: "12px 32px",
-                    width: "100%",
-                    fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
-                    fontWeight: "bold",
+                    position: "fixed",
+                    inset: 0,
+                    backgroundColor: "rgba(0,0,0,0.75)",
+                    display: "flex",
                     justifyContent: "center",
-                    textTransform: "none",
+                    alignItems: "center",
+                    zIndex: 99999,
+                    padding: "16px",
+                    fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
                   }}
                   onClick={() => setShowVRGuideModal(false)}
                 >
-                  Mula Belajar
-                </button>
-              </motion.div>
-            </motion.div>
-            );
-          })()}
-        </AnimatePresence>
-
-
-      {/* Modal Kod Kelas/Keluarga */}
-      <AnimatePresence>
-        {isCodeModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: "rgba(0,0,0,0.5)",
-              zIndex: 9999,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="neo-box"
-              style={{
-                backgroundColor: "#fef9ec",
-                backgroundImage:
-                  "radial-gradient(circle, rgba(16, 24, 47, .11) 1.5px, transparent 1.5px)",
-                backgroundSize: "15px 15px",
-                maxWidth: "400px",
-                width: "90%",
-                padding: "30px",
-                textAlign: "center",
-                position: "relative",
-              }}
-            >
-              <button
-                className="neo-btn bg-red"
-                onClick={() => setIsCodeModalOpen(false)}
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                  width: "36px",
-                  height: "36px",
-                  padding: "0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 10,
-                }}
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-
-              <div
-                className="neo-btn"
-                style={{
-                  backgroundColor: "#168f81",
-                  color: "white",
-                  fontSize: "clamp(1.1rem, 4vw, 1.4rem)",
-                  margin: "0 auto 20px auto",
-                  whiteSpace: "normal",
-                  display: "inline-block",
-                  pointerEvents: "none",
-                  padding: "10px 20px",
-                  lineHeight: "1.2",
-                }}
-              >
-                Masukkan Kod
-              </div>
-
-              <p
-                style={{
-                  marginBottom: "16px",
-                  fontSize: "clamp(1.05rem, 3vw, 1.2rem)",
-                  fontWeight: "bold",
-                  color: "#1e293b",
-                  lineHeight: "1.4",
-                }}
-              >
-                Masukkan kod kelas atau keluarga untuk memuatkan profil.
-              </p>
-
-              {/* Nota format kod 8 aksara & simbol (Grey style & smaller font) */}
-              <div
-                style={{
-                  backgroundColor: "#f1f5f9",
-                  border: "1.5px solid #cbd5e1",
-                  borderRadius: "10px",
-                  padding: "8px 12px",
-                  marginBottom: "16px",
-                  fontSize: "0.78rem",
-                  color: "#475569",
-                  textAlign: "left",
-                  lineHeight: "1.35",
-                }}
-              >
-                <div style={{ fontWeight: "bold", display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px", color: "#334155" }}>
-                  <i className="fa-solid fa-circle-info" style={{ fontSize: "0.85rem" }}></i> Format Kod:
-                </div>
-                <div>• Wajib <strong>8 aksara</strong></div>
-                <div>• Sekurang-kurangnya <strong>1 simbol</strong></div>
-                <div style={{ marginTop: "3px", fontSize: "0.74rem", color: "#64748b" }}>
-                  <strong>Contoh:</strong> <code style={{ backgroundColor: "#e2e8f0", padding: "1px 4px", borderRadius: "4px" }}>KELAS#01</code> atau <code style={{ backgroundColor: "#e2e8f0", padding: "1px 4px", borderRadius: "4px" }}>FAM@2026</code>
-                </div>
-              </div>
-
-              <input
-                type="text"
-                className="neo-input century-gothic-font"
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  marginBottom: "20px",
-                  textAlign: "center",
-                  fontSize: "1.2rem",
-                  fontWeight: "bold",
-                  letterSpacing: "1px",
-                }}
-                placeholder="Cth: KELAS#01"
-                maxLength={8}
-                value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              />
-              <button
-                className="neo-btn"
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  color: "white",
-                  fontSize: "1.1rem",
-                  backgroundColor: "#168f81",
-                  animation:
-                    "outlineGlowGold 2.5s infinite, pulse-scale 2.5s infinite ease-in-out",
-                }}
-                onClick={() => {
-                  if (joinCode.trim()) {
-                    const kodKeluarga =
-                      localStorage.getItem("bunyiKataKodKeluarga") ||
-                      "FAM@2026";
-                    const kodKelas =
-                      localStorage.getItem("bunyiKataKodKelas") || "KELAS#01";
-
-                    const kodAdmin =
-                      localStorage.getItem("bunyiKataKodAdmin") || "ADMIN#01";
-
-                    const entered = joinCode.trim().toUpperCase();
-                    if (
-                      entered === "1" ||
-                      entered === "ADMIN" ||
-                      entered === kodAdmin.toUpperCase()
-                    ) {
-                      alert("Akses Admin berjaya!");
-                      setIsCodeModalOpen(false);
-                      if (typeof (window as any).masukModAdmin === "function") {
-                        (window as any).masukModAdmin();
-                      }
-                    } else if (
-                      entered === kodKelas.toUpperCase() ||
-                      entered === "KELAS123"
-                    ) {
-                      alert("Kod berjaya disahkan!");
-                      setIsCodeModalOpen(false);
-                      const modal = document.getElementById("modal-pilih-anak");
-                      if (modal) {
-                        modal.style.display = "flex";
-                        if (
-                          typeof (window as any).bukaModalPilihAnak ===
-                          "function"
-                        ) {
-                          (window as any).bukaModalPilihAnak(false, true); // isStudentLogin
-                        }
-                      }
-                    } else if (
-                      entered === kodKeluarga.toUpperCase() ||
-                      entered === "KELUARGA123"
-                    ) {
-                      alert("Kod berjaya disahkan!");
-                      setIsCodeModalOpen(false);
-                      const modal = document.getElementById("modal-pilih-anak");
-                      if (modal) {
-                        modal.style.display = "flex";
-                        if (
-                          typeof (window as any).bukaModalPilihAnak ===
-                          "function"
-                        ) {
-                          (window as any).bukaModalPilihAnak(false, false); // normal mode (Mod Ibu Bapa)
-                        }
-                      }
-                    } else {
-                      alert("Kod tidak sah. Sila pastikan kod mengikut format 8 aksara dengan simbol (contoh: KELAS#01 atau FAM@2026).");
-                    }
-                  }
-                }}
-              >
-                Sahkan Kod
-              </button>
-
-              {/* Garisan Pemisah */}
-              <div
-                style={{
-                  borderTop: "2px dashed #cbd5e1",
-                  margin: "20px 0 16px 0",
-                }}
-              ></div>
-
-              {/* 2 Butang Mod: Guru & Ibubapa Bersebelahan */}
-              <div
-                style={{ display: "flex", gap: "10px", marginBottom: "16px" }}
-              >
-                <button
-                  className="neo-btn bg-orange"
-                  style={{
-                    flex: 1,
-                    padding: "10px",
-                    fontSize: "1rem",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    color: "white",
-                  }}
-                  onClick={() => {
-                    setIsCodeModalOpen(false);
-                    setPendingLoginMode("guru");
-                    setShowLoginModal(true);
-                    setLoginEmail("");
-                    setLoginPassword("");
-                  }}
-                >
-                  <i className="fa-solid fa-person-chalkboard"></i> Guru
-                </button>
-                <button
-                  className="neo-btn bg-blue"
-                  style={{
-                    flex: 1,
-                    padding: "10px",
-                    fontSize: "1rem",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    color: "white",
-                  }}
-                  onClick={() => {
-                    setIsCodeModalOpen(false);
-                    setPendingLoginMode("ibubapa");
-                    setShowLoginModal(true);
-                    setLoginEmail("");
-                    setLoginPassword("");
-                  }}
-                >
-                  <i className="fa-solid fa-users"></i> Ibubapa
-                </button>
-              </div>
-
-              {/* Teks Belum Ada Versi Pro */}
-              <div
-                style={{
-                  fontSize: "0.85rem",
-                  color: "#475569",
-                  fontWeight: "bold",
-                }}
-              >
-                Belum ada versi Pro?{" "}
-                <span
-                  style={{
-                    color: "#0284c7",
-                    textDecoration: "underline",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {
-                    setIsCodeModalOpen(false);
-                    setIsModeMenuOpen(true);
-                  }}
-                >
-                  dapatkan di sini
-                </span>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Modal Log Masuk */}
-      <AnimatePresence>
-        {showLoginModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: "rgba(0,0,0,0.7)",
-              zIndex: 999999,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="neo-box"
-              style={{
-                backgroundColor: "#fef9ec",
-                backgroundImage:
-                  "radial-gradient(circle, rgba(16, 24, 47, .11) 1.5px, transparent 1.5px)",
-                backgroundSize: "15px 15px",
-                maxWidth: "350px",
-                width: "90%",
-                padding: "30px 20px",
-                position: "relative",
-                borderRadius: "20px",
-                textAlign: "left",
-              }}
-            >
-              <button
-                className="neo-btn bg-red"
-                onClick={() => setShowLoginModal(false)}
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                  width: "36px",
-                  height: "36px",
-                  padding: "0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 10,
-                }}
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-
-              <div style={{ textAlign: "center", marginTop: "10px" }}>
-                <div
-                  className="neo-btn"
-                  style={{
-                    backgroundColor:
-                      pendingLoginMode === "guru"
-                        ? "var(--color-orange)"
-                        : pendingLoginMode === "ibubapa"
-                          ? "var(--color-blue)"
-                          : "#168f81",
-                    color: "white",
-                    fontSize: "clamp(1.1rem, 4vw, 1.3rem)",
-                    margin: "0 auto 20px auto",
-                    whiteSpace: "normal",
-                    display: "inline-block",
-                    pointerEvents: "none",
-                    padding: "8px 20px",
-                    lineHeight: "1.2",
-                  }}
-                >
-                  Log Masuk{" "}
-                  {pendingLoginMode === "guru"
-                    ? "Guru"
-                    : pendingLoginMode === "ibubapa"
-                      ? "Ibu Bapa"
-                      : "Admin"}
-                </div>
-              </div>
-
-              <div style={{ marginBottom: "15px" }}>
-                <label
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "8px",
-                    fontWeight: "bold",
-                    color: "var(--color-dark)",
-                    fontSize: "0.95rem",
-                  }}
-                >
-                  <span>Emel</span>
-                  <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                </label>
-                <input
-                  type="email"
-                  placeholder="Masukkan emel anda"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "12px",
-                    borderRadius: "10px",
-                    border: "2px solid var(--color-dark)",
-                    fontSize: "1rem",
-                    fontFamily: "inherit",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
-
-              <div style={{ marginBottom: "10px" }}>
-                <label
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "8px",
-                    fontWeight: "bold",
-                    color: "var(--color-dark)",
-                    fontSize: "0.95rem",
-                  }}
-                >
-                  <span>Kata Laluan</span>
-                  <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                </label>
-                <input
-                  type="password"
-                  placeholder="Masukkan kata laluan"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "12px",
-                    borderRadius: "10px",
-                    border: "2px solid var(--color-dark)",
-                    fontSize: "1rem",
-                    fontFamily: "inherit",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
-
-              <div style={{ textAlign: "right", marginBottom: "20px" }}>
-                <button
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#0284c7",
-                    fontWeight: "bold",
-                    fontSize: "0.85rem",
-                    cursor: "pointer",
-                    padding: "0",
-                  }}
-                  onClick={() => {
-                    alert(
-                      "Sila hubungi pentadbir sistem untuk menetapkan semula kata laluan anda.",
-                    );
-                  }}
-                >
-                  Lupa kata laluan?
-                </button>
-              </div>
-
-              <button
-                className="neo-btn"
-                style={{
-                  width: "100%",
-                  justifyContent: "center",
-                  fontSize: "1.1rem",
-                  padding: "12px",
-                  backgroundColor:
-                    pendingLoginMode === "guru"
-                      ? "var(--color-orange)"
-                      : pendingLoginMode === "ibubapa"
-                        ? "var(--color-blue)"
-                        : "#168f81",
-                  color: "#ffffff",
-                }}
-                onClick={() => {
-                  if (!loginEmail || !loginPassword) {
-                    alert("Sila masukkan emel dan kata laluan!");
-                    return;
-                  }
-                  setShowLoginModal(false);
-                  if (pendingLoginMode === "admin") {
-                    (window as any).masukModAdmin &&
-                      (window as any).masukModAdmin();
-                  } else if (pendingLoginMode === "guru") {
-                    (window as any).masukModGuru &&
-                      (window as any).masukModGuru();
-                  } else if (pendingLoginMode === "ibubapa") {
-                    (window as any).bukaModalPilihAnak &&
-                      (window as any).bukaModalPilihAnak();
-                  } else {
-                    (window as any).bukaModalAppInfo &&
-                      (window as any).bukaModalAppInfo(pendingLoginMode);
-                  }
-                }}
-              >
-                Log Masuk{" "}
-                <i
-                  className="fa-solid fa-right-to-bracket"
-                  style={{ marginLeft: "8px" }}
-                ></i>
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Modal Pilih Mod -> Pakej Bunyi Kata */}
-      <AnimatePresence>
-        {isModeMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: "rgba(0,0,0,0.6)",
-              zIndex: 999999,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "15px",
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="neo-box"
-              style={{
-                backgroundColor: "#fef9ec",
-                backgroundImage:
-                  "radial-gradient(circle, rgba(16, 24, 47, .11) 1.5px, transparent 1.5px)",
-                backgroundSize: "15px 15px",
-                maxWidth: "960px",
-                width: "100%",
-                maxHeight: "90vh",
-                overflowY: "auto",
-                padding: "24px 20px 20px 20px",
-                textAlign: "center",
-                position: "relative",
-              }}
-            >
-              <button
-                className="neo-btn bg-red"
-                onClick={() => setIsModeMenuOpen(false)}
-                style={{
-                  position: "absolute",
-                  top: "12px",
-                  right: "12px",
-                  width: "36px",
-                  height: "36px",
-                  padding: "0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 10,
-                }}
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-
-              <div
-                className="neo-btn"
-                style={{
-                  backgroundColor: "#168f81",
-                  color: "white",
-                  fontSize: "clamp(1.1rem, 4vw, 1.4rem)",
-                  margin: "0 auto 18px auto",
-                  whiteSpace: "normal",
-                  display: "inline-block",
-                  pointerEvents: "none",
-                  padding: "8px 22px",
-                  lineHeight: "1.2",
-                  fontWeight: "bold",
-                }}
-              >
-                Pakej Pro Bunyi Kata
-              </div>
-
-              {/* Category Selector Tabs */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  justifyContent: "center",
-                  marginBottom: "22px",
-                }}
-              >
-                <button
-                  className={`neo-btn pakej-tab-btn ${activePakejCategory === "guru" ? "bg-orange" : "bg-white"}`}
-                  style={{
-                    flex: 1,
-                    maxWidth: "220px",
-                    padding: "10px 14px",
-                    fontSize: "1rem",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "6px",
-                    whiteSpace: "nowrap",
-                    color:
-                      activePakejCategory === "guru"
-                        ? "white"
-                        : "var(--color-dark)",
-                    border: "2.5px solid var(--color-dark)",
-                  }}
-                  onClick={() => setActivePakejCategory("guru")}
-                >
-                  <i className="fa-solid fa-person-chalkboard"></i> Pakej Guru
-                </button>
-                <button
-                  className={`neo-btn pakej-tab-btn ${activePakejCategory === "ibubapa" ? "bg-blue" : "bg-white"}`}
-                  style={{
-                    flex: 1,
-                    maxWidth: "220px",
-                    padding: "10px 14px",
-                    fontSize: "1rem",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "6px",
-                    whiteSpace: "nowrap",
-                    color:
-                      activePakejCategory === "ibubapa"
-                        ? "white"
-                        : "var(--color-dark)",
-                    border: "2.5px solid var(--color-dark)",
-                  }}
-                  onClick={() => setActivePakejCategory("ibubapa")}
-                >
-                  <i className="fa-solid fa-users"></i> Pakej Ibu Bapa
-                </button>
-              </div>
-
-              {/* Offer Cards Grid */}
-              <div
-                className="pakej-grid-container"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-                  gap: "18px",
-                  marginBottom: "20px",
-                  textAlign: "left",
-                }}
-              >
-                {/* Pakej 1 Bulan (RM15 Promo Masa) */}
-                <div className="pro-pakej-card">
-                  <div className="pro-pakej-card-inner">
-                    <div className="shine-sweep-overlay"></div>
-                    <div>
-                      <div
-                        style={{
-                          display: "inline-block",
-                          backgroundColor: "#16a34a",
-                          color: "#ffffff",
-                          fontSize: "0.75rem",
-                          fontWeight: "900",
-                          letterSpacing: "0.5px",
-                          textTransform: "uppercase",
-                          padding: "3px 10px",
-                          borderRadius: "8px",
-                          border: "2px solid var(--color-dark)",
-                          boxShadow: "1.5px 1.5px 0 var(--color-dark)",
-                          marginBottom: "8px",
-                        }}
-                      >
-                        Pakej 1 Bulan
-                      </div>
-                      <h3
-                        style={{
-                          fontSize: "1.2rem",
-                          margin: "0 0 4px 0",
-                          color: "var(--color-dark)",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Pakej 1 Bulan
-                      </h3>
-
-                      {/* Original price strikethrough animation & discount badge */}
-                      <div className="original-price-box">
-                        <span className="original-price-strike">RM99</span>
-                        <span className="discount-tag-badge">-85% OFF</span>
-                      </div>
-
-                      {/* Animasi Masa Sahaja */}
-                      <div
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "8px",
-                          background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
-                          border: "2px solid #f43f5e",
-                          borderRadius: "10px",
-                          padding: "5px 12px",
-                          margin: "6px 0 10px 0",
-                          boxShadow: "0 2px 0 var(--color-dark)",
-                        }}
-                      >
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "22px",
-                            height: "22px",
-                            borderRadius: "50%",
-                            backgroundColor: "#e11d48",
-                            color: "white",
-                            fontSize: "0.75rem",
-                            animation: "timerIconSpin 3s linear infinite",
-                            flexShrink: 0,
-                          }}
-                        >
-                          <i className="fa-solid fa-hourglass-half"></i>
-                        </span>
-                        <span
-                          style={{
-                            fontSize: "1.05rem",
-                            fontWeight: "900",
-                            color: "#e11d48",
-                            letterSpacing: "0.8px",
-                            fontFamily: "monospace",
-                          }}
-                        >
-                          {formatPromoTimer(promoSecondsLeft)}
-                        </span>
-                      </div>
-
-                      <div
-                        className="price-tag"
-                        style={{
-                          fontSize: "1.75rem",
-                          fontWeight: "900",
-                          color: "#0f766e",
-                          marginBottom: "12px",
-                          letterSpacing: "-0.5px",
-                        }}
-                      >
-                        RM15{" "}
-                        <span
-                          style={{
-                            fontSize: "0.85rem",
-                            color: "#475569",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          / bulan
-                        </span>
-                      </div>
-
-                      <ul
-                        style={{
-                          listStyle: "none",
-                          padding: 0,
-                          margin: 0,
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "8px",
-                          fontSize: "0.88rem",
-                          color: "#334155",
-                        }}
-                      >
-                        <li
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-circle-check"
-                            style={{ color: "#10b981", marginTop: "3px" }}
-                          ></i>
-                          <span>Akses semua pembelajaran dan latihan</span>
-                        </li>
-                        <li
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-circle-check"
-                            style={{ color: "#10b981", marginTop: "3px" }}
-                          ></i>
-                          <span>Akses AR dan 3D</span>
-                        </li>
-                        <li
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-circle-check"
-                            style={{ color: "#10b981", marginTop: "3px" }}
-                          ></i>
-                          <span>
-                            {activePakejCategory === "guru"
-                              ? "Akses laporan prestasi murid dan statistik murid"
-                              : "Akses laporan anak dan statistik anak"}
-                          </span>
-                        </li>
-                        <li
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-circle-check"
-                            style={{ color: "#10b981", marginTop: "3px" }}
-                          ></i>
-                          <span>
-                            {activePakejCategory === "guru"
-                              ? "Rekod 1 kelas"
-                              : "Rekod 1 anak"}
-                          </span>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <button
-                      className={`neo-btn ${activePakejCategory === "guru" ? "bg-orange btn-daftar-glow-orange" : "bg-blue btn-daftar-glow-blue"}`}
-                      style={{
-                        width: "100%",
-                        marginTop: "16px",
-                        padding: "10px",
-                        fontSize: "1.05rem",
-                        color: "white",
-                        fontWeight: "bold",
-                        justifyContent: "center",
-                      }}
-                      onClick={() => {
-                        setIsModeMenuOpen(false);
-                        setPendingLoginMode(activePakejCategory);
-                        setShowLoginModal(true);
-                        setLoginEmail("");
-                        setLoginPassword("");
-                      }}
-                    >
-                      Daftar
-                    </button>
-                  </div>
-                </div>
-
-                {/* Pakej Bulanan Pro (RM30) */}
-                <div className="pro-pakej-card">
-                  <div className="pro-pakej-card-inner">
-                    <div className="shine-sweep-overlay"></div>
-                    <div>
-                      <div
-                        style={{
-                          display: "inline-block",
-                          backgroundColor: "#dc2626",
-                          color: "#ffffff",
-                          fontSize: "0.75rem",
-                          fontWeight: "900",
-                          letterSpacing: "0.5px",
-                          textTransform: "uppercase",
-                          padding: "3px 10px",
-                          borderRadius: "8px",
-                          border: "2px solid var(--color-dark)",
-                          boxShadow: "1.5px 1.5px 0 var(--color-dark)",
-                          marginBottom: "8px",
-                        }}
-                      >
-                        Pakej Bulanan Pro
-                      </div>
-                      <h3
-                        style={{
-                          fontSize: "1.2rem",
-                          margin: "0 0 4px 0",
-                          color: "var(--color-dark)",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Pakej Bulanan Pro
-                      </h3>
-
-                      {/* Original price strikethrough animation & discount badge */}
-                      <div className="original-price-box">
-                        <span className="original-price-strike">RM99</span>
-                        <span className="discount-tag-badge">-70% OFF</span>
-                      </div>
-
-                      <div
-                        className="price-tag"
-                        style={{
-                          fontSize: "1.75rem",
-                          fontWeight: "900",
-                          color: "#0f766e",
-                          marginBottom: "12px",
-                          letterSpacing: "-0.5px",
-                        }}
-                      >
-                        RM30{" "}
-                        <span
-                          style={{
-                            fontSize: "0.85rem",
-                            color: "#475569",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          / bulan
-                        </span>
-                      </div>
-
-                      <ul
-                        style={{
-                          listStyle: "none",
-                          padding: 0,
-                          margin: 0,
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "8px",
-                          fontSize: "0.88rem",
-                          color: "#334155",
-                        }}
-                      >
-                        <li
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-circle-check"
-                            style={{ color: "#10b981", marginTop: "3px" }}
-                          ></i>
-                          <span>Akses semua pembelajaran dan latihan</span>
-                        </li>
-                        <li
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-circle-check"
-                            style={{ color: "#10b981", marginTop: "3px" }}
-                          ></i>
-                          <span>Akses AR dan 3D</span>
-                        </li>
-                        <li
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-circle-check"
-                            style={{ color: "#10b981", marginTop: "3px" }}
-                          ></i>
-                          <span>
-                            {activePakejCategory === "guru"
-                              ? "Akses laporan prestasi murid dan statistik murid"
-                              : "Akses laporan anak dan statistik anak"}
-                          </span>
-                        </li>
-                        <li
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-circle-check"
-                            style={{ color: "#10b981", marginTop: "3px" }}
-                          ></i>
-                          <span>
-                            {activePakejCategory === "guru"
-                              ? "Rekod 2 kelas"
-                              : "Rekod Multi Anak (Max 3 Anak)"}
-                          </span>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <button
-                      className={`neo-btn ${activePakejCategory === "guru" ? "bg-orange btn-daftar-glow-orange" : "bg-blue btn-daftar-glow-blue"}`}
-                      style={{
-                        width: "100%",
-                        marginTop: "16px",
-                        padding: "10px",
-                        fontSize: "1.05rem",
-                        color: "white",
-                        fontWeight: "bold",
-                        justifyContent: "center",
-                      }}
-                      onClick={() => {
-                        setIsModeMenuOpen(false);
-                        setPendingLoginMode(activePakejCategory);
-                        setShowLoginModal(true);
-                        setLoginEmail("");
-                        setLoginPassword("");
-                      }}
-                    >
-                      Daftar
-                    </button>
-                  </div>
-                </div>
-
-                {/* Pakej 1 Tahun (RM69) */}
-                <div className="pro-pakej-card">
-                  <div className="lebiht-jimat-sticker">Lebih Jimat</div>
-                  <div className="pro-pakej-card-inner">
-                    <div className="shine-sweep-overlay"></div>
-                    <div>
-                      <div
-                        style={{
-                          display: "inline-block",
-                          backgroundColor: "#dc2626",
-                          color: "#ffffff",
-                          fontSize: "0.75rem",
-                          fontWeight: "900",
-                          letterSpacing: "0.5px",
-                          textTransform: "uppercase",
-                          padding: "3px 10px",
-                          borderRadius: "8px",
-                          border: "2px solid var(--color-dark)",
-                          boxShadow: "1.5px 1.5px 0 var(--color-dark)",
-                          marginBottom: "8px",
-                        }}
-                      >
-                        Pakej Tahunan
-                      </div>
-                      <h3
-                        style={{
-                          fontSize: "1.2rem",
-                          margin: "0 0 4px 0",
-                          color: "var(--color-dark)",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Pakej 1 Tahun
-                      </h3>
-
-                      {/* Original price strikethrough animation & discount badge */}
-                      <div className="original-price-box">
-                        <span className="original-price-strike">RM199</span>
-                        <span className="discount-tag-badge">-65% OFF</span>
-                      </div>
-
-                      <div
-                        className="price-tag"
-                        style={{
-                          fontSize: "1.75rem",
-                          fontWeight: "900",
-                          color: "#0f766e",
-                          marginBottom: "12px",
-                          letterSpacing: "-0.5px",
-                        }}
-                      >
-                        RM69{" "}
-                        <span
-                          style={{
-                            fontSize: "0.85rem",
-                            color: "#475569",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          / tahun
-                        </span>
-                      </div>
-
-                      <ul
-                        style={{
-                          listStyle: "none",
-                          padding: 0,
-                          margin: 0,
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "8px",
-                          fontSize: "0.88rem",
-                          color: "#334155",
-                        }}
-                      >
-                        <li
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-circle-check"
-                            style={{ color: "#10b981", marginTop: "3px" }}
-                          ></i>
-                          <span>Akses semua pembelajaran dan latihan</span>
-                        </li>
-                        <li
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-circle-check"
-                            style={{ color: "#10b981", marginTop: "3px" }}
-                          ></i>
-                          <span>Akses AR dan 3D</span>
-                        </li>
-                        <li
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-circle-check"
-                            style={{ color: "#10b981", marginTop: "3px" }}
-                          ></i>
-                          <span>
-                            {activePakejCategory === "guru"
-                              ? "Akses laporan prestasi murid dan statistik murid"
-                              : "Akses laporan anak dan statistik anak"}
-                          </span>
-                        </li>
-                        <li
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-circle-check"
-                            style={{ color: "#10b981", marginTop: "3px" }}
-                          ></i>
-                          <span>
-                            {activePakejCategory === "guru"
-                              ? "Rekod 2 kelas"
-                              : "Rekod Multi Anak (Max 3 Anak)"}
-                          </span>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <button
-                      className={`neo-btn ${activePakejCategory === "guru" ? "bg-orange btn-daftar-glow-orange" : "bg-blue btn-daftar-glow-blue"}`}
-                      style={{
-                        width: "100%",
-                        marginTop: "16px",
-                        padding: "10px",
-                        fontSize: "1.05rem",
-                        color: "white",
-                        fontWeight: "bold",
-                        justifyContent: "center",
-                      }}
-                      onClick={() => {
-                        setIsModeMenuOpen(false);
-                        setPendingLoginMode(activePakejCategory);
-                        setShowLoginModal(true);
-                        setLoginEmail("");
-                        setLoginPassword("");
-                      }}
-                    >
-                      Daftar
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* FAQ Accordion Section */}
-              <div
-                style={{
-                  marginTop: "22px",
-                  paddingTop: "16px",
-                  borderTop: "2.5px dashed #cbd5e1",
-                  textAlign: "left",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    marginBottom: "14px",
-                  }}
-                >
-                  <div
+                  <motion.div
+                    initial={{ scale: 0.9, y: 20 }}
+                    animate={{ scale: 1, y: 0 }}
+                    exit={{ scale: 0.9, y: 20 }}
+                    className="neo-box"
                     style={{
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      backgroundColor: "#168f81",
-                      color: "white",
-                      border: "1.5px solid var(--color-dark)",
+                      backgroundColor: "#ffffff",
+                      backgroundImage:
+                        "radial-gradient(circle, rgba(16, 24, 47, 0.12) 1.5px, transparent 1.5px)",
+                      backgroundSize: "16px 16px",
+                      maxWidth: "520px",
+                      width: "100%",
+                      padding: "28px 24px",
+                      textAlign: "center",
+                      borderRadius: "24px",
+                      boxShadow: "0 25px 50px -12px rgba(0,0,0,0.35)",
+                      border: `4px solid ${accentColor}`,
+                      fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                      position: "relative",
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <h2
+                      style={{
+                        fontSize: "1.6rem",
+                        color: "#ffffff",
+                        backgroundColor: accentColor,
+                        padding: "6px 24px",
+                        borderRadius: "16px",
+                        display: "inline-block",
+                        margin: "0 0 15px 0",
+                        fontWeight: "bold",
+                        fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                        border: `3px solid ${borderColor}`,
+                      }}
+                    >
+                      {modalTitle}
+                    </h2>
+
+                    <p
+                      style={{
+                        fontSize: "0.95rem",
+                        color: "#1e293b",
+                        margin: "0 0 20px 0",
+                        lineHeight: 1.6,
+                        fontWeight: "bold",
+                        fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                      }}
+                    >
+                      {modalDesc}
+                    </p>
+
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(3, 1fr)",
+                        gap: "12px",
+                        marginBottom: "24px",
+                        padding: "14px 10px",
+                        backgroundColor: "rgba(248, 250, 252, 0.9)",
+                        borderRadius: "16px",
+                        border: "2px solid #cbd5e1",
+                      }}
+                    >
+                      {features.map((f, i) => (
+                        <div key={i} style={{ textAlign: "center" }}>
+                          <div style={{ marginBottom: "6px" }}>
+                            <i
+                              className={f.icon}
+                              style={{ fontSize: "1.6rem", color: accentColor }}
+                            ></i>
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "0.8rem",
+                              fontWeight: "bold",
+                              color: "#1e293b",
+                              fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                            }}
+                          >
+                            {f.label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      className="neo-btn"
+                      style={{
+                        backgroundColor: "#168f81",
+                        color: "#ffffff",
+                        fontSize: "1.1rem",
+                        padding: "12px 32px",
+                        width: "100%",
+                        fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                        fontWeight: "bold",
+                        justifyContent: "center",
+                        textTransform: "none",
+                      }}
+                      onClick={() => setShowVRGuideModal(false)}
+                    >
+                      Mula Belajar
+                    </button>
+                  </motion.div>
+                </motion.div>
+              );
+            })()}
+          </AnimatePresence>
+
+
+          {/* Modal Kod Kelas/Keluarga */}
+          <AnimatePresence>
+            {isCodeModalOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  zIndex: 9999,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.9, y: 20 }}
+                  className="neo-box"
+                  style={{
+                    backgroundColor: "#fef9ec",
+                    backgroundImage:
+                      "radial-gradient(circle, rgba(16, 24, 47, .11) 1.5px, transparent 1.5px)",
+                    backgroundSize: "15px 15px",
+                    maxWidth: "400px",
+                    width: "90%",
+                    padding: "30px",
+                    textAlign: "center",
+                    position: "relative",
+                  }}
+                >
+                  <button
+                    className="neo-btn bg-red"
+                    onClick={() => setIsCodeModalOpen(false)}
+                    style={{
+                      position: "absolute",
+                      top: "10px",
+                      right: "10px",
+                      width: "36px",
+                      height: "36px",
+                      padding: "0",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontWeight: "900",
-                      fontSize: "0.85rem",
+                      zIndex: 10,
                     }}
                   >
-                    ?
-                  </div>
-                  <h4
+                    <i className="fa-solid fa-xmark"></i>
+                  </button>
+
+                  <div
+                    className="neo-btn"
                     style={{
-                      margin: 0,
-                      fontSize: "1.05rem",
-                      fontWeight: "bold",
-                      color: "var(--color-dark)",
+                      backgroundColor: "#168f81",
+                      color: "white",
+                      fontSize: "clamp(1.1rem, 4vw, 1.4rem)",
+                      margin: "0 auto 20px auto",
+                      whiteSpace: "normal",
+                      display: "inline-block",
+                      pointerEvents: "none",
+                      padding: "10px 20px",
+                      lineHeight: "1.2",
                     }}
                   >
-                    Soalan Lazim (FAQ)
-                  </h4>
+                    Masukkan Kod
+                  </div>
+
+                  <p
+                    style={{
+                      marginBottom: "16px",
+                      fontSize: "clamp(1.05rem, 3vw, 1.2rem)",
+                      fontWeight: "bold",
+                      color: "#1e293b",
+                      lineHeight: "1.4",
+                    }}
+                  >
+                    Masukkan kod kelas atau keluarga untuk memuatkan profil.
+                  </p>
+
+                  {/* Nota format kod 8 aksara & simbol (Grey style & smaller font) */}
+                  <div
+                    style={{
+                      backgroundColor: "#f1f5f9",
+                      border: "1.5px solid #cbd5e1",
+                      borderRadius: "10px",
+                      padding: "8px 12px",
+                      marginBottom: "16px",
+                      fontSize: "0.78rem",
+                      color: "#475569",
+                      textAlign: "left",
+                      lineHeight: "1.35",
+                    }}
+                  >
+                    <div style={{ fontWeight: "bold", display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px", color: "#334155" }}>
+                      <i className="fa-solid fa-circle-info" style={{ fontSize: "0.85rem" }}></i> Format Kod:
+                    </div>
+                    <div>• Wajib <strong>8 aksara</strong></div>
+                    <div>• Sekurang-kurangnya <strong>1 simbol</strong></div>
+                    <div style={{ marginTop: "3px", fontSize: "0.74rem", color: "#64748b" }}>
+                      <strong>Contoh:</strong> <code style={{ backgroundColor: "#e2e8f0", padding: "1px 4px", borderRadius: "4px" }}>KELAS#01</code> atau <code style={{ backgroundColor: "#e2e8f0", padding: "1px 4px", borderRadius: "4px" }}>FAM@2026</code>
+                    </div>
+                  </div>
+
+                  <input
+                    type="text"
+                    className="neo-input century-gothic-font"
+                    style={{
+                      width: "100%",
+                      padding: "10px",
+                      marginBottom: "20px",
+                      textAlign: "center",
+                      fontSize: "1.2rem",
+                      fontWeight: "bold",
+                      letterSpacing: "1px",
+                    }}
+                    placeholder="Cth: KELAS#01"
+                    maxLength={8}
+                    value={joinCode}
+                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  />
+                  <button
+                    className="neo-btn"
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      color: "white",
+                      fontSize: "1.1rem",
+                      backgroundColor: "#168f81",
+                      animation:
+                        "outlineGlowGold 2.5s infinite, pulse-scale 2.5s infinite ease-in-out",
+                    }}
+                    onClick={() => {
+                      if (joinCode.trim()) {
+                        const kodKeluarga =
+                          localStorage.getItem("bunyiKataKodKeluarga") ||
+                          "FAM@2026";
+                        const kodKelas =
+                          localStorage.getItem("bunyiKataKodKelas") || "KELAS#01";
+
+                        const kodAdmin =
+                          localStorage.getItem("bunyiKataKodAdmin") || "ADMIN#01";
+
+                        const entered = joinCode.trim().toUpperCase();
+                        if (
+                          entered === "1" ||
+                          entered === "ADMIN" ||
+                          entered === kodAdmin.toUpperCase()
+                        ) {
+                          alert("Akses Admin berjaya!");
+                          setIsCodeModalOpen(false);
+                          if (typeof (window as any).masukModAdmin === "function") {
+                            (window as any).masukModAdmin();
+                          }
+                        } else if (
+                          entered === kodKelas.toUpperCase() ||
+                          entered === "KELAS123"
+                        ) {
+                          alert("Kod berjaya disahkan!");
+                          setIsCodeModalOpen(false);
+                          const modal = document.getElementById("modal-pilih-anak");
+                          if (modal) {
+                            modal.style.display = "flex";
+                            if (
+                              typeof (window as any).bukaModalPilihAnak ===
+                              "function"
+                            ) {
+                              (window as any).bukaModalPilihAnak(false, true); // isStudentLogin
+                            }
+                          }
+                        } else if (
+                          entered === kodKeluarga.toUpperCase() ||
+                          entered === "KELUARGA123"
+                        ) {
+                          alert("Kod berjaya disahkan!");
+                          setIsCodeModalOpen(false);
+                          const modal = document.getElementById("modal-pilih-anak");
+                          if (modal) {
+                            modal.style.display = "flex";
+                            if (
+                              typeof (window as any).bukaModalPilihAnak ===
+                              "function"
+                            ) {
+                              (window as any).bukaModalPilihAnak(false, false); // normal mode (Mod Ibu Bapa)
+                            }
+                          }
+                        } else {
+                          alert("Kod tidak sah. Sila pastikan kod mengikut format 8 aksara dengan simbol (contoh: KELAS#01 atau FAM@2026).");
+                        }
+                      }
+                    }}
+                  >
+                    Sahkan Kod
+                  </button>
+
+                  {/* Garisan Pemisah */}
+                  <div
+                    style={{
+                      borderTop: "2px dashed #cbd5e1",
+                      margin: "20px 0 16px 0",
+                    }}
+                  ></div>
+
+                  {/* 2 Butang Mod: Guru & Ibubapa Bersebelahan */}
+                  <div
+                    style={{ display: "flex", gap: "10px", marginBottom: "16px" }}
+                  >
+                    <button
+                      className="neo-btn bg-orange"
+                      style={{
+                        flex: 1,
+                        padding: "10px",
+                        fontSize: "1rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        color: "white",
+                      }}
+                      onClick={() => {
+                        setIsCodeModalOpen(false);
+                        setPendingLoginMode("guru");
+                        setAuthModalTab("login");
+                        setAuthModalError("");
+                        setShowLoginModal(true);
+                        setLoginEmail("");
+                        setLoginPassword("");
+                        setRegGuruNama("");
+                        setRegGuruSekolah("");
+                      }}
+                    >
+                      <i className="fa-solid fa-person-chalkboard"></i> Guru
+                    </button>
+                    <button
+                      className="neo-btn bg-blue"
+                      style={{
+                        flex: 1,
+                        padding: "10px",
+                        fontSize: "1rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        color: "white",
+                      }}
+                      onClick={() => {
+                        setIsCodeModalOpen(false);
+                        setPendingLoginMode("ibubapa");
+                        setAuthModalTab("login");
+                        setAuthModalError("");
+                        setShowLoginModal(true);
+                        setLoginEmail("");
+                        setLoginPassword("");
+                        setRegNamaKeluarga("");
+                      }}
+                    >
+                      <i className="fa-solid fa-users"></i> Ibubapa
+                    </button>
+                  </div>
+
+                  {/* Teks Belum Ada Versi Pro */}
+                  <div
+                    style={{
+                      fontSize: "0.85rem",
+                      color: "#475569",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Belum ada versi Pro?{" "}
+                    <span
+                      style={{
+                        color: "#0284c7",
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setIsCodeModalOpen(false);
+                        setIsModeMenuOpen(true);
+                      }}
+                    >
+                      dapatkan di sini
+                    </span>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Modal Log Masuk */}
+          <AnimatePresence>
+            {showLoginModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(0,0,0,0.7)",
+                  zIndex: 999999,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.9, y: 20 }}
+                  className="neo-box"
+                  style={{
+                    backgroundColor: "#fef9ec",
+                    backgroundImage:
+                      "radial-gradient(circle, rgba(16, 24, 47, .11) 1.5px, transparent 1.5px)",
+                    backgroundSize: "15px 15px",
+                    maxWidth: "780px",
+                    width: "95%",
+                    maxHeight: "92vh",
+                    overflowY: "auto",
+                    padding: "30px 24px 24px 24px",
+                    position: "relative",
+                    borderRadius: "24px",
+                    textAlign: "left",
+                  }}
+                >
+                  <button
+                    className="neo-btn bg-red"
+                    onClick={() => {
+                      setShowLoginModal(false);
+                      setAuthModalError("");
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      right: "12px",
+                      width: "36px",
+                      height: "36px",
+                      padding: "0",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 10,
+                    }}
+                  >
+                    <i className="fa-solid fa-xmark"></i>
+                  </button>
+
+                  <div className="auth-split-modal-container">
+                    {/* BAHAGIAN KIRI: Logo & Info Selamat Datang */}
+                    <div className="auth-modal-left shiny-reveal">
+                      <img
+                        src="/images/sampingan/logo-login-screen.png"
+                        alt="Logo Bunyi Kata"
+                        className="auth-modal-left-logo glitch-logo"
+                      />
+                      <p className="auth-modal-left-desc">
+                        {pendingLoginMode === "guru"
+                          ? "Platform interaktif literasi awal Bahasa Melayu untuk guru membimbing murid menguasai kemahiran fonik, suku kata dan membaca secara seronok dan berkesan."
+                          : pendingLoginMode === "ibubapa"
+                            ? "Bimbing anak anda meneroka dunia membaca, fonik dan suku kata di rumah dengan aktiviti yang ceria, interaktif serta pantau kemajuan mereka!"
+                            : "Portal pengurusan dan kawalan sistem aplikasi Bunyi Kata bagi pentadbiran modul dan akaun pengguna."}
+                      </p>
+
+                      <div className="auth-modal-badges">
+                        {pendingLoginMode === "guru" ? (
+                          <>
+                            <div className="auth-modal-badge-item">
+                              <div className="auth-modal-badge-icon" style={{ backgroundColor: "rgba(249, 115, 22, 0.14)", color: "var(--color-orange)" }}>
+                                <i className="fa-solid fa-chart-line"></i>
+                              </div>
+                              <span>Pantau Rekod &amp; Prestasi Murid</span>
+                            </div>
+                            <div className="auth-modal-badge-item">
+                              <div className="auth-modal-badge-icon" style={{ backgroundColor: "rgba(22, 143, 129, 0.14)", color: "#168f81" }}>
+                                <i className="fa-solid fa-book-open-reader"></i>
+                              </div>
+                              <span>Aktiviti Fonik &amp; Bacaan Bergred</span>
+                            </div>
+                            <div className="auth-modal-badge-item">
+                              <div className="auth-modal-badge-icon" style={{ backgroundColor: "rgba(234, 179, 8, 0.18)", color: "#d97706" }}>
+                                <i className="fa-solid fa-award"></i>
+                              </div>
+                              <span>Penjanaan Sijil &amp; Lencana</span>
+                            </div>
+                          </>
+                        ) : pendingLoginMode === "ibubapa" ? (
+                          <>
+                            <div className="auth-modal-badge-item">
+                              <div className="auth-modal-badge-icon" style={{ backgroundColor: "rgba(59, 130, 246, 0.14)", color: "var(--color-blue)" }}>
+                                <i className="fa-solid fa-shapes"></i>
+                              </div>
+                              <span>Aktiviti Interaktif &amp; Permainan Fonik</span>
+                            </div>
+                            <div className="auth-modal-badge-item">
+                              <div className="auth-modal-badge-icon" style={{ backgroundColor: "rgba(16, 185, 129, 0.14)", color: "#10b981" }}>
+                                <i className="fa-solid fa-chart-pie"></i>
+                              </div>
+                              <span>Pantau Kemajuan Bacaan Anak</span>
+                            </div>
+                            <div className="auth-modal-badge-item">
+                              <div className="auth-modal-badge-icon" style={{ backgroundColor: "rgba(245, 158, 11, 0.18)", color: "#f59e0b" }}>
+                                <i className="fa-solid fa-star"></i>
+                              </div>
+                              <span>Bintang Ceria &amp; Ganjaran Lencana</span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="auth-modal-badge-item">
+                              <div className="auth-modal-badge-icon" style={{ backgroundColor: "rgba(22, 143, 129, 0.14)", color: "#168f81" }}>
+                                <i className="fa-solid fa-gears"></i>
+                              </div>
+                              <span>Kawalan Tetapan &amp; Modul Sistem</span>
+                            </div>
+                            <div className="auth-modal-badge-item">
+                              <div className="auth-modal-badge-icon" style={{ backgroundColor: "rgba(59, 130, 246, 0.14)", color: "var(--color-blue)" }}>
+                                <i className="fa-solid fa-users-gear"></i>
+                              </div>
+                              <span>Pengurusan Akaun Guru &amp; Murid</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* GARIS PEMBAHAGI TENGAH */}
+                    <div className="auth-modal-divider"></div>
+
+                    {/* BAHAGIAN KANAN: Borang Log Masuk / Daftar */}
+                    <div className="auth-modal-right">
+                      {/* Header Badge */}
+                      <div style={{ textAlign: "center", marginTop: "4px" }}>
+                        <div
+                          className="neo-btn"
+                          style={{
+                            backgroundColor:
+                              pendingLoginMode === "guru"
+                                ? "var(--color-orange)"
+                                : pendingLoginMode === "ibubapa"
+                                  ? "var(--color-blue)"
+                                  : "#168f81",
+                            color: "white",
+                            fontSize: "clamp(1.05rem, 3.8vw, 1.25rem)",
+                            margin: "0 auto 16px auto",
+                            whiteSpace: "normal",
+                            display: "inline-block",
+                            pointerEvents: "none",
+                            padding: "8px 20px",
+                            lineHeight: "1.2",
+                          }}
+                        >
+                          {authModalTab === "register" && pendingLoginMode !== "admin"
+                            ? `Daftar Akaun ${pendingLoginMode === "guru" ? "Guru" : "Ibu Bapa"}`
+                            : `Log Masuk ${
+                                pendingLoginMode === "guru"
+                                  ? "Guru"
+                                  : pendingLoginMode === "ibubapa"
+                                    ? "Ibu Bapa"
+                                    : "Admin"
+                              }`}
+                        </div>
+                      </div>
+
+                      {/* Tab Selector (Log Masuk vs Daftar Akaun) */}
+                      {pendingLoginMode !== "admin" && (
+                        <div
+                          style={{
+                            display: "flex",
+                            backgroundColor: "#f1f5f9",
+                            borderRadius: "14px",
+                            padding: "4px",
+                            marginBottom: "16px",
+                            border: "2px solid var(--color-dark)",
+                            gap: "4px",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAuthModalTab("login");
+                              setAuthModalError("");
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: "8px 6px",
+                              borderRadius: "10px",
+                              border:
+                                authModalTab === "login"
+                                  ? "2px solid var(--color-dark)"
+                                  : "2px solid transparent",
+                              backgroundColor:
+                                authModalTab === "login"
+                                  ? pendingLoginMode === "guru"
+                                    ? "var(--color-orange)"
+                                    : "var(--color-blue)"
+                                  : "transparent",
+                              color: authModalTab === "login" ? "#ffffff" : "#475569",
+                              fontWeight: "bold",
+                              fontSize: "0.88rem",
+                              cursor: "pointer",
+                              transition: "all 0.15s ease",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "6px",
+                            }}
+                          >
+                            <i className="fa-solid fa-right-to-bracket"></i>
+                            Log Masuk
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAuthModalTab("register");
+                              setAuthModalError("");
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: "8px 6px",
+                              borderRadius: "10px",
+                              border:
+                                authModalTab === "register"
+                                  ? "2px solid var(--color-dark)"
+                                  : "2px solid transparent",
+                              backgroundColor:
+                                authModalTab === "register"
+                                  ? pendingLoginMode === "guru"
+                                    ? "var(--color-orange)"
+                                    : "var(--color-blue)"
+                                  : "transparent",
+                              color: authModalTab === "register" ? "#ffffff" : "#475569",
+                              fontWeight: "bold",
+                              fontSize: "0.88rem",
+                              cursor: "pointer",
+                              transition: "all 0.15s ease",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "6px",
+                            }}
+                          >
+                            <i className="fa-solid fa-user-plus"></i>
+                            Daftar Baru
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Error Notification */}
+                      {authModalError && (
+                        <div
+                          style={{
+                            backgroundColor: "#fef2f2",
+                            border: "2px solid #ef4444",
+                            color: "#b91c1c",
+                            borderRadius: "10px",
+                            padding: "8px 12px",
+                            fontSize: "0.85rem",
+                            fontWeight: "bold",
+                            marginBottom: "14px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          <i className="fa-solid fa-circle-exclamation"></i>
+                          <span>{authModalError}</span>
+                        </div>
+                      )}
+
+                      {/* FORM FIELDS */}
+                      {authModalTab === "login" || pendingLoginMode === "admin" ? (
+                        /* TAB LOG MASUK */
+                        <>
+                          <div style={{ marginBottom: "15px" }}>
+                            <label
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                marginBottom: "6px",
+                                fontWeight: "bold",
+                                color: "var(--color-dark)",
+                                fontSize: "0.95rem",
+                              }}
+                            >
+                              <span>Emel</span>
+                              <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                            </label>
+                            <input
+                              type="email"
+                              placeholder="Masukkan emel anda"
+                              value={loginEmail}
+                              onChange={(e) => {
+                                setLoginEmail(e.target.value);
+                                if (authModalError) setAuthModalError("");
+                              }}
+                              style={{
+                                width: "100%",
+                                padding: "12px",
+                                borderRadius: "10px",
+                                border: "2px solid var(--color-dark)",
+                                fontSize: "1rem",
+                                fontFamily: "inherit",
+                                boxSizing: "border-box",
+                              }}
+                            />
+                          </div>
+
+                          <div style={{ marginBottom: "10px" }}>
+                            <label
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                marginBottom: "6px",
+                                fontWeight: "bold",
+                                color: "var(--color-dark)",
+                                fontSize: "0.95rem",
+                              }}
+                            >
+                              <span>Kata Laluan</span>
+                              <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                            </label>
+                            <input
+                              type="password"
+                              placeholder="Masukkan kata laluan"
+                              value={loginPassword}
+                              onChange={(e) => {
+                                setLoginPassword(e.target.value);
+                                if (authModalError) setAuthModalError("");
+                              }}
+                              style={{
+                                width: "100%",
+                                padding: "12px",
+                                borderRadius: "10px",
+                                border: "2px solid var(--color-dark)",
+                                fontSize: "1rem",
+                                fontFamily: "inherit",
+                                boxSizing: "border-box",
+                              }}
+                            />
+                          </div>
+
+                          <div style={{ textAlign: "right", marginBottom: "20px" }}>
+                            <button
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color: "#0284c7",
+                                fontWeight: "bold",
+                                fontSize: "0.85rem",
+                                cursor: "pointer",
+                                padding: "0",
+                              }}
+                              onClick={() => {
+                                alert(
+                                  "Sila hubungi pentadbir sistem untuk menetapkan semula kata laluan anda.",
+                                );
+                              }}
+                            >
+                              Lupa kata laluan?
+                            </button>
+                          </div>
+
+                          <button
+                            className="neo-btn"
+                            style={{
+                              width: "100%",
+                              justifyContent: "center",
+                              fontSize: "1.1rem",
+                              padding: "12px",
+                              backgroundColor:
+                                pendingLoginMode === "guru"
+                                  ? "var(--color-orange)"
+                                  : pendingLoginMode === "ibubapa"
+                                    ? "var(--color-blue)"
+                                    : "#168f81",
+                              color: "#ffffff",
+                            }}
+                            onClick={() => {
+                              if (!loginEmail || !loginPassword) {
+                                setAuthModalError("Sila masukkan emel dan kata laluan!");
+                                return;
+                              }
+                              setShowLoginModal(false);
+                              if (pendingLoginMode === "admin") {
+                                (window as any).masukModAdmin &&
+                                  (window as any).masukModAdmin();
+                              } else if (pendingLoginMode === "guru") {
+                                (window as any).masukModGuru &&
+                                  (window as any).masukModGuru();
+                              } else if (pendingLoginMode === "ibubapa") {
+                                (window as any).bukaModalPilihAnak &&
+                                  (window as any).bukaModalPilihAnak();
+                              } else {
+                                (window as any).bukaModalAppInfo &&
+                                  (window as any).bukaModalAppInfo(pendingLoginMode);
+                              }
+                            }}
+                          >
+                            Log Masuk{" "}
+                            <i
+                              className="fa-solid fa-right-to-bracket"
+                              style={{ marginLeft: "8px" }}
+                            ></i>
+                          </button>
+
+                          {pendingLoginMode !== "admin" && (
+                            <div
+                              style={{
+                                textAlign: "center",
+                                marginTop: "16px",
+                                fontSize: "0.88rem",
+                                color: "#475569",
+                              }}
+                            >
+                              Belum mempunyai akaun?{" "}
+                              <button
+                                type="button"
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  color:
+                                    pendingLoginMode === "guru"
+                                      ? "var(--color-orange)"
+                                      : "var(--color-blue)",
+                                  fontWeight: "bold",
+                                  fontSize: "0.88rem",
+                                  cursor: "pointer",
+                                  padding: "0",
+                                  textDecoration: "underline",
+                                }}
+                                onClick={() => {
+                                  setAuthModalTab("register");
+                                  setAuthModalError("");
+                                }}
+                              >
+                                Daftar Akaun Baru
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        /* TAB DAFTAR AKAUN */
+                        <>
+                          {pendingLoginMode === "guru" ? (
+                            /* REGISTER GURU FIELDS */
+                            <>
+                              <div style={{ marginBottom: "12px" }}>
+                                <label
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    marginBottom: "6px",
+                                    fontWeight: "bold",
+                                    color: "var(--color-dark)",
+                                    fontSize: "0.9rem",
+                                  }}
+                                >
+                                  <span>Nama Guru</span>
+                                  <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.1rem" }}>*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Contoh: Cikgu Sarah / En. Razak"
+                                  value={regGuruNama}
+                                  onChange={(e) => {
+                                    setRegGuruNama(e.target.value);
+                                    if (authModalError) setAuthModalError("");
+                                  }}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px 12px",
+                                    borderRadius: "10px",
+                                    border: "2px solid var(--color-dark)",
+                                    fontSize: "0.95rem",
+                                    fontFamily: "inherit",
+                                    boxSizing: "border-box",
+                                  }}
+                                />
+                              </div>
+
+                              <div style={{ marginBottom: "12px" }}>
+                                <label
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    marginBottom: "6px",
+                                    fontWeight: "bold",
+                                    color: "var(--color-dark)",
+                                    fontSize: "0.9rem",
+                                  }}
+                                >
+                                  <span>Nama Sekolah</span>
+                                  <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.1rem" }}>*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Contoh: SK Taman Melati"
+                                  value={regGuruSekolah}
+                                  onChange={(e) => {
+                                    setRegGuruSekolah(e.target.value);
+                                    if (authModalError) setAuthModalError("");
+                                  }}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px 12px",
+                                    borderRadius: "10px",
+                                    border: "2px solid var(--color-dark)",
+                                    fontSize: "0.95rem",
+                                    fontFamily: "inherit",
+                                    boxSizing: "border-box",
+                                  }}
+                                />
+                              </div>
+                            </>
+                          ) : (
+                            /* REGISTER IBU BAPA FIELDS */
+                            <div style={{ marginBottom: "12px" }}>
+                              <label
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                  marginBottom: "6px",
+                                  fontWeight: "bold",
+                                  color: "var(--color-dark)",
+                                  fontSize: "0.9rem",
+                                }}
+                              >
+                                  <span>Nama Keluarga</span>
+                                  <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.1rem" }}>*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Contoh: Keluarga Azman / Pn. Siti"
+                                  value={regNamaKeluarga}
+                                  onChange={(e) => {
+                                    setRegNamaKeluarga(e.target.value);
+                                    if (authModalError) setAuthModalError("");
+                                  }}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px 12px",
+                                    borderRadius: "10px",
+                                    border: "2px solid var(--color-dark)",
+                                    fontSize: "0.95rem",
+                                    fontFamily: "inherit",
+                                    boxSizing: "border-box",
+                                  }}
+                                />
+                              </div>
+                            )}
+
+                          <div style={{ marginBottom: "12px" }}>
+                            <label
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                marginBottom: "6px",
+                                fontWeight: "bold",
+                                color: "var(--color-dark)",
+                                fontSize: "0.9rem",
+                              }}
+                            >
+                              <span>Emel</span>
+                              <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.1rem" }}>*</span>
+                            </label>
+                            <input
+                              type="email"
+                              placeholder={
+                                pendingLoginMode === "guru"
+                                  ? "Contoh: guru@moe.edu.my"
+                                  : "Contoh: ibubapa@gmail.com"
+                              }
+                              value={loginEmail}
+                              onChange={(e) => {
+                                setLoginEmail(e.target.value);
+                                if (authModalError) setAuthModalError("");
+                              }}
+                              style={{
+                                width: "100%",
+                                padding: "10px 12px",
+                                borderRadius: "10px",
+                                border: "2px solid var(--color-dark)",
+                                fontSize: "0.95rem",
+                                fontFamily: "inherit",
+                                boxSizing: "border-box",
+                              }}
+                            />
+                          </div>
+
+                          <div style={{ marginBottom: "18px" }}>
+                            <label
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                marginBottom: "6px",
+                                fontWeight: "bold",
+                                color: "var(--color-dark)",
+                                fontSize: "0.9rem",
+                              }}
+                            >
+                              <span>Kata Laluan</span>
+                              <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.1rem" }}>*</span>
+                            </label>
+                            <input
+                              type="password"
+                              placeholder="Cipta kata laluan anda"
+                              value={loginPassword}
+                              onChange={(e) => {
+                                setLoginPassword(e.target.value);
+                                if (authModalError) setAuthModalError("");
+                              }}
+                              style={{
+                                width: "100%",
+                                padding: "10px 12px",
+                                borderRadius: "10px",
+                                border: "2px solid var(--color-dark)",
+                                fontSize: "0.95rem",
+                                fontFamily: "inherit",
+                                boxSizing: "border-box",
+                              }}
+                            />
+                          </div>
+
+                          <button
+                            className="neo-btn"
+                            style={{
+                              width: "100%",
+                              justifyContent: "center",
+                              fontSize: "1.05rem",
+                              padding: "12px",
+                              backgroundColor:
+                                pendingLoginMode === "guru"
+                                  ? "var(--color-orange)"
+                                  : "var(--color-blue)",
+                              color: "#ffffff",
+                            }}
+                            onClick={() => {
+                              if (pendingLoginMode === "guru") {
+                                if (!regGuruNama.trim()) {
+                                  setAuthModalError("Sila masukkan Nama Guru!");
+                                  return;
+                                }
+                                if (!regGuruSekolah.trim()) {
+                                  setAuthModalError("Sila masukkan Nama Sekolah!");
+                                  return;
+                                }
+                                if (!loginEmail.trim() || !loginPassword.trim()) {
+                                  setAuthModalError("Sila masukkan Emel dan Kata Laluan!");
+                                  return;
+                                }
+
+                                const gName = regGuruNama.trim().toUpperCase();
+                                const gSekolah = regGuruSekolah.trim().toUpperCase();
+                                const gEmail = loginEmail.trim();
+
+                                localStorage.setItem("bunyiKataNamaGuru", gName);
+                                localStorage.setItem("pdf_guru", gName);
+                                localStorage.setItem("bunyiKataNamaSekolah", gSekolah);
+                                localStorage.setItem("bunyiKataGuruEmail", gEmail);
+                                localStorage.setItem("bunyiKataGuruSetupDone", "true");
+
+                                const guruEl = document.getElementById("guru-dashboard-nama-guru-title");
+                                if (guruEl) guruEl.innerText = gName;
+                                const sekolahEl = document.getElementById("guru-dashboard-nama-sekolah-title");
+                                if (sekolahEl) sekolahEl.innerText = gSekolah;
+
+                                setShowLoginModal(false);
+                                (window as any).masukModGuru && (window as any).masukModGuru();
+                              } else if (pendingLoginMode === "ibubapa") {
+                                if (!regNamaKeluarga.trim()) {
+                                  setAuthModalError("Sila masukkan Nama Keluarga!");
+                                  return;
+                                }
+                                if (!loginEmail.trim() || !loginPassword.trim()) {
+                                  setAuthModalError("Sila masukkan Emel dan Kata Laluan!");
+                                  return;
+                                }
+
+                                const famName = regNamaKeluarga.trim().toUpperCase();
+                                const pEmail = loginEmail.trim();
+
+                                localStorage.setItem("bunyiKataNamaKeluarga", famName);
+                                localStorage.setItem("bunyiKataIbubapaEmail", pEmail);
+
+                                const famTitle = document.getElementById("ibubapa-nama-keluarga-title");
+                                if (famTitle) famTitle.innerText = famName;
+
+                                setShowLoginModal(false);
+                                (window as any).bukaModalPilihAnak && (window as any).bukaModalPilihAnak();
+                              }
+                            }}
+                          >
+                            Daftar Akaun {pendingLoginMode === "guru" ? "Guru" : "Ibu Bapa"}{" "}
+                            <i
+                              className="fa-solid fa-user-check"
+                              style={{ marginLeft: "8px" }}
+                            ></i>
+                          </button>
+
+                          <div
+                            style={{
+                              textAlign: "center",
+                              marginTop: "16px",
+                              fontSize: "0.88rem",
+                              color: "#475569",
+                            }}
+                          >
+                            Sudah mempunyai akaun?{" "}
+                            <button
+                              type="button"
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color:
+                                  pendingLoginMode === "guru"
+                                    ? "var(--color-orange)"
+                                    : "var(--color-blue)",
+                                fontWeight: "bold",
+                                fontSize: "0.88rem",
+                                cursor: "pointer",
+                                padding: "0",
+                                textDecoration: "underline",
+                              }}
+                              onClick={() => {
+                                setAuthModalTab("login");
+                                setAuthModalError("");
+                              }}
+                            >
+                              Log Masuk di sini
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Modal Pilih Mod -> Pakej Bunyi Kata */}
+          <AnimatePresence>
+            {isModeMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(0,0,0,0.6)",
+                  zIndex: 999999,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "15px",
+                }}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.9, y: 20 }}
+                  className="neo-box"
+                  style={{
+                    backgroundColor: "#fef9ec",
+                    backgroundImage:
+                      "radial-gradient(circle, rgba(16, 24, 47, .11) 1.5px, transparent 1.5px)",
+                    backgroundSize: "15px 15px",
+                    maxWidth: "960px",
+                    width: "100%",
+                    maxHeight: "90vh",
+                    overflowY: "auto",
+                    padding: "24px 20px 20px 20px",
+                    textAlign: "center",
+                    position: "relative",
+                  }}
+                >
+                  <button
+                    className="neo-btn bg-red"
+                    onClick={() => setIsModeMenuOpen(false)}
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      right: "12px",
+                      width: "36px",
+                      height: "36px",
+                      padding: "0",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 10,
+                    }}
+                  >
+                    <i className="fa-solid fa-xmark"></i>
+                  </button>
+
+                  <div
+                    className="neo-btn"
+                    style={{
+                      backgroundColor: "#168f81",
+                      color: "white",
+                      fontSize: "clamp(1.1rem, 4vw, 1.4rem)",
+                      margin: "0 auto 18px auto",
+                      whiteSpace: "normal",
+                      display: "inline-block",
+                      pointerEvents: "none",
+                      padding: "8px 22px",
+                      lineHeight: "1.2",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Pakej Pro Bunyi Kata
+                  </div>
+
+                  {/* Category Selector Tabs */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      justifyContent: "center",
+                      marginBottom: "22px",
+                    }}
+                  >
+                    <button
+                      className={`neo-btn pakej-tab-btn ${activePakejCategory === "guru" ? "bg-orange" : "bg-white"}`}
+                      style={{
+                        flex: 1,
+                        maxWidth: "220px",
+                        padding: "10px 14px",
+                        fontSize: "1rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                        whiteSpace: "nowrap",
+                        color:
+                          activePakejCategory === "guru"
+                            ? "white"
+                            : "var(--color-dark)",
+                        border: "2.5px solid var(--color-dark)",
+                      }}
+                      onClick={() => setActivePakejCategory("guru")}
+                    >
+                      <i className="fa-solid fa-person-chalkboard"></i> Pakej Guru
+                    </button>
+                    <button
+                      className={`neo-btn pakej-tab-btn ${activePakejCategory === "ibubapa" ? "bg-blue" : "bg-white"}`}
+                      style={{
+                        flex: 1,
+                        maxWidth: "220px",
+                        padding: "10px 14px",
+                        fontSize: "1rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                        whiteSpace: "nowrap",
+                        color:
+                          activePakejCategory === "ibubapa"
+                            ? "white"
+                            : "var(--color-dark)",
+                        border: "2.5px solid var(--color-dark)",
+                      }}
+                      onClick={() => setActivePakejCategory("ibubapa")}
+                    >
+                      <i className="fa-solid fa-users"></i> Pakej Ibu Bapa
+                    </button>
+                  </div>
+
+                  {/* Offer Cards Grid */}
+                  <div
+                    className="pakej-grid-container"
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+                      gap: "18px",
+                      marginBottom: "20px",
+                      textAlign: "left",
+                    }}
+                  >
+                    {/* Pakej 1 Bulan (RM15 Promo Masa) */}
+                    <div className="pro-pakej-card">
+                      <div className="pro-pakej-card-inner">
+                        <div className="shine-sweep-overlay"></div>
+                        <div>
+                          <div
+                            style={{
+                              display: "inline-block",
+                              backgroundColor: "#16a34a",
+                              color: "#ffffff",
+                              fontSize: "0.75rem",
+                              fontWeight: "900",
+                              letterSpacing: "0.5px",
+                              textTransform: "uppercase",
+                              padding: "3px 10px",
+                              borderRadius: "8px",
+                              border: "2px solid var(--color-dark)",
+                              boxShadow: "1.5px 1.5px 0 var(--color-dark)",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            Pakej 1 Bulan
+                          </div>
+                          <h3
+                            style={{
+                              fontSize: "1.2rem",
+                              margin: "0 0 4px 0",
+                              color: "var(--color-dark)",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            Pakej 1 Bulan
+                          </h3>
+
+                          {/* Original price strikethrough animation & discount badge */}
+                          <div className="original-price-box">
+                            <span className="original-price-strike">RM99</span>
+                            <span className="discount-tag-badge">-85% OFF</span>
+                          </div>
+
+                          {/* Animasi Masa Sahaja */}
+                          <div
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
+                              border: "2px solid #f43f5e",
+                              borderRadius: "10px",
+                              padding: "5px 12px",
+                              margin: "6px 0 10px 0",
+                              boxShadow: "0 2px 0 var(--color-dark)",
+                            }}
+                          >
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "22px",
+                                height: "22px",
+                                borderRadius: "50%",
+                                backgroundColor: "#e11d48",
+                                color: "white",
+                                fontSize: "0.75rem",
+                                animation: "timerIconSpin 3s linear infinite",
+                                flexShrink: 0,
+                              }}
+                            >
+                              <i className="fa-solid fa-hourglass-half"></i>
+                            </span>
+                            <span
+                              style={{
+                                fontSize: "1.05rem",
+                                fontWeight: "900",
+                                color: "#e11d48",
+                                letterSpacing: "0.8px",
+                                fontFamily: "monospace",
+                              }}
+                            >
+                              {formatPromoTimer(promoSecondsLeft)}
+                            </span>
+                          </div>
+
+                          <div
+                            className="price-tag"
+                            style={{
+                              fontSize: "1.75rem",
+                              fontWeight: "900",
+                              color: "#0f766e",
+                              marginBottom: "12px",
+                              letterSpacing: "-0.5px",
+                            }}
+                          >
+                            RM15{" "}
+                            <span
+                              style={{
+                                fontSize: "0.85rem",
+                                color: "#475569",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              / bulan
+                            </span>
+                          </div>
+
+                          <ul
+                            style={{
+                              listStyle: "none",
+                              padding: 0,
+                              margin: 0,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "8px",
+                              fontSize: "0.88rem",
+                              color: "#334155",
+                            }}
+                          >
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "8px",
+                              }}
+                            >
+                              <i
+                                className="fa-solid fa-circle-check"
+                                style={{ color: "#10b981", marginTop: "3px" }}
+                              ></i>
+                              <span>Akses semua pembelajaran dan latihan</span>
+                            </li>
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "8px",
+                              }}
+                            >
+                              <i
+                                className="fa-solid fa-circle-check"
+                                style={{ color: "#10b981", marginTop: "3px" }}
+                              ></i>
+                              <span>Akses AR dan 3D</span>
+                            </li>
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "8px",
+                              }}
+                            >
+                              <i
+                                className="fa-solid fa-circle-check"
+                                style={{ color: "#10b981", marginTop: "3px" }}
+                              ></i>
+                              <span>
+                                {activePakejCategory === "guru"
+                                  ? "Akses laporan prestasi murid dan statistik murid"
+                                  : "Akses laporan anak dan statistik anak"}
+                              </span>
+                            </li>
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "8px",
+                              }}
+                            >
+                              <i
+                                className="fa-solid fa-circle-check"
+                                style={{ color: "#10b981", marginTop: "3px" }}
+                              ></i>
+                              <span>
+                                {activePakejCategory === "guru"
+                                  ? "Rekod 1 kelas"
+                                  : "Rekod 1 anak"}
+                              </span>
+                            </li>
+                          </ul>
+                        </div>
+
+                        <button
+                          className={`neo-btn ${activePakejCategory === "guru" ? "bg-orange btn-daftar-glow-orange" : "bg-blue btn-daftar-glow-blue"}`}
+                          style={{
+                            width: "100%",
+                            marginTop: "16px",
+                            padding: "10px",
+                            fontSize: "1.05rem",
+                            color: "white",
+                            fontWeight: "bold",
+                            justifyContent: "center",
+                          }}
+                          onClick={() => {
+                            setIsModeMenuOpen(false);
+                            setPendingLoginMode(activePakejCategory);
+                            setAuthModalTab("register");
+                            setAuthModalError("");
+                            setShowLoginModal(true);
+                            setLoginEmail("");
+                            setLoginPassword("");
+                            setRegGuruNama("");
+                            setRegGuruSekolah("");
+                            setRegNamaKeluarga("");
+                          }}
+                        >
+                          Daftar
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Pakej Bulanan Pro (RM30) */}
+                    <div className="pro-pakej-card">
+                      <div className="pro-pakej-card-inner">
+                        <div className="shine-sweep-overlay"></div>
+                        <div>
+                          <div
+                            style={{
+                              display: "inline-block",
+                              backgroundColor: "#dc2626",
+                              color: "#ffffff",
+                              fontSize: "0.75rem",
+                              fontWeight: "900",
+                              letterSpacing: "0.5px",
+                              textTransform: "uppercase",
+                              padding: "3px 10px",
+                              borderRadius: "8px",
+                              border: "2px solid var(--color-dark)",
+                              boxShadow: "1.5px 1.5px 0 var(--color-dark)",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            Pakej Bulanan Pro
+                          </div>
+                          <h3
+                            style={{
+                              fontSize: "1.2rem",
+                              margin: "0 0 4px 0",
+                              color: "var(--color-dark)",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            Pakej Bulanan Pro
+                          </h3>
+
+                          {/* Original price strikethrough animation & discount badge */}
+                          <div className="original-price-box">
+                            <span className="original-price-strike">RM99</span>
+                            <span className="discount-tag-badge">-70% OFF</span>
+                          </div>
+
+                          <div
+                            className="price-tag"
+                            style={{
+                              fontSize: "1.75rem",
+                              fontWeight: "900",
+                              color: "#0f766e",
+                              marginBottom: "12px",
+                              letterSpacing: "-0.5px",
+                            }}
+                          >
+                            RM30{" "}
+                            <span
+                              style={{
+                                fontSize: "0.85rem",
+                                color: "#475569",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              / bulan
+                            </span>
+                          </div>
+
+                          <ul
+                            style={{
+                              listStyle: "none",
+                              padding: 0,
+                              margin: 0,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "8px",
+                              fontSize: "0.88rem",
+                              color: "#334155",
+                            }}
+                          >
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "8px",
+                              }}
+                            >
+                              <i
+                                className="fa-solid fa-circle-check"
+                                style={{ color: "#10b981", marginTop: "3px" }}
+                              ></i>
+                              <span>Akses semua pembelajaran dan latihan</span>
+                            </li>
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "8px",
+                              }}
+                            >
+                              <i
+                                className="fa-solid fa-circle-check"
+                                style={{ color: "#10b981", marginTop: "3px" }}
+                              ></i>
+                              <span>Akses AR dan 3D</span>
+                            </li>
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "8px",
+                              }}
+                            >
+                              <i
+                                className="fa-solid fa-circle-check"
+                                style={{ color: "#10b981", marginTop: "3px" }}
+                              ></i>
+                              <span>
+                                {activePakejCategory === "guru"
+                                  ? "Akses laporan prestasi murid dan statistik murid"
+                                  : "Akses laporan anak dan statistik anak"}
+                              </span>
+                            </li>
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "8px",
+                              }}
+                            >
+                              <i
+                                className="fa-solid fa-circle-check"
+                                style={{ color: "#10b981", marginTop: "3px" }}
+                              ></i>
+                              <span>
+                                {activePakejCategory === "guru"
+                                  ? "Rekod 2 kelas"
+                                  : "Rekod Multi Anak (Max 3 Anak)"}
+                              </span>
+                            </li>
+                          </ul>
+                        </div>
+
+                        <button
+                          className={`neo-btn ${activePakejCategory === "guru" ? "bg-orange btn-daftar-glow-orange" : "bg-blue btn-daftar-glow-blue"}`}
+                          style={{
+                            width: "100%",
+                            marginTop: "16px",
+                            padding: "10px",
+                            fontSize: "1.05rem",
+                            color: "white",
+                            fontWeight: "bold",
+                            justifyContent: "center",
+                          }}
+                          onClick={() => {
+                            setIsModeMenuOpen(false);
+                            setPendingLoginMode(activePakejCategory);
+                            setAuthModalTab("register");
+                            setAuthModalError("");
+                            setShowLoginModal(true);
+                            setLoginEmail("");
+                            setLoginPassword("");
+                            setRegGuruNama("");
+                            setRegGuruSekolah("");
+                            setRegNamaKeluarga("");
+                          }}
+                        >
+                          Daftar
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Pakej 1 Tahun (RM69) */}
+                    <div className="pro-pakej-card">
+                      <div className="lebiht-jimat-sticker">Lebih Jimat</div>
+                      <div className="pro-pakej-card-inner">
+                        <div className="shine-sweep-overlay"></div>
+                        <div>
+                          <div
+                            style={{
+                              display: "inline-block",
+                              backgroundColor: "#dc2626",
+                              color: "#ffffff",
+                              fontSize: "0.75rem",
+                              fontWeight: "900",
+                              letterSpacing: "0.5px",
+                              textTransform: "uppercase",
+                              padding: "3px 10px",
+                              borderRadius: "8px",
+                              border: "2px solid var(--color-dark)",
+                              boxShadow: "1.5px 1.5px 0 var(--color-dark)",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            Pakej Tahunan
+                          </div>
+                          <h3
+                            style={{
+                              fontSize: "1.2rem",
+                              margin: "0 0 4px 0",
+                              color: "var(--color-dark)",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            Pakej 1 Tahun
+                          </h3>
+
+                          {/* Original price strikethrough animation & discount badge */}
+                          <div className="original-price-box">
+                            <span className="original-price-strike">RM199</span>
+                            <span className="discount-tag-badge">-65% OFF</span>
+                          </div>
+
+                          <div
+                            className="price-tag"
+                            style={{
+                              fontSize: "1.75rem",
+                              fontWeight: "900",
+                              color: "#0f766e",
+                              marginBottom: "12px",
+                              letterSpacing: "-0.5px",
+                            }}
+                          >
+                            RM69{" "}
+                            <span
+                              style={{
+                                fontSize: "0.85rem",
+                                color: "#475569",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              / tahun
+                            </span>
+                          </div>
+
+                          <ul
+                            style={{
+                              listStyle: "none",
+                              padding: 0,
+                              margin: 0,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "8px",
+                              fontSize: "0.88rem",
+                              color: "#334155",
+                            }}
+                          >
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "8px",
+                              }}
+                            >
+                              <i
+                                className="fa-solid fa-circle-check"
+                                style={{ color: "#10b981", marginTop: "3px" }}
+                              ></i>
+                              <span>Akses semua pembelajaran dan latihan</span>
+                            </li>
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "8px",
+                              }}
+                            >
+                              <i
+                                className="fa-solid fa-circle-check"
+                                style={{ color: "#10b981", marginTop: "3px" }}
+                              ></i>
+                              <span>Akses AR dan 3D</span>
+                            </li>
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "8px",
+                              }}
+                            >
+                              <i
+                                className="fa-solid fa-circle-check"
+                                style={{ color: "#10b981", marginTop: "3px" }}
+                              ></i>
+                              <span>
+                                {activePakejCategory === "guru"
+                                  ? "Akses laporan prestasi murid dan statistik murid"
+                                  : "Akses laporan anak dan statistik anak"}
+                              </span>
+                            </li>
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "8px",
+                              }}
+                            >
+                              <i
+                                className="fa-solid fa-circle-check"
+                                style={{ color: "#10b981", marginTop: "3px" }}
+                              ></i>
+                              <span>
+                                {activePakejCategory === "guru"
+                                  ? "Rekod 2 kelas"
+                                  : "Rekod Multi Anak (Max 3 Anak)"}
+                              </span>
+                            </li>
+                          </ul>
+                        </div>
+
+                        <button
+                          className={`neo-btn ${activePakejCategory === "guru" ? "bg-orange btn-daftar-glow-orange" : "bg-blue btn-daftar-glow-blue"}`}
+                          style={{
+                            width: "100%",
+                            marginTop: "16px",
+                            padding: "10px",
+                            fontSize: "1.05rem",
+                            color: "white",
+                            fontWeight: "bold",
+                            justifyContent: "center",
+                          }}
+                          onClick={() => {
+                            setIsModeMenuOpen(false);
+                            setPendingLoginMode(activePakejCategory);
+                            setAuthModalTab("register");
+                            setAuthModalError("");
+                            setShowLoginModal(true);
+                            setLoginEmail("");
+                            setLoginPassword("");
+                            setRegGuruNama("");
+                            setRegGuruSekolah("");
+                            setRegNamaKeluarga("");
+                          }}
+                        >
+                          Daftar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* FAQ Accordion Section */}
+                  <div
+                    style={{
+                      marginTop: "22px",
+                      paddingTop: "16px",
+                      borderTop: "2.5px dashed #cbd5e1",
+                      textAlign: "left",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        marginBottom: "14px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "28px",
+                          height: "28px",
+                          borderRadius: "50%",
+                          backgroundColor: "#168f81",
+                          color: "white",
+                          border: "1.5px solid var(--color-dark)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: "900",
+                          fontSize: "0.85rem",
+                        }}
+                      >
+                        ?
+                      </div>
+                      <h4
+                        style={{
+                          margin: 0,
+                          fontSize: "1.05rem",
+                          fontWeight: "bold",
+                          color: "var(--color-dark)",
+                        }}
+                      >
+                        Soalan Lazim (FAQ)
+                      </h4>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "10px",
+                      }}
+                    >
+                      {faqData.map((faq) => {
+                        const isOpen = activeFaqId === faq.id;
+                        return (
+                          <div
+                            key={faq.id}
+                            style={{
+                              backgroundColor: "#168f81",
+                              borderRadius: "14px",
+                              border: "2.5px solid var(--color-dark)",
+                              boxShadow: isOpen
+                                ? "0 3px 0 var(--color-dark)"
+                                : "0 2px 0 var(--color-dark)",
+                              overflow: "hidden",
+                              transition: "all 0.2s ease",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                gap: "10px",
+                                fontWeight: "bold",
+                                fontSize: "0.92rem",
+                                color: "#ffffff",
+                                padding: "12px 14px",
+                                cursor: "pointer",
+                                userSelect: "none",
+                              }}
+                              onClick={() => setActiveFaqId(isOpen ? null : faq.id)}
+                            >
+                              <span>{faq.question}</span>
+                              <i
+                                className={`fa-solid ${isOpen ? "fa-chevron-up" : "fa-chevron-down"}`}
+                                style={{
+                                  color: "#ffffff",
+                                  fontSize: "0.85rem",
+                                }}
+                              ></i>
+                            </div>
+                            <AnimatePresence>
+                              {isOpen && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                                  style={{ overflow: "hidden" }}
+                                >
+                                  <div
+                                    style={{
+                                      fontSize: "0.88rem",
+                                      color: "#1e293b",
+                                      lineHeight: "1.55",
+                                      whiteSpace: "pre-line",
+                                      borderTop: "2.5px solid var(--color-dark)",
+                                      backgroundColor: "#ffffff",
+                                      padding: "12px 14px",
+                                    }}
+                                  >
+                                    {faq.id === 2 ? (
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          flexDirection: "column",
+                                          gap: "8px",
+                                          paddingTop: "2px",
+                                        }}
+                                      >
+                                        <div
+                                          style={{
+                                            display: "flex",
+                                            alignItems: "flex-start",
+                                            flexWrap: "wrap",
+                                            gap: "4px",
+                                          }}
+                                        >
+                                          <span className="faq-highlight-guru">
+                                            • Pakej Guru:
+                                          </span>
+                                          <span style={{ flex: "1 1 200px" }}>
+                                            Menyokong pengurusan rekod 1 kelas
+                                            murid, pantauan statistik latihan serta
+                                            muat turun laporan prestasi murid.
+                                          </span>
+                                        </div>
+                                        <div
+                                          style={{
+                                            display: "flex",
+                                            alignItems: "flex-start",
+                                            flexWrap: "wrap",
+                                            gap: "4px",
+                                            marginTop: "4px",
+                                          }}
+                                        >
+                                          <span className="faq-highlight-ibubapa">
+                                            • Pakej Ibu Bapa:
+                                          </span>
+                                          <span style={{ flex: "1 1 200px" }}>
+                                            Menyokong pendaftaran dan rekod
+                                            perkembangan sehingga 3 orang anak dalam
+                                            satu akaun.
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      faq.answer
+                                    )}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Modal Maklumat Koleksi Lencana Utama & Sijil */}
+          <div
+            id="modal-info-lencana"
+            className="modal-overlay"
+            style={{
+              display: "none",
+              zIndex: 999999,
+              backgroundColor: "rgba(0,0,0,0.85)",
+              backdropFilter: "blur(4px)",
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "16px",
+            }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                (window as any).tutupModalInfoLencana &&
+                  (window as any).tutupModalInfoLencana();
+              }
+            }}
+          >
+            <div
+              className="modal-content neo-box"
+              style={{
+                maxWidth: "540px",
+                width: "100%",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                textAlign: "center",
+                padding: "24px 18px 20px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                margin: "auto",
+                position: "relative",
+                backgroundColor: "#ffffff",
+                backgroundImage:
+                  "radial-gradient(circle, rgba(16, 24, 47, 0.08) 1.5px, transparent 1.5px)",
+                backgroundSize: "18px 18px",
+                borderRadius: "24px",
+                border: "4px solid var(--color-dark, #10182f)",
+                boxShadow: "0 8px 0 var(--color-dark, #10182f)",
+              }}
+            >
+              {/* Square Red Close Button */}
+              <button
+                className="neo-btn bg-red close-btn"
+                style={{
+                  position: "absolute",
+                  top: "14px",
+                  right: "14px",
+                  width: "38px",
+                  height: "38px",
+                  minWidth: "38px",
+                  minHeight: "38px",
+                  padding: "0",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "12px",
+                  fontSize: "1.15rem",
+                  color: "white",
+                  border: "2.5px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 2.5px 0 var(--color-dark, #10182f)",
+                  cursor: "pointer",
+                  zIndex: 10,
+                }}
+                onClick={() => {
+                  (window as any).tutupModalInfoLencana &&
+                    (window as any).tutupModalInfoLencana();
+                }}
+                title="Tutup"
+                aria-label="Tutup"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+
+              {/* Purple Title Badge */}
+              <div
+                className="neo-btn bg-purple"
+                style={{
+                  fontSize: "clamp(1.15rem, 3.8vw, 1.35rem)",
+                  fontWeight: "900",
+                  color: "white",
+                  padding: "8px 28px",
+                  borderRadius: "20px",
+                  border: "3px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 4px 0 var(--color-dark, #10182f)",
+                  margin: "4px auto 14px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  pointerEvents: "none",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                Panduan Koleksi Lencana
+              </div>
+
+              {/* Card 1: Syarat Buka 4 Lencana Utama */}
+              <div
+                style={{
+                  width: "100%",
+                  background: "#f0fdf4",
+                  border: "2.5px solid #16a34a",
+                  borderRadius: "18px",
+                  padding: "12px 12px 10px",
+                  marginBottom: "12px",
+                  textAlign: "left",
+                  boxSizing: "border-box",
+                }}
+              >
+                {/* Green Header Badge */}
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    background: "#16a34a",
+                    color: "white",
+                    padding: "5px 14px",
+                    borderRadius: "14px",
+                    fontWeight: "900",
+                    fontSize: "0.88rem",
+                    border: "2px solid var(--color-dark, #10182f)",
+                    boxShadow: "0 2px 0 var(--color-dark, #10182f)",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <i className="fa-solid fa-trophy" style={{ color: "#fef08a" }}></i>
+                  <span>Syarat Buka 4 Lencana Utama</span>
+                </div>
+
+                <div
+                  style={{
+                    fontSize: "0.82rem",
+                    color: "#1e293b",
+                    lineHeight: "1.4",
+                    fontWeight: "700",
+                  }}
+                >
+                  Dapatkan <span style={{ background: "#fef08a", color: "#854d0e", padding: "1px 6px", borderRadius: "6px", fontWeight: "800" }}>3 Bintang Penuh</span> dalam sekurang-kurangnya <span style={{ textDecoration: "underline", fontWeight: "800" }}>3 aktiviti</span> bagi setiap cabaran:
+                </div>
+
+                {/* Visual 4 Badges Cards Grid */}
+                <div
+                  style={{
+                    marginTop: "8px",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, 1fr)",
+                    gap: "8px",
+                  }}
+                >
+                  {/* Badge 1 */}
+                  <div
+                    style={{
+                      background: "white",
+                      border: "2px solid #cbd5e1",
+                      borderRadius: "12px",
+                      padding: "8px 10px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      boxShadow: "0 2px 0 #cbd5e1",
+                    }}
+                  >
+                    <img
+                      src="/images/lencana/lencana-penjelajah-alfabet.png"
+                      alt="Kenal Huruf"
+                      style={{ width: "42px", height: "42px", objectFit: "contain", flexShrink: 0 }}
+                    />
+                    <div style={{ overflow: "hidden" }}>
+                      <div style={{ fontSize: "0.84rem", fontWeight: "900", color: "#10182f", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        Kenal Huruf
+                      </div>
+                      <div style={{ display: "flex", gap: "2px", fontSize: "0.72rem", marginTop: "2px", color: "#eab308" }}>
+                        <i className="fa-solid fa-star"></i>
+                        <i className="fa-solid fa-star"></i>
+                        <i className="fa-solid fa-star"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Badge 2 */}
+                  <div
+                    style={{
+                      background: "white",
+                      border: "2px solid #cbd5e1",
+                      borderRadius: "12px",
+                      padding: "8px 10px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      boxShadow: "0 2px 0 #cbd5e1",
+                    }}
+                  >
+                    <img
+                      src="/images/lencana/lencana-pemburu-suku-kata.png"
+                      alt="Suku Kata Asas"
+                      style={{ width: "42px", height: "42px", objectFit: "contain", flexShrink: 0 }}
+                    />
+                    <div style={{ overflow: "hidden" }}>
+                      <div style={{ fontSize: "0.84rem", fontWeight: "900", color: "#10182f", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        Suku Kata Asas
+                      </div>
+                      <div style={{ display: "flex", gap: "2px", fontSize: "0.72rem", marginTop: "2px", color: "#eab308" }}>
+                        <i className="fa-solid fa-star"></i>
+                        <i className="fa-solid fa-star"></i>
+                        <i className="fa-solid fa-star"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Badge 3 */}
+                  <div
+                    style={{
+                      background: "white",
+                      border: "2px solid #cbd5e1",
+                      borderRadius: "12px",
+                      padding: "8px 10px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      boxShadow: "0 2px 0 #cbd5e1",
+                    }}
+                  >
+                    <img
+                      src="/images/lencana/lencana-wira-pulau.png"
+                      alt="Suku Kata Hero"
+                      style={{ width: "42px", height: "42px", objectFit: "contain", flexShrink: 0 }}
+                    />
+                    <div style={{ overflow: "hidden" }}>
+                      <div style={{ fontSize: "0.84rem", fontWeight: "900", color: "#10182f", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        Suku Kata Hero
+                      </div>
+                      <div style={{ display: "flex", gap: "2px", fontSize: "0.72rem", marginTop: "2px", color: "#eab308" }}>
+                        <i className="fa-solid fa-star"></i>
+                        <i className="fa-solid fa-star"></i>
+                        <i className="fa-solid fa-star"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Badge 4 */}
+                  <div
+                    style={{
+                      background: "white",
+                      border: "2px solid #cbd5e1",
+                      borderRadius: "12px",
+                      padding: "8px 10px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      boxShadow: "0 2px 0 #cbd5e1",
+                    }}
+                  >
+                    <img
+                      src="/images/lencana/lencana-naib-raja-bacaan.png"
+                      alt="Bacaan Bergred"
+                      style={{ width: "42px", height: "42px", objectFit: "contain", flexShrink: 0 }}
+                    />
+                    <div style={{ overflow: "hidden" }}>
+                      <div style={{ fontSize: "0.84rem", fontWeight: "900", color: "#10182f", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        Bacaan Bergred
+                      </div>
+                      <div style={{ display: "flex", gap: "2px", fontSize: "0.72rem", marginTop: "2px", color: "#eab308" }}>
+                        <i className="fa-solid fa-star"></i>
+                        <i className="fa-solid fa-star"></i>
+                        <i className="fa-solid fa-star"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Syarat Buka Sijil & Lencana Master */}
+              <div
+                style={{
+                  width: "100%",
+                  background: "#fefce8",
+                  border: "2.5px solid #ca8a04",
+                  borderRadius: "18px",
+                  padding: "12px 12px 12px",
+                  marginBottom: "14px",
+                  textAlign: "left",
+                  boxSizing: "border-box",
+                }}
+              >
+                {/* Gold/Brown Header Badge */}
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    background: "#ca8a04",
+                    color: "white",
+                    padding: "5px 14px",
+                    borderRadius: "14px",
+                    fontWeight: "900",
+                    fontSize: "0.88rem",
+                    border: "2px solid var(--color-dark, #10182f)",
+                    boxShadow: "0 2px 0 var(--color-dark, #10182f)",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <i className="fa-solid fa-certificate" style={{ color: "#fef08a" }}></i>
+                  <span>Syarat Buka Sijil & Lencana Master</span>
+                </div>
+
+                {/* Visual Workflow: 4 Badges -> Arrow -> Master Badge + Sijil (Centered & Prominent) */}
+                <div
+                  style={{
+                    background: "white",
+                    border: "2px solid #e2e8f0",
+                    borderRadius: "14px",
+                    padding: "10px 12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "clamp(8px, 2.5vw, 16px)",
+                    boxShadow: "0 2px 0 #e2e8f0",
+                  }}
+                >
+                  {/* 4 Mini Badges (Larger & Rapat) */}
+                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                    <img src="/images/lencana/lencana-penjelajah-alfabet.png" alt="Kenal Huruf" title="Kenal Huruf" style={{ width: "38px", height: "38px", objectFit: "contain" }} />
+                    <img src="/images/lencana/lencana-pemburu-suku-kata.png" alt="Suku Kata Asas" title="Suku Kata Asas" style={{ width: "38px", height: "38px", objectFit: "contain" }} />
+                    <img src="/images/lencana/lencana-wira-pulau.png" alt="Suku Kata Hero" title="Suku Kata Hero" style={{ width: "38px", height: "38px", objectFit: "contain" }} />
+                    <img src="/images/lencana/lencana-naib-raja-bacaan.png" alt="Bacaan Bergred" title="Bacaan Bergred" style={{ width: "38px", height: "38px", objectFit: "contain" }} />
+                  </div>
+
+                  <i className="fa-solid fa-arrow-right" style={{ color: "#ca8a04", fontSize: "1.25rem", margin: "0 2px" }}></i>
+
+                  {/* Master Badge & Certificate (No KAPTEN label) */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <img
+                      src="/images/lencana/lencana-kapten-harta-karun.png"
+                      alt="Master Badge"
+                      title="Kapten Harta Karun"
+                      style={{ width: "46px", height: "46px", objectFit: "contain" }}
+                    />
+                    <div style={{ height: "36px", width: "2px", background: "#cbd5e1" }}></div>
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "#fef3c7", border: "2px solid #d97706", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <i className="fa-solid fa-file-pdf" style={{ color: "#dc2626", fontSize: "1.25rem" }}></i>
+                      </div>
+                      <div style={{ fontSize: "0.68rem", fontWeight: "900", color: "#b45309", marginTop: "2px" }}>SIJIL</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Close Button */}
+              <button
+                className="neo-btn bg-purple"
+                style={{
+                  width: "100%",
+                  padding: "13px 20px",
+                  fontSize: "1.05rem",
+                  fontWeight: "900",
+                  color: "white",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "10px",
+                  borderRadius: "16px",
+                  border: "3px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 4px 0 var(--color-dark, #10182f)",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  (window as any).tutupModalInfoLencana &&
+                    (window as any).tutupModalInfoLencana();
+                }}
+              >
+                <i className="fa-solid fa-circle-check" style={{ fontSize: "1.2rem" }}></i>
+                <span>Faham & Mula Kumpul Lencana!</span>
+              </button>
+            </div>
+          </div>
+
+          <div
+            id="app-info-modal"
+            className="modal-overlay"
+            style={{
+              display: "none",
+              zIndex: 999999,
+              backgroundColor: "rgba(0,0,0,0.85)",
+            }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                (window as any).tutupModalAppInfo &&
+                  (window as any).tutupModalAppInfo();
+              }
+            }}
+          >
+            <div
+              className="modal-content"
+              style={{
+                maxWidth: "500px",
+                width: "90%",
+                textAlign: "center",
+                padding: "24px 20px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                margin: "auto",
+                position: "relative",
+                backgroundColor: "#ffffff",
+                backgroundImage:
+                  "radial-gradient(circle, rgba(16, 24, 47, 0.11) 1.5px, transparent 1.5px), linear-gradient(#ffffff, #ffffff)",
+                backgroundSize: "18px 18px, auto",
+              }}
+            >
+              <button
+                className="neo-btn bg-red"
+                style={{
+                  position: "absolute",
+                  top: "14px",
+                  right: "14px",
+                  width: "36px",
+                  height: "36px",
+                  minWidth: "36px",
+                  minHeight: "36px",
+                  padding: "0",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "10px",
+                  zIndex: 10,
+                }}
+                onClick={() => {
+                  (window as any).tutupModalAppInfo &&
+                    (window as any).tutupModalAppInfo();
+                }}
+                aria-label="Tutup"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+              <div
+                className="app-info-logo-wrapper"
+                style={{
+                  padding: "0",
+                  background: "transparent",
+                  boxShadow: "none",
+                  border: "none",
+                  textAlign: "center",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100%",
+                  margin: "0 auto 15px auto",
+                }}
+              >
+                <img
+                  referrerPolicy="no-referrer"
+                  src="/images/sampingan/logo-login-screen.png"
+                  alt="Bunyi Kata"
+                  className="glitch-logo"
+                  style={{
+                    maxWidth: "180px",
+                    width: "45vw",
+                    height: "auto",
+                    display: "block",
+                    margin: "0 auto",
+                  }}
+                />
+              </div>
+              <p
+                style={{
+                  fontSize: "clamp(0.7rem, 3.5vw, 0.95rem)",
+                  lineHeight: "1.6",
+                  color: "var(--color-dark)",
+                  marginBottom: "15px",
+                  textAlign: "justify",
+                  width: "100%",
+                }}
+              >
+                Aplikasi ini adalah satu aplikasi mengenal huruf dan suku kata
+                yang sesuai untuk murid Prasekolah dan murid Pemulihan Khas.
+                Aplikasi ini terbahagi kepada dua bahagian utama iaitu
+                Pembelajaran dan Latihan. Elemen gamifikasi yang ditekankan
+                membawa kepada keseronokan dalam pembelajaran. Di akhir
+                pembelajaran dan latihan, murid akan memperoleh hadiah yang
+                menarik!
+              </p>
+              <p
+                style={{
+                  fontSize: "clamp(0.65rem, 3vw, 0.9rem)",
+                  color: "var(--color-dark)",
+                  fontWeight: "bold",
+                  marginBottom: "12px",
+                  width: "100%",
+                  textAlign: "center",
+                }}
+              >
+                Aplikasi ini dibangunkan sepenuhnya oleh
+                <br />
+                IR EduInnovations.
+              </p>
+
+              {/* Butang Ikon Media Sosial (Website, Telegram, Google Play Store, Apple App Store) */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "12px",
+                  marginBottom: "16px",
+                  width: "100%",
+                }}
+              >
+                {/* Website */}
+                <button
+                  type="button"
+                  className="app-info-social-btn btn-web"
+                  title="Laman Web Rasmi"
+                  aria-label="Laman Web Rasmi"
+                  onClick={() => {
+                    if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                    window.open("https://ireduinnovations.com", "_blank");
+                  }}
+                >
+                  <i className="fa-solid fa-globe"></i>
+                </button>
+
+                {/* Telegram */}
+                <button
+                  type="button"
+                  className="app-info-social-btn btn-telegram"
+                  title="Saluran Telegram"
+                  aria-label="Saluran Telegram"
+                  onClick={() => {
+                    if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                    window.open("https://t.me/ireduinnovations", "_blank");
+                  }}
+                >
+                  <i className="fa-brands fa-telegram"></i>
+                </button>
+
+                {/* Google Play Store */}
+                <button
+                  type="button"
+                  className="app-info-social-btn btn-playstore"
+                  title="Google Play Store"
+                  aria-label="Google Play Store"
+                  onClick={() => {
+                    if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                    window.open("https://play.google.com/store/apps", "_blank");
+                  }}
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+                    <path d="M1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924z" fill="#4285F4"/>
+                    <path d="m13.544 10.989 3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973z" fill="#34A853"/>
+                    <path d="m13.544 13.056-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z" fill="#EA4335"/>
+                    <path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594z" fill="#FBBC04"/>
+                  </svg>
+                </button>
+
+                {/* Apple App Store */}
+                <button
+                  type="button"
+                  className="app-info-social-btn btn-appstore"
+                  title="Apple App Store"
+                  aria-label="Apple App Store"
+                  onClick={() => {
+                    if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                    window.open("https://www.apple.com/app-store/", "_blank");
+                  }}
+                >
+                  <i className="fa-brands fa-app-store-ios" style={{ fontSize: "1.45rem", color: "#ffffff" }}></i>
+                </button>
+              </div>
+
+              {/* Hak Cipta Terpelihara hanya untuk Onboarding (Mula Bermain) */}
+              <div
+                id="app-info-copyright"
+                style={{
+                  display: "none",
+                  fontSize: "clamp(0.6rem, 2.5vw, 0.78rem)",
+                  color: "#475569",
+                  marginBottom: "20px",
+                  fontWeight: "bold",
+                  width: "100%",
+                  textAlign: "center",
+                  lineHeight: "1.5",
+                }}
+              >
+                <div>&copy; 2026 Bunyi Kata &bull; Hak Cipta Terpelihara &bull; CRDV2025M00849</div>
+              </div>
+
+              {/* Ruangan Feedback (Hanya dipaparkan untuk Popup Info) */}
+              <div
+                id="app-info-feedback-section"
+                className="feedback-section-box"
+                style={{
+                  display: "none",
+                  width: "100%",
+                  backgroundColor: "#168f81",
+                  backgroundImage:
+                    "linear-gradient(to bottom, transparent 45%, #168f81 100%), radial-gradient(rgba(255, 255, 255, 0.22) 2px, transparent 2px)",
+                  backgroundSize: "100% 100%, 15px 15px",
+                  border: "3px solid var(--color-dark, #10182f)",
+                  borderRadius: "18px",
+                  padding: "14px",
+                  boxShadow: "0 4px 0 var(--color-dark, #10182f)",
+                  textAlign: "left",
+                  boxSizing: "border-box",
+                  marginBottom: "4px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.92rem",
+                    fontWeight: "900",
+                    color: "#ffffff",
+                    marginBottom: "10px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.35)",
+                  }}
+                >
+                  <i
+                    className="fa-solid fa-comment-dots"
+                    style={{ color: "#fef08a", fontSize: "1.15rem" }}
+                  ></i>
+                  <span>Maklum Balas &amp; Cadangan Penambahbaikan</span>
                 </div>
 
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "10px",
-                  }}
-                >
-                  {faqData.map((faq) => {
-                    const isOpen = activeFaqId === faq.id;
-                    return (
-                      <div
-                        key={faq.id}
-                        style={{
-                          backgroundColor: "#168f81",
-                          borderRadius: "14px",
-                          border: "2.5px solid var(--color-dark)",
-                          boxShadow: isOpen
-                            ? "0 3px 0 var(--color-dark)"
-                            : "0 2px 0 var(--color-dark)",
-                          overflow: "hidden",
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            gap: "10px",
-                            fontWeight: "bold",
-                            fontSize: "0.92rem",
-                            color: "#ffffff",
-                            padding: "12px 14px",
-                            cursor: "pointer",
-                            userSelect: "none",
-                          }}
-                          onClick={() => setActiveFaqId(isOpen ? null : faq.id)}
-                        >
-                          <span>{faq.question}</span>
-                          <i
-                            className={`fa-solid ${isOpen ? "fa-chevron-up" : "fa-chevron-down"}`}
-                            style={{
-                              color: "#ffffff",
-                              fontSize: "0.85rem",
-                            }}
-                          ></i>
-                        </div>
-                        <AnimatePresence>
-                          {isOpen && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.25, ease: "easeInOut" }}
-                              style={{ overflow: "hidden" }}
-                            >
-                              <div
-                                style={{
-                                  fontSize: "0.88rem",
-                                  color: "#1e293b",
-                                  lineHeight: "1.55",
-                                  whiteSpace: "pre-line",
-                                  borderTop: "2.5px solid var(--color-dark)",
-                                  backgroundColor: "#ffffff",
-                                  padding: "12px 14px",
-                                }}
-                              >
-                                {faq.id === 2 ? (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      gap: "8px",
-                                      paddingTop: "2px",
-                                    }}
-                                  >
-                                    <div
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "flex-start",
-                                        flexWrap: "wrap",
-                                        gap: "4px",
-                                      }}
-                                    >
-                                      <span className="faq-highlight-guru">
-                                        • Pakej Guru:
-                                      </span>
-                                      <span style={{ flex: "1 1 200px" }}>
-                                        Menyokong pengurusan rekod 1 kelas
-                                        murid, pantauan statistik latihan serta
-                                        muat turun laporan prestasi murid.
-                                      </span>
-                                    </div>
-                                    <div
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "flex-start",
-                                        flexWrap: "wrap",
-                                        gap: "4px",
-                                        marginTop: "4px",
-                                      }}
-                                    >
-                                      <span className="faq-highlight-ibubapa">
-                                        • Pakej Ibu Bapa:
-                                      </span>
-                                      <span style={{ flex: "1 1 200px" }}>
-                                        Menyokong pendaftaran dan rekod
-                                        perkembangan sehingga 3 orang anak dalam
-                                        satu akaun.
-                                      </span>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  faq.answer
-                                )}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-        <div
-          id="app-info-modal"
-          className="modal-overlay"
-          style={{
-            display: "none",
-            zIndex: 999999,
-            backgroundColor: "rgba(0,0,0,0.85)",
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              (window as any).tutupModalAppInfo &&
-                (window as any).tutupModalAppInfo();
-            }
-          }}
-        >
-          <div
-            className="modal-content"
-            style={{
-              maxWidth: "500px",
-              width: "90%",
-              textAlign: "center",
-              padding: "24px 20px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              margin: "auto",
-              position: "relative",
-              backgroundColor: "#ffffff",
-              backgroundImage:
-                "radial-gradient(circle, rgba(16, 24, 47, 0.11) 1.5px, transparent 1.5px), linear-gradient(#ffffff, #ffffff)",
-              backgroundSize: "18px 18px, auto",
-            }}
-          >
-            <button
-              className="neo-btn bg-red"
-              style={{
-                position: "absolute",
-                top: "14px",
-                right: "14px",
-                width: "36px",
-                height: "36px",
-                minWidth: "36px",
-                minHeight: "36px",
-                padding: "0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "10px",
-                zIndex: 10,
-              }}
-              onClick={() => {
-                (window as any).tutupModalAppInfo &&
-                  (window as any).tutupModalAppInfo();
-              }}
-              aria-label="Tutup"
-            >
-              <i className="fa-solid fa-xmark"></i>
-            </button>
-            <div
-              className="app-info-logo-wrapper"
-              style={{
-                padding: "0",
-                background: "transparent",
-                boxShadow: "none",
-                border: "none",
-                textAlign: "center",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                width: "100%",
-                margin: "0 auto 15px auto",
-              }}
-            >
-              <img
-                referrerPolicy="no-referrer"
-                src="/images/sampingan/logo-login-screen.png"
-                alt="Bunyi Kata"
-                className="glitch-logo"
-                style={{
-                  maxWidth: "180px",
-                  width: "45vw",
-                  height: "auto",
-                  display: "block",
-                  margin: "0 auto",
-                }}
-              />
-            </div>
-            <p
-              style={{
-                fontSize: "clamp(0.7rem, 3.5vw, 0.95rem)",
-                lineHeight: "1.6",
-                color: "var(--color-dark)",
-                marginBottom: "15px",
-                textAlign: "justify",
-                width: "100%",
-              }}
-            >
-              Aplikasi ini adalah satu aplikasi mengenal huruf dan suku kata
-              yang sesuai untuk murid Prasekolah dan murid Pemulihan Khas.
-              Aplikasi ini terbahagi kepada dua bahagian utama iaitu
-              Pembelajaran dan Latihan. Elemen gamifikasi yang ditekankan
-              membawa kepada keseronokan dalam pembelajaran. Di akhir
-              pembelajaran dan latihan, murid akan memperoleh hadiah yang
-              menarik!
-            </p>
-            <p
-              style={{
-                fontSize: "clamp(0.65rem, 3vw, 0.9rem)",
-                color: "var(--color-dark)",
-                fontWeight: "bold",
-                marginBottom: "10px",
-                width: "100%",
-                textAlign: "center",
-              }}
-            >
-              Aplikasi ini dibangunkan sepenuhnya oleh
-              <br />
-              IR EduInnovation.
-            </p>
-            {/* MyIPO Hak Cipta Terpelihara hanya untuk Onboarding (Mula Bermain) */}
-            <div
-              id="app-info-copyright"
-              style={{
-                display: "none",
-                fontSize: "clamp(0.6rem, 2.5vw, 0.8rem)",
-                color: "#475569",
-                marginBottom: "25px",
-                fontWeight: "bold",
-                width: "100%",
-                textAlign: "center",
-              }}
-            >
-              <div>MyIPO Hak Cipta Terpelihara CRDV2025M00849 &copy;2026</div>
-            </div>
-
-            {/* Ruangan Feedback (Hanya dipaparkan untuk Popup Info) */}
-            <div
-              id="app-info-feedback-section"
-              className="feedback-section-box"
-              style={{
-                display: "none",
-                width: "100%",
-                backgroundColor: "#168f81",
-                backgroundImage:
-                  "linear-gradient(to bottom, transparent 45%, #168f81 100%), radial-gradient(rgba(255, 255, 255, 0.22) 2px, transparent 2px)",
-                backgroundSize: "100% 100%, 15px 15px",
-                border: "3px solid var(--color-dark, #10182f)",
-                borderRadius: "18px",
-                padding: "14px",
-                boxShadow: "0 4px 0 var(--color-dark, #10182f)",
-                textAlign: "left",
-                boxSizing: "border-box",
-                marginBottom: "4px",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "0.92rem",
-                  fontWeight: "900",
-                  color: "#ffffff",
-                  marginBottom: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  textShadow: "0 1px 2px rgba(0,0,0,0.35)",
-                }}
-              >
-                <i
-                  className="fa-solid fa-comment-dots"
-                  style={{ color: "#fef08a", fontSize: "1.15rem" }}
-                ></i>
-                <span>Maklum Balas &amp; Cadangan Penambahbaikan</span>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                  width: "100%",
-                }}
-              >
-                <input
-                  type="text"
-                  placeholder="Nama anda"
-                  value={feedbackNama}
-                  onChange={(e) => setFeedbackNama(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: "10px",
-                    border: "2px solid var(--color-dark, #10182f)",
-                    fontSize: "0.85rem",
-                    boxSizing: "border-box",
-                    backgroundColor: "#ffffff",
-                    color: "var(--color-dark, #10182f)",
-                    fontWeight: "600",
-                  }}
-                />
-                <div
-                  style={{
-                    display: "flex",
                     gap: "8px",
-                    alignItems: "stretch",
                     width: "100%",
                   }}
                 >
-                  <textarea
-                    placeholder="Tulis apa-apa cadangan atau penambahbaikan..."
-                    value={feedbackMesej}
-                    onChange={(e) => setFeedbackMesej(e.target.value)}
-                    rows={2}
+                  <input
+                    type="text"
+                    placeholder="Nama anda"
+                    value={feedbackNama}
+                    onChange={(e) => setFeedbackNama(e.target.value)}
                     style={{
-                      flex: "1",
+                      width: "100%",
                       padding: "8px 12px",
                       borderRadius: "10px",
                       border: "2px solid var(--color-dark, #10182f)",
                       fontSize: "0.85rem",
-                      resize: "none",
                       boxSizing: "border-box",
                       backgroundColor: "#ffffff",
                       color: "var(--color-dark, #10182f)",
                       fontWeight: "600",
                     }}
-                  ></textarea>
-                  <button
-                    type="button"
-                    className="neo-btn bg-blue"
-                    onClick={() => hantarFeedback()}
-                    title="Hantar Maklum Balas"
-                    style={{
-                      width: "48px",
-                      minWidth: "48px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: "12px",
-                      padding: "0",
-                      backgroundColor: "#0284c7",
-                      color: "#ffffff",
-                      border: "2.5px solid var(--color-dark, #10182f)",
-                      cursor: "pointer",
-                      boxShadow: "0 2px 0 var(--color-dark, #10182f)",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <i
-                      className="fa-solid fa-paper-plane"
-                      style={{ fontSize: "1.1rem", color: "#ffffff" }}
-                    ></i>
-                  </button>
-                </div>
-                {feedbackStatus === "success" && (
+                  />
                   <div
                     style={{
-                      fontSize: "0.82rem",
-                      color: "#064e3b",
-                      backgroundColor: "#ecfdf5",
-                      padding: "8px 12px",
-                      borderRadius: "10px",
-                      border: "2px solid #059669",
-                      textAlign: "center",
-                      fontWeight: "bold",
                       display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                      boxShadow: "0 2px 0 rgba(0,0,0,0.1)",
+                      gap: "8px",
+                      alignItems: "stretch",
+                      width: "100%",
                     }}
                   >
-                    <i className="fa-solid fa-circle-check" style={{ color: "#059669" }}></i>
-                    <span>Maklum balas berjaya dihantar! Terima kasih.</span>
+                    <textarea
+                      placeholder="Tulis apa-apa cadangan atau penambahbaikan..."
+                      value={feedbackMesej}
+                      onChange={(e) => setFeedbackMesej(e.target.value)}
+                      rows={2}
+                      style={{
+                        flex: "1",
+                        padding: "8px 12px",
+                        borderRadius: "10px",
+                        border: "2px solid var(--color-dark, #10182f)",
+                        fontSize: "0.85rem",
+                        resize: "none",
+                        boxSizing: "border-box",
+                        backgroundColor: "#ffffff",
+                        color: "var(--color-dark, #10182f)",
+                        fontWeight: "600",
+                      }}
+                    ></textarea>
+                    <button
+                      type="button"
+                      className="neo-btn bg-blue"
+                      onClick={() => hantarFeedback()}
+                      title="Hantar Maklum Balas"
+                      style={{
+                        width: "48px",
+                        minWidth: "48px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "12px",
+                        padding: "0",
+                        backgroundColor: "#0284c7",
+                        color: "#ffffff",
+                        border: "2.5px solid var(--color-dark, #10182f)",
+                        cursor: "pointer",
+                        boxShadow: "0 2px 0 var(--color-dark, #10182f)",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <i
+                        className="fa-solid fa-paper-plane"
+                        style={{ fontSize: "1.1rem", color: "#ffffff" }}
+                      ></i>
+                    </button>
                   </div>
-                )}
+                  {feedbackStatus === "success" && (
+                    <div
+                      style={{
+                        fontSize: "0.82rem",
+                        color: "#064e3b",
+                        backgroundColor: "#ecfdf5",
+                        padding: "8px 12px",
+                        borderRadius: "10px",
+                        border: "2px solid #059669",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                        boxShadow: "0 2px 0 rgba(0,0,0,0.1)",
+                      }}
+                    >
+                      <i className="fa-solid fa-circle-check" style={{ color: "#059669" }}></i>
+                      <span>Maklum balas berjaya dihantar! Terima kasih.</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Butang Teruskan (Hanya dipaparkan untuk Onboarding / Mula Bermain) */}
-            <button
-              id="app-info-teruskan-btn"
-              className="neo-btn"
-              style={{
-                display: "none",
-                width: "100%",
-                justifyContent: "center",
-                fontSize: "1.1rem",
-                padding: "12px",
-                backgroundColor: "#168f81",
-                color: "#ffffff",
-              }}
-              onClick={() => {
-                try {
-                  const modal = document.getElementById("app-info-modal");
-                  if (modal) modal.style.display = "none";
-                  const mode = (window as any).pendingAppInfoMode || "murid";
-                  (window as any).pendingAppInfoMode = "";
-                  if (mode === "murid") {
-                    if (typeof (window as any).masukModMurid === "function") {
-                      try {
-                        (window as any).masukModMurid(
-                          (window as any).namaMuridAktif || "Murid",
-                        );
-                      } catch (e) {
-                        console.warn("masukModMurid notice:", e);
+              {/* Butang Teruskan (Hanya dipaparkan untuk Onboarding / Mula Bermain) */}
+              <button
+                id="app-info-teruskan-btn"
+                className="neo-btn"
+                style={{
+                  display: "none",
+                  width: "100%",
+                  justifyContent: "center",
+                  fontSize: "1.1rem",
+                  padding: "12px",
+                  backgroundColor: "#168f81",
+                  color: "#ffffff",
+                }}
+                onClick={() => {
+                  try {
+                    const modal = document.getElementById("app-info-modal");
+                    if (modal) modal.style.display = "none";
+                    const mode = (window as any).pendingAppInfoMode || "murid";
+                    (window as any).pendingAppInfoMode = "";
+                    if (mode === "murid") {
+                      if (typeof (window as any).masukModMurid === "function") {
+                        try {
+                          (window as any).masukModMurid(
+                            (window as any).namaMuridAktif || "Murid",
+                          );
+                        } catch (e) {
+                          console.warn("masukModMurid notice:", e);
+                        }
                       }
-                    }
-                    if (typeof (window as any).paparSkrin === "function") {
-                      try {
-                        (window as any).paparSkrin("main-menu-screen");
-                      } catch (e) {
-                        console.warn("paparSkrin notice:", e);
+                      if (typeof (window as any).paparSkrin === "function") {
+                        try {
+                          (window as any).paparSkrin("main-menu-screen");
+                        } catch (e) {
+                          console.warn("paparSkrin notice:", e);
+                        }
                       }
+                      document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+                      document.getElementById("main-menu-screen")?.classList.add("active");
+                      document.body.classList.remove("teacher-mode", "admin-mode", "parent-mode");
+                      const topBanner = document.getElementById("teacher-top-banner");
+                      if (topBanner) topBanner.style.display = "none";
+                      const tNav = document.getElementById("teacher-sticky-nav");
+                      if (tNav) tNav.style.display = "none";
+                      const aNav = document.getElementById("admin-sticky-nav");
+                      if (aNav) aNav.style.display = "none";
+                      const pNav = document.getElementById("parent-sticky-nav");
+                      if (pNav) pNav.style.display = "none";
+                      if (typeof (window as any).updateProfilUI === "function") {
+                        try {
+                          (window as any).updateProfilUI();
+                        } catch (e) {
+                          console.warn("updateProfilUI notice:", e);
+                        }
+                      }
+                    } else if (mode === "guru") {
+                      masukModGuru();
+                    } else if (mode === "ibubapa") {
+                      (window as any).bukaModalPilihAnak &&
+                        (window as any).bukaModalPilihAnak();
+                    } else if (mode === "admin") {
+                      (window as any).masukModAdmin &&
+                        (window as any).masukModAdmin();
                     }
+                  } catch (err) {
+                    console.error("Teruskan click error:", err);
+                    const modal = document.getElementById("app-info-modal");
+                    if (modal) modal.style.display = "none";
                     document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
                     document.getElementById("main-menu-screen")?.classList.add("active");
-                    document.body.classList.remove("teacher-mode", "admin-mode", "parent-mode");
-                    const topBanner = document.getElementById("teacher-top-banner");
-                    if (topBanner) topBanner.style.display = "none";
-                    const tNav = document.getElementById("teacher-sticky-nav");
-                    if (tNav) tNav.style.display = "none";
-                    const aNav = document.getElementById("admin-sticky-nav");
-                    if (aNav) aNav.style.display = "none";
-                    const pNav = document.getElementById("parent-sticky-nav");
-                    if (pNav) pNav.style.display = "none";
-                    if (typeof (window as any).updateProfilUI === "function") {
-                      try {
-                        (window as any).updateProfilUI();
-                      } catch (e) {
-                        console.warn("updateProfilUI notice:", e);
-                      }
-                    }
-                  } else if (mode === "guru") {
-                    masukModGuru();
-                  } else if (mode === "ibubapa") {
-                    (window as any).bukaModalPilihAnak &&
-                      (window as any).bukaModalPilihAnak();
-                  } else if (mode === "admin") {
-                    (window as any).masukModAdmin &&
-                      (window as any).masukModAdmin();
                   }
-                } catch (err) {
-                  console.error("Teruskan click error:", err);
-                  const modal = document.getElementById("app-info-modal");
-                  if (modal) modal.style.display = "none";
-                  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
-                  document.getElementById("main-menu-screen")?.classList.add("active");
-                }
-              }}
-            >
-              Teruskan{" "}
-              <i
-                className="fa-solid fa-arrow-right"
-                style={{ marginLeft: "8px" }}
-              ></i>
-            </button>
+                }}
+              >
+                Teruskan{" "}
+                <i
+                  className="fa-solid fa-arrow-right"
+                  style={{ marginLeft: "8px" }}
+                ></i>
+              </button>
+            </div>
           </div>
-        </div>
         </>,
         document.body
       )}
@@ -15892,6 +17834,29 @@ export default function App() {
             onClose={() => {
               setShowBukuCeritaModal(false);
               setInitialBukuCeritaId(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Cuba Sebut / Cuba Baca Interactive Game Modal */}
+      <AnimatePresence>
+        {showCubaSebut && (
+          <CubaSebutGame
+            mode={cubaSebutConfig.mode}
+            categoryKey={cubaSebutConfig.key}
+            categoryLabel={cubaSebutConfig.label}
+            onClose={() => {
+              setShowCubaSebut(false);
+              if ((window as any).paparSkrin) (window as any).paparSkrin("map-screen");
+            }}
+            onChooseOtherSkill={() => {
+              setShowCubaSebut(false);
+              if (cubaSebutConfig.mode === 'baca') {
+                if ((window as any).showCubaBacaModal) (window as any).showCubaBacaModal();
+              } else {
+                if ((window as any).showCubaSebutModal) (window as any).showCubaSebutModal();
+              }
             }}
           />
         )}

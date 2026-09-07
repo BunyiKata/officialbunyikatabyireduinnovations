@@ -10,6 +10,23 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  // Legacy audio path compatibility middleware
+  app.use((req, res, next) => {
+    if (req.url) {
+      const decoded = decodeURIComponent(req.url);
+      if (decoded.startsWith('/AUDIO FONIK/')) {
+        req.url = req.url.replace(/^\/AUDIO(%20| )FONIK\//i, '/audio/fonik/');
+      } else if (decoded.startsWith('/AUDIO BACAAN BERGRED/')) {
+        req.url = req.url.replace(/^\/AUDIO(%20| )BACAAN(%20| )BERGRED\//i, '/audio/bacaan-bergred/');
+      } else if (decoded.startsWith('/AUDIO TAMBAH TOLAK/audio tambah/')) {
+        req.url = req.url.replace(/^\/AUDIO(%20| )TAMBAH(%20| )TOLAK\/audio(%20| )tambah\//i, '/audio/tambah/');
+      } else if (decoded.startsWith('/AUDIO TAMBAH TOLAK/audio tolak/')) {
+        req.url = req.url.replace(/^\/AUDIO(%20| )TAMBAH(%20| )TOLAK\/audio(%20| )tolak\//i, '/audio/tolak/');
+      }
+    }
+    next();
+  });
+
   // Serve static files from public directory directly (handles audio, images, fonts)
   app.use(express.static(path.join(__dirname, 'public')));
 

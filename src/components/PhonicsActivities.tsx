@@ -6,7 +6,8 @@ import {
   PhonicsMode,
   MODE_CONFIGS,
   PHONICS_DATABASE,
-  isVowelLetter
+  isVowelLetter,
+  getPhonicsAudio
 } from './FonikAbcGame';
 
 export const MAIN_APP_BG = 'transparent';
@@ -163,12 +164,26 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
   minHeight: isMobile ? '460px' : '520px'
 });
 
+  let activeActivityAudio: HTMLAudioElement | null = null;
+
   const playSound = (src: string, onEnd?: () => void) => {
     try {
+      if (activeActivityAudio) {
+        try {
+          activeActivityAudio.pause();
+          activeActivityAudio.currentTime = 0;
+        } catch (e) {}
+        activeActivityAudio = null;
+      }
       const audio = new Audio(src);
-      if (onEnd) audio.onended = onEnd;
+      activeActivityAudio = audio;
+      audio.onended = () => {
+        if (activeActivityAudio === audio) activeActivityAudio = null;
+        if (onEnd) onEnd();
+      };
       audio.play().catch(err => {
         console.warn("Audio notice:", src, err);
+        if (activeActivityAudio === audio) activeActivityAudio = null;
         if (onEnd) onEnd();
       });
     } catch (e) {
@@ -1076,7 +1091,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
         });
       } else {
         playErrorSound();
-        playSound(`/audio/abc/${letter.toLowerCase()}.mp3`);
+        playSound(mode === 'fonik_abc' ? getPhonicsAudio(letter) : `/audio/abc/${letter.toLowerCase()}.mp3`);
         setCards(prev => prev.map(c => c.id === id ? { ...c, status: 'wrong' } : c));
         setTimeout(() => {
           setCards(prev => prev.map(c => c.id === id ? { ...c, status: 'idle' } : c));
@@ -1381,7 +1396,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
       e.stopPropagation();
       setHasInteracted(true);
       setActiveSpeakerId(opt.id);
-      playSound(`/audio/abc/${opt.letter}.mp3`);
+      playSound(mode === 'fonik_abc' ? getPhonicsAudio(opt.letter) : `/audio/abc/${opt.letter}.mp3`);
 
       const knobEl = speakerKnobRefs.current[opt.id];
       const startPt = getKnobCenter(knobEl);

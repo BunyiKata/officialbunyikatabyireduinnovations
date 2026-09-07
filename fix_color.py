@@ -1,7 +1,0 @@
-import re
-with open('src/App.tsx', 'r') as f:
-    content = f.read()
-
-content = content.replace('"backgroundColor":"#ef4444"', '')
-with open('src/App.tsx', 'w') as f:
-    f.write(content)

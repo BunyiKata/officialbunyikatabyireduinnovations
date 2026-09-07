@@ -35,6 +35,46 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/poppins/Poppins-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/poppins/Poppins-500.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/poppins/Poppins-600.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/poppins/Poppins-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/poppins/Poppins-800.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
 /* Hide scrollbar for Chrome, Safari and Opera */
 ::-webkit-scrollbar {
     display: none !important;
@@ -108,11 +148,26 @@ h6,
     font-family: 'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif !important;
 }
 
+/* Pengecualian khas Sijil Pencapaian: Wajib fon Poppins dan warna hitam gelap */
+.sijil-text-poppins,
+.sijil-poppins-text,
+.sijil-nama-murid,
+.sijil-tarikh,
+[data-font="poppins"],
+.modal-content .sijil-text-poppins,
+.modal-content .sijil-nama-murid,
+.modal-content .sijil-tarikh,
+#cert-preview-name,
+#cert-preview-date {
+    font-family: 'Poppins', sans-serif !important;
+    color: #000000 !important;
+}
+
 /* Remove manual Font Awesome overrides */
 
 body {
     background-color: var(--bg-body, var(--bg-cream));
-    background-image: url('https://i.postimg.cc/VsrhP5mn/Copy-of-BUNYI-KATA-APPS.png');
+    background-image: url('/images/sampingan/background-utama.png');
     background-size: cover;
     background-position: center;
     color: var(--color-dark);
@@ -581,6 +636,26 @@ body.parent-mode #parent-sticky-nav .neo-btn {
     max-width: 90% !important;
 }
 
+.modal-title-green-badge {
+    background-color: #168f81 !important;
+    color: #ffffff !important;
+    padding: 8px 24px !important;
+    border-radius: 16px !important;
+    border: 3px solid var(--color-dark, #10182f) !important;
+    box-shadow: 0 4px 0 var(--color-dark, #10182f) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    font-size: clamp(1.15rem, 3.5vw, 1.4rem) !important;
+    font-weight: 900 !important;
+    margin: 0 auto 14px auto !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+    font-family: 'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif !important;
+    box-sizing: border-box !important;
+    max-width: 90% !important;
+}
+
 .map-board {
     position: relative;
     background-color: #feedd6;
@@ -622,7 +697,7 @@ body.parent-mode #parent-sticky-nav .neo-btn {
     align-items: center;
     justify-content: center;
     pointer-events: none;
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: 0.6px;
     user-select: none;
     z-index: 5;
@@ -3008,7 +3083,7 @@ select.filter-select option {
         font-size: 1.35rem !important;
     }
 
-    .guru-filter-container {
+    .guru-filter-container:not(.guru-prestasi-filter-container) {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
@@ -4191,7 +4266,7 @@ body {
 #map-title-bar,
 #modal-pilih-peta-tajuk,
 .map-top-bar>.neo-btn:not(.back-icon-btn):not(.help-btn):not(.match-option):not(.tarikgaris-btn) {
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .map-top-bar {
@@ -6408,7 +6483,6 @@ body:has(#modal-pilih-ar-sukukata[style*="display: flex"]) #mobile-floating-dial
 body:has(#modal-pilih-puzzle-sukukata[style*="display: flex"]) #mobile-floating-dial-container,
 body:has(#modal-pilih-surih[style*="display: flex"]) #mobile-floating-dial-container,
 body:has(#modal-pilih-ar[style*="display: flex"]) #mobile-floating-dial-container,
-body:has(#modal-video-abc[style*="display: flex"]) #mobile-floating-dial-container,
 body:has(#modal-app-info[style*="display: flex"]) #mobile-floating-dial-container {
     display: none !important;
 }
@@ -6661,7 +6735,8 @@ body.parent-mode #main-menu-mobile-header {
         display: inline-flex !important;
     }
 
-    #admin-sticky-nav .nav-btn-statistik {
+    #admin-sticky-nav .nav-btn-statistik,
+    #admin-sticky-nav .nav-btn-sijil {
         order: 2 !important;
         display: inline-flex !important;
     }
@@ -6716,6 +6791,7 @@ body.parent-mode #main-menu-mobile-header {
     body.parent-mode .screen.active,
     #admin-dashboard.active,
     #admin-urus.active,
+    #admin-sijil.active,
     #guru-dashboard.active,
     #guru-urus-murid.active,
     #ibubapa-dashboard.active,
@@ -6765,7 +6841,8 @@ body.parent-mode #main-menu-mobile-header {
         order: 1 !important;
     }
 
-    #admin-sticky-nav .nav-btn-statistik {
+    #admin-sticky-nav .nav-btn-statistik,
+    #admin-sticky-nav .nav-btn-sijil {
         order: 2 !important;
     }
 
@@ -7998,7 +8075,7 @@ body.parent-mode #student-global-nav {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    z-index: 9999;
+    z-index: 100;
 }
 
 #guru-floating-dial-container .mobile-dial-options {
@@ -8058,7 +8135,7 @@ select::-ms-expand {
 
 @media (max-width: 720px) {
     #guru-floating-dial-container {
-        bottom: 95px !important;
+        bottom: 125px !important;
     }
 }
 
@@ -8364,6 +8441,180 @@ i.fa-brands {
     }
 }
 
+/* Sijil Modal Preview Outline Glow Animations */
+@keyframes sijilPreviewGlow {
+    0%, 100% {
+        box-shadow: 0 0 0 3px #f59e0b, 0 0 16px rgba(245, 158, 11, 0.65), 0 0 32px rgba(251, 191, 36, 0.4), 0 8px 20px rgba(0, 0, 0, 0.25);
+        border-color: #0f172a;
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 5px #fde047, 0 0 28px rgba(245, 158, 11, 0.95), 0 0 52px rgba(251, 191, 36, 0.7), 0 10px 24px rgba(0, 0, 0, 0.3);
+        border-color: #d97706;
+        transform: scale(1.012);
+    }
+}
+
+@keyframes certDashedOutlineGlow {
+    0%, 100% {
+        border-color: rgba(245, 158, 11, 0.45);
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+    }
+    50% {
+        border-color: #f59e0b;
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
+    }
+}
+
+@keyframes sijilModalCardGlow {
+    0%, 100% {
+        box-shadow: 0 10px 0 #0f172a, 0 0 0 2px rgba(245, 158, 11, 0.3), 0 0 14px rgba(245, 158, 11, 0.2);
+    }
+    50% {
+        box-shadow: 0 10px 0 #0f172a, 0 0 0 4px #fbbf24, 0 0 28px rgba(245, 158, 11, 0.45);
+    }
+}
+
+.sijil-modal-card {
+    max-width: 540px !important;
+    width: 92% !important;
+    max-height: 92vh !important;
+    overflow-y: auto !important;
+    background-color: #ffffff !important;
+    background-image: radial-gradient(circle, rgba(16, 24, 47, 0.08) 1.5px, transparent 1.5px) !important;
+    background-size: 16px 16px !important;
+    border: 4px solid #0f172a !important;
+    border-radius: 24px !important;
+    padding: 24px 22px 20px 22px !important;
+    text-align: center !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    box-shadow: 0 10px 0 #0f172a !important;
+}
+
+#modal-sijil-canvas-container {
+    display: flex !important;
+    grid-template-columns: none !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    background: #fffdf8 !important;
+    border-radius: 18px !important;
+    border: 2px dashed #f59e0b !important;
+    padding: 10px !important;
+    margin: 16px auto !important;
+}
+
+.sijil-img-glow {
+    animation: sijilPreviewGlow 2.4s infinite ease-in-out !important;
+    will-change: box-shadow, border-color, transform;
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 64vh !important;
+    aspect-ratio: 1414 / 2000 !important;
+    object-fit: contain !important;
+    border-radius: 14px !important;
+    border: 3.5px solid #0f172a !important;
+    display: block !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+}
+
+.sijil-container-glow {
+    animation: certDashedOutlineGlow 2.4s infinite ease-in-out !important;
+}
+
+.sijil-modal-glow {
+    animation: sijilModalCardGlow 2.4s infinite ease-in-out !important;
+}
+
+.sijil-btn-row {
+    display: flex !important;
+    grid-template-columns: none !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    max-width: 380px !important;
+    box-sizing: border-box !important;
+}
+
+.sijil-btn-row > button {
+    flex: 1 1 0 !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    height: 48px !important;
+    padding: 0 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    font-size: 0.94rem !important;
+    font-weight: 800 !important;
+    border-radius: 14px !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.sijil-btn-row > button:hover {
+    transform: translateY(-2px) !important;
+}
+.sijil-btn-row > button:active {
+    transform: translateY(1px) !important;
+}
+
+/* Mobile View: Kekal kemas & tepat seperti yang disahkan */
+@media (max-width: 480px) {
+    #modal-sijil-pencapaian {
+        padding: 8px !important;
+    }
+    .sijil-modal-card {
+        max-width: 340px !important;
+        width: 90% !important;
+        padding: 12px 10px !important;
+        border-radius: 18px !important;
+        border-width: 3px !important;
+    }
+    #modal-sijil-canvas-container {
+        padding: 6px !important;
+        margin-top: 18px !important;
+        margin-bottom: 12px !important;
+        min-height: 260px !important;
+    }
+    .sijil-img-glow {
+        width: 100% !important;
+        max-width: 270px !important;
+        max-height: 58vh !important;
+        border-radius: 10px !important;
+        border-width: 2.5px !important;
+    }
+    .sijil-btn-row {
+        gap: 6px !important;
+        max-width: 100% !important;
+    }
+    .sijil-btn-row > button {
+        height: 42px !important;
+        font-size: 0.82rem !important;
+        padding: 0 2px !important;
+        gap: 4px !important;
+        border-radius: 12px !important;
+    }
+}
+
+
+
+
 @keyframes sweepShine {
     0% {
         transform: translateX(-150%) skewX(-15deg);
@@ -8632,15 +8883,7 @@ i.fa-brands {
         margin-top: 6px !important;
     }
 
-    .cabaran-susun-slot {
-        min-width: 55px !important;
-        height: 42px !important;
-        font-size: 0.95rem !important;
-        padding: 0 6px !important;
-        border-radius: 12px !important;
-    }
-
-    .cabaran-opt-btn {
+    .cabaran-opt-btn:not(.cabaran-susun-opt-btn) {
         padding: 14px 16px !important;
         font-size: 1.35rem !important;
         min-height: 60px !important;
@@ -8652,8 +8895,8 @@ i.fa-brands {
     }
 
     /* Enlarge for Cabaran Asas Bunyi Kata & short letter/number options on mobile */
-    .cabaran-opt-btn.cabaran-opt-short,
-    .cabaran-grid-asas .cabaran-opt-btn:not(.cabaran-opt-cookie) {
+    .cabaran-opt-btn.cabaran-opt-short:not(.cabaran-susun-opt-btn),
+    .cabaran-grid-asas .cabaran-opt-btn:not(.cabaran-opt-cookie):not(.cabaran-susun-opt-btn) {
         min-height: 76px !important;
         font-size: clamp(2.1rem, 7.5vw, 2.9rem) !important;
         font-weight: 900 !important;
@@ -8670,9 +8913,9 @@ i.fa-brands {
     }
 
     .cabaran-game-card {
-        padding: 22px 16px !important;
-        gap: 18px !important;
-        border-radius: 24px !important;
+        padding: 16px 10px !important;
+        gap: 16px !important;
+        border-radius: 20px !important;
     }
 
     .cabaran-opt-img-btn {
@@ -9046,18 +9289,43 @@ i.fa-brands {
 }
 
 @media (min-width: 768px) {
+    /* Ensure inactive screens are strictly hidden */
+    .screen:not(.active) {
+        display: none !important;
+    }
+
+    /* --- LOGIN SCREEN LAPTOP VIEW --- */
+    #login-screen.active {
+        min-height: 100vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 30px 20px 16px 20px !important;
+        box-sizing: border-box !important;
+        overflow-y: auto !important;
+    }
+
+    /* Never show student top nav when login screen is active */
+    body:has(#login-screen.active) #student-global-nav {
+        display: none !important;
+    }
+
     .login-hero-wrapper {
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        gap: 32px;
-        max-width: 920px;
-        margin: 25px auto 15px auto;
+        gap: 48px;
+        max-width: 1080px;
+        margin: auto auto 24px auto;
         padding: 0 20px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .login-hero-wrapper #login-logo-container {
-        flex: 0 1 360px;
+        flex: 0 1 460px;
+        max-width: 460px;
         margin: 0 !important;
         display: flex;
         justify-content: center;
@@ -9065,34 +9333,129 @@ i.fa-brands {
     }
 
     .login-hero-wrapper #login-logo-container .glitch-logo {
-        max-height: 260px !important;
+        max-height: 330px !important;
         width: 100% !important;
-        max-width: 360px !important;
+        max-width: 460px !important;
         height: auto !important;
-        filter: drop-shadow(0px 8px 24px rgba(0, 0, 0, 0.15));
+        filter: drop-shadow(0px 10px 28px rgba(0, 0, 0, 0.16));
     }
 
     .login-hero-wrapper #mode-buttons-container {
-        flex: 0 1 485px;
+        flex: 0 1 540px;
+        max-width: 540px;
         margin: 0 !important;
+        width: 100% !important;
+    }
+
+    .login-hero-wrapper #mode-buttons-container > div {
+        max-width: 540px !important;
         width: 100% !important;
     }
 
     .login-hero-wrapper #mode-buttons-container .neo-box {
         margin-bottom: 0 !important;
+        padding: 24px 20px 22px 20px !important;
     }
 
-    /* Move 'sudah ada kod' card down a bit and lower footer slightly on tablet & laptop screens */
-    #mode-selection-card {
-        margin-top: 28px !important;
-        margin-bottom: 8px !important;
-    }
-
-    #login-screen footer {
-        margin-top: 22px !important;
+    .login-hero-wrapper #mode-buttons-container [style*="perspective"] {
+        height: 220px !important;
         margin-bottom: 12px !important;
-        padding-top: 4px !important;
-        padding-bottom: 4px !important;
+    }
+
+    .login-hero-wrapper #mode-buttons-container [style*="preserve-3d"] {
+        width: 155px !important;
+        height: 190px !important;
+    }
+
+    .login-hero-wrapper #mode-buttons-container [style*="preserve-3d"] img {
+        width: 125px !important;
+        height: 155px !important;
+    }
+
+    .login-hero-wrapper #btn-mula-login {
+        width: min(80%, 280px) !important;
+        font-size: 1.3rem !important;
+        padding: 12px 24px !important;
+        letter-spacing: 0.8px !important;
+    }
+
+    /* 'Sudah ada kod' card enlarged on laptop */
+    #mode-selection-card {
+        max-width: 580px !important;
+        width: 90% !important;
+        padding: 22px 32px !important;
+        margin: 0 auto 24px auto !important;
+        border-radius: 20px !important;
+        box-shadow: 0 6px 0 var(--color-dark, #10182f) !important;
+    }
+
+    #mode-selection-card > div {
+        font-size: 1.15rem !important;
+    }
+
+    #mode-selection-card > div > span {
+        font-size: 1.18rem !important;
+        margin-top: 6px !important;
+    }
+
+    /* Footer anchored nicely to bottom of 100% laptop view without changing font size */
+    #login-screen footer {
+        margin-top: auto !important;
+        margin-bottom: 12px !important;
+        padding: 8px 0 !important;
+    }
+
+    /* --- MAIN MENU SCREEN LAPTOP VIEW --- */
+    #main-menu-screen.active {
+        min-height: 100vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 85px 20px 40px 20px !important;
+        box-sizing: border-box !important;
+        position: relative !important;
+    }
+
+    #main-menu-screen .logo-besar {
+        margin: 0 auto !important;
+        transform: none !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    #main-menu-screen .logo-besar img,
+    #main-menu-screen .logo-besar .glitch-logo {
+        max-height: 330px !important;
+        max-width: 520px !important;
+        width: 100% !important;
+        height: auto !important;
+        filter: drop-shadow(0px 10px 30px rgba(0, 0, 0, 0.15)) !important;
+    }
+
+    #main-menu-screen .main-action-buttons {
+        margin-top: 48px !important;
+        gap: 36px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+    }
+
+    #main-menu-screen .main-action-buttons .neo-btn.ticket-btn-red {
+        min-width: 290px !important;
+        height: 80px !important;
+        font-size: 1.65rem !important;
+        padding: 0 38px !important;
+        border-width: 28px !important;
+        gap: 14px !important;
+        letter-spacing: 0.6px !important;
+        border-radius: 0 !important;
+    }
+
+    #main-menu-screen .main-action-buttons .neo-btn.ticket-btn-red i {
+        font-size: 1.7rem !important;
     }
 }
 
@@ -9391,13 +9754,13 @@ i.fa-brands {
 
     0%,
     100% {
-        box-shadow: 0 4px 0 #0f172a, 0 0 10px rgba(245, 158, 11, 0.5), 0 0 20px rgba(251, 191, 36, 0.35);
+        box-shadow: 0 4px 0 #0f172a, 0 0 12px rgba(245, 158, 11, 0.65), 0 0 24px rgba(251, 191, 36, 0.45);
         border-color: #f59e0b;
     }
 
     50% {
-        box-shadow: 0 4px 0 #0f172a, 0 0 22px rgba(245, 158, 11, 0.95), 0 0 36px rgba(251, 191, 36, 0.75);
-        border-color: #f59e0b;
+        box-shadow: 0 4px 0 #0f172a, 0 0 26px rgba(245, 158, 11, 0.95), 0 0 40px rgba(251, 191, 36, 0.85);
+        border-color: #fbbf24;
     }
 }
 
@@ -9409,7 +9772,9 @@ i.fa-brands {
     animation: badgeGoldGlowPulse 2.2s ease-in-out infinite;
 }
 
-.score-box-glow-pulse {
+.score-box-glow-pulse,
+#cl-score-pill-box,
+#ganjaran-score-pill-box {
     animation: scoreBoxGlowPulse 2.2s ease-in-out infinite !important;
 }
 
@@ -9954,15 +10319,33 @@ i.fa-brands {
    CABARAN LAIN MODAL - LAPTOP VIEW ENHANCEMENT (>= 641px)
 ========================================================= */
 @media (min-width: 768px) {
-    #modal-cabaran-lain-game .modal-content.cabaran-lain-game-modal {
-        max-width: min(620px, 92vw) !important;
-        width: 90% !important;
-        max-height: 95vh !important;
-        padding: 22px 28px 24px !important;
-        border-radius: 28px !important;
+    #modal-cabaran-lain-game .cabaran-tambahan-content-wrapper {
+        max-width: 1080px !important;
+        padding: 0 20px 40px 20px !important;
+    }
+
+    #modal-cabaran-lain-game #cabaran-lain-game-area {
+        min-height: unset !important;
+        width: 100% !important;
+        max-width: min(740px, 94vw) !important;
+        background-color: #168f81 !important;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.22) 2px, transparent 2px) !important;
+        background-size: 16px 16px !important;
         border: 4px solid var(--color-dark, #0f172a) !important;
-        box-shadow: 0 12px 0 var(--color-dark, #0f172a) !important;
-        overflow: hidden !important;
+        border-radius: 26px !important;
+        box-shadow: 0 10px 0 var(--color-dark, #0f172a) !important;
+        padding: 24px 28px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+        margin: 0 auto !important;
+        transition: max-width 0.25s ease !important;
+    }
+
+    #modal-cabaran-lain-game.is-bacaan-bergred #cabaran-lain-game-area,
+    #modal-cabaran-lain-game:has(.cl-bacaan-bergred-wrap) #cabaran-lain-game-area {
+        max-width: min(1040px, 96vw) !important;
     }
 
     #modal-cabaran-lain-game #cabaran-lain-game-title {
@@ -9985,53 +10368,59 @@ i.fa-brands {
     }
 
     #modal-cabaran-lain-game .cl-top-header-row {
-        max-width: min(490px, 58vh) !important;
-        margin-bottom: 12px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 16px !important;
+        padding: 0 4px !important;
     }
 
     #modal-cabaran-lain-game #cl-hearts-box,
     #modal-cabaran-lain-game #cl-score-box {
-        padding: 6px 18px !important;
+        padding: 7px 18px !important;
         font-size: 1.05rem !important;
-        border-radius: 22px !important;
+        border-radius: 24px !important;
     }
 
     #modal-cabaran-lain-game #cl-hearts-box i {
         font-size: 1.35rem !important;
     }
 
-    #modal-cabaran-lain-game #cabaran-lain-game-area {
-        min-height: unset !important;
+    /* Enlarge ALL game canvases and containers on laptop view (Strict aspect ratio, no squashing) */
+    #modal-cabaran-lain-game .cl-canvas-wrap {
+        max-width: min(560px, calc((100vh - 210px) * 1.15), 88vw) !important;
         width: 100% !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
+        margin: 0 auto 12px auto !important;
     }
 
-    /* Enlarge ALL game canvases and containers on laptop view (Ketuk Huruf, Lompat Katak, Tembak Kapal, Bakul Suku Kata, Burung Tambah, Tetak Buah Genap) */
-    #modal-cabaran-lain-game .cl-canvas-wrap,
-    #modal-cabaran-lain-game #cabaran-lain-game-area>div[style*="max-width"],
-    #modal-cabaran-lain-game #cabaran-lain-game-area .cl-canvas-wrap {
-        max-width: min(490px, 58vh) !important;
+    #modal-cabaran-lain-game canvas {
         width: 100% !important;
-        margin: 0 auto 10px auto !important;
+        height: auto !important;
+        max-height: none !important;
+        display: block !important;
     }
 
-    #modal-cabaran-lain-game canvas,
-    #modal-cabaran-lain-game #fj-canvas,
-    #modal-cabaran-lain-game #bc-canvas,
-    #modal-cabaran-lain-game #fs-canvas,
+    #modal-cabaran-lain-game #fj-canvas {
+        max-width: min(560px, calc((100vh - 210px) * 1.2), 88vw) !important;
+        aspect-ratio: 360 / 300 !important;
+    }
+
+    #modal-cabaran-lain-game #ss-canvas,
     #modal-cabaran-lain-game #bm-canvas,
-    #modal-cabaran-lain-game #bt-canvas,
-    #modal-cabaran-lain-game #ss-canvas {
-        max-width: min(490px, 58vh) !important;
-        width: 100% !important;
-        max-height: 58vh !important;
+    #modal-cabaran-lain-game #bt-canvas {
+        max-width: min(540px, calc((100vh - 210px) * 1.125), 88vw) !important;
+        aspect-ratio: 360 / 320 !important;
+    }
+
+    #modal-cabaran-lain-game #bc-canvas,
+    #modal-cabaran-lain-game #fs-canvas {
+        max-width: min(520px, calc((100vh - 210px) * 1.0588), 88vw) !important;
+        aspect-ratio: 360 / 340 !important;
     }
 
     /* Ketuk Huruf (Vowel/Consonant Whack) Grass Field & Moles on Laptop */
     #modal-cabaran-lain-game #vw-field {
-        max-width: min(490px, 58vh) !important;
+        max-width: min(560px, calc((100vh - 210px) * 1.2), 88vw) !important;
+        aspect-ratio: 360 / 300 !important;
         width: 100% !important;
     }
 
@@ -10039,31 +10428,145 @@ i.fa-brands {
         transform: translate(-50%, -50%) scale(1.15) !important;
     }
 
+    /* Cari Kata (Word Search) - Enlarged nicely for laptop view without scrolling */
     #modal-cabaran-lain-game #ws-word-list {
-        max-width: min(490px, 58vh) !important;
+        max-width: min(480px, 88vw) !important;
         margin-bottom: 12px !important;
     }
 
+    #modal-cabaran-lain-game #ws-word-list span {
+        font-size: 1.05rem !important;
+        padding: 6px 16px !important;
+    }
+
     #modal-cabaran-lain-game #ws-grid {
-        max-width: min(450px, 54vh) !important;
-        gap: 8px !important;
+        max-width: min(430px, calc(100vh - 290px), 86vw) !important;
+        gap: 7px !important;
     }
 
     #modal-cabaran-lain-game #ws-grid .ws-cell {
-        font-size: 1.5rem !important;
-        border-radius: 14px !important;
+        font-size: 1.45rem !important;
+        border-radius: 12px !important;
+    }
+
+    /* Padanan Memori - Enlarged cards for laptop view */
+    #modal-cabaran-lain-game #mm-status {
+        color: #0f172a !important;
+        text-shadow: none !important;
+        font-size: 1.05rem !important;
+        font-weight: 900 !important;
+        font-family: 'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif !important;
+        margin-bottom: 14px !important;
+    }
+
+    #modal-cabaran-lain-game.is-padanan-memori #cabaran-lain-game-area,
+    #modal-cabaran-lain-game:has(#mm-grid) #cabaran-lain-game-area {
+        max-width: min(860px, 96vw) !important;
     }
 
     #modal-cabaran-lain-game #mm-grid {
-        max-width: min(490px, 58vh) !important;
-        gap: 10px !important;
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        max-width: min(800px, calc((100vh - 220px) * 1.333), 94vw) !important;
+        gap: 18px !important;
+        margin: 0 auto !important;
+        perspective: 1000px !important;
     }
 
     #modal-cabaran-lain-game #wb-container,
     #modal-cabaran-lain-game #sq-container,
     #modal-cabaran-lain-game #vw-grid {
-        max-width: min(490px, 58vh) !important;
+        max-width: min(560px, 88vw) !important;
         width: 100% !important;
+    }
+
+    /* Bacaan Bergred 2-Column Split Layout on Laptop View */
+    #modal-cabaran-lain-game .cl-bacaan-bergred-wrap {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        max-width: 980px !important;
+        gap: 24px !important;
+        margin: 0 auto !important;
+    }
+
+    #modal-cabaran-lain-game .cl-bacaan-question-card {
+        flex: 0 0 380px !important;
+        max-width: 400px !important;
+        width: 100% !important;
+        margin-bottom: 0 !important;
+        padding: 18px 64px 18px 18px !important;
+        border-radius: 20px !important;
+        background: #ffffff !important;
+        border: 3px solid #1e293b !important;
+        box-shadow: 0 5px 0 #1e293b !important;
+        box-sizing: border-box !important;
+        position: relative !important;
+        cursor: pointer !important;
+        transition: transform 0.15s, box-shadow 0.15s !important;
+    }
+
+    #modal-cabaran-lain-game .cl-bacaan-question-card:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 7px 0 #1e293b !important;
+    }
+
+    #modal-cabaran-lain-game .cl-bacaan-question-card img {
+        width: 68px !important;
+        height: 68px !important;
+        border-radius: 12px !important;
+        border: 2.5px solid #1e293b !important;
+        flex-shrink: 0 !important;
+    }
+
+    #modal-cabaran-lain-game .cl-bacaan-question-card p,
+    #modal-cabaran-lain-game .cl-bacaan-question-card span {
+        font-size: 1.25rem !important;
+        line-height: 1.45 !important;
+        word-break: break-word !important;
+    }
+
+    #modal-cabaran-lain-game #bpa-target-badge {
+        font-size: 1.45rem !important;
+    }
+
+    #modal-cabaran-lain-game .cl-bacaan-question-card button {
+        position: absolute !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        right: 12px !important;
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        min-height: 42px !important;
+        border-radius: 50% !important;
+        font-size: 1.15rem !important;
+    }
+
+    #modal-cabaran-lain-game .cl-bacaan-canvas-wrap {
+        flex: 1 1 540px !important;
+        max-width: min(560px, calc((100vh - 220px) * 1.3077), 58vw) !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    #modal-cabaran-lain-game .cl-bacaan-canvas-wrap canvas,
+    #modal-cabaran-lain-game #bpa-canvas,
+    #modal-cabaran-lain-game #lb-canvas,
+    #modal-cabaran-lain-game #mk-canvas,
+    #modal-cabaran-lain-game #kl-canvas,
+    #modal-cabaran-lain-game #tc-canvas {
+        width: 100% !important;
+        max-width: 100% !important;
+        aspect-ratio: 340 / 260 !important;
+        height: auto !important;
+        max-height: none !important;
+        border-radius: 20px !important;
+        border: 3.5px solid #1e293b !important;
+        box-shadow: 0 5px 0 #1e293b !important;
+        display: block !important;
     }
 }
 
@@ -10177,6 +10680,38 @@ i.fa-brands {
     padding: 0 !important;
 }
 
+#btn_tukar_filter_camera_kirajari {
+    position: absolute !important;
+    top: 14px !important;
+    right: 14px !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border-radius: 50% !important;
+    border: 3px solid #10182f !important;
+    box-shadow: 0 3px 0px #10182f !important;
+    background-color: #facc15 !important;
+    color: #10182f !important;
+    z-index: 30 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: transform 0.15s ease !important;
+}
+
+#btn_tukar_filter_camera_kirajari:hover {
+    transform: scale(1.1) !important;
+}
+
+#btn_tukar_filter_camera_kirajari:active {
+    transform: scale(0.95) !important;
+}
+
 .ar-content-panel {
     display: flex !important;
     flex-direction: column !important;
@@ -10226,7 +10761,7 @@ i.fa-brands {
     font-size: 1.05rem !important;
     padding: 6px 20px !important;
     pointer-events: none !important;
-    text-transform: uppercase !important;
+    text-transform: none !important;
     background-color: #ffe24a !important;
     color: #10182f !important;
     border: 3px solid var(--color-dark, #10182f) !important;
@@ -10361,6 +10896,25 @@ i.fa-brands {
     font-size: 1.6rem !important;
 }
 
+@media (min-width: 769px) {
+    #start_btn_ar_kirajari {
+        min-width: 300px !important;
+        min-height: 64px !important;
+        padding: 16px 56px !important;
+        font-size: 1.85rem !important;
+        font-weight: 900 !important;
+        border-radius: 50px !important;
+        border: 4px solid var(--color-dark, #10182f) !important;
+        box-shadow: 0 6px 0 #10182f !important;
+        letter-spacing: 1px !important;
+    }
+
+    #start_btn_ar_kirajari.bg-red {
+        min-width: 180px !important;
+        padding: 16px 48px !important;
+    }
+}
+
 @media (max-width: 768px) {
 
     #view-ar-sukukata,
@@ -10401,7 +10955,9 @@ i.fa-brands {
         align-items: center !important;
     }
 
-    .ar-camera-filter-btn {
+    .ar-camera-filter-btn,
+    #btn_tukar_filter_camera,
+    #btn_tukar_filter_camera_kirajari {
         display: none !important;
     }
 
@@ -11700,5 +12256,1597 @@ i.fa-brands {
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
+    }
+}
+
+/* ========================================================================== */
+/* TABLET & IPAD VIEWPORT OPTIMIZATION (768px to 1024px / 1200px Landscape)   */
+/* ========================================================================== */
+
+@media (min-width: 768px) and (max-width: 1200px) {
+    /* --- General Tablet Screen & Layout Tweaks --- */
+    .screen {
+        padding-left: 18px !important;
+        padding-right: 18px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* --- 1. Login Screen (Tablet / iPad) --- */
+    #login-screen {
+        padding: 24px 20px 40px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+    }
+
+    #login-screen #login-logo-container img,
+    #login-screen .glitch-logo {
+        max-height: 170px !important;
+        max-width: 85% !important;
+        margin: 0 auto 12px auto !important;
+    }
+
+    #login-screen .login-hero-wrapper {
+        width: 100% !important;
+        max-width: 600px !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    #login-screen #mode-buttons-container {
+        max-width: 520px !important;
+        width: 100% !important;
+        margin: 0 auto 16px auto !important;
+    }
+
+    #login-screen #mode-selection-card {
+        max-width: 500px !important;
+        width: 90% !important;
+        margin: 0 auto 20px auto !important;
+        padding: 18px 24px !important;
+        border-radius: 20px !important;
+    }
+
+    #login-screen #mode-selection-card div {
+        font-size: 1.05rem !important;
+    }
+
+    #login-screen .teacher-login-icon {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 1.25rem !important;
+    }
+
+    /* --- 2. Main Menu Screen (Tablet / iPad) --- */
+    #main-screen,
+    #main-menu-screen {
+        max-width: 800px !important;
+        margin: 0 auto !important;
+        padding: 20px 16px !important;
+    }
+
+    #main-screen .main-action-buttons,
+    #main-menu-screen .main-action-buttons {
+        max-width: 680px !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 14px !important;
+    }
+
+    #main-screen .main-action-buttons .neo-btn,
+    #main-menu-screen .main-action-buttons .neo-btn {
+        min-height: 60px !important;
+        font-size: 1.2rem !important;
+        padding: 16px 28px !important;
+        border-radius: 18px !important;
+    }
+
+    #murid-menu-belajar .sub-menu-grid,
+    #murid-menu-latihan .sub-menu-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+        max-width: 720px !important;
+        margin: 0 auto !important;
+    }
+
+    #murid-menu-belajar .sub-menu-grid .neo-btn,
+    #murid-menu-latihan .sub-menu-grid .neo-btn {
+        min-height: 72px !important;
+        padding: 16px 18px !important;
+        font-size: 1.1rem !important;
+        border-radius: 18px !important;
+    }
+
+    /* --- 3. Map Screen & Cara Belajar (Tablet / iPad) --- */
+    #map-screen .map-top-bar {
+        padding: 12px 24px !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    #map-screen .map-top-bar .page-title {
+        font-size: 1.2rem !important;
+        padding: 8px 24px !important;
+    }
+
+    #map-screen .map-board {
+        max-width: 900px !important;
+        margin: 0 auto !important;
+        padding: 24px 16px !important;
+    }
+
+    #cara-belajar-lain-section {
+        max-width: 820px !important;
+        margin: 20px auto !important;
+        padding: 20px 24px !important;
+        border-radius: 24px !important;
+    }
+
+    #cara-belajar-lain-section .cara-belajar-btn-container {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 12px !important;
+    }
+
+    #cara-belajar-lain-section .cara-belajar-btn {
+        flex: 0 1 calc(33.333% - 10px) !important;
+        min-width: 145px !important;
+        padding: 12px 16px !important;
+        font-size: 0.95rem !important;
+        border-radius: 14px !important;
+    }
+
+    /* --- 4. Mod Guru Dashboard (Tablet / iPad) --- */
+    body.teacher-mode #guru-dashboard {
+        max-width: 920px !important;
+        margin: 0 auto !important;
+        padding: 20px 16px 100px !important;
+    }
+
+    /* Statistik Kelas Saya Header Card */
+    #guru-dashboard .header-card,
+    #guru-dashboard > div:first-child {
+        max-width: 880px !important;
+        width: 100% !important;
+        margin: 0 auto 16px auto !important;
+        border-radius: 22px !important;
+    }
+
+    /* Summary Stats Grid (Bilangan Murid & Aktiviti Selesai) */
+    #guru-dashboard .stats-grid,
+    #guru-dashboard > div[style*="display: grid"] {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+        max-width: 880px !important;
+        margin: 0 auto 18px auto !important;
+    }
+
+    /* Prestasi Murid & Laporan Card */
+    #guru-dashboard .guru-table-card,
+    #guru-dashboard #guru-prestasi-card,
+    #guru-dashboard > div:last-child {
+        max-width: 880px !important;
+        margin: 0 auto 24px auto !important;
+        padding: 20px !important;
+        border-radius: 22px !important;
+    }
+
+    /* Filters Row in Table */
+    .guru-controls-bar {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        margin-bottom: 14px !important;
+    }
+
+    .guru-controls-bar select,
+    #guru-dashboard select {
+        height: 40px !important;
+        font-size: 0.88rem !important;
+        padding: 6px 14px !important;
+        min-width: 140px !important;
+        border-radius: 12px !important;
+    }
+
+    /* Teacher Sticky Nav on Tablet */
+    #teacher-sticky-nav,
+    #admin-sticky-nav,
+    #parent-sticky-nav {
+        max-width: 640px !important;
+        width: calc(100% - 36px) !important;
+        padding: 6px 14px !important;
+        gap: 8px !important;
+        height: 68px !important;
+    }
+
+    #teacher-sticky-nav .neo-btn:not(.nav-item-center-circle) span,
+    #admin-sticky-nav .neo-btn:not(.nav-item-center-circle) span,
+    #parent-sticky-nav .neo-btn:not(.nav-item-center-circle) span {
+        font-size: 0.74rem !important;
+        font-weight: 700 !important;
+    }
+
+    #teacher-sticky-nav .neo-btn:not(.nav-item-center-circle) i,
+    #admin-sticky-nav .neo-btn:not(.nav-item-center-circle) i,
+    #parent-sticky-nav .neo-btn:not(.nav-item-center-circle) i {
+        font-size: 1.25rem !important;
+    }
+
+    /* Floating Dial Button on Tablet */
+    #guru-floating-dial-container {
+        bottom: 24px !important;
+        right: 24px !important;
+    }
+
+    #guru-floating-dial-container #guru-floating-cta {
+        width: 58px !important;
+        height: 58px !important;
+        font-size: 1.4rem !important;
+    }
+
+    /* --- 5. Mod Ibu Bapa Dashboard (Tablet / iPad) --- */
+    body.parent-mode #ibubapa-dashboard,
+    #ibubapa-dashboard {
+        max-width: 920px !important;
+        margin: 0 auto !important;
+        padding: 20px 16px 110px !important;
+    }
+
+    /* Kad Header: Statistik Anak Saya */
+    #ibubapa-dashboard > div.neo-box:first-child {
+        max-width: 880px !important;
+        width: 100% !important;
+        margin: 0 auto 18px auto !important;
+        padding: 20px 24px !important;
+        border-radius: 22px !important;
+    }
+
+    #ibubapa-dashboard .ibubapa-card-avatar-box {
+        width: 64px !important;
+        height: 64px !important;
+    }
+
+    #ibubapa-dashboard #ibubapa-nama-anak-title {
+        font-size: 1.45rem !important;
+    }
+
+    /* 3 Kad Ringkasan (Markah, Lencana, Aktiviti Selesai) */
+    .ibubapa-stats-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+        max-width: 880px !important;
+        margin: 0 auto 20px auto !important;
+    }
+
+    .ibubapa-stats-grid > div {
+        padding: 16px 18px !important;
+        border-radius: 20px !important;
+        min-height: 120px !important;
+    }
+
+    .ibubapa-stats-grid #ibubapa-jumlah-markah,
+    .ibubapa-stats-grid #ibubapa-jumlah-lencana,
+    .ibubapa-stats-grid #ibubapa-aktiviti-selesai {
+        font-size: 2.2rem !important;
+    }
+
+    /* Kad Diagnostik AI & Cadangan Bimbingan */
+    #ibubapa-laporan-card {
+        display: block !important;
+        max-width: 880px !important;
+        margin: 0 auto 20px auto !important;
+        padding: 20px 24px !important;
+        border-radius: 22px !important;
+    }
+
+    #ibubapa-ai-content {
+        font-size: 0.95rem !important;
+        line-height: 1.6 !important;
+    }
+
+    /* Kad Rekod Kemajuan Cabaran & Jadual */
+    #ibubapa-dashboard > div:last-child {
+        max-width: 880px !important;
+        margin: 0 auto 30px auto !important;
+        padding: 20px 22px !important;
+        border-radius: 22px !important;
+    }
+
+    #ibubapa-peta-select {
+        height: 40px !important;
+        font-size: 0.88rem !important;
+        padding: 6px 14px !important;
+        min-width: 160px !important;
+        border-radius: 12px !important;
+    }
+
+    #ibubapa-dashboard .table-responsive {
+        -webkit-overflow-scrolling: touch !important;
+        overflow-x: auto !important;
+    }
+
+    #ibubapa-dashboard .teacher-table th,
+    #ibubapa-dashboard .teacher-table td {
+        padding: 12px 16px !important;
+        font-size: 0.88rem !important;
+    }
+
+    /* Modal Pilih Anak & Edit Keluarga di Tablet */
+    #modal-pilih-anak .modal-content,
+    #modal-edit-profil-keluarga .modal-content {
+        max-width: min(620px, 92vw) !important;
+        padding: 24px !important;
+        border-radius: 24px !important;
+    }
+
+    /* --- 6. Mod Admin Dashboard (Tablet / iPad) --- */
+    body.admin-mode #admin-dashboard,
+    body.admin-mode #admin-sijil,
+    body.admin-mode #admin-urus {
+        max-width: 920px !important;
+        margin: 0 auto !important;
+        padding: 20px 16px 100px !important;
+    }
+
+    .admin-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+        max-width: 880px !important;
+        margin: 0 auto 20px auto !important;
+    }
+
+    .admin-table-card {
+        max-width: 880px !important;
+        margin: 0 auto !important;
+        padding: 18px 20px !important;
+    }
+
+    /* --- 6. Sijil Pencapaian (Tablet / iPad) --- */
+    .sijil-manager-wrapper {
+        max-width: 920px !important;
+        padding: 12px 14px 40px !important;
+    }
+
+    .sijil-header-card {
+        max-width: 540px !important;
+        margin: 0 auto 18px auto !important;
+        padding: 14px 22px !important;
+    }
+
+    /* --- 7. Modals on Tablet / iPad --- */
+    .modal-overlay .modal-content {
+        max-width: min(740px, 92vw) !important;
+        max-height: 90vh !important;
+        padding: 22px 20px !important;
+        border-radius: 24px !important;
+    }
+
+    .modal-overlay .close-btn {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 1.1rem !important;
+    }
+
+    /* --- 8. Activities / Games (Tablet / iPad) --- */
+    #grid-huruf-container {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 14px !important;
+        max-width: 700px !important;
+        margin: 0 auto !important;
+    }
+
+    #grid-huruf-container .kad-huruf-btn {
+        min-height: 75px !important;
+        font-size: 2rem !important;
+        border-radius: 18px !important;
+    }
+
+    #view-surih-nombor .surih-canvas-wrapper,
+    #view-surih-huruf .surih-canvas-wrapper {
+        max-width: 580px !important;
+        margin: 0 auto !important;
+    }
+
+    .cabaran-opt-btn {
+        padding: 16px 20px !important;
+        font-size: 1.15rem !important;
+        min-height: 56px !important;
+        border-radius: 16px !important;
+    }
+}
+
+/* ==========================================================================
+   Auth Modal 2-Column Responsive Split Layout & Typewriter
+   ========================================================================== */
+.auth-split-modal-container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 24px;
+    width: 100%;
+}
+
+.auth-modal-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px 18px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid var(--color-dark, #1e293b);
+    border-radius: 20px;
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.auth-modal-left-logo {
+    width: 175px;
+    max-width: 85%;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.12));
+    margin-bottom: 12px;
+    transition: transform 0.25s ease;
+}
+
+.auth-modal-left-logo:hover {
+    transform: scale(1.03);
+}
+
+.auth-modal-left-title {
+    font-weight: 900;
+    font-size: 1.25rem;
+    color: #1e293b;
+    margin-bottom: 8px;
+    line-height: 1.25;
+    min-height: 2.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.auth-title-highlighter {
+    position: relative;
+    display: inline-block;
+    color: #0f172a;
+    font-weight: 900;
+    z-index: 1;
+    padding: 0 4px;
+    white-space: nowrap;
+}
+
+.auth-title-highlighter::before {
+    content: "";
+    position: absolute;
+    bottom: 3px;
+    left: 0;
+    right: 0;
+    height: 48%;
+    background: linear-gradient(90deg, #fde047 0%, #facc15 50%, #f59e0b 100%);
+    border-radius: 4px;
+    z-index: -1;
+    transform: rotate(-1.2deg);
+    box-shadow: 0 2px 8px rgba(250, 204, 21, 0.45);
+}
+
+.typewriter-cursor {
+    display: inline-block;
+    width: 2.5px;
+    height: 1.15em;
+    background-color: var(--color-orange, #ea580c);
+    margin-left: 2px;
+    vertical-align: middle;
+    border-radius: 2px;
+    animation: typewriterBlink 0.85s infinite;
+}
+
+@keyframes typewriterBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.auth-modal-left-desc {
+    font-size: 0.88rem;
+    color: #475569;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.auth-modal-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.auth-modal-badge-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    background: #ffffff;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden;
+}
+
+.auth-modal-badge-item:hover {
+    transform: translateY(-1px);
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.auth-modal-badge-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    border-radius: 10px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    line-height: 1 !important;
+    overflow: hidden;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.auth-modal-badge-icon i {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 1.05rem !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+.auth-modal-badge-icon i::before {
+    display: block !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.auth-modal-badge-item span {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+.auth-modal-divider {
+    width: 2px;
+    background-color: transparent;
+    border-left: 2px dashed rgba(16, 24, 47, 0.2);
+    margin: 4px 0;
+    flex-shrink: 0;
+}
+
+.auth-modal-right {
+    flex: 1.18;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Prestasi Murid & Laporan Filters (Guru Dashboard) */
+.guru-prestasi-filter-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.guru-filter-secondary-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+    .guru-filter-container {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 8px;
+    }
+    .guru-filter-kelas {
+        width: 100% !important;
+    }
+    .guru-filter-secondary-group {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+    }
+    .guru-filter-secondary-group select {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .guru-prestasi-header-bar {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    #guru-table-title {
+        width: 100% !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+    }
+
+    .guru-prestasi-filter-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        gap: 8px !important;
+    }
+
+    .guru-prestasi-filter-container .guru-filter-kelas,
+    #guru-dashboard-kelas-select {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: block !important;
+        box-sizing: border-box !important;
+    }
+
+    .guru-prestasi-filter-container .guru-filter-secondary-group {
+        display: flex !important;
+        flex-direction: row !important;
+        width: 100% !important;
+        gap: 8px !important;
+    }
+
+    .guru-prestasi-filter-container .guru-filter-secondary-group select,
+    #guru-dashboard-tahap-select,
+    #guru-dashboard-peta-select {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        width: 50% !important;
+        max-width: 50% !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
+        text-overflow: ellipsis !important;
+        padding: 6px 18px 6px 8px !important;
+    }
+}
+
+@media (max-width: 720px) {
+    .auth-split-modal-container {
+        flex-direction: column;
+        gap: 16px;
+    }
+    .auth-modal-divider {
+        width: 100%;
+        height: 2px;
+        border-left: none;
+        border-top: 2px dashed rgba(16, 24, 47, 0.2);
+        margin: 4px 0;
+    }
+    .auth-modal-left {
+        padding: 14px 12px;
+    }
+    .auth-modal-left-logo {
+        width: 125px;
+        margin-bottom: 8px;
+    }
+    .auth-modal-left-title {
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+        min-height: auto;
+    }
+    .auth-modal-left-desc {
+        font-size: 0.82rem;
+        margin-bottom: 8px;
+    }
+    .auth-modal-badges {
+        display: none;
+    }
+}
+
+/* =========================================================
+   APP INFO MODAL SOCIAL MEDIA BUTTONS
+   ========================================================= */
+.app-info-social-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 2.5px solid var(--color-dark, #10182f);
+    box-shadow: 0 3px 0 var(--color-dark, #10182f);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    flex-shrink: 0;
+}
+
+.app-info-social-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--color-dark, #10182f);
+}
+
+.app-info-social-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--color-dark, #10182f);
+}
+
+.app-info-social-btn.btn-web {
+    background-color: #ff8800;
+    color: #ffffff;
+    font-size: 1.25rem;
+}
+
+.app-info-social-btn.btn-telegram {
+    background-color: #24A1DE;
+    color: #ffffff;
+    font-size: 1.35rem;
+}
+
+.app-info-social-btn.btn-playstore {
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.app-info-social-btn.btn-appstore {
+    background-color: #0071e3;
+    color: #ffffff;
+    font-size: 1.45rem;
+}
+
+/* ========================================================
+   CABARAN TAMBAHAN — FULL-SCREEN LAYOUT MATCHING CABARAN UTAMA
+   ======================================================== */
+#modal-cabaran-lain-game.cabaran-tambahan-fullscreen-screen {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 4500 !important;
+    background-color: var(--bg-cream, #fff8ec) !important;
+    background-image: url('/images/sampingan/background-utama.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+}
+
+@media (max-width: 768px) {
+    #modal-cabaran-lain-game,
+    #modal-cabaran-lain-game.cabaran-tambahan-fullscreen-screen {
+        background-position: left center !important;
+    }
+}
+
+/* Master Top Bar for Cabaran Tambahan - Identical index, baseline & layout to Cabaran Utama */
+#modal-cabaran-lain-game .cabaran-tambahan-top-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 25px 20px 12px 20px !important;
+    margin: 0 auto 16px auto !important;
+    width: 100% !important;
+    max-width: 800px !important;
+    position: relative !important;
+    z-index: 50 !important;
+    box-sizing: border-box !important;
+}
+
+#modal-cabaran-lain-game .cabaran-tambahan-top-bar .back-icon-btn {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    z-index: 40 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background-color: var(--color-purple, #8b5cf6) !important;
+    border: 2.5px solid var(--color-dark, #0f172a) !important;
+    box-shadow: 0 2px 0 var(--color-dark, #0f172a) !important;
+    color: #ffffff !important;
+    font-size: 1.25rem !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+}
+
+#modal-cabaran-lain-game .cabaran-tambahan-top-bar .page-title {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    margin: 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    font-size: 1.2rem !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    background-color: var(--color-purple, #8b5cf6) !important;
+    color: #ffffff !important;
+    padding: 8px 24px !important;
+    border-radius: 18px !important;
+    border: 2.5px solid var(--color-dark, #0f172a) !important;
+    box-shadow: 0 2px 0 var(--color-dark, #0f172a) !important;
+    text-transform: none !important;
+}
+
+#modal-cabaran-lain-game .cabaran-tambahan-top-bar .top-bar-spacer,
+#modal-cabaran-lain-game .cabaran-tambahan-top-bar > div:last-child {
+    width: 48px !important;
+    height: 48px !important;
+    flex-shrink: 0 !important;
+    display: block !important;
+    visibility: hidden !important;
+}
+
+#modal-cabaran-lain-game .cabaran-tambahan-content-wrapper {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 1080px !important;
+    height: auto !important;
+    min-height: unset !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 0 16px 32px 16px !important;
+    box-sizing: border-box !important;
+}
+
+#modal-cabaran-lain-game #cabaran-lain-game-area {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: unset !important;
+    width: 100% !important;
+    max-width: min(740px, 94vw) !important;
+    background-color: #168f81 !important;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.22) 2px, transparent 2px) !important;
+    background-size: 16px 16px !important;
+    border: 4px solid var(--color-dark, #0f172a) !important;
+    border-radius: 26px !important;
+    box-shadow: 0 10px 0 var(--color-dark, #0f172a) !important;
+    padding: clamp(16px, 2.5vw, 24px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    margin: 0 auto !important;
+    position: relative !important;
+    transition: max-width 0.25s ease !important;
+}
+
+#modal-cabaran-lain-game.is-bacaan-bergred #cabaran-lain-game-area,
+#modal-cabaran-lain-game:has(.cl-bacaan-bergred-wrap) #cabaran-lain-game-area {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: unset !important;
+    max-width: min(1040px, 96vw) !important;
+}
+
+/* Status Header in Cabaran Tambahan (Hearts on LEFT, Target/Score on RIGHT - Corner by Corner with Game Frame) */
+#modal-cabaran-lain-game .cl-top-header-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto 16px auto !important;
+    padding: 0 4px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+}
+
+#modal-cabaran-lain-game #cl-hearts-box {
+    background: #ffffff !important;
+    padding: 7px 16px !important;
+    border-radius: 30px !important;
+    border: 2.5px solid var(--color-dark, #0f172a) !important;
+    box-shadow: 0 2px 0 var(--color-dark, #0f172a) !important;
+    display: flex !important;
+    gap: 8px !important;
+    align-items: center !important;
+    margin-right: auto !important;
+}
+
+#modal-cabaran-lain-game #cl-score-box {
+    background: #ffffff !important;
+    padding: 7px 16px !important;
+    border-radius: 30px !important;
+    border: 2.5px solid var(--color-dark, #0f172a) !important;
+    box-shadow: 0 2px 0 var(--color-dark, #0f172a) !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    color: var(--color-dark, #0f172a) !important;
+    font-family: 'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif !important;
+    margin-left: auto !important;
+}
+
+#modal-cabaran-lain-game #cl-hearts-box i {
+    font-size: 1.2rem !important;
+}
+
+/* Enlarge Cabaran Tambahan Game Area & Canvases for Laptop View (Strict aspect ratio, no squashing) */
+#modal-cabaran-lain-game .cl-canvas-wrap {
+    width: 100% !important;
+    max-width: min(560px, calc((100vh - 210px) * 1.15), 88vw) !important;
+    margin: 0 auto 12px auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+#modal-cabaran-lain-game canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    display: block !important;
+}
+
+#modal-cabaran-lain-game #fj-canvas {
+    width: 100% !important;
+    max-width: min(560px, calc((100vh - 210px) * 1.2), 88vw) !important;
+    height: auto !important;
+    max-height: none !important;
+    aspect-ratio: 360 / 300 !important;
+    border-radius: 20px !important;
+    border: 3px solid var(--color-dark, #0f172a) !important;
+    box-shadow: 0 3px 0 var(--color-dark, #0f172a) !important;
+    display: block !important;
+}
+
+#modal-cabaran-lain-game #ss-canvas,
+#modal-cabaran-lain-game #bm-canvas,
+#modal-cabaran-lain-game #bt-canvas {
+    width: 100% !important;
+    max-width: min(540px, calc((100vh - 210px) * 1.125), 88vw) !important;
+    height: auto !important;
+    max-height: none !important;
+    aspect-ratio: 360 / 320 !important;
+    border-radius: 20px !important;
+    border: 3px solid var(--color-dark, #0f172a) !important;
+    box-shadow: 0 3px 0 var(--color-dark, #0f172a) !important;
+    display: block !important;
+}
+
+#modal-cabaran-lain-game #bc-canvas,
+#modal-cabaran-lain-game #fs-canvas {
+    width: 100% !important;
+    max-width: min(520px, calc((100vh - 210px) * 1.0588), 88vw) !important;
+    height: auto !important;
+    max-height: none !important;
+    aspect-ratio: 360 / 340 !important;
+    border-radius: 20px !important;
+    border: 3px solid var(--color-dark, #0f172a) !important;
+    box-shadow: 0 3px 0 var(--color-dark, #0f172a) !important;
+    display: block !important;
+}
+
+#modal-cabaran-lain-game #vw-field {
+    width: 100% !important;
+    max-width: min(540px, calc((100vh - 210px) * 1.2), 88vw) !important;
+    aspect-ratio: 360 / 300 !important;
+    margin: 0 auto !important;
+}
+
+/* FIX: Cari Kata (Word Search) - Fits comfortably without scrolling on laptop */
+#modal-cabaran-lain-game #cabaran-lain-game-area > div[style*="Tarik huruf"],
+#modal-cabaran-lain-game #cabaran-lain-game-area > div:first-child:not(.cl-top-header-row) {
+    color: #0f172a !important;
+    text-shadow: none !important;
+    font-size: 1.05rem !important;
+    font-weight: 900 !important;
+    font-family: 'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif !important;
+    margin-bottom: 12px !important;
+    text-align: center !important;
+}
+
+#modal-cabaran-lain-game #ws-word-list {
+    width: 100% !important;
+    max-width: min(480px, 88vw) !important;
+    margin: 0 auto 12px auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    justify-content: center !important;
+}
+
+#modal-cabaran-lain-game #ws-word-list span {
+    font-size: 1.05rem !important;
+    padding: 6px 16px !important;
+}
+
+#modal-cabaran-lain-game #ws-grid {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 7px !important;
+    width: 100% !important;
+    max-width: min(430px, calc(100vh - 290px), 86vw) !important;
+    margin: 0 auto !important;
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+#modal-cabaran-lain-game #ws-grid .ws-cell {
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 900 !important;
+    font-size: 1.45rem !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    color: #1e1b4b !important;
+    border: 2.5px solid #cbd5e1 !important;
+    box-shadow: 0 2px 0 #cbd5e1 !important;
+    cursor: pointer !important;
+}
+
+/* FIX: Padanan Memori (Memory Match) - Enlarged Cards for Laptop View */
+#modal-cabaran-lain-game #mm-status {
+    color: #0f172a !important;
+    text-shadow: none !important;
+    font-size: 1.05rem !important;
+    font-weight: 900 !important;
+    font-family: 'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif !important;
+    margin-bottom: 14px !important;
+    text-align: center !important;
+}
+
+#modal-cabaran-lain-game.is-padanan-memori #cabaran-lain-game-area,
+#modal-cabaran-lain-game:has(#mm-grid) #cabaran-lain-game-area {
+    max-width: min(860px, 96vw) !important;
+}
+
+#modal-cabaran-lain-game #mm-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 18px !important;
+    width: 100% !important;
+    max-width: min(800px, calc((100vh - 220px) * 1.333), 94vw) !important;
+    margin: 0 auto !important;
+    perspective: 1000px !important;
+}
+
+#modal-cabaran-lain-game .mm-card-container {
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    position: relative !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    display: block !important;
+    border-radius: 20px !important;
+}
+
+#modal-cabaran-lain-game .mm-card-inner,
+#modal-cabaran-lain-game .mm-card-front,
+#modal-cabaran-lain-game .mm-card-back {
+    border-radius: 20px !important;
+}
+
+#modal-cabaran-lain-game .mm-card-front {
+    font-size: 2.8rem !important;
+}
+
+#modal-cabaran-lain-game .mm-card-back span,
+#modal-cabaran-lain-game .mm-card-letter {
+    font-size: 3.5rem !important;
+}
+
+#modal-cabaran-lain-game #wb-container,
+#modal-cabaran-lain-game #sq-container,
+#modal-cabaran-lain-game #vw-grid {
+    width: 100% !important;
+    max-width: min(560px, 88vw) !important;
+    margin: 0 auto !important;
+}
+
+/* Bacaan Bergred 2-Column Split Layout (Default / Laptop View) */
+#modal-cabaran-lain-game .cl-bacaan-bergred-wrap {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: 980px !important;
+    gap: 24px !important;
+    margin: 0 auto !important;
+}
+
+#modal-cabaran-lain-game .cl-bacaan-question-card {
+    flex: 0 0 380px !important;
+    max-width: 400px !important;
+    width: 100% !important;
+    margin-bottom: 0 !important;
+    padding: 18px 64px 18px 18px !important;
+    border-radius: 20px !important;
+    background: #ffffff !important;
+    border: 3px solid #1e293b !important;
+    box-shadow: 0 5px 0 #1e293b !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    cursor: pointer !important;
+    transition: transform 0.15s, box-shadow 0.15s !important;
+}
+
+#modal-cabaran-lain-game .cl-bacaan-question-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 7px 0 #1e293b !important;
+}
+
+#modal-cabaran-lain-game .cl-bacaan-question-card img {
+    width: 68px !important;
+    height: 68px !important;
+    border-radius: 12px !important;
+    border: 2.5px solid #1e293b !important;
+    flex-shrink: 0 !important;
+}
+
+#modal-cabaran-lain-game .cl-bacaan-question-card p,
+#modal-cabaran-lain-game .cl-bacaan-question-card span {
+    font-size: 1.25rem !important;
+    line-height: 1.45 !important;
+    word-break: break-word !important;
+}
+
+#modal-cabaran-lain-game #bpa-target-badge {
+    font-size: 1.45rem !important;
+}
+
+#modal-cabaran-lain-game .cl-bacaan-question-card button {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    right: 12px !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    border-radius: 50% !important;
+    font-size: 1.15rem !important;
+}
+
+#modal-cabaran-lain-game .cl-bacaan-canvas-wrap {
+    flex: 0 0 auto !important;
+    max-width: min(560px, calc((100vh - 220px) * 1.3077), 58vw) !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+}
+
+@media (min-width: 768px) {
+    #modal-cabaran-lain-game .cl-bacaan-canvas-wrap {
+        flex: 1 1 540px !important;
+    }
+}
+
+#modal-cabaran-lain-game .cl-bacaan-canvas-wrap canvas,
+#modal-cabaran-lain-game #bpa-canvas,
+#modal-cabaran-lain-game #lb-canvas,
+#modal-cabaran-lain-game #mk-canvas,
+#modal-cabaran-lain-game #kl-canvas,
+#modal-cabaran-lain-game #tc-canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+    aspect-ratio: 340 / 260 !important;
+    height: auto !important;
+    max-height: none !important;
+    border-radius: 20px !important;
+    border: 3.5px solid #1e293b !important;
+    box-shadow: 0 5px 0 #1e293b !important;
+    display: block !important;
+}
+
+/* Responsive Sizing for Mobile View (Preserves Corner-by-Corner Alignment on Mobile) */
+@media (max-width: 768px) {
+    #modal-cabaran-lain-game.cabaran-tambahan-fullscreen-screen {
+        padding-bottom: 24px !important;
+        overflow-y: auto !important;
+    }
+
+    #modal-cabaran-lain-game .cabaran-tambahan-top-bar {
+        padding: 16px 14px 8px 14px !important;
+        margin: 0 auto 10px auto !important;
+    }
+
+    #modal-cabaran-lain-game .cabaran-tambahan-content-wrapper {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: unset !important;
+        padding: 0 10px 24px 10px !important;
+    }
+
+    #modal-cabaran-lain-game #cabaran-lain-game-area,
+    #modal-cabaran-lain-game.is-bacaan-bergred #cabaran-lain-game-area,
+    #modal-cabaran-lain-game:has(.cl-bacaan-bergred-wrap) #cabaran-lain-game-area {
+        flex: 0 0 auto !important;
+        height: auto !important;
+        min-height: unset !important;
+        max-width: min(420px, 94vw) !important;
+        padding: 12px 10px 16px 10px !important;
+        border-radius: 20px !important;
+        margin: 0 auto 16px auto !important;
+    }
+
+    #modal-cabaran-lain-game .cl-top-header-row {
+        max-width: 100% !important;
+        margin-bottom: 12px !important;
+        padding: 0 2px !important;
+    }
+    #modal-cabaran-lain-game .cl-canvas-wrap,
+    #modal-cabaran-lain-game canvas,
+    #modal-cabaran-lain-game #bc-canvas,
+    #modal-cabaran-lain-game #fs-canvas,
+    #modal-cabaran-lain-game #bm-canvas,
+    #modal-cabaran-lain-game #bt-canvas,
+    #modal-cabaran-lain-game #fj-canvas,
+    #modal-cabaran-lain-game #ss-canvas,
+    #modal-cabaran-lain-game #vw-field,
+    #modal-cabaran-lain-game #wb-container,
+    #modal-cabaran-lain-game #sq-container,
+    #modal-cabaran-lain-game #vw-grid {
+        max-width: min(390px, 92vw) !important;
+    }
+    #modal-cabaran-lain-game #ws-word-list {
+        max-width: min(370px, 92vw) !important;
+    }
+    #modal-cabaran-lain-game #ws-word-list span {
+        font-size: 0.95rem !important;
+        padding: 6px 14px !important;
+    }
+    #modal-cabaran-lain-game #ws-grid {
+        max-width: min(360px, 92vw) !important;
+        gap: 6px !important;
+    }
+    #modal-cabaran-lain-game #ws-grid .ws-cell {
+        font-size: 1.3rem !important;
+        border-radius: 12px !important;
+    }
+    #modal-cabaran-lain-game #mm-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        max-width: min(390px, 94vw) !important;
+        gap: 10px !important;
+        margin: 0 auto !important;
+    }
+    #modal-cabaran-lain-game .mm-card-container,
+    #modal-cabaran-lain-game .mm-card-inner,
+    #modal-cabaran-lain-game .mm-card-front,
+    #modal-cabaran-lain-game .mm-card-back {
+        border-radius: 14px !important;
+    }
+    #modal-cabaran-lain-game .mm-card-front {
+        font-size: 2.1rem !important;
+    }
+    #modal-cabaran-lain-game .mm-card-back span,
+    #modal-cabaran-lain-game .mm-card-letter {
+        font-size: 2.6rem !important;
+    }
+
+    /* Mobile Bacaan Bergred Styles */
+    #modal-cabaran-lain-game .cl-bacaan-bergred-wrap {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: unset !important;
+        margin: 0 auto !important;
+        gap: 10px !important;
+    }
+    #modal-cabaran-lain-game .cl-bacaan-question-card {
+        flex: 0 0 auto !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin-bottom: 0 !important;
+        padding: 10px 54px 10px 12px !important;
+        border-radius: 16px !important;
+        cursor: pointer !important;
+    }
+    #modal-cabaran-lain-game .cl-bacaan-question-card img {
+        width: 52px !important;
+        height: 52px !important;
+        border-radius: 10px !important;
+        flex-shrink: 0 !important;
+    }
+    #modal-cabaran-lain-game .cl-bacaan-question-card p,
+    #modal-cabaran-lain-game .cl-bacaan-question-card span {
+        font-size: 1.05rem !important;
+    }
+    #modal-cabaran-lain-game .cl-bacaan-canvas-wrap {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        max-width: min(350px, 92vw) !important;
+        height: auto !important;
+        min-height: unset !important;
+        margin: 0 auto !important;
+    }
+    #modal-cabaran-lain-game .cl-bacaan-canvas-wrap canvas,
+    #modal-cabaran-lain-game #bpa-canvas,
+    #modal-cabaran-lain-game #lb-canvas,
+    #modal-cabaran-lain-game #mk-canvas,
+    #modal-cabaran-lain-game #kl-canvas,
+    #modal-cabaran-lain-game #tc-canvas {
+        width: 100% !important;
+        max-width: 100% !important;
+        aspect-ratio: 340 / 260 !important;
+        height: auto !important;
+        max-height: none !important;
+    }
+}
+
+/* Global instruction banner in Cabaran Tambahan (White pill matching Cabaran Utama style) */
+.cl-instruction-banner,
+#modal-cabaran-lain-game .cl-instruction-banner {
+    background: #ffffff !important;
+    border: 3px solid #0f172a !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 0 #0f172a !important;
+    padding: 7px 22px !important;
+    display: inline-block !important;
+    color: #0f172a !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    font-family: 'AtlantaRounded', sans-serif !important;
+    max-width: 92% !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    text-shadow: none !important;
+}
+
+.cl-instruction-banner *,
+#modal-cabaran-lain-game .cl-instruction-banner * {
+    text-shadow: none !important;
+}
+
+@media (min-width: 768px) {
+    #modal-cabaran-lain-game .cl-instruction-banner {
+        font-size: 1.05rem !important;
+        padding: 8px 24px !important;
+    }
+}
+
+/* Star Popup Animations & Effects */
+@keyframes starDropPop {
+    0% {
+        transform: translateY(-45px) scale(0.2);
+        opacity: 0;
+    }
+    70% {
+        transform: translateY(6px) scale(1.15);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes shineSweepLoop {
+    0% { left: -150%; }
+    100% { left: 150%; }
+}
+
+@keyframes badgeGlowPulse {
+    0%, 100% { filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.45)); }
+    50% { filter: drop-shadow(0 6px 14px rgba(245, 158, 11, 0.8)); }
+}
+
+/* ========================================================
+   CABARAN UTAMA — SUSUN SUKU KATA / AYAT SLOTS & OPTIONS
+   ======================================================== */
+.cabaran-susun-slots-container {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 12px;
+}
+
+.cabaran-susun-slots-container.is-ayat {
+    gap: 10px;
+}
+
+.cabaran-susun-slot {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: 'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+    user-select: none !important;
+    box-sizing: border-box !important;
+    flex-shrink: 1 !important;
+    transition: all 0.15s ease !important;
+}
+
+/* Suku Kata Tapak Slot (Enlarged) */
+.cabaran-susun-slot:not(.is-ayat) {
+    width: clamp(90px, 12vw, 120px) !important;
+    height: clamp(80px, 10vw, 105px) !important;
+    font-size: clamp(2.2rem, 3.5vw, 3rem) !important;
+    border-radius: 20px !important;
+}
+
+/* Ayat Pendek Tapak Slot (Single Row, Fits 4 Items Cleanly) */
+.cabaran-susun-slot.is-ayat {
+    width: clamp(110px, 15vw, 165px) !important;
+    height: clamp(55px, 6vw, 70px) !important;
+    font-size: clamp(1.15rem, 1.8vw, 1.55rem) !important;
+    padding: 0 10px !important;
+    border-radius: 16px !important;
+}
+
+.cabaran-susun-options-container {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 8px !important;
+    gap: 12px;
+}
+
+.cabaran-susun-options-container.is-ayat {
+    gap: 10px;
+}
+
+.cabaran-susun-opt-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: 'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    touch-action: none !important;
+    box-sizing: border-box !important;
+    border: 3.5px solid var(--color-dark) !important;
+    box-shadow: 0 3px 0 var(--color-dark) !important;
+    flex-shrink: 1 !important;
+    white-space: nowrap !important;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.15s ease !important;
+}
+
+.cabaran-susun-opt-btn:hover:not([disabled]) {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 5px 0 var(--color-dark, #0f172a) !important;
+}
+
+.cabaran-susun-opt-btn:active:not([disabled]) {
+    transform: translateY(2px) !important;
+    box-shadow: 0 1px 0 var(--color-dark, #0f172a) !important;
+}
+
+/* Suku Kata Option Buttons: Compact Box, Large Readable Font, Fits 3 in 1 Baris */
+.cabaran-susun-opt-btn:not(.is-ayat) {
+    width: clamp(90px, 12vw, 120px) !important;
+    height: clamp(65px, 8vw, 85px) !important;
+    font-size: clamp(2rem, 3.2vw, 2.7rem) !important;
+    border-radius: 18px !important;
+    padding: 0 16px !important;
+}
+
+/* Ayat Pendek Option Buttons: Compact Box, Fits 4 in 1 Baris on Mobile & Laptop */
+.cabaran-susun-opt-btn.is-ayat {
+    width: clamp(110px, 15vw, 165px) !important;
+    height: clamp(48px, 5.5vw, 62px) !important;
+    font-size: clamp(1.1rem, 1.8vw, 1.5rem) !important;
+    border-radius: 16px !important;
+    padding: 0 12px !important;
+}
+
+@media (max-width: 640px) {
+    .cabaran-susun-slots-container {
+        gap: 6px !important;
+    }
+    .cabaran-susun-slots-container.is-ayat {
+        gap: 4px !important;
+    }
+
+    /* Suku Kata Mobile Slots: Large tapak drop */
+    .cabaran-susun-slot:not(.is-ayat) {
+        width: clamp(76px, 22vw, 105px) !important;
+        height: clamp(70px, 19vw, 95px) !important;
+        font-size: clamp(1.85rem, 5.8vw, 2.7rem) !important;
+        border-radius: 18px !important;
+    }
+
+    /* Ayat Pendek Mobile Slots: Fits 4 in 1 row */
+    .cabaran-susun-slot.is-ayat {
+        width: clamp(60px, 19vw, 85px) !important;
+        height: clamp(48px, 12vw, 60px) !important;
+        font-size: clamp(0.78rem, 2.7vw, 1.05rem) !important;
+        padding: 0 4px !important;
+        border-radius: 14px !important;
+    }
+
+    .cabaran-susun-options-container {
+        gap: 6px !important;
+    }
+    .cabaran-susun-options-container.is-ayat {
+        gap: 4px !important;
+    }
+
+    /* Suku Kata Mobile Options: Compact button footprint, large font, strictly 1 row */
+    .cabaran-susun-opt-btn:not(.is-ayat) {
+        width: clamp(74px, 22vw, 105px) !important;
+        height: clamp(56px, 14vw, 75px) !important;
+        padding: 0 clamp(4px, 1.5vw, 10px) !important;
+        font-size: clamp(1.65rem, 5.2vw, 2.35rem) !important;
+        border-radius: 18px !important;
+    }
+
+    /* Ayat Pendek Mobile Options: Strictly 4 in 1 row */
+    .cabaran-susun-opt-btn.is-ayat {
+        width: clamp(60px, 20vw, 85px) !important;
+        height: clamp(44px, 11vw, 54px) !important;
+        padding: 0 4px !important;
+        font-size: clamp(0.78rem, 2.7vw, 1.05rem) !important;
+        border-radius: 14px !important;
     }
 }

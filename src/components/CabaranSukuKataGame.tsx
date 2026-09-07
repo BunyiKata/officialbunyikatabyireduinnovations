@@ -37,12 +37,17 @@ const CABARAN_DATA: Record<string, any[]> = {
     { type: 'dengar', audio: 'b', options: ['b', 'p', 'd', 't'], answer: 'b' },
     { type: 'dengar', audio: 'c', options: ['c', 's', 'k', 'z'], answer: 'c' },
     { type: 'dengar', audio: 'd', options: ['b', 'd', 'p', 'q'], answer: 'd' },
-    { type: 'dengar', audio: 'e', options: ['e', 'i', 'a', 'u'], answer: 'e' },
+    { type: 'dengar', audio: 'e', options: ['e', 'é', 'a', 'u'], answer: 'e' },
+    { type: 'dengar', audio: 'é', options: ['é', 'e', 'i', 'a'], answer: 'é' },
     { type: 'dengar', audio: 'f', options: ['f', 'v', 'p', 'h'], answer: 'f' },
     { type: 'dengar', audio: 'g', options: ['g', 'j', 'q', 'k'], answer: 'g' },
     { type: 'dengar', audio: 'h', options: ['h', 'n', 'm', 'k'], answer: 'h' },
     { type: 'dengar', audio: 'm', options: ['m', 'n', 'w', 'v'], answer: 'm' },
-    { type: 'dengar', audio: 's', options: ['s', 'z', 'c', 'x'], answer: 's' }
+    { type: 'dengar', audio: 'q', options: ['q', 'p', 'b', 'd'], answer: 'q' },
+    { type: 'dengar', audio: 'r', options: ['r', 'l', 'w', 'm'], answer: 'r' },
+    { type: 'dengar', audio: 's', options: ['s', 'z', 'c', 'x'], answer: 's' },
+    { type: 'dengar', audio: 'x', options: ['x', 's', 'z', 'k'], answer: 'x' },
+    { type: 'dengar', audio: 'y', options: ['y', 'j', 'u', 'i'], answer: 'y' }
   ],
   huruf_vokal: [
     { type: 'padan', image: '🐔', imageText: 'ayam', options: ['a', 'e', 'i', 'u'], answer: 'a' },
@@ -65,7 +70,7 @@ const CABARAN_DATA: Record<string, any[]> = {
     { type: 'dengar', audio: 'm', options: ['n', 'w', 'm', 'v'], answer: 'm' }
   ],
   pengenalan_nombor: [
-    { type: 'padan', image: '➖', imageText: '', options: ['0', '1', '2', '3'], answer: '0' },
+    { type: 'padan', image: '0', imageText: '', options: ['0', '1', '2', '3'], answer: '0' },
     { type: 'padan', image: '🍪', imageText: '', options: ['1', '2', '3', '4'], answer: '1' },
     { type: 'padan', image: '🍪 🍪', imageText: '', options: ['2', '3', '4', '5'], answer: '2' },
     { type: 'padan', image: '🍪 🍪 🍪', imageText: '', options: ['3', '4', '5', '6'], answer: '3' },
@@ -109,8 +114,8 @@ const CABARAN_DATA: Record<string, any[]> = {
     { type: 'padan', image: '10 - 5 = ?', audio: '10 - 5', imageText: '', options: ['🍪 🍪 🍪', '🍪 🍪 🍪 🍪', '🍪 🍪 🍪 🍪 🍪', '🍪 🍪 🍪 🍪 🍪 🍪'], answer: '🍪 🍪 🍪 🍪 🍪' },
     { type: 'padan', image: '10 - 6 = ?', audio: '10 - 6', imageText: '', options: ['🍪 🍪', '🍪 🍪 🍪', '🍪 🍪 🍪 🍪', '🍪 🍪 🍪 🍪 🍪'], answer: '🍪 🍪 🍪 🍪' },
     { type: 'padan', image: '10 - 7 = ?', audio: '10 - 7', imageText: '', options: ['🍪', '🍪 🍪', '🍪 🍪 🍪', '🍪 🍪 🍪 🍪'], answer: '🍪 🍪 🍪' },
-    { type: 'padan', image: '10 - 8 = ?', audio: '10 - 8', imageText: '', options: ['➖', '🍪', '🍪 🍪', '🍪 🍪 🍪'], answer: '🍪 🍪' },
-    { type: 'padan', image: '10 - 9 = ?', audio: '10 - 9', imageText: '', options: ['➖', '🍪', '🍪 🍪', '🍪 🍪 🍪'], answer: '🍪' },
+    { type: 'padan', image: '10 - 8 = ?', audio: '10 - 8', imageText: '', options: ['0', '🍪', '🍪 🍪', '🍪 🍪 🍪'], answer: '🍪 🍪' },
+    { type: 'padan', image: '10 - 9 = ?', audio: '10 - 9', imageText: '', options: ['0', '🍪', '🍪 🍪', '🍪 🍪 🍪'], answer: '🍪' },
     { type: 'padan', image: '10 - 10 = ?', audio: '10 - 10', imageText: '', options: ['0', '🍪', '🍪 🍪', '🍪 🍪 🍪'], answer: '0' }
   ]
 };
@@ -201,16 +206,16 @@ function buildQuestionsForModule(id: string): any[] {
   // Handle Reading / Passages / Sentences (Map 4)
   if (id === 'ayat_pendek') {
     const defaultItems = [
-      { text: 'Saya suka makan nasi.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/saya suka makan nasi.MP3', image: '/images/menu-kad/ayat pendek/saya suka makan nasi.png' },
-      { text: 'Ibu memasak di dapur.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/ibu memasak di dapur.MP3', image: '/images/menu-kad/ayat pendek/ibu memasak di dapur.png' },
-      { text: 'Kucing itu sangat comel.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/kucing itu sangat comel.MP3', image: '/images/menu-kad/ayat pendek/kucing itu sangat comel.png' },
-      { text: 'Adik saya suka bermain.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/adik saya suka bermain.MP3', image: '/images/menu-kad/ayat pendek/adik saya suka bermain.png' },
-      { text: 'Bapa pergi ke pejabat.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/bapa pergi ke pejabat.MP3', image: '/images/menu-kad/ayat pendek/bapa pergi ke pejabat.png' },
-      { text: 'Kakak membaca buku cerita.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/kakak membaca buku cerita.MP3', image: '/images/menu-kad/ayat pendek/kakak membaca buku cerita.png' },
-      { text: 'Kami pergi ke sekolah.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/kami pergi ke sekolah.MP3', image: '/images/menu-kad/ayat pendek/kami pergi ke sekolah.png' },
-      { text: 'Burung itu terbang tinggi.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/burung itu terbang tinggi.MP3', image: '/images/menu-kad/ayat pendek/burung itu terbang tinggi.png' },
-      { text: 'Saya minum air kosong.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/saya minum air kosong.MP3', image: '/images/menu-kad/ayat pendek/saya minum air kosong.png' },
-      { text: 'Kami makan bersama.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/kami makan bersama.MP3', image: '/images/menu-kad/ayat pendek/kami makan bersama.png' }
+      { text: 'Saya suka makan nasi.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya suka makan nasi.MP3', image: '/images/menu-kad/ayat pendek/saya suka makan nasi.png' },
+      { text: 'Ibu memasak di dapur.', audio: '/audio/bacaan-bergred/audio ayat pendek/ibu memasak di dapur.MP3', image: '/images/menu-kad/ayat pendek/ibu memasak di dapur.png' },
+      { text: 'Kucing itu sangat comel.', audio: '/audio/bacaan-bergred/audio ayat pendek/kucing itu sangat comel.MP3', image: '/images/menu-kad/ayat pendek/kucing itu sangat comel.png' },
+      { text: 'Adik saya suka bermain.', audio: '/audio/bacaan-bergred/audio ayat pendek/adik saya suka bermain.MP3', image: '/images/menu-kad/ayat pendek/adik saya suka bermain.png' },
+      { text: 'Bapa pergi ke pejabat.', audio: '/audio/bacaan-bergred/audio ayat pendek/bapa pergi ke pejabat.MP3', image: '/images/menu-kad/ayat pendek/bapa pergi ke pejabat.png' },
+      { text: 'Kakak membaca buku cerita.', audio: '/audio/bacaan-bergred/audio ayat pendek/kakak membaca buku cerita.MP3', image: '/images/menu-kad/ayat pendek/kakak membaca buku cerita.png' },
+      { text: 'Kami pergi ke sekolah.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami pergi ke sekolah.MP3', image: '/images/menu-kad/ayat pendek/kami pergi ke sekolah.png' },
+      { text: 'Burung itu terbang tinggi.', audio: '/audio/bacaan-bergred/audio ayat pendek/burung itu terbang tinggi.MP3', image: '/images/menu-kad/ayat pendek/burung itu terbang tinggi.png' },
+      { text: 'Saya minum air kosong.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya minum air kosong.MP3', image: '/images/menu-kad/ayat pendek/saya minum air kosong.png' },
+      { text: 'Kami makan bersama.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami makan bersama.MP3', image: '/images/menu-kad/ayat pendek/kami makan bersama.png' }
     ];
     const sourceItems = (items && items.length > 0) ? items : defaultItems;
     const shuffledItems = shuffleArray(sourceItems);
@@ -234,16 +239,16 @@ function buildQuestionsForModule(id: string): any[] {
 
   if (id === 'ayat_panjang') {
     const defaultItems = [
-      { text: 'Ibu memasak nasi lemak untuk sarapan pagi ini.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.MP3', image: '/images/menu-kad/ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.png' },
-      { text: 'Kami pergi ke taman permainan pada hari Sabtu.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.MP3', image: '/images/menu-kad/ayat panjang/kami pergi ke taman permainan pada hari sabtu.png' },
-      { text: 'Bapa membeli buah-buahan segar di pasar tani.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.MP3', image: '/images/menu-kad/ayat panjang/bapa membeli buah-buahan segar di pasar tani.png' },
-      { text: 'Kucing kecil itu bermain dengan bola di halaman rumah.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.MP3', image: '/images/menu-kad/ayat panjang/kucing kecil itu bermain dengan bola di halaman rumah.png' },
-      { text: 'Adik saya belajar membaca buku cerita setiap malam.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/adik saya belajar membaca buku cerita setiap .MP3', image: '/images/menu-kad/ayat panjang/adik saya belajar membaca buku cerita setiap malam.png' },
-      { text: 'Guru mengajar kami menulis huruf abjad dengan rapi.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.MP3', image: '/images/menu-kad/ayat panjang/guru mengajar kami menulis huruf abjad dengan rapi.png' },
-      { text: 'Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.MP3', image: '/images/menu-kad/ayat panjang/kami menyanyi lagu sambil bertepuk tangan dengan gembira.png' },
-      { text: 'Burung kecil itu terbang tinggi di langit biru.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.MP3', image: '/images/menu-kad/ayat panjang/burung kecil itu terbang tinggi di langit biru.png' },
-      { text: 'Kakak membantu ibu membasuh pinggan selepas makan malam.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.MP3', image: '/images/menu-kad/ayat panjang/kakak membantu ibu membasuh pinggan selepas makan malam.png' },
-      { text: 'Kami berkumpul di padang sekolah untuk beriadah pagi.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.MP3', image: '/images/menu-kad/ayat panjang/kami berkumpul di padang sekolah untuk beriadah pagi.png' }
+      { text: 'Ibu memasak nasi lemak untuk sarapan pagi ini.', audio: '/audio/bacaan-bergred/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.MP3', image: '/images/menu-kad/ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.png' },
+      { text: 'Kami pergi ke taman permainan pada hari Sabtu.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.MP3', image: '/images/menu-kad/ayat panjang/kami pergi ke taman permainan pada hari sabtu.png' },
+      { text: 'Bapa membeli buah-buahan segar di pasar tani.', audio: '/audio/bacaan-bergred/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.MP3', image: '/images/menu-kad/ayat panjang/bapa membeli buah-buahan segar di pasar tani.png' },
+      { text: 'Kucing kecil itu bermain dengan bola di halaman rumah.', audio: '/audio/bacaan-bergred/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.MP3', image: '/images/menu-kad/ayat panjang/kucing kecil itu bermain dengan bola di halaman rumah.png' },
+      { text: 'Adik saya belajar membaca buku cerita setiap malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/adik saya belajar membaca buku cerita setiap .MP3', image: '/images/menu-kad/ayat panjang/adik saya belajar membaca buku cerita setiap malam.png' },
+      { text: 'Guru mengajar kami menulis huruf abjad dengan rapi.', audio: '/audio/bacaan-bergred/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.MP3', image: '/images/menu-kad/ayat panjang/guru mengajar kami menulis huruf abjad dengan rapi.png' },
+      { text: 'Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.MP3', image: '/images/menu-kad/ayat panjang/kami menyanyi lagu sambil bertepuk tangan dengan gembira.png' },
+      { text: 'Burung kecil itu terbang tinggi di langit biru.', audio: '/audio/bacaan-bergred/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.MP3', image: '/images/menu-kad/ayat panjang/burung kecil itu terbang tinggi di langit biru.png' },
+      { text: 'Kakak membantu ibu membasuh pinggan selepas makan malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.MP3', image: '/images/menu-kad/ayat panjang/kakak membantu ibu membasuh pinggan selepas makan malam.png' },
+      { text: 'Kami berkumpul di padang sekolah untuk beriadah pagi.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.MP3', image: '/images/menu-kad/ayat panjang/kami berkumpul di padang sekolah untuk beriadah pagi.png' }
     ];
     const sourceItems = (items && items.length > 0) ? items : defaultItems;
     const allImages = sourceItems.map((it: any) => it.image || it.icon).filter(Boolean);
@@ -270,7 +275,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 kereta.png',
         passage: 'Kereta.\nIni kereta bapa.\nKereta bapa biru.\nBapa bawa kereta laju.',
-        audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 kereta.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.MP3',
         question: 'Kereta bapa berwarna apa?',
         answer: 'Biru',
         options: ['Biru', 'Merah', 'Kuning', 'Hijau']
@@ -278,7 +283,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 bola.png',
         passage: 'Bola.\nIni bola saya.\nBola saya merah.\nSaya baling bola jauh.',
-        audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 bola.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.MP3',
         question: 'Bola saya berwarna apa?',
         answer: 'Merah',
         options: ['Merah', 'Biru', 'Putih', 'Hitam']
@@ -286,7 +291,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 topi.png',
         passage: 'Topi.\nIni topi adik.\nTopi adik kuning.\nAdik pakai topi elok.',
-        audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 topi.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.MP3',
         question: 'Topi adik berwarna apa?',
         answer: 'Kuning',
         options: ['Kuning', 'Hijau', 'Coklat', 'Merah']
@@ -294,7 +299,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 beg.png',
         passage: 'Beg.\nIni beg kakak.\nBeg kakak hijau.\nKakak bawa beg berat.',
-        audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 beg.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.MP3',
         question: 'Beg kakak berwarna apa?',
         answer: 'Hijau',
         options: ['Hijau', 'Kuning', 'Biru', 'Hitam']
@@ -302,7 +307,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 basikal.png',
         passage: 'Basikal.\nIni basikal abang.\nBasikal abang hitam.\nAbang kayuh basikal laju.',
-        audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 basikal.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.MP3',
         question: 'Basikal abang berwarna apa?',
         answer: 'Hitam',
         options: ['Hitam', 'Biru', 'Merah', 'Kuning']
@@ -325,7 +330,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 rumah.png',
         passage: 'Rumah.\nIni rumah saya.\nRumah saya besar.\nSaya tinggal di rumah besar bersama keluarga.',
-        audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 rumah.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.MP3',
         question: 'Rumah saya bagaimana?',
         answer: 'Besar',
         options: ['Besar', 'Kecil', 'Tinggi', 'Lama']
@@ -333,7 +338,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 sekolah.png',
         passage: 'Sekolah.\nIni sekolah kami.\nSekolah kami ceria.\nKami belajar di sekolah ceria setiap hari.',
-        audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 sekolah.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.MP3',
         question: 'Sekolah kami bagaimana?',
         answer: 'Ceria',
         options: ['Ceria', 'Sepi', 'Gelap', 'Kecil']
@@ -341,7 +346,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 kucing.png',
         passage: 'Kucing.\nIni kucing saya.\nKucing saya comel.\nSaya bermain dengan kucing comel setiap petang.',
-        audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 kucing.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.MP3',
         question: 'Kucing saya bagaimana?',
         answer: 'Comel',
         options: ['Comel', 'Galak', 'Besar', 'Hitam']
@@ -349,7 +354,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 taman.png',
         passage: 'Taman.\nIni taman kami.\nTaman kami luas.\nKami berlari di taman luas pada waktu pagi.',
-        audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 taman.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.MP3',
         question: 'Taman kami bagaimana?',
         answer: 'Luas',
         options: ['Luas', 'Sempit', 'Kecil', 'Gelap']
@@ -357,7 +362,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 dapur.png',
         passage: 'Dapur.\nIni dapur ibu.\nDapur ibu bersih.\nIbu memasak di dapur bersih setiap petang.',
-        audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 dapur.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.MP3',
         question: 'Dapur ibu bagaimana?',
         answer: 'Bersih',
         options: ['Bersih', 'Kotor', 'Besar', 'Sempit']
@@ -1115,29 +1120,31 @@ const PadanGarisanKVK: React.FC<PadanGarisanProps> = ({
               exit={{ scale: 0.8 }}
               style={{
                 width: "100%",
-                maxWidth: "280px",
+                maxWidth: "clamp(340px, 88vw, 440px)",
                 backgroundColor: "#ffffff",
-                border: "3px solid #0f172a",
-                boxShadow: "0 4px 0 #0f172a",
-                borderRadius: "20px",
+                backgroundImage: "radial-gradient(circle, rgba(16, 24, 47, 0.08) 1.5px, transparent 1.5px)",
+                backgroundSize: "16px 16px",
+                border: "4px solid #0f172a",
+                boxShadow: "0 8px 0 #0f172a",
+                borderRadius: "24px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "20px 16px",
+                padding: "26px 20px 22px",
                 textAlign: "center"
               }}
             >
-              <div className="text-[3rem] md:text-[3.5rem] leading-none mb-1" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '85px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '110px', width: '100%', marginBottom: '8px' }}>
                 {activePopup.icon && activePopup.icon.includes('<img') ? (
-                  <div dangerouslySetInnerHTML={{ __html: activePopup.icon }} style={{ width: '100%', height: '85px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                  <div dangerouslySetInnerHTML={{ __html: activePopup.icon }} style={{ width: '100%', height: '110px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
                 ) : activePopup.icon && (activePopup.icon.startsWith('/') || activePopup.icon.includes('.png')) ? (
-                  <img src={activePopup.icon} alt={activePopup.word} style={{ maxHeight: '85px', maxWidth: '100%', objectFit: 'contain' }} />
+                  <img src={activePopup.icon} alt={activePopup.word} style={{ maxHeight: '110px', maxWidth: '100%', objectFit: 'contain' }} />
                 ) : (
-                  activePopup.icon
+                  <div style={{ fontSize: '4.5rem', lineHeight: 1 }}>{activePopup.icon}</div>
                 )}
               </div>
-              <div className="font-black text-green-600 tracking-wide lowercase text-2xl md:text-[1.75rem]">
+              <div className="font-black text-green-600 tracking-wide lowercase" style={{ fontSize: "clamp(1.9rem, 6vw, 2.5rem)", lineHeight: 1.2 }}>
                 {activePopup.word.toLowerCase()}
               </div>
             </motion.div>
@@ -1643,7 +1650,7 @@ const getPetaId = (cId: string | null): number => {
   if (['kenal_huruf', 'kenali_huruf', 'fonik_abc', 'huruf_vokal', 'vokal_konsonan', 'pengenalan_nombor', 'bilang_siri_nombor', 'konsep_tambah', 'konsep_penolakan'].includes(cId)) return 1;
   if (['suku_kata_kv', 'suku_kata_v_kv', 'suku_kata_kv_kv', 'suku_kata_kv_kv_kv', 'suku_kata_kvk', 'suku_kata_v_kvk'].includes(cId)) return 2;
   if (['suku_kata_kv_kvk', 'suku_kata_kvk_kv', 'suku_kata_kvk_kvk', 'suku_kata_kvkk', 'suku_kata_kv_kv_kvk', 'suku_kata_kvk_kv_kvk'].includes(cId)) return 3;
-  if (['ayat_pendek', 'ayat_panjang', 'perenggan_pendek', 'cerita_pendek'].includes(cId)) return 4;
+  if (['ayat_pendek', 'ayat_panjang', 'perenggan_pendek', 'petikan_tahap_1', 'petikan_tahap_2', 'cerita_pendek'].includes(cId)) return 4;
   return 1;
 };
 
@@ -1663,6 +1670,13 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
 
   // Specific state for susun
   const [susunSlots, setSusunSlots] = useState<(number | null)[]>([]);
+  const [touchDragInfo, setTouchDragInfo] = useState<{
+    optIndex: number;
+    text: string;
+    x: number;
+    y: number;
+  } | null>(null);
+  const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
 
   // Tunjuk cursor tunjuk cara audio sekejap sahaja di awal setiap soalan
   const [showAudioDemoCursor, setShowAudioDemoCursor] = useState(true);
@@ -1802,43 +1816,66 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
           });
         }, 300);
 
-        // Award badge to active student profile
-        try {
-          const petaId = getPetaId(cabaranId);
-          const badgeObj = BADGES_BY_PETA[petaId];
-          const studentName = (window as any).namaMuridAktif || 'Murid';
-          if ((window as any).studentData && (window as any).studentData[studentName] && badgeObj) {
-            const s = (window as any).studentData[studentName];
-            if (!s.badges) s.badges = [];
-            if (!s.badges.includes(badgeObj.id)) {
-              s.badges.push(badgeObj.id);
-              if (typeof (window as any).saveStudentData === 'function') {
-                (window as any).saveStudentData();
-              }
-              window.dispatchEvent(new CustomEvent('kemaskini-profil'));
-            }
-          }
-        } catch (e) { }
       } else {
         // Play Cuba Lagi audio
         playCubaLagiResult();
       }
 
       if (cabaranId) {
-        const pct = score / total;
-        let stars = 0;
-        if (pct >= 0.9) stars = 3;
-        else if (pct >= 0.7) stars = 2;
-        else if (pct >= 0.4) stars = 1;
+        const pct = total > 0 ? score / total : 0;
+        const calculatedStars = isLose ? 0 : (activeStarCount > 0 ? activeStarCount : (pct >= 0.85 ? 3 : (pct >= 0.6 ? 2 : (pct >= 0.35 ? 1 : 0))));
+        const stars = isFull ? 3 : calculatedStars;
 
         const key = `stars_${cabaranId}`;
         const existing = Number(localStorage.getItem(key) || 0);
         if (stars > existing) {
           localStorage.setItem(key, stars.toString());
+          localStorage.setItem(`extra_${key}`, stars.toString());
         }
 
         if (typeof window !== 'undefined' && (window as any).logProgress) {
           (window as any).logProgress(cabaranId, 'latihan', score, cabaranId);
+        }
+
+        // Award badge only if at least 3 activities in this map have 3 stars
+        try {
+          const petaId = getPetaId(cabaranId);
+          const badgeObj = BADGES_BY_PETA[petaId];
+          const studentName = (window as any).namaMuridAktif || localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || localStorage.getItem('bunyiKataNamaMurid') || 'Murid';
+          if ((window as any).studentData) {
+            if (!(window as any).studentData[studentName]) {
+              (window as any).studentData[studentName] = typeof (window as any).studentRecord === 'function' ? (window as any).studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: '/images/avatar/avatar1.png' };
+            }
+            const s = (window as any).studentData[studentName];
+            if (!s.badges) s.badges = [];
+            if (!s.stars) s.stars = {};
+            if (!s.scores) s.scores = {};
+
+            s.stars[cabaranId] = Math.min(3, Math.max(s.stars[cabaranId] && s.stars[cabaranId] <= 3 ? s.stars[cabaranId] : 0, stars));
+            s.scores[cabaranId] = Math.max(s.scores[cabaranId] || 0, score);
+
+            let changed = false;
+            const isCompleted = typeof (window as any).isPetaCompleted === 'function' && (window as any).isPetaCompleted(petaId, s);
+            if (isCompleted && badgeObj && !s.badges.includes(badgeObj.id)) {
+              s.badges.push(badgeObj.id);
+              changed = true;
+            }
+
+            const allCompleted = typeof (window as any).isPetaCompleted === 'function' && (window as any).isPetaCompleted('all', s);
+            if (allCompleted && !s.badges.includes('badge_master')) {
+              s.badges.push('badge_master');
+              changed = true;
+            }
+
+            if (changed || stars > 0) {
+              if (typeof (window as any).saveStudentData === 'function') {
+                (window as any).saveStudentData();
+              }
+              window.dispatchEvent(new CustomEvent('kemaskini-profil'));
+            }
+          }
+        } catch (e) {
+          console.warn('Cabaran badge check notice:', e);
         }
       }
     }
@@ -1886,11 +1923,50 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
     setSelectedOption(null);
   };
 
+  const cabaranActiveAudioRef = useRef<HTMLAudioElement | null>(null);
+
   const playAudio = (text: string) => {
+    if (!text) return;
+
+    // Stop any existing audio instance to prevent double playback
+    if (cabaranActiveAudioRef.current) {
+      try {
+        cabaranActiveAudioRef.current.pause();
+        cabaranActiveAudioRef.current.currentTime = 0;
+      } catch (e) {}
+      cabaranActiveAudioRef.current = null;
+    }
+    if ('speechSynthesis' in window) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+
+    if (cabaranId === 'fonik_abc' || cabaranId === 'fonik') {
+      const clean = String(text).toLowerCase().trim();
+      let soundPath = `/audio/fonik/fonik ${clean}.MP3`;
+      if (clean === 'é' || clean === 'e taling' || clean === 'e tailing') {
+        soundPath = '/audio/fonik/fonik e tailing.MP3';
+      } else if (clean === 'e' || clean === 'e pepet') {
+        soundPath = '/audio/fonik/fonik e.MP3';
+      } else if (clean === 'w') {
+        soundPath = '/audio/abc/w.mp3';
+      }
+      try {
+        const audio = new Audio(soundPath);
+        cabaranActiveAudioRef.current = audio;
+        audio.onended = () => {
+          if (cabaranActiveAudioRef.current === audio) cabaranActiveAudioRef.current = null;
+        };
+        audio.play().catch(err => {
+          console.warn("Cabaran phonics audio notice:", soundPath, err);
+          if (cabaranActiveAudioRef.current === audio) cabaranActiveAudioRef.current = null;
+        });
+      } catch (e) {}
+      return;
+    }
+
     if (typeof (window as any).sebutAudio === 'function') {
       (window as any).sebutAudio(text);
     } else if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ms-MY';
       utterance.rate = 0.8;
@@ -2059,6 +2135,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
   if (!cabaranId) return null;
 
   const currentQ = questions[currentIndex];
+  const isAyatPrompt = currentQ?.joinWith === ' ' || cabaranId === 'ayat_pendek' || cabaranId === 'ayat_panjang' || (typeof title === 'string' && title.toLowerCase().includes('ayat'));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', backgroundColor: 'transparent', overflowY: 'auto' }}>
@@ -2075,7 +2152,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
       </div>
 
       {/* Progress Bar & Stats */}
-      <div style={{ padding: '0 20px', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+      <div style={{ padding: '0 20px', maxWidth: isAyatPrompt ? '940px' : '800px', margin: '0 auto', width: '100%', transition: 'max-width 0.2s ease' }}>
         <div style={{ width: '100%', height: '10px', backgroundColor: 'white', borderRadius: '10px', border: '2px solid var(--color-dark)', overflow: 'hidden', marginBottom: '8px' }}>
           {(() => {
             const maxMark = (currentQ?.type === 'padan_garisan_kvk' || currentQ?.type === 'padan_garisan_v_kvk')
@@ -2129,13 +2206,14 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
             className="neo-box cabaran-game-card"
             style={{
               width: '100%',
-              maxWidth: currentQ.type === 'crossword_8x8' ? '750px' : '700px',
+              maxWidth: currentQ.type === 'crossword_8x8' ? '750px' : isAyatPrompt ? '940px' : '760px',
               backgroundColor: '#148f7d',
               backgroundImage: 'radial-gradient(rgba(255,255,255,0.1) 2px, transparent 2px)', backgroundSize: '15px 15px',
-              padding: currentQ.type === 'crossword_8x8' ? '16px' : '30px',
+              padding: currentQ.type === 'crossword_8x8' ? '16px' : 'clamp(16px, 3vw, 28px)',
               display: 'flex', flexDirection: 'column', alignItems: 'center',
-              gap: currentQ.type === 'crossword_8x8' ? '12px' : '24px',
-              border: '4px solid var(--color-dark)', borderRadius: '24px'
+              gap: currentQ.type === 'crossword_8x8' ? '12px' : '20px',
+              border: '4px solid var(--color-dark)', borderRadius: '24px',
+              transition: 'max-width 0.2s ease'
             }}>
 
             {/* Question Content based on type */}
@@ -2265,28 +2343,88 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
               </div>
             )}
 
-            {(currentQ.type === 'padan' || currentQ.type === 'lengkap' || currentQ.type === 'teka') && (
-              <div className={`neo-box cabaran-bacaan-box ${currentQ.type === 'padan' && !currentQ.image.includes('+') && !currentQ.image.includes('-') ? 'cabaran-padan-box' : ''}`} style={{ backgroundColor: '#ffffff', backgroundImage: 'radial-gradient(rgba(16, 24, 47, 0.05) 1.5px, transparent 1.5px)', backgroundSize: '15px 15px', textAlign: 'center', padding: (currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? '10px 14px' : '20px 40px', width: '100%', maxWidth: (currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? 'clamp(220px, 75vw, 300px)' : '450px', position: 'relative' }}>
-                {currentQ.type !== 'teka' && (
-                  <div className={`cabaran-bacaan-image ${currentQ.type === 'padan' && !currentQ.image.includes('🍪') && !currentQ.image.includes('+') && !currentQ.image.includes('-') ? 'cabaran-padan-image' : ''} ${(currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? 'cabaran-math-image' : ''}`} style={{ fontSize: (currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? 'clamp(1.8rem, 6.5vw, 2.8rem)' : (currentQ.image.length > 20 ? 'clamp(1.5rem, 5vw, 2.5rem)' : currentQ.image.length > 10 ? 'clamp(2rem, 8vw, 3rem)' : 'clamp(2.5rem, 10vw, 4rem)'), filter: (currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? 'none' : 'drop-shadow(2px 4px 0 rgba(0,0,0,0.2))', cursor: currentQ.imageText ? 'pointer' : 'default', wordBreak: 'break-word', whiteSpace: (currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? 'nowrap' : 'normal', lineHeight: 1.3 }} onClick={() => currentQ.imageText && playAudio(currentQ.imageText)}>
-                    {currentQ.image.includes('🍪') ? (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px' }}>
-                        {currentQ.image.split(' ').map((char: string, i: number) => (
-                          char === '🍪' ? <span key={i} style={{ display: 'inline-block' }}>🍪</span> : (char === '\n' ? <div key={i} style={{ width: '100%', height: 0 }}></div> : <span key={i}>{char}</span>)
-                        ))}
-                      </div>
-                    ) : currentQ.image && currentQ.image.includes('<img') ? (
-                      <div dangerouslySetInnerHTML={{ __html: currentQ.image }} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
-                    ) : currentQ.image && (currentQ.image.startsWith('/') || currentQ.image.includes('.png')) ? (
-                      <img src={currentQ.image} alt="Soalan" style={{ maxHeight: '125px', maxWidth: '100%', objectFit: 'contain' }} />
-                    ) : (
-                      currentQ.image
-                    )}
-                  </div>
-                )}
-                {currentQ.imageText && currentQ.type !== 'teka' && (
-                  <button className="neo-btn bg-yellow cabaran-dengar-btn" onClick={(e) => { e.stopPropagation(); playAudio(currentQ.imageText); }} style={{ position: 'absolute', top: '-15px', right: '-15px', width: '38px', height: '38px', borderRadius: '50%', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, aspectRatio: '1/1', flexShrink: 0 }}>
-                    <i className="fa-solid fa-volume-high" style={{ color: 'var(--color-dark)', fontSize: '1.05rem' }}></i>
+            {(currentQ.type === 'padan' || currentQ.type === 'lengkap' || currentQ.type === 'teka') && (() => {
+              const targetAudio = currentQ.imageText || currentQ.word || currentQ.audio || currentQ.text || currentQ.answer;
+              return (
+                <div
+                  className={`neo-box cabaran-bacaan-box ${currentQ.type === 'padan' && !currentQ.image.includes('+') && !currentQ.image.includes('-') ? 'cabaran-padan-box' : ''}`}
+                  style={{
+                    backgroundColor: '#ffffff',
+                    backgroundImage: 'radial-gradient(rgba(16, 24, 47, 0.05) 1.5px, transparent 1.5px)',
+                    backgroundSize: '15px 15px',
+                    textAlign: 'center',
+                    padding: (currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? '10px 14px' : '20px 40px',
+                    width: '100%',
+                    maxWidth: (currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? 'clamp(220px, 75vw, 300px)' : '450px',
+                    position: 'relative',
+                    cursor: targetAudio ? 'pointer' : 'default'
+                  }}
+                  onClick={() => {
+                    if (targetAudio) playAudio(targetAudio);
+                  }}
+                  title={targetAudio ? "Tekan untuk dengar audio" : undefined}
+                >
+                  {currentQ.type !== 'teka' && (
+                    <div
+                      className={`cabaran-bacaan-image ${currentQ.type === 'padan' && !currentQ.image.includes('🍪') && !currentQ.image.includes('+') && !currentQ.image.includes('-') ? 'cabaran-padan-image' : ''} ${(currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? 'cabaran-math-image' : ''}`}
+                      style={{
+                        fontSize: (currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? 'clamp(1.8rem, 6.5vw, 2.8rem)' : (currentQ.image.length > 20 ? 'clamp(1.5rem, 5vw, 2.5rem)' : currentQ.image.length > 10 ? 'clamp(2rem, 8vw, 3rem)' : 'clamp(2.5rem, 10vw, 4rem)'),
+                        filter: (currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? 'none' : 'drop-shadow(2px 4px 0 rgba(0,0,0,0.2))',
+                        cursor: targetAudio ? 'pointer' : 'default',
+                        wordBreak: 'break-word',
+                        whiteSpace: (currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? 'nowrap' : 'normal',
+                        lineHeight: 1.3
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (targetAudio) playAudio(targetAudio);
+                      }}
+                    >
+                      {currentQ.image.includes('🍪') ? (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px' }}>
+                          {currentQ.image.split(' ').map((char: string, i: number) => (
+                            char === '🍪' ? <span key={i} style={{ display: 'inline-block' }}>🍪</span> : (char === '\n' ? <div key={i} style={{ width: '100%', height: 0 }}></div> : <span key={i}>{char}</span>)
+                          ))}
+                        </div>
+                      ) : currentQ.image && currentQ.image.includes('<img') ? (
+                        <div dangerouslySetInnerHTML={{ __html: currentQ.image }} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                      ) : currentQ.image && (currentQ.image.startsWith('/') || currentQ.image.includes('.png')) ? (
+                        <img src={currentQ.image} alt="Soalan" style={{ maxHeight: '125px', maxWidth: '100%', objectFit: 'contain' }} />
+                      ) : (
+                        currentQ.image
+                      )}
+                    </div>
+                  )}
+                  {targetAudio && (
+                    <button
+                      className="neo-btn bg-yellow cabaran-dengar-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        playAudio(targetAudio);
+                      }}
+                      title="Dengar Sebutan Audio"
+                      aria-label="Dengar Sebutan Audio"
+                    style={{
+                      position: 'absolute',
+                      top: '-15px',
+                      right: '-15px',
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '50%',
+                      padding: '0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 10,
+                      aspectRatio: '1/1',
+                      flexShrink: 0,
+                      cursor: 'pointer',
+                      border: '3px solid var(--color-dark, #10182f)',
+                      boxShadow: '0 3px 0 var(--color-dark, #10182f)',
+                      backgroundColor: '#facc15'
+                    }}
+                  >
+                    <i className="fa-solid fa-volume-high" style={{ color: 'var(--color-dark, #10182f)', fontSize: '1.15rem' }}></i>
                   </button>
                 )}
                 {currentQ.type === 'lengkap' && (
@@ -2296,14 +2434,23 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                 )}
                 {currentQ.type === 'teka' && (
                   <div
-                    style={{ fontSize: '3rem', fontWeight: 'bold', marginTop: '15px', letterSpacing: '6px', cursor: currentQ.imageText ? 'pointer' : 'default' }}
-                    onClick={() => currentQ.imageText && playAudio(currentQ.imageText)}
+                    style={{
+                      fontSize: 'clamp(2.2rem, 6.5vw, 3.2rem)',
+                      fontWeight: '900',
+                      marginTop: '10px',
+                      marginBottom: '10px',
+                      letterSpacing: '8px',
+                      cursor: (currentQ.imageText || currentQ.word) ? 'pointer' : 'default',
+                      color: 'var(--color-dark, #10182f)'
+                    }}
+                    onClick={() => (currentQ.imageText || currentQ.word) && playAudio(currentQ.imageText || currentQ.word)}
                   >
                     {currentQ.text}
                   </div>
                 )}
               </div>
-            )}
+            );
+          })()}
 
             {currentQ.type === 'cari_gambar' && (
               <div
@@ -2434,55 +2581,55 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                   )}
                 </div>
 
-                <div style={{ color: 'white', fontWeight: 'bold', fontSize: '0.95rem', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
-                  Susun perkataan menjadi ayat lengkap:
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', width: '100%' }}>
-                  {currentQ.syllables.map((_: any, i: number) => {
-                    const filledOptIdx = susunSlots[i];
-                    const filledText = filledOptIdx !== null && filledOptIdx !== undefined ? currentQ.options[filledOptIdx] : '';
-                    return (
-                      <div
-                        key={i}
-                        className="neo-box cabaran-susun-slot"
-                        style={{
-                          minWidth: '65px',
-                          height: '50px',
-                          padding: '0 10px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '1.2rem',
-                          fontWeight: '800',
-                          border: filledText ? '3px solid var(--color-dark)' : '3px dashed rgba(255,255,255,0.8)',
-                          backgroundColor: filledText ? '#ffffff' : 'rgba(255, 255, 255, 0.2)',
-                          color: filledText ? 'var(--color-dark)' : 'white',
-                          boxShadow: filledText ? 'var(--shadow-hard-sm)' : 'none',
-                          borderRadius: '16px',
-                          cursor: filledText ? 'pointer' : 'default',
-                          transition: 'all 0.15s ease'
-                        }}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          const optionIndexStr = e.dataTransfer.getData('text/plain');
-                          if (!optionIndexStr) return;
-                          handleSlotDrop(i, parseInt(optionIndexStr, 10));
-                        }}
-                        onClick={() => {
-                          if (susunSlots[i] !== null && feedback === null) {
-                            const newSlots = [...susunSlots];
-                            newSlots[i] = null;
-                            setSusunSlots(newSlots);
-                          }
-                        }}
-                      >
-                        {filledText}
+                {(() => {
+                  const promptText = isAyatPrompt
+                    ? "Susun perkataan menjadi ayat lengkap:"
+                    : "Susun suku kata menjadi perkataan lengkap:";
+                  return (
+                    <>
+                      <div style={{ color: 'white', fontWeight: 'bold', fontSize: 'clamp(0.95rem, 3.2vw, 1.15rem)', textShadow: '0 2px 4px rgba(0,0,0,0.35)' }}>
+                        {promptText}
                       </div>
-                    );
-                  })}
-                </div>
+
+                      <div className={`cabaran-susun-slots-container ${isAyatPrompt ? 'is-ayat' : ''}`}>
+                        {currentQ.syllables.map((_: any, i: number) => {
+                          const filledOptIdx = susunSlots[i];
+                          const filledText = filledOptIdx !== null && filledOptIdx !== undefined ? currentQ.options[filledOptIdx] : '';
+                          return (
+                            <div
+                              key={i}
+                              data-slot-index={i}
+                              className={`neo-box cabaran-susun-slot ${isAyatPrompt ? 'is-ayat' : ''}`}
+                              style={{
+                                border: filledText ? '3.5px solid var(--color-dark)' : '3.5px dashed rgba(255,255,255,0.9)',
+                                backgroundColor: filledText ? '#ffffff' : 'rgba(255, 255, 255, 0.28)',
+                                color: filledText ? 'var(--color-dark)' : 'white',
+                                boxShadow: filledText ? '0 3px 0 var(--color-dark)' : 'none',
+                                cursor: filledText ? 'pointer' : 'default',
+                              }}
+                              onDragOver={(e) => e.preventDefault()}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                const optionIndexStr = e.dataTransfer.getData('text/plain');
+                                if (!optionIndexStr) return;
+                                handleSlotDrop(i, parseInt(optionIndexStr, 10));
+                              }}
+                              onClick={() => {
+                                if (susunSlots[i] !== null && feedback === null) {
+                                  const newSlots = [...susunSlots];
+                                  newSlots[i] = null;
+                                  setSusunSlots(newSlots);
+                                }
+                              }}
+                            >
+                              {filledText}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             )}
 
@@ -2514,26 +2661,51 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
             {currentQ.options && (() => {
               if (currentQ.type === 'susun') {
                 return (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', width: '100%', marginTop: '5px' }}>
+                  <div className={`cabaran-susun-options-container ${isAyatPrompt ? 'is-ayat' : ''}`}>
                     {currentQ.options.map((opt: string, i: number) => {
                       const isUsed = susunSlots.includes(i);
                       return (
                         <button
                           key={i}
-                          className="neo-btn bg-white cabaran-opt-btn"
+                          className={`neo-btn bg-white cabaran-susun-opt-btn ${isAyatPrompt ? 'is-ayat' : ''}`}
                           style={{
-                            padding: '10px 18px',
-                            fontSize: '1.2rem',
-                            textTransform: 'none',
-                            opacity: isUsed ? 0.35 : 1,
+                            opacity: isUsed ? 0.25 : 1,
                             pointerEvents: isUsed ? 'none' : 'auto',
                             color: 'var(--color-dark)',
-                            lineHeight: '1.3',
-                            borderRadius: '9999px',
-                            cursor: 'pointer'
+                            cursor: isUsed ? 'default' : 'grab',
                           }}
                           draggable={!isUsed}
                           onDragStart={(e) => { e.dataTransfer.setData('text/plain', i.toString()); }}
+                          onTouchStart={(e) => {
+                            if (isUsed || feedback !== null) return;
+                            const t = e.touches[0];
+                            touchStartPosRef.current = { x: t.clientX, y: t.clientY };
+                            setTouchDragInfo({ optIndex: i, text: opt, x: t.clientX, y: t.clientY });
+                          }}
+                          onTouchMove={(e) => {
+                            if (!touchStartPosRef.current) return;
+                            const t = e.touches[0];
+                            setTouchDragInfo(prev => prev ? { ...prev, x: t.clientX, y: t.clientY } : null);
+                          }}
+                          onTouchEnd={(e) => {
+                            if (!touchStartPosRef.current) return;
+                            const t = e.changedTouches[0];
+                            const start = touchStartPosRef.current;
+                            const dist = Math.hypot(t.clientX - start.x, t.clientY - start.y);
+                            const elUnder = document.elementFromPoint(t.clientX, t.clientY);
+                            const slotEl = elUnder?.closest('[data-slot-index]');
+
+                            if (slotEl) {
+                              const slotIdx = parseInt(slotEl.getAttribute('data-slot-index') || '-1', 10);
+                              if (slotIdx >= 0) {
+                                handleSlotDrop(slotIdx, i);
+                              }
+                            } else if (dist < 14) {
+                              handleOptionClick(opt, i);
+                            }
+                            setTouchDragInfo(null);
+                            touchStartPosRef.current = null;
+                          }}
                           onClick={() => handleOptionClick(opt, i)}
                         >
                           {opt}
@@ -2708,7 +2880,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
             : firstQType === 'crossword_8x8'
               ? (questions[0]?.words?.length || 6)
               : (questions.length || 10);
-          const pct = score / total;
+          const pct = total > 0 ? score / total : 0;
           const star1 = Math.ceil(total * 0.4);
           const star2 = Math.ceil(total * 0.7);
           const star3 = total;
@@ -3136,6 +3308,36 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
         })()}
 
       </div>
+
+      {touchDragInfo && (
+        <div
+          style={{
+            position: 'fixed',
+            left: touchDragInfo.x,
+            top: touchDragInfo.y,
+            transform: 'translate(-50%, -50%) scale(1.06)',
+            pointerEvents: 'none',
+            zIndex: 99999,
+            boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+            backgroundColor: '#ffffff',
+            color: 'var(--color-dark)',
+            padding: isAyatPrompt ? '0 10px' : '0 14px',
+            minWidth: isAyatPrompt ? 'clamp(62px, 20vw, 165px)' : 'clamp(74px, 22vw, 105px)',
+            height: isAyatPrompt ? 'clamp(46px, 11vw, 58px)' : 'clamp(56px, 14vw, 75px)',
+            borderRadius: isAyatPrompt ? '14px' : '18px',
+            border: '3.5px solid var(--color-dark)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: isAyatPrompt ? 'clamp(0.85rem, 2.7vw, 1.3rem)' : 'clamp(1.65rem, 5.2vw, 2.35rem)',
+            fontWeight: '900',
+            fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+            userSelect: 'none'
+          }}
+        >
+          {touchDragInfo.text}
+        </div>
+      )}
     </div>
   );
 };

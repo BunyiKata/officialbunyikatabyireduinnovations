@@ -5,7 +5,30 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      {
+        name: 'legacy-audio-rewrite',
+        configureServer(server) {
+          server.middlewares.use((req, _res, next) => {
+            if (req.url) {
+              const decoded = decodeURIComponent(req.url);
+              if (decoded.startsWith('/AUDIO FONIK/')) {
+                req.url = req.url.replace(/^\/AUDIO(%20| )FONIK\//i, '/audio/fonik/');
+              } else if (decoded.startsWith('/AUDIO BACAAN BERGRED/')) {
+                req.url = req.url.replace(/^\/AUDIO(%20| )BACAAN(%20| )BERGRED\//i, '/audio/bacaan-bergred/');
+              } else if (decoded.startsWith('/AUDIO TAMBAH TOLAK/audio tambah/')) {
+                req.url = req.url.replace(/^\/AUDIO(%20| )TAMBAH(%20| )TOLAK\/audio(%20| )tambah\//i, '/audio/tambah/');
+              } else if (decoded.startsWith('/AUDIO TAMBAH TOLAK/audio tolak/')) {
+                req.url = req.url.replace(/^\/AUDIO(%20| )TAMBAH(%20| )TOLAK\/audio(%20| )tolak\//i, '/audio/tolak/');
+              }
+            }
+            next();
+          });
+        }
+      }
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
@@ -17,7 +40,7 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {
-        ignored: ['**/BUNYI KATA AUDIO 2027/**', '**/GAMBAR UTAMA/**', '**/node_modules/**']
+        ignored: ['**/node_modules/**']
       },
     },
   };

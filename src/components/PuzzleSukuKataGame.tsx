@@ -390,16 +390,9 @@ export const PuzzleSukuKataGame: React.FC<{ onClose: () => void }> = ({ onClose 
         handlePronounce();
       }, 400);
 
-      try {
-        const studentName = (window as any).currentUser;
-        if (studentName && (window as any).studentData && (window as any).studentData[studentName]) {
-          (window as any).studentData[studentName].stars = ((window as any).studentData[studentName].stars || 0) + 1;
-          if (typeof (window as any).simpanDataPelajar === 'function') {
-            (window as any).simpanDataPelajar();
-          }
-        }
-      } catch (e) {
-        console.error('Error saving student star:', e);
+      // Auto-update student profile stars immediately
+      if (typeof (window as any).tambahBintangGlobal === 'function') {
+        (window as any).tambahBintangGlobal('puzzle_' + currentCategory, 1);
       }
 
       // Automatik pergi ke soalan gambar puzzle rawak seterusnya selepas 1.8 saat
