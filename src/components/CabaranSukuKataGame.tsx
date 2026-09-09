@@ -2146,7 +2146,15 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
           <i className="fa-solid fa-arrow-left"></i>
         </button>
         <div className="neo-btn bg-purple page-title" style={{ pointerEvents: 'none', fontSize: '1.2rem', whiteSpace: 'nowrap' }}>
-          {title.toUpperCase()}
+          {(() => {
+            const clean = title.replace(/^Cabaran\s+/i, '').trim();
+            if (clean.toLowerCase() === 'ayat pendek') return 'Ayat Pendek';
+            if (clean.toLowerCase() === 'ayat panjang') return 'Ayat Panjang';
+            if (clean.toLowerCase() === 'petikan tahap 1') return 'Petikan Tahap 1';
+            if (clean.toLowerCase() === 'petikan tahap 2') return 'Petikan Tahap 2';
+            if (clean.toLowerCase() === 'cerita pendek') return 'Cerita Pendek';
+            return clean || title;
+          })()}
         </div>
         <div></div>
       </div>

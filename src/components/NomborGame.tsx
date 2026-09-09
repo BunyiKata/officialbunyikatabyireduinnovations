@@ -813,10 +813,38 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
 
   const isMathMode = mode === 'tambah_nombor' || mode === 'tolak_nombor';
   const mathMode = mode === 'tambah_nombor' ? ('tambah' as const) : ('tolak' as const);
-  const mathProgressKey = mode === 'tambah_nombor' ? 'bunyikata_math_tambah_v1' : 'bunyikata_math_tolak_v1';
+  const baseMathProgressKey = mode === 'tambah_nombor' ? 'bunyikata_math_tambah_v1' : 'bunyikata_math_tolak_v1';
+  
+  const isUserAdminCheck = () => {
+    if (typeof window === 'undefined') return false;
+    return !!(
+      (window as any).modAdminAktif ||
+      (window as any).isAdminMode ||
+      localStorage.getItem('bunyiKataUserRole') === 'admin' ||
+      (typeof document !== 'undefined' && (
+        document.body?.classList?.contains('admin-mode') ||
+        document.getElementById('teacher-banner-badge')?.innerText?.toUpperCase().includes('ADMIN')
+      )) ||
+      (window as any).currentUser?.peranan === 'admin'
+    );
+  };
+
+  const getNomborStorageKey = (baseKey: string) => {
+    const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
+    if (isTrial) {
+      return `${baseKey}_trial_session`;
+    }
+    const studentName = typeof window !== 'undefined'
+      ? ((window as any).namaMuridAktif || localStorage.getItem('muridAktif') || 'Murid')
+      : 'Murid';
+    return `${baseKey}_${studentName.toLowerCase().replace(/\s+/g, '_')}`;
+  };
+
+  const isTrialUser = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
   const mathStatus: boolean[] = (() => {
+    if (isTrialUser) return [false, false, false, false, false, false];
     try {
-      const saved = localStorage.getItem(mathProgressKey);
+      const saved = localStorage.getItem(getNomborStorageKey(baseMathProgressKey));
       return saved ? JSON.parse(saved) : [false, false, false, false, false, false];
     } catch (e) {
       return [false, false, false, false, false, false];
@@ -929,8 +957,17 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   }, []);
 
   const [progress, setProgress] = useState<ProgressRecord>(() => {
+    const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
+    if (isTrial) {
+      const initial: ProgressRecord = {};
+      currentDataset.forEach(item => {
+        initial[item.id] = [false, false, false, false, false, false, false];
+      });
+      return initial;
+    }
     try {
-      const saved = localStorage.getItem(currentConfig.progressKey);
+      const storageKey = getNomborStorageKey(currentConfig.progressKey);
+      const saved = localStorage.getItem(storageKey);
       if (saved) return JSON.parse(saved);
     } catch (e) { }
     const initial: ProgressRecord = {};
@@ -942,8 +979,18 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
 
   // Reload progress when mode changes
   useEffect(() => {
+    const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
+    if (isTrial) {
+      const initial: ProgressRecord = {};
+      currentDataset.forEach(item => {
+        initial[item.id] = [false, false, false, false, false, false, false];
+      });
+      setProgress(initial);
+      return;
+    }
     try {
-      const saved = localStorage.getItem(currentConfig.progressKey);
+      const storageKey = getNomborStorageKey(currentConfig.progressKey);
+      const saved = localStorage.getItem(storageKey);
       if (saved) {
         setProgress(JSON.parse(saved));
         return;
@@ -962,13 +1009,15 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
       curr[actIndex] = true;
       const updated = { ...prev, [itemId]: curr };
       try {
-        localStorage.setItem(currentConfig.progressKey, JSON.stringify(updated));
+        const storageKey = getNomborStorageKey(currentConfig.progressKey);
+        localStorage.setItem(storageKey, JSON.stringify(updated));
       } catch (e) { }
       return updated;
     });
 
-    // Auto-update student profile stars immediately (+1 Bintang)
-    if (typeof (window as any).tambahBintangGlobal === 'function') {
+    const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
+    // Auto-update student profile stars immediately (+1 Bintang) - HANYA jika bukan trial
+    if (!isTrial && typeof (window as any).tambahBintangGlobal === 'function') {
       (window as any).tambahBintangGlobal(`nombor_${mode}_${itemId}_act${actIndex + 1}`, 1);
     }
   };
@@ -1098,15 +1147,17 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
 
   const saveMathActivityDone = (actIndex: number) => {
     try {
-      const saved = localStorage.getItem(mathProgressKey);
+      const storageKey = getNomborStorageKey(baseMathProgressKey);
+      const saved = localStorage.getItem(storageKey);
       const arr: boolean[] = saved ? JSON.parse(saved) : [false, false, false, false, false, false];
       arr[actIndex] = true;
-      localStorage.setItem(mathProgressKey, JSON.stringify(arr));
+      localStorage.setItem(storageKey, JSON.stringify(arr));
     } catch (e) { }
     setMathProgressTrigger(prev => prev + 1);
 
-    // Auto-update student profile stars immediately (+1 Bintang)
-    if (typeof (window as any).tambahBintangGlobal === 'function') {
+    const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
+    // Auto-update student profile stars immediately (+1 Bintang) - HANYA jika bukan trial
+    if (!isTrial && typeof (window as any).tambahBintangGlobal === 'function') {
       (window as any).tambahBintangGlobal(`math_${mathMode}_act${actIndex + 1}`, 1);
     }
 

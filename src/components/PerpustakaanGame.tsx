@@ -1619,7 +1619,7 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                             if (this.armLeft && this.armLeft.object3D) this.armLeft.object3D.rotation.x = -swingRad * 0.75;
                             if (this.armRight && this.armRight.object3D) this.armRight.object3D.rotation.x = swingRad * 0.75;
 
-                            const bodyMesh = document.getElementById('vr-player-body');
+                            const bodyMesh = document.getElementById('vr-player-body') as any;
                             if (bodyMesh && bodyMesh.object3D) {
                                 bodyMesh.removeAttribute('animation');
                                 bodyMesh.object3D.position.y = 0.72 + bob;

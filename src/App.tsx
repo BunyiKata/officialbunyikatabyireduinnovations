@@ -17,15 +17,108 @@ import { AdminSijilManager } from "./components/AdminSijilManager";
 import "./utils/sijilGenerator";
 import "./index.css";
 import { motion, AnimatePresence } from "motion/react";
+import {
+  loginWithEmail,
+  registerWithEmail,
+  logout as firebaseLogout,
+  getCurrentUserProfile,
+  sendPasswordResetEmail,
+  updateUserPasswordInFirebase,
+} from "./services/authService";
+import {
+  getClassByCode,
+  getFamilyByCode,
+  getStudentsByClassId,
+  getStudentsByFamilyId,
+  saveClassToFirebase,
+  saveFamilyToFirebase,
+  syncStudentToFirebase,
+  fetchAdminDataFromFirebase,
+  getRegisteredTeachers,
+  getRegisteredParents,
+  getFeedbacksFromFirebase,
+  deleteFeedbackInFirebase,
+  updateProfileSubscription,
+  deleteProfileInFirebase,
+  initFirebaseRealtimeSubscriptions,
+  submitUserFeedback,
+  checkSubscriptionCodeLimit,
+  adminCreateProfile,
+  getClassCountByGuruId,
+  getTeacherClasses,
+  updateClassInFirebase,
+  syncTeacherClasses,
+  updateProfileSubscriptionPlan,
+  recordStudentActivity,
+  recordStudentBadge,
+  saveCertificate,
+  fetchStudentProgressFromFirebase,
+  updateTeacherSchoolAndNameInFirebase,
+  updateParentFamilyAndNameInFirebase,
+  saveParentChildToFirebase,
+  deleteParentChildFromFirebase,
+  syncParentSessionFromFirebase,
+  deleteStudentFromFirebase,
+  testFirebaseConnection,
+  cleanupOrphanedStudentsInFirebase,
+  getStudentsForTeacher,
+  syncTeacherSessionFromFirebase,
+  deleteStudentByNameFromFirebase,
+  checkIsCodeAlreadyUsedInFirebase,
+} from "./services/firebaseService";
 
 if (typeof window !== "undefined") {
+  (window as any).getStudentsForTeacher = getStudentsForTeacher;
+  (window as any).syncTeacherSessionFromFirebase = syncTeacherSessionFromFirebase;
+  (window as any).deleteStudentByNameFromFirebase = deleteStudentByNameFromFirebase;
+  (window as any).deleteParentChildFromFirebase = deleteParentChildFromFirebase;
+  (window as any).checkIsCodeAlreadyUsedInFirebase = checkIsCodeAlreadyUsedInFirebase;
+  (window as any).checkIsCodeAlreadyUsed = checkIsCodeAlreadyUsedInFirebase;
   (window as any).confetti = confetti;
+  (window as any).firebaseLogout = firebaseLogout;
+  (window as any).testFirebaseConnection = testFirebaseConnection;
+  (window as any).fetchAdminDataFromFirebase = fetchAdminDataFromFirebase;
+  (window as any).getRegisteredTeachers = getRegisteredTeachers;
+  (window as any).getRegisteredParents = getRegisteredParents;
+  (window as any).getFeedbacksFromFirebase = getFeedbacksFromFirebase;
+  (window as any).deleteFeedbackInFirebase = deleteFeedbackInFirebase;
+  (window as any).updateProfileSubscription = updateProfileSubscription;
+  (window as any).deleteProfileInFirebase = deleteProfileInFirebase;
+  (window as any).cleanupOrphanedStudentsInFirebase = cleanupOrphanedStudentsInFirebase;
+  (window as any).initFirebaseRealtimeSubscriptions = initFirebaseRealtimeSubscriptions;
+  (window as any).submitUserFeedback = submitUserFeedback;
+  (window as any).saveClassToFirebase = saveClassToFirebase;
+  (window as any).saveFamilyToFirebase = saveFamilyToFirebase;
+  (window as any).syncStudentToFirebase = syncStudentToFirebase;
+  (window as any).getClassByCode = getClassByCode;
+  (window as any).getFamilyByCode = getFamilyByCode;
+  (window as any).getStudentsByClassId = getStudentsByClassId;
+  (window as any).getStudentsByFamilyId = getStudentsByFamilyId;
+  (window as any).updateClassInFirebase = updateClassInFirebase;
+  (window as any).syncTeacherClasses = syncTeacherClasses;
+  (window as any).updateProfileSubscriptionPlan = updateProfileSubscriptionPlan;
+  (window as any).checkSubscriptionCodeLimit = checkSubscriptionCodeLimit;
+  (window as any).getClassCountByGuruId = getClassCountByGuruId;
+  (window as any).getTeacherClasses = getTeacherClasses;
+  (window as any).recordStudentActivity = recordStudentActivity;
+  (window as any).recordStudentBadge = recordStudentBadge;
+  (window as any).saveCertificate = saveCertificate;
+  (window as any).fetchStudentProgressFromFirebase = fetchStudentProgressFromFirebase;
+  (window as any).updateParentFamilyAndNameInFirebase = updateParentFamilyAndNameInFirebase;
+  (window as any).saveParentChildToFirebase = saveParentChildToFirebase;
+  (window as any).syncParentSessionFromFirebase = syncParentSessionFromFirebase;
+  (window as any).deleteStudentFromFirebase = deleteStudentFromFirebase;
 }
 
 function PirateAvatar3DSwiper({
   onStart,
   onOpenProPackage,
-}: { onStart?: () => void; onOpenProPackage?: () => void } = {}) {
+  onRequestEntryChoice,
+}: {
+  onStart?: () => void;
+  onOpenProPackage?: () => void;
+  onRequestEntryChoice?: () => void;
+} = {}) {
   const characters = [
     {
       id: 1,
@@ -72,11 +165,11 @@ function PirateAvatar3DSwiper({
   const dragStartX = React.useRef<number | null>(null);
 
   const triggerProNotice = (charName?: string) => {
-    alert("Dapatkan Bunyi Kata Versi Pro untuk membuka watak ini!");
+    if (typeof (window as any).playBubble === "function") (window as any).playBubble();
     if (onOpenProPackage) {
       onOpenProPackage();
-    } else if ((window as any).openPakejProModal) {
-      (window as any).openPakejProModal();
+    } else if (typeof (window as any).openPakejProModal === "function") {
+      (window as any).openPakejProModal("guru");
     }
   };
 
@@ -142,7 +235,9 @@ function PirateAvatar3DSwiper({
       }
     }
 
-    if (onStart) {
+    if (onRequestEntryChoice) {
+      onRequestEntryChoice();
+    } else if (onStart) {
       onStart();
     } else if (typeof (window as any).masukModMurid === "function") {
       (window as any).masukModMurid(studentName);
@@ -444,8 +539,9 @@ function PirateAvatar3DSwiper({
                       position: "absolute",
                       inset: "4px",
                       borderRadius: "13px",
-                      backgroundColor: "#1e293b",
-                      backgroundImage: "linear-gradient(150deg, #222b3d 0%, #111827 100%)",
+                      backgroundColor: "rgba(30, 41, 59, 0.45)",
+                      backgroundImage: "linear-gradient(150deg, rgba(51, 65, 85, 0.5) 0%, rgba(30, 41, 59, 0.6) 100%)",
+                      backdropFilter: "blur(0.8px)",
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
@@ -465,7 +561,7 @@ function PirateAvatar3DSwiper({
                         width: "90%",
                         height: "90%",
                         objectFit: "contain",
-                        filter: "brightness(20%) opacity(0.35)",
+                        filter: "brightness(75%) opacity(0.75)",
                         pointerEvents: "none",
                       }}
                     />
@@ -772,10 +868,15 @@ function Lencana3DSwiper() {
         (window as any).bukaDetailLencana(b.title, b.desc, b.image, b.mapName, b.petaId === 'all');
       }
     } else {
-      if (b.petaId === 'all') {
-        alert(`Lencana "${b.title}" masih terkunci! Selesaikan sekurang-kurangnya 3 aktiviti (skor 3 bintang penuh) dalam setiap 4 cabaran utama untuk membuka lencana ini dan Sijil Pencapaian.`);
+      const msg =
+        b.petaId === 'all'
+          ? `Lencana "${b.title}" masih terkunci! Selesaikan sekurang-kurangnya 3 aktiviti (skor 3 bintang penuh) dalam setiap 4 cabaran utama untuk membuka lencana ini dan Sijil Pencapaian.`
+          : `Lencana "${b.title}" masih terkunci! Dapatkan 3 bintang (skor penuh) dalam sekurang-kurangnya 3 aktiviti ${b.mapName} untuk membuka lencana ini.`;
+
+      if (typeof (window as any).showAppToast === "function") {
+        (window as any).showAppToast("Lencana Masih Terkunci", msg, "warning");
       } else {
-        alert(`Lencana "${b.title}" masih terkunci! Dapatkan 3 bintang (skor penuh) dalam sekurang-kurangnya 3 aktiviti ${b.mapName} untuk membuka lencana ini.`);
+        alert(msg);
       }
     }
   };
@@ -1390,9 +1491,10 @@ export default function App() {
       (typeof window !== "undefined" && (window as any).namaMuridAktif) ||
       localStorage.getItem("muridAktif") ||
       localStorage.getItem("bunyiKataCurrentMurid") ||
-      "Ali Bin Abu"
+      "Murid"
     );
   });
+  const [editModalMode, setEditModalMode] = React.useState<"guru" | "ibubapa" | "admin">("guru");
 
   React.useEffect(() => {
     const syncStudent = (e?: any) => {
@@ -1499,6 +1601,124 @@ export default function App() {
       setInitialBukuCeritaId(bookId || null);
       setShowBukuCeritaModal(true);
     };
+
+    (window as any).showCantumKataModal = () => {
+      const container = document.getElementById('cantum-kata-buttons-container');
+      const modal = document.getElementById('modal-pilih-cantum-kata');
+      if (!container || !modal) return;
+      const isHero = ((window as any).currentPeta === 3);
+      let buttonsHTML = '';
+      if (isHero) {
+        const heroSkills = [
+          { key: 'kv_kvk', label: 'KV + KVK' },
+          { key: 'kvk_kv', label: 'KVK + KV' },
+          { key: 'kvk_kvk', label: 'KVK + KVK' },
+          { key: 'kv_kv_kvk', label: 'KV + KV + KVK' },
+          { key: 'kvk_kv_kvk', label: 'KVK + KV + KVK' }
+        ];
+        buttonsHTML = heroSkills.map(s => `
+          <button class="neo-btn" style="justify-content: center; padding: 12px 10px; font-size: 0.95rem; width: 100%; display: flex; align-items: center; background-color: #8b5cf6; color: #ffffff;" onclick="document.getElementById('modal-pilih-cantum-kata').style.display = 'none'; if(window.bukaCantumKata) window.bukaCantumKata('${s.key}');">
+            ${s.label}
+          </button>
+        `).join('');
+      } else {
+        const asasSkills = [
+          { key: 'kvkv', label: 'KV + KV' },
+          { key: 'v_kv', label: 'V + KV' },
+          { key: 'kvkvkv', label: 'KV + KV + KV' },
+          { key: 'v_kvk', label: 'V + KVK' }
+        ];
+        buttonsHTML = asasSkills.map(s => `
+          <button class="neo-btn" style="justify-content: center; padding: 12px 10px; font-size: 0.95rem; width: 100%; display: flex; align-items: center; background-color: #8b5cf6; color: #ffffff;" onclick="document.getElementById('modal-pilih-cantum-kata').style.display = 'none'; if(window.bukaCantumKata) window.bukaCantumKata('${s.key}');">
+            ${s.label}
+          </button>
+        `).join('');
+      }
+      container.innerHTML = buttonsHTML;
+      modal.style.display = 'flex';
+    };
+
+    (window as any).bukaCantumKata = (kemahiran?: string) => {
+      const selected = kemahiran || 'kvkv';
+      (window as any).currentCantumKataKemahiran = selected;
+      window.dispatchEvent(new CustomEvent('buka-cantum-kemahiran', { detail: { kemahiran: selected } }));
+      if ((window as any).paparSkrin) (window as any).paparSkrin('view-cantum-kata');
+    };
+
+    (window as any).showCubaSebutModal = () => {
+      const container = document.getElementById('cuba-sebut-sukukata-buttons-container');
+      const modal = document.getElementById('modal-pilih-cuba-sebut-sukukata');
+      if (!container || !modal) return;
+      const isHero = ((window as any).currentPeta === 3);
+      let buttonsHTML = '';
+      if (isHero) {
+        const heroSkills = [
+          { key: 'kv_kvk', label: 'KV + KVK' },
+          { key: 'kvk_kv', label: 'KVK + KV' },
+          { key: 'kvk_kvk', label: 'KVK + KVK' },
+          { key: 'kv_kv_kvk', label: 'KV + KV + KVK' },
+          { key: 'kvk_kv_kvk', label: 'KVK + KV + KVK' }
+        ];
+        buttonsHTML = heroSkills.map(s => `
+          <button class="neo-btn" style="justify-content: center; padding: 12px 10px; font-size: 0.95rem; width: 100%; display: flex; align-items: center; background-color: #ff751f; color: #ffffff;" onclick="document.getElementById('modal-pilih-cuba-sebut-sukukata').style.display = 'none'; if(window.bukaCubaSebut) window.bukaCubaSebut('${s.key}', '${s.label}');">
+            ${s.label}
+          </button>
+        `).join('');
+      } else {
+        const asasSkills = [
+          { key: 'kv', label: 'KV' },
+          { key: 'kvkv', label: 'KV + KV' },
+          { key: 'v_kv', label: 'V + KV' },
+          { key: 'kvkvkv', label: 'KV + KV + KV' },
+          { key: 'kvk', label: 'KVK' },
+          { key: 'v_kvk', label: 'V + KVK' }
+        ];
+        buttonsHTML = asasSkills.map(s => `
+          <button class="neo-btn" style="justify-content: center; padding: 12px 10px; font-size: 0.95rem; width: 100%; display: flex; align-items: center; background-color: #ff751f; color: #ffffff;" onclick="document.getElementById('modal-pilih-cuba-sebut-sukukata').style.display = 'none'; if(window.bukaCubaSebut) window.bukaCubaSebut('${s.key}', '${s.label}');">
+            ${s.label}
+          </button>
+        `).join('');
+      }
+      container.innerHTML = buttonsHTML;
+      modal.style.display = 'flex';
+    };
+
+    (window as any).bukaCubaSebut = (key?: string, label?: string) => {
+      setCubaSebutConfig({
+        key: key || 'kvkv',
+        label: label || 'KV + KV',
+        mode: 'sebut'
+      });
+      setShowCubaSebut(true);
+    };
+
+    (window as any).showCubaBacaModal = () => {
+      const container = document.getElementById('cuba-baca-buttons-container');
+      const modal = document.getElementById('modal-pilih-cuba-baca');
+      if (!container || !modal) return;
+      const bacaSkills = [
+        { key: 'ayat_pendek', label: 'Ayat Pendek' },
+        { key: 'ayat_panjang', label: 'Ayat Panjang' },
+        { key: 'petikan_1', label: 'Petikan Tahap 1' },
+        { key: 'petikan_2', label: 'Petikan Tahap 2' }
+      ];
+      const buttonsHTML = bacaSkills.map(s => `
+        <button class="neo-btn" style="justify-content: center; padding: 12px 10px; font-size: 0.95rem; width: 100%; display: flex; align-items: center; background-color: #10b981; color: #ffffff;" onclick="document.getElementById('modal-pilih-cuba-baca').style.display = 'none'; if(window.bukaCubaBaca) window.bukaCubaBaca('${s.key}', '${s.label}');">
+          ${s.label}
+        </button>
+      `).join('');
+      container.innerHTML = buttonsHTML;
+      modal.style.display = 'flex';
+    };
+
+    (window as any).bukaCubaBaca = (key?: string, label?: string) => {
+      setCubaSebutConfig({
+        key: key || 'ayat_pendek',
+        label: label || 'Ayat Pendek',
+        mode: 'baca'
+      });
+      setShowCubaSebut(true);
+    };
     return () => {
       if (observer) observer.disconnect();
       delete (window as any).showARGuideModal;
@@ -1517,6 +1737,7 @@ export default function App() {
     ) => {
       setEditModalError("");
       setIsMandatorySetup(mandatory);
+      setEditModalMode(mode);
       if (mode === "admin") {
         (window as any).modAdminAktif = true;
         (window as any).modIbuBapaAktif = false;
@@ -1536,24 +1757,76 @@ export default function App() {
         );
         setIsEditModalOpen(true);
       } else if (mode === "guru") {
+        setEditModalMode("guru");
         (window as any).modAdminAktif = false;
         (window as any).modIbuBapaAktif = false;
         (window as any).modGuruAktif = true;
+
+        const guruId = localStorage.getItem("bunyiKataUserId") || (window as any).currentUser?.id;
+        const guruEmail = localStorage.getItem("bunyiKataGuruEmail");
+
+        const currentLvl = (localStorage.getItem("bunyiKataAccessLevel") as "trial" | "pro") || userAccessLevel;
+        const rawPlan = localStorage.getItem("bunyiKataTeacherPlan") || "";
+        const isPaidPro = currentLvl === "pro" && rawPlan.toLowerCase() !== "percuma";
+        setTeacherCanHaveClass2(isPaidPro);
+        setTeacherPlanName(isPaidPro ? (rawPlan || "Bulanan Pro") : "Percuma");
+
+        const sanitizeClassVal = (v: string) => (v || "").trim().toUpperCase();
+        const sanitizeCodeVal = (v: string) => (v || "").trim().toUpperCase();
+
+        // Segerakkan data kelas dari pangkalan data jika pro
+        if (isPaidPro && (guruId || guruEmail)) {
+          syncTeacherClasses(guruId || guruEmail).then((classes) => {
+            if (classes && classes.length > 0) {
+              const c1 = sanitizeCodeVal(classes[0].kod_kelas || "");
+              const k1 = sanitizeClassVal(classes[0].nama_kelas || "");
+              const sch = (classes[0].nama_sekolah || "").toUpperCase();
+              const gName = (classes[0].nama_guru || "").toUpperCase();
+              if (c1) { setEditKodTemp(c1); localStorage.setItem("bunyiKataKodKelas", c1); }
+              if (k1) { setEditKelasTemp(k1); localStorage.setItem("bunyiKataNamaKelas", k1); }
+              if (sch) { setEditSekolahTemp(sch); localStorage.setItem("bunyiKataNamaSekolah", sch); }
+              if (gName) { setEditGuruTemp(gName); localStorage.setItem("pdf_guru", gName); }
+
+              if (classes[1]) {
+                const c2 = sanitizeCodeVal(classes[1].kod_kelas || "");
+                const k2 = sanitizeClassVal(classes[1].nama_kelas || "");
+                if (c2) { setEditKod2Temp(c2); localStorage.setItem("bunyiKataKodKelas2", c2); }
+                if (k2) { setEditKelas2Temp(k2); localStorage.setItem("bunyiKataNamaKelas2", k2); }
+              }
+            }
+          }).catch(console.warn);
+        }
+
         setEditSekolahTemp((localStorage.getItem("bunyiKataNamaSekolah") || "").toUpperCase());
         setEditAvatarTemp(
           localStorage.getItem("bunyiKataSekolahAvatar") ||
           "https://api.dicebear.com/7.x/shapes/svg?seed=school&backgroundColor=ffffff",
         );
-        setEditKelasTemp(
-          (localStorage.getItem("bunyiKataNamaKelas") || "1 CEMERLANG").toUpperCase(),
-        );
-        setEditGuruTemp((localStorage.getItem("pdf_guru") || "").toUpperCase());
-        setEditKodTemp((localStorage.getItem("bunyiKataKodKelas") || "KELAS#01").toUpperCase());
+        setEditKelasTemp(sanitizeClassVal(localStorage.getItem("bunyiKataNamaKelas") || ""));
+        setEditGuruTemp((localStorage.getItem("pdf_guru") || localStorage.getItem("bunyiKataNamaGuru") || "").toUpperCase());
+        setEditKodTemp(sanitizeCodeVal(localStorage.getItem("bunyiKataKodKelas") || ""));
+        setEditKod2Temp(sanitizeCodeVal(localStorage.getItem("bunyiKataKodKelas2") || ""));
+        setEditKelas2Temp(sanitizeClassVal(localStorage.getItem("bunyiKataNamaKelas2") || ""));
+        setIsChangingCode1(false);
+        setIsChangingCode2(false);
+        setIsChangingClassName1(false);
+        setIsChangingClassName2(false);
         setIsEditModalOpen(true);
       } else {
+        setEditModalMode("ibubapa");
         (window as any).modAdminAktif = false;
         (window as any).modIbuBapaAktif = true;
         (window as any).modGuruAktif = false;
+
+        const parentId = localStorage.getItem("bunyiKataUserId") || (window as any).currentUser?.id || "";
+        if (parentId && typeof syncParentSessionFromFirebase === "function") {
+          syncParentSessionFromFirebase(parentId).then((res) => {
+            if (res && res.namaKeluarga) {
+              setEditNamaKeluargaTemp(res.namaKeluarga.toUpperCase());
+            }
+          }).catch(console.warn);
+        }
+
         setEditNamaKeluargaTemp(
           (localStorage.getItem("bunyiKataNamaKeluarga") || "").toUpperCase(),
         );
@@ -1561,12 +1834,14 @@ export default function App() {
           (
             (window as any).anakTerpilih ||
             localStorage.getItem("ibubapaAnakTerpilih") ||
-            "ALI BIN ABU"
+            ""
           ).toUpperCase(),
         );
         setEditKodTemp(
-          (localStorage.getItem("bunyiKataKodKeluarga") || "FAM@2026").toUpperCase(),
+          (localStorage.getItem("bunyiKataKodKeluarga") || "").toUpperCase(),
         );
+        setIsChangingFamilyName(false);
+        setIsChangingFamilyCode(false);
         setIsEditModalOpen(true);
       }
     };
@@ -1580,13 +1855,13 @@ export default function App() {
   const [showGuruSijilModal, setShowGuruSijilModal] = React.useState(false);
   const [selectedExportPeta, setSelectedExportPeta] = React.useState<'all' | '1' | '2' | '3' | '4'>('all');
   const [exportSchoolInput, setExportSchoolInput] = React.useState(() => localStorage.getItem('pdf_sekolah') || 'SK BUKIT BERUANG');
-  const [exportClassInput, setExportClassInput] = React.useState(() => localStorage.getItem('bunyiKataNamaKelas') || localStorage.getItem('pdf_kelas') || '1 Cemerlang');
+  const [exportClassInput, setExportClassInput] = React.useState(() => localStorage.getItem('bunyiKataNamaKelas') || localStorage.getItem('pdf_kelas') || '');
   const [exportTeacherInput, setExportTeacherInput] = React.useState(() => localStorage.getItem('pdf_guru') || 'MUHAMMAD IZZAT BIN RAZAK');
 
   React.useEffect(() => {
     (window as any).bukaModalExport = () => {
       setExportSchoolInput(localStorage.getItem('pdf_sekolah') || 'SK BUKIT BERUANG');
-      setExportClassInput(localStorage.getItem('bunyiKataNamaKelas') || localStorage.getItem('pdf_kelas') || '1 Cemerlang');
+      setExportClassInput(localStorage.getItem('bunyiKataNamaKelas') || localStorage.getItem('pdf_kelas') || '');
       setExportTeacherInput(localStorage.getItem('pdf_guru') || 'MUHAMMAD IZZAT BIN RAZAK');
       setShowExportModal(true);
     };
@@ -1661,25 +1936,181 @@ export default function App() {
     },
   ];
 
+  const isUserAdmin = React.useCallback(() => {
+    try {
+      if (typeof window === "undefined") return false;
+      if (
+        (window as any).isGuestMode ||
+        (window as any).userAccessLevel === "trial" ||
+        localStorage.getItem("bunyiKataAccessLevel") === "trial" ||
+        (window as any).namaMuridAktif === "Tetamu"
+      ) {
+        return false;
+      }
+      return !!(
+        (window as any).modAdminAktif ||
+        (window as any).isAdminMode ||
+        localStorage.getItem("bunyiKataUserRole") === "admin" ||
+        (typeof document !== "undefined" && (
+          document.body?.classList?.contains("admin-mode") ||
+          document.getElementById("teacher-banner-badge")?.innerText?.toUpperCase().includes("ADMIN")
+        )) ||
+        (window as any).currentUser?.peranan === "admin"
+      );
+    } catch (e) {
+      return false;
+    }
+  }, []);
+
+  const [isAdminActive, setIsAdminActive] = React.useState<boolean>(() => {
+    try {
+      if (typeof window === "undefined") return false;
+      if (
+        (window as any).isGuestMode ||
+        (window as any).userAccessLevel === "trial" ||
+        localStorage.getItem("bunyiKataAccessLevel") === "trial" ||
+        (window as any).namaMuridAktif === "Tetamu"
+      ) {
+        return false;
+      }
+      return !!(
+        (window as any).modAdminAktif ||
+        (window as any).isAdminMode ||
+        localStorage.getItem("bunyiKataUserRole") === "admin" ||
+        (typeof document !== "undefined" && (
+          document.body?.classList?.contains("admin-mode") ||
+          document.getElementById("teacher-banner-badge")?.innerText?.toUpperCase().includes("ADMIN")
+        )) ||
+        (window as any).currentUser?.peranan === "admin"
+      );
+    } catch (e) {
+      return false;
+    }
+  });
+
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [isCodeModalOpen, setIsCodeModalOpen] = React.useState(false);
+  const [userAccessLevel, setUserAccessLevel] = React.useState<"trial" | "pro">(() => {
+    if (typeof window !== "undefined") {
+      if (
+        (window as any).isGuestMode ||
+        (window as any).namaMuridAktif === "Tetamu" ||
+        localStorage.getItem("bunyiKataAccessLevel") === "trial"
+      ) {
+        return "trial";
+      }
+      if (
+        localStorage.getItem("bunyiKataUserRole") === "admin" ||
+        (typeof document !== "undefined" && (
+          document.body?.classList?.contains("admin-mode") ||
+          document.getElementById("teacher-banner-badge")?.innerText?.toUpperCase().includes("ADMIN")
+        )) ||
+        (window as any).modAdminAktif ||
+        (window as any).isAdminMode
+      ) {
+        return "pro";
+      }
+      return (localStorage.getItem("bunyiKataAccessLevel") as "trial" | "pro") || "trial";
+    }
+    return "trial";
+  });
+
+  React.useEffect(() => {
+    const handleAdminSync = () => {
+      const isGuest =
+        (window as any).isGuestMode ||
+        (window as any).userAccessLevel === "trial" ||
+        localStorage.getItem("bunyiKataAccessLevel") === "trial" ||
+        (window as any).namaMuridAktif === "Tetamu";
+
+      if (isGuest) {
+        setIsAdminActive(false);
+        setUserAccessLevel("trial");
+        (window as any).userAccessLevel = "trial";
+        (window as any).isGuestMode = true;
+        return;
+      }
+
+      const admin = isUserAdmin();
+      setIsAdminActive(admin);
+      if (admin) {
+        setUserAccessLevel("pro");
+        (window as any).userAccessLevel = "pro";
+        (window as any).modAdminAktif = true;
+        (window as any).isAdminMode = true;
+        (window as any).isGuestMode = false;
+        localStorage.setItem("bunyiKataAccessLevel", "pro");
+      }
+    };
+    handleAdminSync();
+
+    window.addEventListener("admin-mode-change", handleAdminSync);
+    window.addEventListener("focus", handleAdminSync);
+
+    const observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "attributes" && m.attributeName === "class") {
+          handleAdminSync();
+        }
+      }
+    });
+    if (typeof document !== "undefined" && document.body) {
+      observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    }
+
+    return () => {
+      window.removeEventListener("admin-mode-change", handleAdminSync);
+      window.removeEventListener("focus", handleAdminSync);
+      observer.disconnect();
+    };
+  }, [isUserAdmin]);
+
+  const isGuestModeActive = Boolean(
+    (window as any).isGuestMode ||
+    userAccessLevel === "trial" ||
+    localStorage.getItem("bunyiKataAccessLevel") === "trial" ||
+    (window as any).namaMuridAktif === "Tetamu"
+  );
+  const isPlanFree =
+    localStorage.getItem("bunyiKataTeacherPlan")?.toLowerCase() === "percuma" ||
+    localStorage.getItem("bunyiKataParentPlan")?.toLowerCase() === "percuma";
+  const isEffectiveTrial = isGuestModeActive || (isPlanFree && !isUserAdmin() && !isAdminActive);
+  const isEffectivePro = !isEffectiveTrial;
+  const effectiveAccessLevel: "trial" | "pro" = isEffectivePro ? "pro" : "trial";
+  const [isEntryChoiceModalOpen, setIsEntryChoiceModalOpen] = React.useState(false);
+  const [isProPricingModalOpen, setIsProPricingModalOpen] = React.useState(false);
+  const [proPricingTab, setProPricingTab] = React.useState<"guru" | "ibubapa">("guru");
   const [joinCode, setJoinCode] = React.useState("");
   const [showLoginModal, setShowLoginModal] = React.useState(false);
   const [pendingLoginMode, setPendingLoginMode] = React.useState("");
   const [authModalTab, setAuthModalTab] = React.useState<"login" | "register">("login");
   const [loginEmail, setLoginEmail] = React.useState("");
   const [loginPassword, setLoginPassword] = React.useState("");
+  const [showLoginPassword, setShowLoginPassword] = React.useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = React.useState(false);
   const [regGuruNama, setRegGuruNama] = React.useState("");
   const [regGuruSekolah, setRegGuruSekolah] = React.useState("");
   const [regNamaKeluarga, setRegNamaKeluarga] = React.useState("");
   const [authModalError, setAuthModalError] = React.useState("");
-  const [editKodTemp, setEditKodTemp] = React.useState("");
-  const [editKelasTemp, setEditKelasTemp] = React.useState("");
-  const [editSekolahTemp, setEditSekolahTemp] = React.useState("");
-  const [editAvatarTemp, setEditAvatarTemp] = React.useState("");
-  const [editGuruTemp, setEditGuruTemp] = React.useState("");
+  const [isAuthLoading, setIsAuthLoading] = React.useState(false);
+  const [authSuccessMessage, setAuthSuccessMessage] = React.useState("");
+  const [editKodTemp, setEditKodTemp] = React.useState(
+    () => (localStorage.getItem("bunyiKataKodKelas") || "").trim().toUpperCase()
+  );
+  const [editKelasTemp, setEditKelasTemp] = React.useState(
+    () => (localStorage.getItem("bunyiKataNamaKelas") || "").trim().toUpperCase()
+  );
+  const [editSekolahTemp, setEditSekolahTemp] = React.useState(
+    () => (localStorage.getItem("bunyiKataNamaSekolah") || "").trim().toUpperCase()
+  );
+  const [editAvatarTemp, setEditAvatarTemp] = React.useState(
+    () => localStorage.getItem("bunyiKataSekolahAvatar") || "https://api.dicebear.com/7.x/shapes/svg?seed=school&backgroundColor=ffffff"
+  );
+  const [editGuruTemp, setEditGuruTemp] = React.useState(
+    () => (localStorage.getItem("pdf_guru") || localStorage.getItem("bunyiKataNamaGuru") || "").trim().toUpperCase()
+  );
   const [editNamaKeluargaTemp, setEditNamaKeluargaTemp] = React.useState(
-    () => localStorage.getItem("bunyiKataNamaKeluarga") || "",
+    () => (localStorage.getItem("bunyiKataNamaKeluarga") || "").trim().toUpperCase(),
   );
   const [editNamaAnakTemp, setEditNamaAnakTemp] = React.useState("");
   const [editAdminNamaSistemTemp, setEditAdminNamaSistemTemp] = React.useState(
@@ -1692,8 +2123,489 @@ export default function App() {
   const [editModalError, setEditModalError] = React.useState("");
   const [isChangingPassword, setIsChangingPassword] = React.useState(false);
   const [newPasswordInput, setNewPasswordInput] = React.useState("");
+  const [showNewPassword, setShowNewPassword] = React.useState(false);
   const [showPasswordConfirmModal, setShowPasswordConfirmModal] = React.useState(false);
   const [passwordToast, setPasswordToast] = React.useState("");
+  const [editKod2Temp, setEditKod2Temp] = React.useState(
+    () => (localStorage.getItem("bunyiKataKodKelas2") || "").trim().toUpperCase()
+  );
+  const [editKelas2Temp, setEditKelas2Temp] = React.useState(
+    () => (localStorage.getItem("bunyiKataNamaKelas2") || "").trim().toUpperCase()
+  );
+  const [isChangingCode1, setIsChangingCode1] = React.useState(false);
+  const [newCode1Input, setNewCode1Input] = React.useState("");
+  const [isChangingCode2, setIsChangingCode2] = React.useState(false);
+  const [newCode2Input, setNewCode2Input] = React.useState("");
+  const [teacherCanHaveClass2, setTeacherCanHaveClass2] = React.useState(() => {
+    const accessLvl = (localStorage.getItem("bunyiKataAccessLevel") as "trial" | "pro") || "trial";
+    const rawPlan = localStorage.getItem("bunyiKataTeacherPlan") || "";
+    return accessLvl === "pro" && rawPlan.toLowerCase() !== "percuma";
+  });
+  const [teacherPlanName, setTeacherPlanName] = React.useState(() => localStorage.getItem("bunyiKataTeacherPlan") || "Percuma");
+  const [activeUrusKodKelas, setActiveUrusKodKelas] = React.useState(() => localStorage.getItem("bunyiKataKodKelas") || "");
+  const [isEditingUrusKod, setIsEditingUrusKod] = React.useState(false);
+  const [isChangingFamilyCode, setIsChangingFamilyCode] = React.useState(false);
+  const [newFamilyCodeInput, setNewFamilyCodeInput] = React.useState("");
+  const [isChangingAdminCode, setIsChangingAdminCode] = React.useState(false);
+  const [newAdminCodeInput, setNewAdminCodeInput] = React.useState("");
+  const [isChangingClassName1, setIsChangingClassName1] = React.useState(false);
+  const [newClassName1Input, setNewClassName1Input] = React.useState("");
+  const [isChangingClassName2, setIsChangingClassName2] = React.useState(false);
+  const [newClassName2Input, setNewClassName2Input] = React.useState("");
+  const [isChangingFamilyName, setIsChangingFamilyName] = React.useState(false);
+  const [newFamilyNameInput, setNewFamilyNameInput] = React.useState("");
+
+  React.useEffect(() => {
+    const accessLvl = (localStorage.getItem("bunyiKataAccessLevel") as "trial" | "pro") || userAccessLevel;
+    const rawPlan = localStorage.getItem("bunyiKataTeacherPlan") || "";
+    const isPro = accessLvl === "pro" && rawPlan.toLowerCase() !== "percuma";
+    setTeacherCanHaveClass2(isPro);
+
+    const k1 = (localStorage.getItem("bunyiKataNamaKelas") || "").trim().toUpperCase();
+    const c1 = (localStorage.getItem("bunyiKataKodKelas") || "").trim().toUpperCase();
+    const k2 = (localStorage.getItem("bunyiKataNamaKelas2") || "").trim().toUpperCase();
+    const c2 = (localStorage.getItem("bunyiKataKodKelas2") || "").trim().toUpperCase();
+    const fam = (localStorage.getItem("bunyiKataNamaKeluarga") || "").trim().toUpperCase();
+    const gName = (localStorage.getItem("pdf_guru") || localStorage.getItem("bunyiKataNamaGuru") || "").trim().toUpperCase();
+    const sch = (localStorage.getItem("bunyiKataNamaSekolah") || "").trim().toUpperCase();
+
+    if (k1) setEditKelasTemp(k1);
+    if (c1) setEditKodTemp(c1);
+    if (k2) setEditKelas2Temp(k2);
+    if (c2) setEditKod2Temp(c2);
+    if (fam) setEditNamaKeluargaTemp(fam);
+    if (gName) setEditGuruTemp(gName);
+    if (sch) setEditSekolahTemp(sch);
+  }, [userAccessLevel]);
+
+  // Helper mendapatkan maklumat lencana baki langganan (Guru & Ibu Bapa)
+  const getSubscriptionBadgeInfo = (role: "guru" | "ibubapa") => {
+    const accessLvl = isEffectiveTrial ? "trial" : "pro";
+    const planName = role === "guru"
+      ? (localStorage.getItem("bunyiKataTeacherPlan") || teacherPlanName || "Percuma")
+      : (localStorage.getItem("bunyiKataParentPlan") || "Percuma");
+    const tarikhTamatStr = localStorage.getItem("bunyiKataTarikhTamat") || (window as any).currentUser?.tarikh_tamat;
+
+    const isFree = accessLvl === "trial" || planName.toLowerCase() === "percuma";
+    if (isFree) {
+      return {
+        text: "Percuma",
+        color: "#fbbf24",
+        bg: "rgba(251, 191, 36, 0.25)",
+        border: "rgba(251, 191, 36, 0.65)",
+        icon: "fa-solid fa-gift",
+        isFree: true,
+      };
+    }
+
+    let days: number | null = null;
+    if (tarikhTamatStr) {
+      const diffMs = new Date(tarikhTamatStr).getTime() - Date.now();
+      days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    }
+
+    if (days === null || isNaN(days)) {
+      const uId = localStorage.getItem("bunyiKataUserId") || (window as any).currentUser?.id;
+      const uEmail = (role === "guru"
+        ? (localStorage.getItem("bunyiKataGuruEmail") || (window as any).currentUser?.email)
+        : (localStorage.getItem("bunyiKataIbubapaEmail") || localStorage.getItem("bunyiKataParentEmail") || (window as any).currentUser?.email)
+      )?.toLowerCase();
+
+      const storageKey = role === "guru" ? "bunyiKataAdminTeachers" : "bunyiKataAdminParents";
+      try {
+        const list = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        const found = list.find((item: any) =>
+          (uId && item.id === uId) ||
+          (uEmail && item.email && item.email.toLowerCase() === uEmail)
+        );
+        if (found && typeof found.bakiHari === "number") {
+          days = found.bakiHari;
+        }
+      } catch (e) {}
+    }
+
+    if (days === null || isNaN(days)) {
+      const currentU = (window as any).currentUser;
+      if (currentU && typeof currentU.bakiHari === "number") {
+        days = currentU.bakiHari;
+      }
+    }
+
+    if (days === null || isNaN(days)) {
+      if (planName.includes("1 Tahun")) days = 365;
+      else if (planName.includes("6 Bulan")) days = 180;
+      else if (planName.includes("3 Bulan")) days = 90;
+      else days = 30;
+    }
+
+    if (days <= 0) {
+      return {
+        text: "Tamat Tempoh",
+        color: "#f87171",
+        bg: "rgba(239, 68, 68, 0.25)",
+        border: "rgba(239, 68, 68, 0.65)",
+        icon: "fa-solid fa-clock-rotate-left",
+        isFree: false,
+      };
+    }
+
+    let displayText = `${days} Hari Lagi`;
+    if (days >= 365) {
+      const yrs = Math.floor(days / 365);
+      displayText = `${yrs} Tahun Lagi`;
+    } else if (days >= 60) {
+      const mths = Math.floor(days / 30);
+      displayText = `${mths} Bulan Lagi`;
+    }
+
+    return {
+      text: displayText,
+      color: "#34d399",
+      bg: "rgba(16, 185, 129, 0.25)",
+      border: "rgba(52, 211, 153, 0.65)",
+      icon: "fa-solid fa-crown",
+      isFree: false,
+    };
+  };
+
+  // Helper segerak Nama Kelas 1 ke Storan & Firebase
+  const handleSaveClassName1 = async (name: string) => {
+    const clean = name.trim().toUpperCase();
+    if (!clean) {
+      alert("Sila masukkan nama kelas 1!");
+      return;
+    }
+    setEditKelasTemp(clean);
+    localStorage.setItem("bunyiKataNamaKelas", clean);
+
+    let list: string[] = [];
+    try {
+      list = JSON.parse(localStorage.getItem("bunyiKataDaftarKelas") || "[]");
+    } catch (e) {}
+    if (!list.includes(clean)) {
+      if (list.length > 0) list[0] = clean;
+      else list.push(clean);
+      localStorage.setItem("bunyiKataDaftarKelas", JSON.stringify(list));
+    }
+
+    const kod = editKodTemp || localStorage.getItem("bunyiKataKodKelas") || "";
+    const guruId = localStorage.getItem("bunyiKataUserId") || (window as any).currentUser?.id || "";
+    const namaGuru = editGuruTemp || localStorage.getItem("pdf_guru") || "";
+    const namaSekolah = editSekolahTemp || localStorage.getItem("bunyiKataNamaSekolah") || "";
+    if (kod) {
+      try {
+        await saveClassToFirebase({
+          kodKelas: kod,
+          namaKelas: clean,
+          namaSekolah,
+          namaGuru,
+          guruId,
+        });
+      } catch (e) {
+        console.warn("Ralat simpan kelas 1 ke Firebase:", e);
+      }
+    }
+
+    const el = document.getElementById("guru-dashboard-nama-kelas-title");
+    if (el) el.innerText = clean;
+    if (typeof (window as any).kemaskiniSemuaDropdownKelas === "function") {
+      (window as any).kemaskiniSemuaDropdownKelas();
+    }
+    if (typeof (window as any).renderSenaraiMuridUrus === "function") {
+      (window as any).renderSenaraiMuridUrus();
+    }
+    setIsChangingClassName1(false);
+    if (typeof (window as any).showAppToast === "function") {
+      (window as any).showAppToast("Berjaya Disimpan", `Nama Kelas 1 berjaya ditetapkan kepada "${clean}".`);
+    }
+  };
+
+  // Helper segerak Kod Kelas 1 ke Storan & Firebase
+  const handleSaveClassCode1 = async (code: string) => {
+    const clean = code.trim().toUpperCase();
+    const hasSymbol = /[^a-zA-Z0-9\s]/.test(clean);
+    if (clean.length !== 8 || !hasSymbol) {
+      if (typeof (window as any).showAppToast === "function") {
+        (window as any).showAppToast(
+          "Format Kod Tidak Sah",
+          "Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#01)!",
+          "warning"
+        );
+      } else {
+        alert("Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#01)!");
+      }
+      return;
+    }
+    const oldCode = localStorage.getItem("bunyiKataKodKelas") || "";
+    if (clean !== oldCode) {
+      const collision = await checkIsCodeAlreadyUsedInFirebase(clean, "guru", undefined, "kelas1");
+      if (collision.isUsed) {
+        const msg = `Kod "${clean}" tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
+        if (typeof (window as any).showAppToast === "function") {
+          (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
+        } else {
+          alert(msg);
+        }
+        return;
+      }
+    }
+
+    setEditKodTemp(clean);
+    localStorage.setItem("bunyiKataKodKelas", clean);
+    registerCodeInRegistry(clean, "guru");
+
+    const namaKelas = editKelasTemp || localStorage.getItem("bunyiKataNamaKelas") || "";
+    const guruId = localStorage.getItem("bunyiKataUserId") || (window as any).currentUser?.id || "";
+    const namaGuru = editGuruTemp || localStorage.getItem("pdf_guru") || "";
+    const namaSekolah = editSekolahTemp || localStorage.getItem("bunyiKataNamaSekolah") || "";
+    try {
+      if (oldCode && oldCode !== clean) {
+        await updateClassInFirebase({
+          oldKodKelas: oldCode,
+          newKodKelas: clean,
+          namaKelas,
+          namaSekolah,
+          namaGuru,
+          guruId,
+        });
+      } else {
+        await saveClassToFirebase({
+          kodKelas: clean,
+          namaKelas,
+          namaSekolah,
+          namaGuru,
+          guruId,
+        });
+      }
+    } catch (e) {
+      console.warn("Ralat simpan kod kelas 1 ke Firebase:", e);
+    }
+
+    const kodGuru = document.getElementById("guru-dashboard-kod-kelas-title");
+    if (kodGuru) kodGuru.innerText = clean;
+    setIsChangingCode1(false);
+    if (typeof (window as any).showAppToast === "function") {
+      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 1 berjaya ditetapkan kepada "${clean}".`);
+    }
+  };
+
+  // Helper segerak Nama Kelas 2 ke Storan & Firebase
+  const handleSaveClassName2 = async (name: string) => {
+    const clean = name.trim().toUpperCase();
+    if (!clean) {
+      if (typeof (window as any).showAppToast === "function") {
+        (window as any).showAppToast("Nama Kelas Diperlukan", "Sila masukkan nama kelas 2!", "warning");
+      } else {
+        alert("Sila masukkan nama kelas 2!");
+      }
+      return;
+    }
+    setEditKelas2Temp(clean);
+    localStorage.setItem("bunyiKataNamaKelas2", clean);
+
+    let list: string[] = [];
+    try {
+      list = JSON.parse(localStorage.getItem("bunyiKataDaftarKelas") || "[]");
+    } catch (e) {}
+    if (!list.includes(clean)) {
+      if (list.length >= 2) list[1] = clean;
+      else list.push(clean);
+      localStorage.setItem("bunyiKataDaftarKelas", JSON.stringify(list));
+    }
+
+    const kod2 = editKod2Temp || localStorage.getItem("bunyiKataKodKelas2") || "";
+    const guruId = localStorage.getItem("bunyiKataUserId") || (window as any).currentUser?.id || "";
+    const namaGuru = editGuruTemp || localStorage.getItem("pdf_guru") || "";
+    const namaSekolah = editSekolahTemp || localStorage.getItem("bunyiKataNamaSekolah") || "";
+    if (kod2) {
+      try {
+        await saveClassToFirebase({
+          kodKelas: kod2,
+          namaKelas: clean,
+          namaSekolah,
+          namaGuru,
+          guruId,
+        });
+      } catch (e) {
+        console.warn("Ralat simpan kelas 2 ke Firebase:", e);
+      }
+    }
+
+    if (typeof (window as any).kemaskiniSemuaDropdownKelas === "function") {
+      (window as any).kemaskiniSemuaDropdownKelas();
+    }
+    if (typeof (window as any).renderSenaraiMuridUrus === "function") {
+      (window as any).renderSenaraiMuridUrus();
+    }
+    setIsChangingClassName2(false);
+    if (typeof (window as any).showAppToast === "function") {
+      (window as any).showAppToast("Berjaya Disimpan", `Nama Kelas 2 berjaya ditetapkan kepada "${clean}".`);
+    }
+  };
+
+  // Helper segerak Kod Kelas 2 ke Storan & Firebase
+  const handleSaveClassCode2 = async (code: string) => {
+    const clean = code.trim().toUpperCase();
+    const hasSymbol = /[^a-zA-Z0-9\s]/.test(clean);
+    if (clean.length !== 8 || !hasSymbol) {
+      if (typeof (window as any).showAppToast === "function") {
+        (window as any).showAppToast(
+          "Format Kod Tidak Sah",
+          "Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#02)!",
+          "warning"
+        );
+      } else {
+        alert("Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#02)!");
+      }
+      return;
+    }
+    const oldCode2 = localStorage.getItem("bunyiKataKodKelas2") || "";
+    if (clean !== oldCode2) {
+      const collision = await checkIsCodeAlreadyUsedInFirebase(clean, "guru", undefined, "kelas2");
+      if (collision.isUsed) {
+        const msg = `Kod "${clean}" tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
+        if (typeof (window as any).showAppToast === "function") {
+          (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
+        } else {
+          alert(msg);
+        }
+        return;
+      }
+    }
+
+    setEditKod2Temp(clean);
+    localStorage.setItem("bunyiKataKodKelas2", clean);
+    registerCodeInRegistry(clean, "guru");
+
+    const namaKelas2 = editKelas2Temp || localStorage.getItem("bunyiKataNamaKelas2") || "";
+    const guruId = localStorage.getItem("bunyiKataUserId") || (window as any).currentUser?.id || "";
+    const namaGuru = editGuruTemp || localStorage.getItem("pdf_guru") || "";
+    const namaSekolah = editSekolahTemp || localStorage.getItem("bunyiKataNamaSekolah") || "";
+    try {
+      if (oldCode2 && oldCode2 !== clean) {
+        await updateClassInFirebase({
+          oldKodKelas: oldCode2,
+          newKodKelas: clean,
+          namaKelas: namaKelas2,
+          namaSekolah,
+          namaGuru,
+          guruId,
+        });
+      } else {
+        await saveClassToFirebase({
+          kodKelas: clean,
+          namaKelas: namaKelas2,
+          namaSekolah,
+          namaGuru,
+          guruId,
+        });
+      }
+    } catch (e) {
+      console.warn("Ralat simpan kod kelas 2 ke Firebase:", e);
+    }
+
+    setIsChangingCode2(false);
+    if (typeof (window as any).showAppToast === "function") {
+      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 2 berjaya ditetapkan kepada "${clean}".`);
+    }
+  };
+
+  // Helper segerak Nama Keluarga ke Storan & Firebase
+  const handleSaveFamilyName = async (name: string) => {
+    const clean = name.trim().toUpperCase();
+    if (!clean) {
+      if (typeof (window as any).showAppToast === "function") {
+        (window as any).showAppToast("Nama Keluarga Diperlukan", "Sila masukkan nama keluarga!", "warning");
+      } else {
+        alert("Sila masukkan nama keluarga!");
+      }
+      return;
+    }
+    setEditNamaKeluargaTemp(clean);
+    localStorage.setItem("bunyiKataNamaKeluarga", clean);
+
+    const kod = editKodTemp || localStorage.getItem("bunyiKataKodKeluarga") || "";
+    const parentId = localStorage.getItem("bunyiKataUserId") || (window as any).currentUser?.id || "";
+    try {
+      if (typeof updateParentFamilyAndNameInFirebase === "function") {
+        await updateParentFamilyAndNameInFirebase({
+          namaKeluarga: clean,
+          parentIdOrEmail: parentId,
+          kodKeluarga: kod,
+        });
+      } else if (kod && typeof saveFamilyToFirebase === "function") {
+        await saveFamilyToFirebase({
+          kodKeluarga: kod,
+          namaKeluarga: clean,
+          parentId,
+        });
+      }
+    } catch (e) {
+      console.warn("Ralat simpan keluarga ke Firebase:", e);
+    }
+
+    const el = document.getElementById("ibubapa-dashboard-nama-keluarga-title");
+    if (el) el.innerText = clean;
+    const el2 = document.getElementById("ibubapa-nama-keluarga-title");
+    if (el2) el2.innerText = clean;
+    setIsChangingFamilyName(false);
+    if (typeof (window as any).showAppToast === "function") {
+      (window as any).showAppToast("Berjaya Disimpan", `Nama Keluarga berjaya ditetapkan kepada "${clean}".`);
+    }
+  };
+
+  // Helper segerak Kod Keluarga ke Storan & Firebase
+  const handleSaveFamilyCode = async (code: string) => {
+    const clean = code.trim().toUpperCase();
+    const hasSymbol = /[^a-zA-Z0-9\s]/.test(clean);
+    if (clean.length !== 8 || !hasSymbol) {
+      if (typeof (window as any).showAppToast === "function") {
+        (window as any).showAppToast(
+          "Format Kod Tidak Sah",
+          "Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: FAM@2026)!",
+          "warning"
+        );
+      } else {
+        alert("Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: FAM@2026)!");
+      }
+      return;
+    }
+    const oldCode = localStorage.getItem("bunyiKataKodKeluarga") || "";
+    if (clean !== oldCode) {
+      const collision = await checkIsCodeAlreadyUsedInFirebase(clean, "ibubapa");
+      if (collision.isUsed) {
+        const msg = `Kod "${clean}" tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
+        if (typeof (window as any).showAppToast === "function") {
+          (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
+        } else {
+          alert(msg);
+        }
+        return;
+      }
+    }
+
+    setEditKodTemp(clean);
+    localStorage.setItem("bunyiKataKodKeluarga", clean);
+    registerCodeInRegistry(clean, "ibubapa");
+
+    const namaKeluarga = editNamaKeluargaTemp || localStorage.getItem("bunyiKataNamaKeluarga") || "";
+    const parentId = localStorage.getItem("bunyiKataUserId") || (window as any).currentUser?.id || "";
+    try {
+      await saveFamilyToFirebase({
+        kodKeluarga: clean,
+        namaKeluarga,
+        parentId,
+        oldKodKeluarga: oldCode,
+      });
+    } catch (e) {
+      console.warn("Ralat simpan kod keluarga ke Firebase:", e);
+    }
+
+    setIsChangingFamilyCode(false);
+    if (typeof (window as any).showAppToast === "function") {
+      (window as any).showAppToast("Berjaya Disimpan", `Kod Keluarga berjaya ditetapkan kepada "${clean}".`);
+    }
+  };
 
   // Helper untuk elakkan pertindihan kod antara Mod Guru, Ibu Bapa & Admin
   const checkIsCodeAlreadyUsed = (
@@ -1703,28 +2615,37 @@ export default function App() {
     const code = (newCode || "").trim().toUpperCase();
     if (!code) return { isUsed: false };
 
-    const kGuru = (localStorage.getItem("bunyiKataKodKelas") || "KELAS#01").toUpperCase();
-    const kFam = (localStorage.getItem("bunyiKataKodKeluarga") || "FAM@2026").toUpperCase();
-    const kAdm = (localStorage.getItem("bunyiKataKodAdmin") || "ADMIN#01").toUpperCase();
+    const kGuru = (localStorage.getItem("bunyiKataKodKelas") || "").toUpperCase();
+    const kGuru2 = (localStorage.getItem("bunyiKataKodKelas2") || "").toUpperCase();
+    const kFam = (localStorage.getItem("bunyiKataKodKeluarga") || "").toUpperCase();
+    const kAdm = (localStorage.getItem("bunyiKataKodAdmin") || "").toUpperCase();
 
     // Semak sekatan kod sistem / admin
     if (currentRole !== "admin") {
-      if (code === "ADMIN" || code === "1" || code === kAdm) {
+      if (code === "ADMIN" || (kAdm && code === kAdm)) {
         return { isUsed: true, usedBy: "Akaun Admin" };
       }
     }
 
     // Semak pertembungan dengan Kod Kelas Guru yang sedia ada
     if (currentRole !== "guru") {
-      if (code === kGuru || code === "KELAS123") {
+      if ((kGuru && code === kGuru) || (kGuru2 && code === kGuru2)) {
         return { isUsed: true, usedBy: "Mod Guru (Kod Kelas)" };
+      }
+    } else {
+      if (kFam && code === kFam) {
+        return { isUsed: true, usedBy: "Mod Ibu Bapa (Kod Keluarga)" };
       }
     }
 
     // Semak pertembungan dengan Kod Keluarga Ibu Bapa yang sedia ada
     if (currentRole !== "ibubapa") {
-      if (code === kFam || code === "KELUARGA123") {
+      if (kFam && code === kFam) {
         return { isUsed: true, usedBy: "Mod Ibu Bapa (Kod Keluarga)" };
+      }
+    } else {
+      if ((kGuru && code === kGuru) || (kGuru2 && code === kGuru2)) {
+        return { isUsed: true, usedBy: "Mod Guru (Kod Kelas)" };
       }
     }
 
@@ -1781,34 +2702,7 @@ export default function App() {
   const [feedbackMesej, setFeedbackMesej] = React.useState("");
   const [feedbackStatus, setFeedbackStatus] = React.useState("");
 
-  const defaultDummyFeedbacks = [
-    {
-      id: "fb-1",
-      nama: "Puan Noraini (Guru Pemulihan)",
-      mesej: "Aplikasi sangat membantu murid prasekolah dan murid pemulihan khas mengecam suku kata dengan lebih cepat. Sangat interaktif!",
-      tarikh: "25/08/2026 10:30",
-    },
-    {
-      id: "fb-2",
-      nama: "Encik Hafiz (Ibu Bapa)",
-      mesej: "Anak saya seronok main Bilik Bacaan dan cabaran suku kata. Kalau boleh tambah lagi animasi visual untuk perkataan 3 suku kata.",
-      tarikh: "26/08/2026 14:15",
-    },
-    {
-      id: "fb-3",
-      nama: "Cikgu Zulaikha",
-      mesej: "Paparan kad laporan murid dan fungsi muat turun PDF sangat memudahkan urusan rekod prestasi kelas.",
-      tarikh: "27/08/2026 09:45",
-    },
-    {
-      id: "fb-4",
-      nama: "Abu",
-      mesej: "boek",
-      tarikh: "27/08/2026 16:20",
-    },
-  ];
-
-  const hantarFeedback = () => {
+  const hantarFeedback = async () => {
     const rawNama = (
       feedbackNama ||
       (window as any).namaMuridAktif ||
@@ -1818,59 +2712,49 @@ export default function App() {
     const mesej = feedbackMesej.trim();
     if (!mesej) return;
 
-    let list: any[] = [];
     try {
-      const raw = localStorage.getItem("bunyi_kata_feedbacks");
-      list = raw ? JSON.parse(raw) : [];
-      if (!list || list.length === 0) list = [...defaultDummyFeedbacks];
-    } catch (e) {
-      list = [...defaultDummyFeedbacks];
+      if (typeof submitUserFeedback === "function") {
+        await submitUserFeedback({
+          namaPengguna: rawNama,
+          peranan: "Pengguna",
+          rating: 5,
+          komen: mesej,
+        });
+      }
+    } catch (err) {
+      console.warn("Feedback submit notice:", err);
     }
-
-    const now = new Date();
-    const d = String(now.getDate()).padStart(2, "0");
-    const m = String(now.getMonth() + 1).padStart(2, "0");
-    const y = now.getFullYear();
-    const hr = String(now.getHours()).padStart(2, "0");
-    const min = String(now.getMinutes()).padStart(2, "0");
-
-    const newFb = {
-      id: Date.now().toString(),
-      nama: rawNama,
-      mesej: mesej,
-      tarikh: `${d}/${m}/${y} ${hr}:${min}`,
-    };
-
-    list.unshift(newFb);
-    localStorage.setItem("bunyi_kata_feedbacks", JSON.stringify(list));
-
-    // Update count in admin badge if available
-    const badge = document.getElementById("admin-jumlah-feedback");
-    if (badge) badge.innerText = String(list.length);
 
     setFeedbackMesej("");
     setFeedbackStatus("success");
     setTimeout(() => setFeedbackStatus(""), 4000);
+
+    // Kemas kini paparan admin jika dibuka
+    if (typeof (window as any).renderAdminTable === "function") {
+      try {
+        (window as any).renderAdminTable("feedback");
+      } catch (e) {}
+    }
   };
 
   useEffect(() => {
-    // Initialize default dummy feedbacks if empty
+    // Bersihkan sebarang sisa maklum balas dummy lama daripada storan tempatan
     try {
-      const raw = localStorage.getItem("bunyi_kata_feedbacks");
-      if (!raw || raw === "[]" || JSON.parse(raw).length === 0) {
-        localStorage.setItem(
-          "bunyi_kata_feedbacks",
-          JSON.stringify(defaultDummyFeedbacks)
-        );
-      }
-    } catch (e) {
-      localStorage.setItem(
-        "bunyi_kata_feedbacks",
-        JSON.stringify(defaultDummyFeedbacks)
-      );
-    }
+      localStorage.removeItem("bunyi_kata_feedbacks");
+    } catch (e) {}
 
-    (window as any).openPakejProModal = () => setIsModeMenuOpen(true);
+    (window as any).isUserAdmin = isUserAdmin;
+    (window as any).userAccessLevel = isEffectivePro ? "pro" : userAccessLevel;
+    (window as any).setUserAccessLevel = (lvl: "trial" | "pro") => {
+      setUserAccessLevel(lvl);
+      localStorage.setItem("bunyiKataAccessLevel", lvl);
+      (window as any).userAccessLevel = isUserAdmin() ? "pro" : lvl;
+    };
+    (window as any).openPakejProModal = (tab?: "guru" | "ibubapa") => {
+      const activeTab = tab || ((window as any).modIbuBapaAktif ? "ibubapa" : "guru");
+      setProPricingTab(activeTab);
+      setIsProPricingModalOpen(true);
+    };
     (window as any).bukaModalAppInfo = (mode?: string) => {
       const modal = document.getElementById("app-info-modal");
       if (modal) modal.style.display = "flex";
@@ -1919,6 +2803,30 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Inisialisasi langganan Firebase Realtime dan segerakkan data awal
+    try {
+      initFirebaseRealtimeSubscriptions();
+      fetchAdminDataFromFirebase();
+
+      const uid = localStorage.getItem("bunyiKataUserId");
+      const role = localStorage.getItem("bunyiKataUserRole");
+      const pEmail = localStorage.getItem("bunyiKataIbubapaEmail") || localStorage.getItem("bunyiKataParentEmail");
+      const gEmail = localStorage.getItem("bunyiKataGuruEmail");
+
+      if (role === "guru" || gEmail) {
+        syncTeacherSessionFromFirebase(uid || gEmail).catch(console.warn);
+      }
+      if (role === "ibubapa" || pEmail) {
+        syncParentSessionFromFirebase(uid || pEmail).then((res) => {
+          if (res && res.namaKeluarga) {
+            setEditNamaKeluargaTemp(res.namaKeluarga.toUpperCase());
+          }
+        }).catch(console.warn);
+      }
+    } catch (e) {
+      console.warn('Realtime init notice:', e);
+    }
+
     // We will load the logic here or via external file
     if (document.getElementById("app-logic-script")) return;
     const v = new Date().getTime();
@@ -2557,11 +3465,11 @@ export default function App() {
         <div
           className="modal-content"
           style={{
-            maxWidth: "420px",
+            maxWidth: "460px",
             width: "90%",
-            padding: "20px 24px",
+            padding: "24px 20px 20px",
             borderRadius: "20px",
-            textAlign: "left",
+            textAlign: "center",
           }}
         >
           <button
@@ -2580,60 +3488,37 @@ export default function App() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "12px",
+              justifyContent: "center",
               marginBottom: "16px",
-              borderBottom: "2px solid var(--color-gray)",
-              paddingBottom: "12px",
+              paddingBottom: "4px",
             }}
           >
             <div
               style={{
-                background: "#0284c7",
+                backgroundColor: "#0284c7",
                 color: "white",
-                width: "42px",
-                height: "42px",
-                borderRadius: "12px",
-                display: "flex",
+                fontSize: "1.15rem",
+                fontWeight: "800",
+                padding: "8px 24px",
+                borderRadius: "999px",
+                margin: "0 auto",
+                display: "inline-flex",
                 alignItems: "center",
-                justifyContent: "center",
-                fontSize: "1.3rem",
-                boxShadow: "0 2px 0 var(--color-dark)",
-                border: "2px solid var(--color-dark)",
-                flexShrink: "0",
+                gap: "10px",
+                border: "2.5px solid var(--color-dark)",
+                boxShadow: "0 3.5px 0 var(--color-dark)",
+                pointerEvents: "none",
               }}
             >
               <i className="fa-solid fa-users"></i>
+              <span className="modal-title-main">Pilih Profil Murid</span>
             </div>
-            <div style={{ textAlign: "left", flex: "1", minWidth: "0" }}>
-              <h2
-                className="modal-title-main"
-                style={{
-                  fontSize: "1.05rem",
-                  margin: "0",
-                  color: "var(--color-dark)",
-                  fontWeight: "bold",
-                  lineHeight: "1.2",
-                }}
-              >
-                Mod Ibu Bapa
-              </h2>
-              <p
-                style={{
-                  fontSize: "0.72rem",
-                  margin: "2px 0 0 0",
-                  color: "#475569",
-                  fontWeight: "bold",
-                  lineHeight: "1.25",
-                }}
-              >
-                Pilih profil anak anda untuk melihat statistik &amp; laporan
-              </p>
-            </div>
+            <p style={{ display: "none" }}></p>
           </div>
 
           <div
             id="ibubapa-profiles-container"
-            className="ibubapa-profiles-grid"
+            className="student-profiles-list"
           >
             {/* Populated by JS */}
           </div>
@@ -2755,7 +3640,7 @@ export default function App() {
                     color: "#334155",
                   }}
                 >
-                  Kelas: <span id="ai-nama-kelas-txt">1 Cemerlang</span>
+                  Kelas: <span id="ai-nama-kelas-txt">-</span>
                 </span>
               </div>
               <button
@@ -3059,11 +3944,63 @@ export default function App() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                position: "relative",
+                overflow: "hidden",
               }}
               onClick={(e) => {
+                if (isEffectiveTrial) {
+                  if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                  (window as any).openPakejProModal?.("guru");
+                  return;
+                }
                 (window as any).pilihPeta(2);
               }}
             >
+              {isEffectiveTrial && (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "14px",
+                    backgroundColor: "rgba(15, 23, 42, 0.40)",
+                    backdropFilter: "blur(0.8px)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 10,
+                    padding: "8px",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <i
+                    className="fa-solid fa-lock"
+                    style={{
+                      fontSize: "2rem",
+                      color: "#ffffff",
+                      filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.85))",
+                      marginBottom: "4px",
+                    }}
+                  ></i>
+                  <div
+                    style={{
+                      fontSize: "0.78rem",
+                      fontWeight: "800",
+                      color: "#ffffff",
+                      backgroundColor: "#dc2626",
+                      border: "1.5px solid #ef4444",
+                      borderRadius: "10px",
+                      padding: "4px 12px",
+                      textAlign: "center",
+                      lineHeight: "1.2",
+                      boxShadow: "0 3px 8px rgba(0,0,0,0.45)",
+                      letterSpacing: "0.2px",
+                    }}
+                  >
+                    Versi Pro
+                  </div>
+                </div>
+              )}
               <img
                 referrerPolicy="no-referrer"
                 src="/images/sampingan/peta-misi-suku-kata-asas.png"
@@ -3074,6 +4011,7 @@ export default function App() {
                   objectFit: "contain",
                   borderRadius: "8px",
                   marginBottom: "10px",
+                  filter: isEffectiveTrial ? "brightness(75%) grayscale(20%)" : "none",
                 }}
                 alt="Misi Suku Kata Asas"
               />
@@ -3096,11 +4034,63 @@ export default function App() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                position: "relative",
+                overflow: "hidden",
               }}
               onClick={(e) => {
+                if (isEffectiveTrial) {
+                  if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                  (window as any).openPakejProModal?.("guru");
+                  return;
+                }
                 (window as any).pilihPeta(3);
               }}
             >
+              {isEffectiveTrial && (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "14px",
+                    backgroundColor: "rgba(15, 23, 42, 0.40)",
+                    backdropFilter: "blur(0.8px)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 10,
+                    padding: "8px",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <i
+                    className="fa-solid fa-lock"
+                    style={{
+                      fontSize: "2rem",
+                      color: "#ffffff",
+                      filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.85))",
+                      marginBottom: "4px",
+                    }}
+                  ></i>
+                  <div
+                    style={{
+                      fontSize: "0.78rem",
+                      fontWeight: "800",
+                      color: "#ffffff",
+                      backgroundColor: "#dc2626",
+                      border: "1.5px solid #ef4444",
+                      borderRadius: "10px",
+                      padding: "4px 12px",
+                      textAlign: "center",
+                      lineHeight: "1.2",
+                      boxShadow: "0 3px 8px rgba(0,0,0,0.45)",
+                      letterSpacing: "0.2px",
+                    }}
+                  >
+                    Versi Pro
+                  </div>
+                </div>
+              )}
               <img
                 referrerPolicy="no-referrer"
                 src="/images/sampingan/peta-misi-suku-kata-hero.png"
@@ -3111,6 +4101,7 @@ export default function App() {
                   objectFit: "contain",
                   borderRadius: "8px",
                   marginBottom: "10px",
+                  filter: isEffectiveTrial ? "brightness(75%) grayscale(20%)" : "none",
                 }}
                 alt="Misi Suku Kata Hero"
               />
@@ -3133,11 +4124,63 @@ export default function App() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                position: "relative",
+                overflow: "hidden",
               }}
               onClick={(e) => {
+                if (isEffectiveTrial) {
+                  if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                  (window as any).openPakejProModal?.("guru");
+                  return;
+                }
                 (window as any).pilihPeta(4);
               }}
             >
+              {isEffectiveTrial && (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "14px",
+                    backgroundColor: "rgba(15, 23, 42, 0.40)",
+                    backdropFilter: "blur(0.8px)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 10,
+                    padding: "8px",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <i
+                    className="fa-solid fa-lock"
+                    style={{
+                      fontSize: "2rem",
+                      color: "#ffffff",
+                      filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.85))",
+                      marginBottom: "4px",
+                    }}
+                  ></i>
+                  <div
+                    style={{
+                      fontSize: "0.78rem",
+                      fontWeight: "800",
+                      color: "#ffffff",
+                      backgroundColor: "#dc2626",
+                      border: "1.5px solid #ef4444",
+                      borderRadius: "10px",
+                      padding: "4px 12px",
+                      textAlign: "center",
+                      lineHeight: "1.2",
+                      boxShadow: "0 3px 8px rgba(0,0,0,0.45)",
+                      letterSpacing: "0.2px",
+                    }}
+                  >
+                    Versi Pro
+                  </div>
+                </div>
+              )}
               <img
                 referrerPolicy="no-referrer"
                 src="/images/sampingan/peta-misi-bacaan-bergred.png"
@@ -3148,6 +4191,7 @@ export default function App() {
                   objectFit: "contain",
                   borderRadius: "8px",
                   marginBottom: "10px",
+                  filter: isEffectiveTrial ? "brightness(75%) grayscale(20%)" : "none",
                 }}
                 alt="Misi Bacaan Bergred"
               />
@@ -3785,7 +4829,7 @@ export default function App() {
 
       <div
         id="login-screen"
-        className="screen"
+        className="screen active"
         style={{
           visibility: showSplash ? "hidden" : "visible",
           opacity: showSplash ? 0 : 1,
@@ -3865,12 +4909,16 @@ export default function App() {
             }}
           >
             <PirateAvatar3DSwiper
+              onRequestEntryChoice={() => {
+                setIsEntryChoiceModalOpen(true);
+              }}
               onStart={() => {
                 (window as any).bukaModalAppInfo &&
                   (window as any).bukaModalAppInfo("murid");
               }}
               onOpenProPackage={() => {
-                setIsModeMenuOpen(true);
+                if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                (window as any).openPakejProModal?.("guru");
               }}
             />
           </div>
@@ -3968,10 +5016,6 @@ export default function App() {
             <option value="" disabled>
               -- Senarai Nama Murid --
             </option>
-            <option value="Ali Bin Abu">Ali Bin Abu</option>
-            <option value="Siti Aminah">Siti Aminah</option>
-            <option value="Raju A/L Muthu">Raju A/L Muthu</option>
-            <option value="Mei Ling">Mei Ling</option>
           </select>
 
           <h3
@@ -4677,29 +5721,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Cabaran Tambahan Game View (Full Screen matching Cabaran Utama) */}
-        <div id="modal-cabaran-lain-game" className="cabaran-tambahan-fullscreen-screen" style={{ display: "none" }}>
-          {/* Top Bar matching Cabaran Utama */}
-          <div className="cabaran-tambahan-top-bar">
-            <button
-              className="neo-btn bg-purple back-icon-btn"
-              onClick={() => (window as any).closeCabaranLainGame && (window as any).closeCabaranLainGame()}
-              aria-label="Kembali"
-            >
-              <i className="fa-solid fa-arrow-left"></i>
-            </button>
-            <div id="cabaran-lain-game-title" className="neo-btn bg-purple page-title" style={{ pointerEvents: "none", fontSize: "1.2rem", whiteSpace: "nowrap" }}>
-              <i className="fa-solid fa-gamepad"></i> Cabaran
-            </div>
-            <div className="top-bar-spacer" style={{ width: "48px", height: "48px", visibility: "hidden" }}></div>
-          </div>
-
-          <div className="cabaran-tambahan-content-wrapper">
-            <div id="cabaran-lain-game-area" style={{ width: "100%", boxSizing: "border-box" }}>
-              {/* Dynamic game content injected by JS */}
-            </div>
-          </div>
-        </div>
+        {/* Cabaran Tambahan Game View moved to createPortal below map-screen */}
 
         {/* Modal Pilih Surih */}
         <div id="modal-pilih-surih" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
@@ -5826,6 +6848,33 @@ export default function App() {
         </div>
       </div>
 
+      {/* Cabaran Tambahan Game View — rendered via portal to body so position:fixed works correctly outside .screen transform stacking context */}
+      {createPortal(
+        <div id="modal-cabaran-lain-game" className="cabaran-tambahan-fullscreen-screen">
+          {/* Top Bar matching Cabaran Utama */}
+          <div className="cabaran-tambahan-top-bar">
+            <button
+              className="neo-btn bg-purple back-icon-btn"
+              onClick={() => (window as any).closeCabaranLainGame && (window as any).closeCabaranLainGame()}
+              aria-label="Kembali"
+            >
+              <i className="fa-solid fa-arrow-left"></i>
+            </button>
+            <div id="cabaran-lain-game-title" className="neo-btn bg-purple page-title" style={{ pointerEvents: "none", fontSize: "1.2rem", whiteSpace: "nowrap" }}>
+              <i className="fa-solid fa-gamepad"></i> Cabaran
+            </div>
+            <div className="top-bar-spacer" style={{ width: "48px", height: "48px", visibility: "hidden" }}></div>
+          </div>
+
+          <div className="cabaran-tambahan-content-wrapper">
+            <div id="cabaran-lain-game-area" style={{ width: "100%", boxSizing: "border-box" }}>
+              {/* Dynamic game content injected by JS */}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
       <div id="leaderboard-screen" className="screen">
         <div className="map-top-bar">
           <button
@@ -5960,26 +7009,30 @@ export default function App() {
               >
                 {activeStudentName}
               </h2>
-              <div
-                style={{
-                  color: "white",
-                  fontSize: "0.85rem",
-                  fontWeight: "600",
-                  opacity: "0.9",
-                }}
-              >
-                Tahun 1 Cemerlang
-              </div>
-              <div
-                style={{
-                  color: "white",
-                  fontSize: "0.8rem",
-                  fontWeight: "500",
-                  opacity: "0.9",
-                }}
-              >
-                SK Bandar Anggerik
-              </div>
+              {localStorage.getItem('bunyiKataNamaKelas') ? (
+                <div
+                  style={{
+                    color: "white",
+                    fontSize: "0.85rem",
+                    fontWeight: "600",
+                    opacity: "0.9",
+                  }}
+                >
+                  {localStorage.getItem('bunyiKataNamaKelas')}
+                </div>
+              ) : null}
+              {localStorage.getItem('pdf_sekolah') ? (
+                <div
+                  style={{
+                    color: "white",
+                    fontSize: "0.8rem",
+                    fontWeight: "500",
+                    opacity: "0.9",
+                  }}
+                >
+                  {localStorage.getItem('pdf_sekolah')}
+                </div>
+              ) : null}
             </div>
           </div>
           <div
@@ -6013,6 +7066,13 @@ export default function App() {
                 cursor: "pointer",
               }}
               aria-label="Edit Profil"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof (window as any).bukaModalAvatar === "function") {
+                  (window as any).bukaModalAvatar();
+                }
+              }}
             >
               <i className="fa-solid fa-pencil"></i>
             </button>
@@ -6257,7 +7317,12 @@ export default function App() {
               const allDone = typeof (window as any).isPetaCompleted === 'function' ? (window as any).isPetaCompleted('all', d) : false;
               const hasMaster = d && d.badges && d.badges.includes('badge_master');
               if (!allDone && !hasMaster) {
-                alert("Sijil Pencapaian masih terkunci! Dapatkan sekurang-kurangnya 3 bintang (skor penuh) dalam 3 aktiviti untuk setiap 4 cabaran utama (Kenal Huruf, Suku Kata Asas, Suku Kata Hero, dan Bacaan Bergred) untuk membuka sijil ini.");
+                const msg = "Sijil Pencapaian masih terkunci! Dapatkan sekurang-kurangnya 3 bintang (skor penuh) dalam 3 aktiviti untuk setiap 4 cabaran utama (Kenal Huruf, Suku Kata Asas, Suku Kata Hero, dan Bacaan Bergred) untuk membuka sijil ini.";
+                if (typeof (window as any).showAppToast === "function") {
+                  (window as any).showAppToast("Sijil Masih Terkunci", msg, "warning");
+                } else {
+                  alert(msg);
+                }
                 return;
               }
               muatTurunSijil();
@@ -7445,6 +8510,22 @@ export default function App() {
                       textAlign: "center",
                       fontSize: "0.85rem",
                       fontWeight: "bold",
+                      minWidth: "135px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    JENIS LANGGANAN
+                  </th>
+                  <th
+                    style={{
+                      padding: "10px 12px",
+                      background: "transparent",
+                      color: "white",
+                      borderBottom: "2px solid #9a3412",
+                      borderRight: "1px solid rgba(255,255,255,0.25)",
+                      textAlign: "center",
+                      fontSize: "0.85rem",
+                      fontWeight: "bold",
                       minWidth: "150px",
                       textTransform: "uppercase",
                     }}
@@ -7677,19 +8758,48 @@ export default function App() {
               </button>
             </div>
             <div>
-              <span
-                style={{
-                  fontSize: "0.75rem",
-                  background: "rgba(255,255,255,0.25)",
-                  padding: "2px 8px",
-                  borderRadius: "12px",
-                  textTransform: "uppercase",
-                  fontWeight: "bold",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Statistik Kelas Saya
-              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "2px" }}>
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    background: "rgba(255,255,255,0.25)",
+                    padding: "2px 8px",
+                    borderRadius: "12px",
+                    textTransform: "uppercase",
+                    fontWeight: "bold",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  Statistik Kelas Saya
+                </span>
+                {/* Lencana Baki Langganan (Responsif) */}
+                {(() => {
+                  const badge = getSubscriptionBadgeInfo("guru");
+                  return (
+                    <span
+                      onClick={() => setIsProPricingModalOpen(true)}
+                      style={{
+                        cursor: "pointer",
+                        fontSize: "0.74rem",
+                        fontWeight: "bold",
+                        backgroundColor: badge.bg,
+                        border: `1.5px solid ${badge.border}`,
+                        color: "#ffffff",
+                        padding: "2px 9px",
+                        borderRadius: "12px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        boxShadow: "0 2px 0 rgba(0,0,0,0.15)",
+                      }}
+                      title="Klik untuk lihat maklumat status langganan"
+                    >
+                      <i className={badge.icon} style={{ fontSize: "0.75rem", color: badge.color }}></i>
+                      <span>{badge.text}</span>
+                    </span>
+                  );
+                })()}
+              </div>
               <h2
                 id="guru-dashboard-nama-kelas-title"
                 style={{
@@ -7700,7 +8810,7 @@ export default function App() {
                   paddingRight: "35px",
                 }}
               >
-                1 Cemerlang
+                {localStorage.getItem("bunyiKataNamaKelas") || "(Belum Tetap Kelas)"}
               </h2>
               <div
                 className="guru-stat-badges-container"
@@ -7722,7 +8832,7 @@ export default function App() {
                     display: "inline-block",
                   }}
                 >
-                  Sekolah: <span id="guru-dashboard-nama-sekolah-title">-</span>
+                  Sekolah: <span id="guru-dashboard-nama-sekolah-title">{localStorage.getItem("bunyiKataNamaSekolah") || "SK TAMAN MELAWIS"}</span>
                 </div>
                 <div
                   className="stat-badge"
@@ -7735,21 +8845,77 @@ export default function App() {
                     display: "inline-block",
                   }}
                 >
-                  Guru: <span id="guru-dashboard-nama-guru-title">-</span>
+                  Guru: <span id="guru-dashboard-nama-guru-title">{localStorage.getItem("pdf_guru") || "-"}</span>
                 </div>
-                <div
-                  className="stat-badge"
-                  style={{
-                    fontSize: "0.85rem",
-                    fontWeight: "bold",
-                    background: "rgba(255,255,255,0.2)",
-                    padding: "4px 10px",
-                    borderRadius: "20px",
-                    display: "inline-block",
-                  }}
-                >
-                  Kod Kelas: <span id="guru-dashboard-kod-kelas-title">-</span>
-                </div>
+                {isEffectiveTrial ? (
+                  /* LOCKED: Akaun Percuma */
+                  <div
+                    className="stat-badge"
+                    style={{
+                      fontSize: "0.85rem",
+                      fontWeight: "bold",
+                      background: "rgba(185,28,28,0.4)",
+                      padding: "4px 10px",
+                      borderRadius: "20px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setIsProPricingModalOpen(true)}
+                    title="Langgan PRO untuk aktifkan Kod Kelas"
+                  >
+                    🔒 Kod Kelas: <span style={{ letterSpacing: "1px" }}>TERKUNCI (PRO)</span>
+                  </div>
+                ) : (
+                  /* UNLOCKED: Akaun PRO — papar + butang salin */
+                  <div
+                    className="stat-badge"
+                    style={{
+                      fontSize: "0.85rem",
+                      fontWeight: "bold",
+                      background: "rgba(255,255,255,0.2)",
+                      padding: "4px 6px 4px 10px",
+                      borderRadius: "20px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <span>
+                      Kod Kelas: <span id="guru-dashboard-kod-kelas-title">{localStorage.getItem("bunyiKataKodKelas") || "-"}</span>
+                    </span>
+                    <button
+                      type="button"
+                      title="Salin Kod Kelas"
+                      style={{
+                        background: "rgba(255,255,255,0.25)",
+                        border: "1.5px solid rgba(255,255,255,0.6)",
+                        borderRadius: "10px",
+                        color: "white",
+                        padding: "2px 7px",
+                        fontSize: "0.75rem",
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "3px",
+                      }}
+                      onClick={() => {
+                        const kod = document.getElementById("guru-dashboard-kod-kelas-title")?.textContent ||
+                          localStorage.getItem("bunyiKataKodKelas") || "";
+                        if (kod && kod !== "-") {
+                          navigator.clipboard.writeText(kod).then(() => {
+                            if (typeof (window as any).showAppToast === "function") {
+                              (window as any).showAppToast("Kod disalin!", "success");
+                            }
+                          });
+                        }
+                      }}
+                    >
+                      <i className="fa-solid fa-copy" style={{ fontSize: "0.7rem" }}></i> Salin
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -7798,20 +8964,64 @@ export default function App() {
                 setIsMandatorySetup(false);
                 (window as any).modIbuBapaAktif = false;
                 (window as any).modGuruAktif = true;
+
+                const guruId = localStorage.getItem("bunyiKataUserId") || (window as any).currentUser?.id;
+                const guruEmail = localStorage.getItem("bunyiKataGuruEmail");
+
+                const currentLvl = (localStorage.getItem("bunyiKataAccessLevel") as "trial" | "pro") || userAccessLevel;
+                const rawPlan = localStorage.getItem("bunyiKataTeacherPlan") || "";
+                const isPaidPro = currentLvl === "pro" && rawPlan.toLowerCase() !== "percuma";
+                setTeacherCanHaveClass2(isPaidPro);
+                setTeacherPlanName(isPaidPro ? (rawPlan || "Bulanan Pro") : "Percuma");
+
+                const sanitizeDummyClass = (v: string) => {
+                  const s = (v || "").trim();
+                  if (!s || ["1 cemerlang", "1 pintar"].includes(s.toLowerCase())) return "";
+                  return s.toUpperCase();
+                };
+
+                const sanitizeDummyCode = (v: string) => {
+                  const s = (v || "").trim();
+                  if (!s || ["kelas#99", "kelas#01", "kelas123"].includes(s.toLowerCase())) return "";
+                  return s.toUpperCase();
+                };
+
+                if (isPaidPro && (guruId || guruEmail)) {
+                  syncTeacherClasses(guruId || guruEmail).then((classes) => {
+                    if (classes && classes.length > 0) {
+                      setEditKodTemp(sanitizeDummyCode(classes[0].kod_kelas || ""));
+                      setEditKelasTemp(sanitizeDummyClass(classes[0].nama_kelas || ""));
+                      setEditSekolahTemp((classes[0].nama_sekolah || "").toUpperCase());
+                      if (classes[0].nama_guru) setEditGuruTemp(classes[0].nama_guru.toUpperCase());
+                      if (classes[1]) {
+                        setEditKod2Temp(sanitizeDummyCode(classes[1].kod_kelas || ""));
+                        setEditKelas2Temp(sanitizeDummyClass(classes[1].nama_kelas || ""));
+                      }
+                    }
+                  }).catch(console.warn);
+                }
+
                 setEditSekolahTemp(
-                  localStorage.getItem("bunyiKataNamaSekolah") || "",
+                  (localStorage.getItem("bunyiKataNamaSekolah") || "").toUpperCase(),
                 );
+                if ((window as any).playBubble) (window as any).playBubble();
+                setEditModalMode("guru");
+                (window as any).modAdminAktif = false;
+                (window as any).modIbuBapaAktif = false;
+                (window as any).modGuruAktif = true;
                 setEditAvatarTemp(
                   localStorage.getItem("bunyiKataSekolahAvatar") ||
                   "https://api.dicebear.com/7.x/shapes/svg?seed=school&backgroundColor=ffffff",
                 );
-                setEditKelasTemp(
-                  localStorage.getItem("bunyiKataNamaKelas") || "1 Cemerlang",
-                );
-                setEditGuruTemp(localStorage.getItem("pdf_guru") || "");
-                setEditKodTemp(
-                  localStorage.getItem("bunyiKataKodKelas") || "KELAS#01",
-                );
+                setEditKelasTemp(sanitizeDummyClass(localStorage.getItem("bunyiKataNamaKelas") || ""));
+                setEditGuruTemp((localStorage.getItem("pdf_guru") || localStorage.getItem("bunyiKataNamaGuru") || "").toUpperCase());
+                setEditKodTemp(sanitizeDummyCode(localStorage.getItem("bunyiKataKodKelas") || ""));
+                setEditKod2Temp(sanitizeDummyCode(localStorage.getItem("bunyiKataKodKelas2") || ""));
+                setEditKelas2Temp(sanitizeDummyClass(localStorage.getItem("bunyiKataNamaKelas2") || ""));
+                setIsChangingCode1(false);
+                setIsChangingCode2(false);
+                setIsChangingClassName1(false);
+                setIsChangingClassName2(false);
                 setIsEditModalOpen(true);
               }}
               className="neo-btn"
@@ -8305,7 +9515,12 @@ export default function App() {
               className="neo-btn bg-yellow cara-belajar-btn"
               onClick={() => {
                 setIsReportDialOpen(false);
-                setShowGuruSijilModal(true);
+                if (isEffectiveTrial) {
+                  // Akaun percuma — tunjuk modal naik taraf PRO
+                  setIsProPricingModalOpen(true);
+                } else {
+                  setShowGuruSijilModal(true);
+                }
               }}
               style={{
                 display: "flex",
@@ -8315,7 +9530,7 @@ export default function App() {
                 borderRadius: "20px",
                 fontWeight: "900",
                 fontSize: "0.85rem",
-                backgroundColor: "#f59e0b",
+                backgroundColor: isEffectiveTrial ? "#94a3b8" : "#f59e0b",
                 color: "#ffffff",
                 boxShadow: "0 4px 0 rgba(0,0,0,0.2)",
                 border: "2.5px solid var(--color-dark)",
@@ -8325,8 +9540,8 @@ export default function App() {
                 cursor: "pointer",
               }}
             >
-              <span>Sijil Pencapaian</span>
-              <i className="fa-solid fa-award"></i>
+              <span>{isEffectiveTrial ? "🔒 Sijil (PRO)" : "Sijil Pencapaian"}</span>
+              <i className={isEffectiveTrial ? "fa-solid fa-lock" : "fa-solid fa-award"}></i>
             </button>
 
             <button
@@ -8428,7 +9643,7 @@ export default function App() {
             gap: "14px",
           }}
         >
-          {/* Kad 1: Tetapan Nama Kelas (Kecil & Padat) */}
+          {/* Kad 1: Pengurusan Kod & Nama Kelas (Selaras dengan Pop-up Maklumat Guru) */}
           <div
             className="neo-box"
             style={{
@@ -8436,192 +9651,736 @@ export default function App() {
               backgroundImage:
                 "radial-gradient(circle, rgba(16, 24, 47, 0.14) 1.8px, transparent 1.8px)",
               backgroundSize: "16px 16px",
-              padding: "14px 18px",
+              padding: "16px 18px",
               borderRadius: "14px",
               textAlign: "left",
             }}
           >
-            {/* Tajuk Highlight Warna Oren: Sama macam reka bentuk tajuk Pengurusan Murid & Kelas */}
             <div
-              className="neo-btn bg-orange"
               style={{
-                display: "inline-flex",
+                display: "flex",
                 alignItems: "center",
-                gap: "8px",
-                backgroundColor: "var(--color-orange, #ea580c)",
-                color: "white",
-                padding: "6px 16px",
-                borderRadius: "12px",
-                border: "2.5px solid var(--color-dark, #10182f)",
-                boxShadow: "0 3px 0 var(--color-dark, #10182f)",
-                marginBottom: "12px",
-                pointerEvents: "none",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "10px",
+                marginBottom: "14px",
               }}
             >
-              <i className="fa-solid fa-chalkboard" style={{ fontSize: "0.9rem" }}></i>
-              <span
+              <div
+                className="neo-btn bg-orange"
                 style={{
-                  fontWeight: 900,
-                  fontSize: "0.92rem",
-                  fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  backgroundColor: "var(--color-orange, #ea580c)",
+                  color: "white",
+                  padding: "6px 16px",
+                  borderRadius: "12px",
+                  border: "2.5px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 3px 0 var(--color-dark, #10182f)",
+                  pointerEvents: "none",
                 }}
               >
-                Tetapan Nama Kelas
+                <i className="fa-solid fa-chalkboard-user" style={{ fontSize: "0.9rem" }}></i>
+                <span
+                  style={{
+                    fontWeight: 900,
+                    fontSize: "0.92rem",
+                    fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                  }}
+                >
+                  Pengurusan Kod Kelas
+                </span>
+              </div>
+
+              <span
+                style={{
+                  background: isEffectivePro ? "#dcfce7" : "#fee2e2",
+                  color: isEffectivePro ? "#15803d" : "#b91c1c",
+                  border: isEffectivePro ? "1.5px solid #22c55e" : "1.5px solid #ef4444",
+                  padding: "4px 10px",
+                  borderRadius: "8px",
+                  fontSize: "0.78rem",
+                  fontWeight: "bold",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  boxShadow: "0 2px 0 rgba(0,0,0,0.06)",
+                }}
+              >
+                {isEffectiveTrial ? "Percuma" : "Pro"}
               </span>
             </div>
 
-            <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-              {/* Dropdown Tukar / Pilih Kelas yang ada */}
-              <select
-                id="select-pilih-kelas"
-                className="neo-btn filter-select"
-                style={{
-                  padding: "0 28px 0 10px",
-                  fontSize: "0.85rem",
-                  fontWeight: "bold",
-                  height: "40px",
-                  borderRadius: "10px",
-                  border: "2px solid var(--color-dark, #10182f)",
-                  backgroundColor: "#f8fafc",
-                  color: "var(--color-dark, #10182f)",
-                  cursor: "pointer",
-                  boxSizing: "border-box",
-                  margin: 0,
-                }}
-                onChange={(e) => {
-                  if (typeof (window as any).tukarKelasAktif === "function") {
-                    (window as any).tukarKelasAktif(e.target.value);
-                  }
-                }}
-                title="Pilih Kelas"
-              >
-                {/* Populated dynamically by kemaskiniSemuaDropdownKelas */}
-              </select>
+            {isEffectiveTrial ? (
+              /* LOCKED STATE: Pelan Percuma */
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                <div
+                  style={{
+                    backgroundColor: "#f8fafc",
+                    border: "2px dashed #cbd5e1",
+                    borderRadius: "12px",
+                    padding: "14px 16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: "900", color: "#64748b", fontSize: "0.92rem", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <i className="fa-solid fa-lock" style={{ color: "#ef4444" }}></i>
+                      <span>Kelas Pertama Terkunci (Versi Pro)</span>
+                    </div>
+                    <p style={{ margin: "3px 0 0 0", fontSize: "0.82rem", color: "#64748b", lineHeight: "1.4" }}>
+                      Fungsi ini terhad untuk akaun Pro. Sila langgan pakej Pro untuk akses penuh.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="neo-btn"
+                    style={{
+                      backgroundColor: "#ea580c",
+                      color: "white",
+                      padding: "8px 16px",
+                      fontSize: "0.85rem",
+                      borderRadius: "8px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}
+                    onClick={() => {
+                      if (typeof (window as any).openPakejProModal === "function") {
+                        (window as any).openPakejProModal("guru");
+                      } else {
+                        setIsProPricingModalOpen(true);
+                      }
+                    }}
+                  >
+                    <i className="fa-solid fa-crown"></i> Pro
+                  </button>
+                </div>
 
-              {/* Input Edit Nama Kelas */}
-              <input
-                type="text"
-                id="input-nama-kelas"
-                className="neo-input"
-                defaultValue={
-                  localStorage.getItem("bunyiKataNamaKelas") || "1 Cemerlang"
-                }
-                placeholder="Nama kelas..."
-                style={{
-                  flex: 1,
-                  minWidth: "150px",
-                  fontSize: "0.9rem",
-                  padding: "0 12px",
-                  height: "40px",
-                  borderRadius: "10px",
-                  border: "2px solid var(--color-dark, #10182f)",
-                  boxSizing: "border-box",
-                  margin: 0,
-                }}
-              />
+                <div
+                  style={{
+                    backgroundColor: "#f8fafc",
+                    border: "2px dashed #cbd5e1",
+                    borderRadius: "12px",
+                    padding: "14px 16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: "900", color: "#64748b", fontSize: "0.92rem", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <i className="fa-solid fa-lock" style={{ color: "#ef4444" }}></i>
+                      <span>Kelas Kedua Terkunci (Versi Pro)</span>
+                    </div>
+                    <p style={{ margin: "3px 0 0 0", fontSize: "0.82rem", color: "#64748b", lineHeight: "1.4" }}>
+                      Fungsi ini terhad untuk akaun Pro. Sila langgan pakej Pro untuk akses penuh.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="neo-btn"
+                    style={{
+                      backgroundColor: "#ea580c",
+                      color: "white",
+                      padding: "8px 16px",
+                      fontSize: "0.85rem",
+                      borderRadius: "8px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}
+                    onClick={() => {
+                      if (typeof (window as any).openPakejProModal === "function") {
+                        (window as any).openPakejProModal("guru");
+                      } else {
+                        setIsProPricingModalOpen(true);
+                      }
+                    }}
+                  >
+                    <i className="fa-solid fa-crown"></i> Pro
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* UNLOCKED STATE: KELAS 1 & KELAS 2 */
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {/* Kad Kelas 1 */}
+                <div
+                  style={{
+                    backgroundColor: "#ffffff",
+                    border: "2px solid var(--color-dark)",
+                    borderRadius: "12px",
+                    padding: "14px",
+                    boxShadow: "0 3px 0 var(--color-dark)",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                    <span style={{ fontWeight: "900", color: "#c2410c", fontSize: "0.92rem", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <i className="fa-solid fa-1" style={{ background: "#ea580c", color: "white", width: "18px", height: "18px", borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem" }}></i>
+                      Kelas Pertama
+                    </span>
+                  </div>
 
-              {/* Butang Simpan: HANYA ICON SAHAJA */}
-              <button
-                type="button"
-                className="neo-btn bg-orange"
-                style={{
-                  color: "white",
-                  backgroundColor: "var(--color-orange, #ea580c)",
-                  width: "40px",
-                  height: "40px",
-                  minWidth: "40px",
-                  minHeight: "40px",
-                  padding: 0,
-                  borderRadius: "10px",
-                  border: "2px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 3px 0 var(--color-dark, #10182f)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1rem",
-                  boxSizing: "border-box",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
-                  if (typeof (window as any).simpanNamaKelas === "function") {
-                    (window as any).simpanNamaKelas();
-                  }
-                }}
-                title="Simpan Nama Kelas"
-              >
-                <i className="fa-solid fa-floppy-disk"></i>
-              </button>
+                  {/* Nama Kelas 1 */}
+                  <div style={{ marginBottom: "10px" }}>
+                    <label style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
+                      Nama Kelas 1: <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    {!isChangingClassName1 ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div
+                          style={{
+                            flex: 1,
+                            padding: "8px 12px",
+                            borderRadius: "8px",
+                            border: "2px solid #cbd5e1",
+                            backgroundColor: "#f8fafc",
+                            color: editKelasTemp ? "#0f172a" : "#94a3b8",
+                            fontSize: "0.95rem",
+                            fontWeight: "900",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          <i className="fa-solid fa-chalkboard-user" style={{ color: "#ea580c", fontSize: "0.9rem" }}></i>
+                          <span>{editKelasTemp || "Nama Belum Ditetapkan"}</span>
+                        </div>
+                        <button
+                          type="button"
+                          className="neo-btn"
+                          style={{
+                            width: "38px",
+                            height: "38px",
+                            padding: 0,
+                            minWidth: "38px",
+                            backgroundColor: "#ea580c",
+                            color: "#ffffff",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "0.95rem",
+                          }}
+                          onClick={() => {
+                            setIsChangingClassName1(true);
+                            setNewClassName1Input(editKelasTemp || "");
+                          }}
+                          title={editKelasTemp ? "Tukar Nama Kelas 1" : "Tetapkan Nama Kelas 1"}
+                        >
+                          <i className="fa-solid fa-pen-to-square"></i>
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          backgroundColor: "#fff7ed",
+                          border: "2px solid #ea580c",
+                          borderRadius: "10px",
+                          padding: "10px",
+                        }}
+                      >
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                          <input
+                            type="text"
+                            placeholder="CTH: 1 CEMERLANG"
+                            value={newClassName1Input}
+                            onChange={(e) => setNewClassName1Input(e.target.value.toUpperCase())}
+                            style={{
+                              flex: 1,
+                              padding: "8px 10px",
+                              borderRadius: "8px",
+                              border: "2px solid var(--color-dark)",
+                              fontSize: "0.95rem",
+                              fontWeight: "900",
+                              fontFamily: "inherit",
+                              textTransform: "uppercase",
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className="neo-btn bg-red"
+                            style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                            onClick={() => setIsChangingClassName1(false)}
+                            title="Batal"
+                          >
+                            <i className="fa-solid fa-xmark"></i>
+                          </button>
+                          <button
+                            type="button"
+                            className="neo-btn"
+                            style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
+                            onClick={() => handleSaveClassName1(newClassName1Input)}
+                            title="Sahkan Nama Kelas 1"
+                          >
+                            <i className="fa-solid fa-check"></i>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-              {/* Butang Padam Kelas: HANYA ICON TONG SAMPAH MODEN */}
-              <button
-                id="btn-padam-kelas-guru"
-                type="button"
-                className="neo-btn bg-red"
-                style={{
-                  color: "white",
-                  backgroundColor: "var(--color-red, #ef4444)",
-                  width: "40px",
-                  height: "40px",
-                  minWidth: "40px",
-                  minHeight: "40px",
-                  padding: 0,
-                  borderRadius: "10px",
-                  border: "2px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 3px 0 var(--color-dark, #10182f)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1rem",
-                  boxSizing: "border-box",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
-                  if (typeof (window as any).padamKelasSemasa === "function") {
-                    (window as any).padamKelasSemasa();
-                  }
-                }}
-                title="Padam Kelas Semasa"
-              >
-                <i className="fa-solid fa-trash-can"></i>
-              </button>
+                  {/* Kod Kelas 1 */}
+                  <div>
+                    <label style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
+                      Kod Kelas 1: <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    {!isChangingCode1 ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div
+                          style={{
+                            flex: 1,
+                            padding: "8px 12px",
+                            borderRadius: "8px",
+                            border: "2px solid #cbd5e1",
+                            backgroundColor: "#f8fafc",
+                            color: editKodTemp ? "#0f172a" : "#94a3b8",
+                            fontSize: "1rem",
+                            letterSpacing: "2px",
+                            fontWeight: "900",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          <i className="fa-solid fa-key" style={{ color: "#ea580c", fontSize: "0.85rem" }}></i>
+                          <span>{editKodTemp || "Kod Belum Ditetapkan"}</span>
+                        </div>
+                        {editKodTemp && (
+                          <button
+                            type="button"
+                            className="neo-btn"
+                            style={{
+                              width: "38px",
+                              height: "38px",
+                              padding: 0,
+                              minWidth: "38px",
+                              fontSize: "0.88rem",
+                              backgroundColor: "#f1f5f9",
+                              color: "#334155",
+                              border: "2px solid #cbd5e1",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                            onClick={() => {
+                              navigator.clipboard.writeText(editKodTemp);
+                              if ((window as any).showAppToast) {
+                                (window as any).showAppToast("Kod Disalin", "Kod Kelas 1 telah disalin!");
+                              } else {
+                                alert("Kod Kelas 1 telah disalin!");
+                              }
+                            }}
+                            title="Salin Kod"
+                          >
+                            <i className="fa-solid fa-copy"></i>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="neo-btn"
+                          style={{
+                            width: "38px",
+                            height: "38px",
+                            padding: 0,
+                            minWidth: "38px",
+                            backgroundColor: "#ea580c",
+                            color: "#ffffff",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "0.95rem",
+                          }}
+                          onClick={() => {
+                            setIsChangingCode1(true);
+                            setNewCode1Input(editKodTemp || "");
+                          }}
+                          title={editKodTemp ? "Tukar Kod Kelas 1" : "Tetapkan Kod Kelas 1"}
+                        >
+                          <i className="fa-solid fa-pen-to-square"></i>
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          backgroundColor: "#fff7ed",
+                          border: "2px solid #ea580c",
+                          borderRadius: "10px",
+                          padding: "10px",
+                        }}
+                      >
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                          <input
+                            type="text"
+                            maxLength={8}
+                            placeholder="CTH: KELAS#01"
+                            value={newCode1Input}
+                            onChange={(e) => setNewCode1Input(e.target.value.toUpperCase())}
+                            style={{
+                              flex: 1,
+                              padding: "8px 10px",
+                              borderRadius: "8px",
+                              border: "2px solid var(--color-dark)",
+                              fontSize: "1rem",
+                              fontWeight: "900",
+                              letterSpacing: "1.5px",
+                              fontFamily: "inherit",
+                              textTransform: "uppercase",
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className="neo-btn bg-red"
+                            style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                            onClick={() => setIsChangingCode1(false)}
+                            title="Batal"
+                          >
+                            <i className="fa-solid fa-xmark"></i>
+                          </button>
+                          <button
+                            type="button"
+                            className="neo-btn"
+                            style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
+                            onClick={() => handleSaveClassCode1(newCode1Input)}
+                            title="Gunakan Kod Ini"
+                          >
+                            <i className="fa-solid fa-check"></i>
+                          </button>
+                        </div>
+                        <span style={{ fontSize: "0.75rem", color: "#ea580c", marginTop: "4px", display: "block", fontWeight: "bold" }}>
+                          * Wajib 8 aksara & sekurang-kurangnya 1 simbol
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-              {/* Option Tambah Lagi 1 Kelas (Maks. 2 Kelas) - Buka Modal Popup */}
-              <button
-                id="btn-tambah-kelas-guru"
-                type="button"
-                className="neo-btn"
-                style={{
-                  backgroundColor: "#168f81",
-                  color: "white",
-                  height: "40px",
-                  minHeight: "40px",
-                  padding: "0 14px",
-                  borderRadius: "10px",
-                  border: "2px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 3px 0 var(--color-dark, #10182f)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                  fontSize: "0.85rem",
-                  fontWeight: "bold",
-                  whiteSpace: "nowrap",
-                  boxSizing: "border-box",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
-                  if (typeof (window as any).bukaModalTambahKelas === "function") {
-                    (window as any).bukaModalTambahKelas();
-                  } else if (typeof (window as any).tambahKelasBaharu === "function") {
-                    (window as any).tambahKelasBaharu();
-                  }
-                }}
-                title="Tambah 1 Kelas Baharu (Maksimum 2 Kelas)"
-              >
-                <i className="fa-solid fa-plus"></i>
-                <span>Tambah Kelas</span>
-              </button>
-            </div>
+                {/* Kad Kelas 2 */}
+                {teacherCanHaveClass2 && (
+                  <div
+                    style={{
+                      backgroundColor: "#ffffff",
+                      border: "2px solid #0284c7",
+                      borderRadius: "12px",
+                      padding: "14px",
+                      boxShadow: "0 3px 0 var(--color-dark)",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span style={{ fontWeight: "900", color: "#0369a1", fontSize: "0.92rem", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        <i className="fa-solid fa-2" style={{ background: "#0284c7", color: "white", width: "18px", height: "18px", borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem" }}></i>
+                        Kelas Kedua
+                      </span>
+                    </div>
+
+                    {/* Nama Kelas 2 */}
+                    <div style={{ marginBottom: "10px" }}>
+                      <label style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
+                        Nama Kelas 2:
+                      </label>
+                      {!isChangingClassName2 ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <div
+                            style={{
+                              flex: 1,
+                              padding: "8px 12px",
+                              borderRadius: "8px",
+                              border: "2px solid #cbd5e1",
+                              backgroundColor: "#f8fafc",
+                              color: editKelas2Temp ? "#0f172a" : "#94a3b8",
+                              fontSize: "0.95rem",
+                              fontWeight: "900",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <i className="fa-solid fa-chalkboard-user" style={{ color: "#0284c7", fontSize: "0.9rem" }}></i>
+                            <span>{editKelas2Temp || "Nama Belum Ditetapkan"}</span>
+                          </div>
+                          <button
+                            type="button"
+                            className="neo-btn"
+                            style={{
+                              width: "38px",
+                              height: "38px",
+                              padding: 0,
+                              minWidth: "38px",
+                              backgroundColor: "#0284c7",
+                              color: "#ffffff",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "0.95rem",
+                            }}
+                            onClick={() => {
+                              setIsChangingClassName2(true);
+                              setNewClassName2Input(editKelas2Temp || "");
+                            }}
+                            title={editKelas2Temp ? "Tukar Nama Kelas 2" : "Tetapkan Nama Kelas 2"}
+                          >
+                            <i className="fa-solid fa-pen-to-square"></i>
+                          </button>
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            backgroundColor: "#f0f9ff",
+                            border: "2px solid #0284c7",
+                            borderRadius: "10px",
+                            padding: "10px",
+                          }}
+                        >
+                          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                            <input
+                              type="text"
+                              placeholder="CTH: 1 PINTAR"
+                              value={newClassName2Input}
+                              onChange={(e) => setNewClassName2Input(e.target.value.toUpperCase())}
+                              style={{
+                                flex: 1,
+                                padding: "8px 10px",
+                                borderRadius: "8px",
+                                border: "2px solid var(--color-dark)",
+                                fontSize: "0.95rem",
+                                fontWeight: "900",
+                                fontFamily: "inherit",
+                                textTransform: "uppercase",
+                              }}
+                            />
+                            <button
+                              type="button"
+                              className="neo-btn bg-red"
+                              style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                              onClick={() => setIsChangingClassName2(false)}
+                              title="Batal"
+                            >
+                              <i className="fa-solid fa-xmark"></i>
+                            </button>
+                            <button
+                              type="button"
+                              className="neo-btn"
+                              style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
+                              onClick={() => handleSaveClassName2(newClassName2Input)}
+                              title="Sahkan Nama Kelas 2"
+                            >
+                              <i className="fa-solid fa-check"></i>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Kod Kelas 2 */}
+                    <div>
+                      <label style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
+                        Kod Kelas 2:
+                      </label>
+                      {!isChangingCode2 ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <div
+                            style={{
+                              flex: 1,
+                              padding: "8px 12px",
+                              borderRadius: "8px",
+                              border: "2px solid #cbd5e1",
+                              backgroundColor: "#f8fafc",
+                              color: editKod2Temp ? "#0f172a" : "#94a3b8",
+                              fontSize: "1rem",
+                              letterSpacing: "2px",
+                              fontWeight: "900",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <i className="fa-solid fa-key" style={{ color: "#0284c7", fontSize: "0.85rem" }}></i>
+                            <span>{editKod2Temp || "Kod Belum Ditetapkan"}</span>
+                          </div>
+                          {editKod2Temp && (
+                            <button
+                              type="button"
+                              className="neo-btn"
+                              style={{
+                                width: "38px",
+                                height: "38px",
+                                padding: 0,
+                                minWidth: "38px",
+                                fontSize: "0.88rem",
+                                backgroundColor: "#f1f5f9",
+                                color: "#334155",
+                                border: "2px solid #cbd5e1",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                              onClick={() => {
+                                navigator.clipboard.writeText(editKod2Temp);
+                                if ((window as any).showAppToast) {
+                                  (window as any).showAppToast("Kod Disalin", "Kod Kelas 2 telah disalin!");
+                                } else {
+                                  alert("Kod Kelas 2 telah disalin!");
+                                }
+                              }}
+                              title="Salin Kod"
+                            >
+                              <i className="fa-solid fa-copy"></i>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="neo-btn"
+                            style={{
+                              width: "38px",
+                              height: "38px",
+                              padding: 0,
+                              minWidth: "38px",
+                              backgroundColor: "#0284c7",
+                              color: "#ffffff",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "0.95rem",
+                            }}
+                            onClick={() => {
+                              setIsChangingCode2(true);
+                              setNewCode2Input(editKod2Temp || "");
+                            }}
+                            title={editKod2Temp ? "Tukar Kod Kelas 2" : "Tetapkan Kod Kelas 2"}
+                          >
+                            <i className="fa-solid fa-pen-to-square"></i>
+                          </button>
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            backgroundColor: "#f0f9ff",
+                            border: "2px solid #0284c7",
+                            borderRadius: "10px",
+                            padding: "10px",
+                          }}
+                        >
+                          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                            <input
+                              type="text"
+                              maxLength={8}
+                              placeholder="CTH: KLS2#01"
+                              value={newCode2Input}
+                              onChange={(e) => setNewCode2Input(e.target.value.toUpperCase())}
+                              style={{
+                                flex: 1,
+                                padding: "8px 10px",
+                                borderRadius: "8px",
+                                border: "2px solid var(--color-dark)",
+                                fontSize: "1rem",
+                                fontWeight: "900",
+                                letterSpacing: "1.5px",
+                                fontFamily: "inherit",
+                                textTransform: "uppercase",
+                              }}
+                            />
+                            <button
+                              type="button"
+                              className="neo-btn bg-red"
+                              style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                              onClick={() => setIsChangingCode2(false)}
+                              title="Batal"
+                            >
+                              <i className="fa-solid fa-xmark"></i>
+                            </button>
+                            <button
+                              type="button"
+                              className="neo-btn"
+                              style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
+                              onClick={() => {
+                                if (newCode2Input.trim().toUpperCase() === editKodTemp) {
+                                  alert("Kod Kelas 2 tidak boleh sama dengan Kod Kelas 1!");
+                                  return;
+                                }
+                                handleSaveClassCode2(newCode2Input);
+                              }}
+                              title="Gunakan Kod Ini"
+                            >
+                              <i className="fa-solid fa-check"></i>
+                            </button>
+                          </div>
+                          <span style={{ fontSize: "0.75rem", color: "#0284c7", marginTop: "4px", display: "block", fontWeight: "bold" }}>
+                            * Wajib 8 aksara & sekurang-kurangnya 1 simbol
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Pilihan Kelas Aktif untuk Urus Murid */}
+                {teacherCanHaveClass2 && editKelasTemp && editKelas2Temp && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "10px 14px",
+                      backgroundColor: "#f8fafc",
+                      borderRadius: "10px",
+                      border: "1.5px solid #cbd5e1",
+                      marginTop: "6px",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#334155" }}>
+                      Pilih Kelas untuk Senarai Murid:
+                    </span>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button
+                        type="button"
+                        className="neo-btn"
+                        style={{
+                          padding: "6px 14px",
+                          fontSize: "0.82rem",
+                          fontWeight: "bold",
+                          backgroundColor: (localStorage.getItem("bunyiKataNamaKelas") || "") === editKelasTemp ? "#ea580c" : "#f1f5f9",
+                          color: (localStorage.getItem("bunyiKataNamaKelas") || "") === editKelasTemp ? "#ffffff" : "#475569",
+                        }}
+                        onClick={() => {
+                          if (typeof (window as any).tukarKelasAktif === "function") {
+                            (window as any).tukarKelasAktif(editKelasTemp);
+                          }
+                        }}
+                      >
+                        {editKelasTemp}
+                      </button>
+                      <button
+                        type="button"
+                        className="neo-btn"
+                        style={{
+                          padding: "6px 14px",
+                          fontSize: "0.82rem",
+                          fontWeight: "bold",
+                          backgroundColor: (localStorage.getItem("bunyiKataNamaKelas") || "") === editKelas2Temp ? "#0284c7" : "#f1f5f9",
+                          color: (localStorage.getItem("bunyiKataNamaKelas") || "") === editKelas2Temp ? "#ffffff" : "#475569",
+                        }}
+                        onClick={() => {
+                          if (typeof (window as any).tukarKelasAktif === "function") {
+                            (window as any).tukarKelasAktif(editKelas2Temp);
+                          }
+                        }}
+                      >
+                        {editKelas2Temp}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Kad 2: Tambah Murid Baharu (Kecil & Padat di sebelah input) */}
@@ -8667,61 +10426,112 @@ export default function App() {
             </div>
 
             {/* Input + Butang Icon Tambah Murid Betul-betul Di Sebelah Ruang Input */}
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <input
-                type="text"
-                id="input-nama-murid-baru"
-                className="neo-input"
-                placeholder="cth: SITI AISHAH, MUHAMMAD AMIR, NUR FATIN..."
+            {isEffectiveTrial ? (
+              /* LOCKED STATE: Akaun Percuma — Urus Murid Terkunci */
+              <div
                 style={{
-                  flex: 1,
-                  fontSize: "0.9rem",
-                  padding: "0 12px",
-                  height: "40px",
-                  borderRadius: "10px",
-                  border: "2px solid var(--color-dark, #10182f)",
-                  boxSizing: "border-box",
-                  margin: 0,
+                  backgroundColor: "#f8fafc",
+                  border: "2px dashed #cbd5e1",
+                  borderRadius: "12px",
+                  padding: "14px 16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "12px",
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: "900", color: "#64748b", fontSize: "0.92rem", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <i className="fa-solid fa-lock" style={{ color: "#ef4444" }}></i>
+                    <span>Pendaftaran Murid Terkunci (Versi Pro)</span>
+                  </div>
+                  <p style={{ margin: "3px 0 0 0", fontSize: "0.82rem", color: "#64748b", lineHeight: "1.4" }}>
+                    Fungsi ini terhad untuk akaun Pro. Sila langgan pakej Pro untuk akses penuh.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="neo-btn"
+                  style={{
+                    backgroundColor: "#ea580c",
+                    color: "white",
+                    padding: "8px 16px",
+                    fontSize: "0.85rem",
+                    borderRadius: "8px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                  }}
+                  onClick={() => {
+                    if (typeof (window as any).openPakejProModal === "function") {
+                      (window as any).openPakejProModal("guru");
+                    } else {
+                      setIsProPricingModalOpen(true);
+                    }
+                  }}
+                >
+                  <i className="fa-solid fa-crown"></i> Pro
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <input
+                  type="text"
+                  id="input-nama-murid-baru"
+                  className="neo-input"
+                  placeholder="cth: SITI AISHAH, MUHAMMAD AMIR, NUR FATIN..."
+                  style={{
+                    flex: 1,
+                    fontSize: "0.9rem",
+                    padding: "0 12px",
+                    height: "40px",
+                    borderRadius: "10px",
+                    border: "2px solid var(--color-dark, #10182f)",
+                    boxSizing: "border-box",
+                    margin: 0,
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      if (typeof (window as any).tambahMuridBaru === "function") {
+                        (window as any).tambahMuridBaru();
+                      }
+                    }
+                  }}
+                />
+                {/* Butang Tambah Murid: HANYA ICON SAHAJA */}
+                <button
+                  type="button"
+                  className="neo-btn bg-orange"
+                  style={{
+                    color: "white",
+                    backgroundColor: "var(--color-orange, #ea580c)",
+                    width: "40px",
+                    height: "40px",
+                    minWidth: "40px",
+                    minHeight: "40px",
+                    padding: 0,
+                    borderRadius: "10px",
+                    border: "2px solid var(--color-dark, #10182f)",
+                    boxShadow: "0 3px 0 var(--color-dark, #10182f)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "1rem",
+                    boxSizing: "border-box",
+                  }}
+                  onClick={() => {
                     if (typeof (window as any).tambahMuridBaru === "function") {
                       (window as any).tambahMuridBaru();
                     }
-                  }
-                }}
-              />
-              {/* Butang Tambah Murid: HANYA ICON SAHAJA */}
-              <button
-                type="button"
-                className="neo-btn bg-orange"
-                style={{
-                  color: "white",
-                  backgroundColor: "var(--color-orange, #ea580c)",
-                  width: "40px",
-                  height: "40px",
-                  minWidth: "40px",
-                  minHeight: "40px",
-                  padding: 0,
-                  borderRadius: "10px",
-                  border: "2px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 3px 0 var(--color-dark, #10182f)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1rem",
-                  boxSizing: "border-box",
-                }}
-                onClick={() => {
-                  if (typeof (window as any).tambahMuridBaru === "function") {
-                    (window as any).tambahMuridBaru();
-                  }
-                }}
-                title="Tambah Murid"
-              >
-                <i className="fa-solid fa-user-plus"></i>
-              </button>
-            </div>
+                  }}
+                  title="Tambah Murid"
+                >
+                  <i className="fa-solid fa-user-plus"></i>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Kad 3: Senarai Murid Berdaftar */}
@@ -8782,6 +10592,7 @@ export default function App() {
                   id="filter-kelas-senarai-murid"
                   className="neo-btn filter-select"
                   style={{
+                    display: isEffectiveTrial ? "none" : "block",
                     padding: "0 28px 0 10px",
                     fontSize: "0.85rem",
                     fontWeight: "bold",
@@ -9304,19 +11115,48 @@ export default function App() {
                 ></div>
               </div>
               <div>
-                <span
-                  style={{
-                    fontSize: "0.75rem",
-                    background: "rgba(255,255,255,0.25)",
-                    padding: "2px 8px",
-                    borderRadius: "12px",
-                    textTransform: "uppercase",
-                    fontWeight: "bold",
-                    letterSpacing: "0.5px",
-                  }}
-                >
-                  Statistik Anak Saya
-                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "2px" }}>
+                  <span
+                    style={{
+                      fontSize: "0.75rem",
+                      background: "rgba(255,255,255,0.25)",
+                      padding: "2px 8px",
+                      borderRadius: "12px",
+                      textTransform: "uppercase",
+                      fontWeight: "bold",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Statistik Anak Saya
+                  </span>
+                  {/* Lencana Baki Langganan (Responsif) */}
+                  {(() => {
+                    const badge = getSubscriptionBadgeInfo("ibubapa");
+                    return (
+                      <span
+                        onClick={() => setIsProPricingModalOpen(true)}
+                        style={{
+                          cursor: "pointer",
+                          fontSize: "0.74rem",
+                          fontWeight: "bold",
+                          backgroundColor: badge.bg,
+                          border: `1.5px solid ${badge.border}`,
+                          color: "#ffffff",
+                          padding: "2px 9px",
+                          borderRadius: "12px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "5px",
+                          boxShadow: "0 2px 0 rgba(0,0,0,0.15)",
+                        }}
+                        title="Klik untuk lihat maklumat status langganan"
+                      >
+                        <i className={badge.icon} style={{ fontSize: "0.75rem", color: badge.color }}></i>
+                        <span>{badge.text}</span>
+                      </span>
+                    );
+                  })()}
+                </div>
                 <h2
                   id="ibubapa-nama-anak-title"
                   style={{
@@ -9394,18 +11234,21 @@ export default function App() {
               onClick={(e) => {
                 setEditModalError("");
                 setIsMandatorySetup(false);
-                (window as any).modIbuBapaAktif = true;
+                if ((window as any).playBubble) (window as any).playBubble();
+                setEditModalMode("ibubapa");
+                (window as any).modAdminAktif = false;
                 (window as any).modGuruAktif = false;
+                (window as any).modIbuBapaAktif = true;
                 setEditNamaKeluargaTemp(
                   localStorage.getItem("bunyiKataNamaKeluarga") || "",
                 );
                 setEditNamaAnakTemp(
                   (window as any).anakTerpilih ||
                   localStorage.getItem("ibubapaAnakTerpilih") ||
-                  "Ali Bin Abu",
+                  "",
                 );
                 setEditKodTemp(
-                  localStorage.getItem("bunyiKataKodKeluarga") || "FAM@2026",
+                  localStorage.getItem("bunyiKataKodKeluarga") || "",
                 );
                 setIsEditModalOpen(true);
               }}
@@ -13515,9 +15358,9 @@ export default function App() {
       {typeof document !== 'undefined' && createPortal(
         <>
           {isEditModalOpen && (() => {
-            const isAdmin = !!(window as any).modAdminAktif;
-            const isParent = !isAdmin && !!(window as any).modIbuBapaAktif;
-            const isGuru = !isAdmin && !isParent;
+            const isAdmin = editModalMode === "admin";
+            const isParent = editModalMode === "ibubapa";
+            const isGuru = editModalMode === "guru";
 
             const modalHeaderTitle = isAdmin
               ? "Maklumat Admin"
@@ -13906,21 +15749,47 @@ export default function App() {
                               <label style={{ fontSize: "0.82rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
                                 Masukkan Kata Laluan Baharu:
                               </label>
-                              <input
-                                type="password"
-                                placeholder="Cipta kata laluan baharu anda"
-                                value={newPasswordInput}
-                                onChange={(e) => setNewPasswordInput(e.target.value)}
-                                style={{
-                                  width: "100%",
-                                  padding: "10px 12px",
-                                  borderRadius: "8px",
-                                  border: "2px solid var(--color-dark)",
-                                  fontSize: "0.95rem",
-                                  fontFamily: "inherit",
-                                  boxSizing: "border-box",
-                                }}
-                              />
+                              <div style={{ position: "relative", width: "100%" }}>
+                                <input
+                                  type={showNewPassword ? "text" : "password"}
+                                  placeholder="Cipta kata laluan baharu anda"
+                                  value={newPasswordInput}
+                                  onChange={(e) => setNewPasswordInput(e.target.value)}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px 42px 10px 12px",
+                                    borderRadius: "8px",
+                                    border: "2px solid var(--color-dark)",
+                                    fontSize: "0.95rem",
+                                    fontFamily: "inherit",
+                                    boxSizing: "border-box",
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowNewPassword((prev) => !prev)}
+                                  style={{
+                                    position: "absolute",
+                                    right: "8px",
+                                    top: "50%",
+                                    transform: "translateY(-50%)",
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    color: showNewPassword ? "var(--color-orange, #ea580c)" : "#64748b",
+                                    padding: "6px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "1rem",
+                                    zIndex: 2,
+                                  }}
+                                  title={showNewPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
+                                  aria-label={showNewPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
+                                >
+                                  <i className={`fa-solid ${showNewPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                                </button>
+                              </div>
                             </div>
                             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
                               <button
@@ -14000,101 +15869,353 @@ export default function App() {
                           <span style={labelHighlightStyle}>Nama Keluarga</span>
                           <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
                         </div>
-                        <input
-                          type="text"
-                          placeholder="CTH: KELUARGA RAZAK"
-                          value={editNamaKeluargaTemp}
-                          onChange={(e) => {
-                            setEditNamaKeluargaTemp(e.target.value.toUpperCase());
-                            if (editModalError) setEditModalError("");
-                          }}
-                          style={{
-                            width: "100%",
-                            padding: "10px 12px",
-                            borderRadius: "8px",
-                            border: "2px solid var(--color-dark)",
-                            fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
-                            fontFamily: "inherit",
-                            boxSizing: "border-box",
-                            textTransform: "uppercase",
-                            fontWeight: "bold",
-                          }}
-                        />
+                        <div style={{ position: "relative" }}>
+                          <input
+                            type="text"
+                            placeholder="CTH: KELUARGA RAZAK"
+                            value={editNamaKeluargaTemp}
+                            onChange={(e) => {
+                              setEditNamaKeluargaTemp(e.target.value.toUpperCase());
+                              if (editModalError) setEditModalError("");
+                            }}
+                            style={{
+                              width: "100%",
+                              padding: "10px 12px 10px 38px",
+                              borderRadius: "8px",
+                              border: "2px solid var(--color-dark)",
+                              fontSize: "clamp(0.95rem, 2.5vw, 1.05rem)",
+                              fontFamily: "inherit",
+                              boxSizing: "border-box",
+                              textTransform: "uppercase",
+                              fontWeight: "bold",
+                            }}
+                          />
+                          <i
+                            className="fa-solid fa-house-user"
+                            style={{
+                              position: "absolute",
+                              left: "12px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              color: "#0284c7",
+                              fontSize: "1rem",
+                            }}
+                          ></i>
+                        </div>
                       </div>
 
-                      <div style={{ marginBottom: "14px" }}>
+                      {/* Notifikasi & Butang Simpan Automatik apabila mengedit Nama Keluarga */}
+                      {editNamaKeluargaTemp.trim() !== (localStorage.getItem("bunyiKataNamaKeluarga") || "") && (
                         <div
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "flex-start",
-                            gap: "6px",
-                            marginBottom: "6px",
+                            justifyContent: "space-between",
+                            backgroundColor: "#f0f9ff",
+                            border: "1.5px solid #0284c7",
+                            borderRadius: "10px",
+                            padding: "8px 12px",
+                            marginBottom: "14px",
+                            animation: "pulse 1.5s infinite",
                           }}
                         >
-                          <span style={labelHighlightStyle}>Nama Anak</span>
-                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="CTH: ALI BIN ABU"
-                          value={editNamaAnakTemp}
-                          onChange={(e) => {
-                            setEditNamaAnakTemp(e.target.value.toUpperCase());
-                            if (editModalError) setEditModalError("");
-                          }}
-                          style={{
-                            width: "100%",
-                            padding: "10px 12px",
-                            borderRadius: "8px",
-                            border: "2px solid var(--color-dark)",
-                            fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
-                            fontFamily: "inherit",
-                            boxSizing: "border-box",
-                            textTransform: "uppercase",
-                            fontWeight: "bold",
-                          }}
-                        />
-                      </div>
+                          <span style={{ fontSize: "0.82rem", fontWeight: "bold", color: "#0369a1", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <i className="fa-solid fa-circle-info"></i> Perubahan nama keluarga dikesan
+                          </span>
+                          <div style={{ display: "flex", gap: "6px" }}>
+                            <button
+                              type="button"
+                              className="neo-btn"
+                              style={{
+                                backgroundColor: "#f1f5f9",
+                                color: "#475569",
+                                padding: "5px 10px",
+                                fontSize: "0.78rem",
+                                borderRadius: "6px",
+                              }}
+                              onClick={() => {
+                                setEditNamaKeluargaTemp(localStorage.getItem("bunyiKataNamaKeluarga") || "");
+                              }}
+                            >
+                              Batal
+                            </button>
+                            <button
+                              type="button"
+                              className="neo-btn"
+                              style={{
+                                backgroundColor: "#0284c7",
+                                color: "white",
+                                padding: "5px 12px",
+                                fontSize: "0.78rem",
+                                borderRadius: "6px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "5px",
+                              }}
+                              onClick={async () => {
+                                const finalName = editNamaKeluargaTemp.trim().toUpperCase();
+                                if (!finalName) {
+                                  if ((window as any).showAppToast) {
+                                    (window as any).showAppToast("Amaran", "Nama keluarga tidak boleh dibiarkan kosong!", "warning");
+                                  }
+                                  return;
+                                }
+                                localStorage.setItem("bunyiKataNamaKeluarga", finalName);
+                                setEditNamaKeluargaTemp(finalName);
+                                const parentId = localStorage.getItem("bunyiKataUserId") || (window as any).currentUser?.id || "";
+                                const currentKod = localStorage.getItem("bunyiKataKodKeluarga") || "";
 
-                      <div style={{ marginBottom: "14px" }}>
+                                try {
+                                  if (typeof updateParentFamilyAndNameInFirebase === "function") {
+                                    await updateParentFamilyAndNameInFirebase({
+                                      namaKeluarga: finalName,
+                                      parentIdOrEmail: parentId,
+                                      kodKeluarga: currentKod,
+                                    });
+                                  } else if (typeof saveFamilyToFirebase === "function" && currentKod) {
+                                    await saveFamilyToFirebase({
+                                      kodKeluarga: currentKod,
+                                      namaKeluarga: finalName,
+                                      parentId: parentId,
+                                    });
+                                  }
+                                } catch (err) {
+                                  console.warn("Firebase family update notice:", err);
+                                }
+
+                                const famTitle = document.getElementById("ibubapa-nama-keluarga-title");
+                                if (famTitle) famTitle.textContent = finalName;
+                                const famDashTitle = document.getElementById("ibubapa-dashboard-nama-keluarga-title");
+                                if (famDashTitle) famDashTitle.textContent = finalName;
+
+                                setIsChangingFamilyName(false);
+                                if ((window as any).showAppToast) {
+                                  (window as any).showAppToast("Nama Keluarga Dikemas Kini", "Nama keluarga berjaya disimpan ke pangkalan data!");
+                                }
+                              }}
+                            >
+                              <i className="fa-solid fa-floppy-disk"></i> Simpan
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Bahagian Kod Keluarga */}
+                      <div style={{ marginBottom: "16px" }}>
                         <div
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "flex-start",
-                            gap: "6px",
-                            marginBottom: "6px",
+                            justifyContent: "space-between",
+                            marginBottom: "10px",
                           }}
                         >
-                          <span style={labelHighlightStyle}>Kod Keluarga</span>
-                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                          <div
+                            className="neo-btn"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              backgroundColor: "var(--color-blue, #0284c7)",
+                              color: "white",
+                              padding: "6px 16px",
+                              borderRadius: "12px",
+                              border: "2.5px solid var(--color-dark, #10182f)",
+                              boxShadow: "0 3px 0 var(--color-dark, #10182f)",
+                              pointerEvents: "none",
+                            }}
+                          >
+                            <i className="fa-solid fa-people-roof" style={{ fontSize: "0.9rem" }}></i>
+                            <span
+                              style={{
+                                fontWeight: 900,
+                                fontSize: "0.92rem",
+                                fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                              }}
+                            >
+                              Pengurusan Kod Keluarga
+                            </span>
+                          </div>
+                          <span
+                            style={{
+                              background: isEffectivePro ? "#dcfce7" : "#fee2e2",
+                              color: isEffectivePro ? "#15803d" : "#b91c1c",
+                              border: isEffectivePro ? "1.5px solid #22c55e" : "1.5px solid #ef4444",
+                              padding: "4px 10px",
+                              borderRadius: "8px",
+                              fontSize: "0.78rem",
+                              fontWeight: "bold",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              boxShadow: "0 2px 0 rgba(0,0,0,0.06)",
+                            }}
+                          >
+                            {isEffectiveTrial ? "Percuma" : "Pro"}
+                          </span>
                         </div>
-                        <input
-                          type="text"
-                          maxLength={8}
-                          placeholder="CTH: FAM@2026"
-                          value={editKodTemp}
-                          onChange={(e) => {
-                            setEditKodTemp(e.target.value.toUpperCase());
-                            if (editModalError) setEditModalError("");
-                          }}
-                          style={{
-                            width: "100%",
-                            padding: "10px 12px",
-                            borderRadius: "8px",
-                            border: "2px solid var(--color-dark)",
-                            fontSize: "1.1rem",
-                            fontFamily: "inherit",
-                            boxSizing: "border-box",
-                            letterSpacing: "1px",
-                            fontWeight: "bold",
-                            textTransform: "uppercase",
-                          }}
-                        />
-                        <span style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px", display: "block", textAlign: "left" }}>
-                          * Wajib 8 aksara & sekurang-kurangnya 1 simbol (Cth: FAM@2026)
-                        </span>
+
+                        {isEffectiveTrial ? (
+                          <div
+                            style={{
+                              backgroundColor: "#f8fafc",
+                              border: "2px dashed #cbd5e1",
+                              borderRadius: "12px",
+                              padding: "14px 16px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: "12px",
+                              marginBottom: "14px",
+                            }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontWeight: "900", color: "#64748b", fontSize: "0.92rem", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                <i className="fa-solid fa-lock" style={{ color: "#ef4444" }}></i>
+                                <span>Kod Keluarga Terkunci (Versi Pro)</span>
+                              </div>
+                              <p style={{ margin: "3px 0 0 0", fontSize: "0.82rem", color: "#64748b", lineHeight: "1.4" }}>
+                                Fungsi ini terhad untuk akaun Pro. Sila langgan pakej Pro untuk akses penuh.
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              className="neo-btn"
+                              style={{
+                                backgroundColor: "#0284c7",
+                                color: "white",
+                                padding: "8px 16px",
+                                fontSize: "0.85rem",
+                                borderRadius: "8px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                whiteSpace: "nowrap",
+                                flexShrink: 0,
+                              }}
+                              onClick={() => {
+                                if (typeof (window as any).openPakejProModal === "function") {
+                                  (window as any).openPakejProModal("ibubapa");
+                                } else {
+                                  setProPricingTab("ibubapa");
+                                  setIsProPricingModalOpen(true);
+                                }
+                              }}
+                            >
+                              <i className="fa-solid fa-crown"></i> Pro
+                            </button>
+                          </div>
+                        ) : (
+                        <div style={{ marginBottom: "14px" }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-start",
+                              gap: "6px",
+                              marginBottom: "6px",
+                            }}
+                          >
+                            <span style={labelHighlightStyle}>Kod Keluarga</span>
+                            <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                          </div>
+                          {!isChangingFamilyCode ? (
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                              <div
+                                style={{
+                                  flex: 1,
+                                  padding: "10px 12px",
+                                  borderRadius: "8px",
+                                  border: "2px solid #cbd5e1",
+                                  backgroundColor: "#f8fafc",
+                                  color: editKodTemp ? "#0f172a" : "#94a3b8",
+                                  fontSize: "1.05rem",
+                                  letterSpacing: "1.5px",
+                                  fontWeight: "900",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                }}
+                              >
+                                <i className="fa-solid fa-key" style={{ color: "#0284c7", fontSize: "0.9rem" }}></i>
+                                <span>{editKodTemp || "Kod Belum Ditetapkan"}</span>
+                              </div>
+                              <button
+                                type="button"
+                                className="neo-btn"
+                                style={{
+                                  width: "38px",
+                                  height: "38px",
+                                  padding: 0,
+                                  minWidth: "38px",
+                                  backgroundColor: "#0284c7",
+                                  color: "#ffffff",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                                onClick={() => {
+                                  setIsChangingFamilyCode(true);
+                                  setNewFamilyCodeInput(editKodTemp || "");
+                                }}
+                                title={editKodTemp ? "Tukar Kod Keluarga" : "Tetapkan Kod Keluarga"}
+                              >
+                                <i className="fa-solid fa-pen-to-square"></i>
+                              </button>
+                            </div>
+                          ) : (
+                            <div
+                              style={{
+                                backgroundColor: "#f0f9ff",
+                                border: "2px solid #0284c7",
+                                borderRadius: "10px",
+                                padding: "10px",
+                              }}
+                            >
+                              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                <input
+                                  type="text"
+                                  maxLength={8}
+                                  placeholder="CTH: FAM@2026"
+                                  value={newFamilyCodeInput}
+                                  onChange={(e) => setNewFamilyCodeInput(e.target.value.toUpperCase())}
+                                  style={{
+                                    flex: 1,
+                                    padding: "8px 10px",
+                                    borderRadius: "8px",
+                                    border: "2px solid var(--color-dark)",
+                                    fontSize: "1rem",
+                                    fontWeight: "900",
+                                    fontFamily: "inherit",
+                                    textTransform: "uppercase",
+                                    letterSpacing: "1.5px",
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  className="neo-btn bg-red"
+                                  style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                  onClick={() => setIsChangingFamilyCode(false)}
+                                  title="Batal"
+                                >
+                                  <i className="fa-solid fa-xmark"></i>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="neo-btn"
+                                  style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                  onClick={() => handleSaveFamilyCode(newFamilyCodeInput)}
+                                  title="Sahkan Kod Keluarga"
+                                >
+                                  <i className="fa-solid fa-check"></i>
+                                </button>
+                              </div>
+                              <span style={{ fontSize: "0.75rem", color: "#0284c7", marginTop: "4px", display: "block", fontWeight: "bold" }}>
+                                * Wajib 8 aksara & sekurang-kurangnya 1 simbol
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                       </div>
 
                       {/* Ruangan Emel Ibu Bapa (Read-only) */}
@@ -14223,21 +16344,47 @@ export default function App() {
                               <label style={{ fontSize: "0.82rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
                                 Masukkan Kata Laluan Baharu:
                               </label>
-                              <input
-                                type="password"
-                                placeholder="Cipta kata laluan baharu anda"
-                                value={newPasswordInput}
-                                onChange={(e) => setNewPasswordInput(e.target.value)}
-                                style={{
-                                  width: "100%",
-                                  padding: "10px 12px",
-                                  borderRadius: "8px",
-                                  border: "2px solid var(--color-dark)",
-                                  fontSize: "0.95rem",
-                                  fontFamily: "inherit",
-                                  boxSizing: "border-box",
-                                }}
-                              />
+                              <div style={{ position: "relative", width: "100%" }}>
+                                <input
+                                  type={showNewPassword ? "text" : "password"}
+                                  placeholder="Cipta kata laluan baharu anda"
+                                  value={newPasswordInput}
+                                  onChange={(e) => setNewPasswordInput(e.target.value)}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px 42px 10px 12px",
+                                    borderRadius: "8px",
+                                    border: "2px solid var(--color-dark)",
+                                    fontSize: "0.95rem",
+                                    fontFamily: "inherit",
+                                    boxSizing: "border-box",
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowNewPassword((prev) => !prev)}
+                                  style={{
+                                    position: "absolute",
+                                    right: "8px",
+                                    top: "50%",
+                                    transform: "translateY(-50%)",
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    color: showNewPassword ? "var(--color-orange, #ea580c)" : "#64748b",
+                                    padding: "6px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "1rem",
+                                    zIndex: 2,
+                                  }}
+                                  title={showNewPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
+                                  aria-label={showNewPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
+                                >
+                                  <i className={`fa-solid ${showNewPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                                </button>
+                              </div>
                             </div>
                             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
                               <button
@@ -14304,7 +16451,7 @@ export default function App() {
                     </>
                   ) : (
                     <div style={{ width: "100%" }}>
-                      {/* Nama Sekolah & Nama Kelas Side-by-Side */}
+                      {/* Nama Sekolah & Nama Guru Side-by-Side */}
                       <div
                         style={{
                           display: "grid",
@@ -14358,15 +16505,15 @@ export default function App() {
                               marginBottom: "6px",
                             }}
                           >
-                            <span style={labelHighlightStyle}>Nama Kelas</span>
+                            <span style={labelHighlightStyle}>Nama Guru</span>
                             <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
                           </div>
                           <input
                             type="text"
-                            placeholder="CTH: 1 CEMERLANG"
-                            value={editKelasTemp}
+                            placeholder="CTH: CIKGU SARAH"
+                            value={editGuruTemp}
                             onChange={(e) => {
-                              setEditKelasTemp(e.target.value.toUpperCase());
+                              setEditGuruTemp(e.target.value.toUpperCase());
                               if (editModalError) setEditModalError("");
                             }}
                             style={{
@@ -14384,79 +16531,664 @@ export default function App() {
                         </div>
                       </div>
 
-                      <div style={{ marginBottom: "14px" }}>
+                      {/* Notifikasi & Butang Simpan Automatik apabila mengedit Nama Sekolah / Guru */}
+                      {(editSekolahTemp.trim() !== (localStorage.getItem("bunyiKataNamaSekolah") || "") ||
+                        editGuruTemp.trim() !== (localStorage.getItem("bunyiKataNamaGuru") || "")) && (
                         <div
                           style={{
+                            marginBottom: "16px",
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "flex-start",
-                            gap: "6px",
-                            marginBottom: "6px",
+                            justifyContent: "space-between",
+                            backgroundColor: "#ecfdf5",
+                            border: "2px solid #10b981",
+                            borderRadius: "10px",
+                            padding: "8px 12px",
+                            boxShadow: "0 2px 0 var(--color-dark)",
                           }}
                         >
-                          <span style={labelHighlightStyle}>Nama Guru</span>
-                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="CTH: CIKGU SARAH"
-                          value={editGuruTemp}
-                          onChange={(e) => {
-                            setEditGuruTemp(e.target.value.toUpperCase());
-                            if (editModalError) setEditModalError("");
-                          }}
-                          style={{
-                            width: "100%",
-                            padding: "10px 12px",
-                            borderRadius: "8px",
-                            border: "2px solid var(--color-dark)",
-                            fontSize: "clamp(0.95rem, 3vw, 1.1rem)",
-                            fontFamily: "inherit",
-                            boxSizing: "border-box",
-                            textTransform: "uppercase",
-                            fontWeight: "bold",
-                          }}
-                        />
-                      </div>
+                          <span style={{ fontSize: "0.82rem", fontWeight: "bold", color: "#065f46", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <i className="fa-solid fa-pen-nib" style={{ color: "#10b981" }}></i>
+                            Simpan perubahan Nama Sekolah & Guru?
+                          </span>
+                          <button
+                            type="button"
+                            className="neo-btn"
+                            style={{
+                              backgroundColor: "#16a34a",
+                              color: "white",
+                              padding: "6px 14px",
+                              fontSize: "0.84rem",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "6px",
+                            }}
+                            onClick={async () => {
+                              const s = editSekolahTemp.trim().toUpperCase();
+                              const g = editGuruTemp.trim().toUpperCase();
+                              if (!s || !g) {
+                                alert("Sila lengkapkan Nama Sekolah dan Nama Guru!");
+                                return;
+                              }
+                              localStorage.setItem("bunyiKataNamaSekolah", s);
+                              localStorage.setItem("bunyiKataNamaGuru", g);
+                              localStorage.setItem("pdf_guru", g);
+                              const sEl = document.getElementById("guru-dashboard-nama-sekolah-title");
+                              if (sEl) sEl.innerText = s;
+                              const gEl = document.getElementById("guru-dashboard-nama-guru-title");
+                              if (gEl) gEl.innerText = g;
 
-                      <div style={{ marginBottom: "14px" }}>
+                              await updateTeacherSchoolAndNameInFirebase({
+                                namaSekolah: s,
+                                namaGuru: g,
+                              });
+
+                              if (typeof (window as any).showAppToast === "function") {
+                                (window as any).showAppToast("Berjaya Disimpan", "Nama sekolah dan nama guru berjaya dikemas kini ke pangkalan data!");
+                              }
+                            }}
+                          >
+                            <i className="fa-solid fa-check"></i> Simpan
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Bahagian Kod Kelas (Kelas 1 & Kelas 2) */}
+                      <div style={{ marginBottom: "16px" }}>
                         <div
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "flex-start",
-                            gap: "6px",
-                            marginBottom: "6px",
+                            justifyContent: "space-between",
+                            marginBottom: "10px",
                           }}
                         >
-                          <span style={labelHighlightStyle}>Kod Kelas</span>
-                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                          <div
+                            className="neo-btn"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              backgroundColor: "var(--color-orange, #ea580c)",
+                              color: "white",
+                              padding: "6px 16px",
+                              borderRadius: "12px",
+                              border: "2.5px solid var(--color-dark, #10182f)",
+                              boxShadow: "0 3px 0 var(--color-dark, #10182f)",
+                              pointerEvents: "none",
+                            }}
+                          >
+                            <i className="fa-solid fa-chalkboard-user" style={{ fontSize: "0.9rem" }}></i>
+                            <span
+                              style={{
+                                fontWeight: 900,
+                                fontSize: "0.92rem",
+                                fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                              }}
+                            >
+                              Pengurusan Kod Kelas
+                            </span>
+                          </div>
+                          <span
+                            style={{
+                              background: isEffectivePro ? "#dcfce7" : "#fee2e2",
+                              color: isEffectivePro ? "#15803d" : "#b91c1c",
+                              border: isEffectivePro ? "1.5px solid #22c55e" : "1.5px solid #ef4444",
+                              padding: "4px 10px",
+                              borderRadius: "8px",
+                              fontSize: "0.78rem",
+                              fontWeight: "bold",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              boxShadow: "0 2px 0 rgba(0,0,0,0.06)",
+                            }}
+                          >
+                            {isEffectiveTrial ? "Percuma" : "Pro"}
+                          </span>
                         </div>
-                        <input
-                          type="text"
-                          maxLength={8}
-                          placeholder="CTH: KELAS#01"
-                          value={editKodTemp}
-                          onChange={(e) => {
-                            setEditKodTemp(e.target.value.toUpperCase());
-                            if (editModalError) setEditModalError("");
-                          }}
-                          style={{
-                            width: "100%",
-                            padding: "10px 12px",
-                            borderRadius: "8px",
-                            border: "2px solid var(--color-dark)",
-                            fontSize: "1.1rem",
-                            fontFamily: "inherit",
-                            boxSizing: "border-box",
-                            letterSpacing: "1px",
-                            fontWeight: "bold",
-                            textTransform: "uppercase",
-                          }}
-                        />
-                        <span style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px", display: "block", textAlign: "left" }}>
-                          * Wajib 8 aksara & sekurang-kurangnya 1 simbol (Cth: KELAS#01)
-                        </span>
+
+                        {/* KAD KELAS 1 (Utama) */}
+                        {isEffectiveTrial ? (
+                          <div
+                            style={{
+                              backgroundColor: "#f8fafc",
+                              border: "2px dashed #cbd5e1",
+                              borderRadius: "12px",
+                              padding: "14px 16px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: "12px",
+                              marginBottom: "12px",
+                            }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontWeight: "900", color: "#64748b", fontSize: "0.92rem", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                <i className="fa-solid fa-lock" style={{ color: "#ef4444" }}></i>
+                                <span>Kelas Pertama Terkunci (Versi Pro)</span>
+                              </div>
+                              <p style={{ margin: "3px 0 0 0", fontSize: "0.82rem", color: "#64748b", lineHeight: "1.4" }}>
+                                Fungsi ini terhad untuk akaun Pro. Sila langgan pakej Pro untuk akses penuh.
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              className="neo-btn"
+                              style={{
+                                backgroundColor: "#ea580c",
+                                color: "white",
+                                padding: "8px 16px",
+                                fontSize: "0.85rem",
+                                borderRadius: "8px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                whiteSpace: "nowrap",
+                                flexShrink: 0,
+                              }}
+                              onClick={() => {
+                                if (typeof (window as any).openPakejProModal === "function") {
+                                  (window as any).openPakejProModal("guru");
+                                } else {
+                                  setIsProPricingModalOpen(true);
+                                }
+                              }}
+                            >
+                              <i className="fa-solid fa-crown"></i> Pro
+                            </button>
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              backgroundColor: "#ffffff",
+                              border: "2px solid #ea580c",
+                              borderRadius: "12px",
+                              padding: "14px",
+                              marginBottom: "12px",
+                              boxShadow: "0 3px 0 var(--color-dark)",
+                            }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                              <span style={{ fontWeight: "900", color: "#c2410c", fontSize: "0.92rem", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                <i className="fa-solid fa-1" style={{ background: "#ea580c", color: "white", width: "18px", height: "18px", borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem" }}></i>
+                                Kelas Pertama
+                              </span>
+                            </div>
+
+                            <div style={{ marginBottom: "10px" }}>
+                              <label style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
+                                Nama Kelas 1: <span style={{ color: "#ef4444" }}>*</span>
+                              </label>
+                              {!isChangingClassName1 ? (
+                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                  <div
+                                    style={{
+                                      flex: 1,
+                                      padding: "8px 12px",
+                                      borderRadius: "8px",
+                                      border: "2px solid #cbd5e1",
+                                      backgroundColor: "#f8fafc",
+                                      color: editKelasTemp ? "#0f172a" : "#94a3b8",
+                                      fontSize: "0.95rem",
+                                      fontWeight: "900",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "8px",
+                                    }}
+                                  >
+                                    <i className="fa-solid fa-chalkboard-user" style={{ color: "#ea580c", fontSize: "0.9rem" }}></i>
+                                    <span>{editKelasTemp || "Nama Belum Ditetapkan"}</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="neo-btn"
+                                    style={{
+                                      width: "38px",
+                                      height: "38px",
+                                      padding: 0,
+                                      minWidth: "38px",
+                                      backgroundColor: headerBgColor,
+                                      color: "#ffffff",
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                    }}
+                                    onClick={() => {
+                                      setIsChangingClassName1(true);
+                                      setNewClassName1Input(editKelasTemp || "");
+                                    }}
+                                    title={editKelasTemp ? "Tukar Nama Kelas 1" : "Tetapkan Nama Kelas 1"}
+                                  >
+                                    <i className="fa-solid fa-pen-to-square"></i>
+                                  </button>
+                                </div>
+                              ) : (
+                                <div
+                                  style={{
+                                    backgroundColor: "#fff7ed",
+                                    border: "2px solid #ea580c",
+                                    borderRadius: "10px",
+                                    padding: "10px",
+                                  }}
+                                >
+                                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                    <input
+                                      type="text"
+                                      placeholder="CTH: 1 CEMERLANG"
+                                      value={newClassName1Input}
+                                      onChange={(e) => setNewClassName1Input(e.target.value.toUpperCase())}
+                                      style={{
+                                        flex: 1,
+                                        padding: "8px 10px",
+                                        borderRadius: "8px",
+                                        border: "2px solid var(--color-dark)",
+                                        fontSize: "0.95rem",
+                                        fontWeight: "900",
+                                        fontFamily: "inherit",
+                                        textTransform: "uppercase",
+                                      }}
+                                    />
+                                    <button
+                                      type="button"
+                                      className="neo-btn bg-red"
+                                      style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                      onClick={() => setIsChangingClassName1(false)}
+                                      title="Batal"
+                                    >
+                                      <i className="fa-solid fa-xmark"></i>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="neo-btn"
+                                      style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                      onClick={() => handleSaveClassName1(newClassName1Input)}
+                                      title="Sahkan Nama Kelas 1"
+                                    >
+                                      <i className="fa-solid fa-check"></i>
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            <div>
+                              <label style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
+                                Kod Kelas 1: <span style={{ color: "#ef4444" }}>*</span>
+                              </label>
+                              {!isChangingCode1 ? (
+                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                  <div
+                                    style={{
+                                      flex: 1,
+                                      padding: "8px 12px",
+                                      borderRadius: "8px",
+                                      border: "2px solid #cbd5e1",
+                                      backgroundColor: "#f8fafc",
+                                      color: "#0f172a",
+                                      fontSize: "1rem",
+                                      letterSpacing: "2px",
+                                      fontWeight: "900",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "8px",
+                                    }}
+                                  >
+                                    <i className="fa-solid fa-key" style={{ color: "#ea580c", fontSize: "0.85rem" }}></i>
+                                    <span style={{ color: editKodTemp ? "#0f172a" : "#94a3b8" }}>
+                                      {editKodTemp || "Kod Belum Ditetapkan"}
+                                    </span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="neo-btn"
+                                    style={{
+                                      width: "38px",
+                                      height: "38px",
+                                      padding: 0,
+                                      minWidth: "38px",
+                                      backgroundColor: headerBgColor,
+                                      color: "#ffffff",
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                    }}
+                                    onClick={() => {
+                                      setIsChangingCode1(true);
+                                      setNewCode1Input(editKodTemp || "");
+                                    }}
+                                    title={editKodTemp ? "Tukar Kod Kelas 1" : "Tetapkan Kod Kelas 1"}
+                                  >
+                                    <i className="fa-solid fa-pen-to-square"></i>
+                                  </button>
+                                </div>
+                              ) : (
+                                <div
+                                  style={{
+                                    backgroundColor: "#fff7ed",
+                                    border: "2px solid #ea580c",
+                                    borderRadius: "10px",
+                                    padding: "10px",
+                                  }}
+                                >
+                                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                    <input
+                                      type="text"
+                                      maxLength={8}
+                                      placeholder="CTH: KELAS#01"
+                                      value={newCode1Input}
+                                      onChange={(e) => setNewCode1Input(e.target.value.toUpperCase())}
+                                      style={{
+                                        flex: 1,
+                                        padding: "8px 10px",
+                                        borderRadius: "8px",
+                                        border: "2px solid var(--color-dark)",
+                                        fontSize: "1rem",
+                                        fontWeight: "900",
+                                        letterSpacing: "1.5px",
+                                        fontFamily: "inherit",
+                                        textTransform: "uppercase",
+                                      }}
+                                    />
+                                    <button
+                                      type="button"
+                                      className="neo-btn bg-red"
+                                      style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                      onClick={() => setIsChangingCode1(false)}
+                                      title="Batal"
+                                    >
+                                      <i className="fa-solid fa-xmark"></i>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="neo-btn"
+                                      style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                      onClick={() => handleSaveClassCode1(newCode1Input)}
+                                      title="Gunakan Kod Ini"
+                                    >
+                                      <i className="fa-solid fa-check"></i>
+                                    </button>
+                                  </div>
+                                  <span style={{ fontSize: "0.75rem", color: "#ea580c", marginTop: "4px", display: "block", fontWeight: "bold" }}>
+                                    * Wajib 8 aksara & sekurang-kurangnya 1 simbol
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* KAD KELAS 2 (Kelas Kedua) */}
+                        {teacherCanHaveClass2 ? (
+                          <div
+                            style={{
+                              backgroundColor: "#ffffff",
+                              border: "2px solid #0284c7",
+                              borderRadius: "12px",
+                              padding: "14px",
+                              boxShadow: "0 3px 0 var(--color-dark)",
+                            }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                              <span style={{ fontWeight: "900", color: "#0369a1", fontSize: "0.92rem", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                <i className="fa-solid fa-2" style={{ background: "#0284c7", color: "white", width: "18px", height: "18px", borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem" }}></i>
+                                Kelas Kedua
+                              </span>
+                            </div>
+
+                            <div style={{ marginBottom: "10px" }}>
+                              <label style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
+                                Nama Kelas 2:
+                              </label>
+                              {!isChangingClassName2 ? (
+                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                  <div
+                                    style={{
+                                      flex: 1,
+                                      padding: "8px 12px",
+                                      borderRadius: "8px",
+                                      border: "2px solid #cbd5e1",
+                                      backgroundColor: "#f8fafc",
+                                      color: editKelas2Temp ? "#0f172a" : "#94a3b8",
+                                      fontSize: "0.95rem",
+                                      fontWeight: "900",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "8px",
+                                    }}
+                                  >
+                                    <i className="fa-solid fa-chalkboard-user" style={{ color: "#0284c7", fontSize: "0.9rem" }}></i>
+                                    <span>{editKelas2Temp || "Nama Belum Ditetapkan"}</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="neo-btn"
+                                    style={{
+                                      width: "38px",
+                                      height: "38px",
+                                      padding: 0,
+                                      minWidth: "38px",
+                                      backgroundColor: "#0284c7",
+                                      color: "#ffffff",
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                    }}
+                                    onClick={() => {
+                                      setIsChangingClassName2(true);
+                                      setNewClassName2Input(editKelas2Temp || "");
+                                    }}
+                                    title={editKelas2Temp ? "Tukar Nama Kelas 2" : "Tetapkan Nama Kelas 2"}
+                                  >
+                                    <i className="fa-solid fa-pen-to-square"></i>
+                                  </button>
+                                </div>
+                              ) : (
+                                <div
+                                  style={{
+                                    backgroundColor: "#f0f9ff",
+                                    border: "2px solid #0284c7",
+                                    borderRadius: "10px",
+                                    padding: "10px",
+                                  }}
+                                >
+                                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                    <input
+                                      type="text"
+                                      placeholder="CTH: 1 PINTAR"
+                                      value={newClassName2Input}
+                                      onChange={(e) => setNewClassName2Input(e.target.value.toUpperCase())}
+                                      style={{
+                                        flex: 1,
+                                        padding: "8px 10px",
+                                        borderRadius: "8px",
+                                        border: "2px solid var(--color-dark)",
+                                        fontSize: "0.95rem",
+                                        fontWeight: "900",
+                                        fontFamily: "inherit",
+                                        textTransform: "uppercase",
+                                      }}
+                                    />
+                                    <button
+                                      type="button"
+                                      className="neo-btn bg-red"
+                                      style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                      onClick={() => setIsChangingClassName2(false)}
+                                      title="Batal"
+                                    >
+                                      <i className="fa-solid fa-xmark"></i>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="neo-btn"
+                                      style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                      onClick={() => handleSaveClassName2(newClassName2Input)}
+                                      title="Sahkan Nama Kelas 2"
+                                    >
+                                      <i className="fa-solid fa-check"></i>
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            <div>
+                              <label style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
+                                Kod Kelas 2:
+                              </label>
+                              {!isChangingCode2 ? (
+                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                  <div
+                                    style={{
+                                      flex: 1,
+                                      padding: "8px 12px",
+                                      borderRadius: "8px",
+                                      border: "2px solid #cbd5e1",
+                                      backgroundColor: "#f8fafc",
+                                      color: editKod2Temp ? "#0f172a" : "#94a3b8",
+                                      fontSize: "1rem",
+                                      letterSpacing: "2px",
+                                      fontWeight: "900",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "8px",
+                                    }}
+                                  >
+                                    <i className="fa-solid fa-key" style={{ color: "#0284c7", fontSize: "0.85rem" }}></i>
+                                    <span>{editKod2Temp || "Kod Belum Ditetapkan"}</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="neo-btn"
+                                    style={{
+                                      width: "38px",
+                                      height: "38px",
+                                      padding: 0,
+                                      minWidth: "38px",
+                                      backgroundColor: "#0284c7",
+                                      color: "#ffffff",
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                    }}
+                                    onClick={() => {
+                                      setIsChangingCode2(true);
+                                      setNewCode2Input(editKod2Temp || "");
+                                    }}
+                                    title={editKod2Temp ? "Tukar Kod Kelas 2" : "Tetapkan Kod Kelas 2"}
+                                  >
+                                    <i className="fa-solid fa-pen-to-square"></i>
+                                  </button>
+                                </div>
+                              ) : (
+                                <div
+                                  style={{
+                                    backgroundColor: "#f0f9ff",
+                                    border: "2px solid #0284c7",
+                                    borderRadius: "10px",
+                                    padding: "10px",
+                                  }}
+                                >
+                                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                    <input
+                                      type="text"
+                                      maxLength={8}
+                                      placeholder="CTH: KLS2#01"
+                                      value={newCode2Input}
+                                      onChange={(e) => setNewCode2Input(e.target.value.toUpperCase())}
+                                      style={{
+                                        flex: 1,
+                                        padding: "8px 10px",
+                                        borderRadius: "8px",
+                                        border: "2px solid var(--color-dark)",
+                                        fontSize: "1rem",
+                                        fontWeight: "900",
+                                        letterSpacing: "1.5px",
+                                        fontFamily: "inherit",
+                                        textTransform: "uppercase",
+                                      }}
+                                    />
+                                    <button
+                                      type="button"
+                                      className="neo-btn bg-red"
+                                      style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                      onClick={() => setIsChangingCode2(false)}
+                                      title="Batal"
+                                    >
+                                      <i className="fa-solid fa-xmark"></i>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="neo-btn"
+                                      style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                      onClick={() => {
+                                        if (newCode2Input.trim().toUpperCase() === editKodTemp) {
+                                          alert("Kod Kelas 2 tidak boleh sama dengan Kod Kelas 1!");
+                                          return;
+                                        }
+                                        handleSaveClassCode2(newCode2Input);
+                                      }}
+                                      title="Gunakan Kod Ini"
+                                    >
+                                      <i className="fa-solid fa-check"></i>
+                                    </button>
+                                  </div>
+                                  <span style={{ fontSize: "0.75rem", color: "#0284c7", marginTop: "4px", display: "block", fontWeight: "bold" }}>
+                                    * Wajib 8 aksara & sekurang-kurangnya 1 simbol
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              backgroundColor: "#f8fafc",
+                              border: "2px dashed #cbd5e1",
+                              borderRadius: "12px",
+                              padding: "14px 16px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: "12px",
+                              textAlign: "left",
+                            }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontWeight: "900", color: "#64748b", fontSize: "0.92rem", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                <i className="fa-solid fa-lock" style={{ color: "#ef4444" }}></i>
+                                <span>Kelas Kedua Terkunci (Versi Pro)</span>
+                              </div>
+                              <p style={{ margin: "3px 0 0 0", fontSize: "0.82rem", color: "#64748b", lineHeight: "1.4" }}>
+                                Fungsi ini terhad untuk akaun Pro. Sila langgan pakej Pro untuk akses penuh.
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              className="neo-btn"
+                              style={{
+                                backgroundColor: "#ea580c",
+                                color: "white",
+                                padding: "8px 16px",
+                                fontSize: "0.85rem",
+                                borderRadius: "8px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                whiteSpace: "nowrap",
+                                flexShrink: 0,
+                              }}
+                              onClick={() => {
+                                if (typeof (window as any).openPakejProModal === "function") {
+                                  (window as any).openPakejProModal("guru");
+                                } else {
+                                  setIsProPricingModalOpen(true);
+                                }
+                              }}
+                            >
+                              <i className="fa-solid fa-crown"></i> Pro
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {/* Ruangan Emel Guru (Read-only) */}
@@ -14585,21 +17317,47 @@ export default function App() {
                               <label style={{ fontSize: "0.82rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
                                 Masukkan Kata Laluan Baharu:
                               </label>
-                              <input
-                                type="password"
-                                placeholder="Cipta kata laluan baharu anda"
-                                value={newPasswordInput}
-                                onChange={(e) => setNewPasswordInput(e.target.value)}
-                                style={{
-                                  width: "100%",
-                                  padding: "10px 12px",
-                                  borderRadius: "8px",
-                                  border: "2px solid var(--color-dark)",
-                                  fontSize: "0.95rem",
-                                  fontFamily: "inherit",
-                                  boxSizing: "border-box",
-                                }}
-                              />
+                              <div style={{ position: "relative", width: "100%" }}>
+                                <input
+                                  type={showNewPassword ? "text" : "password"}
+                                  placeholder="Cipta kata laluan baharu anda"
+                                  value={newPasswordInput}
+                                  onChange={(e) => setNewPasswordInput(e.target.value)}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px 42px 10px 12px",
+                                    borderRadius: "8px",
+                                    border: "2px solid var(--color-dark)",
+                                    fontSize: "0.95rem",
+                                    fontFamily: "inherit",
+                                    boxSizing: "border-box",
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowNewPassword((prev) => !prev)}
+                                  style={{
+                                    position: "absolute",
+                                    right: "8px",
+                                    top: "50%",
+                                    transform: "translateY(-50%)",
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    color: showNewPassword ? "var(--color-orange, #ea580c)" : "#64748b",
+                                    padding: "6px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "1rem",
+                                    zIndex: 2,
+                                  }}
+                                  title={showNewPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
+                                  aria-label={showNewPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
+                                >
+                                  <i className={`fa-solid ${showNewPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                                </button>
+                              </div>
                             </div>
                             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
                               <button
@@ -14651,7 +17409,11 @@ export default function App() {
                                 }}
                                 onClick={() => {
                                   if (!newPasswordInput.trim()) {
-                                    alert("Sila masukkan kata laluan baharu!");
+                                    if ((window as any).showAppToast) {
+                                      (window as any).showAppToast("Amaran", "Sila masukkan kata laluan baharu!", "warning");
+                                    } else {
+                                      alert("Sila masukkan kata laluan baharu!");
+                                    }
                                     return;
                                   }
                                   setShowPasswordConfirmModal(true);
@@ -14747,18 +17509,30 @@ export default function App() {
                               fontSize: "0.9rem",
                               justifyContent: "center",
                             }}
-                            onClick={() => {
+                            onClick={async () => {
+                              const passToSave = newPasswordInput.trim();
                               if (isAdmin) {
-                                localStorage.setItem("bunyiKataAdminPassword", newPasswordInput.trim());
+                                localStorage.setItem("bunyiKataAdminPassword", passToSave);
                               } else if (isParent) {
-                                localStorage.setItem("bunyiKataIbubapaPassword", newPasswordInput.trim());
+                                localStorage.setItem("bunyiKataIbubapaPassword", passToSave);
                               } else {
-                                localStorage.setItem("bunyiKataGuruPassword", newPasswordInput.trim());
+                                localStorage.setItem("bunyiKataGuruPassword", passToSave);
                               }
+
+                              try {
+                                await updateUserPasswordInFirebase(passToSave);
+                              } catch (err) {
+                                console.warn("Firebase password sync:", err);
+                              }
+
                               setShowPasswordConfirmModal(false);
                               setIsChangingPassword(false);
                               setNewPasswordInput("");
-                              setPasswordToast("Kata laluan baharu berjaya disimpan!");
+                              if ((window as any).showAppToast) {
+                                (window as any).showAppToast("Kata Laluan Dikemaskini", "Kata laluan baharu anda telah berjaya disimpan ke pangkalan data!");
+                              } else if (typeof setPasswordToast === "function") {
+                                setPasswordToast("Kata laluan baharu berjaya disimpan!");
+                              }
                             }}
                           >
                             Ya, Simpan
@@ -14768,41 +17542,18 @@ export default function App() {
                     </div>
                   )}
 
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "12px",
-                      justifyContent: "flex-end",
-                      marginTop: "16px",
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const roleKey: "admin" | "ibubapa" | "guru" = isAdmin
-                          ? "admin"
-                          : isParent
-                            ? "ibubapa"
-                            : "guru";
-
-                        const codeTrimmed = editKodTemp.trim().toUpperCase();
-                        const hasSymbol = /[^a-zA-Z0-9\s]/.test(codeTrimmed);
-
-                        if (codeTrimmed.length !== 8 || !hasSymbol) {
-                          setEditModalError("Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#01 atau FAM@2026)!");
-                          return;
-                        }
-
-                        // Semak pertindihan kod
-                        const collisionCheck = checkIsCodeAlreadyUsed(codeTrimmed, roleKey);
-                        if (collisionCheck.isUsed) {
-                          setEditModalError(
-                            `Kod "${codeTrimmed}" telah digunakan oleh ${collisionCheck.usedBy}! Sila pilih kod lain yang unik agar tidak bertindan.`
-                          );
-                          return;
-                        }
-
-                        if (isAdmin) {
+                  {isAdmin ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "12px",
+                        justifyContent: "flex-end",
+                        marginTop: "16px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={async () => {
                           if (!editAdminNamaSistemTemp.trim()) {
                             setEditModalError("Sila lengkapkan ruangan Nama Sistem!");
                             return;
@@ -14814,6 +17565,7 @@ export default function App() {
 
                           const namaSistem = editAdminNamaSistemTemp.trim().toUpperCase();
                           const namaAdmin = editAdminNamaTemp.trim().toUpperCase();
+                          const codeTrimmed = editKodTemp.trim().toUpperCase();
 
                           localStorage.setItem("bunyiKataNamaSistem", namaSistem);
                           localStorage.setItem("bunyiKataNamaAdmin", namaAdmin);
@@ -14824,114 +17576,183 @@ export default function App() {
                           if (kelasTitle) kelasTitle.innerText = namaSistem;
                           const guruTitle = document.getElementById("admin-dashboard-nama-guru-title");
                           if (guruTitle) guruTitle.innerText = namaAdmin;
-                        } else if (isParent) {
-                          if (!editNamaKeluargaTemp.trim()) {
-                            setEditModalError("Sila lengkapkan ruangan Nama Keluarga!");
-                            return;
+
+                          setEditModalError("");
+                          setIsEditModalOpen(false);
+
+                          if (typeof (window as any).showAppModalAlert === "function") {
+                            (window as any).showAppModalAlert(
+                              "Berjaya Disimpan",
+                              `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                                <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                                Maklumat Admin telah berjaya disimpan!
+                              </p>`
+                            );
                           }
-                          if (!editNamaAnakTemp.trim()) {
-                            setEditModalError("Sila lengkapkan ruangan Nama Anak!");
-                            return;
-                          }
-
-                          const namaKeluarga = editNamaKeluargaTemp.trim().toUpperCase();
-                          const namaAnak = editNamaAnakTemp.trim().toUpperCase();
-
-                          localStorage.setItem("bunyiKataNamaKeluarga", namaKeluarga);
-                          localStorage.setItem("bunyiKataKodKeluarga", codeTrimmed);
-                          localStorage.setItem("bunyiKataIbubapaSetupDone", "true");
-                          registerCodeInRegistry(codeTrimmed, "ibubapa");
-
-                          const oldName = (window as any).anakTerpilih;
-                          (window as any).anakTerpilih = namaAnak;
-                          localStorage.setItem("ibubapaAnakTerpilih", namaAnak);
-
-                          if (oldName && oldName !== namaAnak) {
-                            if ((window as any).studentNames) {
-                              const idx = (window as any).studentNames.indexOf(oldName);
-                              if (idx > -1) (window as any).studentNames[idx] = namaAnak;
-                            }
-                            if ((window as any).parentChildNames) {
-                              const idx = (window as any).parentChildNames.indexOf(oldName);
-                              if (idx > -1) (window as any).parentChildNames[idx] = namaAnak;
-                            }
-                            if ((window as any).studentData && (window as any).studentData[oldName]) {
-                              (window as any).studentData[namaAnak] = (window as any).studentData[oldName];
-                              delete (window as any).studentData[oldName];
-                            }
-                          }
-
-                          const kodIbu = document.getElementById("ibubapa-kod-keluarga-title");
-                          if (kodIbu) kodIbu.innerText = codeTrimmed;
-                          const famTitle = document.getElementById("ibubapa-nama-keluarga-title");
-                          if (famTitle) famTitle.innerText = namaKeluarga;
-                          const anakTitle = document.getElementById("ibubapa-nama-anak-title");
-                          if (anakTitle) anakTitle.innerText = namaAnak;
-
-                          if (typeof (window as any).renderParentDashboard === "function") {
-                            (window as any).renderParentDashboard();
-                          }
-                        } else {
-                          if (!editSekolahTemp.trim()) {
-                            setEditModalError("Sila lengkapkan ruangan Nama Sekolah!");
-                            return;
-                          }
-                          if (!editKelasTemp.trim()) {
-                            setEditModalError("Sila lengkapkan ruangan Nama Kelas!");
-                            return;
-                          }
-                          if (!editGuruTemp.trim()) {
-                            setEditModalError("Sila lengkapkan ruangan Nama Guru!");
-                            return;
-                          }
-
-                          const namaSekolah = editSekolahTemp.trim().toUpperCase();
-                          const namaKelas = editKelasTemp.trim().toUpperCase();
-                          const namaGuru = editGuruTemp.trim().toUpperCase();
-
-                          localStorage.setItem("bunyiKataNamaSekolah", namaSekolah);
-                          localStorage.setItem("bunyiKataNamaKelas", namaKelas);
-                          localStorage.setItem("pdf_guru", namaGuru);
-                          localStorage.setItem("bunyiKataKodKelas", codeTrimmed);
-                          localStorage.setItem("bunyiKataGuruSetupDone", "true");
-                          registerCodeInRegistry(codeTrimmed, "guru");
-
-                          const el = document.getElementById("guru-dashboard-nama-kelas-title");
-                          if (el) el.innerText = namaKelas;
-                          const kodGuru = document.getElementById("guru-dashboard-kod-kelas-title");
-                          if (kodGuru) kodGuru.innerText = codeTrimmed;
-                          const guruEl = document.getElementById("guru-dashboard-nama-guru-title");
-                          if (guruEl) guruEl.innerText = namaGuru;
-                          const sekolahEl = document.getElementById("guru-dashboard-nama-sekolah-title");
-                          if (sekolahEl) sekolahEl.innerText = namaSekolah;
-                        }
-
-                        setEditModalError("");
-                        setIsMandatorySetup(false);
-                        setIsEditModalOpen(false);
-                      }}
-                      title="Simpan"
-                      aria-label="Simpan"
-                      className="neo-btn"
+                        }}
+                        title="Simpan Maklumat Admin"
+                        aria-label="Simpan Maklumat Admin"
+                        className="neo-btn"
+                        style={{
+                          padding: "10px 18px",
+                          borderRadius: "12px",
+                          backgroundColor: headerBgColor,
+                          border: "2.5px solid var(--color-dark)",
+                          boxShadow: "0 4px 0 var(--color-dark)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          cursor: "pointer",
+                          color: "white",
+                          fontSize: "0.95rem",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        <i className="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Maklumat Admin</span>
+                      </button>
+                    </div>
+                  ) : isGuru ? (
+                    <div
                       style={{
-                        width: "48px",
-                        height: "48px",
-                        borderRadius: "12px",
-                        backgroundColor: headerBgColor,
-                        border: "2.5px solid var(--color-dark)",
-                        boxShadow: "0 4px 0 var(--color-dark)",
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        color: "white",
-                        fontSize: "1.3rem",
-                        padding: "0",
+                        gap: "12px",
+                        justifyContent: "flex-end",
+                        marginTop: "16px",
                       }}
                     >
-                      <i className="fa-solid fa-floppy-disk"></i>
-                    </button>
-                  </div>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const s = editSekolahTemp.trim().toUpperCase();
+                          const g = editGuruTemp.trim().toUpperCase();
+                          if (!s || !g) {
+                            setEditModalError("Sila lengkapkan Nama Sekolah dan Nama Guru!");
+                            return;
+                          }
+
+                          localStorage.setItem("bunyiKataNamaSekolah", s);
+                          localStorage.setItem("bunyiKataNamaGuru", g);
+                          localStorage.setItem("pdf_guru", g);
+                          const sEl = document.getElementById("guru-dashboard-nama-sekolah-title");
+                          if (sEl) sEl.innerText = s;
+                          const gEl = document.getElementById("guru-dashboard-nama-guru-title");
+                          if (gEl) gEl.innerText = g;
+
+                          try {
+                            await updateTeacherSchoolAndNameInFirebase({
+                              namaSekolah: s,
+                              namaGuru: g,
+                            });
+                          } catch (err) {
+                            console.warn("Firebase teacher update err:", err);
+                          }
+
+                          setEditModalError("");
+                          setIsEditModalOpen(false);
+
+                          if (typeof (window as any).showAppModalAlert === "function") {
+                            (window as any).showAppModalAlert(
+                              "Berjaya Disimpan",
+                              `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                                <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                                Maklumat Guru & Sekolah telah berjaya disimpan ke pangkalan data!
+                              </p>`
+                            );
+                          } else if (typeof (window as any).showAppToast === "function") {
+                            (window as any).showAppToast("Berjaya Disimpan", "Maklumat Guru & Sekolah berjaya disimpan!");
+                          }
+                        }}
+                        title="Simpan Maklumat Guru"
+                        aria-label="Simpan Maklumat Guru"
+                        className="neo-btn"
+                        style={{
+                          padding: "10px 18px",
+                          borderRadius: "12px",
+                          backgroundColor: headerBgColor,
+                          border: "2.5px solid var(--color-dark)",
+                          boxShadow: "0 4px 0 var(--color-dark)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          cursor: "pointer",
+                          color: "white",
+                          fontSize: "0.95rem",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        <i className="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Maklumat Guru</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "12px",
+                        justifyContent: "flex-end",
+                        marginTop: "16px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const f = editNamaKeluargaTemp.trim().toUpperCase();
+                          if (!f) {
+                            setEditModalError("Sila masukkan Nama Keluarga!");
+                            return;
+                          }
+
+                          localStorage.setItem("bunyiKataNamaKeluarga", f);
+                          const famTitle = document.getElementById("ibubapa-nama-keluarga-title");
+                          if (famTitle) famTitle.innerText = f;
+
+                          try {
+                            await updateParentFamilyAndNameInFirebase({
+                              namaKeluarga: f,
+                            });
+                          } catch (err) {
+                            console.warn("Firebase parent update err:", err);
+                          }
+
+                          setEditModalError("");
+                          setIsEditModalOpen(false);
+
+                          if (typeof (window as any).showAppModalAlert === "function") {
+                            (window as any).showAppModalAlert(
+                              "Berjaya Disimpan",
+                              `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                                <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                                Maklumat Keluarga telah berjaya disimpan ke pangkalan data!
+                              </p>`
+                            );
+                          } else if (typeof (window as any).showAppToast === "function") {
+                            (window as any).showAppToast("Berjaya Disimpan", "Maklumat Keluarga berjaya disimpan!");
+                          }
+                        }}
+                        title="Simpan Maklumat Keluarga"
+                        aria-label="Simpan Maklumat Keluarga"
+                        className="neo-btn"
+                        style={{
+                          padding: "10px 18px",
+                          borderRadius: "12px",
+                          backgroundColor: headerBgColor,
+                          border: "2.5px solid var(--color-dark)",
+                          boxShadow: "0 4px 0 var(--color-dark)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          cursor: "pointer",
+                          color: "white",
+                          fontSize: "0.95rem",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        <i className="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Maklumat Keluarga</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -15086,6 +17907,261 @@ export default function App() {
           </AnimatePresence>
 
 
+          {/* Modal Pilihan Cara Mula */}
+          <AnimatePresence>
+            {isEntryChoiceModalOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(0,0,0,0.65)",
+                  zIndex: 9999,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "15px",
+                  boxSizing: "border-box",
+                }}
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) setIsEntryChoiceModalOpen(false);
+                }}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.9, y: 20 }}
+                  className="neo-box"
+                  style={{
+                    backgroundColor: "#fef9ec",
+                    backgroundImage:
+                      "radial-gradient(circle, rgba(16, 24, 47, .11) 1.5px, transparent 1.5px)",
+                    backgroundSize: "15px 15px",
+                    maxWidth: "430px",
+                    width: "100%",
+                    padding: "26px 20px",
+                    textAlign: "center",
+                    position: "relative",
+                    borderRadius: "22px",
+                    border: "3px solid var(--color-dark, #10182f)",
+                    boxShadow: "0 6px 0 var(--color-dark, #10182f)",
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="neo-btn bg-red"
+                    onClick={() => setIsEntryChoiceModalOpen(false)}
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      right: "12px",
+                      width: "36px",
+                      height: "36px",
+                      padding: "0",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 10,
+                      borderRadius: "10px",
+                    }}
+                    aria-label="Tutup"
+                  >
+                    <i className="fa-solid fa-xmark"></i>
+                  </button>
+
+                  <div
+                    className="neo-btn"
+                    style={{
+                      backgroundColor: "#168f81",
+                      color: "white",
+                      fontSize: "clamp(1.05rem, 3.8vw, 1.3rem)",
+                      margin: "0 auto 12px auto",
+                      display: "inline-block",
+                      pointerEvents: "none",
+                      padding: "8px 20px",
+                      lineHeight: "1.2",
+                      fontWeight: "900",
+                      borderRadius: "12px",
+                    }}
+                  >
+                    PILIH CARA MULA
+                  </div>
+
+                  <p
+                    style={{
+                      marginBottom: "18px",
+                      fontSize: "0.92rem",
+                      fontWeight: "bold",
+                      color: "#334155",
+                      lineHeight: "1.4",
+                    }}
+                  >
+                    Pilih cara untuk memulakan pengembaraan membaca anda:
+                  </p>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    {/* Pilihan 1: Ada Kod Kelas / Keluarga */}
+                    <button
+                      type="button"
+                      className="neo-box"
+                      style={{
+                        cursor: "pointer",
+                        padding: "14px 16px",
+                        backgroundColor: "#ffffff",
+                        border: "3px solid var(--color-dark, #10182f)",
+                        borderRadius: "16px",
+                        boxShadow: "0 4px 0 var(--color-dark, #10182f)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "14px",
+                        textAlign: "left",
+                        width: "100%",
+                      }}
+                      onClick={() => {
+                        if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                        setIsEntryChoiceModalOpen(false);
+                        setIsCodeModalOpen(true);
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "46px",
+                          height: "46px",
+                          borderRadius: "12px",
+                          backgroundColor: "#f59e0b",
+                          border: "2px solid var(--color-dark, #10182f)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#10182f",
+                          fontSize: "1.3rem",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <i className="fa-solid fa-key"></i>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span style={{ fontWeight: "900", fontSize: "1rem", color: "#10182f" }}>
+                            Ada Kod Kelas / Keluarga
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.68rem",
+                              fontWeight: "800",
+                              color: "#ffffff",
+                              backgroundColor: "#168f81",
+                              padding: "2px 6px",
+                              borderRadius: "6px",
+                            }}
+                          >
+                            PRO
+                          </span>
+                        </div>
+                        <div style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "2px" }}>
+                          Masukkan kod kelas atau keluarga untuk akses penuh &amp; rekod markah.
+                        </div>
+                      </div>
+                      <i className="fa-solid fa-chevron-right" style={{ color: "#94a3b8", fontSize: "1rem" }}></i>
+                    </button>
+
+                    {/* Pilihan 2: Cuba Percuma */}
+                    <button
+                      type="button"
+                      className="neo-box"
+                      style={{
+                        cursor: "pointer",
+                        padding: "14px 16px",
+                        backgroundColor: "#ffffff",
+                        border: "3px solid var(--color-dark, #10182f)",
+                        borderRadius: "16px",
+                        boxShadow: "0 4px 0 var(--color-dark, #10182f)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "14px",
+                        textAlign: "left",
+                        width: "100%",
+                      }}
+                      onClick={() => {
+                        setIsEntryChoiceModalOpen(false);
+                        (window as any).isGuestMode = true;
+                        (window as any).isAdminMode = false;
+                        (window as any).modAdminAktif = false;
+                        (window as any).modGuruAktif = false;
+                        (window as any).modIbuBapaAktif = false;
+                        (window as any).userAccessLevel = "trial";
+                        (window as any).namaMuridAktif = "Tetamu";
+                        setUserAccessLevel("trial");
+                        setIsAdminActive(false);
+                        localStorage.setItem("bunyiKataAccessLevel", "trial");
+                        localStorage.removeItem("bunyiKataUserRole");
+                        localStorage.setItem("muridAktif", "Tetamu");
+                        localStorage.setItem("bunyiKataCurrentMurid", "Tetamu");
+
+                        if (typeof (window as any).resetTrialGuestProgress === "function") {
+                          (window as any).resetTrialGuestProgress();
+                        }
+
+                        if (typeof (window as any).bukaModalAppInfo === "function") {
+                          (window as any).bukaModalAppInfo("murid");
+                        } else if (typeof (window as any).masukModMurid === "function") {
+                          (window as any).masukModMurid("Tetamu");
+                        }
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "46px",
+                          height: "46px",
+                          borderRadius: "12px",
+                          backgroundColor: "#10b981",
+                          border: "2px solid var(--color-dark, #10182f)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#ffffff",
+                          fontSize: "1.3rem",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <i className="fa-solid fa-play"></i>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span style={{ fontWeight: "900", fontSize: "1rem", color: "#10182f" }}>
+                            Cuba Percuma
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.68rem",
+                              fontWeight: "800",
+                              color: "#ffffff",
+                              backgroundColor: "#f59e0b",
+                              padding: "2px 6px",
+                              borderRadius: "6px",
+                            }}
+                          >
+                            PERCUMA
+                          </span>
+                        </div>
+                        <div style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "2px" }}>
+                          Terus main aktiviti Asas Bunyi Kata tanpa perlukan sebarang kod pendaftaran.
+                        </div>
+                      </div>
+                      <i className="fa-solid fa-chevron-right" style={{ color: "#94a3b8", fontSize: "1rem" }}></i>
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+
           {/* Modal Kod Kelas/Keluarga */}
           <AnimatePresence>
             {isCodeModalOpen && (
@@ -15191,7 +18267,7 @@ export default function App() {
                     <div>• Wajib <strong>8 aksara</strong></div>
                     <div>• Sekurang-kurangnya <strong>1 simbol</strong></div>
                     <div style={{ marginTop: "3px", fontSize: "0.74rem", color: "#64748b" }}>
-                      <strong>Contoh:</strong> <code style={{ backgroundColor: "#e2e8f0", padding: "1px 4px", borderRadius: "4px" }}>KELAS#01</code> atau <code style={{ backgroundColor: "#e2e8f0", padding: "1px 4px", borderRadius: "4px" }}>FAM@2026</code>
+                      <strong>Contoh Format:</strong> 8 aksara unik (cth: <code style={{ backgroundColor: "#e2e8f0", padding: "1px 4px", borderRadius: "4px" }}>ABCD@123</code>)
                     </div>
                   </div>
 
@@ -15207,7 +18283,7 @@ export default function App() {
                       fontWeight: "bold",
                       letterSpacing: "1px",
                     }}
-                    placeholder="Cth: KELAS#01"
+                    placeholder="Masukkan Kod 8 Aksara"
                     maxLength={8}
                     value={joinCode}
                     onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
@@ -15223,62 +18299,218 @@ export default function App() {
                       animation:
                         "outlineGlowGold 2.5s infinite, pulse-scale 2.5s infinite ease-in-out",
                     }}
-                    onClick={() => {
-                      if (joinCode.trim()) {
-                        const kodKeluarga =
-                          localStorage.getItem("bunyiKataKodKeluarga") ||
-                          "FAM@2026";
-                        const kodKelas =
-                          localStorage.getItem("bunyiKataKodKelas") || "KELAS#01";
-
-                        const kodAdmin =
-                          localStorage.getItem("bunyiKataKodAdmin") || "ADMIN#01";
-
-                        const entered = joinCode.trim().toUpperCase();
-                        if (
-                          entered === "1" ||
-                          entered === "ADMIN" ||
-                          entered === kodAdmin.toUpperCase()
-                        ) {
-                          alert("Akses Admin berjaya!");
-                          setIsCodeModalOpen(false);
-                          if (typeof (window as any).masukModAdmin === "function") {
-                            (window as any).masukModAdmin();
-                          }
-                        } else if (
-                          entered === kodKelas.toUpperCase() ||
-                          entered === "KELAS123"
-                        ) {
-                          alert("Kod berjaya disahkan!");
-                          setIsCodeModalOpen(false);
-                          const modal = document.getElementById("modal-pilih-anak");
-                          if (modal) {
-                            modal.style.display = "flex";
-                            if (
-                              typeof (window as any).bukaModalPilihAnak ===
-                              "function"
-                            ) {
-                              (window as any).bukaModalPilihAnak(false, true); // isStudentLogin
-                            }
-                          }
-                        } else if (
-                          entered === kodKeluarga.toUpperCase() ||
-                          entered === "KELUARGA123"
-                        ) {
-                          alert("Kod berjaya disahkan!");
-                          setIsCodeModalOpen(false);
-                          const modal = document.getElementById("modal-pilih-anak");
-                          if (modal) {
-                            modal.style.display = "flex";
-                            if (
-                              typeof (window as any).bukaModalPilihAnak ===
-                              "function"
-                            ) {
-                              (window as any).bukaModalPilihAnak(false, false); // normal mode (Mod Ibu Bapa)
-                            }
-                          }
+                    onClick={async () => {
+                      if (!joinCode.trim()) {
+                        if (typeof (window as any).showAppModalAlert === "function") {
+                          (window as any).showAppModalAlert(
+                            "Kod Diperlukan",
+                            `<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">
+                              <i class="fa-solid fa-key" style="font-size:2.2rem; color:#ea580c; display:block; margin-bottom:8px;"></i>
+                              Sila masukkan kod kelas atau keluarga terlebih dahulu.
+                            </p>`
+                          );
                         } else {
-                          alert("Kod tidak sah. Sila pastikan kod mengikut format 8 aksara dengan simbol (contoh: KELAS#01 atau FAM@2026).");
+                          alert("Sila masukkan kod kelas atau keluarga!");
+                        }
+                        return;
+                      }
+
+                      const kodKeluarga =
+                        localStorage.getItem("bunyiKataKodKeluarga") || "";
+                      const kodKelas =
+                        localStorage.getItem("bunyiKataKodKelas") || "";
+                      const kodKelas2 =
+                        localStorage.getItem("bunyiKataKodKelas2") || "";
+                      const kodAdmin =
+                        localStorage.getItem("bunyiKataKodAdmin") || "";
+
+                      const entered = joinCode.trim().toUpperCase();
+                      if (
+                        entered === "ADMIN" ||
+                        entered === "ADMIN#01" ||
+                        entered === "ADMIN123" ||
+                        entered === "ADMIN@123" ||
+                        (kodAdmin && entered === kodAdmin.toUpperCase())
+                      ) {
+                        setIsCodeModalOpen(false);
+                        setUserAccessLevel("pro");
+                        localStorage.setItem("bunyiKataAccessLevel", "pro");
+                        localStorage.setItem("bunyiKataUserRole", "admin");
+                        (window as any).userAccessLevel = "pro";
+                        (window as any).modAdminAktif = true;
+                        (window as any).isAdminMode = true;
+                        if (typeof (window as any).masukModAdmin === "function") {
+                          (window as any).masukModAdmin();
+                        }
+                        if (typeof (window as any).showAppModalAlert === "function") {
+                          (window as any).showAppModalAlert(
+                            "Akses Admin Berjaya",
+                            `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                              <i class="fa-solid fa-user-shield" style="font-size:2.2rem; color:#ea580c; display:block; margin-bottom:8px;"></i>
+                              Selamat datang ke Panel Kawalan Pentadbir Bunyi Kata!
+                            </p>`
+                          );
+                        }
+                      } else if (
+                        (kodKelas && entered === kodKelas.toUpperCase()) ||
+                        (kodKelas2 && entered === kodKelas2.toUpperCase())
+                      ) {
+                        setUserAccessLevel("pro");
+                        localStorage.setItem("bunyiKataAccessLevel", "pro");
+                        (window as any).userAccessLevel = "pro";
+                        setIsCodeModalOpen(false);
+                        const modal = document.getElementById("modal-pilih-anak");
+                        if (modal) {
+                          modal.style.display = "flex";
+                          if (
+                            typeof (window as any).bukaModalPilihAnak ===
+                            "function"
+                          ) {
+                            (window as any).bukaModalPilihAnak(false, true); // isStudentLogin
+                          }
+                        }
+                        if (typeof (window as any).showAppModalAlert === "function") {
+                          (window as any).showAppModalAlert(
+                            "Kod Berjaya Disahkan",
+                            `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                              <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                              Akses Kelas PRO berjaya disahkan! Sila pilih profil murid.
+                            </p>`
+                          );
+                        }
+                      } else if (
+                        kodKeluarga &&
+                        entered === kodKeluarga.toUpperCase()
+                      ) {
+                        setUserAccessLevel("pro");
+                        localStorage.setItem("bunyiKataAccessLevel", "pro");
+                        (window as any).userAccessLevel = "pro";
+                        setIsCodeModalOpen(false);
+                        const modal = document.getElementById("modal-pilih-anak");
+                        if (modal) {
+                          modal.style.display = "flex";
+                          if (
+                            typeof (window as any).bukaModalPilihAnak ===
+                            "function"
+                          ) {
+                            (window as any).bukaModalPilihAnak(false, false); // normal mode (Mod Ibu Bapa)
+                          }
+                        }
+                        if (typeof (window as any).showAppModalAlert === "function") {
+                          (window as any).showAppModalAlert(
+                            "Kod Berjaya Disahkan",
+                            `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                              <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                              Akses Keluarga PRO berjaya disahkan! Sila pilih profil anak.
+                            </p>`
+                          );
+                        }
+                      } else {
+                        // Semakan langsung dengan Firebase Realtime Database
+                        try {
+                          const cls = await getClassByCode(entered);
+                          if (cls) {
+                            setUserAccessLevel("pro");
+                            localStorage.setItem("bunyiKataAccessLevel", "pro");
+                            (window as any).userAccessLevel = "pro";
+                            localStorage.setItem("bunyiKataKodKelas", cls.kod_kelas);
+                            localStorage.setItem("bunyiKataNamaSekolah", cls.nama_sekolah);
+                            if (cls.nama_guru) localStorage.setItem("bunyiKataNamaGuru", cls.nama_guru);
+                            if (cls.nama_kelas) localStorage.setItem("bunyiKataNamaKelas", cls.nama_kelas);
+
+                            try {
+                              const remoteStudents = await getStudentsByClassId(cls.id);
+                              if (remoteStudents && remoteStudents.length > 0) {
+                                const names = remoteStudents.map((s: any) => s.nama);
+                                localStorage.setItem("bunyiKataStudentNames", JSON.stringify(names));
+                                if ((window as any).studentNames) {
+                                  (window as any).studentNames = names;
+                                }
+                                if (typeof (window as any).updateStudentDropdown === "function") {
+                                  (window as any).updateStudentDropdown();
+                                }
+                              }
+                            } catch (syncErr) {
+                              console.warn("Fetch class students notice:", syncErr);
+                            }
+
+                            setIsCodeModalOpen(false);
+                            const modal = document.getElementById("modal-pilih-anak");
+                            if (modal) {
+                              modal.style.display = "flex";
+                              if (typeof (window as any).bukaModalPilihAnak === "function") {
+                                (window as any).bukaModalPilihAnak(false, true);
+                              }
+                            }
+                            if (typeof (window as any).showAppModalAlert === "function") {
+                              (window as any).showAppModalAlert(
+                                "Kod Berjaya Disahkan",
+                                `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                                  <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                                  Akses Kelas PRO (${cls.nama_kelas || 'Kelas'}) berjaya disahkan!
+                                </p>`
+                              );
+                            }
+                            return;
+                          }
+
+                          const fam = await getFamilyByCode(entered);
+                          if (fam) {
+                            setUserAccessLevel("pro");
+                            localStorage.setItem("bunyiKataAccessLevel", "pro");
+                            (window as any).userAccessLevel = "pro";
+                            localStorage.setItem("bunyiKataKodKeluarga", fam.kod_keluarga);
+                            localStorage.setItem("bunyiKataNamaKeluarga", fam.nama_keluarga);
+
+                            try {
+                              const remoteChildren = await getStudentsByFamilyId(fam.id);
+                              if (remoteChildren && remoteChildren.length > 0) {
+                                const names = remoteChildren.map((s: any) => s.nama);
+                                localStorage.setItem("bunyiKataParentChildNames", JSON.stringify(names));
+                                if ((window as any).parentChildNames) {
+                                  (window as any).parentChildNames = names;
+                                }
+                                if (typeof (window as any).updateStudentDropdown === "function") {
+                                  (window as any).updateStudentDropdown();
+                                }
+                              }
+                            } catch (syncErr) {
+                              console.warn("Fetch family children notice:", syncErr);
+                            }
+
+                            setIsCodeModalOpen(false);
+                            const modal = document.getElementById("modal-pilih-anak");
+                            if (modal) {
+                              modal.style.display = "flex";
+                              if (typeof (window as any).bukaModalPilihAnak === "function") {
+                                (window as any).bukaModalPilihAnak(false, false);
+                              }
+                            }
+                            if (typeof (window as any).showAppModalAlert === "function") {
+                              (window as any).showAppModalAlert(
+                                "Kod Berjaya Disahkan",
+                                `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                                  <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                                  Akses Keluarga PRO (${fam.nama_keluarga || 'Keluarga'}) berjaya disahkan!
+                                </p>`
+                              );
+                            }
+                            return;
+                          }
+                        } catch (checkErr) {
+                          console.warn("Database code validation warning:", checkErr);
+                        }
+
+                        if (typeof (window as any).showAppModalAlert === "function") {
+                          (window as any).showAppModalAlert(
+                            "Kod Tidak Sah",
+                            `<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">
+                              <i class="fa-solid fa-circle-exclamation" style="font-size:2.2rem; color:#ef4444; display:block; margin-bottom:8px;"></i>
+                              Kod tidak sah. Sila pastikan kod 8 aksara yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.
+                            </p>`
+                          );
+                        } else {
+                          alert("Kod tidak sah. Sila pastikan kod 8 aksara yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.");
                         }
                       }
                     }}
@@ -15641,6 +18873,29 @@ export default function App() {
                         </div>
                       )}
 
+                      {/* Success Notification */}
+                      {authSuccessMessage && (
+                        <div
+                          style={{
+                            backgroundColor: "#f0fdf4",
+                            border: "2px solid #22c55e",
+                            color: "#15803d",
+                            borderRadius: "10px",
+                            padding: "10px 14px",
+                            fontSize: "0.85rem",
+                            fontWeight: "bold",
+                            marginBottom: "14px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            lineHeight: "1.4",
+                          }}
+                        >
+                          <i className="fa-solid fa-circle-check" style={{ fontSize: "1.2rem", flexShrink: 0 }}></i>
+                          <span>{authSuccessMessage}</span>
+                        </div>
+                      )}
+
                       {/* Error Notification */}
                       {authModalError && (
                         <div
@@ -15649,16 +18904,17 @@ export default function App() {
                             border: "2px solid #ef4444",
                             color: "#b91c1c",
                             borderRadius: "10px",
-                            padding: "8px 12px",
+                            padding: "10px 14px",
                             fontSize: "0.85rem",
                             fontWeight: "bold",
                             marginBottom: "14px",
                             display: "flex",
                             alignItems: "center",
                             gap: "8px",
+                            lineHeight: "1.4",
                           }}
                         >
-                          <i className="fa-solid fa-circle-exclamation"></i>
+                          <i className="fa-solid fa-circle-exclamation" style={{ fontSize: "1.2rem", flexShrink: 0 }}></i>
                           <span>{authModalError}</span>
                         </div>
                       )}
@@ -15686,6 +18942,7 @@ export default function App() {
                               type="email"
                               placeholder="Masukkan emel anda"
                               value={loginEmail}
+                              disabled={isAuthLoading}
                               onChange={(e) => {
                                 setLoginEmail(e.target.value);
                                 if (authModalError) setAuthModalError("");
@@ -15717,24 +18974,51 @@ export default function App() {
                               <span>Kata Laluan</span>
                               <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
                             </label>
-                            <input
-                              type="password"
-                              placeholder="Masukkan kata laluan"
-                              value={loginPassword}
-                              onChange={(e) => {
-                                setLoginPassword(e.target.value);
-                                if (authModalError) setAuthModalError("");
-                              }}
-                              style={{
-                                width: "100%",
-                                padding: "12px",
-                                borderRadius: "10px",
-                                border: "2px solid var(--color-dark)",
-                                fontSize: "1rem",
-                                fontFamily: "inherit",
-                                boxSizing: "border-box",
-                              }}
-                            />
+                            <div style={{ position: "relative", width: "100%" }}>
+                              <input
+                                type={showLoginPassword ? "text" : "password"}
+                                placeholder="Masukkan kata laluan"
+                                value={loginPassword}
+                                disabled={isAuthLoading}
+                                onChange={(e) => {
+                                  setLoginPassword(e.target.value);
+                                  if (authModalError) setAuthModalError("");
+                                }}
+                                style={{
+                                  width: "100%",
+                                  padding: "12px 46px 12px 12px",
+                                  borderRadius: "10px",
+                                  border: "2px solid var(--color-dark)",
+                                  fontSize: "1rem",
+                                  fontFamily: "inherit",
+                                  boxSizing: "border-box",
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowLoginPassword((prev) => !prev)}
+                                style={{
+                                  position: "absolute",
+                                  right: "10px",
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  color: showLoginPassword ? "var(--color-orange, #ea580c)" : "#64748b",
+                                  padding: "6px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "1.1rem",
+                                  zIndex: 2,
+                                }}
+                                title={showLoginPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
+                                aria-label={showLoginPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
+                              >
+                                <i className={`fa-solid ${showLoginPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                              </button>
+                            </div>
                           </div>
 
                           <div style={{ textAlign: "right", marginBottom: "20px" }}>
@@ -15748,10 +19032,32 @@ export default function App() {
                                 cursor: "pointer",
                                 padding: "0",
                               }}
-                              onClick={() => {
-                                alert(
-                                  "Sila hubungi pentadbir sistem untuk menetapkan semula kata laluan anda.",
-                                );
+                              onClick={async () => {
+                                const emailToSend =
+                                  loginEmail.trim() ||
+                                  window.prompt(
+                                    "Sila masukkan alamat emel berdaftar anda untuk menerima pautan penetapan semula kata laluan:"
+                                  );
+                                if (!emailToSend || !emailToSend.trim()) return;
+
+                                setIsAuthLoading(true);
+                                try {
+                                  const res = await sendPasswordResetEmail(emailToSend.trim());
+                                  if (res.success) {
+                                    alert(
+                                      `Pautan penetapan semula kata laluan telah dihantar ke: ${emailToSend.trim()}\n\nSila semak peti masuk (Inbox / Spam) emel anda.`
+                                    );
+                                  } else {
+                                    alert(`Ralat: ${res.message}`);
+                                  }
+                                } catch (err: any) {
+                                  alert(
+                                    "Gagal menghantar pautan reset kata laluan: " +
+                                      (err?.message || "")
+                                  );
+                                } finally {
+                                  setIsAuthLoading(false);
+                                }
                               }}
                             >
                               Lupa kata laluan?
@@ -15760,6 +19066,7 @@ export default function App() {
 
                           <button
                             className="neo-btn"
+                            disabled={isAuthLoading}
                             style={{
                               width: "100%",
                               justifyContent: "center",
@@ -15772,33 +19079,177 @@ export default function App() {
                                     ? "var(--color-blue)"
                                     : "#168f81",
                               color: "#ffffff",
+                              opacity: isAuthLoading ? 0.7 : 1,
+                              cursor: isAuthLoading ? "not-allowed" : "pointer",
                             }}
-                            onClick={() => {
-                              if (!loginEmail || !loginPassword) {
+                            onClick={async () => {
+                              if (!loginEmail.trim() || !loginPassword.trim()) {
                                 setAuthModalError("Sila masukkan emel dan kata laluan!");
                                 return;
                               }
-                              setShowLoginModal(false);
-                              if (pendingLoginMode === "admin") {
-                                (window as any).masukModAdmin &&
-                                  (window as any).masukModAdmin();
-                              } else if (pendingLoginMode === "guru") {
-                                (window as any).masukModGuru &&
-                                  (window as any).masukModGuru();
-                              } else if (pendingLoginMode === "ibubapa") {
-                                (window as any).bukaModalPilihAnak &&
-                                  (window as any).bukaModalPilihAnak();
-                              } else {
-                                (window as any).bukaModalAppInfo &&
-                                  (window as any).bukaModalAppInfo(pendingLoginMode);
+                              setIsAuthLoading(true);
+                              setAuthModalError("");
+                              setAuthSuccessMessage("");
+
+                              try {
+                                const res = await loginWithEmail(loginEmail, loginPassword);
+                                if (!res.success) {
+                                  setAuthModalError(res.message);
+                                  setIsAuthLoading(false);
+                                  return;
+                                }
+
+                                const user = res.user;
+                                const role = user?.peranan || pendingLoginMode || "guru";
+                                localStorage.setItem("bunyiKataUserRole", role);
+
+                                if (user) {
+                                  (window as any).currentUser = user;
+                                  if (user.id) localStorage.setItem("bunyiKataUserId", user.id);
+                                  if (user.tarikh_tamat) {
+                                    localStorage.setItem("bunyiKataTarikhTamat", user.tarikh_tamat);
+                                  } else {
+                                    localStorage.removeItem("bunyiKataTarikhTamat");
+                                  }
+                                  const isPaid = !!(user.langganan &&
+                                    user.langganan.toLowerCase() !== "percuma" &&
+                                    (!user.tarikh_tamat || new Date(user.tarikh_tamat) > new Date()));
+                                  const accessLevel: "trial" | "pro" = isPaid ? "pro" : "trial";
+                                  setUserAccessLevel(accessLevel);
+                                  localStorage.setItem("bunyiKataAccessLevel", accessLevel);
+                                  const planName = isPaid ? (user.langganan || "1 Bulan") : "Percuma";
+                                  if (role === "ibubapa") {
+                                    localStorage.setItem("bunyiKataParentPlan", planName);
+                                  } else {
+                                    localStorage.setItem("bunyiKataTeacherPlan", planName);
+                                    setTeacherPlanName(planName);
+                                  }
+                                }
+
+                                if (role === "guru") {
+                                  const gName = user?.nama || "GURU";
+                                  const gSekolah =
+                                    user?.nama_sekolah ||
+                                    localStorage.getItem("bunyiKataNamaSekolah") ||
+                                    "";
+                                  const newEmail = user?.email || loginEmail;
+                                  const prevTeacher = localStorage.getItem("bunyiKataGuruEmail");
+                                  if (!prevTeacher || prevTeacher.toLowerCase() !== newEmail.toLowerCase()) {
+                                    localStorage.setItem("bunyiKataStudentNames", "[]");
+                                    localStorage.setItem("bunyiKataStudentData", "{}");
+                                    localStorage.setItem("bunyiKataDaftarKelas", "[]");
+                                    localStorage.removeItem("bunyiKataNamaKelas");
+                                    (window as any).studentNames = [];
+                                    (window as any).studentData = {};
+                                  }
+
+                                  localStorage.setItem("bunyiKataNamaGuru", gName);
+                                  localStorage.setItem("pdf_guru", gName);
+                                  localStorage.setItem("bunyiKataNamaSekolah", gSekolah);
+                                  localStorage.setItem("bunyiKataGuruEmail", newEmail);
+                                  localStorage.setItem("bunyiKataGuruSetupDone", "true");
+
+                                  // Bersihkan kunci peranan ibu bapa yang tersisa
+                                  localStorage.removeItem("bunyiKataNamaKeluarga");
+                                  localStorage.removeItem("bunyiKataKodKeluarga");
+                                  localStorage.removeItem("bunyiKataParentChildNames");
+                                  localStorage.removeItem("ibubapaAnakTerpilih");
+                                  localStorage.removeItem("bunyiKataIbubapaEmail");
+
+                                  try {
+                                    const existingTeachers = JSON.parse(localStorage.getItem("bunyiKataAdminTeachers") || "[]");
+                                    if (!existingTeachers.some((t: any) => t.id === res.user?.id || (t.email && t.email.toLowerCase() === newEmail))) {
+                                      existingTeachers.unshift({
+                                        id: res.user?.id || ("g_" + Date.now()),
+                                        nama: gName,
+                                        sekolah: gSekolah || "-",
+                                        nama_kelas: "",
+                                        kod_kelas: "",
+                                        murid: 0,
+                                        bakiHari: isPaid ? 30 : 0,
+                                        langganan: isPaid ? (user?.langganan || "1 Bulan (Pro)") : "Percuma",
+                                        email: newEmail,
+                                        no_telefon: "",
+                                        dicipta_pada: new Date().toISOString()
+                                      });
+                                      localStorage.setItem("bunyiKataAdminTeachers", JSON.stringify(existingTeachers));
+                                    }
+                                  } catch (e) {}
+
+                                  const guruEl = document.getElementById("guru-dashboard-nama-guru-title");
+                                  if (guruEl) guruEl.innerText = gName;
+                                  const sekolahEl = document.getElementById("guru-dashboard-nama-sekolah-title");
+                                  if (sekolahEl) sekolahEl.innerText = gSekolah;
+
+                                  setShowLoginModal(false);
+                                  syncTeacherSessionFromFirebase(res.user?.id || newEmail).catch(console.warn);
+                                  (window as any).masukModGuru && (window as any).masukModGuru();
+                                } else if (role === "ibubapa") {
+                                  const famName = user?.nama || "KELUARGA";
+                                  const newEmail = user?.email || loginEmail;
+
+                                  // Bersihkan kunci peranan guru yang tersisa
+                                  localStorage.removeItem("bunyiKataNamaGuru");
+                                  localStorage.removeItem("pdf_guru");
+                                  localStorage.removeItem("bunyiKataNamaSekolah");
+                                  localStorage.removeItem("bunyiKataKodKelas");
+                                  localStorage.removeItem("bunyiKataKodKelas2");
+                                  localStorage.removeItem("bunyiKataNamaKelas");
+                                  localStorage.removeItem("bunyiKataNamaKelas2");
+                                  localStorage.removeItem("bunyiKataGuruEmail");
+
+                                  const prevParent = localStorage.getItem("bunyiKataIbubapaEmail");
+                                  if (!prevParent || prevParent.toLowerCase() !== newEmail.toLowerCase()) {
+                                    localStorage.setItem("bunyiKataParentChildNames", "[]");
+                                    localStorage.removeItem("ibubapaAnakTerpilih");
+                                    (window as any).parentChildNames = [];
+                                    (window as any).anakTerpilih = "";
+                                  }
+
+                                  localStorage.setItem("bunyiKataNamaKeluarga", famName);
+                                  localStorage.setItem("bunyiKataIbubapaEmail", newEmail);
+
+                                  const famTitle = document.getElementById("ibubapa-nama-keluarga-title");
+                                  if (famTitle) famTitle.innerText = famName;
+
+                                  setShowLoginModal(false);
+                                  syncParentSessionFromFirebase(res.user?.id || newEmail).catch(console.warn);
+                                  (window as any).bukaModalPilihAnak && (window as any).bukaModalPilihAnak();
+                                } else if (role === "admin") {
+                                  setUserAccessLevel("pro");
+                                  localStorage.setItem("bunyiKataAccessLevel", "pro");
+                                  localStorage.setItem("bunyiKataUserRole", "admin");
+                                  (window as any).userAccessLevel = "pro";
+                                  (window as any).modAdminAktif = true;
+                                  (window as any).isAdminMode = true;
+                                  setShowLoginModal(false);
+                                  (window as any).masukModAdmin && (window as any).masukModAdmin();
+                                } else {
+                                  setShowLoginModal(false);
+                                  (window as any).bukaModalAppInfo &&
+                                    (window as any).bukaModalAppInfo(pendingLoginMode);
+                                }
+                              } catch (err: any) {
+                                setAuthModalError(err?.message || "Ralat tidak dijangka semasa log masuk.");
+                              } finally {
+                                setIsAuthLoading(false);
                               }
                             }}
                           >
-                            Log Masuk{" "}
-                            <i
-                              className="fa-solid fa-right-to-bracket"
-                              style={{ marginLeft: "8px" }}
-                            ></i>
+                            {isAuthLoading ? (
+                              <>
+                                <i className="fa-solid fa-circle-notch fa-spin" style={{ marginRight: "8px" }}></i>
+                                Sedang Memproses...
+                              </>
+                            ) : (
+                              <>
+                                Log Masuk{" "}
+                                <i
+                                  className="fa-solid fa-right-to-bracket"
+                                  style={{ marginLeft: "8px" }}
+                                ></i>
+                              </>
+                            )}
                           </button>
 
                           {pendingLoginMode !== "admin" && (
@@ -15973,6 +19424,7 @@ export default function App() {
                                   : "Contoh: ibubapa@gmail.com"
                               }
                               value={loginEmail}
+                              disabled={isAuthLoading}
                               onChange={(e) => {
                                 setLoginEmail(e.target.value);
                                 if (authModalError) setAuthModalError("");
@@ -16004,28 +19456,56 @@ export default function App() {
                               <span>Kata Laluan</span>
                               <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.1rem" }}>*</span>
                             </label>
-                            <input
-                              type="password"
-                              placeholder="Cipta kata laluan anda"
-                              value={loginPassword}
-                              onChange={(e) => {
-                                setLoginPassword(e.target.value);
-                                if (authModalError) setAuthModalError("");
-                              }}
-                              style={{
-                                width: "100%",
-                                padding: "10px 12px",
-                                borderRadius: "10px",
-                                border: "2px solid var(--color-dark)",
-                                fontSize: "0.95rem",
-                                fontFamily: "inherit",
-                                boxSizing: "border-box",
-                              }}
-                            />
+                            <div style={{ position: "relative", width: "100%" }}>
+                              <input
+                                type={showRegisterPassword ? "text" : "password"}
+                                placeholder="Cipta kata laluan anda (min 6 aksara)"
+                                value={loginPassword}
+                                disabled={isAuthLoading}
+                                onChange={(e) => {
+                                  setLoginPassword(e.target.value);
+                                  if (authModalError) setAuthModalError("");
+                                }}
+                                style={{
+                                  width: "100%",
+                                  padding: "10px 44px 10px 12px",
+                                  borderRadius: "10px",
+                                  border: "2px solid var(--color-dark)",
+                                  fontSize: "0.95rem",
+                                  fontFamily: "inherit",
+                                  boxSizing: "border-box",
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowRegisterPassword((prev) => !prev)}
+                                style={{
+                                  position: "absolute",
+                                  right: "10px",
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  color: showRegisterPassword ? "var(--color-orange, #ea580c)" : "#64748b",
+                                  padding: "6px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "1.05rem",
+                                  zIndex: 2,
+                                }}
+                                title={showRegisterPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
+                                aria-label={showRegisterPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
+                              >
+                                <i className={`fa-solid ${showRegisterPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                              </button>
+                            </div>
                           </div>
 
                           <button
                             className="neo-btn"
+                            disabled={isAuthLoading}
                             style={{
                               width: "100%",
                               justifyContent: "center",
@@ -16036,8 +19516,10 @@ export default function App() {
                                   ? "var(--color-orange)"
                                   : "var(--color-blue)",
                               color: "#ffffff",
+                              opacity: isAuthLoading ? 0.7 : 1,
+                              cursor: isAuthLoading ? "not-allowed" : "pointer",
                             }}
-                            onClick={() => {
+                            onClick={async () => {
                               if (pendingLoginMode === "guru") {
                                 if (!regGuruNama.trim()) {
                                   setAuthModalError("Sila masukkan Nama Guru!");
@@ -16051,24 +19533,118 @@ export default function App() {
                                   setAuthModalError("Sila masukkan Emel dan Kata Laluan!");
                                   return;
                                 }
+                                if (loginPassword.length < 6) {
+                                  setAuthModalError("Kata laluan mestilah sekurang-kurangnya 6 aksara.");
+                                  return;
+                                }
 
-                                const gName = regGuruNama.trim().toUpperCase();
-                                const gSekolah = regGuruSekolah.trim().toUpperCase();
-                                const gEmail = loginEmail.trim();
+                                setIsAuthLoading(true);
+                                setAuthModalError("");
+                                setAuthSuccessMessage("");
 
-                                localStorage.setItem("bunyiKataNamaGuru", gName);
-                                localStorage.setItem("pdf_guru", gName);
-                                localStorage.setItem("bunyiKataNamaSekolah", gSekolah);
-                                localStorage.setItem("bunyiKataGuruEmail", gEmail);
-                                localStorage.setItem("bunyiKataGuruSetupDone", "true");
+                                try {
+                                  const cleanCheckEmail = loginEmail.trim().toLowerCase();
+                                  try {
+                                    const existingParents = JSON.parse(localStorage.getItem("bunyiKataAdminParents") || "[]");
+                                    if (existingParents.some((p: any) => p.email && p.email.toLowerCase() === cleanCheckEmail)) {
+                                      setAuthModalError(`Emel '${cleanCheckEmail}' telah pun didaftarkan untuk Mod Ibu Bapa. 1 emel hanya untuk 1 akaun sahaja. Sila gunakan 'Log Masuk'.`);
+                                      setIsAuthLoading(false);
+                                      return;
+                                    }
+                                  } catch (e) {}
 
-                                const guruEl = document.getElementById("guru-dashboard-nama-guru-title");
-                                if (guruEl) guruEl.innerText = gName;
-                                const sekolahEl = document.getElementById("guru-dashboard-nama-sekolah-title");
-                                if (sekolahEl) sekolahEl.innerText = gSekolah;
+                                  const res = await registerWithEmail({
+                                    email: loginEmail,
+                                    password: loginPassword,
+                                    nama: regGuruNama.trim(),
+                                    peranan: "guru",
+                                    nama_sekolah: regGuruSekolah.trim(),
+                                  });
 
-                                setShowLoginModal(false);
-                                (window as any).masukModGuru && (window as any).masukModGuru();
+                                  if (!res.success) {
+                                    setAuthModalError(res.message);
+                                    setIsAuthLoading(false);
+                                    return;
+                                  }
+
+                                  if (res.user) {
+                                    (window as any).currentUser = res.user;
+                                    if (res.user.id) localStorage.setItem("bunyiKataUserId", res.user.id);
+                                    setUserAccessLevel("trial");
+                                    localStorage.setItem("bunyiKataAccessLevel", "trial");
+                                    localStorage.setItem("bunyiKataTeacherPlan", "Percuma");
+                                    setTeacherPlanName("Percuma");
+                                  }
+
+                                  const gName = regGuruNama.trim().toUpperCase();
+                                  const gSekolah = regGuruSekolah.trim().toUpperCase();
+                                  const gEmail = loginEmail.trim().toLowerCase();
+
+                                  localStorage.setItem("bunyiKataNamaGuru", gName);
+                                  localStorage.setItem("pdf_guru", gName);
+                                  localStorage.setItem("bunyiKataNamaSekolah", gSekolah);
+                                  localStorage.setItem("bunyiKataGuruEmail", gEmail);
+                                  localStorage.setItem("bunyiKataGuruSetupDone", "true");
+
+                                  // Kosongkan sebarang data murid/kelas terdahulu bagi akaun guru baharu
+                                  localStorage.setItem("bunyiKataStudentNames", "[]");
+                                  localStorage.setItem("bunyiKataStudentData", "{}");
+                                  localStorage.setItem("bunyiKataDaftarKelas", "[]");
+                                  localStorage.removeItem("bunyiKataNamaKelas");
+                                  localStorage.removeItem("bunyiKataNamaKelas2");
+                                  localStorage.removeItem("bunyiKataKodKelas");
+                                  localStorage.removeItem("bunyiKataKodKelas2");
+                                  (window as any).studentNames = [];
+                                  (window as any).studentData = {};
+
+                                  try {
+                                    const existingTeachers = JSON.parse(localStorage.getItem("bunyiKataAdminTeachers") || "[]");
+                                    if (!existingTeachers.some((t: any) => t.id === res.user?.id || (t.email && t.email.toLowerCase() === gEmail))) {
+                                      existingTeachers.unshift({
+                                        id: res.user?.id || ("g_" + Date.now()),
+                                        nama: gName,
+                                        sekolah: gSekolah || "-",
+                                        nama_kelas: "",
+                                        kod_kelas: "",
+                                        murid: 0,
+                                        bakiHari: 0,
+                                        langganan: "Percuma",
+                                        email: gEmail,
+                                        no_telefon: "",
+                                        dicipta_pada: new Date().toISOString()
+                                      });
+                                      localStorage.setItem("bunyiKataAdminTeachers", JSON.stringify(existingTeachers));
+                                    }
+                                  } catch (e) {}
+
+                                  const guruEl = document.getElementById("guru-dashboard-nama-guru-title");
+                                  if (guruEl) guruEl.innerText = gName;
+                                  const sekolahEl = document.getElementById("guru-dashboard-nama-sekolah-title");
+                                  if (sekolahEl) sekolahEl.innerText = gSekolah;
+
+                                  if (res.session) {
+                                    setShowLoginModal(false);
+                                    (window as any).masukModGuru && (window as any).masukModGuru();
+                                    setTimeout(() => {
+                                      setIsMandatorySetup(true);
+                                      setEditModalMode("guru");
+                                      if (typeof (window as any).bukaSetupModal === "function") {
+                                        (window as any).bukaSetupModal("guru");
+                                      } else {
+                                        setIsEditModalOpen(true);
+                                      }
+                                    }, 350);
+                                  } else {
+                                    setAuthSuccessMessage(
+                                      res.message || "Akaun berjaya didaftarkan ke pangkalan data Firebase!"
+                                    );
+                                    setAuthModalTab("login");
+                                  }
+                                } catch (err: any) {
+                                  setAuthModalError(err?.message || "Ralat tidak dijangka semasa pendaftaran.");
+                                } finally {
+                                  setIsAuthLoading(false);
+                                }
                               } else if (pendingLoginMode === "ibubapa") {
                                 if (!regNamaKeluarga.trim()) {
                                   setAuthModalError("Sila masukkan Nama Keluarga!");
@@ -16078,26 +19654,121 @@ export default function App() {
                                   setAuthModalError("Sila masukkan Emel dan Kata Laluan!");
                                   return;
                                 }
+                                if (loginPassword.length < 6) {
+                                  setAuthModalError("Kata laluan mestilah sekurang-kurangnya 6 aksara.");
+                                  return;
+                                }
 
-                                const famName = regNamaKeluarga.trim().toUpperCase();
-                                const pEmail = loginEmail.trim();
+                                setIsAuthLoading(true);
+                                setAuthModalError("");
+                                setAuthSuccessMessage("");
 
-                                localStorage.setItem("bunyiKataNamaKeluarga", famName);
-                                localStorage.setItem("bunyiKataIbubapaEmail", pEmail);
+                                try {
+                                  const cleanCheckEmail = loginEmail.trim().toLowerCase();
+                                  try {
+                                    const existingTeachers = JSON.parse(localStorage.getItem("bunyiKataAdminTeachers") || "[]");
+                                    if (existingTeachers.some((t: any) => t.email && t.email.toLowerCase() === cleanCheckEmail)) {
+                                      setAuthModalError(`Emel '${cleanCheckEmail}' telah pun didaftarkan untuk Mod Guru. 1 emel hanya untuk 1 akaun sahaja. Sila gunakan 'Log Masuk'.`);
+                                      setIsAuthLoading(false);
+                                      return;
+                                    }
+                                  } catch (e) {}
 
-                                const famTitle = document.getElementById("ibubapa-nama-keluarga-title");
-                                if (famTitle) famTitle.innerText = famName;
+                                  const res = await registerWithEmail({
+                                    email: loginEmail,
+                                    password: loginPassword,
+                                    nama: regNamaKeluarga.trim(),
+                                    peranan: "ibubapa",
+                                  });
 
-                                setShowLoginModal(false);
-                                (window as any).bukaModalPilihAnak && (window as any).bukaModalPilihAnak();
+                                  if (!res.success) {
+                                    setAuthModalError(res.message);
+                                    setIsAuthLoading(false);
+                                    return;
+                                  }
+
+                                  if (res.user) {
+                                    (window as any).currentUser = res.user;
+                                    if (res.user.id) localStorage.setItem("bunyiKataUserId", res.user.id);
+                                    setUserAccessLevel("trial");
+                                    localStorage.setItem("bunyiKataAccessLevel", "trial");
+                                  }
+
+                                  const famName = regNamaKeluarga.trim().toUpperCase();
+                                  const pEmail = loginEmail.trim().toLowerCase();
+
+                                  localStorage.setItem("bunyiKataNamaKeluarga", famName);
+                                  localStorage.setItem("bunyiKataIbubapaEmail", pEmail);
+
+                                  // Kosongkan senarai anak & kod terdahulu bagi akaun ibu bapa baharu
+                                  localStorage.setItem("bunyiKataParentChildNames", "[]");
+                                  localStorage.removeItem("ibubapaAnakTerpilih");
+                                  localStorage.removeItem("bunyiKataKodKeluarga");
+                                  (window as any).parentChildNames = [];
+                                  (window as any).anakTerpilih = "";
+
+                                  try {
+                                    const existingParents = JSON.parse(localStorage.getItem("bunyiKataAdminParents") || "[]");
+                                    if (!existingParents.some((p: any) => p.id === res.user?.id || (p.email && p.email.toLowerCase() === pEmail))) {
+                                      existingParents.unshift({
+                                        id: res.user?.id || ("p_" + Date.now()),
+                                        nama: famName,
+                                        nama_keluarga: famName,
+                                        kod_keluarga: "",
+                                        anak: 0,
+                                        bakiHari: 0,
+                                        langganan: "Percuma",
+                                        email: pEmail,
+                                        no_telefon: "",
+                                        dicipta_pada: new Date().toISOString()
+                                      });
+                                      localStorage.setItem("bunyiKataAdminParents", JSON.stringify(existingParents));
+                                    }
+                                  } catch (e) {}
+
+                                  const famTitle = document.getElementById("ibubapa-nama-keluarga-title");
+                                  if (famTitle) famTitle.innerText = famName;
+
+                                  if (res.session) {
+                                    setShowLoginModal(false);
+                                    (window as any).masukModIbubapa && (window as any).masukModIbubapa();
+                                    setTimeout(() => {
+                                      setIsMandatorySetup(true);
+                                      setEditModalMode("ibubapa");
+                                      if (typeof (window as any).bukaSetupModal === "function") {
+                                        (window as any).bukaSetupModal("ibubapa");
+                                      } else {
+                                        setIsEditModalOpen(true);
+                                      }
+                                    }, 350);
+                                  } else {
+                                    setAuthSuccessMessage(
+                                      res.message || "Akaun berjaya didaftarkan ke pangkalan data Firebase!"
+                                    );
+                                    setAuthModalTab("login");
+                                  }
+                                } catch (err: any) {
+                                  setAuthModalError(err?.message || "Ralat tidak dijangka semasa pendaftaran.");
+                                } finally {
+                                  setIsAuthLoading(false);
+                                }
                               }
                             }}
                           >
-                            Daftar Akaun {pendingLoginMode === "guru" ? "Guru" : "Ibu Bapa"}{" "}
-                            <i
-                              className="fa-solid fa-user-check"
-                              style={{ marginLeft: "8px" }}
-                            ></i>
+                            {isAuthLoading ? (
+                              <>
+                                <i className="fa-solid fa-circle-notch fa-spin" style={{ marginRight: "8px" }}></i>
+                                Sedang Mendaftar...
+                              </>
+                            ) : (
+                              <>
+                                Daftar Akaun {pendingLoginMode === "guru" ? "Guru" : "Ibu Bapa"}{" "}
+                                <i
+                                  className="fa-solid fa-user-check"
+                                  style={{ marginLeft: "8px" }}
+                                ></i>
+                              </>
+                            )}
                           </button>
 
                           <div
@@ -16143,7 +19814,7 @@ export default function App() {
 
           {/* Modal Pilih Mod -> Pakej Bunyi Kata */}
           <AnimatePresence>
-            {isModeMenuOpen && (
+            {(isModeMenuOpen || isProPricingModalOpen) && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -16172,18 +19843,21 @@ export default function App() {
                     backgroundImage:
                       "radial-gradient(circle, rgba(16, 24, 47, .11) 1.5px, transparent 1.5px)",
                     backgroundSize: "15px 15px",
-                    maxWidth: "960px",
+                    maxWidth: "840px",
                     width: "100%",
-                    maxHeight: "90vh",
+                    maxHeight: "92vh",
                     overflowY: "auto",
-                    padding: "24px 20px 20px 20px",
+                    padding: "20px 16px",
                     textAlign: "center",
                     position: "relative",
                   }}
                 >
                   <button
                     className="neo-btn bg-red"
-                    onClick={() => setIsModeMenuOpen(false)}
+                    onClick={() => {
+                      setIsModeMenuOpen(false);
+                      setIsProPricingModalOpen(false);
+                    }}
                     style={{
                       position: "absolute",
                       top: "12px",
@@ -16205,8 +19879,8 @@ export default function App() {
                     style={{
                       backgroundColor: "#168f81",
                       color: "white",
-                      fontSize: "clamp(1.1rem, 4vw, 1.4rem)",
-                      margin: "0 auto 18px auto",
+                      fontSize: "clamp(1.1rem, 4vw, 1.35rem)",
+                      margin: "0 auto 16px auto",
                       whiteSpace: "normal",
                       display: "inline-block",
                       pointerEvents: "none",
@@ -16224,16 +19898,16 @@ export default function App() {
                       display: "flex",
                       gap: "10px",
                       justifyContent: "center",
-                      marginBottom: "22px",
+                      marginBottom: "20px",
                     }}
                   >
                     <button
                       className={`neo-btn pakej-tab-btn ${activePakejCategory === "guru" ? "bg-orange" : "bg-white"}`}
                       style={{
                         flex: 1,
-                        maxWidth: "220px",
-                        padding: "10px 14px",
-                        fontSize: "1rem",
+                        maxWidth: "200px",
+                        padding: "9px 14px",
+                        fontSize: "0.95rem",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -16253,9 +19927,9 @@ export default function App() {
                       className={`neo-btn pakej-tab-btn ${activePakejCategory === "ibubapa" ? "bg-blue" : "bg-white"}`}
                       style={{
                         flex: 1,
-                        maxWidth: "220px",
-                        padding: "10px 14px",
-                        fontSize: "1rem",
+                        maxWidth: "200px",
+                        padding: "9px 14px",
+                        fontSize: "0.95rem",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -16278,48 +19952,49 @@ export default function App() {
                     className="pakej-grid-container"
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-                      gap: "18px",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(215px, 1fr))",
+                      gap: "14px",
                       marginBottom: "20px",
                       textAlign: "left",
                     }}
                   >
-                    {/* Pakej 1 Bulan (RM15 Promo Masa) */}
+                    {/* Kad 1: Bulanan Pro */}
                     <div className="pro-pakej-card">
-                      <div className="pro-pakej-card-inner">
+                      <div className="pro-pakej-card-inner" style={{ padding: "16px 14px" }}>
                         <div className="shine-sweep-overlay"></div>
                         <div>
-                          <div
-                            style={{
-                              display: "inline-block",
-                              backgroundColor: "#16a34a",
-                              color: "#ffffff",
-                              fontSize: "0.75rem",
-                              fontWeight: "900",
-                              letterSpacing: "0.5px",
-                              textTransform: "uppercase",
-                              padding: "3px 10px",
-                              borderRadius: "8px",
-                              border: "2px solid var(--color-dark)",
-                              boxShadow: "1.5px 1.5px 0 var(--color-dark)",
-                              marginBottom: "8px",
-                            }}
-                          >
-                            Pakej 1 Bulan
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                            <div
+                              style={{
+                                display: "inline-block",
+                                backgroundColor: "#ea580c",
+                                color: "#ffffff",
+                                fontSize: "0.72rem",
+                                fontWeight: "900",
+                                letterSpacing: "0.5px",
+                                textTransform: "uppercase",
+                                padding: "2px 8px",
+                                borderRadius: "6px",
+                                border: "1.5px solid var(--color-dark)",
+                                boxShadow: "1px 1px 0 var(--color-dark)",
+                              }}
+                            >
+                              {activePakejCategory === "guru" ? "2 KELAS" : "3 PROFIL ANAK"}
+                            </div>
                           </div>
                           <h3
                             style={{
-                              fontSize: "1.2rem",
+                              fontSize: "1.15rem",
                               margin: "0 0 4px 0",
                               color: "var(--color-dark)",
                               fontWeight: "bold",
                             }}
                           >
-                            Pakej 1 Bulan
+                            Bulanan Pro
                           </h3>
 
                           {/* Original price strikethrough animation & discount badge */}
-                          <div className="original-price-box">
+                          <div className="original-price-box" style={{ marginBottom: "4px" }}>
                             <span className="original-price-strike">RM99</span>
                             <span className="discount-tag-badge">-85% OFF</span>
                           </div>
@@ -16329,13 +20004,13 @@ export default function App() {
                             style={{
                               display: "inline-flex",
                               alignItems: "center",
-                              gap: "8px",
+                              gap: "6px",
                               background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
-                              border: "2px solid #f43f5e",
-                              borderRadius: "10px",
-                              padding: "5px 12px",
-                              margin: "6px 0 10px 0",
-                              boxShadow: "0 2px 0 var(--color-dark)",
+                              border: "1.5px solid #f43f5e",
+                              borderRadius: "8px",
+                              padding: "4px 8px",
+                              margin: "4px 0 8px 0",
+                              boxShadow: "0 1.5px 0 var(--color-dark)",
                             }}
                           >
                             <span
@@ -16343,12 +20018,12 @@ export default function App() {
                                 display: "inline-flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                width: "22px",
-                                height: "22px",
+                                width: "18px",
+                                height: "18px",
                                 borderRadius: "50%",
                                 backgroundColor: "#e11d48",
                                 color: "white",
-                                fontSize: "0.75rem",
+                                fontSize: "0.68rem",
                                 animation: "timerIconSpin 3s linear infinite",
                                 flexShrink: 0,
                               }}
@@ -16357,10 +20032,10 @@ export default function App() {
                             </span>
                             <span
                               style={{
-                                fontSize: "1.05rem",
+                                fontSize: "0.95rem",
                                 fontWeight: "900",
                                 color: "#e11d48",
-                                letterSpacing: "0.8px",
+                                letterSpacing: "0.6px",
                                 fontFamily: "monospace",
                               }}
                             >
@@ -16371,17 +20046,17 @@ export default function App() {
                           <div
                             className="price-tag"
                             style={{
-                              fontSize: "1.75rem",
+                              fontSize: "1.6rem",
                               fontWeight: "900",
                               color: "#0f766e",
-                              marginBottom: "12px",
+                              marginBottom: "10px",
                               letterSpacing: "-0.5px",
                             }}
                           >
                             RM15{" "}
                             <span
                               style={{
-                                fontSize: "0.85rem",
+                                fontSize: "0.8rem",
                                 color: "#475569",
                                 fontWeight: "bold",
                               }}
@@ -16397,71 +20072,51 @@ export default function App() {
                               margin: 0,
                               display: "flex",
                               flexDirection: "column",
-                              gap: "8px",
-                              fontSize: "0.88rem",
+                              gap: "7px",
+                              fontSize: "0.83rem",
                               color: "#334155",
+                              lineHeight: "1.35",
                             }}
                           >
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "8px",
-                              }}
-                            >
-                              <i
-                                className="fa-solid fa-circle-check"
-                                style={{ color: "#10b981", marginTop: "3px" }}
-                              ></i>
-                              <span>Akses semua pembelajaran dan latihan</span>
-                            </li>
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "8px",
-                              }}
-                            >
-                              <i
-                                className="fa-solid fa-circle-check"
-                                style={{ color: "#10b981", marginTop: "3px" }}
-                              ></i>
-                              <span>Akses AR dan 3D</span>
-                            </li>
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "8px",
-                              }}
-                            >
-                              <i
-                                className="fa-solid fa-circle-check"
-                                style={{ color: "#10b981", marginTop: "3px" }}
-                              ></i>
-                              <span>
-                                {activePakejCategory === "guru"
-                                  ? "Akses laporan prestasi murid dan statistik murid"
-                                  : "Akses laporan anak dan statistik anak"}
-                              </span>
-                            </li>
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "8px",
-                              }}
-                            >
-                              <i
-                                className="fa-solid fa-circle-check"
-                                style={{ color: "#10b981", marginTop: "3px" }}
-                              ></i>
-                              <span>
-                                {activePakejCategory === "guru"
-                                  ? "Rekod 1 kelas"
-                                  : "Rekod 1 anak"}
-                              </span>
-                            </li>
+                            {activePakejCategory === "guru" ? (
+                              <>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>2 Kelas Serentak</b> (Sehingga 80 murid)</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>Semua 4 Peta &amp; Aktiviti</b> Terbuka</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>2 Kod Kelas</b> Unik</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span>Muat Turun Laporan &amp; Sijil (2 Kelas)</span>
+                                </li>
+                              </>
+                            ) : (
+                              <>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>Sehingga 3 Profil Anak</b> Serentak</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>Semua 4 Peta &amp; Latihan</b> Terbuka</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>Kod Keluarga Khas</b> untuk 3 Anak</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span>Laporan Prestasi &amp; Sijil Setiap Anak</span>
+                                </li>
+                              </>
+                            )}
                           </ul>
                         </div>
 
@@ -16469,24 +20124,30 @@ export default function App() {
                           className={`neo-btn ${activePakejCategory === "guru" ? "bg-orange btn-daftar-glow-orange" : "bg-blue btn-daftar-glow-blue"}`}
                           style={{
                             width: "100%",
-                            marginTop: "16px",
-                            padding: "10px",
-                            fontSize: "1.05rem",
+                            marginTop: "14px",
+                            padding: "9px",
+                            fontSize: "0.98rem",
                             color: "white",
                             fontWeight: "bold",
                             justifyContent: "center",
                           }}
                           onClick={() => {
                             setIsModeMenuOpen(false);
-                            setPendingLoginMode(activePakejCategory);
-                            setAuthModalTab("register");
-                            setAuthModalError("");
-                            setShowLoginModal(true);
-                            setLoginEmail("");
-                            setLoginPassword("");
-                            setRegGuruNama("");
-                            setRegGuruSekolah("");
-                            setRegNamaKeluarga("");
+                            setIsProPricingModalOpen(false);
+                            const isUserLoggedIn = (window as any).currentUser || (window as any).isLoggedIn || ((window as any).userAccessLevel && (window as any).userAccessLevel !== "trial");
+                            if (isUserLoggedIn) {
+                              window.open("https://t.me/+YHsrwwqA-eE5N2Vl", "_blank");
+                            } else {
+                              setPendingLoginMode(activePakejCategory);
+                              setAuthModalTab("register");
+                              setAuthModalError("");
+                              setShowLoginModal(true);
+                              setLoginEmail("");
+                              setLoginPassword("");
+                              setRegGuruNama("");
+                              setRegGuruSekolah("");
+                              setRegNamaKeluarga("");
+                            }
                           }}
                         >
                           Daftar
@@ -16494,65 +20155,66 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Pakej Bulanan Pro (RM30) */}
+                    {/* Kad 2: 3 Bulanan Pro */}
                     <div className="pro-pakej-card">
-                      <div className="pro-pakej-card-inner">
+                      <div className="pro-pakej-card-inner" style={{ padding: "16px 14px" }}>
                         <div className="shine-sweep-overlay"></div>
                         <div>
-                          <div
-                            style={{
-                              display: "inline-block",
-                              backgroundColor: "#dc2626",
-                              color: "#ffffff",
-                              fontSize: "0.75rem",
-                              fontWeight: "900",
-                              letterSpacing: "0.5px",
-                              textTransform: "uppercase",
-                              padding: "3px 10px",
-                              borderRadius: "8px",
-                              border: "2px solid var(--color-dark)",
-                              boxShadow: "1.5px 1.5px 0 var(--color-dark)",
-                              marginBottom: "8px",
-                            }}
-                          >
-                            Pakej Bulanan Pro
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                            <div
+                              style={{
+                                display: "inline-block",
+                                backgroundColor: "#0284c7",
+                                color: "#ffffff",
+                                fontSize: "0.72rem",
+                                fontWeight: "900",
+                                letterSpacing: "0.5px",
+                                textTransform: "uppercase",
+                                padding: "2px 8px",
+                                borderRadius: "6px",
+                                border: "1.5px solid var(--color-dark)",
+                                boxShadow: "1px 1px 0 var(--color-dark)",
+                              }}
+                            >
+                              {activePakejCategory === "guru" ? "2 KELAS" : "3 PROFIL ANAK"}
+                            </div>
                           </div>
                           <h3
                             style={{
-                              fontSize: "1.2rem",
+                              fontSize: "1.15rem",
                               margin: "0 0 4px 0",
                               color: "var(--color-dark)",
                               fontWeight: "bold",
                             }}
                           >
-                            Pakej Bulanan Pro
+                            3 Bulanan Pro
                           </h3>
 
                           {/* Original price strikethrough animation & discount badge */}
-                          <div className="original-price-box">
-                            <span className="original-price-strike">RM99</span>
-                            <span className="discount-tag-badge">-70% OFF</span>
+                          <div className="original-price-box" style={{ marginBottom: "4px" }}>
+                            <span className="original-price-strike">RM150</span>
+                            <span className="discount-tag-badge">-73% OFF</span>
                           </div>
 
                           <div
                             className="price-tag"
                             style={{
-                              fontSize: "1.75rem",
+                              fontSize: "1.6rem",
                               fontWeight: "900",
                               color: "#0f766e",
-                              marginBottom: "12px",
+                              marginBottom: "10px",
                               letterSpacing: "-0.5px",
                             }}
                           >
-                            RM30{" "}
+                            RM40{" "}
                             <span
                               style={{
-                                fontSize: "0.85rem",
+                                fontSize: "0.8rem",
                                 color: "#475569",
                                 fontWeight: "bold",
                               }}
                             >
-                              / bulan
+                              / 3 bulan
                             </span>
                           </div>
 
@@ -16563,71 +20225,51 @@ export default function App() {
                               margin: 0,
                               display: "flex",
                               flexDirection: "column",
-                              gap: "8px",
-                              fontSize: "0.88rem",
+                              gap: "7px",
+                              fontSize: "0.83rem",
                               color: "#334155",
+                              lineHeight: "1.35",
                             }}
                           >
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "8px",
-                              }}
-                            >
-                              <i
-                                className="fa-solid fa-circle-check"
-                                style={{ color: "#10b981", marginTop: "3px" }}
-                              ></i>
-                              <span>Akses semua pembelajaran dan latihan</span>
-                            </li>
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "8px",
-                              }}
-                            >
-                              <i
-                                className="fa-solid fa-circle-check"
-                                style={{ color: "#10b981", marginTop: "3px" }}
-                              ></i>
-                              <span>Akses AR dan 3D</span>
-                            </li>
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "8px",
-                              }}
-                            >
-                              <i
-                                className="fa-solid fa-circle-check"
-                                style={{ color: "#10b981", marginTop: "3px" }}
-                              ></i>
-                              <span>
-                                {activePakejCategory === "guru"
-                                  ? "Akses laporan prestasi murid dan statistik murid"
-                                  : "Akses laporan anak dan statistik anak"}
-                              </span>
-                            </li>
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "8px",
-                              }}
-                            >
-                              <i
-                                className="fa-solid fa-circle-check"
-                                style={{ color: "#10b981", marginTop: "3px" }}
-                              ></i>
-                              <span>
-                                {activePakejCategory === "guru"
-                                  ? "Rekod 2 kelas"
-                                  : "Rekod Multi Anak (Max 3 Anak)"}
-                              </span>
-                            </li>
+                            {activePakejCategory === "guru" ? (
+                              <>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>2 Kelas Serentak</b> (Akses 90 Hari)</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>Semua 4 Peta &amp; Aktiviti</b> Terbuka</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>2 Kod Kelas</b> Unik</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span>Muat Turun Laporan &amp; Sijil (2 Kelas)</span>
+                                </li>
+                              </>
+                            ) : (
+                              <>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>Sehingga 3 Profil Anak</b> (Akses 90 Hari)</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>Semua 4 Peta &amp; Latihan</b> Terbuka</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>Kod Keluarga Khas</b> untuk 3 Anak</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span>Laporan Prestasi &amp; Sijil Setiap Anak</span>
+                                </li>
+                              </>
+                            )}
                           </ul>
                         </div>
 
@@ -16635,24 +20277,30 @@ export default function App() {
                           className={`neo-btn ${activePakejCategory === "guru" ? "bg-orange btn-daftar-glow-orange" : "bg-blue btn-daftar-glow-blue"}`}
                           style={{
                             width: "100%",
-                            marginTop: "16px",
-                            padding: "10px",
-                            fontSize: "1.05rem",
+                            marginTop: "14px",
+                            padding: "9px",
+                            fontSize: "0.98rem",
                             color: "white",
                             fontWeight: "bold",
                             justifyContent: "center",
                           }}
                           onClick={() => {
                             setIsModeMenuOpen(false);
-                            setPendingLoginMode(activePakejCategory);
-                            setAuthModalTab("register");
-                            setAuthModalError("");
-                            setShowLoginModal(true);
-                            setLoginEmail("");
-                            setLoginPassword("");
-                            setRegGuruNama("");
-                            setRegGuruSekolah("");
-                            setRegNamaKeluarga("");
+                            setIsProPricingModalOpen(false);
+                            const isUserLoggedIn = (window as any).currentUser || (window as any).isLoggedIn || ((window as any).userAccessLevel && (window as any).userAccessLevel !== "trial");
+                            if (isUserLoggedIn) {
+                              window.open("https://t.me/+YHsrwwqA-eE5N2Vl", "_blank");
+                            } else {
+                              setPendingLoginMode(activePakejCategory);
+                              setAuthModalTab("register");
+                              setAuthModalError("");
+                              setShowLoginModal(true);
+                              setLoginEmail("");
+                              setLoginPassword("");
+                              setRegGuruNama("");
+                              setRegGuruSekolah("");
+                              setRegNamaKeluarga("");
+                            }
                           }}
                         >
                           Daftar
@@ -16660,43 +20308,43 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Pakej 1 Tahun (RM69) */}
+                    {/* Kad 3: Tahunan Pro */}
                     <div className="pro-pakej-card">
-                      <div className="lebiht-jimat-sticker">Lebih Jimat</div>
-                      <div className="pro-pakej-card-inner">
+                      <div className="pro-pakej-card-inner" style={{ padding: "16px 14px" }}>
                         <div className="shine-sweep-overlay"></div>
                         <div>
-                          <div
-                            style={{
-                              display: "inline-block",
-                              backgroundColor: "#dc2626",
-                              color: "#ffffff",
-                              fontSize: "0.75rem",
-                              fontWeight: "900",
-                              letterSpacing: "0.5px",
-                              textTransform: "uppercase",
-                              padding: "3px 10px",
-                              borderRadius: "8px",
-                              border: "2px solid var(--color-dark)",
-                              boxShadow: "1.5px 1.5px 0 var(--color-dark)",
-                              marginBottom: "8px",
-                            }}
-                          >
-                            Pakej Tahunan
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                            <div
+                              style={{
+                                display: "inline-block",
+                                backgroundColor: "#dc2626",
+                                color: "#ffffff",
+                                fontSize: "0.72rem",
+                                fontWeight: "900",
+                                letterSpacing: "0.5px",
+                                textTransform: "uppercase",
+                                padding: "2px 8px",
+                                borderRadius: "6px",
+                                border: "1.5px solid var(--color-dark)",
+                                boxShadow: "1px 1px 0 var(--color-dark)",
+                              }}
+                            >
+                              PAKEJ TAHUNAN
+                            </div>
                           </div>
                           <h3
                             style={{
-                              fontSize: "1.2rem",
+                              fontSize: "1.15rem",
                               margin: "0 0 4px 0",
                               color: "var(--color-dark)",
                               fontWeight: "bold",
                             }}
                           >
-                            Pakej 1 Tahun
+                            Tahunan Pro
                           </h3>
 
                           {/* Original price strikethrough animation & discount badge */}
-                          <div className="original-price-box">
+                          <div className="original-price-box" style={{ marginBottom: "4px" }}>
                             <span className="original-price-strike">RM199</span>
                             <span className="discount-tag-badge">-65% OFF</span>
                           </div>
@@ -16704,17 +20352,17 @@ export default function App() {
                           <div
                             className="price-tag"
                             style={{
-                              fontSize: "1.75rem",
+                              fontSize: "1.6rem",
                               fontWeight: "900",
                               color: "#0f766e",
-                              marginBottom: "12px",
+                              marginBottom: "10px",
                               letterSpacing: "-0.5px",
                             }}
                           >
                             RM69{" "}
                             <span
                               style={{
-                                fontSize: "0.85rem",
+                                fontSize: "0.8rem",
                                 color: "#475569",
                                 fontWeight: "bold",
                               }}
@@ -16730,71 +20378,51 @@ export default function App() {
                               margin: 0,
                               display: "flex",
                               flexDirection: "column",
-                              gap: "8px",
-                              fontSize: "0.88rem",
+                              gap: "7px",
+                              fontSize: "0.83rem",
                               color: "#334155",
+                              lineHeight: "1.35",
                             }}
                           >
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "8px",
-                              }}
-                            >
-                              <i
-                                className="fa-solid fa-circle-check"
-                                style={{ color: "#10b981", marginTop: "3px" }}
-                              ></i>
-                              <span>Akses semua pembelajaran dan latihan</span>
-                            </li>
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "8px",
-                              }}
-                            >
-                              <i
-                                className="fa-solid fa-circle-check"
-                                style={{ color: "#10b981", marginTop: "3px" }}
-                              ></i>
-                              <span>Akses AR dan 3D</span>
-                            </li>
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "8px",
-                              }}
-                            >
-                              <i
-                                className="fa-solid fa-circle-check"
-                                style={{ color: "#10b981", marginTop: "3px" }}
-                              ></i>
-                              <span>
-                                {activePakejCategory === "guru"
-                                  ? "Akses laporan prestasi murid dan statistik murid"
-                                  : "Akses laporan anak dan statistik anak"}
-                              </span>
-                            </li>
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "8px",
-                              }}
-                            >
-                              <i
-                                className="fa-solid fa-circle-check"
-                                style={{ color: "#10b981", marginTop: "3px" }}
-                              ></i>
-                              <span>
-                                {activePakejCategory === "guru"
-                                  ? "Rekod 2 kelas"
-                                  : "Rekod Multi Anak (Max 3 Anak)"}
-                              </span>
-                            </li>
+                            {activePakejCategory === "guru" ? (
+                              <>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>2 Kelas</b> Akses 365 Hari</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>Semua 4 Peta &amp; Aktiviti</b> Terbuka</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span>Laporan &amp; Sijil Tanpa Had</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span>Sokongan Keutamaan Pentadbir</span>
+                                </li>
+                              </>
+                            ) : (
+                              <>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>Sehingga 3 Profil Anak</b> (365 Hari)</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>Semua 4 Peta &amp; Latihan</b> Terbuka</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span>Laporan &amp; Sijil Lengkap Tanpa Had</span>
+                                </li>
+                                <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                                  <i className="fa-solid fa-circle-check" style={{ color: "#10b981", marginTop: "2px" }}></i>
+                                  <span><b>Penjimatan Maksimum</b> (RM5.75/bln)</span>
+                                </li>
+                              </>
+                            )}
                           </ul>
                         </div>
 
@@ -16802,24 +20430,30 @@ export default function App() {
                           className={`neo-btn ${activePakejCategory === "guru" ? "bg-orange btn-daftar-glow-orange" : "bg-blue btn-daftar-glow-blue"}`}
                           style={{
                             width: "100%",
-                            marginTop: "16px",
-                            padding: "10px",
-                            fontSize: "1.05rem",
+                            marginTop: "14px",
+                            padding: "9px",
+                            fontSize: "0.98rem",
                             color: "white",
                             fontWeight: "bold",
                             justifyContent: "center",
                           }}
                           onClick={() => {
                             setIsModeMenuOpen(false);
-                            setPendingLoginMode(activePakejCategory);
-                            setAuthModalTab("register");
-                            setAuthModalError("");
-                            setShowLoginModal(true);
-                            setLoginEmail("");
-                            setLoginPassword("");
-                            setRegGuruNama("");
-                            setRegGuruSekolah("");
-                            setRegNamaKeluarga("");
+                            setIsProPricingModalOpen(false);
+                            const isUserLoggedIn = (window as any).currentUser || (window as any).isLoggedIn || ((window as any).userAccessLevel && (window as any).userAccessLevel !== "trial");
+                            if (isUserLoggedIn) {
+                              window.open("https://t.me/+YHsrwwqA-eE5N2Vl", "_blank");
+                            } else {
+                              setPendingLoginMode(activePakejCategory);
+                              setAuthModalTab("register");
+                              setAuthModalError("");
+                              setShowLoginModal(true);
+                              setLoginEmail("");
+                              setLoginPassword("");
+                              setRegGuruNama("");
+                              setRegGuruSekolah("");
+                              setRegNamaKeluarga("");
+                            }
                           }}
                         >
                           Daftar
@@ -17512,24 +21146,21 @@ export default function App() {
 
               {/* Butang Ikon Media Sosial (Website, Telegram, Google Play Store, Apple App Store) */}
               <div
+                id="app-info-social-buttons-container"
+                className="app-info-social-row"
                 style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: "12px",
-                  marginBottom: "16px",
-                  width: "100%",
+                  margin: "6px auto 14px auto",
                 }}
               >
                 {/* Website */}
                 <button
                   type="button"
                   className="app-info-social-btn btn-web"
-                  title="Laman Web Rasmi"
+                  title="Laman Web Rasmi (bunyikata.my)"
                   aria-label="Laman Web Rasmi"
                   onClick={() => {
                     if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                    window.open("https://ireduinnovations.com", "_blank");
+                    window.open("https://bunyikata.my", "_blank");
                   }}
                 >
                   <i className="fa-solid fa-globe"></i>
@@ -17543,7 +21174,7 @@ export default function App() {
                   aria-label="Saluran Telegram"
                   onClick={() => {
                     if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                    window.open("https://t.me/ireduinnovations", "_blank");
+                    window.open("https://t.me/+YHsrwwqA-eE5N2Vl", "_blank");
                   }}
                 >
                   <i className="fa-brands fa-telegram"></i>
@@ -17557,7 +21188,7 @@ export default function App() {
                   aria-label="Google Play Store"
                   onClick={() => {
                     if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                    window.open("https://play.google.com/store/apps", "_blank");
+                    window.open("https://play.google.com/store/apps/details?id=com.bunyikatabacaan", "_blank");
                   }}
                 >
                   <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
@@ -17576,7 +21207,7 @@ export default function App() {
                   aria-label="Apple App Store"
                   onClick={() => {
                     if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                    window.open("https://www.apple.com/app-store/", "_blank");
+                    window.open("https://apps.apple.com/my/app/bunyi-kata/id6739794132", "_blank");
                   }}
                 >
                   <i className="fa-brands fa-app-store-ios" style={{ fontSize: "1.45rem", color: "#ffffff" }}></i>
@@ -17762,10 +21393,22 @@ export default function App() {
                     const mode = (window as any).pendingAppInfoMode || "murid";
                     (window as any).pendingAppInfoMode = "";
                     if (mode === "murid") {
+                      const isTrial = (window as any).isGuestMode || (window as any).userAccessLevel === "trial" || userAccessLevel === "trial" || localStorage.getItem("bunyiKataAccessLevel") === "trial";
+                      if (isTrial) {
+                        (window as any).isGuestMode = true;
+                        (window as any).isAdminMode = false;
+                        (window as any).modAdminAktif = false;
+                        (window as any).userAccessLevel = "trial";
+                        (window as any).namaMuridAktif = "Tetamu";
+                        setUserAccessLevel("trial");
+                        setIsAdminActive(false);
+                        localStorage.setItem("bunyiKataAccessLevel", "trial");
+                        localStorage.removeItem("bunyiKataUserRole");
+                      }
                       if (typeof (window as any).masukModMurid === "function") {
                         try {
                           (window as any).masukModMurid(
-                            (window as any).namaMuridAktif || "Murid",
+                            isTrial ? "Tetamu" : ((window as any).namaMuridAktif || "Murid"),
                           );
                         } catch (e) {
                           console.warn("masukModMurid notice:", e);

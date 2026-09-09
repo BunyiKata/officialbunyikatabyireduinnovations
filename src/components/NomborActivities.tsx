@@ -664,6 +664,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
       canvas.addEventListener('pointerdown', onPointerDown);
 
       const onKeyDown = (e: KeyboardEvent) => {
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || (e.target as HTMLElement)?.isContentEditable) return;
         if (e.code === 'Space' || e.code === 'ArrowUp') {
           e.preventDefault();
           handleUserAction();

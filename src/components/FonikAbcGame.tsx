@@ -681,6 +681,27 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
         } else if (targetMode === 'vokal_konsonan') {
           setFilterCategory('vokal');
         }
+        const isUserAdminCheck = () => {
+          if (typeof window === 'undefined') return false;
+          return !!(
+            (window as any).modAdminAktif ||
+            (window as any).isAdminMode ||
+            localStorage.getItem('bunyiKataUserRole') === 'admin' ||
+            (typeof document !== 'undefined' && (
+              document.body?.classList?.contains('admin-mode') ||
+              document.getElementById('teacher-banner-badge')?.innerText?.toUpperCase().includes('ADMIN')
+            )) ||
+            (window as any).currentUser?.peranan === 'admin'
+          );
+        };
+        const isTrialNow = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
+        if (isTrialNow) {
+          const initial: ProgressRecord = {};
+          PHONICS_DATABASE.forEach(item => {
+            initial[item.letter] = [false, false, false, false, false, false];
+          });
+          setProgress(initial);
+        }
         setCurrentView('lessons');
       } else if (!isVisible) {
         wasVisibleRef.current = false;
@@ -697,9 +718,44 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
     return () => observer.disconnect();
   }, []);
 
+  const isUserAdminCheck = () => {
+    if (typeof window === 'undefined') return false;
+    return !!(
+      (window as any).modAdminAktif ||
+      (window as any).isAdminMode ||
+      localStorage.getItem('bunyiKataUserRole') === 'admin' ||
+      (typeof document !== 'undefined' && (
+        document.body?.classList?.contains('admin-mode') ||
+        document.getElementById('teacher-banner-badge')?.innerText?.toUpperCase().includes('ADMIN')
+      )) ||
+      (window as any).currentUser?.peranan === 'admin'
+    );
+  };
+
+  const getPhonicsStorageKey = () => {
+    const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
+    if (isTrial) {
+      return `${currentConfig.progressKey}_trial_session`;
+    }
+    const studentName = typeof window !== 'undefined'
+      ? ((window as any).namaMuridAktif || localStorage.getItem('muridAktif') || 'Murid')
+      : 'Murid';
+    return `${currentConfig.progressKey}_${studentName.toLowerCase().replace(/\s+/g, '_')}`;
+  };
+
   const [progress, setProgress] = useState<ProgressRecord>(() => {
+    const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
+    if (isTrial) {
+      // Mod percuma sentiasa bersih bermula dari kosong (0 aktiviti selesai)
+      const initial: ProgressRecord = {};
+      PHONICS_DATABASE.forEach(item => {
+        initial[item.letter] = [false, false, false, false, false, false];
+      });
+      return initial;
+    }
     try {
-      const saved = localStorage.getItem(currentConfig.progressKey);
+      const storageKey = getPhonicsStorageKey();
+      const saved = localStorage.getItem(storageKey);
       if (saved) return JSON.parse(saved);
     } catch (e) { }
     const initial: ProgressRecord = {};
@@ -711,8 +767,18 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
 
   // Reload progress when mode changes
   useEffect(() => {
+    const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
+    if (isTrial) {
+      const initial: ProgressRecord = {};
+      PHONICS_DATABASE.forEach(item => {
+        initial[item.letter] = [false, false, false, false, false, false];
+      });
+      setProgress(initial);
+      return;
+    }
     try {
-      const saved = localStorage.getItem(currentConfig.progressKey);
+      const storageKey = getPhonicsStorageKey();
+      const saved = localStorage.getItem(storageKey);
       if (saved) {
         setProgress(JSON.parse(saved));
         return;
@@ -731,13 +797,15 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
       curr[actIndex] = true;
       const updated = { ...prev, [letter]: curr };
       try {
-        localStorage.setItem(currentConfig.progressKey, JSON.stringify(updated));
+        const storageKey = getPhonicsStorageKey();
+        localStorage.setItem(storageKey, JSON.stringify(updated));
       } catch (e) { }
       return updated;
     });
 
-    // Auto-update student profile stars immediately (+1 Bintang)
-    if (typeof (window as any).tambahBintangGlobal === 'function') {
+    const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
+    // Auto-update student profile stars immediately (+1 Bintang) - HANYA jika bukan trial
+    if (!isTrial && typeof (window as any).tambahBintangGlobal === 'function') {
       (window as any).tambahBintangGlobal(`fonik_${mode}_${letter}_act${actIndex + 1}`, 1);
     }
   };

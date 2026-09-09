@@ -1,34 +1,4 @@
 
-window.showAppModalConfirm = function (message, onConfirm, options = {}) {
-    let overlay = document.getElementById('app-custom-confirm-overlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'app-custom-confirm-overlay';
-        overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; display:flex; align-items:center; justify-content:center; padding:15px;';
-        document.body.appendChild(overlay);
-    }
-    const iconHtml = options.iconHtml || '<div style="font-size:2.5rem; color:#ef4444; margin-bottom:10px;"><i class="fa-solid fa-triangle-exclamation"></i></div>';
-    const confirmBtnClass = options.btnClass || (options.isBlue ? 'neo-btn bg-blue' : 'neo-btn bg-red');
-    const confirmBtnText = options.confirmText || 'Ya, Teruskan';
-    const confirmBtnStyle = options.confirmStyle || (options.isBlue ? 'padding:8px 18px; font-weight:bold; border-radius:10px; border:2px solid var(--color-dark); background:#0284c7; color:white; cursor:pointer; box-shadow:0 2px 0 var(--color-dark);' : 'padding:8px 18px; font-weight:bold; border-radius:10px; border:2px solid var(--color-dark); color:white; cursor:pointer; box-shadow:0 2px 0 var(--color-dark);');
-
-    overlay.innerHTML = `
-                <div class="neo-box" style="background:white; max-width:400px; width:100%; padding:22px; border-radius:18px; border:3px solid var(--color-dark); text-align:center; box-shadow: 0 4px 0 var(--color-dark);">
-                    ${iconHtml}
-                    <div style="font-weight:bold; font-size:1rem; color:var(--color-dark); margin-bottom:20px; line-height:1.4;">${message}</div>
-                    <div style="display:flex; justify-content:center; gap:12px;">
-                        <button id="app-confirm-cancel" class="neo-btn bg-white" style="padding:8px 18px; font-weight:bold; border-radius:10px; border:2px solid var(--color-dark); cursor:pointer; box-shadow:0 2px 0 var(--color-dark);">Batal</button>
-                        <button id="app-confirm-yes" class="${confirmBtnClass}" style="${confirmBtnStyle}">${confirmBtnText}</button>
-                    </div>
-                </div>
-            `;
-    overlay.style.display = 'flex';
-    document.getElementById('app-confirm-cancel').onclick = () => { overlay.style.display = 'none'; };
-    document.getElementById('app-confirm-yes').onclick = () => {
-        overlay.style.display = 'none';
-        if (typeof onConfirm === 'function') onConfirm();
-    };
-};
 
 window.toggleAdminPasswordVisibility = function () {
     const disp = document.getElementById('admin-pass-display');
@@ -46,102 +16,324 @@ window.toggleAdminPasswordVisibility = function () {
     }
 };
 
+window.showAppToast = function (title, contentHtml, type = 'success') {
+    let container = document.getElementById('app-toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'app-toast-container';
+        document.body.appendChild(container);
+    }
+
+    const cleanTitle = (title || 'Pemberitahuan').replace(/<[^>]*>?/gm, '').trim();
+    let cleanMsg = '';
+    if (typeof contentHtml === 'string') {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = contentHtml;
+        const icons = tempDiv.querySelectorAll('i, svg');
+        icons.forEach(ic => ic.remove());
+        cleanMsg = tempDiv.textContent || tempDiv.innerText || '';
+        cleanMsg = cleanMsg.trim().replace(/\s+/g, ' ');
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'app-toast-item';
+
+    const isError = type === 'error' || cleanTitle.toLowerCase().includes('ralat') || cleanTitle.toLowerCase().includes('tidak sah');
+    const isWarning = type === 'warning' || cleanTitle.toLowerCase().includes('perhatian') || cleanTitle.toLowerCase().includes('diperlukan') || cleanTitle.toLowerCase().includes('wujud');
+
+    let iconBg = '#16a34a'; // green
+    let iconHtml = '<i class="fa-solid fa-check"></i>';
+    if (isError) {
+        iconBg = '#ef4444';
+        iconHtml = '<i class="fa-solid fa-triangle-exclamation"></i>';
+    } else if (isWarning) {
+        iconBg = '#f59e0b';
+        iconHtml = '<i class="fa-solid fa-circle-exclamation"></i>';
+    } else if (cleanTitle.toLowerCase().includes('kod') || cleanTitle.toLowerCase().includes('disahkan')) {
+        iconBg = '#0284c7';
+        iconHtml = '<i class="fa-solid fa-key"></i>';
+    }
+
+    toast.innerHTML = `
+        <div style="width: 38px; height: 38px; min-width: 38px; border-radius: 50%; background: ${iconBg}; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; border: 2px solid var(--color-dark); box-shadow: 0 2px 0 var(--color-dark); flex-shrink: 0;">
+            ${iconHtml}
+        </div>
+        <div style="flex: 1; min-width: 0; text-align: left;">
+            <div style="font-size: 0.95rem; font-weight: 800; color: #1e293b; line-height: 1.2;">${cleanTitle}</div>
+            ${cleanMsg ? `<div style="font-size: 0.82rem; font-weight: 600; color: #475569; margin-top: 3px; line-height: 1.3;">${cleanMsg}</div>` : ''}
+        </div>
+    `;
+
+    const dismiss = () => {
+        toast.classList.add('toast-hiding');
+        setTimeout(() => {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 300);
+    };
+
+    toast.onclick = dismiss;
+    setTimeout(dismiss, 3000);
+    container.appendChild(toast);
+};
+
 window.showAppModalAlert = function (title, contentHtml) {
-    let overlay = document.getElementById('app-custom-alert-overlay');
+    const oldOverlay = document.getElementById('app-custom-alert-overlay');
+    if (oldOverlay) oldOverlay.style.display = 'none';
+    window.showAppToast(title, contentHtml);
+};
+
+window.showAppModalConfirm = function (arg1, arg2, arg3, arg4) {
+    let title = "Pengesahan Diperlukan";
+    let messageHtml = "";
+    let onConfirm = null;
+    let onCancel = null;
+
+    if (typeof arg2 === 'function') {
+        messageHtml = arg1;
+        onConfirm = arg2;
+        if (typeof arg3 === 'function') {
+            onCancel = arg3;
+        } else if (arg3 && typeof arg3 === 'object') {
+            if (arg3.title) title = arg3.title;
+            if (typeof arg3.onCancel === 'function') onCancel = arg3.onCancel;
+        }
+    } else {
+        title = arg1 || "Pengesahan Diperlukan";
+        messageHtml = arg2 || "";
+        onConfirm = arg3;
+        onCancel = arg4;
+    }
+
+    if (typeof messageHtml === 'function') {
+        onConfirm = messageHtml;
+        messageHtml = typeof arg1 === 'string' ? arg1 : "Adakah anda pasti mahu meneruskan tindakan ini?";
+    }
+
+    let overlay = document.getElementById('app-custom-confirm-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
-        overlay.id = 'app-custom-alert-overlay';
+        overlay.id = 'app-custom-confirm-overlay';
         overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; display:flex; align-items:center; justify-content:center; padding:15px;';
         document.body.appendChild(overlay);
     }
     overlay.innerHTML = `
-                <div class="neo-box" style="background-color:#ffffff; background-image:radial-gradient(circle, rgba(16, 24, 47, 0.14) 1.8px, transparent 1.8px); background-size:16px 16px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto; box-sizing:border-box; padding:28px 20px 20px; border-radius:20px; border:3px solid var(--color-dark); text-align:center; box-shadow: 0 4px 0 var(--color-dark); position:relative; margin:auto;">
-                    <button id="app-alert-close-x" class="neo-btn bg-red" style="position:absolute; top:10px; right:10px; width:36px; height:36px; min-width:36px; min-height:36px; padding:0; display:flex; align-items:center; justify-content:center; z-index:10; cursor:pointer; border-radius:10px;" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
-                    
-                    <div style="text-align:center; margin-bottom:18px;">
-                        <div class="neo-btn" style="background-color:#168f81; color:white; font-size:clamp(1.05rem, 4vw, 1.25rem); margin:0 auto; white-space:normal; display:inline-block; pointer-events:none; padding:8px 22px; line-height:1.2; font-weight:bold;">${title}</div>
-                    </div>
-
-                    <div style="text-align:left; margin-bottom:10px;">${contentHtml}</div>
-                </div>
-            `;
+        <div class="neo-box" style="background-color:#ffffff; background-image:radial-gradient(circle, rgba(16, 24, 47, 0.14) 1.8px, transparent 1.8px); background-size:16px 16px; max-width:420px; width:100%; max-height:90vh; overflow-y:auto; box-sizing:border-box; padding:28px 22px 22px; border-radius:20px; border:3px solid var(--color-dark); text-align:center; box-shadow: 0 4px 0 var(--color-dark); position:relative; margin:auto;">
+            <div style="text-align:center; margin-bottom:16px;">
+                <div class="neo-btn" style="background-color:#ea580c; color:white; font-size:clamp(1rem, 3.5vw, 1.15rem); margin:0 auto; white-space:normal; display:inline-block; pointer-events:none; padding:8px 20px; line-height:1.2; font-weight:bold;">${title}</div>
+            </div>
+            <div style="font-size:0.95rem; font-weight:bold; color:#1e293b; line-height:1.5; margin-bottom:22px;">${messageHtml}</div>
+            <div style="display:flex; justify-content:center; gap:12px;">
+                <button id="app-confirm-cancel-btn" class="neo-btn bg-white" style="flex:1; padding:10px 14px; font-weight:bold; font-size:0.9rem; border-radius:10px; border:2px solid var(--color-dark); cursor:pointer;">Batal</button>
+                <button id="app-confirm-ok-btn" class="neo-btn" style="flex:1; padding:10px 14px; font-weight:bold; font-size:0.9rem; color:white; border-radius:10px; border:2px solid var(--color-dark); background-color:#168f81; cursor:pointer;">Ya, Teruskan</button>
+            </div>
+        </div>
+    `;
     overlay.style.display = 'flex';
-    const closeX = document.getElementById('app-alert-close-x');
-    if (closeX) closeX.onclick = () => { overlay.style.display = 'none'; };
-    const closeBtn = document.getElementById('app-alert-close');
-    if (closeBtn) closeBtn.onclick = () => { overlay.style.display = 'none'; };
+    const cancelBtn = document.getElementById('app-confirm-cancel-btn');
+    const okBtn = document.getElementById('app-confirm-ok-btn');
+    const close = () => { overlay.style.display = 'none'; };
+    if (cancelBtn) cancelBtn.onclick = () => { close(); if (typeof onCancel === 'function') onCancel(); };
+    if (okBtn) okBtn.onclick = () => { close(); if (typeof onConfirm === 'function') onConfirm(); };
 };
 
 window.showAdminInfo = function (type, nama, extra) {
     let title = "";
     let contentHtml = "";
-    const cleanSlug = nama.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const realPass = (extra && extra.password) ? extra.password : `${cleanSlug}123`;
-    const tempohStr = (extra && extra.tempoh) ? extra.tempoh : "24 Hari lagi (1 Bulan)";
+
+    // Cari rekod sebenar dari memori/localStorage jika data belum lengkap
+    let match = {};
+    if (type === 'guru') {
+        const teachers = typeof getAdminTeachersList === 'function' ? getAdminTeachersList() : [];
+        match = teachers.find(item => 
+            (extra && extra.id && String(item.id) === String(extra.id)) ||
+            (item.nama && item.nama.trim().toLowerCase() === (nama || '').trim().toLowerCase())
+        ) || {};
+    } else {
+        const parents = typeof getAdminParentsList === 'function' ? getAdminParentsList() : [];
+        match = parents.find(item => 
+            (extra && extra.id && String(item.id) === String(extra.id)) ||
+            (item.nama && item.nama.trim().toLowerCase() === (nama || '').trim().toLowerCase())
+        ) || {};
+    }
+
+    const email = (extra && extra.email) || match.email || '';
+    const realPass = (extra && extra.password) ? extra.password : (match.password || '');
+    const tempohStr = (extra && extra.tempoh) || (match.bakiHari !== undefined ? `${match.bakiHari} Hari (${match.langganan || '1 Bulan'})` : "30 Hari (1 Bulan)");
+    const langganan = (extra && extra.langganan) || match.langganan || '1 Bulan';
+    const profileId = (extra && extra.id) || match.id || '';
+    const sekolah = (extra && extra.sekolah) || match.sekolah || '-';
+    const kodKelas = (extra && (extra.kodKelas || extra.kod_kelas)) || match.kod_kelas || '';
+    const namaKelas = (extra && (extra.namaKelas || extra.nama_kelas)) || match.nama_kelas || '';
+    const kodKeluarga = (extra && (extra.kodKeluarga || extra.kod_keluarga)) || match.kod_keluarga || '';
+    const namaKeluarga = (extra && (extra.namaKeluarga || extra.nama_keluarga)) || match.nama_keluarga || '';
+    const muridCount = (extra && extra.murid !== undefined) ? extra.murid : (match.murid !== undefined ? match.murid : 0);
+    const anakCount = (extra && extra.anak !== undefined) ? extra.anak : (match.anak !== undefined ? match.anak : 0);
+    const noTelefon = (extra && (extra.telefon || extra.no_telefon)) || match.no_telefon || '';
+
+    // Paparan status kata laluan
+    let passHtml = '';
+    if (realPass) {
+        passHtml = `
+            <div style="display:inline-flex; align-items:center; gap:8px; margin-top:4px;">
+                <span id="admin-pass-display" data-real="${realPass}" data-masked="••••••••" style="font-family:monospace; background:#e2e8f0; padding:4px 10px; border-radius:8px; font-weight:bold; font-size:0.95rem; color:#1e293b; border:1.5px solid #cbd5e1;">••••••••</span>
+                <button id="admin-pass-toggle-btn" type="button" onclick="window.toggleAdminPasswordVisibility()" class="neo-btn bg-white" style="border:2px solid var(--color-dark); border-radius:8px; width:34px; height:34px; min-width:34px; min-height:34px; padding:0; font-size:0.9rem; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 2px 0 var(--color-dark); color:#334155;" title="Papar / Sembunyi Kata Laluan">
+                    <i id="admin-pass-toggle-icon" class="fa-solid fa-eye"></i>
+                </button>
+            </div>
+        `;
+    } else {
+        passHtml = `
+            <div style="margin-top:4px;">
+                <span style="background:#ecfdf5; color:#065f46; border:1.5px solid #10b981; padding:4px 10px; border-radius:8px; font-weight:bold; font-size:0.82rem; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-shield-halved" style="color:#10b981;"></i> Dilindungi (Pangkalan Data)
+                </span>
+            </div>
+        `;
+    }
 
     if (type === 'guru') {
         title = "Maklumat Guru";
-        const email = (extra && extra.email) ? extra.email : `${cleanSlug}@moe.edu.my`;
-        const code = `KELAS${Math.floor(Math.random() * 900 + 100)}`;
+        const emailDisplay = email 
+            ? `<span style="color:#ea580c; font-weight:bold; word-break:break-all;">${email}</span>`
+            : `<span style="color:#94a3b8; font-style:italic;">Tiada emel berdaftar</span>`;
+
+        const kodKelasDisplay = kodKelas 
+            ? `<span style="background:#fef3c7; color:#b45309; border:1.5px solid #d97706; padding:4px 12px; border-radius:8px; font-weight:bold; display:inline-block; margin-top:3px; letter-spacing:0.5px;">${kodKelas}${namaKelas ? ` (${namaKelas})` : ''}</span>`
+            : `<span style="background:#f1f5f9; color:#64748b; border:1.5px dashed #cbd5e1; padding:4px 12px; border-radius:8px; font-weight:bold; display:inline-block; margin-top:3px;">Belum Ditetapkan</span>`;
+
         contentHtml = `
-                    <div style="display:flex; flex-direction:column; gap:12px; font-size:0.9rem;">
-                        <div>
-                            <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">NAMA GURU:</strong><br/>
-                            <span style="font-weight:bold; color:var(--color-dark); font-size:1rem;">${nama}</span>
-                        </div>
-                        <div>
-                            <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">EMEL:</strong><br/>
-                            <span style="color:#ea580c; font-weight:bold;">${email}</span>
-                        </div>
-                        <div>
-                            <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">KATA LALUAN:</strong><br/>
-                            <div style="display:inline-flex; align-items:center; gap:8px; margin-top:4px;">
-                                <span id="admin-pass-display" data-real="${realPass}" data-masked="••••••••" style="font-family:monospace; background:#e2e8f0; padding:4px 10px; border-radius:8px; font-weight:bold; font-size:0.95rem; color:#1e293b; border:1.5px solid #cbd5e1;">••••••••</span>
-                                <button id="admin-pass-toggle-btn" type="button" onclick="window.toggleAdminPasswordVisibility()" class="neo-btn bg-white" style="border:2px solid var(--color-dark); border-radius:8px; width:34px; height:34px; min-width:34px; min-height:34px; padding:0; font-size:0.9rem; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 2px 0 var(--color-dark); color:#334155;" title="Papar / Sembunyi Kata Laluan">
-                                    <i id="admin-pass-toggle-icon" class="fa-solid fa-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div>
-                            <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">TEMPOH MASA AKTIF:</strong><br/>
-                            <span style="background:#ffedd5; color:#c2410c; border:1.5px solid #ea580c; padding:3px 10px; border-radius:8px; font-weight:bold; display:inline-flex; align-items:center; gap:6px; margin-top:3px;"><i class="fa-solid fa-clock"></i> ${tempohStr}</span>
-                        </div>
-                        <div>
-                            <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">KOD KELAS:</strong><br/>
-                            <span style="background:#fef3c7; color:#b45309; border:1.5px solid #d97706; padding:3px 10px; border-radius:8px; font-weight:bold; display:inline-block; margin-top:3px;">${code}</span>
-                        </div>
+            <div style="display:flex; flex-direction:column; gap:12px; font-size:0.9rem; text-align:left;">
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">NAMA GURU:</strong><br/>
+                    <span style="font-weight:bold; color:var(--color-dark); font-size:1rem;">${nama}</span>
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">EMEL:</strong><br/>
+                    ${emailDisplay}
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">NAMA SEKOLAH:</strong><br/>
+                    <span style="font-weight:bold; color:#334155;">${sekolah}</span>
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">KOD KELAS:</strong><br/>
+                    ${kodKelasDisplay}
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">BILANGAN MURID:</strong><br/>
+                    <span style="font-weight:bold; color:#334155;">${muridCount} Orang Murid</span>
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">JENIS LANGGANAN:</strong><br/>
+                    <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                        <select class="neo-btn filter-select" style="padding:4px 8px; font-size:0.85rem; font-weight:bold; border-radius:8px; border:2px solid #ea580c; background:#ffffff; cursor:pointer;" onchange="window.tukarLanggananPengguna('${profileId}', 'guru', this.value)">
+                            <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
+                            <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' || langganan === '1 Bulan' || langganan === 'Pro' ? 'selected' : ''}>1 Bulan (Pro)</option>
+                            <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' || langganan === '3 Bulan' ? 'selected' : ''}>3 Bulan (Pro)</option>
+                            <option value="1 Tahun (Pro)" ${langganan === '1 Tahun' || langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
+                        </select>
+                        <span style="font-size:0.75rem; color:#64748b; font-weight:bold;">(Tukar pelan terus)</span>
                     </div>
-                `;
+                </div>
+                ${noTelefon ? `
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">NO. TELEFON:</strong><br/>
+                    <span style="font-weight:bold; color:#334155;">${noTelefon}</span>
+                </div>
+                ` : ''}
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">KATA LALUAN:</strong><br/>
+                    ${passHtml}
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">TEMPOH MASA AKTIF:</strong><br/>
+                    <span style="background:#ffedd5; color:#c2410c; border:1.5px solid #ea580c; padding:4px 10px; border-radius:8px; font-weight:bold; display:inline-flex; align-items:center; gap:6px; margin-top:3px;"><i class="fa-solid fa-clock"></i> ${tempohStr}</span>
+                </div>
+            </div>
+        `;
     } else {
         title = "Maklumat Ibu Bapa";
-        const email = (extra && extra.email) ? extra.email : `${cleanSlug}@gmail.com`;
+        const emailDisplay = email 
+            ? `<span style="color:#0284c7; font-weight:bold; word-break:break-all;">${email}</span>`
+            : `<span style="color:#94a3b8; font-style:italic;">Tiada emel berdaftar</span>`;
+
+        const kodKeluargaDisplay = kodKeluarga 
+            ? `<span style="background:#e0f2fe; color:#0369a1; border:1.5px solid #0284c7; padding:4px 12px; border-radius:8px; font-weight:bold; display:inline-block; margin-top:3px; letter-spacing:0.5px;">${kodKeluarga}${namaKeluarga ? ` (${namaKeluarga})` : ''}</span>`
+            : `<span style="background:#f1f5f9; color:#64748b; border:1.5px dashed #cbd5e1; padding:4px 12px; border-radius:8px; font-weight:bold; display:inline-block; margin-top:3px;">Belum Ditetapkan</span>`;
+
         contentHtml = `
-                    <div style="display:flex; flex-direction:column; gap:12px; font-size:0.9rem;">
-                        <div>
-                            <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">NAMA IBU BAPA:</strong><br/>
-                            <span style="font-weight:bold; color:var(--color-dark); font-size:1rem;">${nama}</span>
-                        </div>
-                        <div>
-                            <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">EMEL:</strong><br/>
-                            <span style="color:#0284c7; font-weight:bold;">${email}</span>
-                        </div>
-                        <div>
-                            <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">KATA LALUAN:</strong><br/>
-                            <div style="display:inline-flex; align-items:center; gap:8px; margin-top:4px;">
-                                <span id="admin-pass-display" data-real="${realPass}" data-masked="••••••••" style="font-family:monospace; background:#e2e8f0; padding:4px 10px; border-radius:8px; font-weight:bold; font-size:0.95rem; color:#1e293b; border:1.5px solid #cbd5e1;">••••••••</span>
-                                <button id="admin-pass-toggle-btn" type="button" onclick="window.toggleAdminPasswordVisibility()" class="neo-btn bg-white" style="border:2px solid var(--color-dark); border-radius:8px; width:34px; height:34px; min-width:34px; min-height:34px; padding:0; font-size:0.9rem; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 2px 0 var(--color-dark); color:#334155;" title="Papar / Sembunyi Kata Laluan">
-                                    <i id="admin-pass-toggle-icon" class="fa-solid fa-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div>
-                            <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">TEMPOH MASA AKTIF:</strong><br/>
-                            <span style="background:#e0f2fe; color:#0369a1; border:1.5px solid #0284c7; padding:3px 10px; border-radius:8px; font-weight:bold; display:inline-flex; align-items:center; gap:6px; margin-top:3px;"><i class="fa-solid fa-clock"></i> ${tempohStr}</span>
-                        </div>
+            <div style="display:flex; flex-direction:column; gap:12px; font-size:0.9rem; text-align:left;">
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">NAMA IBU BAPA:</strong><br/>
+                    <span style="font-weight:bold; color:var(--color-dark); font-size:1rem;">${nama}</span>
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">EMEL:</strong><br/>
+                    ${emailDisplay}
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">KOD KELUARGA:</strong><br/>
+                    ${kodKeluargaDisplay}
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">BILANGAN ANAK:</strong><br/>
+                    <span style="font-weight:bold; color:#334155;">${anakCount} Orang Murid</span>
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">JENIS LANGGANAN:</strong><br/>
+                    <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                        <select class="neo-btn filter-select" style="padding:4px 8px; font-size:0.85rem; font-weight:bold; border-radius:8px; border:2px solid #0284c7; background:#ffffff; cursor:pointer;" onchange="window.tukarLanggananPengguna('${profileId}', 'ibubapa', this.value)">
+                            <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
+                            <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' || langganan === '1 Bulan' || langganan === 'Pro' ? 'selected' : ''}>1 Bulan (Pro)</option>
+                            <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' || langganan === '3 Bulan' ? 'selected' : ''}>3 Bulan (Pro)</option>
+                            <option value="1 Tahun (Pro)" ${langganan === '1 Tahun' || langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
+                        </select>
+                        <span style="font-size:0.75rem; color:#64748b; font-weight:bold;">(Tukar pelan terus)</span>
                     </div>
-                `;
+                </div>
+                ${noTelefon ? `
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">NO. TELEFON:</strong><br/>
+                    <span style="font-weight:bold; color:#334155;">${noTelefon}</span>
+                </div>
+                ` : ''}
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">KATA LALUAN:</strong><br/>
+                    ${passHtml}
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">TEMPOH MASA AKTIF:</strong><br/>
+                    <span style="background:#e0f2fe; color:#0369a1; border:1.5px solid #0284c7; padding:4px 10px; border-radius:8px; font-weight:bold; display:inline-flex; align-items:center; gap:6px; margin-top:3px;"><i class="fa-solid fa-clock"></i> ${tempohStr}</span>
+                </div>
+            </div>
+        `;
     }
-    window.showAppModalAlert(title, contentHtml);
+    let infoModal = document.getElementById('app-admin-info-modal-overlay');
+    if (!infoModal) {
+        infoModal = document.createElement('div');
+        infoModal.id = 'app-admin-info-modal-overlay';
+        infoModal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:99999; display:flex; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;';
+        document.body.appendChild(infoModal);
+    }
+    infoModal.innerHTML = `
+        <div class="neo-box" style="background-color:#ffffff; background-image:radial-gradient(circle, rgba(16, 24, 47, 0.12) 1.8px, transparent 1.8px); background-size:16px 16px; max-width:440px; width:100%; max-height:90vh; overflow-y:auto; box-sizing:border-box; padding:24px 20px 20px; border-radius:20px; border:3px solid var(--color-dark, #10182f); box-shadow:0 6px 0 var(--color-dark, #10182f); position:relative; margin:auto;">
+            <button type="button" class="neo-btn bg-red" style="position:absolute; top:12px; right:12px; width:34px; height:34px; min-width:34px; min-height:34px; padding:0; border-radius:10px; border:2px solid var(--color-dark); display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff;" onclick="document.getElementById('app-admin-info-modal-overlay').style.display='none'">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div style="text-align:center; margin-bottom:16px;">
+                <div class="neo-btn" style="background-color:${type === 'guru' ? '#ea580c' : '#0284c7'}; color:white; font-size:1.05rem; margin:0 auto; display:inline-flex; align-items:center; gap:8px; pointer-events:none; padding:8px 22px; font-weight:bold; border-radius:12px;">
+                    <i class="fa-solid ${type === 'guru' ? 'fa-chalkboard-user' : 'fa-people-roof'}"></i> ${title}
+                </div>
+            </div>
+            <div style="margin-bottom:20px; background:#ffffff; border:2px solid #e2e8f0; border-radius:14px; padding:14px;">
+                ${contentHtml}
+            </div>
+            <div style="display:flex; justify-content:center;">
+                <button type="button" class="neo-btn bg-white" style="width:100%; padding:10px; font-weight:bold; border-radius:10px; border:2px solid var(--color-dark); cursor:pointer; font-size:0.95rem;" onclick="document.getElementById('app-admin-info-modal-overlay').style.display='none'">Tutup</button>
+            </div>
+        </div>
+    `;
+    infoModal.style.display = 'flex';
 };
 
 window.renderAdminTable = function (type = 'guru') {
@@ -165,45 +357,50 @@ window.renderAdminTable = function (type = 'guru') {
         }
         adminThead.innerHTML = `
                     <tr style="background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); color: white;">
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #9a3412; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; width:48px; min-width:48px; text-transform:uppercase;">BIL.</th>
+                        <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #9a3412; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; width:48px; min-width:48px; text-transform:uppercase;">BIL.</th>
                         <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #9a3412; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:140px; text-transform:uppercase;">NAMA GURU</th>
                         <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #9a3412; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:130px; text-transform:uppercase;">NAMA SEKOLAH</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #9a3412; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:110px; text-transform:uppercase;">BILANGAN MURID</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #9a3412; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:150px; text-transform:uppercase;">TEMPOH MASA</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #9a3412; text-align:center; font-size:0.85rem; font-weight:bold; width:60px; min-width:50px; text-transform:uppercase;">INFO</th>
+                        <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #9a3412; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:100px; text-transform:uppercase;">BILANGAN MURID</th>
+                        <th style="padding:10px 10px; background:transparent; color:white; border-bottom:2px solid #9a3412; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:155px; text-transform:uppercase;">JENIS LANGGANAN</th>
+                        <th style="padding:10px 10px; background:transparent; color:white; border-bottom:2px solid #9a3412; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:140px; text-transform:uppercase;">TEMPOH MASA</th>
+                        <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #9a3412; text-align:center; font-size:0.85rem; font-weight:bold; width:60px; min-width:50px; text-transform:uppercase;">INFO</th>
                     </tr>
                 `;
 
-        let adminTeachers = [];
-        try {
-            const savedT = localStorage.getItem('bunyiKataAdminTeachers');
-            if (savedT) adminTeachers = JSON.parse(savedT);
-        } catch(e) {}
-        if (!adminTeachers || adminTeachers.length === 0) {
-            adminTeachers = [
-                { id: "g1", nama: "Cikgu Ahmad", sekolah: "SK Bintang", murid: totalStudents > 0 ? totalStudents : 13, bakiHari: 24, langganan: "1 Bulan" },
-                { id: "g2", nama: "Cikgu Siti", sekolah: "SK Harmoni", murid: 15, bakiHari: 18, langganan: "1 Bulan" },
-                { id: "g3", nama: "Cikgu Ramasamy", sekolah: "SJKT Maju", murid: 8, bakiHari: 29, langganan: "1 Bulan" }
-            ];
-            localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(adminTeachers));
-        }
+        let adminTeachers = typeof getAdminTeachersList === 'function' ? getAdminTeachersList() : [];
         adminTbody.innerHTML = '';
+        if (!adminTeachers || adminTeachers.length === 0) {
+            adminTbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold; font-size: 0.95rem;">
+                        <i class="fa-solid fa-chalkboard-user" style="font-size: 2rem; color: #cbd5e1; display: block; margin-bottom: 10px;"></i>
+                        Tiada rekod guru berdaftar dalam pangkalan data.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
         adminTeachers.forEach((t, index) => {
             const langganan = t.langganan || '1 Bulan';
             const tempohText = `${t.bakiHari} Hari (${langganan})`;
             adminTbody.innerHTML += `
                         <tr class="admin-table-row" style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#ffffff' : '#fff7ed'}; transition: background 0.15s ease;">
-                            <td class="admin-td" style="padding: 9px 12px; font-weight: 600; color: #64748b; border-right: 1px solid #e2e8f0; text-align: center; font-size: 0.85rem;">${index + 1}</td>
+                            <td class="admin-td" style="padding: 9px 8px; font-weight: 600; color: #64748b; border-right: 1px solid #e2e8f0; text-align: center; font-size: 0.85rem;">${index + 1}</td>
                             <td class="admin-td" style="padding: 9px 12px; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem;">${t.nama}</td>
                             <td class="admin-td" style="padding: 9px 12px; color: #475569; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem;">${t.sekolah}</td>
-                            <td class="admin-td" style="padding: 9px 12px; text-align: center; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; font-size: 0.85rem;">${t.murid || 0}</td>
-                            <td class="admin-td" style="padding: 9px 12px; text-align: center; border-right: 1px solid #e2e8f0;">
-                                <span style="background: #ffedd5; color: #c2410c; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 12px; border: 1.5px solid #ea580c; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;">
-                                    <i class="fa-solid fa-clock"></i> ${t.bakiHari} Hari (${langganan})
+                            <td class="admin-td" style="padding: 9px 8px; text-align: center; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; font-size: 0.85rem;">${t.murid || 0}</td>
+                            <td class="admin-td" style="padding: 9px 8px; text-align: center; border-right: 1px solid #e2e8f0; white-space: nowrap;">
+                                <span style="background: #fff7ed; color: #c2410c; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 10px; border: 1.5px solid #ea580c; display: inline-block; white-space: nowrap;">
+                                    ${langganan}
                                 </span>
                             </td>
-                            <td class="admin-td" style="padding: 9px 12px; text-align: center;">
-                                <button class="neo-btn bg-white" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#ea580c; border:1.5px solid #ea580c; margin:0 auto;" data-name="${(t.nama || '').replace(/"/g, '&quot;')}" data-tempoh="${tempohText}" onclick="window.showAdminInfo('guru', this.getAttribute('data-name'), {tempoh: this.getAttribute('data-tempoh')})" title="Info">
+                            <td class="admin-td" style="padding: 9px 10px; text-align: center; border-right: 1px solid #e2e8f0;">
+                                <span style="background: #ffedd5; color: #c2410c; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 12px; border: 1.5px solid #ea580c; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;">
+                                    <i class="fa-solid fa-clock"></i> ${t.bakiHari} Hari
+                                </span>
+                            </td>
+                            <td class="admin-td" style="padding: 9px 8px; text-align: center;">
+                                <button class="neo-btn bg-white" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#ea580c; border:1.5px solid #ea580c; margin:0 auto;" data-id="${t.id}" data-name="${(t.nama || '').replace(/"/g, '&quot;')}" data-email="${(t.email || '').replace(/"/g, '&quot;')}" data-sekolah="${(t.sekolah || '').replace(/"/g, '&quot;')}" data-kod="${(t.kod_kelas || '').replace(/"/g, '&quot;')}" data-namakelas="${(t.nama_kelas || '').replace(/"/g, '&quot;')}" data-murid="${t.murid || 0}" data-telefon="${(t.no_telefon || '').replace(/"/g, '&quot;')}" data-tempoh="${tempohText}" data-langganan="${langganan}" onclick="window.showAdminInfo('guru', this.getAttribute('data-name'), { id: this.getAttribute('data-id'), email: this.getAttribute('data-email'), sekolah: this.getAttribute('data-sekolah'), kodKelas: this.getAttribute('data-kod'), namaKelas: this.getAttribute('data-namakelas'), murid: this.getAttribute('data-murid'), telefon: this.getAttribute('data-telefon'), tempoh: this.getAttribute('data-tempoh'), langganan: this.getAttribute('data-langganan') })" title="Info">
                                     <i class="fa-solid fa-circle-info"></i>
                                 </button>
                             </td>
@@ -218,43 +415,48 @@ window.renderAdminTable = function (type = 'guru') {
         }
         adminThead.innerHTML = `
                     <tr style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white;">
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #075985; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; width:48px; min-width:48px; text-transform:uppercase;">BIL.</th>
+                        <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #075985; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; width:48px; min-width:48px; text-transform:uppercase;">BIL.</th>
                         <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #075985; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:150px; text-transform:uppercase;">NAMA IBU BAPA</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #075985; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:110px; text-transform:uppercase;">BILANGAN ANAK</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #075985; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:150px; text-transform:uppercase;">TEMPOH MASA</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #075985; text-align:center; font-size:0.85rem; font-weight:bold; width:60px; min-width:50px; text-transform:uppercase;">INFO</th>
+                        <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #075985; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:110px; text-transform:uppercase;">BILANGAN ANAK</th>
+                        <th style="padding:10px 10px; background:transparent; color:white; border-bottom:2px solid #075985; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:155px; text-transform:uppercase;">JENIS LANGGANAN</th>
+                        <th style="padding:10px 10px; background:transparent; color:white; border-bottom:2px solid #075985; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:140px; text-transform:uppercase;">TEMPOH MASA</th>
+                        <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #075985; text-align:center; font-size:0.85rem; font-weight:bold; width:60px; min-width:50px; text-transform:uppercase;">INFO</th>
                     </tr>
                 `;
 
-        let adminParents = [];
-        try {
-            const savedP = localStorage.getItem('bunyiKataAdminParents');
-            if (savedP) adminParents = JSON.parse(savedP);
-        } catch(e) {}
-        if (!adminParents || adminParents.length === 0) {
-            adminParents = [
-                { id: "p1", nama: "Encik Razak", anak: 2, bakiHari: 22, langganan: "1 Bulan" },
-                { id: "p2", nama: "Puan Aishah", anak: 1, bakiHari: 14, langganan: "1 Bulan" },
-                { id: "p3", nama: "Encik Muthu", anak: 3, bakiHari: 28, langganan: "1 Bulan" }
-            ];
-            localStorage.setItem('bunyiKataAdminParents', JSON.stringify(adminParents));
-        }
+        let adminParents = typeof getAdminParentsList === 'function' ? getAdminParentsList() : [];
         adminTbody.innerHTML = '';
+        if (!adminParents || adminParents.length === 0) {
+            adminTbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold; font-size: 0.95rem;">
+                        <i class="fa-solid fa-users" style="font-size: 2rem; color: #cbd5e1; display: block; margin-bottom: 10px;"></i>
+                        Tiada rekod ibu bapa berdaftar dalam pangkalan data.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
         adminParents.forEach((t, index) => {
             const langganan = t.langganan || '1 Bulan';
             const tempohText = `${t.bakiHari} Hari (${langganan})`;
             adminTbody.innerHTML += `
                         <tr class="admin-table-row" style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#ffffff' : '#f0f9ff'}; transition: background 0.15s ease;">
-                            <td class="admin-td" style="padding: 9px 12px; font-weight: 600; color: #64748b; border-right: 1px solid #e2e8f0; text-align: center; font-size: 0.85rem;">${index + 1}</td>
+                            <td class="admin-td" style="padding: 9px 8px; font-weight: 600; color: #64748b; border-right: 1px solid #e2e8f0; text-align: center; font-size: 0.85rem;">${index + 1}</td>
                             <td class="admin-td" style="padding: 9px 12px; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem;">${t.nama}</td>
-                            <td class="admin-td" style="padding: 9px 12px; text-align: center; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; font-size: 0.85rem;">${t.anak}</td>
-                            <td class="admin-td" style="padding: 9px 12px; text-align: center; border-right: 1px solid #e2e8f0;">
-                                <span style="background: #e0f2fe; color: #0369a1; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 12px; border: 1.5px solid #0284c7; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;">
-                                    <i class="fa-solid fa-clock"></i> ${t.bakiHari} Hari (${t.langganan})
+                            <td class="admin-td" style="padding: 9px 8px; text-align: center; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; font-size: 0.85rem;">${t.anak || 0}</td>
+                            <td class="admin-td" style="padding: 9px 8px; text-align: center; border-right: 1px solid #e2e8f0; white-space: nowrap;">
+                                <span style="background: #f0f9ff; color: #0284c7; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 10px; border: 1.5px solid #0284c7; display: inline-block; white-space: nowrap;">
+                                    ${langganan}
                                 </span>
                             </td>
-                            <td class="admin-td" style="padding: 9px 12px; text-align: center;">
-                                <button class="neo-btn bg-white" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#0284c7; border:1.5px solid #0284c7; margin:0 auto;" data-name="${t.nama.replace(/"/g, '&quot;')}" data-tempoh="${tempohText}" onclick="window.showAdminInfo('ibubapa', this.getAttribute('data-name'), {tempoh: this.getAttribute('data-tempoh')})" title="Info">
+                            <td class="admin-td" style="padding: 9px 10px; text-align: center; border-right: 1px solid #e2e8f0;">
+                                <span style="background: #e0f2fe; color: #0369a1; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 12px; border: 1.5px solid #0284c7; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;">
+                                    <i class="fa-solid fa-clock"></i> ${t.bakiHari} Hari
+                                </span>
+                            </td>
+                            <td class="admin-td" style="padding: 9px 8px; text-align: center;">
+                                <button class="neo-btn bg-white" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#0284c7; border:1.5px solid #0284c7; margin:0 auto;" data-id="${t.id}" data-name="${(t.nama || '').replace(/"/g, '&quot;')}" data-email="${(t.email || '').replace(/"/g, '&quot;')}" data-kod="${(t.kod_keluarga || '').replace(/"/g, '&quot;')}" data-namakeluarga="${(t.nama_keluarga || '').replace(/"/g, '&quot;')}" data-anak="${t.anak || 0}" data-telefon="${(t.no_telefon || '').replace(/"/g, '&quot;')}" data-tempoh="${tempohText}" data-langganan="${langganan}" onclick="window.showAdminInfo('ibubapa', this.getAttribute('data-name'), { id: this.getAttribute('data-id'), email: this.getAttribute('data-email'), kodKeluarga: this.getAttribute('data-kod'), namaKeluarga: this.getAttribute('data-namakeluarga'), anak: this.getAttribute('data-anak'), telefon: this.getAttribute('data-telefon'), tempoh: this.getAttribute('data-tempoh'), langganan: this.getAttribute('data-langganan') })" title="Info">
                                     <i class="fa-solid fa-circle-info"></i>
                                 </button>
                             </td>
@@ -276,84 +478,77 @@ window.renderAdminTable = function (type = 'guru') {
                     </tr>
                 `;
 
-        const defaultFeedbacks = [
-            {
-                id: "fb-1",
-                nama: "Puan Noraini (Guru Pemulihan)",
-                mesej: "Aplikasi sangat membantu murid prasekolah dan murid pemulihan khas mengecam suku kata dengan lebih cepat. Sangat interaktif!",
-                tarikh: "25/08/2026 10:30"
-            },
-            {
-                id: "fb-2",
-                nama: "Encik Hafiz (Ibu Bapa)",
-                mesej: "Anak saya seronok main Bilik Bacaan dan cabaran suku kata. Kalau boleh tambah lagi animasi visual untuk perkataan 3 suku kata.",
-                tarikh: "26/08/2026 14:15"
-            },
-            {
-                id: "fb-3",
-                nama: "Cikgu Zulaikha",
-                mesej: "Paparan kad laporan murid dan fungsi muat turun PDF sangat memudahkan urusan rekod prestasi kelas.",
-                tarikh: "27/08/2026 09:45"
-            },
-            {
-                id: "fb-4",
-                nama: "Abu",
-                mesej: "boek",
-                tarikh: "27/08/2026 16:20"
-            }
-        ];
+        adminTbody.innerHTML = `
+            <tr>
+                <td colspan="4" style="padding: 24px; text-align: center; color: #64748b; font-weight: bold;">
+                    <i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Memuat turun maklum balas daripada Firebase...
+                </td>
+            </tr>
+        `;
 
-        let feedbacks = [];
-        try {
-            const raw = localStorage.getItem('bunyi_kata_feedbacks');
-            feedbacks = raw ? JSON.parse(raw) : [];
-            if (!feedbacks || feedbacks.length === 0) {
-                feedbacks = defaultFeedbacks;
-                localStorage.setItem('bunyi_kata_feedbacks', JSON.stringify(feedbacks));
+        const renderFeedbackRows = (feedbacks) => {
+            adminTbody.innerHTML = '';
+            const list = Array.isArray(feedbacks) ? feedbacks : [];
+            if (document.getElementById('admin-jumlah-feedback')) {
+                document.getElementById('admin-jumlah-feedback').innerText = list.length;
             }
-        } catch (e) {
-            feedbacks = defaultFeedbacks;
-        }
-
-        adminTbody.innerHTML = '';
-        if (feedbacks.length === 0) {
-            adminTbody.innerHTML = `
-                        <tr>
-                            <td colspan="4" style="padding: 28px; text-align: center; color: #64748b; font-weight: bold;">
-                                <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 8px; display: block; color: #cbd5e1;"></i>
-                                Tiada maklum balas diterima setakat ini.
+            if (list.length === 0) {
+                adminTbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="padding: 28px; text-align: center; color: #64748b; font-weight: bold;">
+                            <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 8px; display: block; color: #cbd5e1;"></i>
+                            Tiada maklum balas diterima setakat ini dalam pangkalan data.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                list.forEach((fb, index) => {
+                    const namaDisplay = fb.nama_pengguna || fb.nama || 'Pengguna';
+                    const perananDisplay = fb.peranan ? ` <span style="font-size:0.75rem; color:#64748b; font-weight:normal;">(${fb.peranan})</span>` : '';
+                    const mesejDisplay = fb.komen || fb.mesej || fb.feedback || '-';
+                    const tarikhDisplay = fb.tarikh ? new Date(fb.tarikh).toLocaleDateString('ms-MY') : '';
+                    adminTbody.innerHTML += `
+                        <tr class="admin-table-row" style="border-bottom: 1px solid #e2e8f0;">
+                            <td class="admin-td" style="padding: 10px 12px; font-weight: 600; color: #64748b; border-right: 1px solid #e2e8f0; text-align: center;">${index + 1}</td>
+                            <td class="admin-td" style="padding: 10px 14px; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; white-space: nowrap;">
+                                <i class="fa-solid fa-user" style="color: #64748b; margin-right: 6px;"></i> ${namaDisplay}${perananDisplay}
+                                ${tarikhDisplay ? `<div style="font-size:0.72rem; color:#94a3b8; font-weight:normal; margin-top:2px;"><i class="fa-regular fa-clock"></i> ${tarikhDisplay}</div>` : ''}
+                            </td>
+                            <td class="admin-td" style="padding: 10px 14px; color: #334155; font-size: 0.9rem; line-height: 1.45; text-align: left; border-right: 1px solid #e2e8f0;">
+                                ${mesejDisplay}
+                            </td>
+                            <td class="admin-td" style="padding: 10px 10px; text-align: center;">
+                                <button class="neo-btn bg-red" style="padding:4px; width:32px; height:32px; border-radius:8px; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#ffffff; margin:0 auto;" onclick="window.padamFeedback('${fb.id}')" title="Padam Maklum Balas">
+                                    <i class="fa-solid fa-trash-can" style="font-size: 0.85rem;"></i>
+                                </button>
                             </td>
                         </tr>
                     `;
+                });
+            }
+        };
+
+        if (typeof window.getFeedbacksFromFirebase === 'function') {
+            window.getFeedbacksFromFirebase().then(renderFeedbackRows).catch(() => renderFeedbackRows([]));
         } else {
-            feedbacks.forEach((fb, index) => {
-                adminTbody.innerHTML += `
-                            <tr class="admin-table-row" style="border-bottom: 1px solid #e2e8f0;">
-                                <td class="admin-td" style="padding: 10px 12px; font-weight: 600; color: #64748b; border-right: 1px solid #e2e8f0; text-align: center;">${index + 1}</td>
-                                <td class="admin-td" style="padding: 10px 14px; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; white-space: nowrap;">
-                                    <i class="fa-solid fa-user" style="color: #64748b; margin-right: 6px;"></i> ${fb.nama || 'Pengguna'}
-                                </td>
-                                <td class="admin-td" style="padding: 10px 14px; color: #334155; font-size: 0.9rem; line-height: 1.45; text-align: left; border-right: 1px solid #e2e8f0;">
-                                    ${fb.mesej || fb.feedback || '-'}
-                                </td>
-                                <td class="admin-td" style="padding: 10px 10px; text-align: center;">
-                                    <button class="neo-btn bg-red" style="padding:4px; width:32px; height:32px; border-radius:8px; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#ffffff; margin:0 auto;" onclick="window.padamFeedback('${fb.id}')" title="Padam Maklum Balas">
-                                        <i class="fa-solid fa-trash-can" style="font-size: 0.85rem;"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-            });
+            renderFeedbackRows([]);
         }
     }
 
-    try {
-        const rawFb = localStorage.getItem('bunyi_kata_feedbacks');
-        const fbList = rawFb ? JSON.parse(rawFb) : [];
-        if (document.getElementById('admin-jumlah-feedback')) {
-            document.getElementById('admin-jumlah-feedback').innerText = fbList.length;
+    window.padamFeedback = async function (id) {
+        if (!confirm("Adakah anda pasti mahu memadam maklum balas ini dari pangkalan data Firebase?")) return;
+        if (typeof window.deleteFeedbackInFirebase === 'function') {
+            const ok = await window.deleteFeedbackInFirebase(id);
+            if (ok) {
+                if (typeof window.showAppModalAlert === 'function') {
+                    window.showAppModalAlert('Berjaya', 'Maklum balas telah berjaya dipadam dari pangkalan data.');
+                }
+                window.renderAdminTable('feedback');
+            } else {
+                alert('Gagal memadam maklum balas daripada Firebase.');
+            }
         }
-    } catch (e) { }
+    };
 };
 
 // --- SISTEM AUTO-SAVE LATIHAN ---
@@ -386,20 +581,22 @@ var audioCtx;
 var lastBubbleTime = 0;
 function playBubble() {
     var nowMs = Date.now();
-    if (nowMs - lastBubbleTime < 350) return;
+    if (nowMs - lastBubbleTime < 220) return;
     lastBubbleTime = nowMs;
     try {
-        if (!audioCtx) audioCtx = new AudioContext();
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.type = 'sine'; const now = audioCtx.currentTime;
-        osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(900, now + 0.1);
-        gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now); osc.stop(now + 0.1);
+        osc.frequency.setValueAtTime(450, now); osc.frequency.exponentialRampToValueAtTime(950, now + 0.08);
+        gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now); osc.stop(now + 0.08);
     } catch (e) { }
 }
+window.playBubble = playBubble;
+window.playClick = playBubble;
 
 function playOops() {
     try {
@@ -1099,39 +1296,295 @@ function studentRecord() {
 }
 window.studentRecord = studentRecord;
 
-var defaultStudentNames = ["Ali Bin Abu", "Siti Aminah", "Raju A/L Muthu", "Mei Ling", "Ahmad Zaki", "Nur Aishah", "Chong Wei", "Deepak Kumar", "Farah Nadia", "Muhammad Harith", "Adam Rayyan", "Sofia Zara"];
+// Purge legacy mock data from localStorage if present
+(function purgeLegacyMockData() {
+    try {
+        const legacyMockStudents = ["Ali Bin Abu", "Siti Aminah", "Raju A/L Muthu", "Mei Ling", "Ahmad Zaki", "Nur Aishah", "Chong Wei", "Deepak Kumar", "Farah Nadia", "Muhammad Harith", "Adam Rayyan", "Sofia Zara"];
+        const rawStudents = localStorage.getItem('bunyiKataStudentNames');
+        if (rawStudents) {
+            let stored = JSON.parse(rawStudents);
+            if (Array.isArray(stored)) {
+                // Buang sebarang nama dummy 'Murid', 'Tetamu' atau legacy mock
+                stored = stored.filter(n => n && !['murid', 'tetamu', 'guest'].includes(n.trim().toLowerCase()) && !legacyMockStudents.some(lm => lm.toLowerCase() === n.trim().toLowerCase()));
+                localStorage.setItem('bunyiKataStudentNames', JSON.stringify(stored));
+            }
+        }
+
+        const legacyMockParents = ["Ali Bin Abu", "Siti Aminah"];
+        const rawParents = localStorage.getItem('bunyiKataParentChildNames');
+        if (rawParents) {
+            let storedP = JSON.parse(rawParents);
+            if (Array.isArray(storedP)) {
+                storedP = storedP.filter(n => n && !['murid', 'tetamu', 'guest'].includes(n.trim().toLowerCase()) && !legacyMockParents.some(lm => lm.toLowerCase() === n.trim().toLowerCase()));
+                localStorage.setItem('bunyiKataParentChildNames', JSON.stringify(storedP));
+            }
+        }
+
+        const rawClasses = localStorage.getItem('bunyiKataDaftarKelas');
+        if (rawClasses) {
+            try {
+                let storedC = JSON.parse(rawClasses);
+                if (Array.isArray(storedC)) {
+                    storedC = storedC.filter(c => typeof c === 'string' && !['1 cemerlang', '1 pintar'].includes(c.trim().toLowerCase()));
+                    if (storedC.length === 0) {
+                        localStorage.removeItem('bunyiKataDaftarKelas');
+                    } else {
+                        localStorage.setItem('bunyiKataDaftarKelas', JSON.stringify(storedC));
+                    }
+                }
+            } catch (e) {}
+        }
+        if (['1 cemerlang', '1 pintar'].includes((localStorage.getItem('bunyiKataNamaKelas') || '').trim().toLowerCase())) {
+            localStorage.removeItem('bunyiKataNamaKelas');
+        }
+        if (['1 cemerlang', '1 pintar'].includes((localStorage.getItem('pdf_kelas') || '').trim().toLowerCase())) {
+            localStorage.removeItem('pdf_kelas');
+        }
+        if (localStorage.getItem('bunyiKataAccessLevel') === 'trial') {
+            localStorage.removeItem('bunyiKataDaftarKelas');
+            localStorage.removeItem('bunyiKataNamaKelas');
+            localStorage.removeItem('bunyiKataKodKelas');
+            localStorage.removeItem('bunyiKataKodKelas2');
+            localStorage.removeItem('bunyiKataNamaKelas2');
+        }
+
+        // Padam sebarang kunci bintang global, modul fonik, dan aktiviti nombor ujian lama supaya tidak bocor ke rekod murid baharu
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && (
+                k.startsWith('stars_') ||
+                k.startsWith('extra_stars_') ||
+                k.startsWith('extra_score_') ||
+                k.startsWith('bunyiKataUnlockedLatihan_') ||
+                k.startsWith('bunyikata_huruf_') ||
+                k.startsWith('bunyikata_vokal_') ||
+                k.startsWith('bunyikata_phonics_') ||
+                k.startsWith('bunyikata_nombor_') ||
+                k.startsWith('bunyikata_siri_') ||
+                k.startsWith('bunyikata_tambah_') ||
+                k.startsWith('bunyikata_tolak_') ||
+                k.startsWith('bunyikata_math_') ||
+                k.startsWith('puzzle_completed_') ||
+                k.startsWith('cantum_completed_')
+            )) {
+                keysToRemove.push(k);
+            }
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+        window.completedBelajarModules = {};
+
+        // Padam sebarang feedback dummy lama daripada localStorage agar membaca terus dari Firebase
+        localStorage.removeItem('bunyi_kata_feedbacks');
+    } catch (e) {
+        console.warn('purgeLegacyMockData notice:', e);
+    }
+})();
+
+const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
+var defaultStudentNames = [];
 var savedStudentNames = JSON.parse(localStorage.getItem('bunyiKataStudentNames') || 'null');
-var studentNames = (Array.isArray(savedStudentNames) && savedStudentNames.length > 0) ? savedStudentNames : defaultStudentNames;
+var studentNames = (Array.isArray(savedStudentNames)) ? savedStudentNames.filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase())) : defaultStudentNames;
 window.studentNames = studentNames;
 
-var defaultParentChildNames = ["Ali Bin Abu", "Siti Aminah"];
+var defaultParentChildNames = [];
 var savedParentChildNames = JSON.parse(localStorage.getItem('bunyiKataParentChildNames') || 'null');
-var parentChildNames = (Array.isArray(savedParentChildNames) && savedParentChildNames.length > 0) ? savedParentChildNames : defaultParentChildNames;
+var parentChildNames = (Array.isArray(savedParentChildNames)) ? savedParentChildNames.filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase())) : defaultParentChildNames;
 window.parentChildNames = parentChildNames;
 
 var savedStudentData = JSON.parse(localStorage.getItem('bunyiKataStudentData') || '{}');
-var studentData = Object.fromEntries(studentNames.map((name, i) => {
+// Padam semua entri dummy/ghost jika wujud dalam simpanan
+if (savedStudentData && typeof savedStudentData === 'object') {
+    Object.keys(savedStudentData).forEach(k => {
+        if (GHOST_NAMES.includes(k.trim().toLowerCase())) {
+            delete savedStudentData[k];
+        }
+    });
+    localStorage.setItem('bunyiKataStudentData', JSON.stringify(savedStudentData));
+}
+var studentData = Object.fromEntries(studentNames.map((name) => {
     const data = { ...studentRecord(), ...(savedStudentData[name] || {}) };
-    if (!data.kelas) {
-        data.kelas = i < 6 ? '1 Cemerlang' : '1 Pintar';
-    }
     return [name, data];
 }));
-if (!studentData["Murid"]) {
-    studentData["Murid"] = studentRecord();
-}
 window.studentData = studentData;
 
 function saveStudentData() {
     try {
-        localStorage.setItem('bunyiKataStudentNames', JSON.stringify(studentNames));
-        localStorage.setItem('bunyiKataParentChildNames', JSON.stringify(parentChildNames));
+        // Jika dalam mod percuma / tetamu, jangan simpan rekod tetamu ke storan tetap dan JANGAN sync ke Firebase
+        if (window.userAccessLevel === 'trial' || window.isGuestMode) {
+            return;
+        }
+
+        // Pastikan entri ghost sentiasa dipadam sebelum disimpan
+        if (studentData && typeof studentData === 'object') {
+            Object.keys(studentData).forEach(k => {
+                if (GHOST_NAMES.includes(k.trim().toLowerCase())) {
+                    delete studentData[k];
+                }
+            });
+        }
+        if (window.studentData && typeof window.studentData === 'object') {
+            Object.keys(window.studentData).forEach(k => {
+                if (GHOST_NAMES.includes(k.trim().toLowerCase())) {
+                    delete window.studentData[k];
+                }
+            });
+        }
+
+        const cleanStudentNames = (Array.isArray(studentNames) ? studentNames : []).filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()));
+        const cleanParentChildNames = (Array.isArray(parentChildNames) ? parentChildNames : []).filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()));
+
+        localStorage.setItem('bunyiKataStudentNames', JSON.stringify(cleanStudentNames));
+        localStorage.setItem('bunyiKataParentChildNames', JSON.stringify(cleanParentChildNames));
         localStorage.setItem('bunyiKataStudentData', JSON.stringify(studentData));
+
+        // Segerakkan data murid & bintang terkumpul ke Firebase secara latar belakang
+        if (typeof window.syncStudentToFirebase === 'function') {
+            const activeCode = localStorage.getItem('bunyiKataKodKelas') || '';
+            const activeFam = localStorage.getItem('bunyiKataKodKeluarga') || '';
+            
+            const userRole = localStorage.getItem('bunyiKataUserRole') || '';
+            
+            if (userRole !== 'ibubapa' && Array.isArray(studentNames)) {
+                const gId = localStorage.getItem('bunyiKataUserId') || '';
+                const gEmail = localStorage.getItem('bunyiKataGuruEmail') || '';
+                const defKelas = localStorage.getItem('bunyiKataNamaKelas') || '';
+                studentNames.forEach(nama => {
+                    if (nama && nama.toLowerCase() !== 'murid' && nama.toLowerCase() !== 'tetamu') {
+                        const data = studentData[nama] || {};
+                        const totalStars = typeof jumlahMarkah === 'function' ? jumlahMarkah(data) : (data.coins || 0);
+                        window.syncStudentToFirebase({
+                            nama: nama,
+                            guruId: gId,
+                            guruEmail: gEmail,
+                            kodKelas: activeCode,
+                            namaKelas: data.kelas || defKelas,
+                            totalBintang: totalStars
+                        }).catch(e => console.warn('Firebase student sync notice:', e));
+                    }
+                });
+            }
+
+            if (userRole === 'ibubapa' && Array.isArray(parentChildNames)) {
+                const pId = localStorage.getItem('bunyiKataUserId') || '';
+                const pEmail = localStorage.getItem('bunyiKataIbubapaEmail') || '';
+                const defFam = localStorage.getItem('bunyiKataNamaKeluarga') || '';
+                parentChildNames.forEach(nama => {
+                    if (nama && nama.toLowerCase() !== 'murid' && nama.toLowerCase() !== 'tetamu') {
+                        const data = studentData[nama] || {};
+                        const totalStars = typeof jumlahMarkah === 'function' ? jumlahMarkah(data) : (data.coins || 0);
+                        window.syncStudentToFirebase({
+                            nama: nama,
+                            parentId: pId,
+                            parentEmail: pEmail,
+                            kodKeluarga: activeFam,
+                            namaKeluarga: defFam,
+                            totalBintang: totalStars,
+                            isParentChild: true
+                        }).catch(e => console.warn('Firebase child sync notice:', e));
+                    }
+                });
+            }
+        }
     } catch (e) {
         console.warn('saveStudentData notice:', e);
     }
 }
 window.saveStudentData = saveStudentData;
+
+window.resetTrialGuestProgress = function () {
+    window.isGuestMode = true;
+    window.userAccessLevel = 'trial';
+    localStorage.setItem('bunyiKataAccessLevel', 'trial');
+
+    const guestName = "Tetamu";
+    window.namaMuridAktif = guestName;
+    localStorage.setItem('muridAktif', guestName);
+    localStorage.setItem('bunyiKataCurrentMurid', guestName);
+
+    // Pastikan tiada kod kelas atau kod keluarga terpaut
+    localStorage.removeItem('bunyiKataKodKelas');
+    localStorage.removeItem('bunyiKataKodKeluarga');
+    localStorage.removeItem('bunyiKataNamaSekolah');
+    localStorage.removeItem('bunyiKataNamaKelas');
+    localStorage.removeItem('bunyiKataNamaKeluarga');
+
+    // Buang semua bintang, markah, modul fonik, dan aktiviti nombor daripada localStorage
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (
+            k.startsWith('stars_') ||
+            k.startsWith('extra_stars_') ||
+            k.startsWith('extra_score_') ||
+            k.startsWith('bunyiKataUnlockedLatihan_') ||
+            k.startsWith('bunyikata_huruf_') ||
+            k.startsWith('bunyikata_vokal_') ||
+            k.startsWith('bunyikata_phonics_') ||
+            k.startsWith('bunyikata_nombor_') ||
+            k.startsWith('bunyikata_siri_') ||
+            k.startsWith('bunyikata_tambah_') ||
+            k.startsWith('bunyikata_tolak_') ||
+            k.startsWith('bunyikata_math_') ||
+            k.startsWith('puzzle_completed_') ||
+            k.startsWith('cantum_completed_')
+        )) {
+            keysToRemove.push(k);
+        }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+    window.completedBelajarModules = {};
+
+    // Reset progress peta kembara & cabaran kepada 0 (kosong sepenuhnya)
+    window.sessionBelajarProgress = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    window.currentMisiUnlockedIndex = 0;
+
+    // Sediakan rekod baharu yang 100% kosong tanpa sebarang aktiviti selesai
+    const cleanRecord = {
+        coins: 0,
+        spentStars: 0,
+        badges: [],
+        newBadges: [],
+        history: [],
+        avatar: '/images/avatar/avatar1.png',
+        belajar: { kad: false, cerita: false, surih: false, kotak: false },
+        latihan: {
+            surihHuruf: false, padanan: false, dragdrop: false,
+            belon: false, puzzle: false, carikata: false,
+            tarikgaris: false, kuizaudio: false, susunkata: false
+        },
+        scores: {
+            surihHuruf: 0, padanan: 0, dragdrop: 0,
+            belon: 0, puzzle: 0, carikata: 0,
+            tarikgaris: 0, kuizaudio: 0, susunkata: 0
+        },
+        stars: {},
+        mapsUnlocked: 1,
+        loginData: { lastLoginDate: null, streak: 0, claimedDays: [] }
+    };
+
+    window.guestRecord = JSON.parse(JSON.stringify(cleanRecord));
+    if (typeof window.studentData !== 'undefined') {
+        delete window.studentData[guestName];
+        delete window.studentData["Murid"];
+    }
+    if (typeof studentData !== 'undefined') {
+        delete studentData[guestName];
+        delete studentData["Murid"];
+    }
+
+    try {
+        const stored = JSON.parse(localStorage.getItem('bunyiKataStudentData') || '{}');
+        delete stored[guestName];
+        delete stored["Murid"];
+        localStorage.setItem('bunyiKataStudentData', JSON.stringify(stored));
+    } catch(e) {}
+
+    // Segerakkan UI profil dan paparan
+    if (typeof updateProfilUI === 'function') updateProfilUI();
+    if (typeof renderLatihanLocks === 'function') renderLatihanLocks();
+    if (typeof filterProfileChallenges === 'function') filterProfileChallenges(1);
+};
 
 
 function bukaSidePanel() {
@@ -1406,6 +1859,27 @@ window.addEventListener('popstate', mengendaliNavigasiURL);
 // We do not need hashchange anymore if we use pathname, but keep it just in case
 window.addEventListener('hashchange', mengendaliNavigasiURL);
 
+window.isUserAdmin = function () {
+    try {
+        return !!(
+            window.modAdminAktif ||
+            window.isAdminMode ||
+            localStorage.getItem('bunyiKataUserRole') === 'admin' ||
+            (document.body && document.body.classList.contains('admin-mode')) ||
+            (document.getElementById('teacher-banner-badge') && document.getElementById('teacher-banner-badge').innerText && document.getElementById('teacher-banner-badge').innerText.toUpperCase().includes('ADMIN')) ||
+            (window.currentUser && window.currentUser.peranan === 'admin')
+        );
+    } catch (e) {
+        return false;
+    }
+};
+window.isSistemAdmin = window.isUserAdmin;
+
+window.isEffectiveTrial = function () {
+    if (window.isUserAdmin && window.isUserAdmin()) return false;
+    return (window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial');
+};
+
 window.masukModAdmin = masukModAdmin;
 
 function masukModAdmin() {
@@ -1413,6 +1887,18 @@ function masukModAdmin() {
     window.modGuruAktif = true;
     modIbuBapaAktif = false;
     window.modIbuBapaAktif = false;
+    modAdminAktif = true;
+    window.isAdminMode = true;
+    window.isGuestMode = false;
+    window.namaMuridAktif = 'Admin';
+    localStorage.setItem('muridAktif', 'Admin');
+    localStorage.setItem('bunyiKataCurrentMurid', 'Admin');
+    localStorage.setItem('bunyiKataUserRole', 'admin');
+    localStorage.setItem('bunyiKataAccessLevel', 'pro');
+    window.userAccessLevel = 'pro';
+    if (typeof window.setUserAccessLevel === 'function') {
+        window.setUserAccessLevel('pro');
+    }
     document.body.classList.add('teacher-mode');
     document.body.classList.add('admin-mode');
     document.body.classList.remove('parent-mode');
@@ -1427,10 +1913,21 @@ function masukModAdmin() {
     const pNav = document.getElementById('parent-sticky-nav');
     if (pNav) pNav.style.display = 'none';
 
+    window.dispatchEvent(new CustomEvent('admin-mode-change', { detail: { isAdmin: true } }));
+
     paparSkrin('admin-dashboard');
 
-    if (typeof window.renderTeacherTable === 'function') {
-        window.renderTeacherTable();
+    if (typeof window.renderAdminTable === 'function') {
+        window.renderAdminTable('guru');
+    }
+    const fetchFn = window.fetchAdminDataFromFirebase || window.fetchAdminDataFromFirebase;
+    if (typeof fetchFn === 'function') {
+        fetchFn().then(() => {
+            if (typeof window.renderAdminTable === 'function') {
+                const sel = document.getElementById('admin-table-selector');
+                window.renderAdminTable(sel ? sel.value : 'guru');
+            }
+        }).catch(err => console.warn('Fetch admin data notice:', err));
     }
 }
 
@@ -1439,9 +1936,48 @@ function masukModGuru() {
     window.modGuruAktif = true;
     modIbuBapaAktif = false;
     window.modIbuBapaAktif = false;
+    modAdminAktif = false;
+    window.modAdminAktif = false;
+    window.isAdminMode = false;
+    window.isGuestMode = false;
     document.body.classList.add('teacher-mode');
     document.body.classList.remove('admin-mode');
     document.body.classList.remove('parent-mode');
+    window.dispatchEvent(new CustomEvent('admin-mode-change', { detail: { isAdmin: false } }));
+
+    const gName = localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || 'Guru';
+    window.namaMuridAktif = gName;
+    localStorage.setItem('muridAktif', gName);
+    localStorage.setItem('bunyiKataCurrentMurid', gName);
+
+    const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
+    if (window.studentData) {
+        GHOST_NAMES.forEach(g => {
+            delete window.studentData[g];
+            delete window.studentData[g.toUpperCase()];
+            delete window.studentData[g.charAt(0).toUpperCase() + g.slice(1)];
+        });
+    }
+    if (typeof studentData !== 'undefined') {
+        GHOST_NAMES.forEach(g => {
+            delete studentData[g];
+            delete studentData[g.toUpperCase()];
+            delete studentData[g.charAt(0).toUpperCase() + g.slice(1)];
+        });
+    }
+    try {
+        const stored = JSON.parse(localStorage.getItem('bunyiKataStudentData') || '{}');
+        let changed = false;
+        Object.keys(stored).forEach(k => {
+            if (GHOST_NAMES.includes(k.trim().toLowerCase())) {
+                delete stored[k];
+                changed = true;
+            }
+        });
+        if (changed) {
+            localStorage.setItem('bunyiKataStudentData', JSON.stringify(stored));
+        }
+    } catch (e) {}
 
     const badge = document.getElementById('teacher-banner-badge');
     if (badge) badge.innerHTML = '<i class="fa-solid fa-graduation-cap"></i> MOD GURU';
@@ -1454,6 +1990,43 @@ function masukModGuru() {
     if (pNav) pNav.style.display = 'none';
 
     paparSkrin('guru-dashboard');
+
+    const kodKelas = localStorage.getItem('bunyiKataKodKelas');
+    const namaKelas = localStorage.getItem('bunyiKataNamaKelas');
+    const namaSekolah = localStorage.getItem('bunyiKataNamaSekolah');
+    const namaGuru = localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru');
+    const guruId = localStorage.getItem('bunyiKataUserId');
+    if (typeof window.syncTeacherSessionFromFirebase === 'function') {
+        const teacherIdentifier = guruId || localStorage.getItem('bunyiKataGuruEmail') || '';
+        if (teacherIdentifier) {
+            window.syncTeacherSessionFromFirebase(teacherIdentifier).catch(function(e) {
+                console.warn('Teacher sync notice:', e);
+            });
+        }
+    } else if (kodKelas && namaKelas && typeof window.saveClassToFirebase === 'function') {
+        window.saveClassToFirebase({
+            kodKelas: kodKelas,
+            namaKelas: namaKelas,
+            namaSekolah: namaSekolah || '',
+            namaGuru: namaGuru || '',
+            guruId: guruId || undefined
+        }).catch(function() {});
+    }
+
+    if (Array.isArray(studentNames) && studentNames.length > 0 && typeof window.syncStudentToFirebase === 'function') {
+        studentNames.forEach(function(stName) {
+            if (stName) {
+                window.syncStudentToFirebase({
+                    nama: stName,
+                    guruId: guruId || undefined,
+                    guruEmail: localStorage.getItem('bunyiKataGuruEmail') || undefined,
+                    kodKelas: kodKelas || '',
+                    namaKelas: namaKelas || '',
+                    totalBintang: (studentData[stName] && (studentData[stName].coins || studentData[stName].bintang)) || 0
+                }).catch(function() {});
+            }
+        });
+    }
 
     if (!localStorage.getItem('bunyiKataGuruSetupDone')) {
         setTimeout(function () {
@@ -1469,9 +2042,16 @@ function keluarModGuru() {
     window.modGuruAktif = false;
     modIbuBapaAktif = false;
     window.modIbuBapaAktif = false;
+    modAdminAktif = false;
+    window.modAdminAktif = false;
+    window.isAdminMode = false;
+    if (localStorage.getItem('bunyiKataUserRole') === 'admin') {
+        localStorage.removeItem('bunyiKataUserRole');
+    }
     document.body.classList.remove('teacher-mode');
     document.body.classList.remove('admin-mode');
     document.body.classList.remove('parent-mode');
+    window.dispatchEvent(new CustomEvent('admin-mode-change', { detail: { isAdmin: false } }));
 
     const tNav = document.getElementById('teacher-sticky-nav');
     if (tNav) tNav.style.display = 'none';
@@ -1496,35 +2076,58 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
 
     const titleMain = modal.querySelector('.modal-title-main');
     const titleSub = modal.querySelector('p');
+    const headerContainer = modal.querySelector('.modal-header-container');
+    const modalContent = modal.querySelector('.modal-content');
+    const container = document.getElementById('ibubapa-profiles-container');
+
     if (isStudentLogin) {
-        if (titleMain) titleMain.textContent = 'Pilih Profil Murid';
-        if (titleSub) titleSub.textContent = 'Sila pilih nama anda untuk memulakan latihan';
+        if (headerContainer) {
+            headerContainer.style.justifyContent = 'center';
+            headerContainer.style.borderBottom = 'none';
+            headerContainer.style.paddingBottom = '4px';
+        }
+        if (titleMain) {
+            titleMain.textContent = 'Pilih Profil Murid';
+        }
+        if (titleSub) {
+            titleSub.style.display = 'none';
+        }
+        if (modalContent) {
+            modalContent.style.maxWidth = '460px';
+            modalContent.style.textAlign = 'center';
+        }
     } else if (isTukarDashboard) {
+        if (headerContainer) {
+            headerContainer.style.justifyContent = 'center';
+            headerContainer.style.borderBottom = 'none';
+            headerContainer.style.paddingBottom = '4px';
+        }
         if (titleMain) titleMain.textContent = 'Tukar Profil Anak';
-        if (titleSub) titleSub.textContent = 'Pilih profil anak untuk paparan dashboard';
+        if (titleSub) titleSub.style.display = 'none';
+        if (modalContent) modalContent.style.maxWidth = '450px';
     } else {
+        if (headerContainer) {
+            headerContainer.style.justifyContent = 'center';
+            headerContainer.style.borderBottom = 'none';
+            headerContainer.style.paddingBottom = '4px';
+        }
         if (titleMain) titleMain.textContent = 'Mod Ibu Bapa';
-        if (titleSub) titleSub.textContent = 'Pilih profil anak anda untuk melihat statistik & laporan';
+        if (titleSub) titleSub.style.display = 'none';
+        if (modalContent) modalContent.style.maxWidth = '450px';
     }
 
-    const container = document.getElementById('ibubapa-profiles-container');
-    const modalContent = modal.querySelector('.modal-content');
-    if (modalContent) {
-        if (isStudentLogin) {
-            modalContent.style.maxWidth = '750px';
-        } else {
-            modalContent.style.maxWidth = '450px';
-        }
-    }
     if (container) {
         container.innerHTML = '';
         if (isStudentLogin) {
-            container.className = 'student-profiles-grid';
+            container.className = 'student-profiles-list';
+            container.style.cssText = 'display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding: 6px 2px; width: 100%; box-sizing: border-box;';
         } else {
             container.className = 'ibubapa-profiles-grid';
+            container.style.cssText = '';
         }
 
-        const childNames = isStudentLogin ? (window.studentNames || studentNames || []) : (window.parentChildNames || defaultParentChildNames || []);
+        const childNamesRaw = isStudentLogin ? (window.studentNames || studentNames || []) : (window.parentChildNames || parentChildNames || []);
+        const childNames = childNamesRaw.slice().sort((a, b) => a.localeCompare(b, 'ms', { sensitivity: 'base' }));
 
         if (!isTukarDashboard && !isStudentLogin) {
             // Add "Profil Ibu Bapa" button with family name
@@ -1540,41 +2143,74 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
             container.appendChild(btnIbuBapa);
         }
 
+        if (isStudentLogin && childNames.length === 0) {
+            container.innerHTML = '<div style="padding: 30px; text-align: center; color: #64748b; font-weight: bold; font-size: 1rem;"><i class="fa-solid fa-user-xmark" style="font-size: 2.2rem; margin-bottom: 10px; display: block; color: #94a3b8;"></i>Tiada murid berdaftar dalam sistem.<br/><span style="font-size: 0.85rem; font-weight: normal; color: #94a3b8;">Sila minta guru mendaftarkan nama murid terlebih dahulu.</span></div>';
+        }
+
         window.__isTukarDashboardTemp = isTukarDashboard;
         childNames.forEach(name => {
-            const wrapper = document.createElement('div');
-            wrapper.style.cssText = 'position: relative; width: 100%; aspect-ratio: 1;';
-
-            const btnAnak = document.createElement('button');
             const childData = (typeof studentData !== 'undefined' && studentData[name]) ? studentData[name] : null;
             const avatarSrc = (childData && childData.avatar) ? childData.avatar : '/images/avatar/avatar1.png';
 
-            btnAnak.className = 'neo-btn bg-white';
-            btnAnak.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 10px; border-radius: 15px; width: 100%; height: 100%;';
-            btnAnak.innerHTML = `<div style="margin-bottom: 8px; width: 85px; height: 85px; display: flex; align-items: center; justify-content: center;"><img src="${avatarSrc}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));" /></div><span style="font-size: 0.95rem; line-height: 1.2; text-align: center; word-break: break-all; overflow-wrap: anywhere; line-break: anywhere;; font-weight: bold;">${name}</span>`;
-            btnAnak.onclick = () => {
-                if (isTukarDashboard) {
+            if (isStudentLogin) {
+                // Horizontal list format for student selection (avatar left circle, name 1 line, arrow right)
+                const btnAnak = document.createElement('button');
+                btnAnak.className = 'neo-btn bg-white student-row-card';
+                btnAnak.innerHTML = `
+                    <div style="width: 48px; height: 48px; min-width: 48px; border-radius: 50%; background: #e0f2fe; border: 2.5px solid var(--color-dark); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 0 var(--color-dark); flex-shrink: 0;">
+                        <img src="${avatarSrc}" alt="${name}" style="width: 100%; height: 100%; object-fit: contain;" />
+                    </div>
+                    <div style="flex: 1; min-width: 0; text-align: left;">
+                        <div style="font-size: 1.05rem; font-weight: 800; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}</div>
+                    </div>
+                    <div style="width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: #0284c7; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border: 1.5px solid var(--color-dark); box-shadow: 0 2px 0 var(--color-dark); flex-shrink: 0;">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                `;
+                btnAnak.onclick = () => {
                     window.tutupModalPilihAnak();
-                    if (window.tukarAnakIbuBapa) window.tukarAnakIbuBapa(name);
-                } else {
-                    window.showAppModalConfirm(
-                        `Adakah anda pasti untuk log masuk profil "${name}"?`,
-                        function () {
-                            window.tutupModalPilihAnak();
-                            window.masukModMurid(name);
-                        },
-                        {
-                            isBlue: true,
-                            iconHtml: '<div style="font-size:2.5rem; color:#0284c7; margin-bottom:10px;"><i class="fa-solid fa-circle-question"></i></div>',
-                            confirmText: 'Ya, Log Masuk'
+                    window.masukModMurid(name);
+                };
+                container.appendChild(btnAnak);
+            } else {
+                const wrapper = document.createElement('div');
+                wrapper.style.cssText = 'position: relative; width: 100%; aspect-ratio: 1;';
+
+                const btnAnak = document.createElement('button');
+                btnAnak.className = 'neo-btn bg-white';
+                btnAnak.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 10px; border-radius: 15px; width: 100%; height: 100%;';
+                btnAnak.innerHTML = `<div style="margin-bottom: 8px; width: 85px; height: 85px; display: flex; align-items: center; justify-content: center;"><img src="${avatarSrc}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));" /></div><span style="font-size: 0.95rem; line-height: 1.2; text-align: center; word-break: break-all; overflow-wrap: anywhere; line-break: anywhere;; font-weight: bold;">${name}</span>`;
+                btnAnak.onclick = () => {
+                    if (isTukarDashboard) {
+                        const isTrial = (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : false) || (!window.isUserAdmin?.() && (localStorage.getItem('bunyiKataParentPlan') === 'trial' || (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase() === 'percuma'));
+                        if (isTrial && childNames.indexOf(name) > 0) {
+                            if (typeof window.openPakejProModal === 'function') {
+                                window.openPakejProModal('ibubapa');
+                            } else if (typeof window.showAppModalAlert === 'function') {
+                                window.showAppModalAlert(
+                                    "Fungsi Terhad (Versi Pro)",
+                                    `<p style="text-align:center; font-weight:bold; color:#b91c1c; margin:10px 0;">
+                                        <i class="fa-solid fa-crown" style="font-size:2.2rem; color:#f59e0b; display:block; margin-bottom:8px;"></i>
+                                        Penukaran profil anak pelbagai terhad untuk Pakej Pro.<br/>
+                                        <span style="font-size:0.85rem; font-weight:normal; color:#64748b;">
+                                            Sila langgan Pakej Pro untuk mengakses profil sehingga 3 orang anak!
+                                        </span>
+                                    </p>`
+                                );
+                            } else {
+                                alert("Penukaran profil anak pelbagai terhad untuk Pakej Pro. Sila langgan Pakej Pro!");
+                            }
+                            return;
                         }
-                    );
-                }
-            };
+                        window.tutupModalPilihAnak();
+                        if (window.tukarAnakIbuBapa) window.tukarAnakIbuBapa(name);
+                    } else {
+                        window.tutupModalPilihAnak();
+                        window.masukModMurid(name);
+                    }
+                };
 
-
-            wrapper.appendChild(btnAnak);
-            if (!isStudentLogin) {
+                wrapper.appendChild(btnAnak);
                 const btnPadam = document.createElement('button');
                 btnPadam.className = 'neo-btn bg-white';
                 btnPadam.style.cssText = 'position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; width: 36px !important; height: 36px !important; min-width: 36px !important; min-height: 36px !important; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0 !important; margin: 0; font-size: 1rem; z-index: 10; cursor: pointer;   0 var(--color-dark); aspect-ratio: 1;';
@@ -1586,96 +2222,170 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
                     }
                 };
                 wrapper.appendChild(btnPadam);
+                container.appendChild(wrapper);
             }
-            container.appendChild(wrapper);
         });
 
         // Add "+ Tambah Profil Anak" button ONLY IF < 3 children
         if (childNames.length < 3 && !isStudentLogin && !isTukarDashboard) {
+            const isTrial = (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : false) || (!window.isUserAdmin?.() && (localStorage.getItem('bunyiKataParentPlan') === 'trial' || (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase() === 'percuma'));
             const btnTambah = document.createElement('button');
             btnTambah.className = 'neo-btn bg-white';
-            btnTambah.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 10px; border-radius: 15px; width: 100%; aspect-ratio: 1; border: 2px dashed #0284c7; box-shadow: none;';
-            btnTambah.innerHTML = '<div style="font-size: 2.5rem; color: #0284c7; margin-bottom: 8px;"><i class="fa-solid fa-plus"></i></div><span style="font-size: 0.95rem; line-height: 1.2; text-align: center; color: #0284c7; font-weight: bold;">Tambah<br/>Anak</span>';
-            btnTambah.onclick = () => {
-                const overlay = document.createElement('div');
-                overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);';
 
-                const modalBox = document.createElement('div');
-                modalBox.className = 'neo-box bg-white';
-                modalBox.style.cssText = 'width: 90%; max-width: 400px; padding: 0; border-radius: 20px; text-align: center; position: relative; overflow: hidden;';
-
-                modalBox.innerHTML = `
-                            <div style="background-color: #0284c7; color: white; padding: 15px; font-size: 1.3rem; font-weight: bold; border-bottom: 2px solid var(--color-dark);">
-                                TAMBAH PROFIL ANAK
-                            </div>
-                            <div style="padding: 25px; background-color: #ffffff; background-image: radial-gradient(#cbd5e1 2px, transparent 2px); background-size: 20px 20px;">
-                                <div style="background-color: #e0f2fe; border: 1.5px solid #0284c7; border-radius: 12px; padding: 8px 16px; margin-bottom: 18px; display: inline-block;">
-                                    <p style="font-size: 0.95rem; font-weight: bold; margin: 0; color: #0369a1;">Masukkan nama dan pilih watak:</p>
-                                </div>
-                                <input type="text" id="new-child-name" class="neo-input century-gothic-font" placeholder="Nama Panggilan" style="width: 100%; padding: 12px; border-radius: 12px; margin-bottom: 20px; font-size: 1.1rem; text-align: center; border: 2px solid var(--color-dark);" />
-                                
-                                <div id="new-child-avatars" style="display: flex; gap: 15px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap;">
-                                    <div class="avatar-option" data-src="/images/avatar/avatar1.png" style="width: 110px; border-radius: 16px; border: 4px solid #0284c7; cursor: pointer; background: var(--color-orange); padding: 10px; box-sizing: border-box; transform: scale(1.05); transition: all 0.2s ease; display: flex; justify-content: center; align-items: center;"><img src="/images/avatar/avatar1.png" style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));" /></div>
-                                    <div class="avatar-option" data-src="/images/avatar/avatar2.png" style="width: 110px; border-radius: 16px; border: 3px solid #cbd5e1; cursor: pointer; background: white; padding: 10px; box-sizing: border-box; transform: scale(1); transition: all 0.2s ease; display: flex; justify-content: center; align-items: center;"><img src="/images/avatar/avatar2.png" style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));" /></div>
-                                </div>
-                                
-                                <div style="display: flex; gap: 10px;">
-                                    <button id="btn-cancel-add" class="neo-btn bg-red" style="flex: 1; padding: 12px; font-size: 1.1rem;"><i class="fa-solid fa-xmark"></i> Batal</button>
-                                    <button id="btn-confirm-add" class="neo-btn" style="flex: 1; padding: 12px; font-size: 1.1rem; background-color: #0284c7; color: white;"><i class="fa-solid fa-check"></i> Simpan</button>
-                                </div>
-                            </div>
-                        `;
-
-                overlay.appendChild(modalBox);
-                document.body.appendChild(overlay);
-
-                let selectedAvatar = '/images/avatar/avatar1.png';
-
-                const opts = modalBox.querySelectorAll('.avatar-option');
-                opts.forEach(opt => {
-                    opt.onclick = () => {
-                        opts.forEach(o => {
-                            o.style.borderColor = '#cbd5e1';
-                            o.style.background = 'white';
-                            o.style.transform = 'scale(1)';
-                        });
-                        opt.style.borderColor = '#0284c7';
-                        opt.style.background = 'var(--color-orange)';
-                        opt.style.transform = 'scale(1.05)';
-                        selectedAvatar = opt.getAttribute('data-src');
-                    };
-                });
-
-                document.getElementById('btn-cancel-add').onclick = () => {
-                    document.body.removeChild(overlay);
-                };
-
-                document.getElementById('btn-confirm-add').onclick = () => {
-                    const newName = document.getElementById('new-child-name').value;
-                    if (newName && newName.trim()) {
-                        const finalName = newName.trim();
-                        if (window.parentChildNames && !window.parentChildNames.includes(finalName)) {
-                            window.parentChildNames.push(finalName);
-                        } else if (!window.parentChildNames) {
-                            window.parentChildNames = [finalName];
-                        }
-
-                        if (typeof studentData !== 'undefined') {
-                            if (!studentData[finalName]) {
-                                studentData[finalName] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1 };
-                            }
-                            studentData[finalName].avatar = selectedAvatar;
-                        }
-                        if (typeof saveStudentData === 'function') saveStudentData();
-
-                        document.body.removeChild(overlay);
-                        window.bukaModalPilihAnak();
+            if (isTrial) {
+                // Versi Pro locked state for free plan
+                btnTambah.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 10px; border-radius: 15px; width: 100%; aspect-ratio: 1; border: 2px dashed #cbd5e1; background: #f8fafc; box-shadow: none; cursor: pointer; position: relative;';
+                btnTambah.innerHTML = `
+                    <div style="font-size: 2.2rem; color: #ef4444; margin-bottom: 6px;">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <span style="font-size: 0.95rem; line-height: 1.2; text-align: center; color: #64748b; font-weight: bold;">
+                        Tambah<br/>Anak
+                    </span>
+                    <span style="background: #fee2e2; color: #b91c1c; border: 1.5px solid #ef4444; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: bold; margin-top: 6px;">
+                        Versi Pro
+                    </span>
+                `;
+                btnTambah.onclick = () => {
+                    if (typeof window.openPakejProModal === 'function') {
+                        window.openPakejProModal('ibubapa');
+                    } else if (typeof window.showAppModalAlert === 'function') {
+                        window.showAppModalAlert(
+                            "Fungsi Terhad (Versi Pro)",
+                            `<p style="text-align:center; font-weight:bold; color:#b91c1c; margin:10px 0;">
+                                <i class="fa-solid fa-crown" style="font-size:2.2rem; color:#f59e0b; display:block; margin-bottom:8px;"></i>
+                                Penambahan profil anak terhad untuk Pakej Pro.<br/>
+                                <span style="font-size:0.85rem; font-weight:normal; color:#64748b;">
+                                    Pelan percuma menyokong 1 profil anak sahaja. Sila langgan Pakej Pro untuk mendaftar sehingga 3 orang anak!
+                                </span>
+                            </p>`
+                        );
                     } else {
-                        alert("Sila masukkan nama profil yang sah.");
+                        alert("Penambahan profil anak terhad untuk Pakej Pro. Sila langgan Pakej Pro untuk mendaftar sehingga 3 profil anak!");
                     }
                 };
-            };
+            } else {
+                btnTambah.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 10px; border-radius: 15px; width: 100%; aspect-ratio: 1; border: 2px dashed #0284c7; box-shadow: none;';
+                btnTambah.innerHTML = '<div style="font-size: 2.5rem; color: #0284c7; margin-bottom: 8px;"><i class="fa-solid fa-plus"></i></div><span style="font-size: 0.95rem; line-height: 1.2; text-align: center; color: #0284c7; font-weight: bold;">Tambah<br/>Anak</span>';
+                btnTambah.onclick = () => {
+                    const userPlan = window.currentParentPlan || localStorage.getItem('bunyiKataParentPlan') || 'pro';
+                    const maxAllowed = (userPlan === 'basic') ? 1 : 3;
+                    if (childNames.length >= maxAllowed) {
+                        alert("Pakej Semasa Anda membenarkan 1 Profil Anak sahaja.\n\nSila langgan Pakej PRO untuk mendaftar sehingga 3 orang anak!");
+                        if (typeof window.openPakejProModal === 'function') window.openPakejProModal('ibubapa');
+                        return;
+                    }
+                    const overlay = document.createElement('div');
+                    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);';
+
+                    const modalBox = document.createElement('div');
+                    modalBox.className = 'neo-box bg-white';
+                    modalBox.style.cssText = 'width: 90%; max-width: 400px; padding: 0; border-radius: 20px; text-align: center; position: relative; overflow: hidden;';
+
+                    modalBox.innerHTML = `
+                                <div style="background-color: #0284c7; color: white; padding: 15px; font-size: 1.3rem; font-weight: bold; border-bottom: 2px solid var(--color-dark);">
+                                    TAMBAH PROFIL ANAK
+                                </div>
+                                <div style="padding: 25px; background-color: #ffffff; background-image: radial-gradient(#cbd5e1 2px, transparent 2px); background-size: 20px 20px;">
+                                    <div style="background-color: #e0f2fe; border: 1.5px solid #0284c7; border-radius: 12px; padding: 8px 16px; margin-bottom: 18px; display: inline-block;">
+                                        <p style="font-size: 0.95rem; font-weight: bold; margin: 0; color: #0369a1;">Masukkan nama dan pilih watak:</p>
+                                    </div>
+                                    <input type="text" id="new-child-name" class="neo-input century-gothic-font" placeholder="Nama Panggilan" style="width: 100%; padding: 12px; border-radius: 12px; margin-bottom: 20px; font-size: 1.1rem; text-align: center; border: 2px solid var(--color-dark);" />
+                                    
+                                    <div id="new-child-avatars" style="display: flex; gap: 15px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap;">
+                                        <div class="avatar-option" data-src="/images/avatar/avatar1.png" style="width: 110px; border-radius: 16px; border: 4px solid #0284c7; cursor: pointer; background: var(--color-orange); padding: 10px; box-sizing: border-box; transform: scale(1.05); transition: all 0.2s ease; display: flex; justify-content: center; align-items: center;"><img src="/images/avatar/avatar1.png" style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));" /></div>
+                                        <div class="avatar-option" data-src="/images/avatar/avatar2.png" style="width: 110px; border-radius: 16px; border: 3px solid #cbd5e1; cursor: pointer; background: white; padding: 10px; box-sizing: border-box; transform: scale(1); transition: all 0.2s ease; display: flex; justify-content: center; align-items: center;"><img src="/images/avatar/avatar2.png" style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));" /></div>
+                                    </div>
+                                    
+                                    <div style="display: flex; gap: 10px;">
+                                        <button id="btn-cancel-add" class="neo-btn bg-red" style="flex: 1; padding: 12px; font-size: 1.1rem;"><i class="fa-solid fa-xmark"></i> Batal</button>
+                                        <button id="btn-confirm-add" class="neo-btn" style="flex: 1; padding: 12px; font-size: 1.1rem; background-color: #0284c7; color: white;"><i class="fa-solid fa-check"></i> Simpan</button>
+                                    </div>
+                                </div>
+                            `;
+
+                    overlay.appendChild(modalBox);
+                    document.body.appendChild(overlay);
+
+                    let selectedAvatar = '/images/avatar/avatar1.png';
+
+                    const opts = modalBox.querySelectorAll('.avatar-option');
+                    opts.forEach(opt => {
+                        opt.onclick = () => {
+                            opts.forEach(o => {
+                                o.style.borderColor = '#cbd5e1';
+                                o.style.background = 'white';
+                                o.style.transform = 'scale(1)';
+                            });
+                            opt.style.borderColor = '#0284c7';
+                            opt.style.background = 'var(--color-orange)';
+                            opt.style.transform = 'scale(1.05)';
+                            selectedAvatar = opt.getAttribute('data-src');
+                        };
+                    });
+
+                    document.getElementById('btn-cancel-add').onclick = () => {
+                        document.body.removeChild(overlay);
+                    };
+
+                    document.getElementById('btn-confirm-add').onclick = () => {
+                        const newName = document.getElementById('new-child-name').value;
+                        if (newName && newName.trim()) {
+                            const finalName = newName.trim().toUpperCase();
+                            if (window.parentChildNames && !window.parentChildNames.includes(finalName)) {
+                                window.parentChildNames.push(finalName);
+                            } else if (!window.parentChildNames) {
+                                window.parentChildNames = [finalName];
+                            }
+                            localStorage.setItem('bunyiKataParentChildNames', JSON.stringify(window.parentChildNames));
+
+                            if (typeof studentData !== 'undefined') {
+                                if (!studentData[finalName]) {
+                                    studentData[finalName] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1 };
+                                }
+                                studentData[finalName].avatar = selectedAvatar;
+                            }
+                            if (typeof saveStudentData === 'function') saveStudentData();
+
+                            // Sync to Firebase (koleksi students & profiles.anak)
+                            const parentId = localStorage.getItem('bunyiKataUserId') || '';
+                            const kodKeluarga = localStorage.getItem('bunyiKataKodKeluarga') || '';
+                            if (typeof window.saveParentChildToFirebase === 'function') {
+                                window.saveParentChildToFirebase({
+                                    namaAnak: finalName,
+                                    parentIdOrEmail: parentId,
+                                    avatarUrl: selectedAvatar,
+                                    kodKeluarga: kodKeluarga
+                                }).catch(function(e) { console.warn('Ralat simpan anak:', e); });
+                            } else if (typeof window.syncStudentToFirebase === 'function') {
+                                window.syncStudentToFirebase({
+                                    nama: finalName,
+                                    kodKeluarga: kodKeluarga,
+                                    totalBintang: 0
+                                }).catch(function() {});
+                            }
+
+                            document.body.removeChild(overlay);
+                            window.bukaModalPilihAnak();
+                        } else {
+                            alert("Sila masukkan nama profil yang sah.");
+                        }
+                    };
+                };
+            }
             container.appendChild(btnTambah);
+        }
+
+        if (childNames.length === 0 && !isStudentLogin) {
+            const isTrial = (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : false) || (!window.isUserAdmin?.() && (localStorage.getItem('bunyiKataParentPlan') === 'trial' || (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase() === 'percuma'));
+            const emptyNotice = document.createElement('div');
+            emptyNotice.style.cssText = 'grid-column: 1 / -1; padding: 12px 10px; text-align: center; color: #475569; font-size: 0.82rem; font-weight: 600; background: #f0f9ff; border: 1.5px dashed #0284c7; border-radius: 12px; margin-top: 6px; line-height: 1.4;';
+            if (isTrial) {
+                emptyNotice.innerHTML = '<i class="fa-solid fa-crown" style="color:#f59e0b; margin-right:6px;"></i><b>Pelan Percuma:</b> 1 profil anak dibenarkan.<br/><span style="font-size:0.75rem; font-weight:normal; color:#64748b;">Langgan <b>Pakej Pro</b> untuk menambah sehingga 3 profil anak & akses penuh!</span>';
+            } else {
+                emptyNotice.innerHTML = '<i class="fa-solid fa-circle-info" style="color:#0284c7; margin-right:6px;"></i>Belum ada profil anak didaftarkan.<br/><span style="font-size:0.75rem; font-weight:normal; color:#64748b;">Sila klik butang <b>"+ Tambah Anak"</b> di atas untuk mendaftarkan profil anak anda.</span>';
+            }
+            container.appendChild(emptyNotice);
         }
     }
     modal.style.display = 'flex';
@@ -1711,7 +2421,7 @@ window.logMasukIbuBapa = function () {
 };
 
 window.masukModIbuBapa = function (namaAnak) {
-    const childNames = window.parentChildNames || defaultParentChildNames || [];
+    const childNames = window.parentChildNames || [];
 
     if (namaAnak === "Profil Ibu Bapa") {
         window.anakTerpilih = childNames.length > 0 ? childNames[0] : '';
@@ -1725,9 +2435,14 @@ window.masukModIbuBapa = function (namaAnak) {
     window.modIbuBapaAktif = true;
     modGuruAktif = false;
     window.modGuruAktif = false;
+    modAdminAktif = false;
+    window.modAdminAktif = false;
+    window.isAdminMode = false;
 
     document.body.classList.add('parent-mode');
     document.body.classList.remove('teacher-mode');
+    document.body.classList.remove('admin-mode');
+    window.dispatchEvent(new CustomEvent('admin-mode-change', { detail: { isAdmin: false } }));
 
     const badge = document.getElementById('teacher-banner-badge');
     if (badge) {
@@ -1744,6 +2459,49 @@ window.masukModIbuBapa = function (namaAnak) {
     window.tutupModalPilihAnak();
     paparSkrin('ibubapa-dashboard');
 
+    const kodKeluarga = localStorage.getItem('bunyiKataKodKeluarga');
+    const namaKeluarga = localStorage.getItem('bunyiKataNamaKeluarga');
+    const parentId = localStorage.getItem('bunyiKataUserId');
+    if (namaKeluarga && typeof window.updateParentFamilyAndNameInFirebase === 'function') {
+        window.updateParentFamilyAndNameInFirebase({
+            namaKeluarga: namaKeluarga,
+            parentIdOrEmail: parentId || '',
+            kodKeluarga: kodKeluarga || ''
+        }).catch(function() {});
+    } else if (kodKeluarga && namaKeluarga && typeof window.saveFamilyToFirebase === 'function') {
+        window.saveFamilyToFirebase({
+            kodKeluarga: kodKeluarga,
+            namaKeluarga: namaKeluarga,
+            namaIbubapa: window.namaIbubapaAktif || 'Ibu Bapa',
+            parentId: parentId || undefined
+        }).catch(function() {});
+    }
+
+    const pChildren = window.parentChildNames || [];
+    if (Array.isArray(pChildren) && pChildren.length > 0) {
+        pChildren.forEach(function(cName) {
+            if (cName) {
+                if (typeof window.saveParentChildToFirebase === 'function') {
+                    window.saveParentChildToFirebase({
+                        namaAnak: cName,
+                        parentIdOrEmail: parentId || '',
+                        kodKeluarga: kodKeluarga || ''
+                    }).catch(function() {});
+                } else if (kodKeluarga && typeof window.syncStudentToFirebase === 'function') {
+                    window.syncStudentToFirebase({
+                        nama: cName,
+                        keluargaId: kodKeluarga,
+                        totalBintang: 0
+                    }).catch(function() {});
+                }
+            }
+        });
+    }
+
+    if (typeof window.syncParentSessionFromFirebase === 'function' && parentId) {
+        window.syncParentSessionFromFirebase(parentId);
+    }
+
     if (!localStorage.getItem('bunyiKataIbubapaSetupDone')) {
         setTimeout(function () {
             if (typeof window.bukaSetupModal === 'function') {
@@ -1752,6 +2510,7 @@ window.masukModIbuBapa = function (namaAnak) {
         }, 350);
     }
 };
+window.masukModIbubapa = window.masukModIbuBapa;
 
 window.tukarAnakIbuBapa = function (namaAnakBaru) {
     if (!namaAnakBaru) return;
@@ -1784,12 +2543,13 @@ window.keluarModIbuBapa = function () {
 };
 
 window.renderParentDashboard = function () {
-    const childNames = window.parentChildNames || defaultParentChildNames || [];
+    const childNames = (Array.isArray(window.parentChildNames) ? window.parentChildNames.slice() : [])
+        .sort((a, b) => a.localeCompare(b, 'ms', { sensitivity: 'base' }));
 
     if (!window.anakTerpilih && childNames.length > 0) {
         window.anakTerpilih = childNames[0];
     }
-    const childName = window.anakTerpilih || 'Murid';
+    const childName = window.anakTerpilih || (childNames.length > 0 ? childNames[0] : 'Tiada Anak');
     const data = (window.studentData && window.studentData[childName]) ? window.studentData[childName] : studentRecord();
 
     // Update header info
@@ -1803,7 +2563,7 @@ window.renderParentDashboard = function () {
     if (famKod) famKod.textContent = localStorage.getItem('bunyiKataKodKeluarga') || '-';
 
     const kelasTitle = document.getElementById('ibubapa-nama-kelas-title');
-    if (kelasTitle) kelasTitle.textContent = localStorage.getItem('bunyiKataNamaKelas') || '1 Cemerlang';
+    if (kelasTitle) kelasTitle.textContent = localStorage.getItem('bunyiKataNamaKelas') || '-';
 
     const avatarEl = document.getElementById('ibubapa-avatar-icon');
     if (avatarEl && typeof updateAvatarElement === 'function') {
@@ -1814,18 +2574,26 @@ window.renderParentDashboard = function () {
     const select = document.getElementById('ibubapa-dashboard-child-select');
     if (select) {
         select.innerHTML = '';
-        childNames.forEach(n => {
+        if (childNames.length === 0) {
             const opt = document.createElement('option');
-            opt.value = n;
-            opt.textContent = n;
-            if (n === childName) opt.selected = true;
+            opt.value = '';
+            opt.textContent = '-- Belum Ada Anak --';
             select.appendChild(opt);
-        });
+        } else {
+            childNames.forEach(n => {
+                const opt = document.createElement('option');
+                opt.value = n;
+                opt.textContent = n;
+                if (n === childName) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
     }
 
     // Stats calculation
     const totalScore = typeof jumlahMarkah === 'function' ? jumlahMarkah(data) : 0;
-    const badgesCount = (data.badges || []).length;
+    const earnedBadges = typeof kiraLencanaMurid === 'function' ? kiraLencanaMurid(data) : (data.badges || []);
+    const badgesCount = earnedBadges.length;
 
     let completedCount = 0;
     if (data.belajar) {
@@ -1899,9 +2667,9 @@ window.renderParentDashboard = function () {
         mapObj.modules.forEach(mod => {
             const key = mod.id;
             const maxScore = typeof getMaxScore === 'function' ? getMaxScore(key) : (key === 'suku_kata_v_kv' || key === 'suku_kata_kvkk' ? 6 : 10);
-            const stars = Number(localStorage.getItem('stars_' + key) || 0);
-            const score = (data.scores && data.scores[key] !== undefined) ? data.scores[key] : (stars > 0 ? Math.round((stars / 3) * maxScore) : 0);
-            const isDone = Boolean((data.latihan && data.latihan[key]) || stars > 0 || (data.scores && data.scores[key] !== undefined && data.scores[key] > 0));
+            const stars = (data && data.stars && data.stars[key] !== undefined) ? Number(data.stars[key] || 0) : 0;
+            const score = (data && data.scores && data.scores[key] !== undefined) ? Number(data.scores[key] || 0) : 0;
+            const isDone = Boolean((data && data.latihan && data.latihan[key]) || stars > 0 || score > 0);
 
             const tr = document.createElement('tr');
 
@@ -1939,7 +2707,7 @@ function muatTurunCSV(targetPetaId) {
     const selectedPetaId = targetPetaId || window.petaFilter || 'all';
 
     let namaSekolah = localStorage.getItem('pdf_sekolah') || 'SEKOLAH KEBANGSAAN';
-    let namaKelas = localStorage.getItem('bunyiKataNamaKelas') || localStorage.getItem('pdf_kelas') || '1 Cemerlang';
+    let namaKelas = localStorage.getItem('bunyiKataNamaKelas') || localStorage.getItem('pdf_kelas') || '-';
     let namaGuru = localStorage.getItem('pdf_guru') || 'GURU BAHASA MELAYU';
 
     const today = new Date();
@@ -1995,8 +2763,8 @@ function muatTurunCSV(targetPetaId) {
                 (mapItem.modules || []).forEach(mod => {
                     const maxScore = typeof getMaxScore === 'function' ? getMaxScore(mod.id) : (mod.id === 'suku_kata_v_kv' || mod.id === 'suku_kata_kvkk' ? 6 : 10);
                     possibleScoreSum += maxScore;
-                    const stars = Number(localStorage.getItem('stars_' + mod.id) || 0);
-                    const score = (s && s[mod.id] !== undefined) ? s[mod.id] : (stars > 0 ? Math.round(stars * (maxScore / 3)) : 0);
+                    const stars = (data && data.stars && data.stars[mod.id] !== undefined) ? Number(data.stars[mod.id] || 0) : 0;
+                    const score = (s && s[mod.id] !== undefined) ? Number(s[mod.id] || 0) : 0;
                     const isDone = Boolean((l && l[mod.id]) || stars > 0 || score > 0);
 
                     actualScoreSum += score;
@@ -2100,8 +2868,8 @@ function muatTurunCSV(targetPetaId) {
         const moduleScores = mapObj.modules.map(mod => {
             const maxScore = typeof getMaxScore === 'function' ? getMaxScore(mod.id) : (mod.id === 'suku_kata_v_kv' || mod.id === 'suku_kata_kvkk' ? 6 : 10);
             totalPossibleMapScore += maxScore;
-            const stars = Number(localStorage.getItem('stars_' + mod.id) || 0);
-            const score = (s && s[mod.id] !== undefined) ? s[mod.id] : (stars > 0 ? Math.round(stars * (maxScore / 3)) : 0);
+            const stars = (data && data.stars && data.stars[mod.id] !== undefined) ? Number(data.stars[mod.id] || 0) : 0;
+            const score = (s && s[mod.id] !== undefined) ? Number(s[mod.id] || 0) : 0;
             const isDone = Boolean((l && l[mod.id]) || stars > 0 || score > 0);
 
             studentMapScore += score;
@@ -2223,7 +2991,7 @@ async function cetakLaporanPDF(targetPetaId) {
     const selectedPetaId = targetPetaId || window.petaFilter || 'all';
 
     let namaSekolah = localStorage.getItem('pdf_sekolah') || 'SEKOLAH KEBANGSAAN';
-    let namaKelas = localStorage.getItem('bunyiKataNamaKelas') || localStorage.getItem('pdf_kelas') || '1 Cemerlang';
+    let namaKelas = localStorage.getItem('bunyiKataNamaKelas') || localStorage.getItem('pdf_kelas') || '-';
     let namaGuru = localStorage.getItem('pdf_guru') || 'GURU BAHASA MELAYU';
 
     const { jsPDF } = window.jspdf;
@@ -2380,9 +3148,9 @@ async function cetakLaporanPDF(targetPetaId) {
 
                 allMaps.forEach(([_, mapObj]) => {
                     (mapObj.modules || []).forEach(mod => {
-                        const stars = Number(localStorage.getItem('stars_' + mod.id) || 0);
-                        const score = (s && s[mod.id] !== undefined) ? s[mod.id] : 0;
-                        if (l[mod.id] || stars > 0 || score > 0) totalCompletedModules++;
+                        const stars = (data && data.stars && data.stars[mod.id] !== undefined) ? Number(data.stars[mod.id] || 0) : 0;
+                        const score = (s && s[mod.id] !== undefined) ? Number(s[mod.id] || 0) : 0;
+                        if ((l && l[mod.id]) || stars > 0 || score > 0) totalCompletedModules++;
                     });
                 });
             });
@@ -2450,10 +3218,10 @@ async function cetakLaporanPDF(targetPetaId) {
                     const s = data.scores || {};
                     const moduleScores = mapObj.modules.map(mod => {
                         const maxScore = typeof getMaxScore === 'function' ? getMaxScore(mod.id) : (mod.id === 'suku_kata_v_kv' || mod.id === 'suku_kata_kvkk' ? 6 : 10);
-                        const score = (s && s[mod.id] !== undefined) ? s[mod.id] : 0;
-                        const stars = Number(localStorage.getItem('stars_' + mod.id) || 0);
+                        const score = (s && s[mod.id] !== undefined) ? Number(s[mod.id] || 0) : 0;
+                        const stars = (data && data.stars && data.stars[mod.id] !== undefined) ? Number(data.stars[mod.id] || 0) : 0;
                         if (score > 0) return `${score}/${maxScore}`;
-                        else if (l[mod.id]) return 'Selesai';
+                        else if (l && l[mod.id]) return 'Selesai';
                         else if (stars > 0) return `${Math.round(stars * (maxScore / 3))}/${maxScore}`;
                         return 'Belum';
                     });
@@ -2622,9 +3390,9 @@ async function cetakLaporanPDF(targetPetaId) {
             totalBadgesCount += (data.badges || []).length;
 
             (mapObj.modules || []).forEach(mod => {
-                const stars = Number(localStorage.getItem('stars_' + mod.id) || 0);
-                const score = (s && s[mod.id] !== undefined) ? s[mod.id] : 0;
-                if (l[mod.id] || stars > 0 || score > 0) totalCompletedModules++;
+                const stars = (data && data.stars && data.stars[mod.id] !== undefined) ? Number(data.stars[mod.id] || 0) : 0;
+                const score = (s && s[mod.id] !== undefined) ? Number(s[mod.id] || 0) : 0;
+                if ((l && l[mod.id]) || stars > 0 || score > 0) totalCompletedModules++;
             });
         });
 
@@ -2675,10 +3443,10 @@ async function cetakLaporanPDF(targetPetaId) {
             const s = data.scores || {};
             const moduleScores = mapObj.modules.map(mod => {
                 const maxScore = typeof getMaxScore === 'function' ? getMaxScore(mod.id) : (mod.id === 'suku_kata_v_kv' || mod.id === 'suku_kata_kvkk' ? 6 : 10);
-                const score = (s && s[mod.id] !== undefined) ? s[mod.id] : 0;
-                const stars = Number(localStorage.getItem('stars_' + mod.id) || 0);
+                const score = (s && s[mod.id] !== undefined) ? Number(s[mod.id] || 0) : 0;
+                const stars = (data && data.stars && data.stars[mod.id] !== undefined) ? Number(data.stars[mod.id] || 0) : 0;
                 if (score > 0) return `${score}/${maxScore}`;
-                else if (l[mod.id]) return 'Selesai';
+                else if (l && l[mod.id]) return 'Selesai';
                 else if (stars > 0) return `${Math.round(stars * (maxScore / 3))}/${maxScore}`;
                 return 'Belum';
             });
@@ -3008,8 +3776,36 @@ function getMaxScore(modId) {
 window.getMaxScore = getMaxScore;
 
 function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '') {
-    if (modGuruAktif) return;
-    const currentStudent = window.namaMuridAktif || namaMuridAktif;
+    const userRole = localStorage.getItem('bunyiKataUserRole') || '';
+    // Jangan sesekali simpan progres jika dalam mod Guru atau mod Admin (Guru/Admin sedang teroka/uji sistem)
+    if (
+        modGuruAktif ||
+        window.modGuruAktif ||
+        modAdminAktif ||
+        window.modAdminAktif ||
+        window.isAdminMode ||
+        document.body.classList.contains('teacher-mode') ||
+        document.body.classList.contains('admin-mode') ||
+        userRole === 'guru' ||
+        userRole === 'admin'
+    ) {
+        return;
+    }
+
+    const currentStudent = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '');
+    const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
+    if (!currentStudent || GHOST_NAMES.includes(currentStudent.trim().toLowerCase())) {
+        return;
+    }
+
+    // Jika mod ibu bapa, hanya rekod jika murid aktif adalah anak yang berdaftar dalam senarai anak
+    if (userRole === 'ibubapa') {
+        const validChildren = window.parentChildNames || [];
+        if (!validChildren.some(c => c.trim().toLowerCase() === currentStudent.trim().toLowerCase())) {
+            return;
+        }
+    }
+
     if (currentStudent && studentData[currentStudent]) {
         const maxScore = getMaxScore(aktiviti);
         const effectiveMarkah = typeof markah === 'number' && markah >= 0 ? markah : maxScore;
@@ -3026,10 +3822,7 @@ function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '') {
         if (isUncappedActivity) {
             starCount = typeof markah === 'number' ? markah : 0;
         } else {
-            const starFromLS = Number(localStorage.getItem('stars_' + aktiviti) || 0);
-            if (starFromLS > 0) {
-                starCount = Math.min(starFromLS, 3);
-            } else if (typeof markah === 'number') {
+            if (typeof markah === 'number') {
                 if (markah <= 3) {
                     starCount = Math.min(markah, 3);
                 } else if (maxScore > 0) {
@@ -3047,16 +3840,42 @@ function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '') {
             studentData[currentStudent].stars[aktiviti] = Math.max(studentData[currentStudent].stars[aktiviti] || 0, finalStarCount);
         }
 
-        const badgeKey = lencana || (kategori === 'latihan' ? aktiviti : '');
-        if (badgeKey && !studentData[currentStudent].badges.includes(badgeKey)) {
-            studentData[currentStudent].badges.push(badgeKey);
-            if (!studentData[currentStudent].newBadges) studentData[currentStudent].newBadges = [];
-            studentData[currentStudent].newBadges.push(badgeKey);
+        if (typeof kiraLencanaMurid === 'function') {
+            studentData[currentStudent].badges = kiraLencanaMurid(studentData[currentStudent]);
         }
 
         if (!studentData[currentStudent].history) studentData[currentStudent].history = [];
         studentData[currentStudent].history.push({ date: new Date().toISOString(), aktiviti, kategori, markah: effectiveMarkah });
         saveStudentData();
+
+        // Rekod terus ke pangkalan data Firebase (Hanya untuk pengguna berdaftar PRO, bukan trial/tetamu)
+        if (
+            typeof window.syncStudentToFirebase === 'function' &&
+            window.userAccessLevel !== 'trial' &&
+            !window.isGuestMode &&
+            currentStudent.toLowerCase() !== 'murid' &&
+            currentStudent.toLowerCase() !== 'tetamu' &&
+            currentStudent.toLowerCase() !== 'guest'
+        ) {
+            const activeCode = localStorage.getItem('bunyiKataKodKelas') || '';
+            const activeFam = localStorage.getItem('bunyiKataKodKeluarga') || '';
+            const totalStars = typeof jumlahMarkah === 'function' ? jumlahMarkah(studentData[currentStudent]) : 0;
+
+            window.syncStudentToFirebase({
+                nama: currentStudent,
+                kodKelas: activeCode,
+                kodKeluarga: activeFam,
+                totalBintang: totalStars
+            }).then(stu => {
+                if (stu && stu.id && typeof window.recordStudentActivity === 'function') {
+                    window.recordStudentActivity(stu.id, kategori, aktiviti, effectiveMarkah, starCount);
+                    if (badgeKey && typeof window.recordStudentBadge === 'function') {
+                        window.recordStudentBadge(stu.id, badgeKey);
+                    }
+                }
+            }).catch(e => console.warn('Firebase activity record notice:', e));
+        }
+
         console.log(`[REKOD] ${currentStudent} selesai ${kategori}: ${aktiviti} (${effectiveMarkah} markah)`);
         if (kategori === 'latihan') unlockNextLatihan(aktiviti);
         if (typeof updateProfilUI === 'function') updateProfilUI();
@@ -3088,7 +3907,7 @@ function jumlahMarkah(data) {
                         else if (sc > 0) st = 1;
                     }
                 } else {
-                    st = Number(localStorage.getItem('extra_stars_' + key) || localStorage.getItem('stars_' + key) || 0);
+                    st = 0;
                 }
                 totalStars += Math.min(Math.max(st, 0), 3);
             });
@@ -3133,12 +3952,12 @@ window.updateProfilUI = updateProfilUI;
 var progressChartInstance = null;
 
 var AVATAR_CONFIG = [
-    { icon: '/images/avatar/avatar1.png', name: 'Lelaki 1', reqStars: 0 },
-    { icon: '/images/avatar/avatar2.png', name: 'Perempuan 2', reqStars: 0 },
-    { icon: '/images/avatar/avatar4.png', name: 'Lelaki 2', reqStars: 20 },
-    { icon: '/images/avatar/avatar3.png', name: 'Perempuan 1', reqStars: 40 },
-    { icon: '/images/avatar/avatar5.png', name: 'Hero 1', reqStars: 60 },
-    { icon: '/images/avatar/avatar6.png', name: 'Hero 2', reqStars: 60 }
+    { icon: '/images/avatar/avatar1.png', name: 'Lelaki 1', reqStars: 0, isPro: false },
+    { icon: '/images/avatar/avatar2.png', name: 'Perempuan 2', reqStars: 0, isPro: false },
+    { icon: '/images/avatar/avatar4.png', name: 'Lelaki 2', reqStars: 20, isPro: true },
+    { icon: '/images/avatar/avatar3.png', name: 'Perempuan 1', reqStars: 40, isPro: true },
+    { icon: '/images/avatar/avatar5.png', name: 'Hero 1', reqStars: 60, isPro: true },
+    { icon: '/images/avatar/avatar6.png', name: 'Hero 2', reqStars: 60, isPro: true }
 ];
 
 var avatarList = AVATAR_CONFIG.map(a => a.icon);
@@ -3198,6 +4017,15 @@ window.profileSwiperNav = function (dir) {
     if (newIdx >= 0 && newIdx < AVATAR_CONFIG.length) {
         window.avatar3DActiveIndex = newIdx;
         var cfg = AVATAR_CONFIG[newIdx];
+        var isTrial = !window.isUserAdmin?.() && (window.userAccessLevel === 'trial' || window.isGuestMode || ((namaMuridAktif && studentData[namaMuridAktif]) ? !studentData[namaMuridAktif].isPro && !window.currentUser : true));
+        var isProAvatar = cfg.isPro || cfg.reqStars > 0;
+
+        if (isTrial && isProAvatar) {
+            if (typeof window.openPakejProModal === 'function') {
+                window.openPakejProModal('guru');
+            }
+        }
+
         var curStudent = (namaMuridAktif && studentData[namaMuridAktif]) ? studentData[namaMuridAktif] : {};
         var totalStars = typeof jumlahMarkah === 'function' ? jumlahMarkah(curStudent) : 0;
         var spentStars = curStudent.spentStars || 0;
@@ -3215,6 +4043,18 @@ window.selectProfileAvatarIndex = function (idx) {
     if (idx >= 0 && idx < AVATAR_CONFIG.length) {
         window.avatar3DActiveIndex = idx;
         var cfg = AVATAR_CONFIG[idx];
+        var isTrial = !window.isUserAdmin?.() && (window.userAccessLevel === 'trial' || window.isGuestMode || ((namaMuridAktif && studentData[namaMuridAktif]) ? !studentData[namaMuridAktif].isPro && !window.currentUser : true));
+        var isProAvatar = cfg.isPro || cfg.reqStars > 0;
+
+        if (isTrial && isProAvatar) {
+            if (typeof window.playBubble === 'function') window.playBubble();
+            if (typeof window.openPakejProModal === 'function') {
+                window.openPakejProModal('guru');
+            }
+            renderAvatarOptions();
+            return;
+        }
+
         var curStudent = (namaMuridAktif && studentData[namaMuridAktif]) ? studentData[namaMuridAktif] : {};
         var totalStars = typeof jumlahMarkah === 'function' ? jumlahMarkah(curStudent) : 0;
         var spentStars = curStudent.spentStars || 0;
@@ -3283,6 +4123,9 @@ function renderAvatarOptions() {
                 opacity = 0;
             }
 
+            const isTrial = !window.isUserAdmin?.() && (window.userAccessLevel === 'trial' || window.isGuestMode || ((namaMuridAktif && studentData[namaMuridAktif]) ? !studentData[namaMuridAktif].isPro && !window.currentUser : true));
+            const isProAvatar = cfg.isPro || cfg.reqStars > 0;
+
             let badgeHTML = '';
             let borderStyle = '2px solid #cbd5e1';
             let cardBg = 'radial-gradient(#dcd5c0 0.75px, transparent 0.75px), linear-gradient(135deg, #f7f4eb 0%, #ebe4d5 100%)';
@@ -3291,6 +4134,15 @@ function renderAvatarOptions() {
                 borderStyle = '4px solid #f59e0b';
                 cardBg = 'radial-gradient(#e5dec9 0.75px, transparent 0.75px), linear-gradient(135deg, #ffffff 0%, #fffdf7 50%, #f5eee0 100%)';
                 badgeHTML = `<div style="position:absolute; top:6px; right:6px; background:#f59e0b; color:white; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; border:1.5px solid white; z-index:10;"><i class="fa-solid fa-check"></i></div>`;
+            } else if (isTrial && isProAvatar) {
+                borderStyle = '2px dashed #ef4444';
+                cardBg = 'radial-gradient(#fecdd3 0.75px, transparent 0.75px), linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)';
+                badgeHTML = `<div style="position:absolute; inset:0; background:rgba(15, 23, 42, 0.48); border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; z-index:10; padding:4px;">
+                            <i class="fa-solid fa-lock" style="font-size:1.6rem; color:#ffffff; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.7)); margin-bottom:6px;"></i>
+                            <div style="font-size:0.72rem; font-weight:800; color:#ffffff; background:#dc2626; border:1.5px solid #ef4444; border-radius:8px; padding:3px 10px; box-shadow:0 2px 6px rgba(0,0,0,0.35); text-transform:none;">
+                                Versi Pro
+                            </div>
+                        </div>`;
             } else if (canClaim) {
                 borderStyle = '3px solid #f59e0b';
                 cardBg = 'radial-gradient(#eddba8 0.75px, transparent 0.75px), linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)';
@@ -3323,7 +4175,7 @@ function renderAvatarOptions() {
                         ${paperTextureHTML}
                         ${shineHTML}
                         <div style="position:relative; width:110px; height:140px; display:flex; align-items:center; justify-content:center; z-index:5;">
-                            <img referrerpolicy="no-referrer" src="${icon}" style="width:100%; height:100%; object-fit:contain; filter:${!isClaimed ? 'grayscale(100%) opacity(0.4)' : 'drop-shadow(0 4px 8px rgba(0,0,0,0.12))'};" />
+                            <img referrerpolicy="no-referrer" src="${icon}" style="width:100%; height:100%; object-fit:contain; filter:${(isTrial && isProAvatar) ? 'brightness(75%) opacity(0.65)' : (!isClaimed ? 'grayscale(100%) opacity(0.4)' : 'drop-shadow(0 4px 8px rgba(0,0,0,0.12))')};" />
                             ${badgeHTML}
                         </div>`;
 
@@ -3374,6 +4226,9 @@ function renderAvatarOptions() {
             opacity = 0;
         }
 
+        const isTrial = !window.isUserAdmin?.() && (window.userAccessLevel === 'trial' || window.isGuestMode || ((namaMuridAktif && studentData[namaMuridAktif]) ? !studentData[namaMuridAktif].isPro && !window.currentUser : true));
+        const isProAvatar = cfg.isPro || cfg.reqStars > 0;
+
         let badgeHTML = '';
         let borderStyle = '2px solid #cbd5e1';
         let cardBg = 'radial-gradient(#dcd5c0 0.75px, transparent 0.75px), linear-gradient(135deg, #f7f4eb 0%, #ebe4d5 100%)';
@@ -3382,6 +4237,15 @@ function renderAvatarOptions() {
             borderStyle = '4px solid #f59e0b';
             cardBg = 'radial-gradient(#e5dec9 0.75px, transparent 0.75px), linear-gradient(135deg, #ffffff 0%, #fffdf7 50%, #f5eee0 100%)';
             badgeHTML = `<div style="position:absolute; top:6px; right:6px; background:#f59e0b; color:white; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; border:1.5px solid white; z-index:10;"><i class="fa-solid fa-check"></i></div>`;
+        } else if (isTrial && isProAvatar) {
+            borderStyle = '2px dashed #ef4444';
+            cardBg = 'radial-gradient(#fecdd3 0.75px, transparent 0.75px), linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)';
+            badgeHTML = `<div style="position:absolute; inset:0; background:rgba(15, 23, 42, 0.48); border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; z-index:10; padding:4px;">
+                        <i class="fa-solid fa-lock" style="font-size:1.6rem; color:#ffffff; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.7)); margin-bottom:6px;"></i>
+                        <div style="font-size:0.72rem; font-weight:800; color:#ffffff; background:#dc2626; border:1.5px solid #ef4444; border-radius:8px; padding:3px 10px; box-shadow:0 2px 6px rgba(0,0,0,0.35); text-transform:none;">
+                            Versi Pro
+                        </div>
+                    </div>`;
         } else if (canClaim) {
             borderStyle = '3px solid #f59e0b';
             cardBg = 'radial-gradient(#eddba8 0.75px, transparent 0.75px), linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)';
@@ -3431,7 +4295,7 @@ function renderAvatarOptions() {
                     ${paperTextureHTML}
                     ${shineHTML}
                     <div style="position:relative; width:110px; height:140px; display:flex; align-items:center; justify-content:center; z-index:5;">
-                        <img referrerpolicy="no-referrer" src="${icon}" style="width:100%; height:100%; object-fit:contain; filter:${!isClaimed ? 'grayscale(100%) opacity(0.4)' : 'drop-shadow(0 4px 8px rgba(0,0,0,0.12))'};" />
+                        <img referrerpolicy="no-referrer" src="${icon}" style="width:100%; height:100%; object-fit:contain; filter:${(isTrial && isProAvatar) ? 'brightness(75%) opacity(0.65)' : (!isClaimed ? 'grayscale(100%) opacity(0.4)' : 'drop-shadow(0 4px 8px rgba(0,0,0,0.12))')};" />
                         ${badgeHTML}
                     </div>
                 </div>`;
@@ -3550,6 +4414,15 @@ window.pilihAvatarTemp = function (icon) {
 window.simpanProfilEdit = function () {
     let newName = document.getElementById('edit-nama-input').value.trim();
     if (!newName) return alert('Sila masukkan nama.');
+
+    var isTrial = !window.isUserAdmin?.() && (window.userAccessLevel === 'trial' || window.isGuestMode || ((namaMuridAktif && studentData[namaMuridAktif]) ? !studentData[namaMuridAktif].isPro && !window.currentUser : true));
+    var chosenCfg = AVATAR_CONFIG.find(function(a) { return a.icon === window.tempSelectedAvatar; });
+    if (isTrial && chosenCfg && (chosenCfg.isPro || chosenCfg.reqStars > 0)) {
+        if (typeof window.openPakejProModal === 'function') {
+            window.openPakejProModal('guru');
+        }
+        return;
+    }
 
     if (newName !== namaMuridAktif) {
         if (studentData[newName]) {
@@ -3781,7 +4654,106 @@ var MAP_CHALLENGES = {
             { id: "consonant_whack", title: "Ketuk Huruf Konsonan", desc: "Ketuk tikus yang pegang huruf konsonan", icon: "fa-hand-pointer", color: "#3b82f6" }
         ]
     }
-};
+// --- SISTEM PENGIRAAN LENCANA RASMI (5 LENCANA) ---
+function kiraLencanaMurid(data) {
+    if (!data) return [];
+    const earned = [];
+    if (typeof MAP_CHALLENGES === 'undefined') return earned;
+
+    const badgeKeys = {
+        1: 'badge_peta_1',
+        2: 'badge_peta_2',
+        3: 'badge_peta_3',
+        4: 'badge_peta_4'
+    };
+
+    let mapsQualifiedCount = 0;
+    for (let petaId = 1; petaId <= 4; petaId++) {
+        const mapObj = MAP_CHALLENGES[petaId];
+        if (!mapObj || !Array.isArray(mapObj.modules)) continue;
+
+        let fullStarCount = 0;
+        mapObj.modules.forEach(mod => {
+            const key = mod.id;
+            let stars = 0;
+            if (data.stars && data.stars[key] !== undefined) {
+                stars = Number(data.stars[key] || 0);
+            } else if (data.scores && data.scores[key] !== undefined) {
+                const maxScore = typeof getMaxScore === 'function' ? getMaxScore(key) : 10;
+                const sc = Number(data.scores[key] || 0);
+                if (sc >= maxScore * 0.9) stars = 3;
+            }
+            if (stars >= 3) {
+                fullStarCount++;
+            }
+        });
+
+        // Kriteria sah: Sekurang-kurangnya 3 aktiviti dalam cabaran utama mendapat 3 bintang penuh
+        if (fullStarCount >= 3) {
+            earned.push(badgeKeys[petaId]);
+            mapsQualifiedCount++;
+        }
+    }
+
+    // Lencana Ke-5: Master Badge "Kapten Harta Karun" (bila kesemua 4 cabaran peta utama selesai)
+    if (mapsQualifiedCount >= 4) {
+        earned.push('badge_master');
+    }
+
+    return earned;
+}
+window.kiraLencanaMurid = kiraLencanaMurid;
+
+// --- SISTEM PENGECAMAN PINTAR NAMA MURID (SMART PARSING) ---
+function parseStudentNamesInput(rawText) {
+    if (!rawText || typeof rawText !== 'string') return [];
+    
+    let text = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+    // Tangani format nombor turutan atas satu baris, cth: "1. Siti Aishah, 2. Muhammad Amir" atau "1) Ali 2) Abu"
+    text = text.replace(/(?:^|[\s,;])(?:no\.?|bil\.?|)\s*(\d+)[\.\)\-\:]\s*/gi, '\n');
+
+    // Ganti bullet points dengan baris baru
+    text = text.replace(/[\u2022\u2023\u25E6\u2043\u2219\*\•\-\–\—\>]\s*/g, '\n');
+
+    // Pecahkan mengikut baris baru, koma, atau titik bertindih
+    const rawItems = text.split(/[\n,;\t]+/);
+    const cleanedNames = [];
+    const seen = new Set();
+    const GHOST_NAMES = ['TETAMU', 'MURID', 'GUEST', 'STUDENT', 'NAMA', 'NAME', 'BIL', 'NO', 'LELAKI', 'PEREMPUAN', 'JANTINA', 'KELAS'];
+
+    for (let item of rawItems) {
+        if (!item) continue;
+        // Buang nombor turutan di awal, simbol, dan tanda baca
+        let clean = item
+            .replace(/^(?:no\.?|bil\.?|)\s*\d+[\.\)\-\:\s]*/i, '')
+            .replace(/^[•\*\-\–\—\>\[\]\(\)\.\,\:\;\s]+/, '')
+            .replace(/[•\*\-\–\—\>\[\]\(\)\.\,\:\;\s]+$/, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        // Buang no KP / IC jika disalin dari fail sekolah
+        clean = clean.replace(/\b\d{6}-?\d{2}-?\d{4}\b/g, '').trim();
+        // Buang perkataan jantina jika disalin terus dari lajur Excel
+        clean = clean.replace(/\b(lelaki|perempuan)\b/gi, '').trim();
+        clean = clean.replace(/\s+/g, ' ').trim();
+
+        // Pastikan nama mempunyai sekurang-kurangnya 2 huruf
+        const alphaOnly = clean.replace(/[^a-zA-Z\u00C0-\u024F]/g, '');
+        if (alphaOnly.length < 2) continue;
+
+        const upper = clean.toUpperCase();
+        if (GHOST_NAMES.includes(upper)) continue;
+
+        if (!seen.has(upper)) {
+            seen.add(upper);
+            cleanedNames.push(upper);
+        }
+    }
+
+    return cleanedNames;
+}
+window.parseStudentNamesInput = parseStudentNamesInput;
 
 function filterProfileChallenges(petaIdStr) {
     const petaId = Number(petaIdStr) || 1;
@@ -3793,10 +4765,9 @@ function filterProfileChallenges(petaIdStr) {
 
     mapObj.modules.forEach((modul) => {
         const key = modul.id;
-        let stars = Number(localStorage.getItem('extra_stars_' + key) || localStorage.getItem('stars_' + key) || 0);
+        let stars = 0;
         if (data && data.stars) {
-            const stData = Number(data.stars['extra_' + key] || data.stars[key] || 0);
-            if (stData > stars) stars = stData;
+            stars = Number(data.stars['extra_' + key] || data.stars[key] || 0);
         }
         const maxScore = (petaId === 5) ? 3 : ((typeof getMaxScore === 'function') ? getMaxScore(key) : 10);
 
@@ -3934,42 +4905,22 @@ function renderProfile() {
         }
     ];
 
-    function isPetaCompleted(petaId) {
-        if (typeof MAP_CHALLENGES === 'undefined' || !MAP_CHALLENGES[petaId]) return false;
-        const modules = MAP_CHALLENGES[petaId].modules;
-        if (!modules || modules.length === 0) return false;
-        return modules.every(m => {
-            const stars = Number(localStorage.getItem('stars_' + m.id) || 0);
-            const score = (data && data.scores && data.scores[m.id]) ? data.scores[m.id] : 0;
-            const inLatihan = Boolean(data && data.latihan && data.latihan[m.id]);
-            return inLatihan || stars > 0 || score > 0;
-        });
-    }
-
-    const peta1Done = isPetaCompleted(1);
-    const peta2Done = isPetaCompleted(2);
-    const peta3Done = isPetaCompleted(3);
-    const peta4Done = isPetaCompleted(4);
-    const all4Done = peta1Done && peta2Done && peta3Done && peta4Done;
-
+    const earnedList = kiraLencanaMurid(data);
     const badgeStatus = {
-        1: peta1Done,
-        2: peta2Done,
-        3: peta3Done,
-        4: peta4Done,
-        "all": all4Done
+        1: earnedList.includes('badge_peta_1'),
+        2: earnedList.includes('badge_peta_2'),
+        3: earnedList.includes('badge_peta_3'),
+        4: earnedList.includes('badge_peta_4'),
+        "all": earnedList.includes('badge_master')
     };
 
-    if (!data.badges) data.badges = [];
+    data.badges = earnedList;
 
     let htmlBadges = '';
     let earnedCount = 0;
 
     FIVE_BADGES.forEach((badge, index) => {
         let unlocked = Boolean(badgeStatus[badge.petaId]);
-        if (!unlocked && data.badges.includes(badge.id)) {
-            unlocked = true;
-        }
 
         if (unlocked) {
             earnedCount++;
@@ -4016,7 +4967,12 @@ function renderProfile() {
                 window.bukaDetailLencana(b.title, b.desc, b.image, b.mapName, b.petaId === 'all');
             }
         } else {
-            alert("Lencana \"" + b.title + "\" masih terkunci! Selesaikan semua modul dalam " + b.mapName + " untuk membuka lencana ini.");
+            const msg = "Lencana \"" + b.title + "\" masih terkunci! Selesaikan semua modul dalam " + b.mapName + " untuk membuka lencana ini.";
+            if (typeof window.showAppToast === 'function') {
+                window.showAppToast('Lencana Masih Terkunci', msg, 'warning');
+            } else {
+                alert(msg);
+            }
         }
     };
 
@@ -4170,8 +5126,8 @@ window.renderTeacherTable = function () {
         if (typeof MAP_CHALLENGES !== 'undefined') {
             Object.values(MAP_CHALLENGES).forEach(map => {
                 map.modules.forEach(mod => {
-                    const stars = Number(localStorage.getItem('stars_' + mod.id) || 0);
-                    const score = (data.scores && data.scores[mod.id] !== undefined) ? data.scores[mod.id] : (stars * 10);
+                    const stars = (data.stars && data.stars[mod.id] !== undefined) ? Number(data.stars[mod.id]) : 0;
+                    const score = (data.scores && data.scores[mod.id] !== undefined) ? data.scores[mod.id] : 0;
                     const isDone = Boolean((data.latihan && data.latihan[mod.id]) || stars > 0 || score > 0);
                     if (isDone) totalSelesai++;
                 });
@@ -4181,12 +5137,14 @@ window.renderTeacherTable = function () {
     if (document.getElementById('guru-jumlah-murid')) document.getElementById('guru-jumlah-murid').innerText = totalStudents;
     if (document.getElementById('guru-aktiviti-selesai')) document.getElementById('guru-aktiviti-selesai').innerText = totalSelesai;
 
-    if (document.getElementById('admin-jumlah-murid')) document.getElementById('admin-jumlah-murid').innerText = totalStudents;
     const currentTeachers = typeof getAdminTeachersList === 'function' ? getAdminTeachersList() : [];
     const currentParents = typeof getAdminParentsList === 'function' ? getAdminParentsList() : [];
-    if (document.getElementById('admin-jumlah-guru')) document.getElementById('admin-jumlah-guru').innerText = currentTeachers.length || 3;
-    if (document.getElementById('admin-jumlah-ibubapa')) document.getElementById('admin-jumlah-ibubapa').innerText = currentParents.length || 3;
-    if (document.getElementById('admin-jumlah-anak')) document.getElementById('admin-jumlah-anak').innerText = totalStudents > 0 ? totalStudents : "6";
+    const totalAdminMurid = currentTeachers.reduce((sum, t) => sum + (Number(t.murid) || 0), 0);
+    if (document.getElementById('admin-jumlah-murid')) document.getElementById('admin-jumlah-murid').innerText = totalAdminMurid;
+    if (document.getElementById('admin-jumlah-guru')) document.getElementById('admin-jumlah-guru').innerText = currentTeachers.length;
+    if (document.getElementById('admin-jumlah-ibubapa')) document.getElementById('admin-jumlah-ibubapa').innerText = currentParents.length;
+    const totalAnak = currentParents.reduce((sum, p) => sum + (Number(p.anak) || 0), 0);
+    if (document.getElementById('admin-jumlah-anak')) document.getElementById('admin-jumlah-anak').innerText = totalAnak;
     try {
         const rawFb = localStorage.getItem('bunyi_kata_feedbacks');
         const fbList = rawFb ? JSON.parse(rawFb) : [];
@@ -4201,7 +5159,7 @@ window.renderTeacherTable = function () {
                     <tr>
                         <th rowspan="2" style="width:45px; min-width:40px; vertical-align:middle; text-align:center; font-size:0.78rem; font-weight:bold; color:#ffffff !important; background:linear-gradient(135deg, #0f766e 0%, #115e59 100%); text-transform:uppercase; border-bottom:2px solid #042f2e; border-right:1px solid rgba(255,255,255,0.25);">BIL.</th>
                         <th rowspan="2" style="width:200px; min-width:160px; vertical-align:middle; text-align:center; font-size:0.78rem; font-weight:bold; color:#ffffff !important; background:linear-gradient(135deg, #0f766e 0%, #115e59 100%); text-transform:uppercase; border-bottom:2px solid #042f2e; border-right:1px solid rgba(255,255,255,0.25);">NAMA MURID</th>
-                        <th rowspan="2" style="width:115px; min-width:100px; vertical-align:middle; text-align:center; font-size:0.78rem; font-weight:bold; color:#ffffff !important; background:linear-gradient(135deg, #0f766e 0%, #115e59 100%); text-transform:uppercase; border-bottom:2px solid #042f2e; border-right:1px solid rgba(255,255,255,0.25);">JUMLAH MARKAH</th>
+                        <th rowspan="2" style="width:115px; min-width:100px; vertical-align:middle; text-align:center; font-size:0.78rem; font-weight:bold; color:#ffffff !important; background:linear-gradient(135deg, #0f766e 0%, #115e59 100%); text-transform:uppercase; border-bottom:2px solid #042f2e; border-right:1px solid rgba(255,255,255,0.25);">JUMLAH BINTANG</th>
                         <th rowspan="2" style="width:90px; min-width:80px; vertical-align:middle; text-align:center; font-size:0.78rem; font-weight:bold; color:#ffffff !important; background:linear-gradient(135deg, #0f766e 0%, #115e59 100%); text-transform:uppercase; border-bottom:2px solid #042f2e; border-right:1px solid rgba(255,255,255,0.25);">LENCANA</th>
                         <th colspan="${mapObj.modules.length}" class="group-latihan" style="font-size:0.82rem; font-weight:bold; padding:6px 10px; text-transform:uppercase; color:#ffffff !important; background:linear-gradient(135deg, #0d9488 0%, #0f766e 100%); text-align:center; border-bottom:2px solid #5eead4; border-right:1px solid rgba(255,255,255,0.25);">${mapObj.title.toUpperCase()}</th>
                         <th rowspan="2" style="width:60px; min-width:50px; vertical-align:middle; text-align:center; font-size:0.78rem; font-weight:bold; color:#ffffff !important; background:linear-gradient(135deg, #0f766e 0%, #115e59 100%); text-transform:uppercase; border-bottom:2px solid #042f2e;">RESET</th>
@@ -4216,32 +5174,58 @@ window.renderTeacherTable = function () {
                 `;
     }
 
-    const listKelas = typeof window.getDaftarKelas === 'function' ? window.getDaftarKelas() : ['1 Cemerlang', '1 Pintar'];
-    const activeClass = localStorage.getItem('bunyiKataNamaKelas') || listKelas[0] || '1 Cemerlang';
+    const listKelas = typeof window.getDaftarKelas === 'function' ? window.getDaftarKelas() : [];
+    const activeClass = localStorage.getItem('bunyiKataNamaKelas') || (listKelas.length > 0 ? listKelas[0] : '');
+
+    const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
+    const validStudentNames = (Array.isArray(studentNames) && studentNames.length > 0)
+        ? studentNames.filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()))
+        : (Array.isArray(window.studentNames) && window.studentNames.length > 0
+            ? window.studentNames.filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()))
+            : Object.keys(studentData || {}).filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase())));
+
+    // Susun nama murid mengikut abjad (A-Z)
+    validStudentNames.sort((a, b) => a.localeCompare(b, 'ms', { sensitivity: 'base' }));
 
     let classTotalStudents = 0;
-    for (const [nama, data] of Object.entries(studentData)) {
-        const sKelas = data.kelas || listKelas[0];
-        if (sKelas === activeClass) classTotalStudents++;
-    }
+    validStudentNames.forEach(nama => {
+        const data = (studentData && studentData[nama]) || {};
+        const sKelas = data.kelas || (listKelas.length > 0 ? listKelas[0] : '');
+        if (activeClass && sKelas.toLowerCase() === activeClass.toLowerCase()) classTotalStudents++;
+    });
     if (document.getElementById('guru-jumlah-murid')) document.getElementById('guru-jumlah-murid').innerText = classTotalStudents;
 
+    if (classTotalStudents === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="${mapObj.modules.length + 5}" style="text-align:center; padding:36px 16px; color:#64748b;">
+                    <div style="font-size:2rem; color:#cbd5e1; margin-bottom:8px;"><i class="fa-solid fa-user-graduate"></i></div>
+                    <div style="font-weight:bold; font-size:0.95rem; color:#1e293b; margin-bottom:4px;">Tiada Murid Berdaftar</div>
+                    <div style="font-size:0.8rem; color:#64748b;">Sila tambah murid di bahagian 'Urus Murid' untuk melihat statistik aktiviti kelas "${activeClass || '-'}".</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
     let index = 1;
-    for (const [nama, data] of Object.entries(studentData)) {
+    for (const nama of validStudentNames) {
+        const data = (studentData && studentData[nama]) || {};
         const sKelas = data.kelas || listKelas[0];
         if (sKelas !== activeClass) continue;
 
-        const lencanaCount = (data.badges || []).length;
+        const earnedBadges = typeof kiraLencanaMurid === 'function' ? kiraLencanaMurid(data) : (data.badges || []);
+        const lencanaCount = earnedBadges.length;
 
-        if (tahapFilter === 'cemerlang' && lencanaCount <= 5) continue;
-        if (tahapFilter === 'sederhana' && (lencanaCount < 2 || lencanaCount > 5)) continue;
-        if (tahapFilter === 'lemah' && lencanaCount >= 2) continue;
+        if (tahapFilter === 'cemerlang' && lencanaCount <= 3) continue;
+        if (tahapFilter === 'sederhana' && (lencanaCount < 1 || lencanaCount > 3)) continue;
+        if (tahapFilter === 'lemah' && lencanaCount >= 1) continue;
 
         let moduleCellsHTML = '';
         mapObj.modules.forEach(mod => {
             const key = mod.id;
             const maxScore = getMaxScore(key);
-            const stars = Number(localStorage.getItem('stars_' + key) || 0);
+            const stars = (data.stars && data.stars[key] !== undefined) ? Number(data.stars[key]) : 0;
             const score = (data.scores && data.scores[key] !== undefined) ? data.scores[key] : (stars > 0 ? Math.round((stars / 3) * maxScore) : 0);
             const isDone = Boolean((data.latihan && data.latihan[key]) || stars > 0 || (data.scores && data.scores[key] !== undefined && data.scores[key] > 0));
 
@@ -4366,11 +5350,46 @@ function kembaliKePilihPeta() {
     bukaModalPilihPeta(modSemasa || 'belajar');
 }
 
+function checkIsTrial() {
+    const role = localStorage.getItem('bunyiKataUserRole') || '';
+    if (role === 'admin' || window.isAdminMode || window.modAdminAktif || (typeof document !== 'undefined' && document.body && document.body.classList.contains('admin-mode'))) {
+        return false;
+    }
+    if (role === 'guru' || window.modGuruAktif || (typeof document !== 'undefined' && document.body && document.body.classList.contains('teacher-mode'))) {
+        const plan = (localStorage.getItem('bunyiKataTeacherPlan') || '').toLowerCase();
+        const access = localStorage.getItem('bunyiKataAccessLevel');
+        return plan === 'percuma' || access === 'trial';
+    }
+    if (role === 'ibubapa' || window.modIbuBapaAktif || (typeof document !== 'undefined' && document.body && document.body.classList.contains('parent-mode'))) {
+        const plan = (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase();
+        const access = localStorage.getItem('bunyiKataAccessLevel');
+        return plan === 'percuma' || access === 'trial';
+    }
+    // Jika tetamu / akaun percuma
+    return true;
+}
+window.checkIsTrial = checkIsTrial;
+
 function bukaModalPilihPeta(mod) {
+    const isGuestOrTrial = typeof checkIsTrial === 'function' ? checkIsTrial() : true;
+    if (!isGuestOrTrial) {
+        window.userAccessLevel = 'pro';
+        localStorage.setItem('bunyiKataAccessLevel', 'pro');
+        if (typeof window.setUserAccessLevel === 'function') {
+            window.setUserAccessLevel('pro');
+        }
+    } else {
+        window.userAccessLevel = 'trial';
+        window.isGuestMode = true;
+        localStorage.setItem('bunyiKataAccessLevel', 'trial');
+        if (typeof window.setUserAccessLevel === 'function') {
+            window.setUserAccessLevel('trial');
+        }
+    }
     modSemasa = mod;
     const petaTajuk = document.getElementById('modal-pilih-peta-tajuk');
     if (petaTajuk) {
-        petaTajuk.innerText = mod === 'belajar' ? 'PILIH PETA KEMBARA' : 'PILIH PETA LATIHAN';
+        petaTajuk.innerText = mod === 'belajar' ? 'Pilih Peta Kembara' : 'Pilih Peta Latihan';
         if (mod === 'latihan') {
             petaTajuk.classList.remove('bg-orange');
             petaTajuk.classList.add('bg-purple');
@@ -4500,9 +5519,16 @@ window.updateMisi3DSlots = function () {
 
 // Second definition avoided, unified renderAdminTable used above
 
-window.padamFeedback = function (id) {
-    if (!confirm("Adakah anda pasti mahu memadam maklum balas ini?")) return;
+window.padamFeedback = async function (id) {
+    if (!confirm("Adakah anda pasti mahu memadam maklum balas ini dari pangkalan data Firebase?")) return;
     try {
+        if (typeof window.deleteFeedbackInFirebase === 'function') {
+            const ok = await window.deleteFeedbackInFirebase(id);
+            if (ok) {
+                window.renderAdminTable('feedback');
+                return;
+            }
+        }
         const raw = localStorage.getItem('bunyi_kata_feedbacks');
         let list = raw ? JSON.parse(raw) : [];
         list = list.filter(item => item.id !== id);
@@ -4520,14 +5546,10 @@ function getAdminTeachersList() {
         const savedT = localStorage.getItem('bunyiKataAdminTeachers');
         if (savedT) adminTeachers = JSON.parse(savedT);
     } catch (e) { }
-    if (!adminTeachers || adminTeachers.length === 0) {
-        let totalStudents = Object.keys(window.studentData || {}).length || (window.studentNames ? window.studentNames.length : 12);
-        adminTeachers = [
-            { id: "g1", nama: "Cikgu Ahmad", sekolah: "SK Bintang", murid: totalStudents > 0 ? totalStudents : 13, bakiHari: 24, langganan: "1 Bulan", email: "cikguahmad@moe.edu.my", password: "ahmad123" },
-            { id: "g2", nama: "Cikgu Siti", sekolah: "SK Harmoni", murid: 15, bakiHari: 18, langganan: "1 Bulan", email: "cikgusiti@moe.edu.my", password: "siti123" },
-            { id: "g3", nama: "Cikgu Ramasamy", sekolah: "SJKT Maju", murid: 8, bakiHari: 29, langganan: "1 Bulan", email: "ramasamy@moe.edu.my", password: "rama123" }
-        ];
-        localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(adminTeachers));
+    if (Array.isArray(adminTeachers)) {
+        adminTeachers = adminTeachers.filter(t => t && t.id !== "g1" && t.id !== "g2" && t.id !== "g3");
+    } else {
+        adminTeachers = [];
     }
     return adminTeachers;
 }
@@ -4539,17 +5561,186 @@ function getAdminParentsList() {
         const savedP = localStorage.getItem('bunyiKataAdminParents');
         if (savedP) adminParents = JSON.parse(savedP);
     } catch (e) { }
-    if (!adminParents || adminParents.length === 0) {
-        adminParents = [
-            { id: "p1", nama: "Encik Razak", anak: 2, bakiHari: 22, langganan: "1 Bulan", email: "razak@gmail.com", password: "razak123" },
-            { id: "p2", nama: "Puan Aishah", anak: 1, bakiHari: 14, langganan: "1 Bulan", email: "aishah@gmail.com", password: "aishah123" },
-            { id: "p3", nama: "Encik Muthu", anak: 3, bakiHari: 28, langganan: "1 Bulan", email: "muthu@gmail.com", password: "muthu123" }
-        ];
-        localStorage.setItem('bunyiKataAdminParents', JSON.stringify(adminParents));
+    if (Array.isArray(adminParents)) {
+        adminParents = adminParents.filter(p => p && p.id !== "p1" && p.id !== "p2" && p.id !== "p3");
+    } else {
+        adminParents = [];
     }
     return adminParents;
 }
 window.getAdminParentsList = getAdminParentsList;
+
+window.lanjutTempohGuru = async function(id) {
+    window.showAppModalConfirm(
+        'Tambah Tempoh Langganan',
+        'Adakah anda ingin menambah tempoh langganan guru ini sebanyak <span style="color:#16a34a; font-weight:900;">+30 Hari</span>?',
+        async function () {
+            if (typeof window.updateProfileSubscription === 'function') {
+                await window.updateProfileSubscription(id, 30);
+            }
+            let teachers = getAdminTeachersList();
+            const t = teachers.find(item => item.id === id);
+            if (t) {
+                t.bakiHari = (t.bakiHari || 0) + 30;
+                localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(teachers));
+            }
+            if (typeof window.fetchAdminDataFromFirebase === 'function') {
+                await window.fetchAdminDataFromFirebase();
+            } else if (typeof window.fetchAdminDataFromFirebase === 'function') {
+                await window.fetchAdminDataFromFirebase();
+            }
+            if (typeof window.renderAdminUrus === 'function') window.renderAdminUrus('guru');
+            if (typeof window.renderAdminTable === 'function') window.renderAdminTable('guru');
+            window.showAppToast('Berjaya Ditambah', 'Tempoh langganan guru berjaya ditambah 30 hari!');
+        }
+    );
+};
+
+window.padamGuruAdmin = async function(id) {
+    const teachers = getAdminTeachersList();
+    const t = teachers.find(item => item.id === id);
+    const namaGuru = t ? t.nama : 'guru ini';
+
+    window.showAppModalConfirm(
+        'Padam Rekod Guru',
+        `Adakah anda pasti mahu memadam <strong>${namaGuru}</strong> daripada rekod sistem?<br><span style="color:#ef4444; font-size:0.85rem; font-weight:normal; display:inline-block; margin-top:6px;">Tindakan ini akan memadam akaun, kelas dan rekod murid di bawah guru ini secara kekal.</span>`,
+        async function () {
+            if (typeof window.deleteProfileInFirebase === 'function') {
+                await window.deleteProfileInFirebase(id);
+            } else if (typeof window.deleteProfileInFirebase === 'function') {
+                await window.deleteProfileInFirebase(id);
+            }
+            if (typeof window.cleanupOrphanedStudentsInFirebase === 'function') {
+                try { await window.cleanupOrphanedStudentsInFirebase(); } catch (e) {}
+            }
+            // Padam juga murid dan kelas guru ini daripada storan setempat
+            try {
+                const kodKelasList = (t?.kod_kelas || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+                let localMurid = JSON.parse(localStorage.getItem('bunyiKataMurid') || '[]');
+                if (Array.isArray(localMurid) && kodKelasList.length > 0) {
+                    localMurid = localMurid.filter(m => !kodKelasList.includes((m.kelasId || m.kelas || '').toUpperCase()));
+                    localStorage.setItem('bunyiKataMurid', JSON.stringify(localMurid));
+                }
+            } catch (e) {}
+
+            let curTeachers = getAdminTeachersList().filter(item => item.id !== id);
+            localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(curTeachers));
+            if (typeof window.fetchAdminDataFromFirebase === 'function') {
+                await window.fetchAdminDataFromFirebase();
+            } else if (typeof window.fetchAdminDataFromFirebase === 'function') {
+                await window.fetchAdminDataFromFirebase();
+            }
+            if (typeof window.renderAdminUrus === 'function') window.renderAdminUrus('guru');
+            if (typeof window.renderAdminTable === 'function') window.renderAdminTable('guru');
+            if (document.getElementById('admin-jumlah-guru')) {
+                document.getElementById('admin-jumlah-guru').innerText = curTeachers.length;
+            }
+            window.showAppToast('Berjaya Dipadam', 'Rekod guru, kelas dan semua murid berkaitan telah berjaya dipadam daripada pangkalan data.');
+        }
+    );
+};
+
+window.lanjutTempohParent = async function(id) {
+    window.showAppModalConfirm(
+        'Tambah Tempoh Langganan',
+        'Adakah anda ingin menambah tempoh langganan ibu bapa ini sebanyak <span style="color:#16a34a; font-weight:900;">+30 Hari</span>?',
+        async function () {
+            if (typeof window.updateProfileSubscription === 'function') {
+                await window.updateProfileSubscription(id, 30);
+            }
+            let parents = getAdminParentsList();
+            const p = parents.find(item => item.id === id);
+            if (p) {
+                p.bakiHari = (p.bakiHari || 0) + 30;
+                localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));
+            }
+            if (typeof window.fetchAdminDataFromFirebase === 'function') {
+                await window.fetchAdminDataFromFirebase();
+            } else if (typeof window.fetchAdminDataFromFirebase === 'function') {
+                await window.fetchAdminDataFromFirebase();
+            }
+            if (typeof window.renderAdminUrus === 'function') window.renderAdminUrus('ibubapa');
+            if (typeof window.renderAdminTable === 'function') window.renderAdminTable('ibubapa');
+            window.showAppToast('Berjaya Ditambah', 'Tempoh langganan ibu bapa berjaya ditambah 30 hari!');
+        }
+    );
+};
+
+window.padamParentAdmin = async function(id) {
+    const parents = getAdminParentsList();
+    const p = parents.find(item => item.id === id);
+    const namaParent = p ? p.nama : 'ibu bapa ini';
+
+    window.showAppModalConfirm(
+        'Padam Rekod Ibu Bapa',
+        `Adakah anda pasti mahu memadam <strong>${namaParent}</strong> daripada rekod sistem?<br><span style="color:#ef4444; font-size:0.85rem; font-weight:normal; display:inline-block; margin-top:6px;">Tindakan ini akan memadam akaun, rekod keluarga dan profil anak berkaitan secara kekal.</span>`,
+        async function () {
+            if (typeof window.deleteProfileInFirebase === 'function') {
+                await window.deleteProfileInFirebase(id);
+            } else if (typeof window.deleteProfileInFirebase === 'function') {
+                await window.deleteProfileInFirebase(id);
+            }
+            if (typeof window.cleanupOrphanedStudentsInFirebase === 'function') {
+                try { await window.cleanupOrphanedStudentsInFirebase(); } catch (e) {}
+            }
+            // Padam juga profil anak ibu bapa ini daripada storan setempat
+            try {
+                const kodFam = (p?.kod_keluarga || '').trim().toUpperCase();
+                let localMurid = JSON.parse(localStorage.getItem('bunyiKataMurid') || '[]');
+                if (Array.isArray(localMurid) && kodFam) {
+                    localMurid = localMurid.filter(m => (m.keluargaId || m.kod_keluarga || '').toUpperCase() !== kodFam);
+                    localStorage.setItem('bunyiKataMurid', JSON.stringify(localMurid));
+                }
+            } catch (e) {}
+
+            let curParents = getAdminParentsList().filter(item => item.id !== id);
+            localStorage.setItem('bunyiKataAdminParents', JSON.stringify(curParents));
+            if (typeof window.fetchAdminDataFromFirebase === 'function') {
+                await window.fetchAdminDataFromFirebase();
+            } else if (typeof window.fetchAdminDataFromFirebase === 'function') {
+                await window.fetchAdminDataFromFirebase();
+            }
+            if (typeof window.renderAdminUrus === 'function') window.renderAdminUrus('ibubapa');
+            if (typeof window.renderAdminTable === 'function') window.renderAdminTable('ibubapa');
+            if (document.getElementById('admin-jumlah-ibubapa')) {
+                document.getElementById('admin-jumlah-ibubapa').innerText = curParents.length;
+            }
+            window.showAppToast('Berjaya Dipadam', 'Rekod ibu bapa dan profil anak berkaitan telah berjaya dipadam daripada pangkalan data.');
+        }
+    );
+};
+
+window.tukarLanggananPengguna = async function (id, role, newPlan) {
+    if (!id || !newPlan) return;
+    
+    window.showAppModalConfirm(
+        'Pengesahan Tukar Pelan',
+        `Adakah anda pasti mahu menukar jenis langganan pengguna ini kepada <span style="color:#ea580c; font-weight:900;">"${newPlan}"</span>?`,
+        async () => {
+            if (typeof window.updateProfileSubscriptionPlan === 'function') {
+                const ok = await window.updateProfileSubscriptionPlan(id, newPlan);
+                if (ok) {
+                    if (typeof window.fetchAdminDataFromFirebase === 'function') {
+                        await window.fetchAdminDataFromFirebase();
+                    } else if (typeof window.fetchAdminDataFromFirebase === 'function') {
+                        await window.fetchAdminDataFromFirebase();
+                    }
+                    if (typeof window.renderAdminUrus === 'function') window.renderAdminUrus(role);
+                    if (typeof window.renderAdminTable === 'function') window.renderAdminTable(role);
+                    window.showAppToast('Berjaya Dikemaskini', `Jenis langganan telah berjaya dikemaskini kepada "${newPlan}".`);
+                } else {
+                    window.showAppToast('Ralat', 'Ralat mengemaskini jenis langganan di pelayan.', 'error');
+                }
+            } else {
+                window.showAppToast('Ralat', 'Fungsi kemas kini langganan tidak ditemui.', 'error');
+            }
+        },
+        () => {
+            if (typeof window.renderAdminUrus === 'function') window.renderAdminUrus(role);
+            if (typeof window.renderAdminTable === 'function') window.renderAdminTable(role);
+        }
+    );
+};
 
 window.tukarAdminUrusTab = function (tab) {
     window.currentAdminUrusTab = tab;
@@ -4584,37 +5775,56 @@ window.renderAdminUrus = function (tab) {
     if (activeTab === 'guru') {
         const teachers = getAdminTeachersList();
         let rowsHtml = '';
-        teachers.forEach((t, idx) => {
-            const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
-            const langganan = t.langganan || '1 Bulan';
-            const tempohText = `${t.bakiHari} Hari (${langganan})`;
-            rowsHtml += `
-                <tr style="background:${rowBg}; border-bottom:1px solid #e2e8f0; transition:background 0.15s ease;">
-                    <td style="padding:10px 8px; text-align:center; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${idx + 1}</td>
-                    <td style="padding:10px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${t.nama}</td>
-                    <td style="padding:10px 12px; color:#475569; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${t.sekolah}</td>
-                    <td style="padding:10px 10px; text-align:center; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${t.murid || 0}</td>
-                    <td style="padding:10px 10px; text-align:center; border-right:1px solid #e2e8f0;">
-                        <span style="background:#ffedd5; color:#c2410c; font-size:0.8rem; font-weight:bold; padding:4px 8px; border-radius:12px; border:1.5px solid #ea580c; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <i class="fa-solid fa-clock"></i> ${tempohText}
-                        </span>
-                    </td>
-                    <td style="padding:9px 10px; text-align:center; border-right:1px solid #e2e8f0;">
-                        <button class="neo-btn bg-white" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#ea580c; border:1.5px solid #ea580c; margin:0 auto;" data-name="${(t.nama || '').replace(/"/g, '&quot;')}" data-tempoh="${tempohText}" data-email="${(t.email || '').replace(/"/g, '&quot;')}" data-pass="${(t.password || '').replace(/"/g, '&quot;')}" onclick="window.showAdminInfo('guru', this.getAttribute('data-name'), {tempoh: this.getAttribute('data-tempoh'), email: this.getAttribute('data-email'), password: this.getAttribute('data-pass')})" title="Info">
-                            <i class="fa-solid fa-circle-info"></i>
-                        </button>
-                    </td>
-                    <td style="padding:8px 10px; text-align:center; white-space:nowrap;">
-                        <button class="neo-btn bg-green" style="padding:4px 8px; font-size:0.75rem; border-radius:8px; margin-right:6px; color:#fff; display:inline-flex; align-items:center; gap:4px;" onclick="window.lanjutTempohGuru('${t.id}')" title="Tambah 30 Hari">
-                            <i class="fa-solid fa-plus"></i> 30H
-                        </button>
-                        <button class="neo-btn bg-red" style="padding:4px 8px; font-size:0.75rem; border-radius:8px; color:#fff; display:inline-flex; align-items:center; gap:4px;" onclick="window.padamGuruAdmin('${t.id}')" title="Padam Guru">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
+        if (teachers.length === 0) {
+            rowsHtml = `
+                <tr>
+                    <td colspan="8" style="padding:32px 16px; text-align:center; color:#64748b; font-weight:bold; font-size:0.95rem;">
+                        <i class="fa-solid fa-chalkboard-user" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:10px;"></i>
+                        Tiada rekod guru berdaftar dalam sistem.
                     </td>
                 </tr>
             `;
-        });
+        } else {
+            teachers.forEach((t, idx) => {
+                const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+                const langganan = t.langganan || '1 Bulan';
+                const tempohText = `${t.bakiHari} Hari (${langganan})`;
+                rowsHtml += `
+                    <tr style="background:${rowBg}; border-bottom:1px solid #e2e8f0; transition:background 0.15s ease;">
+                        <td style="padding:10px 8px; text-align:center; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${idx + 1}</td>
+                        <td style="padding:10px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${t.nama}</td>
+                        <td style="padding:10px 12px; color:#475569; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${t.sekolah}</td>
+                        <td style="padding:10px 10px; text-align:center; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${t.murid || 0}</td>
+                        <td style="padding:8px 8px; text-align:center; border-right:1px solid #e2e8f0; white-space:nowrap;">
+                            <select class="neo-btn filter-select" style="padding: 4px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 8px; border: 1.5px solid #ea580c; background: #fff; cursor: pointer; white-space: nowrap; width: auto; min-width: 145px; display: inline-block;" onchange="window.tukarLanggananPengguna('${t.id}', 'guru', this.value)">
+                                <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
+                                <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' || langganan === '1 Bulan' || langganan === 'Pro' ? 'selected' : ''}>1 Bulan (Pro)</option>
+                                <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' || langganan === '3 Bulan' ? 'selected' : ''}>3 Bulan (Pro)</option>
+                                <option value="1 Tahun (Pro)" ${langganan === '1 Tahun' || langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
+                            </select>
+                        </td>
+                        <td style="padding:10px 10px; text-align:center; border-right:1px solid #e2e8f0;">
+                            <span style="background:#ffedd5; color:#c2410c; font-size:0.8rem; font-weight:bold; padding:4px 8px; border-radius:12px; border:1.5px solid #ea580c; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
+                                <i class="fa-solid fa-clock"></i> ${t.bakiHari} Hari
+                            </span>
+                        </td>
+                        <td style="padding:9px 10px; text-align:center; border-right:1px solid #e2e8f0;">
+                            <button class="neo-btn bg-white" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#ea580c; border:1.5px solid #ea580c; margin:0 auto;" data-id="${t.id}" data-name="${(t.nama || '').replace(/"/g, '&quot;')}" data-tempoh="${tempohText}" data-langganan="${langganan}" data-email="${(t.email || '').replace(/"/g, '&quot;')}" data-sekolah="${(t.sekolah || '').replace(/"/g, '&quot;')}" data-kod="${(t.kod_kelas || '').replace(/"/g, '&quot;')}" data-namakelas="${(t.nama_kelas || '').replace(/"/g, '&quot;')}" data-murid="${t.murid || 0}" data-telefon="${(t.no_telefon || '').replace(/"/g, '&quot;')}" data-pass="${(t.password || '').replace(/"/g, '&quot;')}" onclick="window.showAdminInfo('guru', this.getAttribute('data-name'), { id: this.getAttribute('data-id'), tempoh: this.getAttribute('data-tempoh'), langganan: this.getAttribute('data-langganan'), email: this.getAttribute('data-email'), sekolah: this.getAttribute('data-sekolah'), kodKelas: this.getAttribute('data-kod'), namaKelas: this.getAttribute('data-namakelas'), murid: this.getAttribute('data-murid'), telefon: this.getAttribute('data-telefon'), password: this.getAttribute('data-pass') })" title="Info">
+                                <i class="fa-solid fa-circle-info"></i>
+                            </button>
+                        </td>
+                        <td style="padding:8px 10px; text-align:center; white-space:nowrap;">
+                            <button class="neo-btn bg-green" style="padding:4px 8px; font-size:0.75rem; border-radius:8px; margin-right:6px; color:#fff; display:inline-flex; align-items:center; gap:4px;" onclick="window.lanjutTempohGuru('${t.id}')" title="Tambah 30 Hari">
+                                <i class="fa-solid fa-plus"></i> 30H
+                            </button>
+                            <button class="neo-btn bg-red" style="padding:4px 8px; font-size:0.75rem; border-radius:8px; color:#fff; display:inline-flex; align-items:center; gap:4px;" onclick="window.padamGuruAdmin('${t.id}')" title="Padam Guru">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
 
         container.innerHTML = `
             <!-- Table Card: Butang Daftar & Tajuk DI DALAM FRAME PUTIH ATAS JADUAL -->
@@ -4637,14 +5847,15 @@ window.renderAdminUrus = function (tab) {
                     </div>
 
                     <div style="width:100%; max-width:100%; min-width:0; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; border:2px solid var(--color-dark, #10182f); box-sizing:border-box;">
-                        <table style="width:100%; min-width:680px; border-collapse:collapse; font-size:0.85rem; text-align:left;">
+                        <table style="width:100%; min-width:740px; border-collapse:collapse; font-size:0.85rem; text-align:left;">
                             <thead>
                                 <tr style="background:linear-gradient(135deg, #ea580c 0%, #c2410c 100%); color:#ffffff;">
                                     <th style="padding:10px 8px; text-align:center; width:48px; border-right:1px solid rgba(255,255,255,0.25);">BIL</th>
                                     <th style="padding:10px 12px; border-right:1px solid rgba(255,255,255,0.25); min-width:140px;">NAMA GURU</th>
                                     <th style="padding:10px 12px; border-right:1px solid rgba(255,255,255,0.25); min-width:130px;">NAMA SEKOLAH</th>
-                                    <th style="padding:10px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.25); min-width:110px;">BILANGAN MURID</th>
-                                    <th style="padding:10px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.25); min-width:150px;">TEMPOH MASA</th>
+                                    <th style="padding:10px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.25); min-width:100px;">BILANGAN MURID</th>
+                                    <th style="padding:10px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.25); min-width:155px;">JENIS LANGGANAN</th>
+                                    <th style="padding:10px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.25); min-width:140px;">TEMPOH MASA</th>
                                     <th style="padding:10px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.25); width:60px;">INFO</th>
                                     <th style="padding:10px 10px; text-align:center; width:110px;">TINDAKAN</th>
                                 </tr>
@@ -4659,36 +5870,55 @@ window.renderAdminUrus = function (tab) {
     } else if (activeTab === 'ibubapa') {
         const parents = getAdminParentsList();
         let rowsHtml = '';
-        parents.forEach((p, idx) => {
-            const rowBg = idx % 2 === 0 ? '#ffffff' : '#f0f9ff';
-            const langganan = p.langganan || '1 Bulan';
-            const tempohText = `${p.bakiHari} Hari (${langganan})`;
-            rowsHtml += `
-                <tr style="background:${rowBg}; border-bottom:1px solid #e2e8f0; transition:background 0.15s ease;">
-                    <td style="padding:10px 8px; text-align:center; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${idx + 1}</td>
-                    <td style="padding:10px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${p.nama}</td>
-                    <td style="padding:10px 10px; text-align:center; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${p.anak || 1}</td>
-                    <td style="padding:10px 10px; text-align:center; border-right:1px solid #e2e8f0;">
-                        <span style="background:#e0f2fe; color:#0369a1; font-size:0.8rem; font-weight:bold; padding:4px 8px; border-radius:12px; border:1.5px solid #0284c7; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <i class="fa-solid fa-clock"></i> ${tempohText}
-                        </span>
-                    </td>
-                    <td style="padding:9px 10px; text-align:center; border-right:1px solid #e2e8f0;">
-                        <button class="neo-btn bg-white" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#0284c7; border:1.5px solid #0284c7; margin:0 auto;" data-name="${(p.nama || '').replace(/"/g, '&quot;')}" data-tempoh="${tempohText}" data-email="${(p.email || '').replace(/"/g, '&quot;')}" data-pass="${(p.password || '').replace(/"/g, '&quot;')}" onclick="window.showAdminInfo('ibubapa', this.getAttribute('data-name'), {tempoh: this.getAttribute('data-tempoh'), email: this.getAttribute('data-email'), password: this.getAttribute('data-pass')})" title="Info">
-                            <i class="fa-solid fa-circle-info"></i>
-                        </button>
-                    </td>
-                    <td style="padding:8px 10px; text-align:center; white-space:nowrap;">
-                        <button class="neo-btn bg-green" style="padding:4px 8px; font-size:0.75rem; border-radius:8px; margin-right:6px; color:#fff; display:inline-flex; align-items:center; gap:4px;" onclick="window.lanjutTempohParent('${p.id}')" title="Tambah 30 Hari">
-                            <i class="fa-solid fa-plus"></i> 30H
-                        </button>
-                        <button class="neo-btn bg-red" style="padding:4px 8px; font-size:0.75rem; border-radius:8px; color:#fff; display:inline-flex; align-items:center; gap:4px;" onclick="window.padamParentAdmin('${p.id}')" title="Padam Rekod">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
+        if (parents.length === 0) {
+            rowsHtml = `
+                <tr>
+                    <td colspan="8" style="padding:32px 16px; text-align:center; color:#64748b; font-weight:bold; font-size:0.95rem;">
+                        <i class="fa-solid fa-users" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:10px;"></i>
+                        Tiada rekod ibu bapa berdaftar dalam sistem.
                     </td>
                 </tr>
             `;
-        });
+        } else {
+            parents.forEach((p, idx) => {
+                const rowBg = idx % 2 === 0 ? '#ffffff' : '#f0f9ff';
+                const langganan = p.langganan || '1 Bulan';
+                const tempohText = `${p.bakiHari} Hari (${langganan})`;
+                rowsHtml += `
+                    <tr style="background:${rowBg}; border-bottom:1px solid #e2e8f0; transition:background 0.15s ease;">
+                        <td style="padding:10px 8px; text-align:center; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${idx + 1}</td>
+                        <td style="padding:10px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${p.nama}</td>
+                        <td style="padding:10px 10px; text-align:center; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${p.anak || 0}</td>
+                        <td style="padding:8px 8px; text-align:center; border-right:1px solid #e2e8f0; white-space:nowrap;">
+                            <select class="neo-btn filter-select" style="padding: 4px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 8px; border: 1.5px solid #0284c7; background: #fff; cursor: pointer; white-space: nowrap; width: auto; min-width: 145px; display: inline-block;" onchange="window.tukarLanggananPengguna('${p.id}', 'ibubapa', this.value)">
+                                <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
+                                <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' || langganan === '1 Bulan' || langganan === 'Pro' ? 'selected' : ''}>1 Bulan (Pro)</option>
+                                <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' || langganan === '3 Bulan' ? 'selected' : ''}>3 Bulan (Pro)</option>
+                                <option value="1 Tahun (Pro)" ${langganan === '1 Tahun' || langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
+                            </select>
+                        </td>
+                        <td style="padding:10px 10px; text-align:center; border-right:1px solid #e2e8f0;">
+                            <span style="background:#e0f2fe; color:#0369a1; font-size:0.8rem; font-weight:bold; padding:4px 8px; border-radius:12px; border:1.5px solid #0284c7; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
+                                <i class="fa-solid fa-clock"></i> ${p.bakiHari} Hari
+                            </span>
+                        </td>
+                        <td style="padding:9px 10px; text-align:center; border-right:1px solid #e2e8f0;">
+                            <button class="neo-btn bg-white" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#0284c7; border:1.5px solid #0284c7; margin:0 auto;" data-id="${p.id}" data-name="${(p.nama || '').replace(/"/g, '&quot;')}" data-tempoh="${tempohText}" data-langganan="${langganan}" data-email="${(p.email || '').replace(/"/g, '&quot;')}" data-kod="${(p.kod_keluarga || '').replace(/"/g, '&quot;')}" data-namakeluarga="${(p.nama_keluarga || '').replace(/"/g, '&quot;')}" data-anak="${p.anak || 0}" data-telefon="${(p.no_telefon || '').replace(/"/g, '&quot;')}" data-pass="${(p.password || '').replace(/"/g, '&quot;')}" onclick="window.showAdminInfo('ibubapa', this.getAttribute('data-name'), { id: this.getAttribute('data-id'), tempoh: this.getAttribute('data-tempoh'), langganan: this.getAttribute('data-langganan'), email: this.getAttribute('data-email'), kodKeluarga: this.getAttribute('data-kod'), namaKeluarga: this.getAttribute('data-namakeluarga'), anak: this.getAttribute('data-anak'), telefon: this.getAttribute('data-telefon'), password: this.getAttribute('data-pass') })" title="Info">
+                                <i class="fa-solid fa-circle-info"></i>
+                            </button>
+                        </td>
+                        <td style="padding:8px 10px; text-align:center; white-space:nowrap;">
+                            <button class="neo-btn bg-green" style="padding:4px 8px; font-size:0.75rem; border-radius:8px; margin-right:6px; color:#fff; display:inline-flex; align-items:center; gap:4px;" onclick="window.lanjutTempohParent('${p.id}')" title="Tambah 30 Hari">
+                                <i class="fa-solid fa-plus"></i> 30H
+                            </button>
+                            <button class="neo-btn bg-red" style="padding:4px 8px; font-size:0.75rem; border-radius:8px; color:#fff; display:inline-flex; align-items:center; gap:4px;" onclick="window.padamParentAdmin('${p.id}')" title="Padam Rekod">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
 
         container.innerHTML = `
             <!-- Table Card: Butang Daftar & Tajuk DI DALAM FRAME PUTIH ATAS JADUAL -->
@@ -4711,13 +5941,14 @@ window.renderAdminUrus = function (tab) {
                     </div>
 
                     <div style="width:100%; max-width:100%; min-width:0; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; border:2px solid var(--color-dark, #10182f); box-sizing:border-box;">
-                        <table style="width:100%; min-width:680px; border-collapse:collapse; font-size:0.85rem; text-align:left;">
+                        <table style="width:100%; min-width:740px; border-collapse:collapse; font-size:0.85rem; text-align:left;">
                             <thead>
                                 <tr style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#ffffff;">
                                     <th style="padding:10px 8px; text-align:center; width:48px; border-right:1px solid rgba(255,255,255,0.25);">BIL</th>
                                     <th style="padding:10px 12px; border-right:1px solid rgba(255,255,255,0.25); min-width:150px;">NAMA IBU BAPA</th>
-                                    <th style="padding:10px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.25); min-width:110px;">BILANGAN ANAK</th>
-                                    <th style="padding:10px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.25); min-width:150px;">TEMPOH MASA</th>
+                                    <th style="padding:10px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.25); min-width:100px;">BILANGAN ANAK</th>
+                                    <th style="padding:10px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.25); min-width:155px;">JENIS LANGGANAN</th>
+                                    <th style="padding:10px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.25); min-width:140px;">TEMPOH MASA</th>
                                     <th style="padding:10px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.25); width:60px;">INFO</th>
                                     <th style="padding:10px 10px; text-align:center; width:110px;">TINDAKAN</th>
                                 </tr>
@@ -4823,7 +6054,7 @@ window.bukaModalDaftarAdmin = function (type) {
     overlay.style.display = 'flex';
 };
 
-window.simpanDaftarGuruModal = function () {
+window.simpanDaftarGuruModal = async function () {
     const namaEl = document.getElementById('modal-admin-guru-nama');
     const sekEl = document.getElementById('modal-admin-guru-sekolah');
     const emailEl = document.getElementById('modal-admin-guru-email');
@@ -4842,16 +6073,42 @@ window.simpanDaftarGuruModal = function () {
         return;
     }
 
+    const cleanEmail = email || `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}@moe.edu.my`;
+
+    // Cipta profil dan kelas di pangkalan data Firebase
+    let profileId = null;
+    let kodKelas = null;
+    if (typeof window.adminCreateProfile === 'function') {
+        try {
+            const res = await window.adminCreateProfile({
+                nama: nama,
+                peranan: 'guru',
+                nama_sekolah: sekolah,
+                email: cleanEmail,
+                hari: hari,
+                langganan: hari > 30 ? '1 Tahun' : '1 Bulan'
+            });
+            if (res && res.success) {
+                profileId = res.profile?.id;
+                kodKelas = res.classOrFamily?.kod_kelas;
+            }
+        } catch (err) {
+            console.warn('[Admin] Ralat daftar guru ke Firebase:', err);
+        }
+    }
+
     const teachers = getAdminTeachersList();
     const newTeacher = {
-        id: 'g_' + Date.now(),
+        id: profileId || ('g_' + Date.now()),
         nama: nama,
         sekolah: sekolah,
-        email: email || `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}@moe.edu.my`,
+        nama_kelas: 'KELAS 1',
+        kod_kelas: kodKelas || (typeof window.generateUniqueCode === 'function' ? window.generateUniqueCode('GURU') : 'GURU#101'),
+        email: cleanEmail,
         password: password || `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}123`,
         murid: 0,
         bakiHari: hari,
-        langganan: '1 Bulan'
+        langganan: hari > 30 ? '1 Tahun' : '1 Bulan'
     };
     teachers.push(newTeacher);
     localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(teachers));
@@ -4864,10 +6121,16 @@ window.simpanDaftarGuruModal = function () {
     if (document.getElementById('admin-jumlah-guru')) {
         document.getElementById('admin-jumlah-guru').innerText = teachers.length;
     }
-    alert(`Guru "${nama}" berjaya didaftarkan!`);
+
+    // Segerakkan data Firebase di latar belakang
+    if (typeof window.getRegisteredTeachers === 'function') {
+        window.getRegisteredTeachers().catch(e => console.warn(e));
+    }
+
+    alert(`Guru "${nama}" berjaya didaftarkan ke pangkalan data Firebase!\nKod Kelas: ${newTeacher.kod_kelas}`);
 };
 
-window.simpanDaftarParentModal = function () {
+window.simpanDaftarParentModal = async function () {
     const namaEl = document.getElementById('modal-admin-parent-nama');
     const anakEl = document.getElementById('modal-admin-parent-anak');
     const emailEl = document.getElementById('modal-admin-parent-email');
@@ -4886,15 +6149,40 @@ window.simpanDaftarParentModal = function () {
         return;
     }
 
+    const cleanEmail = email || `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}@gmail.com`;
+
+    // Cipta profil dan keluarga di pangkalan data Firebase
+    let profileId = null;
+    let kodKeluarga = null;
+    if (typeof window.adminCreateProfile === 'function') {
+        try {
+            const res = await window.adminCreateProfile({
+                nama: nama,
+                peranan: 'ibubapa',
+                email: cleanEmail,
+                hari: hari,
+                langganan: hari > 30 ? '1 Tahun' : '1 Bulan'
+            });
+            if (res && res.success) {
+                profileId = res.profile?.id;
+                kodKeluarga = res.classOrFamily?.kod_keluarga;
+            }
+        } catch (err) {
+            console.warn('[Admin] Ralat daftar ibu bapa ke Firebase:', err);
+        }
+    }
+
     const parents = getAdminParentsList();
     const newParent = {
-        id: 'p_' + Date.now(),
+        id: profileId || ('p_' + Date.now()),
         nama: nama,
+        nama_keluarga: `KELUARGA ${nama.toUpperCase()}`,
+        kod_keluarga: kodKeluarga || (typeof window.generateUniqueCode === 'function' ? window.generateUniqueCode('FAM') : 'FAM#2026'),
         anak: anak,
-        email: email || `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}@gmail.com`,
+        email: cleanEmail,
         password: password || `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}123`,
         bakiHari: hari,
-        langganan: '1 Bulan'
+        langganan: hari > 30 ? '1 Tahun' : '1 Bulan'
     };
     parents.push(newParent);
     localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));
@@ -4907,60 +6195,17 @@ window.simpanDaftarParentModal = function () {
     if (document.getElementById('admin-jumlah-ibubapa')) {
         document.getElementById('admin-jumlah-ibubapa').innerText = parents.length;
     }
-    alert(`Ibu bapa "${nama}" berjaya didaftarkan!`);
+
+    // Segerakkan data Firebase di latar belakang
+    if (typeof window.getRegisteredParents === 'function') {
+        window.getRegisteredParents().catch(e => console.warn(e));
+    }
+
+    alert(`Ibu bapa "${nama}" berjaya didaftarkan ke pangkalan data Firebase!\nKod Keluarga: ${newParent.kod_keluarga}`);
 };
 
-window.lanjutTempohGuru = function (id) {
-    const teachers = getAdminTeachersList();
-    const t = teachers.find(item => item.id === id);
-    if (!t) return;
-    t.bakiHari = (t.bakiHari || 0) + 30;
-    localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(teachers));
-    window.renderAdminUrus('guru');
-    if (typeof window.renderAdminTable === 'function') window.renderAdminTable('guru');
-};
 
-window.padamGuruAdmin = function (id) {
-    window.showAppModalConfirm(
-        'Adakah anda pasti mahu memadam guru ini daripada rekod sistem?',
-        function () {
-            let teachers = getAdminTeachersList();
-            teachers = teachers.filter(t => t.id !== id);
-            localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(teachers));
-            window.renderAdminUrus('guru');
-            if (typeof window.renderAdminTable === 'function') window.renderAdminTable('guru');
-            if (document.getElementById('admin-jumlah-guru')) {
-                document.getElementById('admin-jumlah-guru').innerText = teachers.length;
-            }
-        }
-    );
-};
 
-window.lanjutTempohParent = function (id) {
-    const parents = getAdminParentsList();
-    const p = parents.find(item => item.id === id);
-    if (!p) return;
-    p.bakiHari = (p.bakiHari || 0) + 30;
-    localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));
-    window.renderAdminUrus('ibubapa');
-    if (typeof window.renderAdminTable === 'function') window.renderAdminTable('ibubapa');
-};
-
-window.padamParentAdmin = function (id) {
-    window.showAppModalConfirm(
-        'Adakah anda pasti mahu memadam ibu bapa ini daripada rekod sistem?',
-        function () {
-            let parents = getAdminParentsList();
-            parents = parents.filter(p => p.id !== id);
-            localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));
-            window.renderAdminUrus('ibubapa');
-            if (typeof window.renderAdminTable === 'function') window.renderAdminTable('ibubapa');
-            if (document.getElementById('admin-jumlah-ibubapa')) {
-                document.getElementById('admin-jumlah-ibubapa').innerText = parents.length;
-            }
-        }
-    );
-};
 
 window.misi3DNext = function () {
     if (!window.currentMisiModules || window.currentMisiModules.length === 0) return;
@@ -5232,12 +6477,14 @@ window.initCabaranLainSwipe = function () {
     });
 
     let mouseStartX = null;
-    stage.addEventListener('mousedown', (e) => { mouseStartX = e.clientX; e.preventDefault(); });
+    stage.addEventListener('mousedown', (e) => {
+        mouseStartX = e.clientX;
+    });
     stage.addEventListener('mouseup', (e) => {
         if (mouseStartX === null) return;
         const diff = e.clientX - mouseStartX;
         mouseStartX = null;
-        if (Math.abs(diff) > 40) {
+        if (Math.abs(diff) > 45) {
             if (diff < 0) window.cabaranLainNext();
             else window.cabaranLainPrev();
         }
@@ -5412,16 +6659,30 @@ window.openCabaranLainGame = function (modul) {
         window.generateTangkapCeritaGame(gameArea);
     }
 
+    const isBacaanBergred = (petaId === 4) || ['burung_ayat', 'ular_ayat', 'bina_ayat', 'lastik_burung', 'sambung_ayat', 'meriam_kata', 'teka_petikan', 'katak_lompat', 'detektif_petikan', 'tangkap_cerita', 'kembara_cerita'].includes(modul.type);
+    if (isBacaanBergred) {
+        modal.classList.add('is-bacaan-bergred');
+    } else {
+        modal.classList.remove('is-bacaan-bergred');
+    }
+
     document.body.classList.add('hide-top-banner');
     const topBanner = document.getElementById('teacher-top-banner');
     if (topBanner) topBanner.style.display = 'none';
 
     modal.style.display = 'flex';
+    modal.classList.add('modal-open');
 };
 
 window.closeCabaranLainGame = function () {
     const modal = document.getElementById('modal-cabaran-lain-game');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('modal-open');
+        modal.classList.remove('is-bacaan-bergred');
+    }
+    const starModal = document.getElementById('modal-cabaran-lain-star-result');
+    if (starModal) starModal.style.setProperty('display', 'none', 'important');
     if (window.speedQuizTimer) { clearInterval(window.speedQuizTimer); window.speedQuizTimer = null; }
     if (window.vowelWhackTimer) { clearInterval(window.vowelWhackTimer); window.vowelWhackTimer = null; }
     if (window.vowelWhackSpawnTimer) { clearTimeout(window.vowelWhackSpawnTimer); window.vowelWhackSpawnTimer = null; }
@@ -5441,6 +6702,9 @@ window.closeCabaranLainGame = function () {
     if (window.uaAnimId) { cancelAnimationFrame(window.uaAnimId); window.uaAnimId = null; }
     if (window.uaTimer) { clearInterval(window.uaTimer); window.uaTimer = null; }
     if (window.uaKeyHandler) { window.removeEventListener('keydown', window.uaKeyHandler); window.uaKeyHandler = null; }
+    if (window.bpaAnimId) { cancelAnimationFrame(window.bpaAnimId); window.bpaAnimId = null; }
+    if (window.bpaTimer) { clearInterval(window.bpaTimer); window.bpaTimer = null; }
+    if (window.bpaKeyHandler) { window.removeEventListener('keydown', window.bpaKeyHandler); window.bpaKeyHandler = null; }
     if (window.lbAnimId) { cancelAnimationFrame(window.lbAnimId); window.lbAnimId = null; }
     if (window.mkAnimId) { cancelAnimationFrame(window.mkAnimId); window.mkAnimId = null; }
     if (window.klAnimId) { cancelAnimationFrame(window.klAnimId); window.klAnimId = null; }
@@ -5590,20 +6854,28 @@ window.showCabaranLainStarPopup = function (score, stars) {
     if (stars === 0 && window.playSalahSound) window.playSalahSound();
 
     let modal = document.getElementById('modal-cabaran-lain-star-result');
+    const gameScreen = document.getElementById('modal-cabaran-lain-game');
     if (!modal) {
         modal = document.createElement('div');
         modal.id = 'modal-cabaran-lain-star-result';
-        modal.className = 'modal-overlay';
-        modal.style.display = 'none';
-        modal.style.position = 'fixed';
-        modal.style.inset = '0';
-        modal.style.background = 'rgba(15, 23, 42, 0.75)';
-        modal.style.backdropFilter = 'blur(4px)';
-        modal.style.zIndex = '99999';
-        modal.style.alignItems = 'center';
-        modal.style.justifyContent = 'center';
+        modal.className = 'modal-overlay cabaran-lain-star-modal';
+    }
+    if (gameScreen && gameScreen.style.display !== 'none') {
+        gameScreen.appendChild(modal);
+    } else {
         document.body.appendChild(modal);
     }
+    modal.style.setProperty('position', 'fixed', 'important');
+    modal.style.setProperty('inset', '0', 'important');
+    modal.style.setProperty('width', '100vw', 'important');
+    modal.style.setProperty('height', '100vh', 'important');
+    modal.style.setProperty('background', 'rgba(15, 23, 42, 0.78)', 'important');
+    modal.style.setProperty('backdrop-filter', 'blur(5px)', 'important');
+    modal.style.setProperty('-webkit-backdrop-filter', 'blur(5px)', 'important');
+    modal.style.setProperty('z-index', '9999999', 'important');
+    modal.style.setProperty('align-items', 'center', 'important');
+    modal.style.setProperty('justify-content', 'center', 'important');
+    modal.style.setProperty('display', 'flex', 'important');
 
     const isFullStars = stars >= 3;
     const titleText = isFullStars ? 'Tahniah Anda Hebat!' : 'Cuba Lagi!';
@@ -5713,14 +6985,14 @@ window.showCabaranLainStarPopup = function (score, stars) {
     </div>
     `;
 
-    modal.style.display = 'flex';
+    modal.style.setProperty('display', 'flex', 'important');
 };
 
 window.goToLencanaFromCabaranLain = function () {
     const starModal = document.getElementById('modal-cabaran-lain-star-result');
-    if (starModal) starModal.style.display = 'none';
+    if (starModal) starModal.style.setProperty('display', 'none', 'important');
     const gameModal = document.getElementById('modal-cabaran-lain-game');
-    if (gameModal) gameModal.style.display = 'none';
+    if (gameModal) gameModal.style.setProperty('display', 'none', 'important');
     if (typeof window.closeCabaranLainGame === 'function') {
         window.closeCabaranLainGame();
     }
@@ -5731,13 +7003,13 @@ window.goToLencanaFromCabaranLain = function () {
 
 window.closeCabaranLainStarPopup = function () {
     const modal = document.getElementById('modal-cabaran-lain-star-result');
-    if (modal) modal.style.display = 'none';
+    if (modal) modal.style.setProperty('display', 'none', 'important');
     window.closeCabaranLainGame();
 };
 
 window.replayCurrentCabaranLain = function () {
     const modal = document.getElementById('modal-cabaran-lain-star-result');
-    if (modal) modal.style.display = 'none';
+    if (modal) modal.style.setProperty('display', 'none', 'important');
     if (window.currentExtraChallenge) {
         window.openCabaranLainGame(window.currentExtraChallenge);
     }
@@ -5761,9 +7033,11 @@ window.generateFruitSlashGame = function (area) {
     // Header with hearts and score (Buah Genap: 0/10)
     html += window.renderCabaranLainHeader(window.fsScore, window.fsTarget, `Buah Genap: ${window.fsScore}/${window.fsTarget}`);
 
-    // Top instruction text (matching Ketuk Tikus clean style with colored highlight)
-    html += '<div style="text-align:center;font-weight:800;color:#1e1b4b;margin-bottom:8px;font-size:0.95rem;font-family:\'AtlantaRounded\',sans-serif;">';
-    html += 'Tetak nombor <span style="color:#ea580c;font-size:1.15rem;font-weight:900;">genap</span> sahaja!';
+    // Top instruction text
+    html += '<div class="cl-instruction-wrap">';
+    html += '<div class="cl-instruction-box">';
+    html += 'Tetak nombor <span style="color:#ea580c;font-size:1.15rem;font-weight:900;margin:0 4px;">genap</span> sahaja!';
+    html += '</div>';
     html += '</div>';
 
     // Canvas element
@@ -6489,8 +7763,10 @@ window.generateWordSearchGame = function (area, words) {
     let html = '';
 
     // Instruction subtitle
-    html += '<div style="text-align:center;font-weight:800;color:#1e1b4b;margin-bottom:10px;font-size:0.95rem;font-family:\'AtlantaRounded\',sans-serif;">';
+    html += '<div class="cl-instruction-wrap">';
+    html += '<div class="cl-instruction-box">';
     html += 'Tarik huruf untuk cari perkataan di bawah!';
+    html += '</div>';
     html += '</div>';
 
     // Colorful word badges at top
@@ -6793,7 +8069,7 @@ window.generateMemoryMatchGame = function (area, words) {
     window.mmAttempts = 0;
     window.mmInstructionText = instructionText;
 
-    let html = `<div id="mm-status" style="text-align:center;font-weight:800;font-size:0.92rem;color:#475569;margin-bottom:10px;">${instructionText} (0/6)</div>`;
+    let html = `<div class="cl-instruction-wrap"><div id="mm-status" class="cl-instruction-box">${instructionText} (0/6)</div></div>`;
     html += `<div id="mm-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:340px;margin:0 auto;perspective:1000px;">`;
 
     cards.forEach((card, idx) => {
@@ -6919,9 +8195,11 @@ window.generateBasketCatchGame = function (area) {
     // Header with hearts and score
     html += window.renderCabaranLainHeader(window.bcScore, window.bcTarget, `Ditangkap: ${window.bcScore}/${window.bcTarget}`);
 
-    // Top instruction text (matching Ketuk Tikus clean style)
-    html += '<div style="text-align:center;font-weight:800;color:#1e1b4b;margin-bottom:8px;font-size:0.95rem;font-family:\'AtlantaRounded\',sans-serif;">';
-    html += 'Tangkap gambar yang <span style="color:#0284c7;font-size:1.15rem;font-weight:900;">sepadan</span> ke dalam bakul!';
+    // Top instruction text
+    html += '<div class="cl-instruction-wrap">';
+    html += '<div class="cl-instruction-box">';
+    html += 'Tangkap gambar yang <span style="color:#0284c7;font-size:1.15rem;font-weight:900;margin:0 4px;">sepadan</span> ke dalam bakul!';
+    html += '</div>';
     html += '</div>';
 
     // Canvas container
@@ -7060,6 +8338,7 @@ window.initBasketCatchCanvas = function () {
 
     // Keyboard controls
     window.bcKeyHandler = function (e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
         if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
             basket.targetX = Math.max(45, basket.targetX - 35);
             if (gameState === 'ready') {
@@ -7609,8 +8888,10 @@ window.renderFrogJumpDOM = function (area) {
     html += window.renderCabaranLainHeader(window.fjCurrentIdx + 1, window.fjQuestions.length, `Soalan ${window.fjCurrentIdx + 1}/${window.fjQuestions.length}`);
 
     // Top instruction
-    html += '<div style="text-align:center;font-weight:800;color:#1e1b4b;margin-bottom:8px;font-size:0.95rem;font-family:\'AtlantaRounded\',sans-serif;">';
-    html += 'Lompat ke suku kata yang <span style="color:#059669;font-size:1.15rem;font-weight:900;">betul</span>!';
+    html += '<div class="cl-instruction-wrap">';
+    html += '<div class="cl-instruction-box">';
+    html += 'Lompat ke suku kata yang <span style="color:#059669;font-size:1.15rem;font-weight:900;margin:0 4px;">betul</span>!';
+    html += '</div>';
     html += '</div>';
 
     // Canvas container
@@ -8216,10 +9497,10 @@ window.renderBirdMathDOM = function (area) {
     // Header with hearts and score (Soalan X/5)
     html += window.renderCabaranLainHeader(window.bmCurrentQIndex + 1, window.bmTotal);
 
-    // Question pill bar (Clean, no extra subtitle text!)
-    html += '<div style="text-align:center;margin-bottom:8px;">';
-    html += '<div style="background:#ffffff;border:3px solid #0284c7;border-radius:18px;padding:4px 20px;display:inline-block;box-shadow:0 3px 0 #0369a1;">';
-    html += `<span id="bm-q-pill" style="font-size:1.35rem;font-weight:900;color:#0369a1;font-family:'AtlantaRounded',sans-serif;">${q.a} + ${q.b} = ?</span>`;
+    // Question pill bar
+    html += '<div class="cl-instruction-wrap">';
+    html += '<div class="cl-instruction-box" style="padding:4px 22px;">';
+    html += `<span id="bm-q-pill" style="font-size:1.35rem;font-weight:900;color:#0284c7;font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">${q.a} + ${q.b} = ?</span>`;
     html += '</div>';
     html += '</div>';
 
@@ -8334,6 +9615,7 @@ window.initBirdMathCanvas = function () {
 
     // Keydown handler
     window.bmKeyHandler = function (e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
         if (e.code === 'Space' || e.code === 'ArrowUp') {
             e.preventDefault();
             handleJump();
@@ -8897,9 +10179,9 @@ window.renderBirdTolakDOM = function (area) {
     html += window.renderCabaranLainHeader(window.btCurrentQIndex + 1, window.btTotal);
 
     // Question pill bar
-    html += '<div style="text-align:center;margin-bottom:8px;">';
-    html += '<div style="background:#ffffff;border:3px solid #ea580c;border-radius:18px;padding:4px 20px;display:inline-block;box-shadow:0 3px 0 #c2410c;">';
-    html += `<span id="bt-q-pill" style="font-size:1.35rem;font-weight:900;color:#c2410c;font-family:'AtlantaRounded',sans-serif;">${q.a} - ${q.b} = ?</span>`;
+    html += '<div class="cl-instruction-wrap">';
+    html += '<div class="cl-instruction-box" style="padding:4px 22px;">';
+    html += `<span id="bt-q-pill" style="font-size:1.35rem;font-weight:900;color:#ea580c;font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">${q.a} - ${q.b} = ?</span>`;
     html += '</div>';
     html += '</div>';
 
@@ -9010,6 +10292,7 @@ window.initBirdTolakCanvas = function () {
     };
 
     window.btKeyHandler = function (e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
         if (e.code === 'Space' || e.code === 'ArrowUp') {
             e.preventDefault();
             handleJump();
@@ -9708,8 +10991,10 @@ window.renderSpaceShooterDOM = function (area) {
     html += window.renderCabaranLainHeader(window.ssCurrentIdx + 1, window.ssQuestions.length, `Soalan ${window.ssCurrentIdx + 1}/${window.ssQuestions.length}`);
 
     // Top instruction
-    html += '<div style="text-align:center;font-weight:800;color:#1e1b4b;margin-bottom:8px;font-size:0.95rem;font-family:\'AtlantaRounded\',sans-serif;">';
-    html += 'Tembak suku kata mengikut <span style="color:#6366f1;font-size:1.15rem;font-weight:900;">susunan perkataan</span>!';
+    html += '<div class="cl-instruction-wrap">';
+    html += '<div class="cl-instruction-box">';
+    html += 'Tembak suku kata mengikut <span style="color:#6366f1;font-size:1.15rem;font-weight:900;margin:0 4px;">susunan perkataan</span>!';
+    html += '</div>';
     html += '</div>';
 
     // Canvas container
@@ -9890,6 +11175,7 @@ window.initSpaceShooterCanvas = function () {
 
     // Keyboard Controls
     window.ssKeyHandler = function (e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
         if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
             ship.targetX = Math.max(28, ship.targetX - 30);
         } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
@@ -10420,9 +11706,9 @@ window.renderSpeedQuiz = function (area) {
 
     window.sqTimeLeft = 8;
     let html = window.renderCabaranLainHeader(window.sqCurrent + 1, window.sqTotal);
-    html += `<div id="sq-timer-bar" style="height:8px;background:#e2e8f0;border-radius:4px;margin:8px auto;max-width:280px;overflow:hidden;"><div id="sq-timer-fill" style="height:100%;width:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:4px;transition:width 0.3s;"></div></div>`;
-    html += `<div style="text-align:center;margin:14px 0;font-size:1.6rem;font-weight:900;color:#1e293b;letter-spacing:2px;padding:14px;background:#f1f5f9;border-radius:16px;border:3px solid #cbd5e1;">${correctWord.split('').join(' ')}</div>`;
-    html += `<div style="text-align:center;font-weight:600;color:#64748b;margin-bottom:10px;">Pilih perkataan yang betul:</div>`;
+    html += `<div id="sq-timer-bar" style="height:8px;background:#e2e8f0;border-radius:4px;margin:6px auto;max-width:280px;overflow:hidden;"><div id="sq-timer-fill" style="height:100%;width:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:4px;transition:width 0.3s;"></div></div>`;
+    html += `<div class="cl-instruction-wrap" style="margin-bottom:6px;"><div class="cl-instruction-box">Pilih perkataan yang betul:</div></div>`;
+    html += `<div style="text-align:center;margin:8px auto 14px auto;font-size:1.6rem;font-weight:900;color:#0f172a;letter-spacing:3px;padding:10px 20px;background:#ffffff;border-radius:18px;border:3px solid #0f172a;box-shadow:0 4px 0 #0f172a;max-width:280px;box-sizing:border-box;font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">${correctWord.split('').join(' ')}</div>`;
     html += `<div style="display:flex;flex-direction:column;gap:10px;max-width:280px;margin:0 auto;">`;
     choices.forEach(ch => {
         html += `<button onclick="window.sqAnswer('${ch}','${correctWord}')" class="neo-btn" style="padding:12px;font-size:1rem;font-weight:800;border-radius:14px;border:3px solid #334155;background:#ffffff;cursor:pointer;text-align:center;">${ch}</button>`;
@@ -10539,11 +11825,13 @@ window.renderVowelWhackField = function (area) {
     html += window.renderCabaranLainHeader(window.vwScore, window.vwTarget);
 
     // Instruction based on mode
+    html += '<div class="cl-instruction-wrap">';
     if (window.vwMode === 'consonant') {
-        html += '<div style="text-align:center;font-weight:800;color:#1e3a0f;margin-bottom:8px;font-size:0.92rem;font-family:\'AtlantaRounded\',sans-serif;">Ketuk tikus yang pegang <span style=\"color:#2563eb;font-size:1.1rem;font-weight:900;\">huruf konsonan</span> sahaja!</div>';
+        html += '<div class="cl-instruction-box">Ketuk tikus yang pegang <span style="color:#2563eb;font-size:1.1rem;font-weight:900;margin:0 4px;">huruf konsonan</span> sahaja!</div>';
     } else {
-        html += '<div style="text-align:center;font-weight:800;color:#1e3a0f;margin-bottom:8px;font-size:0.92rem;font-family:\'AtlantaRounded\',sans-serif;">Ketuk tikus yang pegang <span style=\"color:#ef4444;font-size:1.1rem;font-weight:900;\">huruf vokal</span> sahaja!</div>';
+        html += '<div class="cl-instruction-box">Ketuk tikus yang pegang <span style="color:#ef4444;font-size:1.1rem;font-weight:900;margin:0 4px;">huruf vokal</span> sahaja!</div>';
     }
+    html += '</div>';
 
     // Game field — green grass
     html += '<div id="vw-field" style="'
@@ -11318,38 +12606,34 @@ window.renderBurungPatukAyatQuestion = function (area) {
     const closeQuote = '\u201d';
 
     html += `
-    <div style="display:flex; flex-direction:column; align-items:center; width:100%; max-width:440px; margin:0 auto; user-select:none;">
-        <!-- Card / Progress Banner -->
-        <div style="background:#ffffff; border:2.5px solid #1e293b; border-radius:16px; padding:8px 12px; box-shadow:0 3px 0 #1e293b; width:100%; box-sizing:border-box; margin-bottom:8px;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <img src="${q.image}" style="width:48px; height:48px; border-radius:10px; object-fit:cover; border:2px solid #1e293b; flex-shrink:0;" onerror="this.src='/images/menu/ayat pendek.png';" />
-                    <div style="text-align:left;">
-                        <div style="font-size:0.75rem; font-weight:800; color:#64748b; margin-bottom:1px; font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">Patuk perkataan seterusnya:</div>
-                        <div id="bpa-target-badge" style="font-size:1.25rem; font-weight:900; color:#059669; font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif; display:flex; align-items:center;">
-                            <span style="color:#0284c7; font-family:Arial, sans-serif; font-weight:900; margin-right:1px;">${openQuote}</span><span>${cleanWords[0]}</span><span style="color:#0284c7; font-family:Arial, sans-serif; font-weight:900; margin-left:1px;">${closeQuote}</span>
-                        </div>
+    <div class="cl-bacaan-bergred-wrap">
+        <!-- Left Side: Card / Progress Banner -->
+        <div class="cl-bacaan-question-card" style="position:relative; padding:18px 68px 18px 18px;">
+            <div style="display:flex; align-items:center; gap:14px;">
+                <img src="${q.image}" style="width:58px; height:58px; border-radius:12px; object-fit:cover; border:2.5px solid #1e293b; flex-shrink:0;" onerror="this.src='/images/menu/ayat pendek.png';" />
+                <div style="text-align:left;">
+                    <div style="font-size:0.82rem; font-weight:800; color:#64748b; margin-bottom:2px; font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">Patuk perkataan seterusnya:</div>
+                    <div id="bpa-target-badge" style="font-size:1.4rem; font-weight:900; color:#059669; font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif; display:flex; align-items:center;">
+                        <span style="color:#0284c7; font-family:Arial, sans-serif; font-weight:900; margin-right:1px;">${openQuote}</span><span>${cleanWords[0]}</span><span style="color:#0284c7; font-family:Arial, sans-serif; font-weight:900; margin-left:1px;">${closeQuote}</span>
                     </div>
                 </div>
-                <button type="button" onclick="sebutTeksPermainan('${q.audio || q.text}')" style="width:40px !important; height:40px !important; min-width:40px !important; min-height:40px !important; max-width:40px !important; max-height:40px !important; padding:0 !important; border-radius:50% !important; aspect-ratio:1/1 !important; display:flex !important; align-items:center !important; justify-content:center !important; flex-shrink:0 !important; box-sizing:border-box !important; background:#10b981; color:#ffffff; border:2px solid #1e293b; box-shadow:0 2.5px 0 #1e293b; cursor:pointer;" title="Dengar Ayat">
-                    <i class="fa-solid fa-volume-high" style="font-size:1rem; margin:0; padding:0;"></i>
-                </button>
             </div>
             <!-- Live Completed Sentence Assembly Track -->
-            <div id="bpa-sentence-assembly" style="display:flex; flex-wrap:wrap; gap:5px; align-items:center; justify-content:flex-start; margin-top:8px; padding-top:6px; border-top:1.5px dashed #e2e8f0;">
+            <div id="bpa-sentence-assembly" style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:flex-start; margin-top:14px; padding-top:10px; border-top:2px dashed #e2e8f0;">
                 ${progressPills}
             </div>
+            <button type="button" onclick="sebutTeksPermainan('${q.audio || q.text}')" style="position:absolute; top:22px; right:16px; width:44px !important; height:44px !important; min-width:44px !important; min-height:44px !important; max-width:44px !important; max-height:44px !important; padding:0 !important; border-radius:50% !important; aspect-ratio:1/1 !important; display:flex !important; align-items:center !important; justify-content:center !important; flex-shrink:0 !important; box-sizing:border-box !important; background:#10b981; color:#ffffff; border:2.5px solid #1e293b; box-shadow:0 3px 0 #1e293b; cursor:pointer;" title="Dengar Ayat">
+                <i class="fa-solid fa-volume-high" style="font-size:1.15rem; margin:0; padding:0;"></i>
+            </button>
         </div>
 
-        <!-- Canvas Game Area -->
-        <div style="position:relative; width:100%; max-width:340px; margin:0 auto 6px auto;">
-            <canvas id="bpa-canvas" width="340" height="260" style="width:100%; max-width:340px; aspect-ratio:340/260; border-radius:18px; border:3px solid #1e293b; box-shadow:0 4px 0 #1e293b; background:#7dd3fc; display:block; margin:0 auto; user-select:none; touch-action:none; cursor:pointer;"></canvas>
-            <div id="bpa-hint-tap" style="position:absolute; bottom:28px; left:50%; transform:translateX(-50%); pointer-events:none; background:rgba(0,0,0,0.55); color:#ffffff; font-size:0.75rem; font-weight:900; padding:3px 12px; border-radius:12px; font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif; letter-spacing:0.5px; transition:opacity 0.3s; opacity:0.9;">
+        <!-- Right Side: Canvas Game Area (Enlarged) -->
+        <div class="cl-bacaan-canvas-wrap" style="position:relative;">
+            <canvas id="bpa-canvas" width="340" height="260" style="background:#7dd3fc; display:block; margin:0 auto; user-select:none; touch-action:none; cursor:pointer;"></canvas>
+            <div id="bpa-hint-tap" style="position:absolute; bottom:28px; left:50%; transform:translateX(-50%); pointer-events:none; background:rgba(0,0,0,0.6); color:#ffffff; font-size:0.8rem; font-weight:900; padding:4px 14px; border-radius:14px; font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif; letter-spacing:0.5px; transition:opacity 0.3s; opacity:0.9; white-space:nowrap;">
                 👆 Ketuk skrin untuk terbang!
             </div>
         </div>
-
-
     </div>
     `;
 
@@ -11461,6 +12745,7 @@ window.initBurungPatukAyatCanvas = function () {
     
 
     window.bpaKeyHandler = function (e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
         if (e.code === 'Space' || e.code === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
             e.preventDefault();
             flapBird();
@@ -11844,19 +13129,20 @@ window.renderLastikBurungQuestion = function (area) {
     let html = window.renderCabaranLainHeader(window.lbCurrent + 1, window.lbTotal);
 
     html += `
-    <div style="display:flex; flex-direction:column; align-items:center; width:100%; max-width:460px; margin:0 auto;">
-        <!-- Sentence with Blank & Top-Right Audio -->
-        <div style="background:#ffffff; border:2.5px solid #1e293b; border-radius:14px; padding:10px 52px 10px 14px; box-shadow:0 3px 0 #1e293b; width:100%; box-sizing:border-box; margin-bottom:8px; text-align:center; position:relative;">
-            <p style="margin:0; font-size:1.02rem; font-weight:800; line-height:1.4; color:#1e293b; font-family:'AtlantaRounded',sans-serif;">
+    <div class="cl-bacaan-bergred-wrap">
+        <!-- Left Side: Sentence Card with Blank & Audio -->
+        <div class="cl-bacaan-question-card" style="position:relative; padding:18px 68px 18px 18px; text-align:left;">
+            <div style="font-size:0.82rem; font-weight:800; color:#64748b; margin-bottom:6px; font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">Lengkapkan ayat:</div>
+            <p style="margin:0; font-size:1.15rem; font-weight:800; line-height:1.45; color:#1e293b; font-family:'AtlantaRounded',sans-serif;">
                 ${q.text.replace('______', `<span id="lb-blank" style="display:inline-block; min-width:75px; border-bottom:3px solid #1e293b; color:#1e293b; font-weight:900; padding:0 4px; text-align:center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`)}
             </p>
-            <button type="button" onclick="sebutTeksPermainan('${q.audio || q.fullText}')" style="position:absolute; top:50%; transform:translateY(-50%); right:10px; width:36px !important; height:36px !important; min-width:36px !important; min-height:36px !important; max-width:36px !important; max-height:36px !important; padding:0 !important; border-radius:50% !important; aspect-ratio:1/1 !important; display:flex !important; align-items:center !important; justify-content:center !important; flex-shrink:0 !important; box-sizing:border-box !important; background:#f59e0b; color:#ffffff; border:2px solid #1e293b; box-shadow:0 2px 0 #1e293b; cursor:pointer;" title="Dengar">
-                <i class="fa-solid fa-volume-high" style="font-size:0.9rem; margin:0; padding:0;"></i>
+            <button type="button" onclick="sebutTeksPermainan('${q.audio || q.fullText}')" style="position:absolute; top:50%; transform:translateY(-50%); right:16px; width:44px !important; height:44px !important; min-width:44px !important; min-height:44px !important; max-width:44px !important; max-height:44px !important; padding:0 !important; border-radius:50% !important; aspect-ratio:1/1 !important; display:flex !important; align-items:center !important; justify-content:center !important; flex-shrink:0 !important; box-sizing:border-box !important; background:#f59e0b; color:#ffffff; border:2.5px solid #1e293b; box-shadow:0 3px 0 #1e293b; cursor:pointer;" title="Dengar">
+                <i class="fa-solid fa-volume-high" style="font-size:1.15rem; margin:0; padding:0;"></i>
             </button>
         </div>
 
-        <!-- Canvas Game Wrap with Animated Hand Cursor Demo -->
-        <div style="position:relative; width:100%; max-width:340px; margin:0 auto;">
+        <!-- Right Side: Canvas Game Wrap (Enlarged) with Animated Hand Cursor Demo -->
+        <div class="cl-bacaan-canvas-wrap" style="position:relative;">
             <style>
                 @keyframes lbSlingshotPull {
                     0% { transform: translate(-50%, -50%) translate(0px, 0px) scale(1); opacity: 0; }
@@ -11866,7 +13152,7 @@ window.renderLastikBurungQuestion = function (area) {
                     100% { transform: translate(-50%, -50%) translate(0px, 0px) scale(1); opacity: 0; }
                 }
             </style>
-            <canvas id="lb-canvas" width="340" height="260" style="width:100%; max-width:340px; aspect-ratio:340/260; border-radius:16px; border:3px solid #1e293b; box-shadow:0 4px 0 #1e293b; background:#38bdf8; display:block; margin:0 auto; user-select:none; touch-action:none;"></canvas>
+            <canvas id="lb-canvas" width="340" height="260" style="background:#38bdf8; display:block; margin:0 auto; user-select:none; touch-action:none;"></canvas>
             <div id="lb-cursor-demo" style="position:absolute; inset:0; pointer-events:none; z-index:20;">
                 <div style="position:absolute; left:65px; top:175px; animation:lbSlingshotPull 2.2s infinite ease-in-out;">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" style="display:block; filter:drop-shadow(0 3px 5px rgba(16,24,47,0.35));">
@@ -12253,18 +13539,20 @@ window.renderMeriamKataQuestion = function (area) {
     let html = window.renderCabaranLainHeader(window.mkCurrent + 1, window.mkTotal);
 
     html += `
-    <div style="display:flex; flex-direction:column; align-items:center; width:100%; max-width:460px; margin:0 auto;">
-        <!-- Question Badge with Illustration & Audio -->
-        <div style="background:#ffffff; border:2.5px solid #1e293b; border-radius:14px; padding:6px 52px 6px 10px; box-shadow:0 3px 0 #1e293b; width:100%; box-sizing:border-box; margin-bottom:8px; display:flex; align-items:center; gap:10px; position:relative;">
-            <img src="${q.image}" style="width:46px; height:46px; border-radius:8px; object-fit:cover; border:1.5px solid #1e293b; flex-shrink:0;" onerror="this.src='/images/menu/petikan tahap 1.png';" />
-            <span style="font-size:0.96rem; font-weight:900; color:#1e293b; text-align:left; line-height:1.35; font-family:'AtlantaRounded',sans-serif;">${q.question}</span>
-            <button type="button" onclick="sebutTeksPermainan('${q.audio || q.question}')" style="position:absolute; top:50%; transform:translateY(-50%); right:10px; width:36px !important; height:36px !important; min-width:36px !important; min-height:36px !important; max-width:36px !important; max-height:36px !important; padding:0 !important; border-radius:50% !important; aspect-ratio:1/1 !important; display:flex !important; align-items:center !important; justify-content:center !important; flex-shrink:0 !important; box-sizing:border-box !important; background:#0284c7; color:#ffffff; border:2px solid #1e293b; box-shadow:0 2px 0 #1e293b; cursor:pointer;" title="Dengar">
-                <i class="fa-solid fa-volume-high" style="font-size:0.9rem; margin:0; padding:0;"></i>
+    <div class="cl-bacaan-bergred-wrap">
+        <!-- Left Side: Question Badge with Illustration & Audio -->
+        <div class="cl-bacaan-question-card" style="position:relative; padding:18px 68px 18px 18px;">
+            <div style="display:flex; align-items:center; gap:14px;">
+                <img src="${q.image}" style="width:58px; height:58px; border-radius:12px; object-fit:cover; border:2.5px solid #1e293b; flex-shrink:0;" onerror="this.src='/images/menu/petikan tahap 1.png';" />
+                <span style="font-size:1.1rem; font-weight:900; color:#1e293b; text-align:left; line-height:1.4; font-family:'AtlantaRounded',sans-serif;">${q.question}</span>
+            </div>
+            <button type="button" onclick="sebutTeksPermainan('${q.audio || q.question}')" style="position:absolute; top:50%; transform:translateY(-50%); right:16px; width:44px !important; height:44px !important; min-width:44px !important; min-height:44px !important; max-width:44px !important; max-height:44px !important; padding:0 !important; border-radius:50% !important; aspect-ratio:1/1 !important; display:flex !important; align-items:center !important; justify-content:center !important; flex-shrink:0 !important; box-sizing:border-box !important; background:#0284c7; color:#ffffff; border:2px solid #1e293b; box-shadow:0 3px 0 #1e293b; cursor:pointer;" title="Dengar">
+                <i class="fa-solid fa-volume-high" style="font-size:1.15rem; margin:0; padding:0;"></i>
             </button>
         </div>
 
-        <!-- Canvas Game Wrap with Animated Hand Cursor Demo (No blue button) -->
-        <div style="position:relative; width:100%; max-width:340px; margin:0 auto 6px auto;">
+        <!-- Right Side: Canvas Game Wrap (Enlarged) with Animated Hand Cursor Demo -->
+        <div class="cl-bacaan-canvas-wrap" style="position:relative;">
             <style>
                 @keyframes mkAimAndTap {
                     0% { transform: translate(-50%, -50%) translate(0px, 0px) scale(1); opacity: 0; }
@@ -12275,7 +13563,7 @@ window.renderMeriamKataQuestion = function (area) {
                     100% { transform: translate(-50%, -50%) translate(0px, 0px) scale(1); opacity: 0; }
                 }
             </style>
-            <canvas id="mk-canvas" width="340" height="260" style="width:100%; max-width:340px; aspect-ratio:340/260; border-radius:18px; border:3px solid #1e293b; box-shadow:0 4px 0 #1e293b; background:#cffafe; display:block; margin:0 auto; user-select:none; touch-action:none; cursor:crosshair;"></canvas>
+            <canvas id="mk-canvas" width="340" height="260" style="background:#cffafe; display:block; margin:0 auto; user-select:none; touch-action:none; cursor:crosshair;"></canvas>
             
             <!-- Animated Hand Cursor (Exact Same Design as Lastik Burung) -->
             <div id="mk-cursor-demo" style="position:absolute; inset:0; pointer-events:none; z-index:20;">
@@ -12644,19 +13932,21 @@ window.renderKatakLompatQuestion = function (area) {
     let html = window.renderCabaranLainHeader(window.klCurrent + 1, window.klTotal);
 
     html += `
-    <div style="display:flex; flex-direction:column; align-items:center; width:100%; max-width:460px; margin:0 auto;">
-        <!-- Question Badge with Illustration & Audio -->
-        <div style="background:#ffffff; border:2.5px solid #1e293b; border-radius:14px; padding:6px 52px 6px 10px; box-shadow:0 3px 0 #1e293b; width:100%; box-sizing:border-box; margin-bottom:8px; display:flex; align-items:center; gap:10px; position:relative;">
-            <img src="${q.image}" style="width:46px; height:46px; border-radius:8px; object-fit:cover; border:1.5px solid #1e293b; flex-shrink:0;" onerror="this.src='/images/menu/petikan tahap 2.png';" />
-            <span style="font-size:0.96rem; font-weight:900; color:#1e293b; text-align:left; line-height:1.35; font-family:'AtlantaRounded',sans-serif;">${q.question}</span>
-            <button type="button" onclick="sebutTeksPermainan('${q.audio || q.question}')" style="position:absolute; top:50%; transform:translateY(-50%); right:10px; width:36px !important; height:36px !important; min-width:36px !important; min-height:36px !important; max-width:36px !important; max-height:36px !important; padding:0 !important; border-radius:50% !important; aspect-ratio:1/1 !important; display:flex !important; align-items:center !important; justify-content:center !important; flex-shrink:0 !important; box-sizing:border-box !important; background:#8b5cf6; color:#ffffff; border:2px solid #1e293b; box-shadow:0 2px 0 #1e293b; cursor:pointer;" title="Dengar">
-                <i class="fa-solid fa-volume-high" style="font-size:0.9rem; margin:0; padding:0;"></i>
+    <div class="cl-bacaan-bergred-wrap">
+        <!-- Left Side: Question Badge with Illustration & Audio -->
+        <div class="cl-bacaan-question-card" style="position:relative; padding:18px 68px 18px 18px;">
+            <div style="display:flex; align-items:center; gap:14px;">
+                <img src="${q.image}" style="width:58px; height:58px; border-radius:12px; object-fit:cover; border:2.5px solid #1e293b; flex-shrink:0;" onerror="this.src='/images/menu/petikan tahap 2.png';" />
+                <span style="font-size:1.1rem; font-weight:900; color:#1e293b; text-align:left; line-height:1.4; font-family:'AtlantaRounded',sans-serif;">${q.question}</span>
+            </div>
+            <button type="button" onclick="sebutTeksPermainan('${q.audio || q.question}')" style="position:absolute; top:50%; transform:translateY(-50%); right:16px; width:44px !important; height:44px !important; min-width:44px !important; min-height:44px !important; max-width:44px !important; max-height:44px !important; padding:0 !important; border-radius:50% !important; aspect-ratio:1/1 !important; display:flex !important; align-items:center !important; justify-content:center !important; flex-shrink:0 !important; box-sizing:border-box !important; background:#8b5cf6; color:#ffffff; border:2px solid #1e293b; box-shadow:0 3px 0 #1e293b; cursor:pointer;" title="Dengar">
+                <i class="fa-solid fa-volume-high" style="font-size:1.15rem; margin:0; padding:0;"></i>
             </button>
         </div>
 
-        <!-- Canvas Game Wrap -->
-        <div style="position:relative; width:100%; max-width:340px; margin:0 auto;">
-            <canvas id="kl-canvas" width="340" height="260" style="width:100%; max-width:340px; aspect-ratio:340/260; border-radius:16px; border:3px solid #1e293b; box-shadow:0 4px 0 #1e293b; background:#38bdf8; display:block; margin:0 auto; user-select:none; cursor:pointer;"></canvas>
+        <!-- Right Side: Canvas Game Wrap (Enlarged) -->
+        <div class="cl-bacaan-canvas-wrap" style="position:relative;">
+            <canvas id="kl-canvas" width="340" height="260" style="background:#38bdf8; display:block; margin:0 auto; user-select:none; cursor:pointer;"></canvas>
         </div>
     </div>
     `;
@@ -13028,19 +14318,21 @@ window.renderTangkapCeritaQuestion = function (area) {
     let html = window.renderCabaranLainHeader(window.tcCurrent + 1, window.tcTotal);
 
     html += `
-    <div style="display:flex; flex-direction:column; align-items:center; width:100%; max-width:460px; margin:0 auto;">
-        <!-- Question Badge with Book Cover & Audio -->
-        <div style="background:#ffffff; border:2.5px solid #1e293b; border-radius:14px; padding:6px 52px 6px 10px; box-shadow:0 3px 0 #1e293b; width:100%; box-sizing:border-box; margin-bottom:8px; display:flex; align-items:center; gap:10px; position:relative;">
-            <img src="${q.image}" style="width:38px; height:46px; border-radius:6px; object-fit:cover; border:1.5px solid #1e293b; flex-shrink:0;" onerror="this.src='/images/menu/cerita pendek.png';" />
-            <span style="font-size:0.92rem; font-weight:900; color:#1e293b; text-align:left; line-height:1.35; font-family:'AtlantaRounded',sans-serif;">${q.question}</span>
-            <button type="button" onclick="sebutTeksPermainan('${q.question}')" style="position:absolute; top:50%; transform:translateY(-50%); right:10px; width:36px !important; height:36px !important; min-width:36px !important; min-height:36px !important; max-width:36px !important; max-height:36px !important; padding:0 !important; border-radius:50% !important; aspect-ratio:1/1 !important; display:flex !important; align-items:center !important; justify-content:center !important; flex-shrink:0 !important; box-sizing:border-box !important; background:#f43f5e; color:#ffffff; border:2px solid #1e293b; box-shadow:0 2px 0 #1e293b; cursor:pointer;" title="Dengar">
-                <i class="fa-solid fa-volume-high" style="font-size:0.9rem; margin:0; padding:0;"></i>
+    <div class="cl-bacaan-bergred-wrap">
+        <!-- Left Side: Question Badge with Book Cover & Audio -->
+        <div class="cl-bacaan-question-card" style="position:relative; padding:18px 68px 18px 18px;">
+            <div style="display:flex; align-items:center; gap:14px;">
+                <img src="${q.image}" style="width:52px; height:64px; border-radius:10px; object-fit:cover; border:2px solid #1e293b; flex-shrink:0;" onerror="this.src='/images/menu/cerita pendek.png';" />
+                <span style="font-size:1.1rem; font-weight:900; color:#1e293b; text-align:left; line-height:1.4; font-family:'AtlantaRounded',sans-serif;">${q.question}</span>
+            </div>
+            <button type="button" onclick="sebutTeksPermainan('${q.question}')" style="position:absolute; top:50%; transform:translateY(-50%); right:16px; width:44px !important; height:44px !important; min-width:44px !important; min-height:44px !important; max-width:44px !important; max-height:44px !important; padding:0 !important; border-radius:50% !important; aspect-ratio:1/1 !important; display:flex !important; align-items:center !important; justify-content:center !important; flex-shrink:0 !important; box-sizing:border-box !important; background:#f43f5e; color:#ffffff; border:2px solid #1e293b; box-shadow:0 3px 0 #1e293b; cursor:pointer;" title="Dengar">
+                <i class="fa-solid fa-volume-high" style="font-size:1.15rem; margin:0; padding:0;"></i>
             </button>
         </div>
 
-        <!-- Canvas Game Wrap -->
-        <div style="position:relative; width:100%; max-width:340px; margin:0 auto;">
-            <canvas id="tc-canvas" width="340" height="260" style="width:100%; max-width:340px; aspect-ratio:340/260; border-radius:16px; border:3px solid #1e293b; box-shadow:0 4px 0 #1e293b; background:#e0f2fe; display:block; margin:0 auto; user-select:none; touch-action:none; cursor:grab;"></canvas>
+        <!-- Right Side: Canvas Game Wrap (Enlarged) -->
+        <div class="cl-bacaan-canvas-wrap" style="position:relative;">
+            <canvas id="tc-canvas" width="340" height="260" style="background:#e0f2fe; display:block; margin:0 auto; user-select:none; touch-action:none; cursor:grab;"></canvas>
         </div>
     </div>
     `;
@@ -13078,6 +14370,7 @@ window.initTangkapCeritaCanvas = function () {
     };
 
     window.tcKeyHandler = function (e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
         if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { window.tcMoveBasket(-22); e.preventDefault(); }
         else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { window.tcMoveBasket(22); e.preventDefault(); }
     };
@@ -13319,10 +14612,24 @@ window.initTangkapCeritaCanvas = function () {
 // --- END CABARAN LAIN ENGINE ---
 
 function bukaPeta(nomborPeta, skipScreenChange = false) {
+    const isTrial = typeof checkIsTrial === 'function' ? checkIsTrial() : (window.isGuestMode || window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial');
+    if (isTrial && nomborPeta > 1) {
+        if (typeof window.playBubble === 'function') window.playBubble();
+        if (typeof window.openPakejProModal === 'function') {
+            const role = localStorage.getItem('bunyiKataUserRole') || 'guru';
+            window.openPakejProModal(role === 'ibubapa' ? 'ibubapa' : 'guru');
+        }
+        return;
+    }
     window.currentPeta = nomborPeta;
     tutupModal();
-    const prefix = modSemasa === 'belajar' ? 'MISI ' : 'CABARAN ';
-    const mapTitles = { 1: prefix + 'ASAS BUNYI KATA', 2: prefix + 'SUKU KATA ASAS', 3: prefix + 'SUKU KATA HERO', 4: prefix + 'BACAAN BERGRED' };
+    const prefix = modSemasa === 'belajar' ? 'Misi ' : 'Cabaran ';
+    const mapTitles = {
+        1: prefix + 'Asas Bunyi Kata',
+        2: prefix + 'Suku Kata Asas',
+        3: prefix + 'Suku Kata Hero',
+        4: prefix + 'Bacaan Bergred'
+    };
 
     const titleBar = document.getElementById('map-title-bar');
     if (titleBar) {
@@ -13412,7 +14719,7 @@ function bukaPeta(nomborPeta, skipScreenChange = false) {
         if (modGuruAktif) unlockedIdx = modules.length;
     } else {
         window.sessionBelajarProgress = window.sessionBelajarProgress || {};
-        let defaultUnlocked = window.currentPeta === 1 ? 2 : 0;
+        let defaultUnlocked = 0;
         if (window.sessionBelajarProgress[window.currentPeta] === undefined) {
             window.sessionBelajarProgress[window.currentPeta] = defaultUnlocked;
         }
@@ -13434,6 +14741,10 @@ function bukaPeta(nomborPeta, skipScreenChange = false) {
             isLocked = !modGuruAktif && (moduleIndex > unlockedIdx);
         } else {
             isLocked = !modGuruAktif && (modul.locked || moduleIndex > unlockedIdx);
+            // Dalam Peta 1 (Asas Bunyi Kata), Kenali Huruf (0), Vokal & Konsonan (1), dan Fonik ABC (2) sentiasa dibuka (unlocked) siap-siap
+            if (window.currentPeta === 1 && (moduleIndex === 0 || moduleIndex === 1 || moduleIndex === 2)) {
+                isLocked = false;
+            }
         }
 
         let starsHTML = '';
@@ -13451,13 +14762,23 @@ function bukaPeta(nomborPeta, skipScreenChange = false) {
         modul.starsHTML = starsHTML;
         modul.isLocked = isLocked;
 
-        if (!isLocked && moduleIndex === unlockedIdx) {
+        if (!isLocked && (moduleIndex === unlockedIdx || (unlockedIdx === 0 && moduleIndex === 0))) {
             activeLevelIdx = moduleIndex;
         }
 
+        let isCompleted = false;
+        if (modSemasa === 'latihan') {
+            const stars = Number(localStorage.getItem('stars_' + modul.id) || 0);
+            isCompleted = !isLocked && (stars >= 1);
+        } else {
+            // Mod belajar: hanya tandakan selesai jika pengguna betul-betul telah tamat aktiviti modul tersebut
+            const isDone = window.completedBelajarModules && window.completedBelajarModules[modul.id];
+            isCompleted = !isLocked && Boolean(isDone);
+        }
+
         const lockedClass = isLocked ? 'locked' : '';
-        const activeClass = (!isLocked && moduleIndex === unlockedIdx) ? 'active-level' : '';
-        const completedClass = (!isLocked && moduleIndex < unlockedIdx) ? 'completed-level' : '';
+        const activeClass = (!isLocked && moduleIndex === activeLevelIdx) ? 'active-level' : '';
+        const completedClass = isCompleted ? 'completed-level' : '';
 
         slotsHtml += `
                     <div id="misi-slot-${moduleIndex}" class="misi-3d-card-slot" onclick="window.handleMisiCardClick(${moduleIndex})">
@@ -13485,8 +14806,8 @@ function bukaPeta(nomborPeta, skipScreenChange = false) {
     let headerBadgeHtml = '';
     if (modSemasa === 'latihan') {
         headerBadgeHtml = `
-            <div id="cabaran-utama-title-badge" class="neo-btn bg-purple cabaran-badge-title" style="font-size: 1.15rem; font-weight: 900; color: white; padding: 6px 24px; border-radius: 20px; border: 3px solid #1e293b; box-shadow: 0 4px 0 #1e293b; margin: 0 auto 12px auto; display: inline-flex; align-items: center; justify-content: center; pointer-events: none; text-transform: uppercase; letter-spacing: 0.5px; z-index: 5;">
-                CABARAN UTAMA
+            <div id="cabaran-utama-title-badge" class="neo-btn bg-purple cabaran-badge-title" style="font-size: 1.15rem; font-weight: 900; color: white; padding: 6px 24px; border-radius: 20px; border: 3px solid #1e293b; box-shadow: 0 4px 0 #1e293b; margin: 0 auto 12px auto; display: inline-flex; align-items: center; justify-content: center; pointer-events: none; text-transform: none; letter-spacing: 0.5px; z-index: 5;">
+                Cabaran Utama
             </div>
         `;
     }
@@ -14175,7 +15496,7 @@ function unlockNextBelajar(id) {
         var index = window.currentPetaModules.findIndex(m => m.id === id);
         if (index !== -1) {
             window.sessionBelajarProgress = window.sessionBelajarProgress || {};
-            let defaultUnlocked = window.currentPeta === 1 ? 2 : 0;
+            let defaultUnlocked = 0;
             if (window.sessionBelajarProgress[window.currentPeta] === undefined) {
                 window.sessionBelajarProgress[window.currentPeta] = defaultUnlocked;
             }
@@ -15523,6 +16844,23 @@ function janaMuatTurunSijilPDF(namaOptional) {
         doc.line(35, 167, 95, 167);
         doc.line(pageWidth - 95, 167, pageWidth - 35, 167);
 
+        const serialNo = `BK-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`No Siri Pengesahan: ${serialNo}`, pageWidth / 2, 180, { align: 'center' });
+
+        // Simpan sijil ke Firebase untuk pengesahan rasmi
+        if (typeof window.saveCertificate === 'function') {
+            window.saveCertificate({
+                noSiri: serialNo,
+                namaMurid: String(studentName),
+                namaSekolah: localStorage.getItem('bunyiKataNamaSekolah') || 'SK BUKIT BERUANG',
+                namaKelas: localStorage.getItem('bunyiKataNamaKelas') || '',
+                namaGuru: localStorage.getItem('pdf_guru') || '',
+            }).catch(e => console.warn('Firebase cert save notice:', e));
+        }
+
         // Footer copyright
         doc.setFont('helvetica', 'italic');
         doc.setFontSize(9);
@@ -15542,7 +16880,12 @@ window.janaMuatTurunSijilPDF = janaMuatTurunSijilPDF;
 function muatTurunSijil() {
     const sijilBtn = document.getElementById('sijil-btn');
     if (sijilBtn && sijilBtn.disabled) {
-        alert("Sijil Pencapaian masih terkunci! Selesaikan semua 4 Peta Cabaran untuk membuka Sijil Pencapaian Kapten Harta Karun.");
+        const msg = "Sijil Pencapaian masih terkunci! Selesaikan semua 4 Peta Cabaran untuk membuka Sijil Pencapaian Kapten Harta Karun.";
+        if (typeof window.showAppToast === 'function') {
+            window.showAppToast('Sijil Masih Terkunci', msg, 'warning');
+        } else {
+            alert(msg);
+        }
         return;
     }
 
@@ -15624,6 +16967,13 @@ setTimeout(() => {
     if (btnEditProfil) {
         btnEditProfil.addEventListener('click', (e) => {
             e.preventDefault();
+            const isTrial = window.isGuestMode || window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial' || window.namaMuridAktif === 'Tetamu';
+            if (isTrial) {
+                if (typeof window.openPakejProModal === 'function') {
+                    window.openPakejProModal('guru');
+                }
+                return;
+            }
             if (window.bukaModalAvatar) {
                 window.bukaModalAvatar();
             }
@@ -15731,21 +17081,28 @@ window.masukModMurid = function (namaAnak) {
     window.modIbuBapaAktif = false;
     if (typeof modIbuBapaAktif !== 'undefined') modIbuBapaAktif = false;
 
-    // default student
-    const studentName = namaAnak || "Murid";
+    // Hanya reset progress jika pengguna memilih mod Tetamu tanpa nama murid sah
+    const isExplicitGuest = !namaAnak || namaAnak === 'Tetamu' || (window.isGuestMode && !namaAnak);
+    if (isExplicitGuest && (!namaAnak || namaAnak === 'Tetamu')) {
+        if (typeof window.resetTrialGuestProgress === 'function') {
+            window.resetTrialGuestProgress();
+        }
+        namaAnak = "Tetamu";
+    }
+
+    // Tetapkan nama murid / anak sebenar
+    const studentName = (namaAnak && namaAnak.trim()) ? namaAnak.trim() : "Murid";
     window.namaMuridAktif = studentName;
     if (typeof namaMuridAktif !== 'undefined') namaMuridAktif = studentName;
     localStorage.setItem('muridAktif', studentName);
     localStorage.setItem('bunyiKataCurrentMurid', studentName);
 
-    // ensure studentData has this user
+    // Pastikan rekod data murid wujud
     if (typeof window.studentData !== 'undefined') {
         if (!window.studentData[studentName]) {
             window.studentData[studentName] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: window.selectedAvatarIcon || '/images/avatar/avatar1.png' };
         }
-        // Sync selectedAvatarIcon to match the student's existing avatar
         window.selectedAvatarIcon = window.studentData[studentName].avatar;
-
         if (typeof saveStudentData === 'function') saveStudentData();
     }
     if (typeof studentData !== 'undefined') {
@@ -15756,6 +17113,25 @@ window.masukModMurid = function (namaAnak) {
     }
     if (!window.selectedAvatarIcon) {
         window.selectedAvatarIcon = "/images/avatar/avatar1.png";
+    }
+
+    // Muat turun rekod kemajuan murid (bintang & lencana) dari Firebase Realtime Database jika ada
+    if (studentName !== 'Tetamu' && typeof window.fetchStudentProgressFromFirebase === 'function') {
+        window.fetchStudentProgressFromFirebase(studentName).then(remote => {
+            if (remote) {
+                const sTarget = (typeof window.studentData !== 'undefined') ? window.studentData : studentData;
+                if (sTarget && sTarget[studentName]) {
+                    if (remote.badges && Array.isArray(remote.badges) && remote.badges.length > 0) {
+                        sTarget[studentName].badges = Array.from(new Set([...(sTarget[studentName].badges || []), ...remote.badges]));
+                    }
+                    if (remote.totalBintang !== undefined && remote.totalBintang > 0) {
+                        sTarget[studentName].totalBintang = remote.totalBintang;
+                    }
+                    if (typeof saveStudentData === 'function') saveStudentData();
+                    if (typeof updateProfilUI === 'function') updateProfilUI();
+                }
+            }
+        }).catch(e => console.warn('Firebase student sync notice:', e));
     }
 
     // UI Updates
@@ -15783,13 +17159,10 @@ window.masukModMurid = function (namaAnak) {
 
     if (typeof updateProfilUI === 'function') updateProfilUI();
 
+    // Terus buka skrin profil murid seperti yang diminta oleh pengguna
     if (typeof window.paparSkrin === 'function') {
-        window.paparSkrin('main-menu-screen');
+        window.paparSkrin('profile-screen');
     }
-    // Audio welcome disabled per user request
-    // if(typeof window.sebutAudio === 'function') {
-    //     window.sebutAudio("Selamat datang " + studentName);
-    // }
 }
 window.flipFlashcard = flipFlashcard;
 
@@ -16103,15 +17476,16 @@ function tutupModalSenaraiBacaan() {
 
 // --- PENGURUSAN MURID & KELAS ---
 window.getDaftarKelas = function () {
+    if (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : (window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial')) {
+        return [];
+    }
     let list = [];
     try {
         const raw = localStorage.getItem('bunyiKataDaftarKelas');
         if (raw) list = JSON.parse(raw);
     } catch (e) { }
 
-    if (!Array.isArray(list) || list.length === 0) {
-        list = ['1 Cemerlang', '1 Pintar'];
-    }
+    if (!Array.isArray(list)) list = [];
 
     // Strict case-insensitive deduplication and sanitization
     const seen = new Set();
@@ -16131,16 +17505,17 @@ window.getDaftarKelas = function () {
 
     // Hard limit: strictly maximum 2 classes
     let final2 = cleanList.slice(0, 2);
-    if (final2.length === 0) {
-        final2 = ['1 Cemerlang', '1 Pintar'];
-    }
-
-    localStorage.setItem('bunyiKataDaftarKelas', JSON.stringify(final2));
     return final2;
 };
 
 window.getKelasAktif = function () {
+    if (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : (window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial')) {
+        return '';
+    }
     const list = window.getDaftarKelas();
+    if (list.length === 0) {
+        return '';
+    }
     let cur = localStorage.getItem('bunyiKataNamaKelas') || '';
     cur = cur.trim();
 
@@ -16149,10 +17524,12 @@ window.getKelasAktif = function () {
     if (match) {
         cur = match; // Normalize to standard case
     } else {
-        cur = list[0] || '1 Cemerlang';
+        cur = list[0] || '';
     }
 
-    localStorage.setItem('bunyiKataNamaKelas', cur);
+    if (cur) {
+        localStorage.setItem('bunyiKataNamaKelas', cur);
+    }
     return cur;
 };
 
@@ -16164,48 +17541,81 @@ window.kemaskiniSemuaDropdownKelas = function () {
     const selectTetapan = document.getElementById('select-pilih-kelas');
     if (selectTetapan) {
         selectTetapan.innerHTML = '';
-        list.forEach(k => {
+        if (list.length === 0) {
             const opt = document.createElement('option');
-            opt.value = k;
-            opt.textContent = k;
-            if (k === active) opt.selected = true;
+            opt.value = '';
+            opt.textContent = '-- Tiada Kelas --';
             selectTetapan.appendChild(opt);
-        });
-        selectTetapan.value = active;
+            selectTetapan.value = '';
+        } else {
+            list.forEach(k => {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = k;
+                if (k === active) opt.selected = true;
+                selectTetapan.appendChild(opt);
+            });
+            selectTetapan.value = active;
+        }
     }
 
     // 2. Input nama kelas di Tetapan Nama Kelas
     const inputKelas = document.getElementById('input-nama-kelas');
     if (inputKelas) {
         inputKelas.value = active;
+        if (!active) {
+            inputKelas.placeholder = 'Cth: 1 Amanah';
+        }
+    }
+
+    // 2b. Input kod kelas di Tetapan Nama Kelas (#guru-urus-murid)
+    const inputKodUrus = document.getElementById('input-kod-kelas-urus');
+    if (inputKodUrus) {
+        inputKodUrus.value = window.getKodBagiKelas(active);
     }
 
     // 3. Dropdown filter di Senarai Murid Berdaftar (TIADA "Semua Kelas")
     const selectSenarai = document.getElementById('filter-kelas-senarai-murid');
     if (selectSenarai) {
         selectSenarai.innerHTML = '';
-        list.forEach(k => {
+        if (list.length === 0) {
             const opt = document.createElement('option');
-            opt.value = k;
-            opt.textContent = k;
-            if (k === active) opt.selected = true;
+            opt.value = '';
+            opt.textContent = '-- Tiada Kelas --';
             selectSenarai.appendChild(opt);
-        });
-        selectSenarai.value = active;
+            selectSenarai.value = '';
+        } else {
+            list.forEach(k => {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = k;
+                if (k === active) opt.selected = true;
+                selectSenarai.appendChild(opt);
+            });
+            selectSenarai.value = active;
+        }
     }
 
     // 4. Dropdown filter di Dashboard Guru (TIADA "Semua Kelas")
     const selectDash = document.getElementById('guru-dashboard-kelas-select');
     if (selectDash) {
         selectDash.innerHTML = '';
-        list.forEach(k => {
+        if (list.length === 0) {
             const opt = document.createElement('option');
-            opt.value = k;
-            opt.textContent = k;
-            if (k === active) opt.selected = true;
+            opt.value = '';
+            opt.textContent = '-- Tiada Kelas --';
             selectDash.appendChild(opt);
-        });
-        selectDash.value = active;
+            selectDash.value = '';
+        } else {
+            list.forEach(k => {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = k;
+                if (k === active) opt.selected = true;
+                selectDash.appendChild(opt);
+            });
+            selectDash.value = active;
+        }
     }
 
     // 5. Butang Tambah Kelas: Had maksimum 2 kelas
@@ -16224,9 +17634,92 @@ window.kemaskiniSemuaDropdownKelas = function () {
 
     // Update tajuk nama kelas di dashboard guru & ibubapa
     const t1 = document.getElementById('guru-dashboard-nama-kelas-title');
-    if (t1) t1.innerText = active;
+    if (t1) t1.innerText = active || '(Belum Tetap Kelas)';
+    const tKod = document.getElementById('guru-dashboard-kod-kelas-title');
+    if (tKod) tKod.innerText = window.getKodBagiKelas(active) || localStorage.getItem('bunyiKataKodKelas') || '-';
+    const tSekolah = document.getElementById('guru-dashboard-nama-sekolah-title');
+    if (tSekolah) tSekolah.innerText = localStorage.getItem('bunyiKataNamaSekolah') || 'SK TAMAN MELAWIS';
+    const tGuru = document.getElementById('guru-dashboard-nama-guru-title');
+    if (tGuru) tGuru.innerText = localStorage.getItem('pdf_guru') || '-';
     const t2 = document.getElementById('ibubapa-nama-kelas-title');
-    if (t2) t2.innerText = active;
+    if (t2) t2.innerText = active || '-';
+};
+
+window.getKodBagiKelas = function (namaKelas) {
+    const k2 = localStorage.getItem('bunyiKataNamaKelas2');
+    if (namaKelas && k2 && namaKelas.trim().toUpperCase() === k2.trim().toUpperCase()) {
+        return localStorage.getItem('bunyiKataKodKelas2') || '';
+    }
+    return localStorage.getItem('bunyiKataKodKelas') || '';
+};
+
+window.simpanKodKelasUrus = async function () {
+    const inputKodUrus = document.getElementById('input-kod-kelas-urus');
+    if (!inputKodUrus) return;
+    const newKod = inputKodUrus.value.trim().toUpperCase();
+    const hasSymbol = /[^a-zA-Z0-9\s]/.test(newKod);
+    if (newKod.length !== 8 || !hasSymbol) {
+        if (typeof window.showAppToast === 'function') {
+            window.showAppToast('Format Kod Tidak Sah', 'Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#01 atau ABCD@123)!', 'warning');
+        } else {
+            alert('Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol!');
+        }
+        return;
+    }
+    const active = window.getKelasAktif();
+    const k2 = localStorage.getItem('bunyiKataNamaKelas2');
+    const isKelas2 = (k2 && active && active.trim().toUpperCase() === k2.trim().toUpperCase());
+    const oldKod = isKelas2
+        ? (localStorage.getItem('bunyiKataKodKelas2') || '')
+        : (localStorage.getItem('bunyiKataKodKelas') || '');
+
+    if (newKod !== oldKod) {
+        const checkFn = window.checkIsCodeAlreadyUsedInFirebase || window.checkIsCodeAlreadyUsed;
+        if (typeof checkFn === 'function') {
+            const collision = await checkFn(newKod, 'guru', undefined, isKelas2 ? 'kelas2' : 'kelas1');
+            if (collision && collision.isUsed) {
+                if (typeof window.showAppToast === 'function') {
+                    window.showAppToast('Kod Telah Digunakan', `Kod "${newKod}" tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`, 'warning');
+                } else {
+                    alert(`Kod "${newKod}" telah digunakan oleh ${collision.usedBy}! Sila pilih kod lain.`);
+                }
+                return;
+            }
+        }
+    }
+
+    if (isKelas2) {
+        localStorage.setItem('bunyiKataKodKelas2', newKod);
+    } else {
+        localStorage.setItem('bunyiKataKodKelas', newKod);
+        const kodTitle = document.getElementById('guru-dashboard-kod-kelas-title');
+        if (kodTitle) kodTitle.innerText = newKod;
+    }
+
+    // Kemaskini ke Firebase
+    if (typeof window.updateClassInFirebase === 'function') {
+        const namaSekolah = localStorage.getItem('bunyiKataNamaSekolah') || '';
+        const namaGuru = localStorage.getItem('pdf_guru') || '';
+        const guruId = localStorage.getItem('bunyiKataUserId') || (window.currentUser ? window.currentUser.id : null);
+        try {
+            await window.updateClassInFirebase({
+                oldKodKelas: oldKod,
+                newKodKelas: newKod,
+                namaKelas: active,
+                namaSekolah: namaSekolah,
+                namaGuru: namaGuru,
+                guruId: guruId || undefined,
+            });
+        } catch (err) {
+            console.warn('Ralat simpan kod kelas:', err);
+        }
+    }
+
+    if (typeof window.showAppToast === 'function') {
+        window.showAppToast('Berjaya Disimpan', `Kod kelas bagi "${active}" berjaya dikemaskini kepada "${newKod}".`, 'success');
+    } else {
+        alert(`Kod kelas bagi "${active}" berjaya dikemaskini kepada "${newKod}".`);
+    }
 };
 
 window.tukarKelasAktif = function (namaKelas) {
@@ -16240,15 +17733,35 @@ window.tukarKelasAktif = function (namaKelas) {
 
 
 window.padamKelasSemasa = function () {
+    if (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : (window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial')) {
+        if (typeof window.openPakejProModal === 'function') {
+            window.openPakejProModal('guru');
+        } else {
+            alert("Pengurusan kelas memerlukan Pelan PRO!");
+        }
+        return;
+    }
     const list = window.getDaftarKelas();
+    if (list.length === 0) {
+        alert("Tiada kelas untuk dipadam.");
+        return;
+    }
+    const currentActive = window.getKelasAktif();
+
     if (list.length <= 1) {
-        alert("Akaun guru mesti mempunyai sekurang-kurangnya 1 kelas. Anda tidak boleh memadam kelas terakhir.");
+        const sahkan = confirm(`Adakah anda pasti mahu memadam kelas "${currentActive}"?`);
+        if (!sahkan) return;
+        localStorage.setItem('bunyiKataDaftarKelas', JSON.stringify([]));
+        localStorage.removeItem('bunyiKataNamaKelas');
+        window.kemaskiniSemuaDropdownKelas();
+        if (typeof window.renderSenaraiMuridUrus === 'function') window.renderSenaraiMuridUrus();
+        if (typeof window.renderTeacherTable === 'function') window.renderTeacherTable();
+        alert(`Kelas "${currentActive}" telah dipadam.`);
         return;
     }
 
-    const currentActive = window.getKelasAktif();
     const remaining = list.filter(k => k.toLowerCase() !== currentActive.toLowerCase());
-    const newActive = remaining[0] || '1 Cemerlang';
+    const newActive = remaining[0] || '';
 
     const sahkan = confirm(`Adakah anda pasti mahu memadam kelas "${currentActive}"?\n\nSemua murid dalam kelas ini akan dipindahkan ke kelas "${newActive}".`);
     if (!sahkan) return;
@@ -16274,9 +17787,18 @@ window.padamKelasSemasa = function () {
 };
 
 window.bukaModalTambahKelas = function () {
+    if (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : (window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial')) {
+        if (typeof window.openPakejProModal === 'function') {
+            window.openPakejProModal('guru');
+        } else {
+            alert("Penambahan kelas memerlukan Pelan PRO!");
+        }
+        return;
+    }
     const list = window.getDaftarKelas();
-    if (list.length >= 2) {
-        alert("Maksimum 2 kelas sahaja dibenarkan untuk satu akaun guru! Anda boleh padam salah satu kelas jika ingin menambah kelas baharu.");
+    const maxAllowed = 2;
+    if (list.length >= maxAllowed) {
+        alert("Maksimum 2 kelas sahaja dibenarkan bagi akaun guru (Pakej Pro)! Anda boleh padam salah satu kelas jika ingin menambah kelas baharu.");
         return;
     }
 
@@ -16355,17 +17877,53 @@ window.simpanKelasBaharuModal = function () {
     localStorage.setItem('bunyiKataDaftarKelas', JSON.stringify(final2));
     window.tukarKelasAktif(nama);
 
+    // Simpan maklumat kelas baharu ke Firebase
+    if (typeof window.saveClassToFirebase === 'function') {
+        let kodKelas = localStorage.getItem('bunyiKataKodKelas') || (typeof window.generateUniqueCode === 'function' ? window.generateUniqueCode('GURU') : '');
+        if (final2.length > 1) {
+            kodKelas = typeof window.generateUniqueCode === 'function' ? window.generateUniqueCode('GURU') : (localStorage.getItem('bunyiKataKodKelas2') || '');
+        }
+        const namaSekolah = localStorage.getItem('bunyiKataNamaSekolah') || 'SK BUKIT BERUANG';
+        const namaGuru = localStorage.getItem('pdf_guru') || '';
+        const guruId = localStorage.getItem('bunyiKataUserId') || (window.currentUser ? window.currentUser.id : null);
+        window.saveClassToFirebase({
+            kodKelas,
+            namaKelas: nama,
+            namaSekolah,
+            namaGuru,
+            guruId: guruId || undefined
+        }).then(res => {
+            console.log('[Firebase] Kelas baharu berjaya disimpan:', res);
+        }).catch(e => console.warn('Firebase class save notice:', e));
+    }
+
     document.getElementById('modal-tambah-kelas-overlay').style.display = 'none';
-    alert(`Kelas "${nama}" telah berjaya didaftarkan! (2/2 Kelas digunakan)`);
+    if (typeof window.showAppModalAlert === 'function') {
+        window.showAppModalAlert('Kelas Berjaya Ditambah', `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;"><i class="fa-solid fa-circle-check" style="font-size:2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>Kelas <strong>"${nama}"</strong> telah berjaya didaftarkan!<br><span style="color:#64748b; font-size:0.85rem;">(${final2.length}/2 Kelas digunakan)</span></p>`);
+    } else {
+        alert(`Kelas "${nama}" telah berjaya didaftarkan! (${final2.length}/2 Kelas digunakan)`);
+    }
 };
 
 
 window.simpanNamaKelas = function () {
+    if (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : (window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial')) {
+        if (typeof window.openPakejProModal === 'function') {
+            window.openPakejProModal('guru');
+        } else {
+            alert("Tetapan nama kelas memerlukan Pelan PRO!");
+        }
+        return;
+    }
     const kelasInput = document.getElementById('input-nama-kelas');
     if (!kelasInput) return;
     const newName = kelasInput.value.trim();
     if (!newName) {
-        alert('Sila masukkan nama kelas!');
+        if (typeof window.showAppModalAlert === 'function') {
+            window.showAppModalAlert('Nama Kelas Diperlukan', '<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">Sila masukkan nama kelas terlebih dahulu!</p>');
+        } else {
+            alert('Sila masukkan nama kelas!');
+        }
         return;
     }
     const oldName = window.getKelasAktif();
@@ -16380,6 +17938,22 @@ window.simpanNamaKelas = function () {
     localStorage.setItem('bunyiKataDaftarKelas', JSON.stringify(list));
     localStorage.setItem('bunyiKataNamaKelas', newName);
 
+    // Kemaskini nama kelas di Firebase / Firebase
+    if (typeof window.saveClassToFirebase === 'function' || typeof window.saveClassToFirebase === 'function') {
+        const saveFn = window.saveClassToFirebase || window.saveClassToFirebase;
+        const kodKelas = localStorage.getItem('bunyiKataKodKelas') || '';
+        const namaSekolah = localStorage.getItem('bunyiKataNamaSekolah') || '';
+        const namaGuru = localStorage.getItem('pdf_guru') || '';
+        const guruId = localStorage.getItem('bunyiKataUserId') || (window.currentUser ? window.currentUser.id : null);
+        saveFn({
+            kodKelas,
+            namaKelas: newName,
+            namaSekolah,
+            namaGuru,
+            guruId: guruId || undefined
+        }).catch(e => console.warn('Class rename notice:', e));
+    }
+
     // Kemaskini data murid bagi kelas lama ke kelas baharu
     Object.keys(studentData).forEach(nama => {
         if (!studentData[nama].kelas || studentData[nama].kelas === oldName) {
@@ -16391,7 +17965,12 @@ window.simpanNamaKelas = function () {
     window.kemaskiniSemuaDropdownKelas();
     if (typeof window.renderSenaraiMuridUrus === 'function') window.renderSenaraiMuridUrus();
     if (typeof window.renderTeacherTable === 'function') window.renderTeacherTable();
-    alert(`Nama kelas telah dikemaskini kepada "${newName}".`);
+
+    if (typeof window.showAppModalAlert === 'function') {
+        window.showAppModalAlert('Berjaya Disimpan', `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;"><i class="fa-solid fa-circle-check" style="font-size:2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>Nama kelas telah berjaya dikemaskini kepada <strong>"${newName}"</strong>.</p>`);
+    } else {
+        alert(`Nama kelas telah dikemaskini kepada "${newName}".`);
+    }
 };
 
 function updateStudentDropdown() {
@@ -16416,25 +17995,47 @@ function renderSenaraiMuridUrus() {
     const searchInput = document.getElementById('carian-murid-urus');
     const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
     const activeKelas = window.getKelasAktif();
-
     const listKelas = window.getDaftarKelas();
-    studentNames.forEach((nama, idx) => {
-        if (!studentData[nama]) studentData[nama] = studentRecord();
-        if (!studentData[nama].kelas) {
-            studentData[nama].kelas = idx < 6 ? (listKelas[0] || '1 Cemerlang') : (listKelas[1] || '1 Pintar');
+
+    if (!listKelas || listKelas.length === 0) {
+        if (countEl) countEl.innerText = '0';
+        if (container) {
+            container.innerHTML = `
+                <div style="padding:32px 16px; text-align:center; color:#64748b;">
+                    <div style="font-size:2.2rem; color:#0d9488; margin-bottom:8px;"><i class="fa-solid fa-chalkboard-user"></i></div>
+                    <div style="font-weight:bold; font-size:0.95rem; color:#1e293b; margin-bottom:4px;">Belum Ada Kelas Dicipta</div>
+                    <div style="font-size:0.8rem; color:#64748b; max-width:340px; margin:0 auto;">Sila masukkan nama kelas anda di bahagian 'Tetapan Nama Kelas' di bawah dan klik ikon simpan sebelum mendaftar murid.</div>
+                </div>
+            `;
         }
-    });
+        return;
+    }
 
     const muridDalamKelas = studentNames.filter(nama => {
-        const k = (studentData[nama] && studentData[nama].kelas) || listKelas[0];
-        return k === activeKelas;
+        if (!nama || GHOST_NAMES.includes(nama.trim().toLowerCase())) return false;
+        if (!studentData[nama]) studentData[nama] = studentRecord();
+        let k = studentData[nama].kelas;
+        if (!k && activeKelas) {
+            studentData[nama].kelas = activeKelas;
+            k = activeKelas;
+        }
+        return (k || listKelas[0] || '').toLowerCase() === (activeKelas || '').toLowerCase();
     });
+
+    // Susun nama murid mengikut abjad (A-Z)
+    muridDalamKelas.sort((a, b) => a.localeCompare(b, 'ms', { sensitivity: 'base' }));
 
     if (countEl) countEl.innerText = muridDalamKelas.length;
     if (!container) return;
 
     if (muridDalamKelas.length === 0) {
-        container.innerHTML = `<div style="padding:24px 16px; text-align:center; color:#94a3b8; font-size:0.85rem; font-weight:bold;">Tiada murid berdaftar dalam kelas "${activeKelas}". Sila tambah murid baharu di atas.</div>`;
+        container.innerHTML = `
+            <div style="padding:32px 16px; text-align:center; color:#64748b;">
+                <div style="font-size:2.2rem; color:#cbd5e1; margin-bottom:8px;"><i class="fa-solid fa-users"></i></div>
+                <div style="font-weight:bold; font-size:0.95rem; color:#1e293b; margin-bottom:4px;">Tiada Murid Dalam Kelas "${activeKelas}"</div>
+                <div style="font-size:0.8rem; color:#64748b;">Sila tambah nama murid menggunakan borang di atas.</div>
+            </div>
+        `;
         return;
     }
 
@@ -16511,7 +18112,7 @@ window.bukaModalStatistik = function () {
     const modal = document.getElementById('modal-statistik');
     if (!modal) return;
 
-    const namaKelas = localStorage.getItem('bunyiKataNamaKelas') || '1 Cemerlang';
+    const namaKelas = localStorage.getItem('bunyiKataNamaKelas') || '-';
     const kelasTxt = document.getElementById('ai-nama-kelas-txt');
     if (kelasTxt) kelasTxt.innerText = namaKelas;
 
@@ -16531,7 +18132,7 @@ window.janaDiagnostikAI = function () {
     const container = document.getElementById('ai-diagnostic-content');
     if (!container) return;
 
-    const namaKelas = localStorage.getItem('bunyiKataNamaKelas') || '1 Cemerlang';
+    const namaKelas = localStorage.getItem('bunyiKataNamaKelas') || '-';
     const totalStudents = (studentNames && studentNames.length) ? studentNames.length : 0;
 
     if (totalStudents === 0) {
@@ -16798,17 +18399,36 @@ window.tambahMuridBaru = function () {
     if (!input) return;
     const rawValue = input.value.trim();
     if (!rawValue) {
-        alert('Sila masukkan nama murid!');
+        if (typeof window.showAppModalAlert === 'function') {
+            window.showAppModalAlert('Nama Murid Diperlukan', '<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">Sila masukkan nama murid terlebih dahulu!</p>');
+        } else {
+            alert('Sila masukkan nama murid!');
+        }
         return;
     }
 
     const activeKelas = window.getKelasAktif();
-    const namesToAdd = rawValue.split(/[\n,]+/).map(n => n.trim().toUpperCase()).filter(n => n.length > 0);
+    if (!activeKelas) {
+        if (typeof window.showAppModalAlert === 'function') {
+            window.showAppModalAlert('Tetapan Kelas Diperlukan', '<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">Sila tetapkan nama kelas terlebih dahulu di bahagian "Tetapan Nama Kelas" di bawah sebelum menambah murid!</p>');
+        } else {
+            alert('Sila tetapkan nama kelas terlebih dahulu di bahagian "Tetapan Nama Kelas" di bawah sebelum menambah murid!');
+        }
+        return;
+    }
+    const namesToAdd = typeof parseStudentNamesInput === 'function'
+        ? parseStudentNamesInput(rawValue)
+        : rawValue.split(/[\n,]+/).map(n => n.trim().toUpperCase()).filter(n => n.length > 0);
 
     let addedCount = 0;
     let duplicates = [];
 
+    const GHOST_NAMES = ['TETAMU', 'MURID', 'GUEST', 'STUDENT'];
     namesToAdd.forEach(nama => {
+        // Sekat nama sistem/dummy daripada didaftarkan sebagai murid
+        if (GHOST_NAMES.includes(nama.toUpperCase())) {
+            return;
+        }
         if (studentNames.some(n => n && n.toUpperCase() === (nama || '').toUpperCase())) {
             duplicates.push(nama);
         } else {
@@ -16818,10 +18438,25 @@ window.tambahMuridBaru = function () {
             }
             studentData[nama].kelas = activeKelas;
             addedCount++;
+
+            // Segerakkan murid ke Firebase dengan guru_id dan kod_kelas lengkap
+            if (typeof window.syncStudentToFirebase === 'function') {
+                window.syncStudentToFirebase({
+                    nama: nama,
+                    guruId: localStorage.getItem('bunyiKataUserId') || '',
+                    guruEmail: localStorage.getItem('bunyiKataGuruEmail') || '',
+                    kodKelas: localStorage.getItem('bunyiKataKodKelas') || '',
+                    namaKelas: activeKelas,
+                    totalBintang: 0
+                }).catch(e => console.warn('Student sync notice:', e));
+            }
         }
     });
 
     if (addedCount > 0) {
+        // Pastikan senarai murid sentiasa tersusun mengikut abjad (A-Z)
+        studentNames.sort((a, b) => a.localeCompare(b, 'ms', { sensitivity: 'base' }));
+        window.studentNames = studentNames;
         saveStudentData();
         input.value = '';
         renderSenaraiMuridUrus();
@@ -16829,10 +18464,22 @@ window.tambahMuridBaru = function () {
         if (typeof window.renderTeacherTable === 'function') window.renderTeacherTable();
     }
 
-    if (duplicates.length > 0 && addedCount === 0) {
-        alert('Semua nama murid tersebut sudah wujud dalam senarai!');
-    } else if (duplicates.length > 0) {
-        alert(addedCount + ' murid berjaya ditambah ke kelas "' + activeKelas + '".\nTerdapat nama yang diabaikan kerana sudah wujud:\n' + duplicates.join(', '));
+    if (typeof window.showAppModalAlert === 'function') {
+        if (duplicates.length > 0 && addedCount === 0) {
+            window.showAppModalAlert('Nama Telah Wujud', '<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">Semua nama murid yang dimasukkan sudah wujud dalam senarai kelas!</p>');
+        } else if (duplicates.length > 0) {
+            window.showAppModalAlert('Maklumat Murid Ditambah', `<p style="text-align:center; font-weight:bold; color:#1e293b; margin:10px 0;"><span style="color:#15803d;">${addedCount} orang murid berjaya ditambah ke kelas "${activeKelas}".</span><br><br><span style="color:#ef4444; font-size:0.9rem;">Nama yang diabaikan (sudah wujud):<br>${duplicates.join(', ')}</span></p>`);
+        } else {
+            window.showAppModalAlert('Berjaya Ditambah', `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;"><i class="fa-solid fa-circle-check" style="font-size:2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>${addedCount} orang murid berjaya ditambah ke kelas <strong>"${activeKelas}"</strong>!</p>`);
+        }
+    } else {
+        if (duplicates.length > 0 && addedCount === 0) {
+            alert('Semua nama murid tersebut sudah wujud dalam senarai!');
+        } else if (duplicates.length > 0) {
+            alert(addedCount + ' murid berjaya ditambah ke kelas "' + activeKelas + '".\nTerdapat nama yang diabaikan kerana sudah wujud:\n' + duplicates.join(', '));
+        } else {
+            alert(addedCount + ' murid berjaya ditambah.');
+        }
     }
 };
 
@@ -16846,6 +18493,12 @@ window.padamMurid = function (nama) {
             if (studentData[nama]) delete studentData[nama];
             if (window.studentData && window.studentData[nama]) delete window.studentData[nama];
             saveStudentData();
+            if (typeof window.deleteStudentByNameFromFirebase === 'function') {
+                window.deleteStudentByNameFromFirebase(nama, {
+                    guruId: localStorage.getItem('bunyiKataUserId') || '',
+                    kodKelas: localStorage.getItem('bunyiKataKodKelas') || ''
+                }).catch(e => console.warn('Delete student remote notice:', e));
+            }
             renderSenaraiMuridUrus();
             updateStudentDropdown();
             if (typeof window.renderTeacherTable === 'function') window.renderTeacherTable();
@@ -20943,6 +22596,15 @@ const PETA_INFO = {
 };
 
 window.pilihPeta = function (nomborPeta) {
+    const isTrial = typeof checkIsTrial === 'function' ? checkIsTrial() : (window.isGuestMode || window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial');
+    if (isTrial && nomborPeta > 1) {
+        if (typeof window.playBubble === 'function') window.playBubble();
+        if (typeof window.openPakejProModal === 'function') {
+            const role = localStorage.getItem('bunyiKataUserRole') || 'guru';
+            window.openPakejProModal(role === 'ibubapa' ? 'ibubapa' : 'guru');
+        }
+        return;
+    }
     const pModal = document.getElementById('modal-pilih-peta');
     if (pModal) pModal.style.display = 'none';
 
@@ -21135,7 +22797,7 @@ window.pilihPeta = function (nomborPeta) {
 document.addEventListener('DOMContentLoaded', function () {
     mengendaliNavigasiURL();
     setTimeout(() => {
-        let nKelas = localStorage.getItem('bunyiKataNamaKelas') || '1 Cemerlang';
+        let nKelas = localStorage.getItem('bunyiKataNamaKelas') || '-';
         let nGuru = localStorage.getItem('pdf_guru') || '';
         let elKelas = document.getElementById('guru-dashboard-nama-kelas-title');
         if (elKelas) elKelas.innerText = nKelas;
@@ -21155,9 +22817,17 @@ window.padamProfilAnakIbuBapa = function (namaAnak) {
         function () {
             parentChildNames = parentChildNames.filter(n => n !== childName);
             window.parentChildNames = parentChildNames;
+            localStorage.setItem('bunyiKataParentChildNames', JSON.stringify(parentChildNames));
             if (studentData[childName]) delete studentData[childName];
             if (window.studentData && window.studentData[childName]) delete window.studentData[childName];
             saveStudentData();
+
+            if (typeof window.deleteParentChildFromFirebase === 'function') {
+                window.deleteParentChildFromFirebase({
+                    namaAnak: childName,
+                    parentIdOrEmail: localStorage.getItem('bunyiKataUserId') || ''
+                }).catch(function(e) { console.warn('Ralat padam anak di Firebase:', e); });
+            }
 
             if (window.anakTerpilih === childName) {
                 window.anakTerpilih = parentChildNames.length > 0 ? parentChildNames[0] : '';
@@ -22194,6 +23864,131 @@ window.bukaPuzzleSukuKata = function (kemahiran) {
     window.currentPuzzleKemahiran = selectedKemahiran;
     window.dispatchEvent(new CustomEvent('buka-puzzle-kemahiran', { detail: { kemahiran: selectedKemahiran } }));
     paparSkrin('view-puzzle-sukukata');
+};
+
+window.showCantumKataModal = function () {
+    const container = document.getElementById('cantum-kata-buttons-container');
+    const modal = document.getElementById('modal-pilih-cantum-kata');
+    if (!container || !modal) return;
+
+    const isHero = (window.currentPeta === 3);
+    let buttonsHTML = '';
+
+    if (isHero) {
+        const heroSkills = [
+            { key: 'kv_kvk', label: 'KV + KVK' },
+            { key: 'kvk_kv', label: 'KVK + KV' },
+            { key: 'kvk_kvk', label: 'KVK + KVK' },
+            { key: 'kv_kv_kvk', label: 'KV + KV + KVK' },
+            { key: 'kvk_kv_kvk', label: 'KVK + KV + KVK' }
+        ];
+        buttonsHTML = heroSkills.map(s => `
+            <button class="neo-btn" style="justify-content: center; padding: 12px 10px; font-size: 0.95rem; width: 100%; display: flex; align-items: center; background-color: #8b5cf6; color: #ffffff;" onclick="document.getElementById('modal-pilih-cantum-kata').style.display = 'none'; if(window.bukaCantumKata) window.bukaCantumKata('${s.key}');">
+                ${s.label}
+            </button>
+        `).join('');
+    } else {
+        const asasSkills = [
+            { key: 'kvkv', label: 'KV + KV' },
+            { key: 'v_kv', label: 'V + KV' },
+            { key: 'kvkvkv', label: 'KV + KV + KV' },
+            { key: 'v_kvk', label: 'V + KVK' }
+        ];
+        buttonsHTML = asasSkills.map(s => `
+            <button class="neo-btn" style="justify-content: center; padding: 12px 10px; font-size: 0.95rem; width: 100%; display: flex; align-items: center; background-color: #8b5cf6; color: #ffffff;" onclick="document.getElementById('modal-pilih-cantum-kata').style.display = 'none'; if(window.bukaCantumKata) window.bukaCantumKata('${s.key}');">
+                ${s.label}
+            </button>
+        `).join('');
+    }
+
+    container.innerHTML = buttonsHTML;
+    modal.style.display = 'flex';
+};
+
+window.bukaCantumKata = function (kemahiran) {
+    const selectedKemahiran = kemahiran || 'kvkv';
+    window.currentCantumKataKemahiran = selectedKemahiran;
+    window.dispatchEvent(new CustomEvent('buka-cantum-kemahiran', { detail: { kemahiran: selectedKemahiran } }));
+    paparSkrin('view-cantum-kata');
+};
+
+window.showCubaSebutModal = function () {
+    const container = document.getElementById('cuba-sebut-sukukata-buttons-container');
+    const modal = document.getElementById('modal-pilih-cuba-sebut-sukukata');
+    if (!container || !modal) return;
+
+    const isHero = (window.currentPeta === 3);
+    let buttonsHTML = '';
+
+    if (isHero) {
+        const heroSkills = [
+            { key: 'kv_kvk', label: 'KV + KVK' },
+            { key: 'kvk_kv', label: 'KVK + KV' },
+            { key: 'kvk_kvk', label: 'KVK + KVK' },
+            { key: 'kv_kv_kvk', label: 'KV + KV + KVK' },
+            { key: 'kvk_kv_kvk', label: 'KVK + KV + KVK' }
+        ];
+        buttonsHTML = heroSkills.map(s => `
+            <button class="neo-btn" style="justify-content: center; padding: 12px 10px; font-size: 0.95rem; width: 100%; display: flex; align-items: center; background-color: #ff751f; color: #ffffff;" onclick="document.getElementById('modal-pilih-cuba-sebut-sukukata').style.display = 'none'; if(window.bukaCubaSebut) window.bukaCubaSebut('${s.key}', '${s.label}');">
+                ${s.label}
+            </button>
+        `).join('');
+    } else {
+        const asasSkills = [
+            { key: 'kv', label: 'KV' },
+            { key: 'kvkv', label: 'KV + KV' },
+            { key: 'v_kv', label: 'V + KV' },
+            { key: 'kvkvkv', label: 'KV + KV + KV' },
+            { key: 'kvk', label: 'KVK' },
+            { key: 'v_kvk', label: 'V + KVK' }
+        ];
+        buttonsHTML = asasSkills.map(s => `
+            <button class="neo-btn" style="justify-content: center; padding: 12px 10px; font-size: 0.95rem; width: 100%; display: flex; align-items: center; background-color: #ff751f; color: #ffffff;" onclick="document.getElementById('modal-pilih-cuba-sebut-sukukata').style.display = 'none'; if(window.bukaCubaSebut) window.bukaCubaSebut('${s.key}', '${s.label}');">
+                ${s.label}
+            </button>
+        `).join('');
+    }
+
+    container.innerHTML = buttonsHTML;
+    modal.style.display = 'flex';
+};
+
+window.bukaCubaSebut = function (key, label) {
+    const k = key || 'kvkv';
+    const l = label || 'KV + KV';
+    window.dispatchEvent(new CustomEvent('buka-cuba-sebut', {
+        detail: { key: k, label: l, mode: 'sebut' }
+    }));
+};
+
+window.showCubaBacaModal = function () {
+    const container = document.getElementById('cuba-baca-buttons-container');
+    const modal = document.getElementById('modal-pilih-cuba-baca');
+    if (!container || !modal) return;
+
+    const bacaSkills = [
+        { key: 'ayat_pendek', label: 'Ayat Pendek' },
+        { key: 'ayat_panjang', label: 'Ayat Panjang' },
+        { key: 'petikan_1', label: 'Petikan Tahap 1' },
+        { key: 'petikan_2', label: 'Petikan Tahap 2' }
+    ];
+
+    const buttonsHTML = bacaSkills.map(s => `
+        <button class="neo-btn" style="justify-content: center; padding: 12px 10px; font-size: 0.95rem; width: 100%; display: flex; align-items: center; background-color: #10b981; color: #ffffff;" onclick="document.getElementById('modal-pilih-cuba-baca').style.display = 'none'; if(window.bukaCubaBaca) window.bukaCubaBaca('${s.key}', '${s.label}');">
+            ${s.label}
+        </button>
+    `).join('');
+
+    container.innerHTML = buttonsHTML;
+    modal.style.display = 'flex';
+};
+
+window.bukaCubaBaca = function (key, label) {
+    const k = key || 'ayat_pendek';
+    const l = label || 'Ayat Pendek';
+    window.dispatchEvent(new CustomEvent('buka-cuba-sebut', {
+        detail: { key: k, label: l, mode: 'baca' }
+    }));
 };
 
 window.currentARFilter = 'bear';
@@ -23312,7 +25107,7 @@ function initARKiraJariCamera() {
 }
 
 
-// Auto-sanitize existing localStorage on load
+// Refresh class list if available
 try {
     if (typeof window !== 'undefined' && window.getDaftarKelas) {
         window.getDaftarKelas();

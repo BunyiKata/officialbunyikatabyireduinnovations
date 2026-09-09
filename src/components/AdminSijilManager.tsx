@@ -41,7 +41,7 @@ const loadStudentsForClass = (clsName: string): StudentItem[] => {
     let idx = 1;
     for (const [name, data] of Object.entries(rawData)) {
       if (!name || name.toLowerCase() === 'murid') continue;
-      const sKelas = ((data as any)?.kelas || '1 Cemerlang').trim();
+      const sKelas = ((data as any)?.kelas || '').trim();
       if (sKelas.toLowerCase() === clsName.trim().toLowerCase()) {
         items.push({
           id: String(idx++),
@@ -112,20 +112,20 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
 
   const classList: string[] = typeof window !== 'undefined' && (window as any).getDaftarKelas 
     ? (window as any).getDaftarKelas() 
-    : ['1 Cemerlang', '1 Pintar'];
+    : [];
 
   const [selectedClass, setSelectedClass] = useState<string>(() => {
     if (initialClass) return initialClass;
     if (typeof window !== 'undefined' && (window as any).getKelasAktif) {
       return (window as any).getKelasAktif();
     }
-    return localStorage.getItem('bunyiKataNamaKelas') || '1 Cemerlang';
+    return localStorage.getItem('bunyiKataNamaKelas') || '';
   });
 
   // Bulk Students
   const [students, setStudents] = useState<StudentItem[]>(() => {
     if (isGuruMode) {
-      return loadStudentsForClass(initialClass || localStorage.getItem('bunyiKataNamaKelas') || '1 Cemerlang');
+      return loadStudentsForClass(initialClass || localStorage.getItem('bunyiKataNamaKelas') || '');
     }
     return DEFAULT_STUDENTS;
   });
