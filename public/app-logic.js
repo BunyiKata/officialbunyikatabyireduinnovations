@@ -579,20 +579,62 @@ function updateProgressBar(id, percentage) {
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioCtx;
 var lastBubbleTime = 0;
+
+function initAudioContext() {
+    try {
+        if (!audioCtx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume().catch(() => {});
+        }
+    } catch (e) {}
+}
+
+if (typeof document !== 'undefined') {
+    ['click', 'touchstart', 'mousedown', 'pointerdown', 'keydown'].forEach(evt => {
+        document.addEventListener(evt, initAudioContext, { capture: true, passive: true });
+    });
+}
+
 function playBubble() {
     var nowMs = Date.now();
-    if (nowMs - lastBubbleTime < 220) return;
+    if (nowMs - lastBubbleTime < 100) return;
     lastBubbleTime = nowMs;
     try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.type = 'sine'; const now = audioCtx.currentTime;
-        osc.frequency.setValueAtTime(450, now); osc.frequency.exponentialRampToValueAtTime(950, now + 0.08);
-        gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-        osc.start(now); osc.stop(now + 0.08);
+        if (!audioCtx) {
+            audioCtx = (typeof window !== 'undefined' && window._globalAudioCtx) ? window._globalAudioCtx : null;
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+        }
+        if (!audioCtx) return;
+        if (typeof window !== 'undefined') window._globalAudioCtx = audioCtx;
+
+        const triggerNote = () => {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                const now = audioCtx.currentTime;
+                osc.frequency.setValueAtTime(450, now);
+                osc.frequency.exponentialRampToValueAtTime(950, now + 0.08);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } catch (err) {}
+        };
+
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume().then(triggerNote).catch(() => {});
+        } else {
+            triggerNote();
+        }
     } catch (e) { }
 }
 window.playBubble = playBubble;
@@ -998,8 +1040,8 @@ window.getAudioPath = function (text) {
 // ============================================================================
 // ROBUST MOBILE AUDIO MANAGER & SINGLETON (Prevents Safari 16-player & 6-context limits)
 // ============================================================================
-window._globalAudioCtx = null;
-window._sharedAudioInstance = null;
+window._globalAudioCtx = window._globalAudioCtx || null;
+window._sharedAudioInstance = window._sharedAudioInstance || null;
 
 window.getGlobalAudioContext = function () {
     try {
@@ -1410,8 +1452,11 @@ window.studentData = studentData;
 
 function saveStudentData() {
     try {
-        // Jika dalam mod percuma / tetamu, jangan simpan rekod tetamu ke storan tetap dan JANGAN sync ke Firebase
-        if (window.userAccessLevel === 'trial' || window.isGuestMode) {
+        const curStu = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || '';
+        const isRealStudent = curStu && !GHOST_NAMES.includes(curStu.trim().toLowerCase());
+
+        // Jika dalam mod percuma / tetamu tanpa profil murid sah, jangan simpan rekod tetamu ke storan tetap dan JANGAN sync ke Firebase
+        if (!isRealStudent && (window.userAccessLevel === 'trial' || window.isGuestMode)) {
             return;
         }
 
@@ -1442,18 +1487,18 @@ function saveStudentData() {
         if (typeof window.syncStudentToFirebase === 'function') {
             const activeCode = localStorage.getItem('bunyiKataKodKelas') || '';
             const activeFam = localStorage.getItem('bunyiKataKodKeluarga') || '';
-            
             const userRole = localStorage.getItem('bunyiKataUserRole') || '';
             
-            if (userRole !== 'ibubapa' && Array.isArray(studentNames)) {
+            if ((userRole === 'guru' || userRole === 'admin') && Array.isArray(studentNames) && studentNames.length > 0) {
                 const gId = localStorage.getItem('bunyiKataUserId') || '';
                 const gEmail = localStorage.getItem('bunyiKataGuruEmail') || '';
                 const defKelas = localStorage.getItem('bunyiKataNamaKelas') || '';
                 studentNames.forEach(nama => {
-                    if (nama && nama.toLowerCase() !== 'murid' && nama.toLowerCase() !== 'tetamu') {
+                    if (nama && !GHOST_NAMES.includes(nama.toLowerCase())) {
                         const data = studentData[nama] || {};
                         const totalStars = typeof jumlahMarkah === 'function' ? jumlahMarkah(data) : (data.coins || 0);
                         window.syncStudentToFirebase({
+                            id: data.id,
                             nama: nama,
                             guruId: gId,
                             guruEmail: gEmail,
@@ -1463,6 +1508,23 @@ function saveStudentData() {
                         }).catch(e => console.warn('Firebase student sync notice:', e));
                     }
                 });
+            } else if (isRealStudent && userRole === 'murid') {
+                const isPC = localStorage.getItem('bunyiKataIsParentChild') === 'true';
+                const data = studentData[curStu] || {};
+                const stuId = localStorage.getItem('bunyiKataStudentId') || data.id;
+                const totalStars = typeof jumlahMarkah === 'function' ? jumlahMarkah(data) : (data.coins || 0);
+                window.syncStudentToFirebase({
+                    id: stuId,
+                    nama: curStu,
+                    isParentChild: isPC,
+                    kodKelas: isPC ? '' : activeCode,
+                    kodKeluarga: isPC ? activeFam : '',
+                    parentId: isPC ? (localStorage.getItem('bunyiKataUserId') || '') : '',
+                    parentEmail: isPC ? (localStorage.getItem('bunyiKataIbubapaEmail') || '') : '',
+                    guruId: !isPC ? (localStorage.getItem('bunyiKataUserId') || '') : '',
+                    guruEmail: !isPC ? (localStorage.getItem('bunyiKataGuruEmail') || '') : '',
+                    totalBintang: totalStars
+                }).catch(e => console.warn('Firebase student sync notice:', e));
             }
 
             if (userRole === 'ibubapa' && Array.isArray(parentChildNames)) {
@@ -1680,6 +1742,8 @@ function paparSkrin(screenId, skipHash) {
     }
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     sasaran.classList.add('active');
+    window.currentActiveScreen = screenId;
+    window.dispatchEvent(new CustomEvent('screen-changed', { detail: { screenId: screenId } }));
 
     // Kemaskini Tajuk Halaman & Navigasi Sejarah tanpa '#'
     const tajukSkrin = SCREEN_NAMES_MAP[screenId] || 'Bunyi Kata';
@@ -1764,9 +1828,19 @@ function paparSkrin(screenId, skipHash) {
         }
     }
 
-    // Jika buka dashboard guru, render jadual
+    // Jika buka dashboard guru, render jadual dan segerakkan data terkini dari Firebase
     if (screenId === 'guru-dashboard') {
-        if (typeof renderTeacherTable === 'function') renderTeacherTable();
+        if (typeof window.kemaskiniSemuaDropdownKelas === 'function') window.kemaskiniSemuaDropdownKelas();
+        if (typeof window.renderTeacherTable === 'function') window.renderTeacherTable();
+        if (typeof window.syncTeacherSessionFromFirebase === 'function') {
+            const gId = localStorage.getItem('bunyiKataUserId') || '';
+            const gEmail = localStorage.getItem('bunyiKataGuruEmail') || '';
+            if (gId || gEmail) {
+                window.syncTeacherSessionFromFirebase(gId || gEmail).catch(function (e) {
+                    console.warn('[Firebase RTDB] Auto-sync guru notice:', e);
+                });
+            }
+        }
     }
     if (screenId === 'admin-dashboard') {
         if (typeof window.renderAdminTable === 'function') window.renderAdminTable('guru');
@@ -1834,30 +1908,26 @@ function paparSkrin(screenId, skipHash) {
 
 window.paparSkrin = paparSkrin;
 function mengendaliNavigasiURL(e) {
-    if (e && e.state && e.state.screenId && document.getElementById(e.state.screenId)) {
-        paparSkrin(e.state.screenId, true);
-    } else {
-        let path = window.location.pathname.replace(/^\/+/, '');
-        if (path === '') {
-            // Check hash for backward compatibility
-            if (window.location.hash) {
-                path = window.location.hash.replace('#', '');
-            } else {
-                path = 'login-screen'; // Default screen
-            }
-        }
-        if (path && document.getElementById(path)) {
-            paparSkrin(path, true);
-            try {
-                history.replaceState({ screenId: path }, '', '/' + path);
-            } catch (err) { }
-        }
+    let path = (e && e.state && e.state.screenId) ? e.state.screenId : window.location.pathname.replace(/^\/+/, '');
+    if (!path && window.location.hash) {
+        path = window.location.hash.replace('#', '');
+    }
+    if (!path) {
+        path = 'login-screen';
+    }
+    if (path) {
+        paparSkrin(path, true);
+        try {
+            history.replaceState({ screenId: path }, '', '/' + path);
+        } catch (err) { }
     }
 }
 
 window.addEventListener('popstate', mengendaliNavigasiURL);
-// We do not need hashchange anymore if we use pathname, but keep it just in case
 window.addEventListener('hashchange', mengendaliNavigasiURL);
+setTimeout(function () {
+    mengendaliNavigasiURL();
+}, 100);
 
 window.isUserAdmin = function () {
     try {
@@ -1866,18 +1936,36 @@ window.isUserAdmin = function () {
             window.isAdminMode ||
             localStorage.getItem('bunyiKataUserRole') === 'admin' ||
             (document.body && document.body.classList.contains('admin-mode')) ||
-            (document.getElementById('teacher-banner-badge') && document.getElementById('teacher-banner-badge').innerText && document.getElementById('teacher-banner-badge').innerText.toUpperCase().includes('ADMIN')) ||
             (window.currentUser && window.currentUser.peranan === 'admin')
         );
     } catch (e) {
         return false;
     }
 };
-window.isSistemAdmin = window.isUserAdmin;
-
 window.isEffectiveTrial = function () {
     if (window.isUserAdmin && window.isUserAdmin()) return false;
-    return (window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial');
+    if (window.isAdminMode || window.modAdminAktif) return false;
+    if (localStorage.getItem('bunyiKataUserRole') === 'admin') return false;
+
+    if (window.isGuestMode || window.namaMuridAktif === 'Tetamu') return true;
+
+    const teacherPlan = (localStorage.getItem('bunyiKataTeacherPlan') || '').toLowerCase().trim();
+    const parentPlan = (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase().trim();
+    const userRole = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
+    const accessLvl = (localStorage.getItem('bunyiKataAccessLevel') || window.userAccessLevel || '').toLowerCase().trim();
+
+    if (teacherPlan === 'percuma' || teacherPlan === 'trial') return true;
+    if (parentPlan === 'percuma' || parentPlan === 'trial') return true;
+    if (accessLvl === 'trial') return true;
+
+    const isTeacherPaid = teacherPlan && teacherPlan !== 'percuma' && teacherPlan !== 'trial';
+    const isParentPaid = parentPlan && parentPlan !== 'percuma' && parentPlan !== 'trial';
+
+    if (userRole === 'guru' && !isTeacherPaid) return true;
+    if (userRole === 'ibubapa' && !isParentPaid) return true;
+    if (!userRole && !isTeacherPaid && !isParentPaid && accessLvl !== 'pro') return true;
+
+    return false;
 };
 
 window.masukModAdmin = masukModAdmin;
@@ -2028,13 +2116,6 @@ function masukModGuru() {
         });
     }
 
-    if (!localStorage.getItem('bunyiKataGuruSetupDone')) {
-        setTimeout(function () {
-            if (typeof window.bukaSetupModal === 'function') {
-                window.bukaSetupModal('guru', true);
-            }
-        }, 350);
-    }
 }
 
 function keluarModGuru() {
@@ -2120,7 +2201,7 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
         container.innerHTML = '';
         if (isStudentLogin) {
             container.className = 'student-profiles-list';
-            container.style.cssText = 'display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding: 6px 2px; width: 100%; box-sizing: border-box;';
+            container.style.cssText = 'display: flex !important; flex-direction: column !important; gap: 10px; max-height: 430px; overflow-y: auto; padding: 4px 2px; width: 100%; box-sizing: border-box;';
         } else {
             container.className = 'ibubapa-profiles-grid';
             container.style.cssText = '';
@@ -2179,22 +2260,47 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
 
             if (isStudentLogin) {
                 // Horizontal list format for student selection (avatar left circle, name 1 line, arrow right)
+                let studentId = (childData && childData.id) || (window.studentFirebaseIds && window.studentFirebaseIds[name]) || '';
+                if (!studentId) {
+                    try {
+                        const idMap = JSON.parse(localStorage.getItem('bunyiKataStudentFirebaseIds') || '{}');
+                        if (idMap[name]) studentId = idMap[name];
+                    } catch (e) {}
+                }
+
                 const btnAnak = document.createElement('button');
                 btnAnak.className = 'neo-btn bg-white student-row-card';
+                btnAnak.dataset.studentId = studentId;
                 btnAnak.innerHTML = `
-                    <div style="width: 48px; height: 48px; min-width: 48px; border-radius: 50%; background: #e0f2fe; border: 2.5px solid var(--color-dark); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 0 var(--color-dark); flex-shrink: 0;">
+                    <div style="width: 44px; height: 44px; min-width: 44px; border-radius: 50%; background: #e0f2fe; border: 2.5px solid var(--color-dark); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 0 var(--color-dark); flex-shrink: 0;">
                         <img src="${avatarSrc}" alt="${name}" style="width: 100%; height: 100%; object-fit: contain;" />
                     </div>
                     <div style="flex: 1; min-width: 0; text-align: left;">
-                        <div style="font-size: 1.05rem; font-weight: 800; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}</div>
+                        <div class="student-row-name">${name}</div>
                     </div>
-                    <div style="width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: #0284c7; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border: 1.5px solid var(--color-dark); box-shadow: 0 2px 0 var(--color-dark); flex-shrink: 0;">
+                    <div style="width: 30px; height: 30px; min-width: 30px; border-radius: 50%; background: #0284c7; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; border: 1.5px solid var(--color-dark); box-shadow: 0 2px 0 var(--color-dark); flex-shrink: 0;">
                         <i class="fa-solid fa-arrow-right"></i>
                     </div>
                 `;
                 btnAnak.onclick = () => {
-                    window.tutupModalPilihAnak();
-                    window.masukModMurid(name);
+                    try {
+                        window.tutupModalPilihAnak();
+                    } catch (e) {}
+                    if (studentId) {
+                        try {
+                            localStorage.setItem('bunyiKataStudentId', studentId);
+                        } catch (e) {}
+                    }
+                    try {
+                        window.masukModMurid(name, studentId);
+                    } catch (err) {
+                        console.error('Error in masukModMurid:', err);
+                    }
+                    if (typeof window.paparSkrin === 'function') {
+                        try {
+                            window.paparSkrin('main-menu-screen');
+                        } catch (e) {}
+                    }
                 };
                 container.appendChild(btnAnak);
             } else {
@@ -2207,7 +2313,7 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
                 btnAnak.innerHTML = `<div style="margin-bottom: 8px; width: 85px; height: 85px; display: flex; align-items: center; justify-content: center;"><img src="${avatarSrc}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));" /></div><span style="font-size: 0.95rem; line-height: 1.2; text-align: center; word-break: break-all; overflow-wrap: anywhere; line-break: anywhere;; font-weight: bold;">${name}</span>`;
                 btnAnak.onclick = () => {
                     if (isTukarDashboard) {
-                        const isTrial = (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : false) || (!window.isUserAdmin?.() && (localStorage.getItem('bunyiKataParentPlan') === 'trial' || (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase() === 'percuma'));
+                        const isTrial = typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : true;
                         if (isTrial && childNames.indexOf(name) > 0) {
                             if (typeof window.openPakejProModal === 'function') {
                                 window.openPakejProModal('ibubapa');
@@ -2232,6 +2338,9 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
                     } else {
                         window.tutupModalPilihAnak();
                         window.masukModMurid(name);
+                        if (typeof window.paparSkrin === 'function') {
+                            window.paparSkrin('main-menu-screen');
+                        }
                     }
                 };
 
@@ -2253,7 +2362,7 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
 
         // Add "+ Tambah Profil Anak" button ONLY IF < 3 children
         if (childNames.length < 3 && !isStudentLogin && !isTukarDashboard) {
-            const isTrial = (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : false) || (!window.isUserAdmin?.() && (localStorage.getItem('bunyiKataParentPlan') === 'trial' || (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase() === 'percuma'));
+            const isTrial = typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : true;
             const btnTambah = document.createElement('button');
             btnTambah.className = 'neo-btn bg-white';
 
@@ -2281,7 +2390,7 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
                                 <i class="fa-solid fa-crown" style="font-size:2.2rem; color:#f59e0b; display:block; margin-bottom:8px;"></i>
                                 Penambahan profil anak terhad untuk Pakej Pro.<br/>
                                 <span style="font-size:0.85rem; font-weight:normal; color:#64748b;">
-                                    Pelan percuma menyokong 1 profil anak sahaja. Sila langgan Pakej Pro untuk mendaftar sehingga 3 orang anak!
+                                    Pelan percuma tidak membenarkan pendaftaran profil anak. Sila langgan Pakej Pro untuk mendaftar sehingga 3 profil anak & akses penuh!
                                 </span>
                             </p>`
                         );
@@ -2402,11 +2511,11 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
         }
 
         if (childNames.length === 0 && !isStudentLogin) {
-            const isTrial = (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : false) || (!window.isUserAdmin?.() && (localStorage.getItem('bunyiKataParentPlan') === 'trial' || (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase() === 'percuma'));
+            const isTrial = typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : true;
             const emptyNotice = document.createElement('div');
             emptyNotice.style.cssText = 'grid-column: 1 / -1; padding: 12px 10px; text-align: center; color: #475569; font-size: 0.82rem; font-weight: 600; background: #f0f9ff; border: 1.5px dashed #0284c7; border-radius: 12px; margin-top: 6px; line-height: 1.4;';
             if (isTrial) {
-                emptyNotice.innerHTML = '<i class="fa-solid fa-crown" style="color:#f59e0b; margin-right:6px;"></i><b>Pelan Percuma:</b> 1 profil anak dibenarkan.<br/><span style="font-size:0.75rem; font-weight:normal; color:#64748b;">Langgan <b>Pakej Pro</b> untuk menambah sehingga 3 profil anak & akses penuh!</span>';
+                emptyNotice.innerHTML = '<i class="fa-solid fa-crown" style="color:#f59e0b; margin-right:6px;"></i><b>Pelan Percuma:</b> Tiada profil anak dibenarkan.<br/><span style="font-size:0.75rem; font-weight:normal; color:#64748b;">Langgan <b>Pakej Pro</b> untuk menambah sehingga 3 profil anak & akses penuh!</span>';
             } else {
                 emptyNotice.innerHTML = '<i class="fa-solid fa-circle-info" style="color:#0284c7; margin-right:6px;"></i>Belum ada profil anak didaftarkan.<br/><span style="font-size:0.75rem; font-weight:normal; color:#64748b;">Sila klik butang <b>"+ Tambah Anak"</b> di atas untuk mendaftarkan profil anak anda.</span>';
             }
@@ -2431,11 +2540,12 @@ window.logMasukIbuBapa = function () {
         const newName = prompt("Sila masukkan nama profil anak baharu:");
         if (newName && newName.trim()) {
             const finalName = newName.trim();
-            if (window.studentNames && !window.studentNames.includes(finalName)) {
-                window.studentNames.push(finalName);
-            } else if (!window.studentNames) {
-                window.studentNames = [finalName];
+            if (window.parentChildNames && !window.parentChildNames.includes(finalName)) {
+                window.parentChildNames.push(finalName);
+            } else if (!window.parentChildNames) {
+                window.parentChildNames = [finalName];
             }
+            localStorage.setItem('bunyiKataParentChildNames', JSON.stringify(window.parentChildNames));
             window.masukModIbuBapa(finalName);
         } else {
             alert("Nama profil tidak sah.");
@@ -2527,13 +2637,6 @@ window.masukModIbuBapa = function (namaAnak) {
         window.syncParentSessionFromFirebase(parentId);
     }
 
-    if (!localStorage.getItem('bunyiKataIbubapaSetupDone')) {
-        setTimeout(function () {
-            if (typeof window.bukaSetupModal === 'function') {
-                window.bukaSetupModal('ibubapa', true);
-            }
-        }, 350);
-    }
 };
 window.masukModIbubapa = window.masukModIbuBapa;
 
@@ -3800,35 +3903,50 @@ function getMaxScore(modId) {
 }
 window.getMaxScore = getMaxScore;
 
-function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '') {
+function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '', customStars = null) {
+    const currentStudent = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || '';
+    const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
+    const isRealStudent = currentStudent && !GHOST_NAMES.includes(currentStudent.trim().toLowerCase());
+
     const userRole = localStorage.getItem('bunyiKataUserRole') || '';
-    // Jangan sesekali simpan progres jika dalam mod Guru atau mod Admin (Guru/Admin sedang teroka/uji sistem)
+
+    // Hanya sekat jika mod Guru/Admin aktif TANPA profil murid sah (iaitu guru/admin sedang bermain/uji sendiri)
     if (
-        modGuruAktif ||
+        (modGuruAktif ||
         window.modGuruAktif ||
         modAdminAktif ||
         window.modAdminAktif ||
         window.isAdminMode ||
         document.body.classList.contains('teacher-mode') ||
-        document.body.classList.contains('admin-mode') ||
-        userRole === 'guru' ||
-        userRole === 'admin'
+        document.body.classList.contains('admin-mode')) &&
+        (userRole === 'guru' || userRole === 'admin') &&
+        !isRealStudent
     ) {
         return;
     }
 
-    const currentStudent = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '');
-    const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
-    if (!currentStudent || GHOST_NAMES.includes(currentStudent.trim().toLowerCase())) {
+    if (!isRealStudent) {
         return;
     }
+
+    // Pastikan peranan murid ditetapkan jika murid sebenar sedang aktif
+    localStorage.setItem('bunyiKataUserRole', 'murid');
+    window.isGuestMode = false;
 
     // Jika mod ibu bapa, hanya rekod jika murid aktif adalah anak yang berdaftar dalam senarai anak
     if (userRole === 'ibubapa') {
         const validChildren = window.parentChildNames || [];
-        if (!validChildren.some(c => c.trim().toLowerCase() === currentStudent.trim().toLowerCase())) {
+        if (validChildren.length > 0 && !validChildren.some(c => c.trim().toLowerCase() === currentStudent.trim().toLowerCase())) {
             return;
         }
+    }
+
+    // Pastikan data murid wujud
+    if (!studentData[currentStudent]) {
+        studentData[currentStudent] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: window.selectedAvatarIcon || '/images/avatar/avatar1.png' };
+    }
+    if (typeof window.studentData !== 'undefined' && !window.studentData[currentStudent]) {
+        window.studentData[currentStudent] = studentData[currentStudent];
     }
 
     if (currentStudent && studentData[currentStudent]) {
@@ -3843,30 +3961,37 @@ function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '') {
 
         if (!studentData[currentStudent].stars) studentData[currentStudent].stars = {};
         let starCount = 0;
-        const isUncappedActivity = aktiviti.startsWith('ar_') || aktiviti.startsWith('arSukuKata_') || aktiviti.startsWith('tandukKata_') || aktiviti.startsWith('cabaran_');
-        if (isUncappedActivity) {
-            starCount = typeof markah === 'number' ? markah : 0;
+        if (customStars !== null && typeof customStars === 'number') {
+            starCount = Math.min(3, Math.max(0, customStars));
         } else {
-            if (typeof markah === 'number') {
-                if (markah <= 3) {
-                    starCount = Math.min(markah, 3);
-                } else if (maxScore > 0) {
-                    const pct = markah / maxScore;
-                    if (pct >= 0.9) starCount = 3;
-                    else if (pct >= 0.6) starCount = 2;
-                    else if (pct > 0) starCount = 1;
-                } else {
-                    starCount = Math.min(markah, 3);
+            const isUncappedActivity = aktiviti.startsWith('ar_') || aktiviti.startsWith('arSukuKata_') || aktiviti.startsWith('tandukKata_') || aktiviti.startsWith('cabaran_');
+            if (isUncappedActivity) {
+                starCount = typeof markah === 'number' ? markah : 0;
+            } else {
+                if (typeof markah === 'number') {
+                    if (markah <= 3) {
+                        starCount = Math.min(markah, 3);
+                    } else if (maxScore > 0) {
+                        const pct = markah / maxScore;
+                        if (pct >= 0.85) starCount = 3;
+                        else if (pct >= 0.6) starCount = 2;
+                        else if (pct > 0) starCount = 1;
+                    } else {
+                        starCount = Math.min(markah, 3);
+                    }
                 }
             }
         }
         if (starCount > 0) {
-            const finalStarCount = isUncappedActivity ? starCount : Math.min(starCount, 3);
+            const finalStarCount = (aktiviti.startsWith('ar_') || aktiviti.startsWith('arSukuKata_') || aktiviti.startsWith('tandukKata_')) ? starCount : Math.min(starCount, 3);
             studentData[currentStudent].stars[aktiviti] = Math.max(studentData[currentStudent].stars[aktiviti] || 0, finalStarCount);
         }
 
         if (typeof kiraLencanaMurid === 'function') {
             studentData[currentStudent].badges = kiraLencanaMurid(studentData[currentStudent]);
+        }
+        if (lencana && Array.isArray(studentData[currentStudent].badges) && !studentData[currentStudent].badges.includes(lencana)) {
+            studentData[currentStudent].badges.push(lencana);
         }
 
         if (!studentData[currentStudent].history) studentData[currentStudent].history = [];
@@ -3876,34 +4001,47 @@ function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '') {
         // Rekod terus ke pangkalan data Firebase (Hanya untuk pengguna berdaftar PRO, bukan trial/tetamu)
         if (
             typeof window.syncStudentToFirebase === 'function' &&
-            window.userAccessLevel !== 'trial' &&
             !window.isGuestMode &&
-            currentStudent.toLowerCase() !== 'murid' &&
-            currentStudent.toLowerCase() !== 'tetamu' &&
-            currentStudent.toLowerCase() !== 'guest'
+            isRealStudent
         ) {
-            const activeCode = localStorage.getItem('bunyiKataKodKelas') || '';
-            const activeFam = localStorage.getItem('bunyiKataKodKeluarga') || '';
+            const isPC = localStorage.getItem('bunyiKataIsParentChild') === 'true';
+            const activeCode = isPC ? '' : (localStorage.getItem('bunyiKataKodKelas') || '');
+            const activeFam = isPC ? (localStorage.getItem('bunyiKataKodKeluarga') || '') : '';
             const totalStars = typeof jumlahMarkah === 'function' ? jumlahMarkah(studentData[currentStudent]) : 0;
+            const stuId = localStorage.getItem('bunyiKataStudentId') || (studentData[currentStudent] && studentData[currentStudent].id);
 
             window.syncStudentToFirebase({
+                id: stuId,
                 nama: currentStudent,
+                isParentChild: isPC,
                 kodKelas: activeCode,
                 kodKeluarga: activeFam,
+                parentId: isPC ? (localStorage.getItem('bunyiKataUserId') || '') : '',
+                parentEmail: isPC ? (localStorage.getItem('bunyiKataIbubapaEmail') || '') : '',
+                guruId: !isPC ? (localStorage.getItem('bunyiKataUserId') || '') : '',
+                guruEmail: !isPC ? (localStorage.getItem('bunyiKataGuruEmail') || '') : '',
                 totalBintang: totalStars
             }).then(stu => {
-                if (stu && stu.id && typeof window.recordStudentActivity === 'function') {
-                    window.recordStudentActivity(stu.id, kategori, aktiviti, effectiveMarkah, starCount);
-                    if (badgeKey && typeof window.recordStudentBadge === 'function') {
-                        window.recordStudentBadge(stu.id, badgeKey);
+                const targetId = (stu && stu.id) || stuId;
+                if (targetId && typeof window.recordStudentActivity === 'function') {
+                    window.recordStudentActivity(targetId, kategori, aktiviti, effectiveMarkah, starCount);
+                    const badgesToRecord = (studentData[currentStudent] && Array.isArray(studentData[currentStudent].badges)) ? studentData[currentStudent].badges : [];
+                    if (typeof window.recordStudentBadge === 'function') {
+                        badgesToRecord.forEach(bKey => {
+                            window.recordStudentBadge(targetId, bKey);
+                        });
+                        if (lencana && !badgesToRecord.includes(lencana)) {
+                            window.recordStudentBadge(targetId, lencana);
+                        }
                     }
                 }
             }).catch(e => console.warn('Firebase activity record notice:', e));
         }
 
-        console.log(`[REKOD] ${currentStudent} selesai ${kategori}: ${aktiviti} (${effectiveMarkah} markah)`);
+        console.log(`[REKOD] ${currentStudent} selesai ${kategori}: ${aktiviti} (${effectiveMarkah} markah, ${starCount} bintang)`);
         if (kategori === 'latihan') unlockNextLatihan(aktiviti);
         if (typeof updateProfilUI === 'function') updateProfilUI();
+        window.dispatchEvent(new CustomEvent('kemaskini-profil'));
     }
 }
 window.logProgress = logProgress;
@@ -3967,6 +4105,11 @@ function jumlahMarkah(data) {
                 totalStars += isUncapped ? Math.max(st, 0) : Math.min(Math.max(st, 0), 3);
             }
         });
+    }
+
+    if (totalStars === 0 && data) {
+        if (data.totalBintang !== undefined && Number(data.totalBintang) > 0) return Number(data.totalBintang);
+        if (data.coins !== undefined && Number(data.coins) > 0) return Number(data.coins);
     }
 
     return totalStars;
@@ -4543,18 +4686,24 @@ function animateValue(id, end, duration = 1000) {
 window.updateAvatarElement = updateAvatarElement;
 function updateAvatarElement(el, icon) {
     if (!el) return;
-    if (icon && (icon.startsWith('http') || icon.startsWith('/') || icon.includes('.png'))) {
-        el.className = el.className.replace(/fa-[a-zA-Z0-9-]+/g, '').replace(/fa-solid/g, '').trim();
-        el.style.backgroundImage = 'url("' + icon + '")';
-        el.style.backgroundSize = 'contain';
-        el.style.backgroundPosition = 'center';
-        el.style.backgroundRepeat = 'no-repeat';
-        el.style.color = 'transparent';
-        el.innerHTML = '';
-    } else {
-        el.style.backgroundImage = 'none';
-        el.className = 'fa-solid ' + (icon || 'fa-child-reaching') + ' ' + el.className.replace(/fa-[a-zA-Z0-9-]+/g, '').replace(/fa-solid/g, '').trim();
-        el.style.color = 'var(--color-dark)';
+    try {
+        const rawClass = typeof el.className === 'string' ? el.className : (el.className && typeof el.className.baseVal === 'string' ? el.className.baseVal : '');
+        const cleanClass = rawClass.replace(/fa-[a-zA-Z0-9-]+/g, '').replace(/fa-solid/g, '').trim();
+        if (icon && (icon.startsWith('http') || icon.startsWith('/') || icon.includes('.png'))) {
+            el.className = cleanClass;
+            el.style.backgroundImage = 'url("' + icon + '")';
+            el.style.backgroundSize = 'contain';
+            el.style.backgroundPosition = 'center';
+            el.style.backgroundRepeat = 'no-repeat';
+            el.style.color = 'transparent';
+            el.innerHTML = '';
+        } else {
+            el.style.backgroundImage = 'none';
+            el.className = ('fa-solid ' + (icon || 'fa-child-reaching') + ' ' + cleanClass).trim();
+            el.style.color = 'var(--color-dark)';
+        }
+    } catch (e) {
+        console.warn('updateAvatarElement notice:', e);
     }
 }
 
@@ -4618,7 +4767,11 @@ function updateProfilUI() {
             animateValue('profil-jumlah-markah', netStars);
         }
         if (typeof renderProfile === 'function') {
-            renderProfile();
+            try {
+                renderProfile();
+            } catch (err) {
+                console.error('renderProfile notice:', err);
+            }
         }
     }
 }
@@ -4679,6 +4832,8 @@ var MAP_CHALLENGES = {
             { id: "consonant_whack", title: "Ketuk Huruf Konsonan", desc: "Ketuk tikus yang pegang huruf konsonan", icon: "fa-hand-pointer", color: "#3b82f6" }
         ]
     }
+};
+
 // --- SISTEM PENGIRAAN LENCANA RASMI (5 LENCANA) ---
 function kiraLencanaMurid(data) {
     if (!data) return [];
@@ -4728,6 +4883,41 @@ function kiraLencanaMurid(data) {
     return earned;
 }
 window.kiraLencanaMurid = kiraLencanaMurid;
+
+function getCurrentProfileData() {
+    const studentName = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || localStorage.getItem('bunyiKataNamaMurid') || '';
+    if (!studentName) return null;
+    if (typeof studentData !== 'undefined' && studentData && studentData[studentName]) {
+        return studentData[studentName];
+    }
+    if (typeof window.studentData !== 'undefined' && window.studentData && window.studentData[studentName]) {
+        return window.studentData[studentName];
+    }
+    try {
+        const raw = localStorage.getItem('bunyiKataStudentData');
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed[studentName]) return parsed[studentName];
+        }
+    } catch (e) {}
+    return null;
+}
+window.getCurrentProfileData = getCurrentProfileData;
+
+function isPetaCompleted(petaId, data) {
+    if (!data) data = getCurrentProfileData();
+    if (!data) return false;
+    const earned = kiraLencanaMurid(data);
+    if (petaId === 'all' || petaId === 'master' || petaId === 5) {
+        return earned.includes('badge_master');
+    }
+    const numId = Number(petaId);
+    if (numId >= 1 && numId <= 4) {
+        return earned.includes(`badge_peta_${numId}`);
+    }
+    return false;
+}
+window.isPetaCompleted = isPetaCompleted;
 
 // --- SISTEM PENGECAMAN PINTAR NAMA MURID (SMART PARSING) ---
 function parseStudentNamesInput(rawText) {
@@ -5009,7 +5199,8 @@ function renderProfile() {
 
     const sijilBtn = document.getElementById('sijil-btn');
     if (sijilBtn) {
-        const isUnlocked = all4Done || earnedCount === 5;
+        const all4Done = Boolean(badgeStatus[1] && badgeStatus[2] && badgeStatus[3] && badgeStatus[4]);
+        const isUnlocked = all4Done || earnedCount === 5 || Boolean(badgeStatus["all"]);
         const lockIcon = document.getElementById('sijil-lock-icon');
         const mainIcon = document.getElementById('sijil-main-icon');
 
@@ -5237,7 +5428,7 @@ window.renderTeacherTable = function () {
     for (const nama of validStudentNames) {
         const data = (studentData && studentData[nama]) || {};
         const sKelas = data.kelas || listKelas[0];
-        if (sKelas !== activeClass) continue;
+        if (activeClass && sKelas && sKelas.toLowerCase().trim() !== activeClass.toLowerCase().trim()) continue;
 
         const earnedBadges = typeof kiraLencanaMurid === 'function' ? kiraLencanaMurid(data) : (data.badges || []);
         const lencanaCount = earnedBadges.length;
@@ -5474,10 +5665,13 @@ function bukaModalPilihPeta(mod) {
         console.warn('[BunyiKata] modal-pilih-peta tidak dijumpai dalam DOM.');
     }
 }
+window.bukaModalPilihPeta = bukaModalPilihPeta;
+
 function tutupModal() {
     const m = document.getElementById('modal-pilih-peta');
     if (m) m.style.display = 'none';
 }
+window.tutupModal = tutupModal;
 
 // --- 3D MISI CARDS SWIPER ENGINE ---
 window.currentMisiModules = [];
@@ -17121,11 +17315,19 @@ window.mainAudioSukuKataSemasa = function () {
     }
 }
 
-window.masukModMurid = function (namaAnak) {
+window.masukModMurid = function (namaAnak, stuIdParam) {
     window.modGuruAktif = false;
     if (typeof modGuruAktif !== 'undefined') modGuruAktif = false;
+    window.modAdminAktif = false;
+    if (typeof modAdminAktif !== 'undefined') modAdminAktif = false;
+    window.isAdminMode = false;
     window.modIbuBapaAktif = false;
     if (typeof modIbuBapaAktif !== 'undefined') modIbuBapaAktif = false;
+
+    if (typeof document !== 'undefined' && document.body) {
+        document.body.classList.remove('teacher-mode');
+        document.body.classList.remove('admin-mode');
+    }
 
     // Hanya reset progress jika pengguna memilih mod Tetamu tanpa nama murid sah
     const isExplicitGuest = !namaAnak || namaAnak === 'Tetamu' || (window.isGuestMode && !namaAnak);
@@ -17143,38 +17345,151 @@ window.masukModMurid = function (namaAnak) {
     localStorage.setItem('muridAktif', studentName);
     localStorage.setItem('bunyiKataCurrentMurid', studentName);
 
+    let explicitStudentId = stuIdParam || '';
+    if (!explicitStudentId && typeof window !== 'undefined') {
+        try {
+            const idMap = JSON.parse(localStorage.getItem('bunyiKataStudentFirebaseIds') || '{}');
+            if (idMap[studentName]) explicitStudentId = idMap[studentName];
+        } catch (e) {}
+        if (!explicitStudentId) {
+            explicitStudentId = localStorage.getItem('bunyiKataStudentId') || '';
+        }
+    }
+    if (explicitStudentId) {
+        localStorage.setItem('bunyiKataStudentId', explicitStudentId);
+    }
+
+    // Tentukan sama ada profil ini adalah anak keluarga (Mod Ibu Bapa) atau murid kelas (Mod Guru)
+    let pChildNames = [];
+    try {
+        pChildNames = JSON.parse(localStorage.getItem('bunyiKataParentChildNames') || '[]');
+    } catch(e){}
+    if (window.parentChildNames && Array.isArray(window.parentChildNames)) {
+        pChildNames = Array.from(new Set([...pChildNames, ...window.parentChildNames]));
+    }
+    const isParentChild = pChildNames.some(n => n && n.trim().toUpperCase() === studentName.trim().toUpperCase());
+    if (isParentChild) {
+        localStorage.setItem('bunyiKataIsParentChild', 'true');
+    } else {
+        localStorage.setItem('bunyiKataIsParentChild', 'false');
+    }
+
+    // Kosongkan bintang dan skor murid sebelumnya daripada localStorage agar tidak bercampur
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith('stars_') || k.startsWith('extra_stars_') || k.startsWith('score_') || k.startsWith('latihan_'))) {
+            localStorage.removeItem(k);
+        }
+    }
+
+    if (studentName === 'Tetamu' || isExplicitGuest) {
+        window.isGuestMode = true;
+        window.userAccessLevel = 'trial';
+        localStorage.setItem('bunyiKataAccessLevel', 'trial');
+        localStorage.removeItem('bunyiKataUserRole');
+        if (typeof window.setUserAccessLevel === 'function') {
+            window.setUserAccessLevel('trial');
+        }
+    } else {
+        window.isGuestMode = false;
+        window.userAccessLevel = 'pro';
+        localStorage.setItem('bunyiKataAccessLevel', 'pro');
+        localStorage.setItem('bunyiKataUserRole', 'murid');
+        if (typeof window.setUserAccessLevel === 'function') {
+            window.setUserAccessLevel('pro');
+        }
+    }
+
     // Pastikan rekod data murid wujud
     if (typeof window.studentData !== 'undefined') {
         if (!window.studentData[studentName]) {
             window.studentData[studentName] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: window.selectedAvatarIcon || '/images/avatar/avatar1.png' };
         }
+        if (explicitStudentId) window.studentData[studentName].id = explicitStudentId;
         window.selectedAvatarIcon = window.studentData[studentName].avatar;
-        if (typeof saveStudentData === 'function') saveStudentData();
     }
     if (typeof studentData !== 'undefined') {
         if (!studentData[studentName]) {
             studentData[studentName] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: window.selectedAvatarIcon || '/images/avatar/avatar1.png' };
         }
+        if (explicitStudentId) studentData[studentName].id = explicitStudentId;
         window.selectedAvatarIcon = studentData[studentName].avatar;
     }
     if (!window.selectedAvatarIcon) {
         window.selectedAvatarIcon = "/images/avatar/avatar1.png";
     }
 
-    // Muat turun rekod kemajuan murid (bintang & lencana) dari Firebase Realtime Database jika ada
+    const curAvatar = window.selectedAvatarIcon;
+    document.querySelectorAll('.murid-info-avatar').forEach(el => {
+        if (typeof updateAvatarElement === 'function') {
+            updateAvatarElement(el, curAvatar);
+        } else {
+            el.style.backgroundImage = `url('${curAvatar}')`;
+            el.style.backgroundSize = 'contain';
+            el.style.backgroundPosition = 'center';
+            el.style.backgroundRepeat = 'no-repeat';
+        }
+    });
+
+    // Muat turun rekod kemajuan murid (bintang, skor, lencana) dari Firebase Realtime Database jika ada
     if (studentName !== 'Tetamu' && typeof window.fetchStudentProgressFromFirebase === 'function') {
-        window.fetchStudentProgressFromFirebase(studentName).then(remote => {
+        window.fetchStudentProgressFromFirebase(studentName, explicitStudentId).then(remote => {
             if (remote) {
                 const sTarget = (typeof window.studentData !== 'undefined') ? window.studentData : studentData;
                 if (sTarget && sTarget[studentName]) {
+                    if (remote.id) {
+                        sTarget[studentName].id = remote.id;
+                        localStorage.setItem('bunyiKataStudentId', remote.id);
+                    }
                     if (remote.badges && Array.isArray(remote.badges) && remote.badges.length > 0) {
                         sTarget[studentName].badges = Array.from(new Set([...(sTarget[studentName].badges || []), ...remote.badges]));
                     }
+                    if (remote.scores && typeof remote.scores === 'object') {
+                        sTarget[studentName].scores = { ...(sTarget[studentName].scores || {}), ...remote.scores };
+                    }
+                    if (remote.stars && typeof remote.stars === 'object') {
+                        sTarget[studentName].stars = { ...(sTarget[studentName].stars || {}), ...remote.stars };
+                    }
+                    if (remote.latihan && typeof remote.latihan === 'object') {
+                        sTarget[studentName].latihan = { ...(sTarget[studentName].latihan || {}), ...remote.latihan };
+                    }
                     if (remote.totalBintang !== undefined && remote.totalBintang > 0) {
                         sTarget[studentName].totalBintang = remote.totalBintang;
+                        sTarget[studentName].coins = remote.totalBintang;
                     }
-                    if (typeof saveStudentData === 'function') saveStudentData();
-                    if (typeof updateProfilUI === 'function') updateProfilUI();
+
+                    // PENTING: Sync bintang & skor ke localStorage supaya peta cabaran boleh baca
+                    // Peta cabaran membaca dari localStorage.getItem('stars_' + moduleId)
+                    try {
+                        const mergedStars = sTarget[studentName].stars;
+                        if (mergedStars && typeof mergedStars === 'object') {
+                            Object.keys(mergedStars).forEach(function (moduleId) {
+                                var starVal = Number(mergedStars[moduleId] || 0);
+                                if (starVal > 0) {
+                                    localStorage.setItem('stars_' + moduleId, String(starVal));
+                                }
+                            });
+                        }
+                        const mergedScores = sTarget[studentName].scores;
+                        if (mergedScores && typeof mergedScores === 'object') {
+                            Object.keys(mergedScores).forEach(function (moduleId) {
+                                var scoreVal = Number(mergedScores[moduleId] || 0);
+                                if (scoreVal > 0) {
+                                    localStorage.setItem('score_' + moduleId, String(scoreVal));
+                                }
+                            });
+                        }
+                        // Simpan juga ke bunyiKataStudentData
+                        try {
+                            localStorage.setItem('bunyiKataStudentData', JSON.stringify(sTarget));
+                        } catch (e) {}
+                    } catch (syncErr) {
+                        console.warn('localStorage stars sync notice:', syncErr);
+                    }
+
+                    if (typeof updateProfilUI === 'function') {
+                        try { updateProfilUI(); } catch(e) {}
+                    }
                 }
             }
         }).catch(e => console.warn('Firebase student sync notice:', e));
@@ -17203,12 +17518,28 @@ window.masukModMurid = function (namaAnak) {
 
     window.dispatchEvent(new CustomEvent('student-changed', { detail: { name: studentName } }));
 
-    if (typeof updateProfilUI === 'function') updateProfilUI();
+    if (typeof updateProfilUI === 'function') {
+        try {
+            updateProfilUI();
+        } catch (e) {
+            console.error('updateProfilUI in masukModMurid notice:', e);
+        }
+    }
+
+    window.currentActiveScreen = 'main-menu-screen';
+    window.dispatchEvent(new CustomEvent('screen-changed', { detail: { screenId: 'main-menu-screen' } }));
 
     // Buka Menu Utama murid supaya aktiviti Belajar dan Latihan sedia dipilih
     if (typeof window.paparSkrin === 'function') {
         window.paparSkrin('main-menu-screen');
     }
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const mainMenu = document.getElementById('main-menu-screen');
+    if (mainMenu) mainMenu.classList.add('active');
+    const loginScr = document.getElementById('login-screen');
+    if (loginScr) loginScr.classList.remove('active');
+    const modalPilih = document.getElementById('modal-pilih-anak');
+    if (modalPilih) modalPilih.style.display = 'none';
 }
 window.flipFlashcard = flipFlashcard;
 
@@ -19454,7 +19785,12 @@ const VR_STATION_DATA = {
         title: 'Galeri Huruf Fonik (a - z)',
         color: '#059669',
         isFonik: true,
-        items: 'abcdefghijklmnopqrstuvwxyz'.split('').map(l => ({ text: l, sound: l, isFonik: true }))
+        items: 'abcdefghijklmnopqrstuvwxyz'.split('').map(l => ({
+            text: l,
+            sound: l,
+            audio: l === 'w' ? '/audio/abc/w.mp3' : `/audio/fonik/fonik ${l}.MP3`,
+            isFonik: true
+        }))
     },
     'back-abc-lower': {
         title: 'Galeri Huruf Kecil (a - z)',
@@ -20076,8 +20412,12 @@ window.playVRStationVoice = function (teks, onEnd) {
         '100': '/audio/nombor/seratus.mp3', 'seratus': '/audio/nombor/seratus.mp3'
     };
 
-    if (numAudioMap[rawKey]) {
+    if (typeof teks === 'string' && (teks.startsWith('/') || teks.endsWith('.mp3') || teks.endsWith('.MP3'))) {
+        audioPath = teks;
+    } else if (numAudioMap[rawKey]) {
         audioPath = numAudioMap[rawKey];
+    } else if (window.currentVRStationId === 'front-abc-upper' || (VR_STATION_DATA[window.currentVRStationId] && VR_STATION_DATA[window.currentVRStationId].isFonik)) {
+        audioPath = rawKey === 'w' ? '/audio/abc/w.mp3' : `/audio/fonik/fonik ${rawKey}.MP3`;
     } else if (typeof window.getAudioPath === 'function') {
         audioPath = window.getAudioPath(teks);
     }
@@ -20623,8 +20963,11 @@ window.tukarVRStationCard = function (delta) {
 
 window.playVRItemAudio = function (soundText, index, isEncoded) {
     if (isEncoded) soundText = decodeURIComponent(soundText);
-    if (!soundText && window.currentVRStationItems && window.currentVRStationItems[index]) {
-        const itm = window.currentVRStationItems[index];
+    const itm = (window.currentVRStationItems && window.currentVRStationItems[index]) ? window.currentVRStationItems[index] : null;
+    const curStation = VR_STATION_DATA[window.currentVRStationId];
+    if (curStation && (curStation.isFonik || window.currentVRStationId === 'front-abc-upper')) {
+        soundText = (itm && itm.audio) ? itm.audio : (soundText === 'w' ? '/audio/abc/w.mp3' : `/audio/fonik/fonik ${soundText || (itm && itm.text)}.MP3`);
+    } else if (!soundText && itm) {
         soundText = itm.audio || itm.sound || itm.word || itm.text;
     }
     if (!soundText) return;
@@ -22841,7 +23184,7 @@ window.pilihPeta = function (nomborPeta) {
     requestAnimationFrame(renderFrame);
 };
 
-document.addEventListener('DOMContentLoaded', function () {
+function initAppLogicOnReady() {
     mengendaliNavigasiURL();
     setTimeout(() => {
         let nKelas = localStorage.getItem('bunyiKataNamaKelas') || '-';
@@ -22853,7 +23196,13 @@ document.addEventListener('DOMContentLoaded', function () {
         let elGuru = document.getElementById('guru-dashboard-nama-guru-title');
         if (elGuru) elGuru.innerText = nGuru || '-';
     }, 500);
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAppLogicOnReady);
+} else {
+    initAppLogicOnReady();
+}
 
 window.padamProfilAnakIbuBapa = function (namaAnak) {
     const childName = namaAnak || window.anakTerpilih;

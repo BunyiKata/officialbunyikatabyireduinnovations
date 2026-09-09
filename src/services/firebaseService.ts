@@ -54,6 +54,10 @@ export interface StudentRecord {
   total_bintang: number;
   pin_keselamatan?: string;
   catatan?: string;
+  scores?: Record<string, number>;
+  stars?: Record<string, number>;
+  latihan?: Record<string, boolean>;
+  badges?: string[];
   dicipta_pada?: string;
   dikemaskini_pada?: string;
 }
@@ -450,6 +454,7 @@ export async function syncTeacherClasses(emailOrId: string): Promise<ClassRecord
       localStorage.setItem('bunyiKataKodKelas', c1.kod_kelas);
       localStorage.setItem('bunyiKataNamaKelas', c1.nama_kelas);
       localStorage.setItem('bunyiKataNamaSekolah', c1.nama_sekolah);
+      localStorage.setItem('pdf_sekolah', c1.nama_sekolah);
       if (c1.nama_guru) {
         localStorage.setItem('bunyiKataNamaGuru', c1.nama_guru);
         localStorage.setItem('pdf_guru', c1.nama_guru);
@@ -662,6 +667,10 @@ export async function syncStudentToFirebase(student: {
   totalBintang?: number;
   avatarUrl?: string;
   isParentChild?: boolean;
+  badges?: string[];
+  scores?: Record<string, number>;
+  stars?: Record<string, number>;
+  latihan?: Record<string, boolean>;
 }): Promise<StudentRecord | null> {
   const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
   if (!student.nama || GHOST_NAMES.includes(student.nama.trim().toLowerCase())) {
@@ -676,8 +685,15 @@ export async function syncStudentToFirebase(student: {
     const activeUserRole = localStorage.getItem('bunyiKataUserRole') || '';
     const activeTeacherEmail = localStorage.getItem('bunyiKataGuruEmail') || '';
     const activeParentEmail = localStorage.getItem('bunyiKataIbubapaEmail') || '';
+    let parentChildNamesRaw: string[] = [];
+    try {
+      parentChildNamesRaw = JSON.parse(localStorage.getItem('bunyiKataParentChildNames') || '[]');
+    } catch (e) {}
 
-    const isParentChild = student.isParentChild === true || activeUserRole === 'ibubapa';
+    const isParentChild = student.isParentChild === true || 
+      activeUserRole === 'ibubapa' || 
+      localStorage.getItem('bunyiKataIsParentChild') === 'true' ||
+      (Array.isArray(parentChildNamesRaw) && parentChildNamesRaw.some((n: string) => n && n.trim().toUpperCase() === cleanName));
 
     let targetGuruId: string | null = null;
     let targetGuruEmail: string | null = null;
@@ -765,6 +781,13 @@ export async function syncStudentToFirebase(student: {
 
     // Cari jika murid sudah wujud mengikut mod peranan yang betul
     let existingDocId: string | null = student.id || null;
+    if (!existingDocId && typeof window !== 'undefined') {
+      const activeStuId = localStorage.getItem('bunyiKataStudentId');
+      const activeStuName = (localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || '').trim().toUpperCase();
+      if (activeStuId && activeStuName === cleanName) {
+        existingDocId = activeStuId;
+      }
+    }
     if (!existingDocId) {
       if (!isParentChild) {
         if (targetGuruId) {
@@ -783,6 +806,19 @@ export async function syncStudentToFirebase(student: {
         if (!existingDocId && targetKelasId) {
           try {
             const qFind = query(ref(db, 'students'), orderByChild('kelas_id'), equalTo(targetKelasId));
+            const snapFind = await get(qFind);
+            if (snapFind.exists()) {
+              snapFind.forEach(c => {
+                if (c.val()?.nama?.trim().toUpperCase() === cleanName) {
+                  existingDocId = c.key!;
+                }
+              });
+            }
+          } catch (e) {}
+        }
+        if (!existingDocId && activeKodKelas) {
+          try {
+            const qFind = query(ref(db, 'students'), orderByChild('kod_kelas'), equalTo(activeKodKelas));
             const snapFind = await get(qFind);
             if (snapFind.exists()) {
               snapFind.forEach(c => {
@@ -820,6 +856,19 @@ export async function syncStudentToFirebase(student: {
             }
           } catch (e) {}
         }
+        if (!existingDocId && activeKodFam) {
+          try {
+            const qFind = query(ref(db, 'students'), orderByChild('kod_keluarga'), equalTo(activeKodFam));
+            const snapFind = await get(qFind);
+            if (snapFind.exists()) {
+              snapFind.forEach(c => {
+                if (c.val()?.nama?.trim().toUpperCase() === cleanName) {
+                  existingDocId = c.key!;
+                }
+              });
+            }
+          } catch (e) {}
+        }
       }
     }
 
@@ -836,7 +885,6 @@ export async function syncStudentToFirebase(student: {
       keluarga_id: targetKeluargaId || null,
       kod_keluarga: activeKodFam || null,
       nama_keluarga: activeNamaFam || null,
-      total_bintang: student.totalBintang || 0,
       dikemaskini_pada: now,
     };
     if (student.avatarUrl) {
@@ -844,9 +892,47 @@ export async function syncStudentToFirebase(student: {
     }
 
     if (existingDocId) {
+      // Dapatkan data sedia ada dahulu supaya total_bintang / scores / stars tidak ditindih secara sengaja
+      try {
+        const existSnap = await get(ref(db, `students/${existingDocId}`));
+        if (existSnap.exists()) {
+          const existVal = existSnap.val();
+          payload.total_bintang = Math.max(student.totalBintang || 0, existVal.total_bintang || 0);
+          if (existVal.scores) payload.scores = existVal.scores;
+          if (existVal.stars) payload.stars = existVal.stars;
+          if (existVal.latihan) payload.latihan = existVal.latihan;
+          if (existVal.badges) {
+            payload.badges = Array.from(new Set([...(existVal.badges || []), ...(student.badges || [])]));
+          }
+          if (isParentChild) {
+            payload.guru_id = null;
+            payload.guru_email = null;
+            payload.kelas_id = null;
+            payload.kod_kelas = null;
+            payload.nama_kelas = null;
+            if (!payload.parent_id && existVal.parent_id) payload.parent_id = existVal.parent_id;
+            if (!payload.keluarga_id && existVal.keluarga_id) payload.keluarga_id = existVal.keluarga_id;
+            if (!payload.kod_keluarga && existVal.kod_keluarga) payload.kod_keluarga = existVal.kod_keluarga;
+          } else {
+            payload.parent_id = null;
+            payload.parent_email = null;
+            payload.keluarga_id = null;
+            payload.kod_keluarga = null;
+            payload.nama_keluarga = null;
+            if (!payload.guru_id && existVal.guru_id) payload.guru_id = existVal.guru_id;
+            if (!payload.kelas_id && existVal.kelas_id) payload.kelas_id = existVal.kelas_id;
+            if (!payload.kod_kelas && existVal.kod_kelas) payload.kod_kelas = existVal.kod_kelas;
+          }
+        } else {
+          payload.total_bintang = student.totalBintang || 0;
+        }
+      } catch (e) {
+        payload.total_bintang = student.totalBintang || 0;
+      }
       await update(ref(db, `students/${existingDocId}`), payload);
       return { id: existingDocId, dicipta_pada: now, ...payload } as StudentRecord;
     } else {
+      payload.total_bintang = student.totalBintang || 0;
       payload.dicipta_pada = now;
       const newRef = push(ref(db, 'students'));
       await set(newRef, payload);
@@ -874,6 +960,10 @@ export async function getStudentsForTeacher(params: {
     if (!snap || !snap.exists()) return;
     snap.forEach((c: any) => {
       const data = c.val();
+      // Jangan masukkan anak keluarga (Mod Ibu Bapa) ke dalam senarai murid guru
+      if ((data.parent_id || data.keluarga_id || data.parent_email) && !data.guru_id && !data.kelas_id) {
+        return;
+      }
       const nama = (data.nama || '').trim().toUpperCase();
       if (nama && !GHOST_NAMES.includes(nama.toLowerCase())) {
         studentsMap.set(nama, { id: c.key, ...data } as StudentRecord);
@@ -994,25 +1084,73 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
         rawLocalData = {};
       }
 
+      const idMap: Record<string, string> = {};
       const cleanedStudentData: any = {};
       remoteStudents.forEach(st => {
         if (!st.nama || GHOST_NAMES.includes(st.nama.trim().toLowerCase())) return;
+        if (st.id) idMap[st.nama] = st.id;
         const prev = rawLocalData[st.nama] || {};
         cleanedStudentData[st.nama] = {
+          id: st.id,
           avatar: st.avatar_url || prev.avatar || '/images/avatar/avatar1.png',
-          coins: Math.max(st.total_bintang || 0, prev.coins || 0),
+          coins: st.total_bintang !== undefined ? st.total_bintang : (prev.coins || 0),
+          totalBintang: st.total_bintang !== undefined ? st.total_bintang : (prev.totalBintang || 0),
           spentStars: prev.spentStars || 0,
           kelas: st.nama_kelas || prev.kelas || localStorage.getItem('bunyiKataNamaKelas') || '',
+          kod_kelas: st.kod_kelas || prev.kod_kelas || '',
+          nama_keluarga: st.nama_keluarga || prev.nama_keluarga || '',
+          kod_keluarga: st.kod_keluarga || prev.kod_keluarga || '',
+          kelas_id: st.kelas_id || prev.kelas_id || '',
+          keluarga_id: st.keluarga_id || prev.keluarga_id || '',
           history: prev.history || [],
-          badges: prev.badges || []
+          badges: Array.from(new Set([...(st.badges || []), ...(prev.badges || [])])),
+          scores: { ...(prev.scores || {}), ...(st.scores || {}) },
+          stars: { ...(prev.stars || {}), ...(st.stars || {}) },
+          latihan: { ...(prev.latihan || {}), ...(st.latihan || {}) },
         };
       });
 
+      // Gabungkan juga skor daripada nod scores/ bagi memastikan data 100% tally
+      try {
+        const snapScores = await get(ref(db, 'scores'));
+        if (snapScores.exists()) {
+          const studentIdToNama = new Map<string, string>();
+          remoteStudents.forEach(s => {
+            if (s.id && s.nama) studentIdToNama.set(s.id, s.nama);
+          });
+          snapScores.forEach(scoreSnap => {
+            const sc = scoreSnap.val();
+            if (sc && sc.student_id && studentIdToNama.has(sc.student_id)) {
+              const sName = studentIdToNama.get(sc.student_id)!;
+              if (cleanedStudentData[sName]) {
+                if (!cleanedStudentData[sName].scores) cleanedStudentData[sName].scores = {};
+                if (!cleanedStudentData[sName].stars) cleanedStudentData[sName].stars = {};
+                if (!cleanedStudentData[sName].latihan) cleanedStudentData[sName].latihan = {};
+
+                const oldSc = cleanedStudentData[sName].scores[sc.aktiviti_nama] || 0;
+                const oldSt = cleanedStudentData[sName].stars[sc.aktiviti_nama] || 0;
+                cleanedStudentData[sName].scores[sc.aktiviti_nama] = Math.max(oldSc, Number(sc.skor) || 0);
+                cleanedStudentData[sName].stars[sc.aktiviti_nama] = Math.max(oldSt, Number(sc.bintang) || 0);
+                cleanedStudentData[sName].latihan[sc.aktiviti_nama] = true;
+                if (sc.bintang && cleanedStudentData[sName].coins === 0) {
+                  cleanedStudentData[sName].coins = Math.max(cleanedStudentData[sName].coins, Number(sc.bintang));
+                  cleanedStudentData[sName].totalBintang = Math.max(cleanedStudentData[sName].totalBintang, Number(sc.bintang));
+                }
+              }
+            }
+          });
+        }
+      } catch (scoreErr) {
+        console.warn('[Firebase RTDB] Skor merge notice:', scoreErr);
+      }
+
       localStorage.setItem('bunyiKataStudentData', JSON.stringify(cleanedStudentData));
+      localStorage.setItem('bunyiKataStudentFirebaseIds', JSON.stringify(idMap));
 
       if (typeof window !== 'undefined') {
         (window as any).studentNames = studentNames;
         (window as any).studentData = cleanedStudentData;
+        (window as any).studentFirebaseIds = idMap;
 
         if (typeof (window as any).updateStudentDropdown === 'function') {
           (window as any).updateStudentDropdown();
@@ -1115,17 +1253,55 @@ export async function saveScoreToFirebase(scoreData: {
       tarikh: now,
     });
 
-    // Kemas kini jumlah bintang dalam rekod murid
+    // Kemas kini skor, bintang modul, dan jumlah bintang dalam rekod murid
     try {
-      const sSnap = await get(ref(db, `students/${scoreData.studentId}`));
+      const sRef = ref(db, `students/${scoreData.studentId}`);
+      const sSnap = await get(sRef);
       if (sSnap.exists()) {
-        const curr = sSnap.val()?.total_bintang || 0;
-        await update(ref(db, `students/${scoreData.studentId}`), {
-          total_bintang: curr + scoreData.bintang,
+        const sVal = sSnap.val() || {};
+        const oldScores = sVal.scores || {};
+        const oldStars = sVal.stars || {};
+        const prevScore = oldScores[scoreData.aktivitiNama] || 0;
+        const prevStar = oldStars[scoreData.aktivitiNama] || 0;
+
+        const bestScore = Math.max(prevScore, Number(scoreData.skor) || 0);
+        const bestStar = Math.max(prevStar, Number(scoreData.bintang) || 0);
+        const starDiff = Math.max(0, bestStar - prevStar);
+        const currTotalStars = sVal.total_bintang || 0;
+
+        const updatePayload: any = {
+          [`scores/${scoreData.aktivitiNama}`]: bestScore,
+          [`stars/${scoreData.aktivitiNama}`]: bestStar,
+          [`latihan/${scoreData.aktivitiNama}`]: true,
           dikemaskini_pada: now,
-        });
+        };
+        if (starDiff > 0 || currTotalStars === 0) {
+          updatePayload.total_bintang = currTotalStars + (starDiff > 0 ? starDiff : bestStar);
+        }
+
+        await update(sRef, updatePayload);
+
+        // Kemaskini juga ke dalam memori studentData setempat jika ada
+        if (typeof window !== 'undefined') {
+          const sName = sVal.nama;
+          const sTarget = (window as any).studentData;
+          if (sTarget && sName && sTarget[sName]) {
+            if (!sTarget[sName].scores) sTarget[sName].scores = {};
+            if (!sTarget[sName].stars) sTarget[sName].stars = {};
+            if (!sTarget[sName].latihan) sTarget[sName].latihan = {};
+            sTarget[sName].scores[scoreData.aktivitiNama] = bestScore;
+            sTarget[sName].stars[scoreData.aktivitiNama] = bestStar;
+            sTarget[sName].latihan[scoreData.aktivitiNama] = true;
+            if (starDiff > 0 || !sTarget[sName].coins) {
+              sTarget[sName].coins = (sTarget[sName].coins || 0) + (starDiff > 0 ? starDiff : bestStar);
+              sTarget[sName].totalBintang = (sTarget[sName].totalBintang || 0) + (starDiff > 0 ? starDiff : bestStar);
+            }
+          }
+        }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[Firebase RTDB] Ralat kemaskini profil murid semasa simpan skor:', e);
+    }
     return true;
   } catch (err) {
     console.error('[Firebase RTDB] Ralat saveScoreToFirebase:', err);
@@ -1222,25 +1398,61 @@ export async function saveCertificate(certData: {
 /**
  * Memuatkan rekod kemajuan murid (bintang, markah, lencana) daripada Realtime Database
  */
-export async function fetchStudentProgressFromFirebase(studentName: string): Promise<any | null> {
+export async function fetchStudentProgressFromFirebase(studentName: string, studentId?: string): Promise<any | null> {
   try {
-    if (!studentName) return null;
-    const clean = studentName.trim().toUpperCase();
+    if (!studentName && !studentId) return null;
+
+    // 1. Jika studentId diberikan, terus muat turun rekod tepat
+    if (studentId) {
+      try {
+        const snap = await get(ref(db, `students/${studentId}`));
+        if (snap.exists()) {
+          const sData = snap.val();
+          return {
+            id: snap.key,
+            nama: sData.nama,
+            totalBintang: sData.total_bintang || 0,
+            badges: sData.badges || [],
+            scores: sData.scores || {},
+            stars: sData.stars || {},
+            latihan: sData.latihan || {},
+            kelasId: sData.kelas_id,
+            keluargaId: sData.keluarga_id,
+            kodKelas: sData.kod_kelas,
+            kodKeluarga: sData.kod_keluarga,
+          };
+        }
+      } catch (e) {}
+    }
+
+    // 2. Jika tiada studentId, cari mengikut nama & kod kelas semasa
+    const clean = (studentName || '').trim().toUpperCase();
     const snap = await get(ref(db, 'students'));
     if (!snap.exists()) return null;
 
     let progress: any = null;
+    const activeCode = (localStorage.getItem('bunyiKataKodKelas') || localStorage.getItem('bunyiKataKodKeluarga') || '').trim().toUpperCase();
+
     snap.forEach(c => {
       const sData = c.val();
-      if (sData?.nama?.trim().toUpperCase() === clean && !progress) {
-        progress = {
-          id: c.key,
-          nama: sData.nama,
-          totalBintang: sData.total_bintang || 0,
-          badges: sData.badges || [],
-          kelasId: sData.kelas_id,
-          keluargaId: sData.keluarga_id,
-        };
+      const matchName = sData?.nama?.trim().toUpperCase() === clean;
+      if (matchName && !progress) {
+        const matchCode = !activeCode || (sData.kod_kelas && sData.kod_kelas.toUpperCase() === activeCode) || (sData.kod_keluarga && sData.kod_keluarga.toUpperCase() === activeCode);
+        if (matchCode) {
+          progress = {
+            id: c.key,
+            nama: sData.nama,
+            totalBintang: sData.total_bintang || 0,
+            badges: sData.badges || [],
+            scores: sData.scores || {},
+            stars: sData.stars || {},
+            latihan: sData.latihan || {},
+            kelasId: sData.kelas_id,
+            keluargaId: sData.keluarga_id,
+            kodKelas: sData.kod_kelas,
+            kodKeluarga: sData.kod_keluarga,
+          };
+        }
       }
     });
     return progress;
@@ -1905,13 +2117,15 @@ export async function updateTeacherSchoolAndNameInFirebase(params: {
         const qUser = query(ref(db, 'profiles'), orderByChild('email'), equalTo(userId.trim().toLowerCase()));
         const snapUser = await get(qUser);
         if (snapUser.exists()) {
-          snapUser.forEach(async (c) => {
-            await update(ref(db, `profiles/${c.key}`), {
+          const updates: Promise<void>[] = [];
+          snapUser.forEach((c) => {
+            updates.push(update(ref(db, `profiles/${c.key}`), {
               nama: cleanGuru,
               nama_sekolah: cleanSekolah,
               dikemaskini_pada: now,
-            });
+            }));
           });
+          await Promise.all(updates);
         }
       } else {
         const pSnap = await get(ref(db, `profiles/${userId}`));
@@ -2161,21 +2375,25 @@ export async function deleteParentChildFromFirebase(params: {
       const qStu = query(ref(db, 'students'), orderByChild('keluarga_id'), equalTo(parentId));
       const snapStu = await get(qStu);
       if (snapStu.exists()) {
-        snapStu.forEach(async (c) => {
+        const removals: Promise<void>[] = [];
+        snapStu.forEach((c) => {
           if (c.val()?.nama?.trim().toUpperCase() === cleanName) {
-            await remove(ref(db, `students/${c.key}`));
+            removals.push(remove(ref(db, `students/${c.key}`)));
           }
         });
+        await Promise.all(removals);
       }
     } else if (parentEmail) {
       const qStu = query(ref(db, 'students'), orderByChild('parent_email'), equalTo(parentEmail.toLowerCase()));
       const snapStu = await get(qStu);
       if (snapStu.exists()) {
-        snapStu.forEach(async (c) => {
+        const removals: Promise<void>[] = [];
+        snapStu.forEach((c) => {
           if (c.val()?.nama?.trim().toUpperCase() === cleanName) {
-            await remove(ref(db, `students/${c.key}`));
+            removals.push(remove(ref(db, `students/${c.key}`)));
           }
         });
+        await Promise.all(removals);
       }
     }
 
@@ -2280,24 +2498,59 @@ export async function syncParentSessionFromFirebase(userIdOrEmail?: string): Pro
 
     // 3. Ambil senarai anak daripada koleksi students
     try {
-      let qStu: any = null;
+      const stuSnaps: any[] = [];
       if (parentId) {
-        qStu = query(ref(db, 'students'), orderByChild('keluarga_id'), equalTo(parentId));
-      } else if (parentEmail) {
-        qStu = query(ref(db, 'students'), orderByChild('parent_email'), equalTo(parentEmail.toLowerCase()));
+        try {
+          const s1 = await get(query(ref(db, 'students'), orderByChild('parent_id'), equalTo(parentId)));
+          if (s1.exists()) stuSnaps.push(s1);
+        } catch (e) {}
+        try {
+          const s2 = await get(query(ref(db, 'students'), orderByChild('keluarga_id'), equalTo(parentId)));
+          if (s2.exists()) stuSnaps.push(s2);
+        } catch (e) {}
       }
-      if (qStu) {
-        const snapStu = await get(qStu);
-        if (snapStu.exists()) {
-          const stuNames: string[] = [];
-          snapStu.forEach((c: any) => {
-            const n = c.val()?.nama;
-            if (n) stuNames.push(n);
-          });
-          if (stuNames.length > 0) {
-            children = Array.from(new Set([...children, ...stuNames]));
+      if (parentEmail) {
+        try {
+          const s3 = await get(query(ref(db, 'students'), orderByChild('parent_email'), equalTo(parentEmail.toLowerCase())));
+          if (s3.exists()) stuSnaps.push(s3);
+        } catch (e) {}
+      }
+
+      let rawLocalData: any = {};
+      try {
+        rawLocalData = JSON.parse(localStorage.getItem('bunyiKataStudentData') || '{}');
+      } catch (e) {}
+      const idMap: Record<string, string> = {};
+
+      stuSnaps.forEach(snap => {
+        snap.forEach((c: any) => {
+          const sVal = c.val();
+          const n = sVal?.nama ? sVal.nama.trim().toUpperCase() : '';
+          if (n && !GHOST_NAMES.includes(n.toLowerCase())) {
+            children.push(n);
+            idMap[n] = c.key;
+            const prev = rawLocalData[n] || {};
+            rawLocalData[n] = {
+              ...prev,
+              id: c.key,
+              nama: n,
+              avatar: sVal.avatar_url || prev.avatar || '/images/avatar/avatar1.png',
+              coins: sVal.total_bintang !== undefined ? sVal.total_bintang : (prev.coins || 0),
+              totalBintang: sVal.total_bintang !== undefined ? sVal.total_bintang : (prev.totalBintang || 0),
+              badges: Array.from(new Set([...(sVal.badges || []), ...(prev.badges || [])])),
+              scores: { ...(prev.scores || {}), ...(sVal.scores || {}) },
+              stars: { ...(prev.stars || {}), ...(sVal.stars || {}) },
+              latihan: { ...(prev.latihan || {}), ...(sVal.latihan || {}) },
+            };
           }
-        }
+        });
+      });
+
+      localStorage.setItem('bunyiKataStudentData', JSON.stringify(rawLocalData));
+      localStorage.setItem('bunyiKataStudentFirebaseIds', JSON.stringify(idMap));
+      if (typeof window !== 'undefined') {
+        (window as any).studentData = rawLocalData;
+        (window as any).studentFirebaseIds = idMap;
       }
     } catch (e) {}
 

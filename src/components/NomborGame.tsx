@@ -814,17 +814,14 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   const isMathMode = mode === 'tambah_nombor' || mode === 'tolak_nombor';
   const mathMode = mode === 'tambah_nombor' ? ('tambah' as const) : ('tolak' as const);
   const baseMathProgressKey = mode === 'tambah_nombor' ? 'bunyikata_math_tambah_v1' : 'bunyikata_math_tolak_v1';
-  
+
   const isUserAdminCheck = () => {
     if (typeof window === 'undefined') return false;
     return !!(
       (window as any).modAdminAktif ||
       (window as any).isAdminMode ||
       localStorage.getItem('bunyiKataUserRole') === 'admin' ||
-      (typeof document !== 'undefined' && (
-        document.body?.classList?.contains('admin-mode') ||
-        document.getElementById('teacher-banner-badge')?.innerText?.toUpperCase().includes('ADMIN')
-      )) ||
+      (typeof document !== 'undefined' && document.body?.classList?.contains('admin-mode')) ||
       (window as any).currentUser?.peranan === 'admin'
     );
   };
@@ -852,13 +849,13 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   })();
 
   const currentConfig = NOMBOR_MODE_CONFIGS[mode] || NOMBOR_MODE_CONFIGS.bilang_0_10;
-  const currentDataset: NomborItem[] = 
-    mode === 'tambah_nombor' 
-      ? TAMBAH_NOMBOR_DATABASE 
-      : mode === 'tolak_nombor' 
-        ? TOLAK_NOMBOR_DATABASE 
-        : mode === 'siri_nombor' 
-          ? SIRI_NOMBOR_DATABASE 
+  const currentDataset: NomborItem[] =
+    mode === 'tambah_nombor'
+      ? TAMBAH_NOMBOR_DATABASE
+      : mode === 'tolak_nombor'
+        ? TOLAK_NOMBOR_DATABASE
+        : mode === 'siri_nombor'
+          ? SIRI_NOMBOR_DATABASE
           : ASAS_0_10_DATABASE;
 
   const currentItem = currentDataset[selectedItemIndex] || currentDataset[0];
@@ -875,7 +872,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
     const handleSetMode = (e: any) => {
       const targetMode = (e.detail?.mode || (window as any).nomborMode) as string;
       const targetFilter = e.detail?.filter || (window as any).nomborFilter;
-      
+
       if (targetMode === 'tambah_nombor') {
         setMode('tambah_nombor');
       } else if (targetMode === 'tolak_nombor') {
@@ -1220,8 +1217,8 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
     return (
       <>
         <GlobalTerbaikPopup show={globalTerbaik} />
-        <Activity1PicturePuzzleNombor 
-          item={currentItem} 
+        <Activity1PicturePuzzleNombor
+          item={currentItem}
           mode={mode}
           isMobile={isMobile}
           onComplete={() => saveActivityDone(currentItem.id, 0)}
@@ -1232,8 +1229,8 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
             } else {
               setCurrentView('act2');
             }
-          }} 
-          onBack={() => setCurrentView('hub')} 
+          }}
+          onBack={() => setCurrentView('hub')}
         />
       </>
     );
@@ -2768,8 +2765,8 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: 'white',
-                    fontSize: isMobile 
-                      ? (item.digit.length >= 3 ? '1.95rem' : '2.4rem') 
+                    fontSize: isMobile
+                      ? (item.digit.length >= 3 ? '1.95rem' : '2.4rem')
                       : (item.digit.length >= 3 ? '2.85rem' : '3.4rem'),
                     letterSpacing: item.digit.length >= 3 ? (isMobile ? '-2px' : '-4px') : 'normal',
                     fontWeight: 900,

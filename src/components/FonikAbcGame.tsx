@@ -17,8 +17,19 @@ export interface FonikAbcGameProps {
   initialMode?: PhonicsMode;
 }
 
-export const VOWELS_SET = new Set(['a', 'e', 'é', 'i', 'o', 'u']);
+export const VOWELS_SET = new Set(['a', 'e', 'i', 'o', 'u']);
 export const isVowelLetter = (letter: string) => VOWELS_SET.has(letter.toLowerCase());
+
+export const getCleanDisplayLetter = (letter: string, isUpper: boolean = false): string => {
+  const l = (letter || '').trim();
+  if (l === 'é' || l === 'e taling' || l === 'e tailing' || l === 'e-taling') {
+    return isUpper ? 'E' : 'e';
+  }
+  if (l === 'É') {
+    return 'E';
+  }
+  return isUpper ? l.toUpperCase() : l;
+};
 
 export interface ModeConfig {
   mode: PhonicsMode;
@@ -687,10 +698,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
             (window as any).modAdminAktif ||
             (window as any).isAdminMode ||
             localStorage.getItem('bunyiKataUserRole') === 'admin' ||
-            (typeof document !== 'undefined' && (
-              document.body?.classList?.contains('admin-mode') ||
-              document.getElementById('teacher-banner-badge')?.innerText?.toUpperCase().includes('ADMIN')
-            )) ||
+            (typeof document !== 'undefined' && document.body?.classList?.contains('admin-mode')) ||
             (window as any).currentUser?.peranan === 'admin'
           );
         };
@@ -724,10 +732,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
       (window as any).modAdminAktif ||
       (window as any).isAdminMode ||
       localStorage.getItem('bunyiKataUserRole') === 'admin' ||
-      (typeof document !== 'undefined' && (
-        document.body?.classList?.contains('admin-mode') ||
-        document.getElementById('teacher-banner-badge')?.innerText?.toUpperCase().includes('ADMIN')
-      )) ||
+      (typeof document !== 'undefined' && document.body?.classList?.contains('admin-mode')) ||
       (window as any).currentUser?.peranan === 'admin'
     );
   };
@@ -2115,7 +2120,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
           }}>
             <div style={{
               height: '100%',
-              width: `${(PHONICS_DATABASE.filter(p => (mode !== 'kenali_huruf' || p.letter !== 'é') && progress[p.letter]?.every(Boolean)).length / (mode === 'kenali_huruf' ? 26 : PHONICS_DATABASE.length)) * 100}%`,
+              width: `${(PHONICS_DATABASE.filter(p => (mode === 'fonik_abc' || p.letter !== 'é') && progress[p.letter]?.every(Boolean)).length / (mode === 'fonik_abc' ? PHONICS_DATABASE.length : 26)) * 100}%`,
               backgroundColor: currentConfig.bannerProgressColor,
               borderRadius: '999px',
               transition: 'width 0.4s ease'
@@ -2205,6 +2210,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
       }}>
         {PHONICS_DATABASE.filter(item => {
           if (mode === 'kenali_huruf' && item.letter === 'é') return false;
+          if (mode === 'vokal_konsonan' && item.letter === 'é') return false;
           if (mode !== 'vokal_konsonan') return true;
           const isV = isVowelLetter(item.letter);
           return filterCategory === 'vokal' ? isV : !isV;

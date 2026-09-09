@@ -37,8 +37,8 @@ const CABARAN_DATA: Record<string, any[]> = {
     { type: 'dengar', audio: 'b', options: ['b', 'p', 'd', 't'], answer: 'b' },
     { type: 'dengar', audio: 'c', options: ['c', 's', 'k', 'z'], answer: 'c' },
     { type: 'dengar', audio: 'd', options: ['b', 'd', 'p', 'q'], answer: 'd' },
-    { type: 'dengar', audio: 'e', options: ['e', 'é', 'a', 'u'], answer: 'e' },
-    { type: 'dengar', audio: 'é', options: ['é', 'e', 'i', 'a'], answer: 'é' },
+    { type: 'dengar', audio: 'e', options: ['e', 'o', 'a', 'u'], answer: 'e' },
+    { type: 'dengar', audio: 'e-taling', options: ['e', 'i', 'a', 'u'], answer: 'e' },
     { type: 'dengar', audio: 'f', options: ['f', 'v', 'p', 'h'], answer: 'f' },
     { type: 'dengar', audio: 'g', options: ['g', 'j', 'q', 'k'], answer: 'g' },
     { type: 'dengar', audio: 'h', options: ['h', 'n', 'm', 'k'], answer: 'h' },
@@ -1834,7 +1834,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
         }
 
         if (typeof window !== 'undefined' && (window as any).logProgress) {
-          (window as any).logProgress(cabaranId, 'latihan', score, cabaranId);
+          (window as any).logProgress(cabaranId, 'latihan', score, cabaranId, stars);
         }
 
         // Award badge only if at least 3 activities in this map have 3 stars
@@ -1865,6 +1865,18 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
             if (allCompleted && !s.badges.includes('badge_master')) {
               s.badges.push('badge_master');
               changed = true;
+            }
+
+            if (typeof (window as any).kiraLencanaMurid === 'function') {
+              const earnedBadges = (window as any).kiraLencanaMurid(s);
+              if (Array.isArray(earnedBadges)) {
+                earnedBadges.forEach((bKey: string) => {
+                  if (!s.badges.includes(bKey)) {
+                    s.badges.push(bKey);
+                    changed = true;
+                  }
+                });
+              }
             }
 
             if (changed || stars > 0) {
@@ -1943,9 +1955,9 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
     if (cabaranId === 'fonik_abc' || cabaranId === 'fonik') {
       const clean = String(text).toLowerCase().trim();
       let soundPath = `/audio/fonik/fonik ${clean}.MP3`;
-      if (clean === 'é' || clean === 'e taling' || clean === 'e tailing') {
+      if (clean === 'é' || clean === 'e taling' || clean === 'e tailing' || clean === 'e-taling') {
         soundPath = '/audio/fonik/fonik e tailing.MP3';
-      } else if (clean === 'e' || clean === 'e pepet') {
+      } else if (clean === 'e' || clean === 'e pepet' || clean === 'e-pepet') {
         soundPath = '/audio/fonik/fonik e.MP3';
       } else if (clean === 'w') {
         soundPath = '/audio/abc/w.mp3';
@@ -2905,7 +2917,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
             : 'Cuba Lagi!';
 
           return (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999 }}>
               <motion.div
                 initial={{ scale: 0.8, opacity: 0, y: 30 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}

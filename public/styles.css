@@ -10604,7 +10604,7 @@ body.parent-mode #main-menu-mobile-header {
     }
 
     /* --- 1. Login Screen (Tablet / iPad) --- */
-    #login-screen {
+    #login-screen.active {
         padding: 24px 20px 40px !important;
         display: flex !important;
         flex-direction: column !important;

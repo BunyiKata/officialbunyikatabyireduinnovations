@@ -7,7 +7,8 @@ import {
   MODE_CONFIGS,
   PHONICS_DATABASE,
   isVowelLetter,
-  getPhonicsAudio
+  getPhonicsAudio,
+  getCleanDisplayLetter
 } from './FonikAbcGame';
 
 export const MAIN_APP_BG = 'transparent';
@@ -257,6 +258,9 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
     const [tappedLower, setTappedLower] = useState<boolean[]>([false, false, false, false, false, false]);
     const [tappedUpper, setTappedUpper] = useState<boolean[]>([false, false, false, false, false, false]);
 
+    const displayLower = getCleanDisplayLetter(phonics.letter, false);
+    const displayUpper = getCleanDisplayLetter(phonics.letter, true);
+
     const handleTapLower = (idx: number) => {
       playSound(phonics.soundAudio);
       setTappedLower(prev => {
@@ -319,17 +323,17 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
               const isVowel = isVowelLetter(phonics.letter);
               if (mode === 'kenali_huruf') {
                 return phase === 'lower'
-                  ? `Tekan setiap huruf kecil [${phonics.letter}]. Kenal bentuk dan sebut namanya.`
-                  : `Tekan setiap huruf besar [${phonics.uppercase}]. Kenal bentuk dan sebut namanya.`;
+                  ? `Tekan setiap huruf kecil [${displayLower}]. Kenal bentuk dan sebut namanya.`
+                  : `Tekan setiap huruf besar [${displayUpper}]. Kenal bentuk dan sebut namanya.`;
               }
               if (mode === 'vokal_konsonan') {
                 return phase === 'lower'
-                  ? `Huruf [${phonics.letter}] ialah huruf ${isVowel ? 'VOKAL 🔴' : 'KONSONAN 🔵'}. Tekan untuk dengar sebutan!`
-                  : `Huruf [${phonics.uppercase}] ialah huruf ${isVowel ? 'VOKAL 🔴' : 'KONSONAN 🔵'}. Tekan untuk dengar sebutan!`;
+                  ? `Huruf [${displayLower}] ialah huruf ${isVowel ? 'VOKAL 🔴' : 'KONSONAN 🔵'}. Tekan untuk dengar sebutan!`
+                  : `Huruf [${displayUpper}] ialah huruf ${isVowel ? 'VOKAL 🔴' : 'KONSONAN 🔵'}. Tekan untuk dengar sebutan!`;
               }
               return phase === 'lower'
-                ? `Tekan setiap ${phonics.letter}. Dengar, kemudian sebut bunyinya.`
-                : `Tekan setiap ${phonics.uppercase}. Dengar, kemudian sebut bunyinya.`;
+                ? `Tekan setiap ${displayLower}. Dengar, kemudian sebut bunyinya.`
+                : `Tekan setiap ${displayUpper}. Dengar, kemudian sebut bunyinya.`;
             })()}
           </div>
 
@@ -369,7 +373,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                     transition: 'background 0.25s'
                   }}
                 >
-                  {phonics.letter}
+                  {displayLower}
                 </motion.button>
               ))
             ) : (
@@ -398,7 +402,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                     transition: 'background 0.25s'
                   }}
                 >
-                  {phonics.uppercase}
+                  {displayUpper}
                 </motion.button>
               ))
             )}
@@ -419,6 +423,9 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
     const [merged1, setMerged1] = useState(false);
     const [merged2, setMerged2] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
+
+    const displayLower = getCleanDisplayLetter(phonics.letter, false);
+    const displayUpper = getCleanDisplayLetter(phonics.letter, true);
 
     // Auto advance when both rows are merged
     const handleConnectRow1 = () => {
@@ -490,9 +497,9 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
             }}
           >
             {mode === 'kenali_huruf'
-              ? `Tarik & cantumkan puzzle huruf kecil [${phonics.letter}] dengan huruf besar [${phonics.uppercase}]!`
+              ? `Tarik & cantumkan puzzle huruf kecil [${displayLower}] dengan huruf besar [${displayUpper}]!`
               : mode === 'vokal_konsonan'
-                ? `Cantumkan puzzle huruf [${phonics.letter}] (${isVowelLetter(phonics.letter) ? 'VOKAL' : 'KONSONAN'}) dengan [${phonics.uppercase}]!`
+                ? `Cantumkan puzzle huruf [${displayLower}] (${isVowelLetter(phonics.letter) ? 'VOKAL' : 'KONSONAN'}) dengan [${displayUpper}]!`
                 : 'Tarik dan cantumkan kedua-dua pasangan huruf di bawah!'}
           </div>
 
@@ -570,7 +577,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                     color: '#431407',
                     fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif'
                   }}>
-                    {phonics.uppercase}
+                    {displayUpper}
                   </div>
                   <div style={{
                     width: isMobile ? '95px' : '120px',
@@ -585,7 +592,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                     color: '#500724',
                     fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif'
                   }}>
-                    {phonics.letter}
+                    {displayLower}
                   </div>
                 </motion.div>
               ) : (
@@ -619,7 +626,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                       cursor: 'pointer'
                     }}
                   >
-                    {phonics.uppercase}
+                    {displayUpper}
                     <div style={{
                       position: 'absolute',
                       right: isMobile ? '-16px' : '-22px',
@@ -664,7 +671,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                       touchAction: 'none'
                     }}
                   >
-                    {phonics.letter}
+                    {displayLower}
                     <div style={{
                       position: 'absolute',
                       left: isMobile ? '-4px' : '-5px',
@@ -714,7 +721,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                     color: '#500724',
                     fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif'
                   }}>
-                    {phonics.letter}
+                    {displayLower}
                   </div>
                   <div style={{
                     width: isMobile ? '95px' : '150px',
@@ -729,7 +736,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                     color: '#431407',
                     fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif'
                   }}>
-                    {phonics.uppercase}
+                    {displayUpper}
                   </div>
                 </motion.div>
               ) : (
@@ -763,7 +770,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                       cursor: 'pointer'
                     }}
                   >
-                    {phonics.letter}
+                    {displayLower}
                     <div style={{
                       position: 'absolute',
                       right: isMobile ? '-16px' : '-22px',
@@ -808,7 +815,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                       touchAction: 'none'
                     }}
                   >
-                    {phonics.uppercase}
+                    {displayUpper}
                     <div style={{
                       position: 'absolute',
                       left: isMobile ? '-4px' : '-5px',
@@ -843,10 +850,13 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
     const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'];
     const spreadX = [6, 68, 22, 50, 12, 60, 36, 75];
 
+    const displayLower = getCleanDisplayLetter(phonics.letter, false);
+    const displayUpper = getCleanDisplayLetter(phonics.letter, true);
+
     const [bubbles, setBubbles] = useState(() => {
       return Array.from({ length: totalCount }, (_, i) => ({
         id: `bubble-${i}`,
-        letter: i % 2 === 0 ? phonics.letter : phonics.uppercase,
+        letter: i % 2 === 0 ? displayLower : displayUpper,
         popped: false,
         color: colors[i % colors.length],
         left: spreadX[i % spreadX.length],
@@ -927,10 +937,10 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
               }}
             >
               {mode === 'kenali_huruf'
-                ? <span>Pecahkan buih huruf kecil <strong>[{phonics.letter}]</strong> & besar <strong>[{phonics.uppercase}]</strong>!</span>
+                ? <span>Pecahkan buih huruf kecil <strong>[{displayLower}]</strong> & besar <strong>[{displayUpper}]</strong>!</span>
                 : mode === 'vokal_konsonan'
-                  ? <span>Pecahkan buih huruf <strong>{isVowelLetter(phonics.letter) ? 'Vokal' : 'Konsonan'} [{phonics.letter}]</strong>!</span>
-                  : <span>Pecahkan setiap buih <strong>[{phonics.letter}]</strong> & <strong>[{phonics.uppercase}]</strong>!</span>}
+                  ? <span>Pecahkan buih huruf <strong>{isVowelLetter(phonics.letter) ? 'Vokal' : 'Konsonan'} [{displayLower}]</strong>!</span>
+                  : <span>Pecahkan setiap buih <strong>[{displayLower}]</strong> & <strong>[{displayUpper}]</strong>!</span>}
             </div>
 
             {/* Counter Pill on Top-Right with black text */}
@@ -1036,6 +1046,9 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
     const currentConfig = MODE_CONFIGS[mode] || MODE_CONFIGS.kenali_huruf;
     const [phase, setPhase] = useState<1 | 2>(1);
 
+    const displayLower = getCleanDisplayLetter(phonics.letter, false);
+    const displayUpper = getCleanDisplayLetter(phonics.letter, true);
+
     // Bright vibrant colors matching main menu cards
     const brightPalettes = [
       '#10b981', '#3b82f6', '#ec4899', '#f59e0b', '#8b5cf6', '#06b6d4',
@@ -1043,7 +1056,10 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
     ];
 
     const generateCards = (targetChar: string, isUpper: boolean) => {
-      const distractors = PHONICS_DATABASE.filter(p => p.letter !== phonics.letter).map(p => isUpper ? p.uppercase : p.letter.toLowerCase());
+      // Exclude opposite e/é to ensure single clean e without confusion
+      const distractors = PHONICS_DATABASE
+        .filter(p => p.letter !== phonics.letter && p.letter !== 'é' && p.letter !== 'e')
+        .map(p => isUpper ? p.uppercase : p.letter.toLowerCase());
       const list = [
         { id: 't-1', letter: targetChar, isTarget: true, status: 'idle', color: brightPalettes[0] },
         { id: 't-2', letter: targetChar, isTarget: true, status: 'idle', color: brightPalettes[1] },
@@ -1054,14 +1070,14 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
         { id: 'd-1', letter: distractors[0] || 'B', isTarget: false, status: 'idle', color: brightPalettes[6] },
         { id: 'd-2', letter: distractors[1] || 'C', isTarget: false, status: 'idle', color: brightPalettes[7] },
         { id: 'd-3', letter: distractors[2] || 'D', isTarget: false, status: 'idle', color: brightPalettes[8] },
-        { id: 'd-4', letter: distractors[3] || 'E', isTarget: false, status: 'idle', color: brightPalettes[9] },
+        { id: 'd-4', letter: distractors[3] || 'M', isTarget: false, status: 'idle', color: brightPalettes[9] },
         { id: 'd-5', letter: distractors[4] || 'F', isTarget: false, status: 'idle', color: brightPalettes[10] },
-        { id: 'd-6', letter: distractors[5] || 'M', isTarget: false, status: 'idle', color: brightPalettes[11] }
+        { id: 'd-6', letter: distractors[5] || 'K', isTarget: false, status: 'idle', color: brightPalettes[11] }
       ];
       return list.sort(() => Math.random() - 0.5);
     };
 
-    const [cards, setCards] = useState(() => generateCards(phonics.letter.toLowerCase(), false));
+    const [cards, setCards] = useState(() => generateCards(displayLower, false));
 
     const targetTotal = cards.filter(c => c.isTarget).length;
     const poppedTargetCount = cards.filter(c => c.isTarget && c.status === 'correct').length;
@@ -1078,7 +1094,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
               // Pusingan 1 complete -> Switch to Pusingan 2 (Huruf Besar)
               setTimeout(() => {
                 setPhase(2);
-                setCards(generateCards(phonics.uppercase, true));
+                setCards(generateCards(displayUpper, true));
                 playSound(phonics.soundAudio);
               }, 400);
             } else {
@@ -1142,17 +1158,17 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                   const isVowel = isVowelLetter(phonics.letter);
                   if (mode === 'kenali_huruf') {
                     return phase === 1
-                      ? `Tekan setiap huruf kecil [${phonics.letter}] sahaja!`
-                      : `Tekan setiap huruf besar [${phonics.uppercase}] sahaja!`;
+                      ? `Tekan setiap huruf kecil [${displayLower}] sahaja!`
+                      : `Tekan setiap huruf besar [${displayUpper}] sahaja!`;
                   }
                   if (mode === 'vokal_konsonan') {
                     return phase === 1
-                      ? `Tekan huruf kecil [${phonics.letter}] (${isVowel ? 'Vokal' : 'Konsonan'}) sahaja!`
-                      : `Tekan huruf besar [${phonics.uppercase}] (${isVowel ? 'Vokal' : 'Konsonan'}) sahaja!`;
+                      ? `Tekan huruf kecil [${displayLower}] (${isVowel ? 'Vokal' : 'Konsonan'}) sahaja!`
+                      : `Tekan huruf besar [${displayUpper}] (${isVowel ? 'Vokal' : 'Konsonan'}) sahaja!`;
                   }
                   return phase === 1
-                    ? `Tekan setiap bunyi huruf kecil [${phonics.letter}] sahaja!`
-                    : `Tekan setiap bunyi huruf besar [${phonics.uppercase}] sahaja!`;
+                    ? `Tekan setiap bunyi huruf kecil [${displayLower}] sahaja!`
+                    : `Tekan setiap bunyi huruf besar [${displayUpper}] sahaja!`;
                 })()}
               </div>
 
@@ -1208,17 +1224,17 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                   const isVowel = isVowelLetter(phonics.letter);
                   if (mode === 'kenali_huruf') {
                     return phase === 1
-                      ? `Tekan setiap huruf kecil [${phonics.letter}] sahaja!`
-                      : `Tekan setiap huruf besar [${phonics.uppercase}] sahaja!`;
+                      ? `Tekan setiap huruf kecil [${displayLower}] sahaja!`
+                      : `Tekan setiap huruf besar [${displayUpper}] sahaja!`;
                   }
                   if (mode === 'vokal_konsonan') {
                     return phase === 1
-                      ? `Tekan huruf kecil [${phonics.letter}] (${isVowel ? 'Vokal' : 'Konsonan'}) sahaja!`
-                      : `Tekan huruf besar [${phonics.uppercase}] (${isVowel ? 'Vokal' : 'Konsonan'}) sahaja!`;
+                      ? `Tekan huruf kecil [${displayLower}] (${isVowel ? 'Vokal' : 'Konsonan'}) sahaja!`
+                      : `Tekan huruf besar [${displayUpper}] (${isVowel ? 'Vokal' : 'Konsonan'}) sahaja!`;
                   }
                   return phase === 1
-                    ? `Tekan setiap bunyi huruf kecil [${phonics.letter}] sahaja!`
-                    : `Tekan setiap bunyi huruf besar [${phonics.uppercase}] sahaja!`;
+                    ? `Tekan setiap bunyi huruf kecil [${displayLower}] sahaja!`
+                    : `Tekan setiap bunyi huruf besar [${displayUpper}] sahaja!`;
                 })()}
               </div>
 
@@ -1360,7 +1376,9 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
   // -------------------------------------------------------------
   export function Activity5MatchSound({ phonics, mode, isMobile, onNext, onBack, onComplete, triggerTerbaik }: PhonicsActivityProps) {
     const currentConfig = MODE_CONFIGS[mode] || MODE_CONFIGS.kenali_huruf;
-    const distractors = PHONICS_DATABASE.filter(p => p.letter !== phonics.letter);
+    const displayLower = getCleanDisplayLetter(phonics.letter, false);
+    // Exclude opposite e/é so there's never both e-taling and e-pepet in options
+    const distractors = PHONICS_DATABASE.filter(p => p.letter !== phonics.letter && p.letter !== 'é' && p.letter !== 'e');
 
     const [audioOptions] = useState(() => {
       const list = [
@@ -1497,10 +1515,10 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
             }}
           >
             {mode === 'kenali_huruf'
-              ? <span>Dengar sebutan nama huruf di kiri, tarik garisan ke huruf <strong>[{phonics.letter}]</strong>.</span>
+              ? <span>Dengar sebutan nama huruf di kiri, tarik garisan ke huruf <strong>[{displayLower}]</strong>.</span>
               : mode === 'vokal_konsonan'
-                ? <span>Dengar audio di kiri, tarik garisan sepadan ke huruf <strong>{isVowelLetter(phonics.letter) ? 'Vokal' : 'Konsonan'} [{phonics.letter}]</strong>.</span>
-                : <span>Dengar 3 audio di kiri, tarik garisan audio yang sepadan ke huruf <strong>[{phonics.letter}]</strong>.</span>}
+                ? <span>Dengar audio di kiri, tarik garisan sepadan ke huruf <strong>{isVowelLetter(phonics.letter) ? 'Vokal' : 'Konsonan'} [{displayLower}]</strong>.</span>
+                : <span>Dengar 3 audio di kiri, tarik garisan audio yang sepadan ke huruf <strong>[{displayLower}]</strong>.</span>}
           </div>
 
           <div
@@ -1678,7 +1696,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                   position: 'relative'
                 }}
               >
-                {phonics.letter}
+                {displayLower}
               </motion.button>
 
               <div
@@ -1719,6 +1737,9 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
       false, false, false
     ]);
     const [showPopupReveal, setShowPopupReveal] = useState(false);
+
+    const displayLower = getCleanDisplayLetter(phonics.letter, false);
+    const displayUpper = getCleanDisplayLetter(phonics.letter, true);
 
     const isAllOpen = openTiles.every(Boolean);
 
@@ -1782,12 +1803,12 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
               const isVowel = isVowelLetter(phonics.letter);
               if (mode === 'kenali_huruf') {
                 return isAllOpen
-                  ? `✨ Gambar rahsia ialah [${phonics.word.toUpperCase()}], bermula dengan huruf [${phonics.letter.toUpperCase()}]!`
+                  ? `✨ Gambar rahsia ialah [${phonics.word.toUpperCase()}], bermula dengan huruf [${displayUpper}]!`
                   : 'Buka setiap jubin untuk mendedahkan gambar & huruf awalan!';
               }
               if (mode === 'vokal_konsonan') {
                 return isAllOpen
-                  ? `✨ Gambar [${phonics.word.toUpperCase()}] bermula dengan huruf ${isVowel ? 'VOKAL 🔴' : 'KONSONAN 🔵'} [${phonics.letter.toUpperCase()}]!`
+                  ? `✨ Gambar [${phonics.word.toUpperCase()}] bermula dengan huruf ${isVowel ? 'VOKAL 🔴' : 'KONSONAN 🔵'} [${displayUpper}]!`
                   : 'Buka setiap jubin untuk kenali gambar & kategori huruf awalan!';
               }
               return isAllOpen
@@ -1865,7 +1886,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
                         color: '#451a03',
                         fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif'
                       }}>
-                        {phonics.letter}
+                        {displayLower}
                       </span>
                     </motion.button>
                   );
