@@ -5393,10 +5393,16 @@ export default function App() {
           <button
             className="neo-btn ticket-btn-red main-menu-btn-anim-1"
             onClick={(e) => {
+              if (typeof (window as any).playBubble === "function") (window as any).playBubble();
               if (typeof (window as any).bukaModalPilihPeta === "function") {
                 (window as any).bukaModalPilihPeta("belajar");
-              } else if (typeof bukaModalPilihPeta === "function") {
-                bukaModalPilihPeta("belajar");
+              } else {
+                // Fallback: cuba panggil selepas delay jika app-logic.js belum siap load
+                setTimeout(() => {
+                  if (typeof (window as any).bukaModalPilihPeta === "function") {
+                    (window as any).bukaModalPilihPeta("belajar");
+                  }
+                }, 500);
               }
             }}
           >
@@ -5405,10 +5411,15 @@ export default function App() {
           <button
             className="neo-btn ticket-btn-red main-menu-btn-anim-2"
             onClick={(e) => {
+              if (typeof (window as any).playBubble === "function") (window as any).playBubble();
               if (typeof (window as any).bukaModalPilihPeta === "function") {
                 (window as any).bukaModalPilihPeta("latihan");
-              } else if (typeof bukaModalPilihPeta === "function") {
-                bukaModalPilihPeta("latihan");
+              } else {
+                setTimeout(() => {
+                  if (typeof (window as any).bukaModalPilihPeta === "function") {
+                    (window as any).bukaModalPilihPeta("latihan");
+                  }
+                }, 500);
               }
             }}
           >

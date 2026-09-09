@@ -5406,6 +5406,12 @@ window.checkIsTrial = checkIsTrial;
 function bukaModalPilihPeta(mod) {
     modSemasa = mod;
     window.modSemasa = mod;
+
+    // Unlock AudioContext pada user gesture
+    try {
+        if (typeof playBubble === 'function') playBubble();
+    } catch (e) {}
+
     const isGuestOrTrial = typeof checkIsTrial === 'function' ? checkIsTrial() : false;
     if (!isGuestOrTrial) {
         window.userAccessLevel = 'pro';
@@ -5461,10 +5467,16 @@ function bukaModalPilihPeta(mod) {
         }
     });
 
-    document.getElementById('modal-pilih-peta').style.display = 'flex';
+    const modalPeta = document.getElementById('modal-pilih-peta');
+    if (modalPeta) {
+        modalPeta.style.display = 'flex';
+    } else {
+        console.warn('[BunyiKata] modal-pilih-peta tidak dijumpai dalam DOM.');
+    }
 }
 function tutupModal() {
-    document.getElementById('modal-pilih-peta').style.display = 'none';
+    const m = document.getElementById('modal-pilih-peta');
+    if (m) m.style.display = 'none';
 }
 
 // --- 3D MISI CARDS SWIPER ENGINE ---
