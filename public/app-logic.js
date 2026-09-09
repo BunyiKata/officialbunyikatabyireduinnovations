@@ -2126,7 +2126,32 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
             container.style.cssText = '';
         }
 
-        const childNamesRaw = isStudentLogin ? (window.studentNames || studentNames || []) : (window.parentChildNames || parentChildNames || []);
+        let childNamesRaw = [];
+        if (isStudentLogin) {
+            if (window.studentNames && Array.isArray(window.studentNames) && window.studentNames.length > 0) {
+                childNamesRaw = window.studentNames;
+            } else if (typeof studentNames !== 'undefined' && Array.isArray(studentNames) && studentNames.length > 0) {
+                childNamesRaw = studentNames;
+            } else {
+                try {
+                    childNamesRaw = JSON.parse(localStorage.getItem('bunyiKataStudentNames') || '[]');
+                } catch (e) {
+                    childNamesRaw = [];
+                }
+            }
+        } else {
+            if (window.parentChildNames && Array.isArray(window.parentChildNames) && window.parentChildNames.length > 0) {
+                childNamesRaw = window.parentChildNames;
+            } else if (typeof parentChildNames !== 'undefined' && Array.isArray(parentChildNames) && parentChildNames.length > 0) {
+                childNamesRaw = parentChildNames;
+            } else {
+                try {
+                    childNamesRaw = JSON.parse(localStorage.getItem('bunyiKataParentChildNames') || '[]');
+                } catch (e) {
+                    childNamesRaw = [];
+                }
+            }
+        }
         const childNames = childNamesRaw.slice().sort((a, b) => a.localeCompare(b, 'ms', { sensitivity: 'base' }));
 
         if (!isTukarDashboard && !isStudentLogin) {
@@ -5351,6 +5376,9 @@ function kembaliKePilihPeta() {
 }
 
 function checkIsTrial() {
+    if (localStorage.getItem('bunyiKataAccessLevel') === 'pro' || window.userAccessLevel === 'pro') {
+        return false;
+    }
     const role = localStorage.getItem('bunyiKataUserRole') || '';
     if (role === 'admin' || window.isAdminMode || window.modAdminAktif || (typeof document !== 'undefined' && document.body && document.body.classList.contains('admin-mode'))) {
         return false;
@@ -5365,13 +5393,20 @@ function checkIsTrial() {
         const access = localStorage.getItem('bunyiKataAccessLevel');
         return plan === 'percuma' || access === 'trial';
     }
+    // Jika murid aktif berdaftar (bukan Tetamu)
+    const activeStudent = window.namaMuridAktif || localStorage.getItem('muridAktif') || '';
+    if (activeStudent && activeStudent !== 'Tetamu' && activeStudent !== 'Murid') {
+        return false;
+    }
     // Jika tetamu / akaun percuma
     return true;
 }
 window.checkIsTrial = checkIsTrial;
 
 function bukaModalPilihPeta(mod) {
-    const isGuestOrTrial = typeof checkIsTrial === 'function' ? checkIsTrial() : true;
+    modSemasa = mod;
+    window.modSemasa = mod;
+    const isGuestOrTrial = typeof checkIsTrial === 'function' ? checkIsTrial() : false;
     if (!isGuestOrTrial) {
         window.userAccessLevel = 'pro';
         localStorage.setItem('bunyiKataAccessLevel', 'pro');
@@ -5386,7 +5421,6 @@ function bukaModalPilihPeta(mod) {
             window.setUserAccessLevel('trial');
         }
     }
-    modSemasa = mod;
     const petaTajuk = document.getElementById('modal-pilih-peta-tajuk');
     if (petaTajuk) {
         petaTajuk.innerText = mod === 'belajar' ? 'Pilih Peta Kembara' : 'Pilih Peta Latihan';
@@ -17159,9 +17193,9 @@ window.masukModMurid = function (namaAnak) {
 
     if (typeof updateProfilUI === 'function') updateProfilUI();
 
-    // Terus buka skrin profil murid seperti yang diminta oleh pengguna
+    // Buka Menu Utama murid supaya aktiviti Belajar dan Latihan sedia dipilih
     if (typeof window.paparSkrin === 'function') {
-        window.paparSkrin('profile-screen');
+        window.paparSkrin('main-menu-screen');
     }
 }
 window.flipFlashcard = flipFlashcard;
@@ -22596,7 +22630,8 @@ const PETA_INFO = {
 };
 
 window.pilihPeta = function (nomborPeta) {
-    const isTrial = typeof checkIsTrial === 'function' ? checkIsTrial() : (window.isGuestMode || window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial');
+    const currentMod = window.modSemasa || modSemasa || 'belajar';
+    const isTrial = typeof checkIsTrial === 'function' ? checkIsTrial() : false;
     if (isTrial && nomborPeta > 1) {
         if (typeof window.playBubble === 'function') window.playBubble();
         if (typeof window.openPakejProModal === 'function') {
@@ -22608,8 +22643,8 @@ window.pilihPeta = function (nomborPeta) {
     const pModal = document.getElementById('modal-pilih-peta');
     if (pModal) pModal.style.display = 'none';
 
-    // Only show popup for Latihan (Peta Cabaran). Skip for Belajar (Peta Kembara).
-    if (window.modSemasa === 'belajar') {
+    // Terus buka peta kembara untuk mod Belajar
+    if (currentMod === 'belajar') {
         window.bukaPeta(nomborPeta);
         return;
     }

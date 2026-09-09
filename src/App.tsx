@@ -30,6 +30,7 @@ import {
   getFamilyByCode,
   getStudentsByClassId,
   getStudentsByFamilyId,
+  getStudentsByCode,
   saveClassToFirebase,
   saveFamilyToFirebase,
   syncStudentToFirebase,
@@ -65,9 +66,11 @@ import {
   syncTeacherSessionFromFirebase,
   deleteStudentByNameFromFirebase,
   checkIsCodeAlreadyUsedInFirebase,
+  getStudentsByCode,
 } from "./services/firebaseService";
 
 if (typeof window !== "undefined") {
+  (window as any).getStudentsByCode = getStudentsByCode;
   (window as any).getStudentsForTeacher = getStudentsForTeacher;
   (window as any).syncTeacherSessionFromFirebase = syncTeacherSessionFromFirebase;
   (window as any).deleteStudentByNameFromFirebase = deleteStudentByNameFromFirebase;
@@ -94,6 +97,7 @@ if (typeof window !== "undefined") {
   (window as any).getFamilyByCode = getFamilyByCode;
   (window as any).getStudentsByClassId = getStudentsByClassId;
   (window as any).getStudentsByFamilyId = getStudentsByFamilyId;
+  (window as any).getStudentsByCode = getStudentsByCode;
   (window as any).updateClassInFirebase = updateClassInFirebase;
   (window as any).syncTeacherClasses = syncTeacherClasses;
   (window as any).updateProfileSubscriptionPlan = updateProfileSubscriptionPlan;
@@ -4265,7 +4269,9 @@ export default function App() {
               }}
             ></div>
           </div>
-          <span>Profil</span>
+          <span className="murid-info-name" style={{ maxWidth: "160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {activeStudentName && activeStudentName !== "Murid" && activeStudentName !== "Tetamu" ? activeStudentName : "Profil"}
+          </span>
         </button>
         <button
           className="nav-item bg-purple desktop-nav-only"
@@ -18358,6 +18364,32 @@ export default function App() {
                         setUserAccessLevel("pro");
                         localStorage.setItem("bunyiKataAccessLevel", "pro");
                         (window as any).userAccessLevel = "pro";
+                        (window as any).isGuestMode = false;
+
+                        try {
+                          let remoteStudents = await getStudentsByCode(entered);
+                          if (remoteStudents && remoteStudents.length > 0) {
+                            const names = remoteStudents.map((s: any) => s.nama);
+                            localStorage.setItem("bunyiKataStudentNames", JSON.stringify(names));
+                            (window as any).studentNames = names;
+                            const sData = (window as any).studentData || {};
+                            remoteStudents.forEach((s: any) => {
+                              sData[s.nama] = {
+                                coins: s.total_markah || 0,
+                                badges: s.badges || [],
+                                mapsUnlocked: s.mapsUnlocked || 4,
+                                avatar: s.avatar || "/images/avatar/avatar1.png",
+                              };
+                            });
+                            (window as any).studentData = sData;
+                            if (typeof (window as any).updateStudentDropdown === "function") {
+                              (window as any).updateStudentDropdown();
+                            }
+                          }
+                        } catch (syncErr) {
+                          console.warn("Fetch class students error:", syncErr);
+                        }
+
                         setIsCodeModalOpen(false);
                         const modal = document.getElementById("modal-pilih-anak");
                         if (modal) {
@@ -18385,6 +18417,32 @@ export default function App() {
                         setUserAccessLevel("pro");
                         localStorage.setItem("bunyiKataAccessLevel", "pro");
                         (window as any).userAccessLevel = "pro";
+                        (window as any).isGuestMode = false;
+
+                        try {
+                          let remoteChildren = await getStudentsByCode(entered);
+                          if (remoteChildren && remoteChildren.length > 0) {
+                            const names = remoteChildren.map((s: any) => s.nama);
+                            localStorage.setItem("bunyiKataParentChildNames", JSON.stringify(names));
+                            (window as any).parentChildNames = names;
+                            const sData = (window as any).studentData || {};
+                            remoteChildren.forEach((s: any) => {
+                              sData[s.nama] = {
+                                coins: s.total_markah || 0,
+                                badges: s.badges || [],
+                                mapsUnlocked: s.mapsUnlocked || 4,
+                                avatar: s.avatar || "/images/avatar/avatar1.png",
+                              };
+                            });
+                            (window as any).studentData = sData;
+                            if (typeof (window as any).updateStudentDropdown === "function") {
+                              (window as any).updateStudentDropdown();
+                            }
+                          }
+                        } catch (syncErr) {
+                          console.warn("Fetch family children error:", syncErr);
+                        }
+
                         setIsCodeModalOpen(false);
                         const modal = document.getElementById("modal-pilih-anak");
                         if (modal) {
@@ -18413,19 +18471,31 @@ export default function App() {
                             setUserAccessLevel("pro");
                             localStorage.setItem("bunyiKataAccessLevel", "pro");
                             (window as any).userAccessLevel = "pro";
+                            (window as any).isGuestMode = false;
                             localStorage.setItem("bunyiKataKodKelas", cls.kod_kelas);
                             localStorage.setItem("bunyiKataNamaSekolah", cls.nama_sekolah);
                             if (cls.nama_guru) localStorage.setItem("bunyiKataNamaGuru", cls.nama_guru);
                             if (cls.nama_kelas) localStorage.setItem("bunyiKataNamaKelas", cls.nama_kelas);
 
                             try {
-                              const remoteStudents = await getStudentsByClassId(cls.id);
+                              let remoteStudents = await getStudentsByCode(entered);
+                              if ((!remoteStudents || remoteStudents.length === 0) && cls.id) {
+                                remoteStudents = await getStudentsByClassId(cls.id);
+                              }
                               if (remoteStudents && remoteStudents.length > 0) {
                                 const names = remoteStudents.map((s: any) => s.nama);
                                 localStorage.setItem("bunyiKataStudentNames", JSON.stringify(names));
-                                if ((window as any).studentNames) {
-                                  (window as any).studentNames = names;
-                                }
+                                (window as any).studentNames = names;
+                                const sData = (window as any).studentData || {};
+                                remoteStudents.forEach((s: any) => {
+                                  sData[s.nama] = {
+                                    coins: s.total_markah || 0,
+                                    badges: s.badges || [],
+                                    mapsUnlocked: s.mapsUnlocked || 4,
+                                    avatar: s.avatar || "/images/avatar/avatar1.png",
+                                  };
+                                });
+                                (window as any).studentData = sData;
                                 if (typeof (window as any).updateStudentDropdown === "function") {
                                   (window as any).updateStudentDropdown();
                                 }
@@ -18447,7 +18517,7 @@ export default function App() {
                                 "Kod Berjaya Disahkan",
                                 `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
                                   <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
-                                  Akses Kelas PRO (${cls.nama_kelas || 'Kelas'}) berjaya disahkan!
+                                  Akses Kelas PRO (${cls.nama_kelas || 'Kelas'}) berjaya disahkan! Sila pilih profil murid.
                                 </p>`
                               );
                             }
@@ -18459,17 +18529,29 @@ export default function App() {
                             setUserAccessLevel("pro");
                             localStorage.setItem("bunyiKataAccessLevel", "pro");
                             (window as any).userAccessLevel = "pro";
+                            (window as any).isGuestMode = false;
                             localStorage.setItem("bunyiKataKodKeluarga", fam.kod_keluarga);
                             localStorage.setItem("bunyiKataNamaKeluarga", fam.nama_keluarga);
 
                             try {
-                              const remoteChildren = await getStudentsByFamilyId(fam.id);
+                              let remoteChildren = await getStudentsByCode(entered);
+                              if ((!remoteChildren || remoteChildren.length === 0) && fam.id) {
+                                remoteChildren = await getStudentsByFamilyId(fam.id);
+                              }
                               if (remoteChildren && remoteChildren.length > 0) {
                                 const names = remoteChildren.map((s: any) => s.nama);
                                 localStorage.setItem("bunyiKataParentChildNames", JSON.stringify(names));
-                                if ((window as any).parentChildNames) {
-                                  (window as any).parentChildNames = names;
-                                }
+                                (window as any).parentChildNames = names;
+                                const sData = (window as any).studentData || {};
+                                remoteChildren.forEach((s: any) => {
+                                  sData[s.nama] = {
+                                    coins: s.total_markah || 0,
+                                    badges: s.badges || [],
+                                    mapsUnlocked: s.mapsUnlocked || 4,
+                                    avatar: s.avatar || "/images/avatar/avatar1.png",
+                                  };
+                                });
+                                (window as any).studentData = sData;
                                 if (typeof (window as any).updateStudentDropdown === "function") {
                                   (window as any).updateStudentDropdown();
                                 }
@@ -18491,7 +18573,48 @@ export default function App() {
                                 "Kod Berjaya Disahkan",
                                 `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
                                   <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
-                                  Akses Keluarga PRO (${fam.nama_keluarga || 'Keluarga'}) berjaya disahkan!
+                                  Akses Keluarga PRO (${fam.nama_keluarga || 'Keluarga'}) berjaya disahkan! Sila pilih profil anak.
+                                </p>`
+                              );
+                            }
+                            return;
+                          }
+
+                          // Semakan langsung jika kod didaftarkan pada profil murid itu sendiri
+                          const directStudents = await getStudentsByCode(entered);
+                          if (directStudents && directStudents.length > 0) {
+                            setUserAccessLevel("pro");
+                            localStorage.setItem("bunyiKataAccessLevel", "pro");
+                            (window as any).userAccessLevel = "pro";
+                            (window as any).isGuestMode = false;
+                            const names = directStudents.map((s: any) => s.nama);
+                            localStorage.setItem("bunyiKataStudentNames", JSON.stringify(names));
+                            (window as any).studentNames = names;
+                            const sData = (window as any).studentData || {};
+                            directStudents.forEach((s: any) => {
+                              sData[s.nama] = {
+                                coins: s.total_markah || 0,
+                                badges: s.badges || [],
+                                mapsUnlocked: s.mapsUnlocked || 4,
+                                avatar: s.avatar || "/images/avatar/avatar1.png",
+                              };
+                            });
+                            (window as any).studentData = sData;
+
+                            setIsCodeModalOpen(false);
+                            const modal = document.getElementById("modal-pilih-anak");
+                            if (modal) {
+                              modal.style.display = "flex";
+                              if (typeof (window as any).bukaModalPilihAnak === "function") {
+                                (window as any).bukaModalPilihAnak(false, true);
+                              }
+                            }
+                            if (typeof (window as any).showAppModalAlert === "function") {
+                              (window as any).showAppModalAlert(
+                                "Kod Berjaya Disahkan",
+                                `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                                  <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                                  Akses PRO berjaya disahkan! Sila pilih profil murid.
                                 </p>`
                               );
                             }
@@ -21393,7 +21516,11 @@ export default function App() {
                     const mode = (window as any).pendingAppInfoMode || "murid";
                     (window as any).pendingAppInfoMode = "";
                     if (mode === "murid") {
-                      const isTrial = (window as any).isGuestMode || (window as any).userAccessLevel === "trial" || userAccessLevel === "trial" || localStorage.getItem("bunyiKataAccessLevel") === "trial";
+                      const currentActive = (window as any).namaMuridAktif || localStorage.getItem("muridAktif") || localStorage.getItem("bunyiKataCurrentMurid");
+                      const hasSelectedStudent = Boolean(currentActive && currentActive !== "Tetamu" && currentActive !== "Murid");
+                      const isExplicitTrial = (window as any).isGuestMode || localStorage.getItem("bunyiKataAccessLevel") === "trial";
+                      const isTrial = !hasSelectedStudent && isExplicitTrial;
+
                       if (isTrial) {
                         (window as any).isGuestMode = true;
                         (window as any).isAdminMode = false;
@@ -21404,11 +21531,14 @@ export default function App() {
                         setIsAdminActive(false);
                         localStorage.setItem("bunyiKataAccessLevel", "trial");
                         localStorage.removeItem("bunyiKataUserRole");
+                      } else if (hasSelectedStudent) {
+                        (window as any).namaMuridAktif = currentActive;
+                        (window as any).isGuestMode = false;
                       }
                       if (typeof (window as any).masukModMurid === "function") {
                         try {
                           (window as any).masukModMurid(
-                            isTrial ? "Tetamu" : ((window as any).namaMuridAktif || "Murid"),
+                            hasSelectedStudent ? currentActive : (isTrial ? "Tetamu" : "Murid"),
                           );
                         } catch (e) {
                           console.warn("masukModMurid notice:", e);

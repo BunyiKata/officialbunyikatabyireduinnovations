@@ -615,6 +615,34 @@ export async function getStudentsByFamilyId(familyId: string): Promise<StudentRe
 }
 
 /**
+ * Mendapatkan senarai murid berdasarkan kod kelas atau kod keluarga secara universal
+ */
+export async function getStudentsByCode(code: string): Promise<StudentRecord[]> {
+  if (!code) return [];
+  const clean = code.trim().toUpperCase();
+  const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
+  try {
+    const list: StudentRecord[] = [];
+    const snapAll = await get(ref(db, 'students'));
+    if (snapAll.exists()) {
+      snapAll.forEach(child => {
+        const val = child.val();
+        if (val && (
+          (val.kod_kelas && val.kod_kelas.toUpperCase() === clean) ||
+          (val.kod_keluarga && val.kod_keluarga.toUpperCase() === clean)
+        )) {
+          list.push({ id: child.key!, ...val });
+        }
+      });
+    }
+    return list.filter(s => s.nama && !GHOST_NAMES.includes(s.nama.trim().toLowerCase()));
+  } catch (err) {
+    console.error('[Firebase RTDB] Ralat getStudentsByCode:', err);
+    return [];
+  }
+}
+
+/**
  * Menyegerakkan rekod murid ke Firebase Realtime Database
  */
 export async function syncStudentToFirebase(student: {
