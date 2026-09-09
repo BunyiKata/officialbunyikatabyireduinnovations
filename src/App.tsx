@@ -17986,181 +17986,614 @@ export default function App() {
                       backgroundColor: "#168f81",
                       color: "white",
                       fontSize: "clamp(1.05rem, 3.8vw, 1.3rem)",
-                      margin: "0 auto 12px auto",
+                      margin: "0 auto 16px auto",
                       display: "inline-block",
                       pointerEvents: "none",
-                      padding: "8px 20px",
+                      padding: "8px 24px",
                       lineHeight: "1.2",
                       fontWeight: "900",
                       borderRadius: "12px",
                     }}
                   >
-                    PILIH CARA MULA
+                    Pilih Cara Mula
                   </div>
 
-                  <p
+                  {/* 1. Butang Cuba Percuma di ATAS (Reka bentuk menarik & menonjol tanpa teks panjang) */}
+                  <button
+                    type="button"
+                    className="neo-box"
                     style={{
-                      marginBottom: "18px",
-                      fontSize: "0.92rem",
-                      fontWeight: "bold",
-                      color: "#334155",
-                      lineHeight: "1.4",
+                      cursor: "pointer",
+                      padding: "12px 16px",
+                      backgroundColor: "#ffffff",
+                      border: "3px solid var(--color-dark, #10182f)",
+                      borderRadius: "16px",
+                      boxShadow: "0 4px 0 var(--color-dark, #10182f)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      width: "100%",
+                      transition: "transform 0.1s ease",
+                      marginBottom: "16px",
+                    }}
+                    onClick={() => {
+                      if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                      setIsEntryChoiceModalOpen(false);
+                      (window as any).isGuestMode = true;
+                      (window as any).isAdminMode = false;
+                      (window as any).modAdminAktif = false;
+                      (window as any).modGuruAktif = false;
+                      (window as any).modIbuBapaAktif = false;
+                      (window as any).userAccessLevel = "trial";
+                      (window as any).namaMuridAktif = "Tetamu";
+                      setUserAccessLevel("trial");
+                      setIsAdminActive(false);
+                      localStorage.setItem("bunyiKataAccessLevel", "trial");
+                      localStorage.removeItem("bunyiKataUserRole");
+                      localStorage.setItem("muridAktif", "Tetamu");
+                      localStorage.setItem("bunyiKataCurrentMurid", "Tetamu");
+
+                      if (typeof (window as any).resetTrialGuestProgress === "function") {
+                        (window as any).resetTrialGuestProgress();
+                      }
+
+                      if (typeof (window as any).bukaModalAppInfo === "function") {
+                        (window as any).bukaModalAppInfo("murid");
+                      } else if (typeof (window as any).masukModMurid === "function") {
+                        (window as any).masukModMurid("Tetamu");
+                      }
                     }}
                   >
-                    Pilih cara untuk memulakan pengembaraan membaca anda:
-                  </p>
-
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    {/* Pilihan 1: Ada Kod Kelas / Keluarga */}
-                    <button
-                      type="button"
-                      className="neo-box"
-                      style={{
-                        cursor: "pointer",
-                        padding: "14px 16px",
-                        backgroundColor: "#ffffff",
-                        border: "3px solid var(--color-dark, #10182f)",
-                        borderRadius: "16px",
-                        boxShadow: "0 4px 0 var(--color-dark, #10182f)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "14px",
-                        textAlign: "left",
-                        width: "100%",
-                      }}
-                      onClick={() => {
-                        if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                        setIsEntryChoiceModalOpen(false);
-                        setIsCodeModalOpen(true);
-                      }}
-                    >
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                       <div
                         style={{
-                          width: "46px",
-                          height: "46px",
-                          borderRadius: "12px",
-                          backgroundColor: "#f59e0b",
-                          border: "2px solid var(--color-dark, #10182f)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "#10182f",
-                          fontSize: "1.3rem",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <i className="fa-solid fa-key"></i>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <span style={{ fontWeight: "900", fontSize: "1rem", color: "#10182f" }}>
-                            Ada Kod Kelas / Keluarga
-                          </span>
-                          <span
-                            style={{
-                              fontSize: "0.68rem",
-                              fontWeight: "800",
-                              color: "#ffffff",
-                              backgroundColor: "#168f81",
-                              padding: "2px 6px",
-                              borderRadius: "6px",
-                            }}
-                          >
-                            PRO
-                          </span>
-                        </div>
-                        <div style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "2px" }}>
-                          Masukkan kod kelas atau keluarga untuk akses penuh &amp; rekod markah.
-                        </div>
-                      </div>
-                      <i className="fa-solid fa-chevron-right" style={{ color: "#94a3b8", fontSize: "1rem" }}></i>
-                    </button>
-
-                    {/* Pilihan 2: Cuba Percuma */}
-                    <button
-                      type="button"
-                      className="neo-box"
-                      style={{
-                        cursor: "pointer",
-                        padding: "14px 16px",
-                        backgroundColor: "#ffffff",
-                        border: "3px solid var(--color-dark, #10182f)",
-                        borderRadius: "16px",
-                        boxShadow: "0 4px 0 var(--color-dark, #10182f)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "14px",
-                        textAlign: "left",
-                        width: "100%",
-                      }}
-                      onClick={() => {
-                        setIsEntryChoiceModalOpen(false);
-                        (window as any).isGuestMode = true;
-                        (window as any).isAdminMode = false;
-                        (window as any).modAdminAktif = false;
-                        (window as any).modGuruAktif = false;
-                        (window as any).modIbuBapaAktif = false;
-                        (window as any).userAccessLevel = "trial";
-                        (window as any).namaMuridAktif = "Tetamu";
-                        setUserAccessLevel("trial");
-                        setIsAdminActive(false);
-                        localStorage.setItem("bunyiKataAccessLevel", "trial");
-                        localStorage.removeItem("bunyiKataUserRole");
-                        localStorage.setItem("muridAktif", "Tetamu");
-                        localStorage.setItem("bunyiKataCurrentMurid", "Tetamu");
-
-                        if (typeof (window as any).resetTrialGuestProgress === "function") {
-                          (window as any).resetTrialGuestProgress();
-                        }
-
-                        if (typeof (window as any).bukaModalAppInfo === "function") {
-                          (window as any).bukaModalAppInfo("murid");
-                        } else if (typeof (window as any).masukModMurid === "function") {
-                          (window as any).masukModMurid("Tetamu");
-                        }
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "46px",
-                          height: "46px",
+                          width: "44px",
+                          height: "44px",
                           borderRadius: "12px",
                           backgroundColor: "#10b981",
-                          border: "2px solid var(--color-dark, #10182f)",
+                          border: "2.5px solid var(--color-dark, #10182f)",
+                          boxShadow: "0 2px 0 var(--color-dark, #10182f)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           color: "#ffffff",
-                          fontSize: "1.3rem",
+                          fontSize: "1.25rem",
                           flexShrink: 0,
                         }}
                       >
                         <i className="fa-solid fa-play"></i>
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <span style={{ fontWeight: "900", fontSize: "1rem", color: "#10182f" }}>
-                            Cuba Percuma
-                          </span>
-                          <span
-                            style={{
-                              fontSize: "0.68rem",
-                              fontWeight: "800",
-                              color: "#ffffff",
-                              backgroundColor: "#f59e0b",
-                              padding: "2px 6px",
-                              borderRadius: "6px",
-                            }}
-                          >
-                            PERCUMA
-                          </span>
-                        </div>
-                        <div style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "2px" }}>
-                          Terus main aktiviti Asas Bunyi Kata tanpa perlukan sebarang kod pendaftaran.
-                        </div>
-                      </div>
-                      <i className="fa-solid fa-chevron-right" style={{ color: "#94a3b8", fontSize: "1rem" }}></i>
+                      <span
+                        style={{
+                          fontWeight: "900",
+                          fontSize: "1.15rem",
+                          color: "#10182f",
+                        }}
+                      >
+                        Cuba Percuma
+                      </span>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          fontWeight: "900",
+                          color: "#ffffff",
+                          backgroundColor: "#f59e0b",
+                          border: "1.5px solid var(--color-dark, #10182f)",
+                          boxShadow: "0 2px 0 var(--color-dark, #10182f)",
+                          padding: "3px 8px",
+                          borderRadius: "8px",
+                          letterSpacing: "0.5px",
+                        }}
+                      >
+                        PERCUMA
+                      </span>
+                      <i className="fa-solid fa-chevron-right" style={{ color: "var(--color-dark, #10182f)", fontSize: "1.1rem" }}></i>
+                    </div>
+                  </button>
+
+                  {/* Garis Pemisah dengan Teks Halus */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      margin: "0 0 14px 0",
+                    }}
+                  >
+                    <div style={{ flex: 1, borderTop: "2px dashed #cbd5e1" }}></div>
+                    <span
+                      style={{
+                        fontSize: "0.78rem",
+                        fontWeight: "800",
+                        color: "#64748b",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                      }}
+                    >
+                      Atau Akses Penuh
+                    </span>
+                    <div style={{ flex: 1, borderTop: "2px dashed #cbd5e1" }}></div>
+                  </div>
+
+                  {/* 2. Ruangan Masukkan Kod 8 Aksara */}
+                  <input
+                    type="text"
+                    className="neo-input century-gothic-font"
+                    style={{
+                      width: "100%",
+                      padding: "10px",
+                      marginBottom: "10px",
+                      textAlign: "center",
+                      fontSize: "1.15rem",
+                      fontWeight: "bold",
+                      letterSpacing: "1px",
+                    }}
+                    placeholder="Masukkan Kod 8 Aksara"
+                    maxLength={8}
+                    value={joinCode}
+                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  />
+
+                  {/* Butang Sahkan Kod */}
+                  <button
+                    className="neo-btn"
+                    style={{
+                      width: "100%",
+                      padding: "11px",
+                      color: "white",
+                      fontSize: "1.08rem",
+                      backgroundColor: "#168f81",
+                      fontWeight: "900",
+                      borderRadius: "12px",
+                      boxShadow: "0 4px 0 var(--color-dark, #10182f)",
+                      cursor: "pointer",
+                    }}
+                    onClick={async () => {
+                      if (!joinCode.trim()) {
+                        if (typeof (window as any).showAppModalAlert === "function") {
+                          (window as any).showAppModalAlert(
+                            "Kod Diperlukan",
+                            `<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">
+                              <i class="fa-solid fa-key" style="font-size:2.2rem; color:#ea580c; display:block; margin-bottom:8px;"></i>
+                              Sila masukkan kod kelas atau keluarga terlebih dahulu.
+                            </p>`
+                          );
+                        } else {
+                          alert("Sila masukkan kod kelas atau keluarga!");
+                        }
+                        return;
+                      }
+
+                      const kodKeluarga =
+                        localStorage.getItem("bunyiKataKodKeluarga") || "";
+                      const kodKelas =
+                        localStorage.getItem("bunyiKataKodKelas") || "";
+                      const kodKelas2 =
+                        localStorage.getItem("bunyiKataKodKelas2") || "";
+                      const kodAdmin =
+                        localStorage.getItem("bunyiKataKodAdmin") || "";
+
+                      const entered = joinCode.trim().toUpperCase();
+                      if (
+                        entered === "ADMIN" ||
+                        entered === "ADMIN#01" ||
+                        entered === "ADMIN123" ||
+                        entered === "ADMIN@123" ||
+                        (kodAdmin && entered === kodAdmin.toUpperCase())
+                      ) {
+                        setIsEntryChoiceModalOpen(false);
+                        setIsCodeModalOpen(false);
+                        setUserAccessLevel("pro");
+                        localStorage.setItem("bunyiKataAccessLevel", "pro");
+                        localStorage.setItem("bunyiKataUserRole", "admin");
+                        (window as any).userAccessLevel = "pro";
+                        (window as any).modAdminAktif = true;
+                        (window as any).isAdminMode = true;
+                        if (typeof (window as any).masukModAdmin === "function") {
+                          (window as any).masukModAdmin();
+                        }
+                        if (typeof (window as any).showAppModalAlert === "function") {
+                          (window as any).showAppModalAlert(
+                            "Akses Admin Berjaya",
+                            `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                              <i class="fa-solid fa-user-shield" style="font-size:2.2rem; color:#ea580c; display:block; margin-bottom:8px;"></i>
+                              Selamat datang ke Panel Kawalan Pentadbir Bunyi Kata!
+                            </p>`
+                          );
+                        }
+                      } else if (
+                        (kodKelas && entered === kodKelas.toUpperCase()) ||
+                        (kodKelas2 && entered === kodKelas2.toUpperCase())
+                      ) {
+                        setUserAccessLevel("pro");
+                        localStorage.setItem("bunyiKataAccessLevel", "pro");
+                        (window as any).userAccessLevel = "pro";
+                        (window as any).isGuestMode = false;
+
+                        try {
+                          let remoteStudents = await getStudentsByCode(entered);
+                          if (remoteStudents && remoteStudents.length > 0) {
+                            const names = remoteStudents.map((s: any) => s.nama);
+                            localStorage.setItem("bunyiKataStudentNames", JSON.stringify(names));
+                            (window as any).studentNames = names;
+                            const sData = (window as any).studentData || {};
+                            remoteStudents.forEach((s: any) => {
+                              sData[s.nama] = {
+                                coins: s.total_markah || 0,
+                                badges: s.badges || [],
+                                mapsUnlocked: s.mapsUnlocked || 4,
+                                avatar: s.avatar || "/images/avatar/avatar1.png",
+                              };
+                            });
+                            (window as any).studentData = sData;
+                            if (typeof (window as any).updateStudentDropdown === "function") {
+                              (window as any).updateStudentDropdown();
+                            }
+                          }
+                        } catch (syncErr) {
+                          console.warn("Fetch class students error:", syncErr);
+                        }
+
+                        setIsEntryChoiceModalOpen(false);
+                        setIsCodeModalOpen(false);
+                        const modal = document.getElementById("modal-pilih-anak");
+                        if (modal) {
+                          modal.style.display = "flex";
+                          if (
+                            typeof (window as any).bukaModalPilihAnak ===
+                            "function"
+                          ) {
+                            (window as any).bukaModalPilihAnak(false, true); // isStudentLogin
+                          }
+                        }
+                        if (typeof (window as any).showAppModalAlert === "function") {
+                          (window as any).showAppModalAlert(
+                            "Kod Berjaya Disahkan",
+                            `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                              <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                              Akses Kelas PRO berjaya disahkan! Sila pilih profil murid.
+                            </p>`
+                          );
+                        }
+                      } else if (
+                        kodKeluarga &&
+                        entered === kodKeluarga.toUpperCase()
+                      ) {
+                        setUserAccessLevel("pro");
+                        localStorage.setItem("bunyiKataAccessLevel", "pro");
+                        (window as any).userAccessLevel = "pro";
+                        (window as any).isGuestMode = false;
+
+                        try {
+                          let remoteChildren = await getStudentsByCode(entered);
+                          if (remoteChildren && remoteChildren.length > 0) {
+                            const names = remoteChildren.map((s: any) => s.nama);
+                            localStorage.setItem("bunyiKataParentChildNames", JSON.stringify(names));
+                            (window as any).parentChildNames = names;
+                            const sData = (window as any).studentData || {};
+                            remoteChildren.forEach((s: any) => {
+                              sData[s.nama] = {
+                                coins: s.total_markah || 0,
+                                badges: s.badges || [],
+                                mapsUnlocked: s.mapsUnlocked || 4,
+                                avatar: s.avatar || "/images/avatar/avatar1.png",
+                              };
+                            });
+                            (window as any).studentData = sData;
+                            if (typeof (window as any).updateStudentDropdown === "function") {
+                              (window as any).updateStudentDropdown();
+                            }
+                          }
+                        } catch (syncErr) {
+                          console.warn("Fetch family children error:", syncErr);
+                        }
+
+                        setIsEntryChoiceModalOpen(false);
+                        setIsCodeModalOpen(false);
+                        const modal = document.getElementById("modal-pilih-anak");
+                        if (modal) {
+                          modal.style.display = "flex";
+                          if (
+                            typeof (window as any).bukaModalPilihAnak ===
+                            "function"
+                          ) {
+                            (window as any).bukaModalPilihAnak(false, false); // normal mode (Mod Ibu Bapa)
+                          }
+                        }
+                        if (typeof (window as any).showAppModalAlert === "function") {
+                          (window as any).showAppModalAlert(
+                            "Kod Berjaya Disahkan",
+                            `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                              <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                              Akses Keluarga PRO berjaya disahkan! Sila pilih profil anak.
+                            </p>`
+                          );
+                        }
+                      } else {
+                        // Semakan langsung dengan Firebase Realtime Database
+                        try {
+                          const cls = await getClassByCode(entered);
+                          if (cls) {
+                            setUserAccessLevel("pro");
+                            localStorage.setItem("bunyiKataAccessLevel", "pro");
+                            (window as any).userAccessLevel = "pro";
+                            (window as any).isGuestMode = false;
+                            localStorage.setItem("bunyiKataKodKelas", cls.kod_kelas);
+                            localStorage.setItem("bunyiKataNamaSekolah", cls.nama_sekolah);
+                            if (cls.nama_guru) localStorage.setItem("bunyiKataNamaGuru", cls.nama_guru);
+                            if (cls.nama_kelas) localStorage.setItem("bunyiKataNamaKelas", cls.nama_kelas);
+
+                            try {
+                              let remoteStudents = await getStudentsByCode(entered);
+                              if ((!remoteStudents || remoteStudents.length === 0) && cls.id) {
+                                remoteStudents = await getStudentsByClassId(cls.id);
+                              }
+                              if (remoteStudents && remoteStudents.length > 0) {
+                                const names = remoteStudents.map((s: any) => s.nama);
+                                localStorage.setItem("bunyiKataStudentNames", JSON.stringify(names));
+                                (window as any).studentNames = names;
+                                const sData = (window as any).studentData || {};
+                                remoteStudents.forEach((s: any) => {
+                                  sData[s.nama] = {
+                                    coins: s.total_markah || 0,
+                                    badges: s.badges || [],
+                                    mapsUnlocked: s.mapsUnlocked || 4,
+                                    avatar: s.avatar || "/images/avatar/avatar1.png",
+                                  };
+                                });
+                                (window as any).studentData = sData;
+                                if (typeof (window as any).updateStudentDropdown === "function") {
+                                  (window as any).updateStudentDropdown();
+                                }
+                              }
+                            } catch (syncErr) {
+                              console.warn("Fetch class students notice:", syncErr);
+                            }
+
+                            setIsEntryChoiceModalOpen(false);
+                            setIsCodeModalOpen(false);
+                            const modal = document.getElementById("modal-pilih-anak");
+                            if (modal) {
+                              modal.style.display = "flex";
+                              if (typeof (window as any).bukaModalPilihAnak === "function") {
+                                (window as any).bukaModalPilihAnak(false, true);
+                              }
+                            }
+                            if (typeof (window as any).showAppModalAlert === "function") {
+                              (window as any).showAppModalAlert(
+                                "Kod Berjaya Disahkan",
+                                `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                                  <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                                  Akses Kelas PRO (${cls.nama_kelas || 'Kelas'}) berjaya disahkan! Sila pilih profil murid.
+                                </p>`
+                              );
+                            }
+                            return;
+                          }
+
+                          const fam = await getFamilyByCode(entered);
+                          if (fam) {
+                            setUserAccessLevel("pro");
+                            localStorage.setItem("bunyiKataAccessLevel", "pro");
+                            (window as any).userAccessLevel = "pro";
+                            (window as any).isGuestMode = false;
+                            localStorage.setItem("bunyiKataKodKeluarga", fam.kod_keluarga);
+                            localStorage.setItem("bunyiKataNamaKeluarga", fam.nama_keluarga);
+
+                            try {
+                              let remoteChildren = await getStudentsByCode(entered);
+                              if ((!remoteChildren || remoteChildren.length === 0) && fam.id) {
+                                remoteChildren = await getStudentsByFamilyId(fam.id);
+                              }
+                              if (remoteChildren && remoteChildren.length > 0) {
+                                const names = remoteChildren.map((s: any) => s.nama);
+                                localStorage.setItem("bunyiKataParentChildNames", JSON.stringify(names));
+                                (window as any).parentChildNames = names;
+                                const sData = (window as any).studentData || {};
+                                remoteChildren.forEach((s: any) => {
+                                  sData[s.nama] = {
+                                    coins: s.total_markah || 0,
+                                    badges: s.badges || [],
+                                    mapsUnlocked: s.mapsUnlocked || 4,
+                                    avatar: s.avatar || "/images/avatar/avatar1.png",
+                                  };
+                                });
+                                (window as any).studentData = sData;
+                                if (typeof (window as any).updateStudentDropdown === "function") {
+                                  (window as any).updateStudentDropdown();
+                                }
+                              }
+                            } catch (syncErr) {
+                              console.warn("Fetch family children notice:", syncErr);
+                            }
+
+                            setIsEntryChoiceModalOpen(false);
+                            setIsCodeModalOpen(false);
+                            const modal = document.getElementById("modal-pilih-anak");
+                            if (modal) {
+                              modal.style.display = "flex";
+                              if (typeof (window as any).bukaModalPilihAnak === "function") {
+                                (window as any).bukaModalPilihAnak(false, false);
+                              }
+                            }
+                            if (typeof (window as any).showAppModalAlert === "function") {
+                              (window as any).showAppModalAlert(
+                                "Kod Berjaya Disahkan",
+                                `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                                  <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                                  Akses Keluarga PRO (${fam.nama_keluarga || 'Keluarga'}) berjaya disahkan! Sila pilih profil anak.
+                                </p>`
+                              );
+                            }
+                            return;
+                          }
+
+                          // Semakan langsung jika kod didaftarkan pada profil murid itu sendiri
+                          const directStudents = await getStudentsByCode(entered);
+                          if (directStudents && directStudents.length > 0) {
+                            setUserAccessLevel("pro");
+                            localStorage.setItem("bunyiKataAccessLevel", "pro");
+                            (window as any).userAccessLevel = "pro";
+                            (window as any).isGuestMode = false;
+                            const names = directStudents.map((s: any) => s.nama);
+                            localStorage.setItem("bunyiKataStudentNames", JSON.stringify(names));
+                            (window as any).studentNames = names;
+                            const sData = (window as any).studentData || {};
+                            directStudents.forEach((s: any) => {
+                              sData[s.nama] = {
+                                coins: s.total_markah || 0,
+                                badges: s.badges || [],
+                                mapsUnlocked: s.mapsUnlocked || 4,
+                                avatar: s.avatar || "/images/avatar/avatar1.png",
+                              };
+                            });
+                            (window as any).studentData = sData;
+
+                            setIsEntryChoiceModalOpen(false);
+                            setIsCodeModalOpen(false);
+                            const modal = document.getElementById("modal-pilih-anak");
+                            if (modal) {
+                              modal.style.display = "flex";
+                              if (typeof (window as any).bukaModalPilihAnak === "function") {
+                                (window as any).bukaModalPilihAnak(false, true);
+                              }
+                            }
+                            if (typeof (window as any).showAppModalAlert === "function") {
+                              (window as any).showAppModalAlert(
+                                "Kod Berjaya Disahkan",
+                                `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                                  <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                                  Akses PRO berjaya disahkan! Sila pilih profil murid.
+                                </p>`
+                              );
+                            }
+                            return;
+                          }
+                        } catch (checkErr) {
+                          console.warn("Database code validation warning:", checkErr);
+                        }
+
+                        if (typeof (window as any).showAppModalAlert === "function") {
+                          (window as any).showAppModalAlert(
+                            "Kod Tidak Sah",
+                            `<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">
+                              <i class="fa-solid fa-circle-exclamation" style="font-size:2.2rem; color:#ef4444; display:block; margin-bottom:8px;"></i>
+                              Kod tidak sah. Sila pastikan kod 8 aksara yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.
+                            </p>`
+                          );
+                        } else {
+                          alert("Kod tidak sah. Sila pastikan kod 8 aksara yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.");
+                        }
+                      }
+                    }}
+                  >
+                    Sahkan Kod
+                  </button>
+
+                  {/* Nota ringkas di bawah ruangan kod */}
+                  <div
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "#64748b",
+                      marginTop: "7px",
+                      textAlign: "center",
+                    }}
+                  >
+                    * Kod 8 aksara unik (cth: <strong style={{ color: "#334155" }}>ABCD@123</strong>)
+                  </div>
+
+                  {/* Garis Pemisah Putus-putus */}
+                  <div
+                    style={{
+                      borderTop: "2px dashed #cbd5e1",
+                      margin: "16px 0 14px 0",
+                    }}
+                  ></div>
+
+                  {/* 2 Butang Mod: Guru & Ibubapa Bersebelahan */}
+                  <div
+                    style={{ display: "flex", gap: "10px", marginBottom: "14px" }}
+                  >
+                    <button
+                      className="neo-btn bg-orange"
+                      style={{
+                        flex: 1,
+                        padding: "10px",
+                        fontSize: "0.95rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        color: "white",
+                        fontWeight: "bold",
+                      }}
+                      onClick={() => {
+                        setIsEntryChoiceModalOpen(false);
+                        setPendingLoginMode("guru");
+                        setAuthModalTab("login");
+                        setAuthModalError("");
+                        setShowLoginModal(true);
+                        setLoginEmail("");
+                        setLoginPassword("");
+                        setRegGuruNama("");
+                        setRegGuruSekolah("");
+                      }}
+                    >
+                      <i className="fa-solid fa-person-chalkboard"></i> Guru
                     </button>
+                    <button
+                      className="neo-btn bg-blue"
+                      style={{
+                        flex: 1,
+                        padding: "10px",
+                        fontSize: "0.95rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        color: "white",
+                        fontWeight: "bold",
+                      }}
+                      onClick={() => {
+                        setIsEntryChoiceModalOpen(false);
+                        setPendingLoginMode("ibubapa");
+                        setAuthModalTab("login");
+                        setAuthModalError("");
+                        setShowLoginModal(true);
+                        setLoginEmail("");
+                        setLoginPassword("");
+                        setRegNamaKeluarga("");
+                      }}
+                    >
+                      <i className="fa-solid fa-users"></i> Ibubapa
+                    </button>
+                  </div>
+
+                  {/* Teks Belum Ada Versi Pro */}
+                  <div
+                    style={{
+                      fontSize: "0.84rem",
+                      color: "#475569",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Belum ada versi Pro?{" "}
+                    <span
+                      style={{
+                        color: "#0284c7",
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setIsEntryChoiceModalOpen(false);
+                        setIsModeMenuOpen(true);
+                      }}
+                    >
+                      dapatkan di sini
+                    </span>
                   </div>
                 </motion.div>
               </motion.div>
