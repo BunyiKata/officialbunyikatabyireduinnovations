@@ -66,7 +66,6 @@ import {
   syncTeacherSessionFromFirebase,
   deleteStudentByNameFromFirebase,
   checkIsCodeAlreadyUsedInFirebase,
-  getStudentsByCode,
 } from "./services/firebaseService";
 
 if (typeof window !== "undefined") {
