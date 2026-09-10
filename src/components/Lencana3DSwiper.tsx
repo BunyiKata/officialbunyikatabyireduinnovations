@@ -88,6 +88,13 @@ export function Lencana3DSwiper() {
       }
     }
 
+    if (data && (!data.badges || data.badges.length === 0) && typeof (window as any).kiraLencanaMurid === 'function') {
+      const earned = (window as any).kiraLencanaMurid(data);
+      if (Array.isArray(earned) && earned.length > 0) {
+        data.badges = earned;
+      }
+    }
+
     const calculatedBadges = (typeof (window as any).kiraLencanaMurid === 'function' && data) ? (window as any).kiraLencanaMurid(data) : [];
     const status: Record<string, boolean> = {};
 
@@ -133,13 +140,32 @@ export function Lencana3DSwiper() {
 
   React.useEffect(() => {
     checkBadgeStatus();
+
+    // Auto retry checking badge status in case of asynchronous Firebase data hydration on refresh
+    const t1 = setTimeout(checkBadgeStatus, 150);
+    const t2 = setTimeout(checkBadgeStatus, 500);
+    const t3 = setTimeout(checkBadgeStatus, 1200);
+    const t4 = setTimeout(checkBadgeStatus, 2500);
+
     const handleUpdate = () => checkBadgeStatus();
     window.addEventListener("kemaskini-profil", handleUpdate);
     window.addEventListener("storage", handleUpdate);
+    window.addEventListener("papar-skrin", handleUpdate);
+
+    // Watch when #lencana-screen becomes active
+    const screen = document.getElementById("lencana-screen");
+    let observer: MutationObserver | null = null;
+    if (screen) {
+      observer = new MutationObserver(() => {
+        if (screen.classList.contains("active")) {
+          checkBadgeStatus();
+        }
+      });
+      observer.observe(screen, { attributes: true, attributeFilter: ["class"] });
+    }
 
     // Auto popup maklumat lencana setiap kali masuk skrin Lencana Saya
     const timer = setTimeout(() => {
-      const screen = document.getElementById("lencana-screen");
       if (screen && screen.classList.contains("active")) {
         if (typeof (window as any).bukaModalInfoLencana === "function") {
           (window as any).bukaModalInfoLencana();
@@ -148,9 +174,15 @@ export function Lencana3DSwiper() {
     }, 350);
 
     return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+      clearTimeout(timer);
+      if (observer) observer.disconnect();
       window.removeEventListener("kemaskini-profil", handleUpdate);
       window.removeEventListener("storage", handleUpdate);
-      clearTimeout(timer);
+      window.removeEventListener("papar-skrin", handleUpdate);
     };
   }, []);
 

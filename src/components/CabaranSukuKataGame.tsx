@@ -62,12 +62,16 @@ const CABARAN_DATA: Record<string, any[]> = {
     { type: 'padan', image: '💊', imageText: 'ubat', options: ['u', 'a', 'i', 'o'], answer: 'u' }
   ],
   vokal_konsonan: [
-    { type: 'dengar', audio: 'a', options: ['a', 'b', 'c', 'd'], answer: 'a' },
-    { type: 'dengar', audio: 'b', options: ['d', 'b', 'p', 'q'], answer: 'b' },
-    { type: 'dengar', audio: 'e', options: ['i', 'a', 'e', 'u'], answer: 'e' },
-    { type: 'dengar', audio: 'g', options: ['j', 'g', 'q', 'k'], answer: 'g' },
-    { type: 'dengar', audio: 'i', options: ['e', 'i', 'a', 'o'], answer: 'i' },
-    { type: 'dengar', audio: 'm', options: ['n', 'w', 'm', 'v'], answer: 'm' }
+    { type: 'padan', image: '/images/sukukata/ayam.png', imageText: 'ayam', audio: 'ayam', answer: 'a', options: ['a', 'b', 'c', 'd'] },
+    { type: 'padan', image: '/images/sukukata/epal.png', imageText: 'epal', audio: 'epal', answer: 'e', options: ['e', 'i', 'o', 'u'] },
+    { type: 'padan', image: '/images/sukukata/ikan.png', imageText: 'ikan', audio: 'ikan', answer: 'i', options: ['i', 'a', 'e', 'o'] },
+    { type: 'padan', image: '/images/sukukata/otak.png', imageText: 'otak', audio: 'otak', answer: 'o', options: ['o', 'u', 'e', 'a'] },
+    { type: 'padan', image: '/images/sukukata/ular.png', imageText: 'ular', audio: 'ular', answer: 'u', options: ['u', 'a', 'i', 'o'] },
+    { type: 'padan', image: '/images/sukukata/beca.png', imageText: 'beca', audio: 'beca', answer: 'b', options: ['b', 'd', 'p', 't'] },
+    { type: 'padan', image: '/images/sukukata/cawan.png', imageText: 'cawan', audio: 'cawan', answer: 'c', options: ['c', 's', 'k', 'z'] },
+    { type: 'padan', image: '/images/sukukata/gajah.png', imageText: 'gajah', audio: 'gajah', answer: 'g', options: ['g', 'j', 'k', 'q'] },
+    { type: 'padan', image: '/images/sukukata/mata.png', imageText: 'mata', audio: 'mata', answer: 'm', options: ['m', 'n', 'w', 'v'] },
+    { type: 'padan', image: '/images/sukukata/tali.png', imageText: 'tali', audio: 'tali', answer: 't', options: ['t', 'd', 'b', 'l'] }
   ],
   pengenalan_nombor: [
     { type: 'padan', image: '0', imageText: '', options: ['0', '1', '2', '3'], answer: '0' },
@@ -197,7 +201,157 @@ const MODULE_FLASHCARDS: Record<string, Array<{ front: string; back: string; ico
   ]
 };
 
+const VOKAL_QUESTION_ITEMS: Record<string, Array<{ word: string; letter: string; image: string }>> = {
+  a: [
+    { word: 'ayam', letter: 'a', image: '/images/sukukata/ayam.png' },
+    { word: 'api', letter: 'a', image: '/images/sukukata/api.png' },
+    { word: 'alu', letter: 'a', image: '/images/sukukata/alu.png' }
+  ],
+  e: [
+    { word: 'epal', letter: 'e', image: '/images/sukukata/epal.png' },
+    { word: 'enam', letter: 'e', image: '/images/sukukata/enam.png' }
+  ],
+  i: [
+    { word: 'ikan', letter: 'i', image: '/images/sukukata/ikan.png' },
+    { word: 'itik', letter: 'i', image: '/images/sukukata/itik.png' },
+    { word: 'ibu', letter: 'i', image: '/images/sukukata/ibu.png' },
+    { word: 'isi', letter: 'i', image: '/images/sukukata/isi.png' }
+  ],
+  o: [
+    { word: 'otak', letter: 'o', image: '/images/sukukata/otak.png' },
+    { word: 'obor', letter: 'o', image: '/images/sukukata/obor.png' },
+    { word: 'oren', letter: 'o', image: '/images/sukukata/oren.png' }
+  ],
+  u: [
+    { word: 'ular', letter: 'u', image: '/images/sukukata/ular.png' },
+    { word: 'ulat', letter: 'u', image: '/images/sukukata/ulat.png' },
+    { word: 'ubi', letter: 'u', image: '/images/sukukata/ubi.png' },
+    { word: 'ulu', letter: 'u', image: '/images/sukukata/ulu.png' }
+  ]
+};
+
+const KONSONAN_QUESTION_ITEMS: Record<string, Array<{ word: string; letter: string; image: string }>> = {
+  b: [
+    { word: 'beca', letter: 'b', image: '/images/sukukata/beca.png' },
+    { word: 'botol', letter: 'b', image: '/images/sukukata/botol.png' },
+    { word: 'baldi', letter: 'b', image: '/images/sukukata/baldi.png' }
+  ],
+  c: [
+    { word: 'cawan', letter: 'c', image: '/images/sukukata/cawan.png' },
+    { word: 'ciku', letter: 'c', image: '/images/sukukata/ciku.png' },
+    { word: 'cerek', letter: 'c', image: '/images/sukukata/cerek.png' }
+  ],
+  g: [
+    { word: 'gajah', letter: 'g', image: '/images/sukukata/gajah.png' },
+    { word: 'gitar', letter: 'g', image: '/images/sukukata/gitar.png' },
+    { word: 'gelas', letter: 'g', image: '/images/sukukata/gelas.png' }
+  ],
+  h: [
+    { word: 'harimau', letter: 'h', image: '/images/sukukata/harimau.png' }
+  ],
+  j: [
+    { word: 'jari', letter: 'j', image: '/images/sukukata/jari.png' },
+    { word: 'jam', letter: 'j', image: '/images/sukukata/jam.png' },
+    { word: 'jambu', letter: 'j', image: '/images/sukukata/jambu.png' }
+  ],
+  k: [
+    { word: 'kuku', letter: 'k', image: '/images/sukukata/kuku.png' },
+    { word: 'katil', letter: 'k', image: '/images/sukukata/katil.png' },
+    { word: 'kereta', letter: 'k', image: '/images/sukukata/kereta.png' }
+  ],
+  l: [
+    { word: 'labu', letter: 'l', image: '/images/sukukata/labu.png' },
+    { word: 'lampu', letter: 'l', image: '/images/sukukata/lampu.png' },
+    { word: 'lilin', letter: 'l', image: '/images/sukukata/lilin.png' }
+  ],
+  m: [
+    { word: 'mata', letter: 'm', image: '/images/sukukata/mata.png' },
+    { word: 'mancis', letter: 'm', image: '/images/sukukata/mancis.png' }
+  ],
+  n: [
+    { word: 'nasi', letter: 'n', image: '/images/sukukata/nasi.png' },
+    { word: 'nanas', letter: 'n', image: '/images/sukukata/nanas.png' }
+  ],
+  p: [
+    { word: 'paku', letter: 'p', image: '/images/sukukata/paku.png' },
+    { word: 'pelita', letter: 'p', image: '/images/sukukata/pelita.png' },
+    { word: 'pintu', letter: 'p', image: '/images/sukukata/pintu.png' }
+  ],
+  r: [
+    { word: 'rusa', letter: 'r', image: '/images/sukukata/rusa.png' },
+    { word: 'raga', letter: 'r', image: '/images/sukukata/raga.png' }
+  ],
+  s: [
+    { word: 'sudu', letter: 's', image: '/images/sukukata/sudu.png' },
+    { word: 'sawi', letter: 's', image: '/images/sukukata/sawi.png' },
+    { word: 'sabun', letter: 's', image: '/images/sukukata/sabun.png' }
+  ],
+  t: [
+    { word: 'tali', letter: 't', image: '/images/sukukata/tali.png' },
+    { word: 'tebu', letter: 't', image: '/images/sukukata/tebu.png' },
+    { word: 'tomato', letter: 't', image: '/images/sukukata/tomato.png' }
+  ],
+  v: [
+    { word: 'van', letter: 'v', image: '/images/sukukata/van.png' }
+  ],
+  w: [
+    { word: 'wang', letter: 'w', image: '/images/sukukata/wang.png' }
+  ],
+  y: [
+    { word: 'yoyo', letter: 'y', image: '/images/sukukata/yoyo.png' }
+  ],
+  z: [
+    { word: 'zirafah', letter: 'z', image: '/images/sukukata/zirafah.png' }
+  ]
+};
+
+const ALL_DISTRACTOR_LETTERS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'v', 'w', 'y', 'z'];
+
+function generateVokalKonsonanQuestions(): any[] {
+  // 1. Pilih 5 soalan huruf vokal (1 daripada setiap: a, e, i, o, u)
+  const vowelLetters = ['a', 'e', 'i', 'o', 'u'];
+  const vowelQuestions = vowelLetters.map(letter => {
+    const list = VOKAL_QUESTION_ITEMS[letter] || [];
+    const picked = list[Math.floor(Math.random() * list.length)];
+    const distractors = shuffleArray(ALL_DISTRACTOR_LETTERS.filter(l => l !== picked.letter)).slice(0, 3);
+    return {
+      type: 'padan',
+      image: picked.image,
+      imageText: picked.word,
+      audio: picked.word,
+      answer: picked.letter,
+      options: shuffleArray([picked.letter, ...distractors]),
+      category: 'vokal'
+    };
+  });
+
+  // 2. Pilih 5 soalan huruf konsonan (5 huruf konsonan berbeza secara rawak)
+  const availableConsonants = shuffleArray(Object.keys(KONSONAN_QUESTION_ITEMS)).slice(0, 5);
+  const consonantQuestions = availableConsonants.map(letter => {
+    const list = KONSONAN_QUESTION_ITEMS[letter] || [];
+    const picked = list[Math.floor(Math.random() * list.length)];
+    const distractors = shuffleArray(ALL_DISTRACTOR_LETTERS.filter(l => l !== picked.letter)).slice(0, 3);
+    return {
+      type: 'padan',
+      image: picked.image,
+      imageText: picked.word,
+      audio: picked.word,
+      answer: picked.letter,
+      options: shuffleArray([picked.letter, ...distractors]),
+      category: 'konsonan'
+    };
+  });
+
+  // 3. Gabungkan 5 vokal + 5 konsonan = 10 soalan, susunan di-random
+  return shuffleArray([...vowelQuestions, ...consonantQuestions]);
+}
+
 function buildQuestionsForModule(id: string): any[] {
+  // Soalan Vokal & Konsonan: 10 soalan gambar (5 vokal, 5 konsonan secara rawak)
+  if (id === 'vokal_konsonan') {
+    return generateVokalKonsonanQuestions();
+  }
+
   const windowData = typeof window !== 'undefined' && (window as any).moduleContentData;
   const moduleData = windowData && windowData[id];
   const flashcards = (moduleData && moduleData.flashcards) || MODULE_FLASHCARDS[id] || null;
@@ -272,6 +426,7 @@ function buildQuestionsForModule(id: string): any[] {
 
   if (id === 'petikan_tahap_1') {
     const Q_LIST = [
+      // 1. Kereta
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 kereta.png',
         passage: 'Kereta.\nIni kereta bapa.\nKereta bapa biru.\nBapa bawa kereta laju.',
@@ -281,6 +436,15 @@ function buildQuestionsForModule(id: string): any[] {
         options: ['Biru', 'Merah', 'Kuning', 'Hijau']
       },
       {
+        image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 kereta.png',
+        passage: 'Kereta.\nIni kereta bapa.\nKereta bapa biru.\nBapa bawa kereta laju.',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.MP3',
+        question: 'Siapakah yang membawa kereta laju?',
+        answer: 'Bapa',
+        options: ['Bapa', 'Adik', 'Abang', 'Kakak']
+      },
+      // 2. Bola
+      {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 bola.png',
         passage: 'Bola.\nIni bola saya.\nBola saya merah.\nSaya baling bola jauh.',
         audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.MP3',
@@ -288,6 +452,15 @@ function buildQuestionsForModule(id: string): any[] {
         answer: 'Merah',
         options: ['Merah', 'Biru', 'Putih', 'Hitam']
       },
+      {
+        image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 bola.png',
+        passage: 'Bola.\nIni bola saya.\nBola saya merah.\nSaya baling bola jauh.',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.MP3',
+        question: 'Saya baling bola ke mana?',
+        answer: 'Jauh',
+        options: ['Jauh', 'Dekat', 'Tinggi', 'Rendah']
+      },
+      // 3. Topi
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 topi.png',
         passage: 'Topi.\nIni topi adik.\nTopi adik kuning.\nAdik pakai topi elok.',
@@ -297,6 +470,15 @@ function buildQuestionsForModule(id: string): any[] {
         options: ['Kuning', 'Hijau', 'Coklat', 'Merah']
       },
       {
+        image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 topi.png',
+        passage: 'Topi.\nIni topi adik.\nTopi adik kuning.\nAdik pakai topi elok.',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.MP3',
+        question: 'Bagaimanakah adik memakai topi?',
+        answer: 'Elok',
+        options: ['Elok', 'Senget', 'Ketat', 'Kotor']
+      },
+      // 4. Beg
+      {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 beg.png',
         passage: 'Beg.\nIni beg kakak.\nBeg kakak hijau.\nKakak bawa beg berat.',
         audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.MP3',
@@ -305,12 +487,29 @@ function buildQuestionsForModule(id: string): any[] {
         options: ['Hijau', 'Kuning', 'Biru', 'Hitam']
       },
       {
+        image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 beg.png',
+        passage: 'Beg.\nIni beg kakak.\nBeg kakak hijau.\nKakak bawa beg berat.',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.MP3',
+        question: 'Bagaimanakah beg yang kakak bawa?',
+        answer: 'Berat',
+        options: ['Berat', 'Ringan', 'Kecil', 'Kosong']
+      },
+      // 5. Basikal
+      {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 basikal.png',
         passage: 'Basikal.\nIni basikal abang.\nBasikal abang hitam.\nAbang kayuh basikal laju.',
         audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.MP3',
         question: 'Basikal abang berwarna apa?',
         answer: 'Hitam',
         options: ['Hitam', 'Biru', 'Merah', 'Kuning']
+      },
+      {
+        image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 basikal.png',
+        passage: 'Basikal.\nIni basikal abang.\nBasikal abang hitam.\nAbang kayuh basikal laju.',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.MP3',
+        question: 'Bagaimanakah abang mengayuh basikal?',
+        answer: 'Laju',
+        options: ['Laju', 'Perlahan', 'Lambat', 'Jatuh']
       }
     ];
     return shuffleArray(Q_LIST).map((q: any) => ({
@@ -327,6 +526,7 @@ function buildQuestionsForModule(id: string): any[] {
 
   if (id === 'petikan_tahap_2') {
     const Q_LIST = [
+      // 1. Rumah
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 rumah.png',
         passage: 'Rumah.\nIni rumah saya.\nRumah saya besar.\nSaya tinggal di rumah besar bersama keluarga.',
@@ -336,6 +536,15 @@ function buildQuestionsForModule(id: string): any[] {
         options: ['Besar', 'Kecil', 'Tinggi', 'Lama']
       },
       {
+        image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 rumah.png',
+        passage: 'Rumah.\nIni rumah saya.\nRumah saya besar.\nSaya tinggal di rumah besar bersama keluarga.',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.MP3',
+        question: 'Saya tinggal di rumah bersama siapa?',
+        answer: 'Keluarga',
+        options: ['Keluarga', 'Kawan', 'Jiran', 'Guru']
+      },
+      // 2. Sekolah
+      {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 sekolah.png',
         passage: 'Sekolah.\nIni sekolah kami.\nSekolah kami ceria.\nKami belajar di sekolah ceria setiap hari.',
         audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.MP3',
@@ -343,6 +552,15 @@ function buildQuestionsForModule(id: string): any[] {
         answer: 'Ceria',
         options: ['Ceria', 'Sepi', 'Gelap', 'Kecil']
       },
+      {
+        image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 sekolah.png',
+        passage: 'Sekolah.\nIni sekolah kami.\nSekolah kami ceria.\nKami belajar di sekolah ceria setiap hari.',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.MP3',
+        question: 'Bilakah kami belajar di sekolah ceria?',
+        answer: 'Setiap hari',
+        options: ['Setiap hari', 'Setiap malam', 'Hari Ahad', 'Hari Sabtu']
+      },
+      // 3. Kucing
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 kucing.png',
         passage: 'Kucing.\nIni kucing saya.\nKucing saya comel.\nSaya bermain dengan kucing comel setiap petang.',
@@ -352,6 +570,15 @@ function buildQuestionsForModule(id: string): any[] {
         options: ['Comel', 'Galak', 'Besar', 'Hitam']
       },
       {
+        image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 kucing.png',
+        passage: 'Kucing.\nIni kucing saya.\nKucing saya comel.\nSaya bermain dengan kucing comel setiap petang.',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.MP3',
+        question: 'Bilakah saya bermain dengan kucing comel?',
+        answer: 'Setiap petang',
+        options: ['Setiap petang', 'Setiap pagi', 'Waktu malam', 'Tengah hari']
+      },
+      // 4. Taman
+      {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 taman.png',
         passage: 'Taman.\nIni taman kami.\nTaman kami luas.\nKami berlari di taman luas pada waktu pagi.',
         audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.MP3',
@@ -360,12 +587,29 @@ function buildQuestionsForModule(id: string): any[] {
         options: ['Luas', 'Sempit', 'Kecil', 'Gelap']
       },
       {
+        image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 taman.png',
+        passage: 'Taman.\nIni taman kami.\nTaman kami luas.\nKami berlari di taman luas pada waktu pagi.',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.MP3',
+        question: 'Bilakah kami berlari di taman luas?',
+        answer: 'Waktu pagi',
+        options: ['Waktu pagi', 'Waktu malam', 'Waktu petang', 'Tengah hari']
+      },
+      // 5. Dapur
+      {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 dapur.png',
         passage: 'Dapur.\nIni dapur ibu.\nDapur ibu bersih.\nIbu memasak di dapur bersih setiap petang.',
         audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.MP3',
         question: 'Dapur ibu bagaimana?',
         answer: 'Bersih',
         options: ['Bersih', 'Kotor', 'Besar', 'Sempit']
+      },
+      {
+        image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 dapur.png',
+        passage: 'Dapur.\nIni dapur ibu.\nDapur ibu bersih.\nIbu memasak di dapur bersih setiap petang.',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.MP3',
+        question: 'Ibu memasak di dapur pada waktu apa?',
+        answer: 'Setiap petang',
+        options: ['Setiap petang', 'Setiap pagi', 'Waktu malam', 'Tengah hari']
       }
     ];
     return shuffleArray(Q_LIST).map((q: any) => ({
@@ -445,7 +689,7 @@ function buildQuestionsForModule(id: string): any[] {
     });
   }
 
-  if (id === 'fonik_abc' || id === 'kenal_huruf' || id === 'kenali_huruf' || id === 'huruf_vokal' || id === 'pengenalan_nombor' || id === 'bilang_0_10' || id === 'konsep_tambah' || id === 'konsep_penolakan' || id === 'bilang_siri_nombor' || id === 'vokal_konsonan') {
+  if (id === 'fonik_abc' || id === 'kenal_huruf' || id === 'kenali_huruf' || id === 'huruf_vokal' || id === 'pengenalan_nombor' || id === 'bilang_0_10' || id === 'konsep_tambah' || id === 'konsep_penolakan' || id === 'bilang_siri_nombor') {
     const rawQ = CABARAN_DATA[id] || [];
     const count = rawQ.length <= 10 ? rawQ.length : 10;
     const shuffledQ = shuffleArray(rawQ).slice(0, count);
@@ -1976,6 +2220,37 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
       return;
     }
 
+    if (cabaranId === 'vokal_konsonan') {
+      const clean = String(text).toLowerCase().trim();
+      const soundPath = `/audio/sukukata/${clean}.mp3`;
+      try {
+        const audio = new Audio(soundPath);
+        cabaranActiveAudioRef.current = audio;
+        audio.onended = () => {
+          if (cabaranActiveAudioRef.current === audio) cabaranActiveAudioRef.current = null;
+        };
+        audio.play().catch(err => {
+          console.warn("Sukukata audio play notice:", soundPath, err);
+          if (typeof (window as any).sebutAudio === 'function') {
+            (window as any).sebutAudio(clean);
+          }
+        });
+        return;
+      } catch (e) {}
+    }
+
+    if (text.startsWith('/audio/') || text.endsWith('.mp3') || text.endsWith('.MP3')) {
+      try {
+        const audio = new Audio(text);
+        cabaranActiveAudioRef.current = audio;
+        audio.onended = () => {
+          if (cabaranActiveAudioRef.current === audio) cabaranActiveAudioRef.current = null;
+        };
+        audio.play().catch(() => {});
+      } catch (e) {}
+      return;
+    }
+
     if (typeof (window as any).sebutAudio === 'function') {
       (window as any).sebutAudio(text);
     } else if ('speechSynthesis' in window) {
@@ -1985,6 +2260,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
       window.speechSynthesis.speak(utterance);
     }
   };
+
 
   const playSoundEffect = (type: 'correct' | 'wrong') => {
     try {
@@ -2377,7 +2653,8 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                     width: '100%',
                     maxWidth: (currentQ.image.includes('+') || currentQ.image.includes('-')) && currentQ.image.includes('=') ? 'clamp(220px, 75vw, 300px)' : '450px',
                     position: 'relative',
-                    cursor: targetAudio ? 'pointer' : 'default'
+                    cursor: targetAudio ? 'pointer' : 'default',
+                    overflow: 'visible'
                   }}
                   onClick={() => {
                     if (targetAudio) playAudio(targetAudio);
@@ -2409,14 +2686,20 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                       ) : currentQ.image && currentQ.image.includes('<img') ? (
                         <div dangerouslySetInnerHTML={{ __html: currentQ.image }} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
                       ) : currentQ.image && (currentQ.image.startsWith('/') || currentQ.image.includes('.png')) ? (
-                        <img src={currentQ.image} alt="Soalan" style={{ maxHeight: '125px', maxWidth: '100%', objectFit: 'contain' }} />
+                        <img
+                          src={currentQ.image}
+                          alt={currentQ.imageText || "Soalan"}
+                          style={{ maxHeight: '130px', maxWidth: '100%', objectFit: 'contain', cursor: targetAudio ? 'pointer' : 'default' }}
+                        />
                       ) : (
                         currentQ.image
                       )}
                     </div>
                   )}
                   {targetAudio && (
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.12 }}
+                      whileTap={{ scale: 0.9 }}
                       className="neo-btn bg-yellow cabaran-dengar-btn"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -2445,7 +2728,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                     }}
                   >
                     <i className="fa-solid fa-volume-high" style={{ color: 'var(--color-dark, #10182f)', fontSize: '1.15rem' }}></i>
-                  </button>
+                  </motion.button>
                 )}
                 {currentQ.type === 'lengkap' && (
                   <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginTop: '15px' }}>

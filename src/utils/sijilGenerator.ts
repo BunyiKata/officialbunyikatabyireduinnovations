@@ -230,8 +230,18 @@ export const printCertificateA4 = async (
 
 // Buka Modal Sijil Pencapaian Rasmi untuk Mod Murid
 export const bukaModalSijilMurid = async (namaOptional?: string): Promise<void> => {
-  const studentName = namaOptional || 
-    ((window as any).namaMuridAktif ? (window as any).namaMuridAktif : (localStorage.getItem('bunyiKataNamaMurid') || 'MURID CEMERLANG'));
+  let studentName = (namaOptional && typeof namaOptional === 'string' && namaOptional.trim()) ? namaOptional.trim() : '';
+  if (!studentName) {
+    const raw = (window as any).namaMuridAktif;
+    if (raw && typeof raw === 'string' && raw.trim() && raw !== 'Tetamu' && raw !== 'Admin') {
+      studentName = raw.trim();
+    } else {
+      studentName = localStorage.getItem('muridAktif') || 
+                    localStorage.getItem('bunyiKataCurrentMurid') || 
+                    localStorage.getItem('bunyiKataNamaMurid') || 
+                    (raw || 'MURID CEMERLANG');
+    }
+  }
 
   let certModal = document.getElementById('modal-sijil-pencapaian');
   if (!certModal) {
@@ -279,16 +289,16 @@ export const bukaModalSijilMurid = async (namaOptional?: string): Promise<void> 
       }
 
       .sijil-modal-card {
-        max-width: 540px !important;
+        max-width: 520px !important;
         width: 92% !important;
-        max-height: 92vh !important;
+        max-height: 94vh !important;
         overflow-y: auto !important;
         background-color: #ffffff !important;
         background-image: radial-gradient(circle, rgba(16, 24, 47, 0.08) 1.5px, transparent 1.5px) !important;
         background-size: 16px 16px !important;
         border: 4px solid #0f172a !important;
         border-radius: 24px !important;
-        padding: 24px 22px 20px 22px !important;
+        padding: 20px 18px 18px 18px !important;
         text-align: center !important;
         position: relative !important;
         box-sizing: border-box !important;
@@ -309,10 +319,10 @@ export const bukaModalSijilMurid = async (namaOptional?: string): Promise<void> 
         max-width: 100% !important;
         box-sizing: border-box !important;
         background: #fffdf8 !important;
-        border-radius: 18px !important;
+        border-radius: 16px !important;
         border: 2px dashed #f59e0b !important;
-        padding: 10px !important;
-        margin: 16px auto !important;
+        padding: 8px !important;
+        margin: 12px auto 16px auto !important;
       }
 
       .sijil-img-glow {
@@ -324,7 +334,7 @@ export const bukaModalSijilMurid = async (namaOptional?: string): Promise<void> 
         max-height: 64vh !important;
         aspect-ratio: 1414 / 2000 !important;
         object-fit: contain !important;
-        border-radius: 14px !important;
+        border-radius: 12px !important;
         border: 3.5px solid #0f172a !important;
         display: block !important;
         margin: 0 auto !important;
@@ -346,7 +356,7 @@ export const bukaModalSijilMurid = async (namaOptional?: string): Promise<void> 
         flex-wrap: nowrap !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 12px !important;
+        gap: 10px !important;
         width: 100% !important;
         max-width: 380px !important;
         box-sizing: border-box !important;
@@ -416,22 +426,26 @@ export const bukaModalSijilMurid = async (namaOptional?: string): Promise<void> 
       }
     </style>
     <div class="modal-content neo-box sijil-modal-card sijil-modal-glow">
-      <button class="neo-btn bg-red close-btn" onclick="document.getElementById('modal-sijil-pencapaian').style.display='none'" style="position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 12px; border: 2.5px solid #0f172a; padding: 0; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer;" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+      <!-- Butang X merah petak -->
+      <button class="neo-btn bg-red close-btn" onclick="document.getElementById('modal-sijil-pencapaian').style.display='none'" style="position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 8px; border: 2.5px solid #0f172a; box-shadow: 0 3px 0 #0f172a; background-color: #ef4444; color: #ffffff; padding: 0; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer;" aria-label="Tutup"><i class="fa-solid fa-xmark" style="font-size: 1.15rem; color: #ffffff;"></i></button>
 
       <div id="modal-sijil-canvas-container" class="sijil-container-glow">
-        <div style="font-weight: 800; color: #64748b; font-size: 0.9rem;">
-          <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.6rem; color: #ea580c; display: block; margin-bottom: 8px;"></i>
+        <div style="font-weight: 800; color: #64748b; font-size: 0.9rem; padding: 30px 20px;">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.8rem; color: #ea580c; display: block; margin-bottom: 10px;"></i>
           Menjana Sijil Rasmi...
         </div>
       </div>
 
       <div class="sijil-btn-row">
-        <button id="btn-sijil-pdf" class="neo-btn" style="background-color: #dc2626; color: white; border: 2.5px solid #0f172a; box-shadow: 0 3px 0 #0f172a; cursor: pointer;">
+        <!-- Butang PDF merah (hanya teks PDF dan icon sahaja) -->
+        <button id="btn-sijil-pdf" class="neo-btn" style="background-color: #ef4444; color: white; border: 2.5px solid #0f172a; box-shadow: 0 3px 0 #0f172a; cursor: pointer;">
           <i class="fa-solid fa-file-pdf"></i> PDF
         </button>
+        <!-- Butang PNG (icon download dan teks PNG) -->
         <button id="btn-sijil-png" class="neo-btn" style="background-color: #ea580c; color: white; border: 2.5px solid #0f172a; box-shadow: 0 3px 0 #0f172a; cursor: pointer;">
           <i class="fa-solid fa-download"></i> PNG
         </button>
+        <!-- Butang Cetak (cetak gambar sijil) -->
         <button id="btn-sijil-print" class="neo-btn bg-white" title="Cetak" aria-label="Cetak" style="border: 2.5px solid #0f172a; box-shadow: 0 3px 0 #0f172a; color: #0f172a; cursor: pointer;">
           <i class="fa-solid fa-print"></i> Cetak
         </button>

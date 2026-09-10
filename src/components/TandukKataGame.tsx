@@ -238,9 +238,10 @@ const CATEGORY_TO_MODULE_MAP: Record<string, string> = {
 
 function getCategoryWords(category: string) {
     const moduleId = CATEGORY_TO_MODULE_MAP[category];
+    let allWords: any[] = [];
     if (moduleId && (window as any).moduleContentData?.[moduleId]?.flashcards) {
         const cards = (window as any).moduleContentData[moduleId].flashcards;
-        return cards.map((c: any) => {
+        allWords = cards.map((c: any) => {
             let emojiStr = c.icon || '🔊';
             if (emojiStr.includes('<img')) {
                 const matchSrc = emojiStr.match(/src="([^"]+)"/);
@@ -254,8 +255,41 @@ function getCategoryWords(category: string) {
                 return { word: c.front, syllables: [c.front], emoji: emojiStr };
             }
         });
+    } else {
+        allWords = WORD_DATABASE[category as keyof typeof WORD_DATABASE] || WORD_DATABASE['KV'];
     }
-    return WORD_DATABASE[category as keyof typeof WORD_DATABASE] || WORD_DATABASE['KV'];
+
+    if (category && category.toUpperCase() === 'KV') {
+        const STORAGE_KEY = 'tanduk_kata_used_kv_words';
+        let usedWords: string[] = [];
+        try {
+            const saved = sessionStorage.getItem(STORAGE_KEY);
+            if (saved) usedWords = JSON.parse(saved);
+        } catch (e) {}
+
+        // Filter pool to pick words not yet learned in the current cycle
+        let available = allWords.filter((item: any) => !usedWords.includes(item.word));
+
+        // If remaining pool has fewer than 10 words, reset so all words can be cycled again
+        if (available.length < 10) {
+            usedWords = [];
+            available = [...allWords];
+        }
+
+        // Shuffle available words
+        const shuffled = [...available].sort(() => Math.random() - 0.5);
+        const chosen = shuffled.slice(0, 10);
+
+        // Record newly chosen words in usedWords
+        const newUsed = [...usedWords, ...chosen.map((c: any) => c.word)];
+        try {
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newUsed));
+        } catch (e) {}
+
+        return chosen;
+    }
+
+    return allWords;
 }
 
 const SYLLABLE_COLORS = ['#1e293b', '#ef4444'];
@@ -653,6 +687,7 @@ interface LevelData {
     items: any[];
     platforms: { id: string; x: number; y: number; width: number; height: number }[];
     barrels: { id: string; x: number }[];
+    worldWidth: number;
 }
 
 const generateLevelLayout = (words: any[]): LevelData => {
@@ -825,7 +860,8 @@ const generateLevelLayout = (words: any[]): LevelData => {
         }
     });
 
-    return { items, platforms, barrels };
+    const worldWidth = Math.max(12000, currentX + 3500);
+    return { items, platforms, barrels, worldWidth };
 };
 
 interface DustParticle {
@@ -855,6 +891,8 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
     const [gamePlatforms, setGamePlatforms] = useState<any[]>([]);
     const [gameBarrels, setGameBarrels] = useState<{ id: string; x: number }[]>([]);
     const [stars, setStars] = useState(0);
+    const [worldWidth, setWorldWidth] = useState(12000);
+    const worldWidthRef = useRef(12000);
     const [activeWord, setActiveWord] = useState<any | null>(null);
     const [showReward, setShowReward] = useState(false);
     const [showGameOver, setShowGameOver] = useState(false);
@@ -920,6 +958,8 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
         const words = getCategoryWords(category);
         const layout = generateLevelLayout(words);
 
+        setWorldWidth(layout.worldWidth);
+        worldWidthRef.current = layout.worldWidth;
         setGameItems(layout.items);
         gameItemsRef.current = layout.items;
         setGamePlatforms(layout.platforms);
@@ -1208,7 +1248,7 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
                     spawnDust(nextX, nextY);
                 }
 
-                state.x = Math.max(50, nextX);
+                state.x = Math.min(worldWidthRef.current - 150, Math.max(50, nextX));
                 state.y = nextY;
                 state.isJumping = !onGround;
 
@@ -1313,9 +1353,10 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
             setStars(s => {
                 const nextStars = s + 1;
                 const cat = selectedCategoryRef.current || selectedCategory || 'KV';
-                const cappedStars = nextStars;
-                if ((window as any).logProgress) {
-                    (window as any).logProgress('tandukKata_' + cat, 'latihan', cappedStars, 'tandukKata');
+                if (typeof (window as any).tambahBintangGlobal === 'function') {
+                    (window as any).tambahBintangGlobal('tandukKata_' + cat, 1);
+                } else if ((window as any).logProgress) {
+                    (window as any).logProgress('tandukKata_' + cat, 'latihan', nextStars, 'tandukKata');
                 }
                 if (typeof (window as any).updateProfilUI === 'function') {
                     (window as any).updateProfilUI();
@@ -1370,7 +1411,7 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
                     position: 'absolute', 
                     top: 0, 
                     left: 0, 
-                    width: '10000px', 
+                    width: `${worldWidth}px`, 
                     height: '100%', 
                     zIndex: 1,
                     willChange: 'transform',
@@ -1418,21 +1459,21 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
                     position: 'absolute',
                     bottom: 0,
                     left: 0,
-                    width: '10000px',
+                    width: `${worldWidth}px`,
                     height: `${FLOOR_Y}px`,
                     zIndex: 2,
                     overflow: 'hidden'
                 }}>
-                    <svg width="10000" height={FLOOR_Y} style={{ display: 'block' }}>
+                    <svg width={worldWidth} height={FLOOR_Y} style={{ display: 'block' }}>
                         {/* Top 60px row of Top-Grass Tiles */}
-                        <rect x="0" y="0" width="10000" height="60" fill="url(#tileTopGrassPattern)" />
+                        <rect x="0" y="0" width={worldWidth} height="60" fill="url(#tileTopGrassPattern)" />
                         {/* Lower rows of Underground Dirt Tiles */}
-                        <rect x="0" y="60" width="10000" height={FLOOR_Y - 60} fill="url(#tileDirtPattern)" />
+                        <rect x="0" y="60" width={worldWidth} height={FLOOR_Y - 60} fill="url(#tileDirtPattern)" />
                     </svg>
                 </div>
 
                 {/* Deep Below-Screen Fill */}
-                <div style={{ position: 'absolute', bottom: '-100vh', left: 0, width: '10000px', height: '100vh', backgroundColor: '#261004' }} />
+                <div style={{ position: 'absolute', bottom: '-100vh', left: 0, width: `${worldWidth}px`, height: '100vh', backgroundColor: '#261004' }} />
 
                 {/* === Floating Platforms: Image 2 Tileset Blocks === */}
                 {gamePlatforms && gamePlatforms.map(plat => (
@@ -2073,23 +2114,16 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
                                     </button>
                                     <button
                                         className="neo-btn bg-orange cursor-pointer"
-                                        title="Menu Seterusnya"
-                                        aria-label="Menu Seterusnya"
+                                        title="Menu Utama"
+                                        aria-label="Menu Utama"
                                         onClick={() => {
                                             setShowGameOver(false);
-                                            const currentIdx = CATEGORIES.indexOf(selectedCategory || 'KV');
-                                            if (currentIdx !== -1 && currentIdx < CATEGORIES.length - 1) {
-                                                const nextCat = CATEGORIES[currentIdx + 1];
-                                                setSelectedCategory(nextCat);
-                                                startGame(nextCat);
-                                            } else {
-                                                setGameState('idle');
-                                                onClose();
-                                            }
+                                            setGameState('idle');
+                                            onClose();
                                         }}
                                         style={{ padding: '14px 20px', fontSize: '1.4rem', flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                     >
-                                        <i className="fa-solid fa-bars"></i>
+                                        <i className="fa-solid fa-house"></i>
                                     </button>
                                 </div>
                             </motion.div>

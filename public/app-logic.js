@@ -1309,7 +1309,8 @@ function triggerSuccessAnimation(mesej, callback, retryCallback, starsCount) {
 
 // --- SISTEM LOG MASUK & PENJEJAKAN ---
 var modSemasa = 'belajar';
-var namaMuridAktif = "";
+var namaMuridAktif = (typeof window !== 'undefined' && window.namaMuridAktif) ? window.namaMuridAktif : ((typeof localStorage !== 'undefined' ? (localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || localStorage.getItem('bunyiKataNamaMurid') || "") : ""));
+window.namaMuridAktif = namaMuridAktif;
 var modGuruAktif = false;
 
 function studentRecord() {
@@ -1390,15 +1391,11 @@ window.studentRecord = studentRecord;
             localStorage.removeItem('bunyiKataNamaKelas2');
         }
 
-        // Padam sebarang kunci bintang global, modul fonik, dan aktiviti nombor ujian lama supaya tidak bocor ke rekod murid baharu
+        // Padam modul ujian lama dummy sahaja tanpa memadam bintang atau rekod kemajuan murid sah
         const keysToRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
             if (k && (
-                k.startsWith('stars_') ||
-                k.startsWith('extra_stars_') ||
-                k.startsWith('extra_score_') ||
-                k.startsWith('bunyiKataUnlockedLatihan_') ||
                 k.startsWith('bunyikata_huruf_') ||
                 k.startsWith('bunyikata_vokal_') ||
                 k.startsWith('bunyikata_phonics_') ||
@@ -1444,10 +1441,26 @@ if (savedStudentData && typeof savedStudentData === 'object') {
     });
     localStorage.setItem('bunyiKataStudentData', JSON.stringify(savedStudentData));
 }
-var studentData = Object.fromEntries(studentNames.map((name) => {
-    const data = { ...studentRecord(), ...(savedStudentData[name] || {}) };
-    return [name, data];
-}));
+var studentData = {};
+if (savedStudentData && typeof savedStudentData === 'object') {
+    Object.keys(savedStudentData).forEach(name => {
+        if (name && !GHOST_NAMES.includes(name.trim().toLowerCase())) {
+            studentData[name] = { ...studentRecord(), ...(savedStudentData[name] || {}) };
+        }
+    });
+}
+var allKnownNames = Array.from(new Set([
+    ...(studentNames || []),
+    ...(parentChildNames || []),
+    ...(localStorage.getItem('muridAktif') ? [localStorage.getItem('muridAktif')] : []),
+    ...(localStorage.getItem('bunyiKataCurrentMurid') ? [localStorage.getItem('bunyiKataCurrentMurid')] : [])
+])).filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()));
+
+allKnownNames.forEach(name => {
+    if (!studentData[name]) {
+        studentData[name] = { ...studentRecord(), ...(savedStudentData[name] || {}) };
+    }
+});
 window.studentData = studentData;
 
 function saveStudentData() {
@@ -1493,8 +1506,9 @@ function saveStudentData() {
                 const gId = localStorage.getItem('bunyiKataUserId') || '';
                 const gEmail = localStorage.getItem('bunyiKataGuruEmail') || '';
                 const defKelas = localStorage.getItem('bunyiKataNamaKelas') || '';
+                const gName = (localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || '').trim().toUpperCase();
                 studentNames.forEach(nama => {
-                    if (nama && !GHOST_NAMES.includes(nama.toLowerCase())) {
+                    if (nama && !GHOST_NAMES.includes(nama.toLowerCase()) && (nama.trim().toUpperCase() !== gName)) {
                         const data = studentData[nama] || {};
                         const totalStars = typeof jumlahMarkah === 'function' ? jumlahMarkah(data) : (data.coins || 0);
                         window.syncStudentToFirebase({
@@ -1873,8 +1887,18 @@ function paparSkrin(screenId, skipHash) {
         if (typeof window.closePerpustakaanReact === 'function') window.closePerpustakaanReact();
     }
     if (screenId === 'murid-menu-latihan') renderLatihanLocks();
-    if (screenId === 'profile-screen' || screenId === 'prestasi-screen' || screenId === 'lencana-screen') renderProfile();
-    if (screenId === 'leaderboard-screen') renderLeaderboard();
+    if (screenId === 'profile-screen' || screenId === 'prestasi-screen' || screenId === 'lencana-screen') {
+        renderProfile();
+        window.dispatchEvent(new CustomEvent('kemaskini-profil'));
+    }
+    window.dispatchEvent(new CustomEvent('papar-skrin', { detail: { screenId } }));
+    if (screenId === 'leaderboard-screen') {
+        if (typeof window.tukarCarta === 'function') {
+            window.tukarCarta('harian');
+        } else {
+            renderLeaderboard('harian');
+        }
+    }
     if (screenId === 'map-screen') {
         if (window.updateMisi3DSlots) window.updateMisi3DSlots();
         if (window.updateCabaranLainSlots) window.updateCabaranLainSlots();
@@ -2034,11 +2058,14 @@ function masukModGuru() {
     window.dispatchEvent(new CustomEvent('admin-mode-change', { detail: { isAdmin: false } }));
 
     const gName = localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || 'Guru';
-    window.namaMuridAktif = gName;
-    localStorage.setItem('muridAktif', gName);
-    localStorage.setItem('bunyiKataCurrentMurid', gName);
+    // JANGAN sesekali tetapkan nama guru sebagai nama murid aktif atau rekod murid
+    window.namaMuridAktif = '';
+    localStorage.removeItem('muridAktif');
+    localStorage.removeItem('bunyiKataCurrentMurid');
+    localStorage.removeItem('bunyiKataStudentId');
 
     const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
+    if (gName) GHOST_NAMES.push(gName.toLowerCase());
     if (window.studentData) {
         GHOST_NAMES.forEach(g => {
             delete window.studentData[g];
@@ -2053,6 +2080,12 @@ function masukModGuru() {
             delete studentData[g.charAt(0).toUpperCase() + g.slice(1)];
         });
     }
+    if (typeof studentNames !== 'undefined' && Array.isArray(studentNames)) {
+        studentNames = studentNames.filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()));
+    }
+    if (window.studentNames && Array.isArray(window.studentNames)) {
+        window.studentNames = window.studentNames.filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()));
+    }
     try {
         const stored = JSON.parse(localStorage.getItem('bunyiKataStudentData') || '{}');
         let changed = false;
@@ -2064,6 +2097,11 @@ function masukModGuru() {
         });
         if (changed) {
             localStorage.setItem('bunyiKataStudentData', JSON.stringify(stored));
+        }
+        const storedNames = JSON.parse(localStorage.getItem('bunyiKataStudentNames') || '[]');
+        if (Array.isArray(storedNames)) {
+            const cleanStored = storedNames.filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()));
+            localStorage.setItem('bunyiKataStudentNames', JSON.stringify(cleanStored));
         }
     } catch (e) {}
 
@@ -2102,8 +2140,9 @@ function masukModGuru() {
     }
 
     if (Array.isArray(studentNames) && studentNames.length > 0 && typeof window.syncStudentToFirebase === 'function') {
+        const teacherUpper = (namaGuru || '').trim().toUpperCase();
         studentNames.forEach(function(stName) {
-            if (stName) {
+            if (stName && !GHOST_NAMES.includes(stName.trim().toLowerCase()) && stName.trim().toUpperCase() !== teacherUpper) {
                 window.syncStudentToFirebase({
                     nama: stName,
                     guruId: guruId || undefined,
@@ -2796,8 +2835,8 @@ window.renderParentDashboard = function () {
             const key = mod.id;
             const maxScore = typeof getMaxScore === 'function' ? getMaxScore(key) : (key === 'suku_kata_v_kv' || key === 'suku_kata_kvkk' ? 6 : 10);
             const stars = (data && data.stars && data.stars[key] !== undefined) ? Number(data.stars[key] || 0) : 0;
-            const score = (data && data.scores && data.scores[key] !== undefined) ? Number(data.scores[key] || 0) : 0;
-            const isDone = Boolean((data && data.latihan && data.latihan[key]) || stars > 0 || score > 0);
+            const score = (data && data.scores && data.scores[key] !== undefined) ? Number(data.scores[key] || 0) : (stars > 0 ? Math.round((stars / 3) * maxScore) : 0);
+            const isDone = (score >= maxScore && maxScore > 0);
 
             const tr = document.createElement('tr');
 
@@ -2808,7 +2847,7 @@ window.renderParentDashboard = function () {
                         </span>`;
             } else {
                 statusBadge = `<span style="background:#fee2e2; color:#b91c1c; font-size:0.75rem; font-weight:bold; padding:4px 10px; border-radius:8px; border:1px solid #991b1b; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;">
-                            <i class="fa-solid fa-circle-xmark"></i> 0/${maxScore}
+                            <i class="fa-solid fa-circle-xmark"></i> ${score}/${maxScore}
                         </span>`;
             }
 
@@ -3904,26 +3943,19 @@ function getMaxScore(modId) {
 window.getMaxScore = getMaxScore;
 
 function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '', customStars = null) {
-    const currentStudent = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || '';
-    const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
-    const isRealStudent = currentStudent && !GHOST_NAMES.includes(currentStudent.trim().toLowerCase());
-
     const userRole = localStorage.getItem('bunyiKataUserRole') || '';
+    const teacherName = (localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || '').trim().toUpperCase();
+    const isTeacherOrAdmin = userRole === 'guru' || userRole === 'admin' || window.modGuruAktif || window.modAdminAktif || (typeof document !== 'undefined' && document.body && (document.body.classList.contains('teacher-mode') || document.body.classList.contains('admin-mode')));
 
-    // Hanya sekat jika mod Guru/Admin aktif TANPA profil murid sah (iaitu guru/admin sedang bermain/uji sendiri)
-    if (
-        (modGuruAktif ||
-        window.modGuruAktif ||
-        modAdminAktif ||
-        window.modAdminAktif ||
-        window.isAdminMode ||
-        document.body.classList.contains('teacher-mode') ||
-        document.body.classList.contains('admin-mode')) &&
-        (userRole === 'guru' || userRole === 'admin') &&
-        !isRealStudent
-    ) {
+    // Guru / Admin yang mengakses aplikasi tidak perlu direkodkan bintang atau aktiviti
+    if (isTeacherOrAdmin) {
+        console.log('[REKOD] Mod Guru/Admin aktif: Bintang dan aktiviti tidak direkodkan untuk guru.');
         return;
     }
+
+    const currentStudent = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || '';
+    const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
+    const isRealStudent = currentStudent && !GHOST_NAMES.includes(currentStudent.trim().toLowerCase()) && currentStudent.trim().toUpperCase() !== teacherName;
 
     if (!isRealStudent) {
         return;
@@ -3961,10 +3993,23 @@ function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '', c
 
         if (!studentData[currentStudent].stars) studentData[currentStudent].stars = {};
         let starCount = 0;
+        const isUncappedActivity = (
+            aktiviti.startsWith('ar_') ||
+            aktiviti.startsWith('arSukuKata_') ||
+            aktiviti.startsWith('arKiraJari_') ||
+            aktiviti.startsWith('tandukKata_') ||
+            aktiviti.startsWith('puzzle_') ||
+            aktiviti.startsWith('cantumKata_') ||
+            aktiviti.startsWith('cubaSebut_') ||
+            aktiviti.startsWith('cubaBaca_') ||
+            aktiviti.startsWith('nombor_') ||
+            aktiviti.startsWith('math_') ||
+            aktiviti.startsWith('fonik_') ||
+            (aktiviti.startsWith('cabaran_') && !aktiviti.includes('tambahan'))
+        );
         if (customStars !== null && typeof customStars === 'number') {
-            starCount = Math.min(3, Math.max(0, customStars));
+            starCount = isUncappedActivity ? Math.max(0, customStars) : Math.min(3, Math.max(0, customStars));
         } else {
-            const isUncappedActivity = aktiviti.startsWith('ar_') || aktiviti.startsWith('arSukuKata_') || aktiviti.startsWith('tandukKata_') || aktiviti.startsWith('cabaran_');
             if (isUncappedActivity) {
                 starCount = typeof markah === 'number' ? markah : 0;
             } else {
@@ -3983,7 +4028,7 @@ function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '', c
             }
         }
         if (starCount > 0) {
-            const finalStarCount = (aktiviti.startsWith('ar_') || aktiviti.startsWith('arSukuKata_') || aktiviti.startsWith('tandukKata_')) ? starCount : Math.min(starCount, 3);
+            const finalStarCount = isUncappedActivity ? starCount : Math.min(starCount, 3);
             studentData[currentStudent].stars[aktiviti] = Math.max(studentData[currentStudent].stars[aktiviti] || 0, finalStarCount);
         }
 
@@ -4008,7 +4053,9 @@ function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '', c
             const activeCode = isPC ? '' : (localStorage.getItem('bunyiKataKodKelas') || '');
             const activeFam = isPC ? (localStorage.getItem('bunyiKataKodKeluarga') || '') : '';
             const totalStars = typeof jumlahMarkah === 'function' ? jumlahMarkah(studentData[currentStudent]) : 0;
-            const stuId = localStorage.getItem('bunyiKataStudentId') || (studentData[currentStudent] && studentData[currentStudent].id);
+            const stuId = (studentData[currentStudent] && studentData[currentStudent].id) ||
+                (window.studentFirebaseIds && window.studentFirebaseIds[currentStudent]) ||
+                localStorage.getItem('bunyiKataStudentId');
 
             window.syncStudentToFirebase({
                 id: stuId,
@@ -4046,6 +4093,133 @@ function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '', c
 }
 window.logProgress = logProgress;
 
+// === FUNGSI TAMBAH BINTANG GLOBAL: REKOD TERUS KE PROFIL MURID/ANAK SERTA-MERTA ===
+window.tambahBintangGlobal = function (activityKey, amount) {
+    if (!activityKey) return;
+
+    const userRole = localStorage.getItem('bunyiKataUserRole') || '';
+    const teacherName = (localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || '').trim().toUpperCase();
+    const isTeacherOrAdmin = userRole === 'guru' || userRole === 'admin' || window.modGuruAktif || window.modAdminAktif || (typeof document !== 'undefined' && document.body && (document.body.classList.contains('teacher-mode') || document.body.classList.contains('admin-mode')));
+
+    // Guru / Admin yang mengakses aplikasi tidak perlu ditambah bintang
+    if (isTeacherOrAdmin) {
+        console.log('[BINTANG] Mod Guru/Admin aktif: Bintang tidak ditambah untuk guru.');
+        return;
+    }
+
+    const starDelta = Number(amount) || 1;
+    const currentStudent = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif') || 'Murid';
+    if (teacherName && currentStudent.trim().toUpperCase() === teacherName) {
+        console.log('[BINTANG] Guru tidak boleh menerima bintang sebagai murid.');
+        return;
+    }
+
+    // 1. Kemaskini rekod murid dalam memori
+    let curRecord = null;
+    if (typeof studentData !== 'undefined') {
+        if (!studentData[currentStudent]) {
+            studentData[currentStudent] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: window.selectedAvatarIcon || '/images/avatar/avatar1.png' };
+        }
+        if (!studentData[currentStudent].stars) studentData[currentStudent].stars = {};
+        if (!studentData[currentStudent].scores) studentData[currentStudent].scores = {};
+        curRecord = studentData[currentStudent];
+    }
+    if (window.studentData) {
+        if (!window.studentData[currentStudent]) {
+            window.studentData[currentStudent] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: window.selectedAvatarIcon || '/images/avatar/avatar1.png' };
+        }
+        if (!window.studentData[currentStudent].stars) window.studentData[currentStudent].stars = {};
+        if (!window.studentData[currentStudent].scores) window.studentData[currentStudent].scores = {};
+        if (!curRecord) curRecord = window.studentData[currentStudent];
+    }
+
+    if (curRecord) {
+        const prevStars = Number(curRecord.stars[activityKey] || 0);
+        const newStars = prevStars + starDelta;
+        curRecord.stars[activityKey] = newStars;
+        curRecord.scores[activityKey] = newStars;
+        curRecord.coins = (curRecord.coins || 0) + starDelta;
+
+        if (typeof studentData !== 'undefined' && studentData[currentStudent]) {
+            studentData[currentStudent].stars[activityKey] = newStars;
+            studentData[currentStudent].scores[activityKey] = newStars;
+            studentData[currentStudent].coins = (studentData[currentStudent].coins || 0) + starDelta;
+        }
+        if (window.studentData && window.studentData[currentStudent]) {
+            window.studentData[currentStudent].stars[activityKey] = newStars;
+            window.studentData[currentStudent].scores[activityKey] = newStars;
+            window.studentData[currentStudent].coins = (window.studentData[currentStudent].coins || 0) + starDelta;
+        }
+
+        if (!curRecord.history) curRecord.history = [];
+        curRecord.history.push({
+            date: new Date().toISOString(),
+            aktiviti: activityKey,
+            kategori: 'latihan',
+            markah: newStars
+        });
+    }
+
+    // 2. Simpan ke storan tempatan
+    try {
+        const lsKey = 'stars_' + activityKey;
+        const prevLs = Number(localStorage.getItem(lsKey) || 0);
+        localStorage.setItem(lsKey, (prevLs + starDelta).toString());
+    } catch (e) {
+        console.warn('localStorage stars notice:', e);
+    }
+
+    // 3. Simpan data murid
+    if (typeof saveStudentData === 'function') {
+        saveStudentData();
+    } else if (typeof window.saveStudentData === 'function') {
+        window.saveStudentData();
+    }
+
+    // 4. Sinkronisasi segera terus ke Firebase untuk murid/anak
+    const isRealStudent = !window.isGuestMode && currentStudent !== 'Tetamu' && currentStudent !== 'Murid Baharu';
+    if (typeof window.syncStudentToFirebase === 'function' && isRealStudent) {
+        try {
+            const isPC = localStorage.getItem('bunyiKataIsParentChild') === 'true';
+            const activeCode = isPC ? '' : (localStorage.getItem('bunyiKataKodKelas') || '');
+            const activeFam = isPC ? (localStorage.getItem('bunyiKataKodKeluarga') || '') : '';
+            const totalStars = typeof jumlahMarkah === 'function' ? jumlahMarkah(curRecord || (typeof studentData !== 'undefined' ? studentData[currentStudent] : null)) : 0;
+            const stuId = (curRecord && curRecord.id) ||
+                (typeof studentData !== 'undefined' && studentData[currentStudent] && studentData[currentStudent].id) ||
+                (window.studentFirebaseIds && window.studentFirebaseIds[currentStudent]) ||
+                localStorage.getItem('bunyiKataStudentId');
+
+            window.syncStudentToFirebase({
+                id: stuId,
+                nama: currentStudent,
+                isParentChild: isPC,
+                kodKelas: activeCode,
+                kodKeluarga: activeFam,
+                parentId: isPC ? (localStorage.getItem('bunyiKataUserId') || '') : '',
+                parentEmail: isPC ? (localStorage.getItem('bunyiKataIbubapaEmail') || '') : '',
+                guruId: !isPC ? (localStorage.getItem('bunyiKataUserId') || '') : '',
+                guruEmail: !isPC ? (localStorage.getItem('bunyiKataGuruEmail') || '') : '',
+                totalBintang: totalStars
+            }).then(stu => {
+                const targetId = (stu && stu.id) || stuId;
+                if (targetId && typeof window.recordStudentActivity === 'function') {
+                    const currentActStars = (curRecord && curRecord.stars && curRecord.stars[activityKey]) || starDelta;
+                    window.recordStudentActivity(targetId, 'latihan', activityKey, currentActStars, starDelta);
+                }
+            }).catch(err => console.warn('Firebase instant star sync notice:', err));
+        } catch (fbErr) {
+            console.warn('Firebase instant sync exception:', fbErr);
+        }
+    }
+
+    // 5. Kemaskini paparan profil serta-merta
+    if (typeof updateProfilUI === 'function') {
+        updateProfilUI();
+    }
+    window.dispatchEvent(new CustomEvent('kemaskini-profil'));
+    window.dispatchEvent(new CustomEvent('bintang-dikemaskini', { detail: { activityKey, delta: starDelta } }));
+};
+
 function jumlahMarkah(data) {
     if (!data) data = (namaMuridAktif && studentData[namaMuridAktif]) ? studentData[namaMuridAktif] : {};
     let totalStars = 0;
@@ -4079,14 +4253,54 @@ function jumlahMarkah(data) {
         totalStars = Object.values(data.scores).reduce((total, markah) => total + Math.min(Number(markah || 0), 3), 0);
     }
 
+    // Cabaran Tambahan: Setiap cabaran tambahan maksima 3 bintang sahaja (berdasarkan popup bintang)
+    if (typeof EXTRA_CHALLENGES_DATA !== 'undefined') {
+        Object.values(EXTRA_CHALLENGES_DATA).forEach(list => {
+            if (Array.isArray(list)) {
+                list.forEach(m => {
+                    const baseId = m.id;
+                    countedKeys.add(baseId);
+                    countedKeys.add('extra_' + baseId);
+                    countedKeys.add(baseId.replace(/^extra_/, ''));
+                    
+                    let st = 0;
+                    if (data && data.stars) {
+                        if (data.stars[baseId] !== undefined) st = Math.max(st, Number(data.stars[baseId] || 0));
+                        if (data.stars['extra_' + baseId] !== undefined) st = Math.max(st, Number(data.stars['extra_' + baseId] || 0));
+                    }
+                    totalStars += Math.min(Math.max(st, 0), 3);
+                });
+            }
+        });
+    }
+
     if (data && data.scores) {
         Object.keys(data.scores).forEach(key => {
-            if (!countedKeys.has(key)) {
+            const normKey = key.startsWith('extra_extra_') ? key.replace('extra_extra_', 'extra_') : key;
+            if (!countedKeys.has(key) && !countedKeys.has(normKey)) {
                 countedKeys.add(key);
-                const isUncapped = key.startsWith('ar_') || key.startsWith('arSukuKata_') || key.startsWith('tandukKata_') || key.startsWith('cabaran_') || key.startsWith('surih_');
+                countedKeys.add(normKey);
+                const isExtra = key.startsWith('extra_') || key.includes('_extra_');
+                const isUncapped = !isExtra && (
+                    key.startsWith('ar_') ||
+                    key.startsWith('arSukuKata_') ||
+                    key.startsWith('arKiraJari_') ||
+                    key.startsWith('tandukKata_') ||
+                    key.startsWith('puzzle_') ||
+                    key.startsWith('cantumKata_') ||
+                    key.startsWith('cubaSebut_') ||
+                    key.startsWith('cubaBaca_') ||
+                    key.startsWith('nombor_') ||
+                    key.startsWith('math_') ||
+                    key.startsWith('fonik_') ||
+                    (key.startsWith('cabaran_') && !key.includes('tambahan')) ||
+                    key.startsWith('surih_')
+                );
                 let st = 0;
                 if (data.stars && data.stars[key] !== undefined) {
                     st = Number(data.stars[key] || 0);
+                } else if (data.stars && data.stars[normKey] !== undefined) {
+                    st = Number(data.stars[normKey] || 0);
                 } else {
                     const sc = Number(data.scores[key] || 0);
                     st = isUncapped ? sc : Math.min(sc, 3);
@@ -4098,10 +4312,27 @@ function jumlahMarkah(data) {
 
     if (data && data.stars) {
         Object.keys(data.stars).forEach(key => {
-            if (!countedKeys.has(key)) {
+            const normKey = key.startsWith('extra_extra_') ? key.replace('extra_extra_', 'extra_') : key;
+            if (!countedKeys.has(key) && !countedKeys.has(normKey)) {
                 countedKeys.add(key);
-                const st = Number(data.stars[key] || 0);
-                const isUncapped = key.startsWith('ar_') || key.startsWith('arSukuKata_') || key.startsWith('tandukKata_') || key.startsWith('cabaran_') || key.startsWith('surih_');
+                countedKeys.add(normKey);
+                const isExtra = key.startsWith('extra_') || key.includes('_extra_');
+                const isUncapped = !isExtra && (
+                    key.startsWith('ar_') ||
+                    key.startsWith('arSukuKata_') ||
+                    key.startsWith('arKiraJari_') ||
+                    key.startsWith('tandukKata_') ||
+                    key.startsWith('puzzle_') ||
+                    key.startsWith('cantumKata_') ||
+                    key.startsWith('cubaSebut_') ||
+                    key.startsWith('cubaBaca_') ||
+                    key.startsWith('nombor_') ||
+                    key.startsWith('math_') ||
+                    key.startsWith('fonik_') ||
+                    (key.startsWith('cabaran_') && !key.includes('tambahan')) ||
+                    key.startsWith('surih_')
+                );
+                const st = Number(data.stars[key] || data.stars[normKey] || 0);
                 totalStars += isUncapped ? Math.max(st, 0) : Math.min(Math.max(st, 0), 3);
             }
         });
@@ -4847,6 +5078,10 @@ function kiraLencanaMurid(data) {
         4: 'badge_peta_4'
     };
 
+    const sName = (data.nama || data.name || '').trim().toLowerCase();
+    const activeStudentName = (window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif') || '').trim().toLowerCase();
+    const isThisActiveStudent = Boolean(activeStudentName && sName && activeStudentName === sName);
+
     let mapsQualifiedCount = 0;
     for (let petaId = 1; petaId <= 4; petaId++) {
         const mapObj = MAP_CHALLENGES[petaId];
@@ -4862,6 +5097,9 @@ function kiraLencanaMurid(data) {
                 const maxScore = typeof getMaxScore === 'function' ? getMaxScore(key) : 10;
                 const sc = Number(data.scores[key] || 0);
                 if (sc >= maxScore * 0.9) stars = 3;
+            } else if (isThisActiveStudent) {
+                const lsStar = Number(localStorage.getItem('stars_' + key) || 0);
+                if (lsStar > 0) stars = lsStar;
             }
             if (stars >= 3) {
                 fullStarCount++;
@@ -4869,45 +5107,68 @@ function kiraLencanaMurid(data) {
         });
 
         // Kriteria sah: Sekurang-kurangnya 3 aktiviti dalam cabaran utama mendapat 3 bintang penuh
-        if (fullStarCount >= 3) {
-            earned.push(badgeKeys[petaId]);
+        // ATAU lencana sah tersimpan dalam rekod murid (jika murid memang mempunyai markah/bintang)
+        const badgeKey = badgeKeys[petaId];
+        const hasStudentRecord = (data.totalBintang && data.totalBintang > 0) || (data.stars && Object.keys(data.stars).length > 0) || (data.scores && Object.keys(data.scores).length > 0);
+        const alreadyEarned = (hasStudentRecord && data.badges && Array.isArray(data.badges) && data.badges.includes(badgeKey));
+        if (fullStarCount >= 3 || alreadyEarned) {
+            earned.push(badgeKey);
             mapsQualifiedCount++;
         }
     }
 
     // Lencana Ke-5: Master Badge "Kapten Harta Karun" (bila kesemua 4 cabaran peta utama selesai)
-    if (mapsQualifiedCount >= 4) {
+    const hasStudentRecord = (data.totalBintang && data.totalBintang > 0) || (data.stars && Object.keys(data.stars).length > 0) || (data.scores && Object.keys(data.scores).length > 0);
+    if (mapsQualifiedCount >= 4 || (hasStudentRecord && data.badges && Array.isArray(data.badges) && data.badges.includes('badge_master'))) {
         earned.push('badge_master');
     }
 
-    return earned;
+    return Array.from(new Set(earned));
 }
 window.kiraLencanaMurid = kiraLencanaMurid;
 
 function getCurrentProfileData() {
     const studentName = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || localStorage.getItem('bunyiKataNamaMurid') || '';
     if (!studentName) return null;
+    let s = null;
     if (typeof studentData !== 'undefined' && studentData && studentData[studentName]) {
-        return studentData[studentName];
+        s = studentData[studentName];
+    } else if (typeof window.studentData !== 'undefined' && window.studentData && window.studentData[studentName]) {
+        s = window.studentData[studentName];
+    } else {
+        try {
+            const raw = localStorage.getItem('bunyiKataStudentData');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && parsed[studentName]) {
+                    s = parsed[studentName];
+                    if (typeof studentData !== 'undefined' && studentData) studentData[studentName] = s;
+                    if (typeof window.studentData !== 'undefined' && window.studentData) window.studentData[studentName] = s;
+                }
+            }
+        } catch (e) {}
     }
-    if (typeof window.studentData !== 'undefined' && window.studentData && window.studentData[studentName]) {
-        return window.studentData[studentName];
-    }
-    try {
-        const raw = localStorage.getItem('bunyiKataStudentData');
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            if (parsed && parsed[studentName]) return parsed[studentName];
+    if (s && (!s.badges || s.badges.length === 0) && typeof kiraLencanaMurid === 'function') {
+        const earned = kiraLencanaMurid(s);
+        if (Array.isArray(earned) && earned.length > 0) {
+            s.badges = earned;
         }
-    } catch (e) {}
-    return null;
+    }
+    return s;
 }
 window.getCurrentProfileData = getCurrentProfileData;
 
 function isPetaCompleted(petaId, data) {
     if (!data) data = getCurrentProfileData();
     if (!data) return false;
-    const earned = kiraLencanaMurid(data);
+    const existingBadges = (data && Array.isArray(data.badges)) ? data.badges : [];
+    if (petaId === 'all' || petaId === 'master' || petaId === 5) {
+        if (existingBadges.includes('badge_master')) return true;
+    } else {
+        const numId = Number(petaId);
+        if (numId >= 1 && numId <= 4 && existingBadges.includes(`badge_peta_${numId}`)) return true;
+    }
+    const earned = (typeof kiraLencanaMurid === 'function') ? kiraLencanaMurid(data) : [];
     if (petaId === 'all' || petaId === 'master' || petaId === 5) {
         return earned.includes('badge_master');
     }
@@ -5064,8 +5325,9 @@ function renderProfile() {
     }
 
     const selectEl = document.getElementById('profile-peta-filter');
-    const selectedPeta = selectEl && selectEl.value ? selectEl.value : '1';
-    if (selectEl && !selectEl.value) {
+    let selectedPeta = selectEl && selectEl.value ? selectEl.value : '1';
+    if (selectedPeta === '5') selectedPeta = '1';
+    if (selectEl && (!selectEl.value || selectEl.value === '5')) {
         selectEl.value = '1';
     }
 
@@ -5120,16 +5382,18 @@ function renderProfile() {
         }
     ];
 
-    const earnedList = kiraLencanaMurid(data);
+    const existingBadges = (data && Array.isArray(data.badges)) ? data.badges : [];
+    const earnedList = (typeof kiraLencanaMurid === 'function') ? kiraLencanaMurid(data) : [];
+    const allBadges = Array.from(new Set([...existingBadges, ...earnedList]));
     const badgeStatus = {
-        1: earnedList.includes('badge_peta_1'),
-        2: earnedList.includes('badge_peta_2'),
-        3: earnedList.includes('badge_peta_3'),
-        4: earnedList.includes('badge_peta_4'),
-        "all": earnedList.includes('badge_master')
+        1: allBadges.includes('badge_peta_1'),
+        2: allBadges.includes('badge_peta_2'),
+        3: allBadges.includes('badge_peta_3'),
+        4: allBadges.includes('badge_peta_4'),
+        "all": allBadges.includes('badge_master')
     };
 
-    data.badges = earnedList;
+    data.badges = allBadges;
 
     let htmlBadges = '';
     let earnedCount = 0;
@@ -5342,9 +5606,10 @@ window.renderTeacherTable = function () {
         if (typeof MAP_CHALLENGES !== 'undefined') {
             Object.values(MAP_CHALLENGES).forEach(map => {
                 map.modules.forEach(mod => {
+                    const maxScore = typeof getMaxScore === 'function' ? getMaxScore(mod.id) : 10;
                     const stars = (data.stars && data.stars[mod.id] !== undefined) ? Number(data.stars[mod.id]) : 0;
-                    const score = (data.scores && data.scores[mod.id] !== undefined) ? data.scores[mod.id] : 0;
-                    const isDone = Boolean((data.latihan && data.latihan[mod.id]) || stars > 0 || score > 0);
+                    const score = (data.scores && data.scores[mod.id] !== undefined) ? Number(data.scores[mod.id]) : (stars > 0 ? Math.round((stars / 3) * maxScore) : 0);
+                    const isDone = (score >= maxScore && maxScore > 0);
                     if (isDone) totalSelesai++;
                 });
             });
@@ -5394,11 +5659,19 @@ window.renderTeacherTable = function () {
     const activeClass = localStorage.getItem('bunyiKataNamaKelas') || (listKelas.length > 0 ? listKelas[0] : '');
 
     const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
+    const teacherName = (localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || '').trim().toLowerCase();
+    const isNotGhostOrGuru = n => {
+        if (!n) return false;
+        const lower = n.trim().toLowerCase();
+        if (GHOST_NAMES.includes(lower)) return false;
+        if (teacherName && lower === teacherName) return false;
+        return true;
+    };
     const validStudentNames = (Array.isArray(studentNames) && studentNames.length > 0)
-        ? studentNames.filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()))
+        ? studentNames.filter(isNotGhostOrGuru)
         : (Array.isArray(window.studentNames) && window.studentNames.length > 0
-            ? window.studentNames.filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()))
-            : Object.keys(studentData || {}).filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase())));
+            ? window.studentNames.filter(isNotGhostOrGuru)
+            : Object.keys(studentData || {}).filter(isNotGhostOrGuru));
 
     // Susun nama murid mengikut abjad (A-Z)
     validStudentNames.sort((a, b) => a.localeCompare(b, 'ms', { sensitivity: 'base' }));
@@ -5442,8 +5715,8 @@ window.renderTeacherTable = function () {
             const key = mod.id;
             const maxScore = getMaxScore(key);
             const stars = (data.stars && data.stars[key] !== undefined) ? Number(data.stars[key]) : 0;
-            const score = (data.scores && data.scores[key] !== undefined) ? data.scores[key] : (stars > 0 ? Math.round((stars / 3) * maxScore) : 0);
-            const isDone = Boolean((data.latihan && data.latihan[key]) || stars > 0 || (data.scores && data.scores[key] !== undefined && data.scores[key] > 0));
+            const score = (data.scores && data.scores[key] !== undefined) ? Number(data.scores[key]) : (stars > 0 ? Math.round((stars / 3) * maxScore) : 0);
+            const isDone = (score >= maxScore && maxScore > 0);
 
             if (isDone) {
                 moduleCellsHTML += `
@@ -5456,7 +5729,7 @@ window.renderTeacherTable = function () {
                 moduleCellsHTML += `
                             <td style="text-align:center; vertical-align:middle; padding:6px 6px; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;">
                                 <span style="background:#fee2e2; color:#b91c1c; font-size:0.75rem; font-weight:bold; padding:3px 8px; border-radius:8px; border:1px solid #fca5a5; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
-                                    <i class="fa-solid fa-circle-xmark"></i> 0/${maxScore}
+                                    <i class="fa-solid fa-circle-xmark"></i> ${score}/${maxScore}
                                 </span>
                             </td>`;
             }
@@ -5468,7 +5741,7 @@ window.renderTeacherTable = function () {
                     <tr style="background:${rowBg}; transition: background 0.15s ease;">
                         <td style="font-weight:600; text-align:center; vertical-align:middle; padding:6px 8px; font-size:0.8rem; color:#64748b; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;">${index++}</td>
                         <td style="font-weight:bold; color:var(--color-dark, #1e293b); vertical-align:middle; padding:6px 12px; font-size:0.82rem; text-align:left; text-transform:uppercase; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0; white-space:nowrap;">${nama.toUpperCase()}</td>
-                        <td style="font-weight:bold; vertical-align:middle; text-align:center; padding:6px 8px; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;"><span style="color:#d97706; font-size:0.8rem; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-star"></i> ${jumlahMarkah(data)}</span></td>
+                        <td style="font-weight:bold; vertical-align:middle; text-align:center; padding:6px 8px; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;"><span style="color:#d97706; font-size:0.8rem; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-star"></i> ${(data && data.totalBintang !== undefined && (!data.stars || Object.keys(data.stars).length === 0)) ? Number(data.totalBintang || 0) : jumlahMarkah(data)}</span></td>
                         <td style="font-weight:bold; vertical-align:middle; text-align:center; padding:6px 8px; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;">
                             <span style="background:#fef3c7; color:#b45309; padding:3px 8px; border-radius:8px; border:1px solid #fcd34d; font-size:0.75rem; display:inline-flex; align-items:center; gap:4px;">
                                 <i class="fa-solid fa-award"></i> ${lencanaCount}
@@ -5487,37 +5760,250 @@ window.renderTeacherTable = function () {
 };
 
 window.tukarCarta = function (jenis) {
-    document.querySelectorAll('#btn-leaderboard-harian, #btn-leaderboard-mingguan, #btn-leaderboard-bulanan').forEach(btn => {
+    document.querySelectorAll('#btn-leaderboard-harian, #btn-leaderboard-mingguan, #btn-leaderboard-bulanan, #btn-leaderboard-global').forEach(btn => {
         btn.classList.remove('bg-yellow');
         btn.classList.add('bg-white');
     });
-    document.getElementById('btn-leaderboard-' + jenis).classList.remove('bg-white');
-    document.getElementById('btn-leaderboard-' + jenis).classList.add('bg-yellow');
+    const activeBtn = document.getElementById('btn-leaderboard-' + jenis);
+    if (activeBtn) {
+        activeBtn.classList.remove('bg-white');
+        activeBtn.classList.add('bg-yellow');
+    }
 
     renderLeaderboard(jenis);
 };
 
 window.renderLeaderboard = renderLeaderboard;
-function renderLeaderboard(jenis = 'harian') {
-    // Get all students and sort by score descending
-    const studentsArr = Object.entries(studentData).map(([nama, data]) => {
-        let baseScore = jumlahMarkah(data);
-        if (jenis === 'mingguan') baseScore = (baseScore * 5) + (nama.length * 2);
-        if (jenis === 'bulanan') baseScore = (baseScore * 20) + (nama.length * 5);
-        return { name: nama, score: baseScore, avatar: data.avatar || "/images/avatar/avatar1.png" };
-    });
-    studentsArr.sort((a, b) => b.score - a.score);
-
+async function renderLeaderboard(jenis = 'harian') {
     const grandstandEl = document.getElementById('leaderboard-grandstand');
     const listEl = document.getElementById('leaderboard-list');
+    if (!grandstandEl || !listEl) return;
+
+    grandstandEl.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; font-weight:bold; color:var(--color-dark);"><i class="fa-solid fa-spinner fa-spin"></i> Memuatkan kedudukan...</div>';
+    listEl.innerHTML = '';
+
+    const curActiveName = (window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || '').trim();
+    const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
+    const teacherName = (localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || '').trim().toLowerCase();
+
+    let studentsArr = [];
+
+    if (jenis === 'global') {
+        // --- MOD KEDUDUKAN GLOBAL (TOP 10 BULANAN / KESELURUHAN) ---
+        try {
+            const res = await fetch('https://bunyi-kata-official-default-rtdb.asia-southeast1.firebasedatabase.app/students.json');
+            if (res.ok) {
+                const data = await res.json();
+                for (const [id, s] of Object.entries(data || {})) {
+                    if (!s || !s.nama) continue;
+                    const lower = s.nama.trim().toLowerCase();
+                    if (GHOST_NAMES.includes(lower)) continue;
+                    if (teacherName && lower === teacherName) continue;
+                    studentsArr.push({
+                        id: id,
+                        name: s.nama.trim().toUpperCase(),
+                        score: Number(s.total_bintang || 0),
+                        avatar: s.avatar_url || '/images/avatar/avatar1.png',
+                        kelas: s.nama_kelas || s.kod_kelas || s.nama_keluarga || ''
+                    });
+                }
+            }
+        } catch (err) {
+            console.warn('Ralat muat turun global students:', err);
+        }
+
+        // Fallback jika fetch offline
+        if (studentsArr.length === 0 && typeof studentData !== 'undefined') {
+            Object.entries(studentData).forEach(([n, d]) => {
+                const lower = n.trim().toLowerCase();
+                if (GHOST_NAMES.includes(lower) || (teacherName && lower === teacherName)) return;
+                studentsArr.push({
+                    name: n.trim().toUpperCase(),
+                    score: jumlahMarkah(d),
+                    avatar: d.avatar || '/images/avatar/avatar1.png',
+                    kelas: d.kelas || ''
+                });
+            });
+        }
+
+        // Susun markah bintang tertinggi (jika sama, susun mengikut abjad nama)
+        studentsArr.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ms'));
+        // Hadkan kepada TOP 10 SAHAJA untuk kedudukan Global
+        studentsArr = studentsArr.slice(0, 10);
+    } else {
+        // --- MOD KEDUDUKAN KELAS / KELUARGA (HARIAN, MINGGUAN, BULANAN) ---
+        const isParentChild = Boolean(
+            localStorage.getItem('bunyiKataIsParentChild') === 'true' ||
+            window.modIbuBapaAktif ||
+            (typeof document !== 'undefined' && document.body && document.body.classList.contains('parent-mode'))
+        );
+
+        let targetNames = [];
+        const sTarget = (typeof window.studentData !== 'undefined') ? window.studentData : (typeof studentData !== 'undefined' ? studentData : {});
+
+        if (isParentChild) {
+            // Hanya anak-anak di dalam keluarga pengguna sahaja
+            const rawChildren = localStorage.getItem('bunyiKataChildNames') || localStorage.getItem('bunyiKataParentChildNames');
+            if (rawChildren) {
+                try {
+                    const parsed = JSON.parse(rawChildren);
+                    if (Array.isArray(parsed) && parsed.length > 0) targetNames = parsed;
+                } catch(e) {}
+            }
+            if (targetNames.length === 0 && window.parentChildNames && Array.isArray(window.parentChildNames)) {
+                targetNames = [...window.parentChildNames];
+            }
+            if (targetNames.length === 0) {
+                const curFam = (sTarget[curActiveName] && sTarget[curActiveName].nama_keluarga) || localStorage.getItem('bunyiKataNamaKeluarga') || '';
+                targetNames = Object.keys(sTarget).filter(n => {
+                    const d = sTarget[n] || {};
+                    return curFam && d.nama_keluarga && d.nama_keluarga.toLowerCase() === curFam.toLowerCase();
+                });
+            }
+        } else {
+            // Hanya murid-murid di dalam kelas murid aktif sahaja
+            const activeClass = (sTarget[curActiveName]?.kelas || localStorage.getItem('bunyiKataNamaKelas') || '').trim().toLowerCase();
+            const allNames = (Array.isArray(studentNames) && studentNames.length > 0)
+                ? studentNames
+                : ((Array.isArray(window.studentNames) && window.studentNames.length > 0)
+                    ? window.studentNames
+                    : Object.keys(sTarget));
+
+            targetNames = allNames.filter(n => {
+                if (!n) return false;
+                const lower = n.trim().toLowerCase();
+                if (GHOST_NAMES.includes(lower) || (teacherName && lower === teacherName)) return false;
+                if (!activeClass) return true;
+                const d = sTarget[n] || {};
+                const sKelas = (d.kelas || '').trim().toLowerCase();
+                return !sKelas || sKelas === activeClass;
+            });
+        }
+
+        // Singkirkan duplikasi & pastikan murid aktif termasuk jika ada
+        targetNames = Array.from(new Set(targetNames.filter(n => {
+            const lower = n.trim().toLowerCase();
+            return !GHOST_NAMES.includes(lower) && (lower !== teacherName);
+        })));
+        if (curActiveName && !GHOST_NAMES.includes(curActiveName.toLowerCase()) && curActiveName.toLowerCase() !== teacherName && !targetNames.includes(curActiveName)) {
+            targetNames.push(curActiveName);
+        }
+
+        // Muat turun rekod aktiviti dari Firebase /scores.json jika ada untuk kiraan harian/mingguan yang tepat
+        let scoresList = [];
+        try {
+            const scRes = await fetch('https://bunyi-kata-official-default-rtdb.asia-southeast1.firebasedatabase.app/scores.json');
+            if (scRes.ok) {
+                const scData = await scRes.json();
+                if (scData) scoresList = Object.values(scData);
+            }
+        } catch(e) {}
+
+        const now = new Date();
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const sevenDaysAgoTime = now.getTime() - (7 * 24 * 60 * 60 * 1000);
+
+        studentsArr = targetNames.map(nama => {
+            const d = sTarget[nama] || {};
+            const sId = d.id || '';
+            let computedStars = 0;
+
+            if (scoresList.length > 0 && sId) {
+                // Tapis skor mengikut student_id
+                const studentScores = scoresList.filter(sc => sc && sc.student_id === sId);
+                const bestByActivity = {};
+
+                studentScores.forEach(sc => {
+                    if (!sc || !sc.tarikh) return;
+                    const scTime = new Date(sc.tarikh).getTime();
+                    const scDateStr = sc.tarikh.slice(0, 10);
+                    const scMonthStr = sc.tarikh.slice(0, 7);
+
+                    let include = false;
+                    if (jenis === 'harian') {
+                        include = (scDateStr === todayStr);
+                    } else if (jenis === 'mingguan') {
+                        include = (scTime >= sevenDaysAgoTime);
+                    } else if (jenis === 'bulanan') {
+                        include = (scMonthStr === currentMonthStr);
+                    }
+
+                    if (include) {
+                        const actKey = sc.aktiviti_nama || sc.modul || 'act';
+                        const bVal = Number(sc.bintang || 0);
+                        bestByActivity[actKey] = Math.max(bestByActivity[actKey] || 0, bVal);
+                    }
+                });
+
+                computedStars = Object.values(bestByActivity).reduce((sum, b) => sum + b, 0);
+            }
+
+            // Tambah bintang Cabaran Tambahan (extra challenges) dari studentData
+            // Cabaran tambahan tidak direkodkan ke /scores, jadi perlu dicampur berasingan
+            let extraStars = 0;
+            if (typeof EXTRA_CHALLENGES_DATA !== 'undefined' && d && d.stars) {
+                const extraCountedKeys = new Set();
+                Object.values(EXTRA_CHALLENGES_DATA).forEach(list => {
+                    if (Array.isArray(list)) {
+                        list.forEach(m => {
+                            const baseId = m.id;
+                            if (extraCountedKeys.has(baseId)) return;
+                            extraCountedKeys.add(baseId);
+                            let st = 0;
+                            if (d.stars[baseId] !== undefined) st = Math.max(st, Number(d.stars[baseId] || 0));
+                            if (d.stars['extra_' + baseId] !== undefined) st = Math.max(st, Number(d.stars['extra_' + baseId] || 0));
+                            extraStars += Math.min(Math.max(st, 0), 3);
+                        });
+                    }
+                });
+            }
+            // Juga semak localStorage untuk cabaran tambahan jika studentData tiada
+            if (extraStars === 0 && typeof EXTRA_CHALLENGES_DATA !== 'undefined') {
+                Object.values(EXTRA_CHALLENGES_DATA).forEach(list => {
+                    if (Array.isArray(list)) {
+                        list.forEach(m => {
+                            const lsVal = Number(localStorage.getItem('extra_stars_' + m.id) || 0);
+                            extraStars += Math.min(Math.max(lsVal, 0), 3);
+                        });
+                    }
+                });
+            }
+            computedStars += extraStars;
+
+            // Fallback kepada jumlahMarkah jika masih 0 (tiada rekod /scores langsung)
+            if (computedStars === 0) {
+                const baseline = jumlahMarkah(d);
+                if (jenis === 'bulanan') {
+                    computedStars = baseline;
+                } else if (jenis === 'mingguan') {
+                    computedStars = baseline;
+                } else if (jenis === 'harian') {
+                    if (nama === curActiveName && baseline > 0) computedStars = baseline;
+                }
+            }
+
+            return {
+                name: nama,
+                score: computedStars,
+                avatar: d.avatar || "/images/avatar/avatar1.png"
+            };
+        });
+
+        // Susun markah bintang menurun; jika markah sama (cth 0 bintang), susun mengikut abjad (A-Z)
+        studentsArr.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ms'));
+    }
 
     grandstandEl.innerHTML = '';
     listEl.innerHTML = '';
 
+    if (studentsArr.length === 0) {
+        grandstandEl.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:30px; color:#64748b; font-weight:bold;">Tiada murid dalam senarai ini.</div>';
+        return;
+    }
+
     // Top 3
     const top3 = studentsArr.slice(0, 3);
-
-    // We want the order to be visually: 2nd, 1st, 3rd.
     const podiumPositions = [
         { rank: 2, data: top3[1], cls: 'podium-2', iconColor: 'color: #94a3b8' },
         { rank: 1, data: top3[0], cls: 'podium-1', iconColor: 'color: #f59e0b' },
@@ -5526,37 +6012,42 @@ function renderLeaderboard(jenis = 'harian') {
 
     podiumPositions.forEach(pos => {
         if (pos.data) {
-            const isCurrentUser = pos.data.name === namaMuridAktif;
+            const isCurrentUser = pos.data.name.trim().toLowerCase() === curActiveName.trim().toLowerCase();
             const highlightStyle = isCurrentUser ? 'box-shadow: 0 0 15px var(--color-blue);' : '';
             grandstandEl.innerHTML += `
-                        <div class="podium ${pos.cls}" style="${highlightStyle}">
-                            <div class="podium-avatar">
-                                ${(pos.data.avatar && (pos.data.avatar.startsWith('http') || pos.data.avatar.startsWith('/') || pos.data.avatar.includes('.png'))) ? `<div style="width:100%; height:100%; border-radius:50%; background-image:url('${pos.data.avatar}'); background-size:contain; background-position:center; background-repeat:no-repeat; background-color:white;"></div>` : `<i class="fa-solid ${pos.data.avatar}" style="${pos.iconColor}; text-shadow: 1px 1px 0 #000;"></i>`}
-                                <div class="podium-rank-badge" style="position:absolute; top:-6px; right:-6px; background:var(--color-yellow); border: 2px solid var(--color-dark); border-radius:50%; width: 22px; height:22px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:0.75rem; color:var(--color-dark); box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${pos.rank}</div>
-                            </div>
-                            <div class="podium-name" style="${isCurrentUser ? 'color:var(--color-blue);' : ''}">${pos.data.name}</div>
-                            <div class="podium-score"><i class="fa-solid fa-star" style="color:#f59e0b; margin-right:3px;"></i>${pos.data.score}</div>
-                        </div>
-                    `;
+                <div class="podium ${pos.cls}" style="${highlightStyle}">
+                    <div class="podium-avatar">
+                        ${(pos.data.avatar && (pos.data.avatar.startsWith('http') || pos.data.avatar.startsWith('/') || pos.data.avatar.includes('.png')))
+                            ? `<div style="width:100%; height:100%; border-radius:50%; background-image:url('${pos.data.avatar}'); background-size:contain; background-position:center; background-repeat:no-repeat; background-color:white;"></div>`
+                            : `<i class="fa-solid ${pos.data.avatar}" style="${pos.iconColor}; text-shadow: 1px 1px 0 #000;"></i>`}
+                        <div class="podium-rank-badge" style="position:absolute; top:-6px; right:-6px; background:var(--color-yellow); border: 2px solid var(--color-dark); border-radius:50%; width: 22px; height:22px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:0.75rem; color:var(--color-dark); box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${pos.rank}</div>
+                    </div>
+                    <div class="podium-name" style="${isCurrentUser ? 'color:var(--color-blue); font-weight:bold;' : ''}">${pos.data.name}</div>
+                    <div class="podium-score"><i class="fa-solid fa-star" style="color:#f59e0b; margin-right:3px;"></i>${pos.data.score}</div>
+                </div>
+            `;
         } else {
-            grandstandEl.innerHTML += `<div class="podium ${pos.cls}" style="opacity: 0.5;"></div>`;
+            grandstandEl.innerHTML += `<div class="podium ${pos.cls}" style="opacity: 0.3;"></div>`;
         }
     });
 
-    // The rest
+    // The rest (Rank 4 onwards)
     const rest = studentsArr.slice(3);
     rest.forEach((student, index) => {
-        const isCurrentUser = student.name === namaMuridAktif;
+        const isCurrentUser = student.name.trim().toLowerCase() === curActiveName.trim().toLowerCase();
         const highlightStyle = isCurrentUser ? 'border-color: var(--color-blue); background: #eff6ff;' : '';
         listEl.innerHTML += `
-                    <div class="leaderboard-item" style="${highlightStyle}">
-                        <div class="leaderboard-item-rank">#${index + 4}</div>
-                        <div class="leaderboard-item-name" style="${isCurrentUser ? 'color:var(--color-blue);' : ''}">
-${(student.avatar && (student.avatar.startsWith('http') || student.avatar.startsWith('/') || student.avatar.includes('.png'))) ? `<div style="display:inline-block; width:24px; height:24px; margin-right:8px; border-radius:50%; background-image:url('${student.avatar}'); background-size:contain; background-position:center; background-repeat:no-repeat; vertical-align:middle;"></div>` : `<i class="fa-solid ${student.avatar}" style="margin-right:8px; opacity:0.8;"></i>`}
-${student.name}</div>
-                        <div class="leaderboard-item-score"><i class="fa-solid fa-star" style="color:#f59e0b; margin-right:4px;"></i>${student.score}</div>
-                    </div>
-                `;
+            <div class="leaderboard-item" style="${highlightStyle}">
+                <div class="leaderboard-item-rank">#${index + 4}</div>
+                <div class="leaderboard-item-name" style="${isCurrentUser ? 'color:var(--color-blue); font-weight:bold;' : ''}">
+                    ${(student.avatar && (student.avatar.startsWith('http') || student.avatar.startsWith('/') || student.avatar.includes('.png')))
+                        ? `<div style="display:inline-block; width:24px; height:24px; margin-right:8px; border-radius:50%; background-image:url('${student.avatar}'); background-size:contain; background-position:center; background-repeat:no-repeat; vertical-align:middle;"></div>`
+                        : `<i class="fa-solid ${student.avatar}" style="margin-right:8px; opacity:0.8;"></i>`}
+                    ${student.name}
+                </div>
+                <div class="leaderboard-item-score"><i class="fa-solid fa-star" style="color:#f59e0b; margin-right:4px;"></i>${student.score}</div>
+            </div>
+        `;
     });
 }
 
@@ -7087,11 +7578,21 @@ window.triggerConfettiEffect = function (isCelebration) {
     }
 };
 
-// === POPUP BINTANG CABARAN LAIN (DIKEMASKINI SEPERTI GAMBAR GAMBAR 2) ===
+// === POPUP BINTANG CABARAN LAIN (HANYA JUMLAH BINTANG: MAKSIMUM 3 BINTANG) ===
 window.showCabaranLainStarPopup = function (score, stars) {
-    if (stars > 0 && window.triggerConfettiEffect) window.triggerConfettiEffect(true);
-    if (stars > 0 && window.playBetulSound) window.playBetulSound();
-    if (stars === 0 && window.playSalahSound) window.playSalahSound();
+    // Pastikan bintang dikesan daripada popup bintang secara tepat (maksima 3 sahaja)
+    let cleanStars = 0;
+    if (stars !== undefined) {
+        cleanStars = Number(stars) || 0;
+    } else if (score !== undefined) {
+        cleanStars = score <= 3 ? Number(score) : (score >= 80 ? 3 : score >= 50 ? 2 : score > 0 ? 1 : 0);
+    }
+    // Sepatutnya max jumlah bintang adalah 3 sahaja setiap cabaran tambahan
+    cleanStars = Math.min(3, Math.max(0, Math.round(cleanStars)));
+
+    if (cleanStars > 0 && window.triggerConfettiEffect) window.triggerConfettiEffect(true);
+    if (cleanStars > 0 && window.playBetulSound) window.playBetulSound();
+    if (cleanStars === 0 && window.playSalahSound) window.playSalahSound();
 
     let modal = document.getElementById('modal-cabaran-lain-star-result');
     const gameScreen = document.getElementById('modal-cabaran-lain-game');
@@ -7117,7 +7618,7 @@ window.showCabaranLainStarPopup = function (score, stars) {
     modal.style.setProperty('justify-content', 'center', 'important');
     modal.style.setProperty('display', 'flex', 'important');
 
-    const isFullStars = stars >= 3;
+    const isFullStars = cleanStars >= 3;
     const titleText = isFullStars ? 'Tahniah Anda Hebat!' : 'Cuba Lagi!';
 
     const renderStarSvg = (isFilled, isMiddle, rotateAngle) => {
@@ -7147,9 +7648,9 @@ window.showCabaranLainStarPopup = function (score, stars) {
         `;
     };
 
-    const star1 = renderStarSvg(stars >= 1, false, -15);
-    const star2 = renderStarSvg(stars >= 2, true, 0);
-    const star3 = renderStarSvg(stars >= 3, false, 15);
+    const star1 = renderStarSvg(cleanStars >= 1, false, -15);
+    const star2 = renderStarSvg(cleanStars >= 2, true, 0);
+    const star3 = renderStarSvg(cleanStars >= 3, false, 15);
 
     modal.innerHTML = `
     <div class="modal-content" style="max-width:440px;width:92%;padding:28px 24px 22px 24px;border-radius:28px;text-align:center;background:#ffffff;background-image:radial-gradient(#cbd5e1 1.5px, transparent 1.5px);background-size:14px 14px;border:4px solid #0f172a;box-shadow:0 12px 0 #0f172a;position:relative;animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;">
@@ -7172,15 +7673,15 @@ window.showCabaranLainStarPopup = function (score, stars) {
             ${star3}
         </div>
 
-        <!-- Middle Dotted Score Box with Outline Glow Loop -->
+        <!-- Middle Dotted Score Box with Outline Glow Loop (HANYA JUMLAH BINTANG: MAKSIMA 3) -->
         <div style="border:2.5px dashed #94a3b8;border-radius:20px;padding:12px 14px;margin:8px 0;width:100%;box-sizing:border-box;background:rgba(255,255,255,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;">
             <div style="font-size:0.88rem;font-weight:900;color:#0f172a;letter-spacing:0.5px;font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;margin-bottom:4px;">
                 ANDA MENDAPAT
             </div>
             
             <div class="score-box-glow-pulse" style="background:#ffffff;border:3px solid #0f172a;border-radius:16px;padding:4px 32px;margin:6px auto;width:100%;max-width:170px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;">
-                <span style="font-size:2.4rem;font-weight:900;color:#0f172a;font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;line-height:1;">
-                    ${stars}
+                <span id="cl-star-result-number" style="font-size:2.4rem;font-weight:900;color:#0f172a;font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;line-height:1;">
+                    ${cleanStars}
                 </span>
             </div>
 
@@ -7202,7 +7703,7 @@ window.showCabaranLainStarPopup = function (score, stars) {
             </div>
             <div style="display:flex;flex-direction:column;">
                 <div style="font-size:0.88rem;font-weight:900;color:#0f172a;line-height:1.2;font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">
-                    ${isFullStars ? 'Tahniah, Anda Hebat!' : 'Teruskan usaha anda!'}
+                    ${isFullStars ? 'Tahniah, Anda Hebat!' : 'Cuba Lagi!'}
                 </div>
                 <div style="font-size:0.78rem;font-weight:600;color:#475569;line-height:1.2;margin-top:2px;">
                     ${isFullStars ? 'Pembelajaran akan menjadikan anda lebih baik.' : 'Latihan akan menjadikan anda lebih baik.'}
@@ -7210,23 +7711,26 @@ window.showCabaranLainStarPopup = function (score, stars) {
             </div>
         </div>
 
-        <!-- Bottom 3 Action Buttons -->
-        <div style="display:flex;gap:10px;width:100%;margin-top:4px;">
-            <button onclick="window.goToLencanaFromCabaranLain()" title="Koleksi Lencana" style="background:#a855f7;border:3px solid #0f172a;border-radius:16px;box-shadow:0 4px 0 #0f172a;flex:1;padding:11px 0;color:white;display:flex;align-items:center;justify-content:center;font-size:1.25rem;cursor:pointer;transition:transform 0.1s;" onmousedown="this.style.transform='translateY(2px)'" onmouseup="this.style.transform='none'">
-                <i class="fa-solid fa-award"></i>
-            </button>
-            <button onclick="window.replayCurrentCabaranLain()" title="Main Semula" style="background:#ef4444;border:3px solid #0f172a;border-radius:16px;box-shadow:0 4px 0 #0f172a;flex:1;padding:11px 0;color:white;display:flex;align-items:center;justify-content:center;font-size:1.25rem;cursor:pointer;transition:transform 0.1s;" onmousedown="this.style.transform='translateY(2px)'" onmouseup="this.style.transform='none'">
+        <!-- Bottom Action Buttons: Main Semula & Menu Utama (Hanya Bintang, Tiada Lencana) -->
+        <div style="display:flex;gap:12px;width:100%;margin-top:4px;">
+            <button onclick="window.replayCurrentCabaranLain()" title="Main Semula" class="neo-btn bg-red" style="border:3px solid #0f172a;border-radius:16px;box-shadow:0 4px 0 #0f172a;flex:1;padding:12px 0;color:white;display:flex;align-items:center;justify-content:center;font-size:1.35rem;cursor:pointer;transition:transform 0.1s;" onmousedown="this.style.transform='translateY(2px)'" onmouseup="this.style.transform='none'">
                 <i class="fa-solid fa-rotate-right"></i>
             </button>
-            <button onclick="window.closeCabaranLainStarPopup()" title="Menu Utama" style="background:#f97316;border:3px solid #0f172a;border-radius:16px;box-shadow:0 4px 0 #0f172a;flex:1;padding:11px 0;color:white;display:flex;align-items:center;justify-content:center;font-size:1.25rem;cursor:pointer;transition:transform 0.1s;" onmousedown="this.style.transform='translateY(2px)'" onmouseup="this.style.transform='none'">
-                <i class="fa-solid fa-bars"></i>
+            <button onclick="window.closeCabaranLainStarPopup()" title="Menu Utama" class="neo-btn bg-orange" style="border:3px solid #0f172a;border-radius:16px;box-shadow:0 4px 0 #0f172a;flex:1;padding:12px 0;color:white;display:flex;align-items:center;justify-content:center;font-size:1.35rem;cursor:pointer;transition:transform 0.1s;" onmousedown="this.style.transform='translateY(2px)'" onmouseup="this.style.transform='none'">
+                <i class="fa-solid fa-house"></i>
             </button>
         </div>
     </div>
     `;
 
+    // Pastikan rekod tersimpan sentiasa selari dengan popup jumlah bintang (max 3)
+    if (window.currentExtraChallenge && window.currentExtraChallenge.id) {
+        window.saveCabaranLainScore(window.currentExtraChallenge.id, score, cleanStars);
+    }
+
     modal.style.setProperty('display', 'flex', 'important');
 };
+
 
 window.goToLencanaFromCabaranLain = function () {
     const starModal = document.getElementById('modal-cabaran-lain-star-result');
@@ -8097,11 +8601,25 @@ window.initWordSearchGestures = function () {
         const allCells = gridEl.querySelectorAll('.ws-cell');
         allCells.forEach(cell => {
             if (cell.dataset.found !== 'true') {
+                cell.classList.remove('ws-cell-selected');
+                cell.style.removeProperty('background');
+                cell.style.removeProperty('color');
+                cell.style.removeProperty('border-color');
+                cell.style.removeProperty('box-shadow');
+                cell.style.removeProperty('transform');
                 cell.style.background = '#ffffff';
                 cell.style.color = '#1e1b4b';
                 cell.style.borderColor = '#cbd5e1';
-                cell.style.boxShadow = '0 3px 0 #cbd5e1';
+                cell.style.boxShadow = '0 2px 0 #cbd5e1';
                 cell.style.transform = 'scale(1)';
+            } else {
+                const bg = cell.dataset.color || '#10b981';
+                const border = cell.dataset.border || '#059669';
+                cell.style.setProperty('background', bg, 'important');
+                cell.style.setProperty('color', '#ffffff', 'important');
+                cell.style.setProperty('border-color', border, 'important');
+                cell.style.setProperty('box-shadow', `0 3px 0 ${border}`, 'important');
+                cell.style.setProperty('transform', 'scale(1)', 'important');
             }
         });
 
@@ -8111,11 +8629,12 @@ window.initWordSearchGestures = function () {
             if (cell) {
                 currentLineCells.push(cell);
                 if (cell.dataset.found !== 'true') {
-                    cell.style.background = '#8b5cf6';
-                    cell.style.color = '#ffffff';
-                    cell.style.borderColor = '#6d28d9';
-                    cell.style.boxShadow = '0 3px 0 #6d28d9';
-                    cell.style.transform = 'scale(1.08)';
+                    cell.classList.add('ws-cell-selected');
+                    cell.style.setProperty('background', '#8b5cf6', 'important');
+                    cell.style.setProperty('color', '#ffffff', 'important');
+                    cell.style.setProperty('border-color', '#6d28d9', 'important');
+                    cell.style.setProperty('box-shadow', '0 3px 0 #6d28d9', 'important');
+                    cell.style.setProperty('transform', 'scale(1.08)', 'important');
                 }
             }
         });
@@ -8167,11 +8686,15 @@ window.initWordSearchGestures = function () {
             // Lock grid cells with color
             currentLineCells.forEach(c => {
                 c.dataset.found = 'true';
-                c.style.background = col.activeBg;
-                c.style.color = '#ffffff';
-                c.style.borderColor = col.border;
-                c.style.boxShadow = `0 3px 0 ${col.border}`;
-                c.style.transform = 'scale(1)';
+                c.dataset.color = col.activeBg;
+                c.dataset.border = col.border;
+                c.classList.add('ws-cell-found');
+                c.classList.remove('ws-cell-selected');
+                c.style.setProperty('background', col.activeBg, 'important');
+                c.style.setProperty('color', '#ffffff', 'important');
+                c.style.setProperty('border-color', col.border, 'important');
+                c.style.setProperty('box-shadow', `0 3px 0 ${col.border}`, 'important');
+                c.style.setProperty('transform', 'scale(1)', 'important');
             });
 
             // Update top pill tag
@@ -8202,15 +8725,21 @@ window.initWordSearchGestures = function () {
             // Not match -> reset selection smoothly
             currentLineCells.forEach(c => {
                 if (c.dataset.found !== 'true') {
-                    c.style.background = '#fee2e2';
-                    c.style.borderColor = '#fca5a5';
-                    c.style.boxShadow = '0 3px 0 #fca5a5';
+                    c.style.setProperty('background', '#fee2e2', 'important');
+                    c.style.setProperty('border-color', '#fca5a5', 'important');
+                    c.style.setProperty('box-shadow', '0 3px 0 #fca5a5', 'important');
                     setTimeout(() => {
                         if (c.dataset.found !== 'true') {
+                            c.classList.remove('ws-cell-selected');
+                            c.style.removeProperty('background');
+                            c.style.removeProperty('color');
+                            c.style.removeProperty('border-color');
+                            c.style.removeProperty('box-shadow');
+                            c.style.removeProperty('transform');
                             c.style.background = '#ffffff';
                             c.style.color = '#1e1b4b';
                             c.style.borderColor = '#cbd5e1';
-                            c.style.boxShadow = '0 3px 0 #cbd5e1';
+                            c.style.boxShadow = '0 2px 0 #cbd5e1';
                             c.style.transform = 'scale(1)';
                         }
                     }, 250);
@@ -12524,33 +13053,64 @@ window.vowelWhackEnd = function () {
     }, 400);
 };
 
-// === SCORE SAVING ===
+// === SCORE SAVING (CABARAN TAMBAHAN: MAKSIMA 3 BINTANG) ===
 window.saveCabaranLainScore = function (challengeId, score, stars) {
+    if (!challengeId) return;
+
+    // Pastikan max jumlah bintang adalah 3 sahaja setiap cabaran tambahan
+    let cleanStars = 0;
+    if (stars !== undefined) {
+        cleanStars = Number(stars) || 0;
+    } else if (score !== undefined) {
+        cleanStars = score <= 3 ? Number(score) : (score >= 80 ? 3 : score >= 50 ? 2 : score > 0 ? 1 : 0);
+    }
+    const validStars = Math.min(3, Math.max(0, Math.round(cleanStars)));
+    const validScore = Math.min(100, Math.max(0, Math.round(Number(score) || (validStars * 33.33))));
+
     const key = 'extra_stars_' + challengeId;
     const scoreKey = 'extra_score_' + challengeId;
     const prevStars = Number(localStorage.getItem(key) || 0);
     const prevScore = Number(localStorage.getItem(scoreKey) || 0);
-    if (stars > prevStars) localStorage.setItem(key, stars);
-    if (score > prevScore) localStorage.setItem(scoreKey, score);
+    if (validStars > prevStars) localStorage.setItem(key, validStars);
+    if (validScore > prevScore) localStorage.setItem(scoreKey, validScore);
 
-    localStorage.setItem('stars_' + challengeId, stars);
-    localStorage.setItem('stars_extra_' + challengeId, stars);
+    localStorage.setItem('stars_' + challengeId, validStars);
+    // Hapus duplicate keys lama
+    localStorage.removeItem('stars_extra_' + challengeId);
+    if (challengeId.startsWith('extra_')) {
+        localStorage.removeItem('extra_stars_extra_' + challengeId);
+    }
 
-    if (namaMuridAktif && studentData[namaMuridAktif]) {
-        if (!studentData[namaMuridAktif].stars) studentData[namaMuridAktif].stars = {};
-        if (!studentData[namaMuridAktif].scores) studentData[namaMuridAktif].scores = {};
-        const prev = Number(studentData[namaMuridAktif].stars[challengeId] || 0);
-        if (stars > prev) {
-            studentData[namaMuridAktif].stars[challengeId] = stars;
-            studentData[namaMuridAktif].stars['extra_' + challengeId] = stars;
-            studentData[namaMuridAktif].scores[challengeId] = score;
-            if (typeof window.simpanDataKeStorage === 'function') window.simpanDataKeStorage();
+    const currentStudent = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif');
+    if (currentStudent && studentData && studentData[currentStudent]) {
+        if (!studentData[currentStudent].stars) studentData[currentStudent].stars = {};
+        if (!studentData[currentStudent].scores) studentData[currentStudent].scores = {};
+
+        // Hapus sebarang duplicate key extra_extra lama dalam rekod murid
+        if (studentData[currentStudent].stars['extra_' + challengeId]) {
+            delete studentData[currentStudent].stars['extra_' + challengeId];
+        }
+
+        const prev = Number(studentData[currentStudent].stars[challengeId] || 0);
+        if (validStars > prev) {
+            studentData[currentStudent].stars[challengeId] = validStars;
+            studentData[currentStudent].scores[challengeId] = validScore;
+            
+            if (typeof saveStudentData === 'function') {
+                saveStudentData();
+            } else if (typeof window.saveStudentData === 'function') {
+                window.saveStudentData();
+            }
         }
     }
 
     // Update card display and profile UI
-    window.refreshCabaranLainCards();
-    window.updateProfilUI();
+    if (typeof window.refreshCabaranLainCards === 'function') {
+        window.refreshCabaranLainCards();
+    }
+    if (typeof window.updateProfilUI === 'function') {
+        window.updateProfilUI();
+    }
 };
 
 window.refreshCabaranLainCards = function () {
@@ -16965,8 +17525,18 @@ window.bukaDetailLencana = function (title, desc, image, mapName, isMaster) {
     modal.style.display = 'flex';
 };
 
+window.muatTurunSijil = function (namaOptional) {
+    if (typeof window.bukaModalSijilMurid === 'function') {
+        window.bukaModalSijilMurid(namaOptional);
+    }
+};
+
 function janaMuatTurunSijilPDF(namaOptional) {
-    const studentName = namaOptional || ((typeof namaMuridAktif !== 'undefined' && namaMuridAktif) ? namaMuridAktif : (localStorage.getItem('bunyiKataNamaMurid') || 'Murid Cemerlang'));
+    const studentName = namaOptional || ((typeof namaMuridAktif !== 'undefined' && namaMuridAktif) ? namaMuridAktif : (localStorage.getItem('bunyiKataNamaMurid') || 'MURID CEMERLANG'));
+    if (typeof window.downloadCertificatePDF === 'function') {
+        window.downloadCertificatePDF(studentName);
+        return;
+    }
     const currentDate = new Date().toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric' });
 
     let jsPDFObj = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : (typeof jsPDF !== 'undefined' ? jsPDF : null);
@@ -17117,7 +17687,7 @@ function janaMuatTurunSijilPDF(namaOptional) {
 }
 window.janaMuatTurunSijilPDF = janaMuatTurunSijilPDF;
 
-function muatTurunSijil() {
+function muatTurunSijil(namaOptional) {
     const sijilBtn = document.getElementById('sijil-btn');
     if (sijilBtn && sijilBtn.disabled) {
         const msg = "Sijil Pencapaian masih terkunci! Selesaikan semua 4 Peta Cabaran untuk membuka Sijil Pencapaian Kapten Harta Karun.";
@@ -17129,72 +17699,16 @@ function muatTurunSijil() {
         return;
     }
 
-    const studentName = (typeof namaMuridAktif !== 'undefined' && namaMuridAktif) ? namaMuridAktif : 'Murid Cemerlang';
-    const currentDate = new Date().toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric' });
-
-    let certModal = document.getElementById('modal-sijil-pencapaian');
-    if (!certModal) {
-        certModal = document.createElement('div');
-        certModal.id = 'modal-sijil-pencapaian';
-        certModal.className = 'modal-overlay';
-        certModal.style.cssText = 'display: flex; z-index: 3200; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; padding: 15px;';
-        document.body.appendChild(certModal);
+    if (typeof window.bukaModalSijilMurid === 'function') {
+        window.bukaModalSijilMurid(namaOptional);
+        return;
+    } else {
+        setTimeout(() => {
+            if (typeof window.bukaModalSijilMurid === 'function') {
+                window.bukaModalSijilMurid(namaOptional);
+            }
+        }, 100);
     }
-
-    certModal.innerHTML = `
-    <div class="modal-content neo-box" style="max-width: 680px; width: 100%; background: #ffffff; border: 6px solid #d4af37; border-radius: 24px; padding: 26px 20px; text-align: center; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); background-image: radial-gradient(circle, rgba(212, 175, 55, 0.12) 1.5px, transparent 1.5px); background-size: 16px 16px;">
-        <button class="neo-btn bg-red close-btn" onclick="document.getElementById('modal-sijil-pencapaian').style.display='none'" style="position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; z-index: 10;" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
-
-        <div style="border: 2px dashed #d4af37; padding: 22px 16px; border-radius: 16px; background: rgba(255,255,255,0.96);">
-            <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 8px;">
-                <img src="/images/sampingan/logo-main-screen.png" alt="Bunyi Kata" style="max-height: 55px; width: auto;" />
-            </div>
-
-            <div class="century-gothic-font" style="font-size: 0.85rem; letter-spacing: 2px; color: #b45309; text-transform: uppercase; font-weight: 800; margin-bottom: 4px;">
-                SIJIL PENCAPAIAN RASMI
-            </div>
-
-            <h1 class="century-gothic-font" style="font-size: clamp(1.5rem, 4vw, 2.1rem); font-weight: 900; color: #0f172a; margin-bottom: 10px; text-transform: uppercase; border-bottom: 3px solid #d4af37; display: inline-block; padding-bottom: 4px;">
-                KAPTEN HARTA KARUN
-            </h1>
-
-            <p style="font-size: 0.95rem; color: #475569; margin-bottom: 6px;">
-                Dengan ini disahkan bahawa
-            </p>
-
-            <div class="century-gothic-font" style="font-size: clamp(1.4rem, 4.5vw, 2rem); font-weight: 900; color: #0284c7; margin: 8px 0 14px; text-transform: uppercase; letter-spacing: 1px;">
-                ${studentName}
-            </div>
-
-            <p style="font-size: 0.92rem; color: #334155; max-width: 500px; margin: 0 auto 18px; line-height: 1.55;">
-                Telah berjaya menyelesaikan kesemua 4 Peta Cabaran Pembelajaran Bunyi Kata (Kenal Huruf, Suku Kata Asas, Suku Kata Hero & Bacaan Bergred) serta memperolehi Lencana Kehormat Kapten Harta Karun!
-            </p>
-
-            <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap;">
-                <div style="width: 65px; height: 65px; border-radius: 50%; border: 3px solid #d4af37; overflow: hidden; background: #fff; padding: 2px;">
-                    <img src="/images/avatar/avatar2.png" style="width: 100%; height: 100%; object-fit: contain;" />
-                </div>
-                <div style="text-align: left;">
-                    <div style="font-weight: 800; font-size: 0.95rem; color: #0f172a;">Aplikasi Bunyi Kata</div>
-                    <div style="font-size: 0.8rem; color: #64748b;">Tarikh: ${currentDate}</div>
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                <button class="neo-btn bg-green" onclick="window.janaMuatTurunSijilPDF('${studentName.replace(/'/g, "\'")}')" style="font-size: 0.95rem; padding: 10px 18px; display: inline-flex; align-items: center; gap: 6px;">
-                    <i class="fa-solid fa-file-pdf"></i> Muat Turun Sijil (PDF)
-                </button>
-                <button class="neo-btn bg-orange" onclick="window.print()" style="font-size: 0.95rem; padding: 10px 18px; display: inline-flex; align-items: center; gap: 6px; color: white;">
-                    <i class="fa-solid fa-print"></i> Cetak
-                </button>
-                <button class="neo-btn bg-blue" onclick="document.getElementById('modal-sijil-pencapaian').style.display='none'" style="font-size: 0.95rem; padding: 10px 18px;">
-                    Tutup
-                </button>
-            </div>
-        </div>
-    </div>
-    `;
-    certModal.style.display = 'flex';
 }
 
 window.muatTurunSijil = muatTurunSijil;
@@ -17436,7 +17950,10 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
         window.fetchStudentProgressFromFirebase(studentName, explicitStudentId).then(remote => {
             if (remote) {
                 const sTarget = (typeof window.studentData !== 'undefined') ? window.studentData : studentData;
-                if (sTarget && sTarget[studentName]) {
+                if (sTarget) {
+                    if (!sTarget[studentName]) {
+                        sTarget[studentName] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: window.selectedAvatarIcon || '/images/avatar/avatar1.png' };
+                    }
                     if (remote.id) {
                         sTarget[studentName].id = remote.id;
                         localStorage.setItem('bunyiKataStudentId', remote.id);
@@ -17456,6 +17973,13 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
                     if (remote.totalBintang !== undefined && remote.totalBintang > 0) {
                         sTarget[studentName].totalBintang = remote.totalBintang;
                         sTarget[studentName].coins = remote.totalBintang;
+                    }
+
+                    if ((!sTarget[studentName].badges || sTarget[studentName].badges.length === 0) && typeof kiraLencanaMurid === 'function') {
+                        const earned = kiraLencanaMurid(sTarget[studentName]);
+                        if (Array.isArray(earned) && earned.length > 0) {
+                            sTarget[studentName].badges = earned;
+                        }
                     }
 
                     // PENTING: Sync bintang & skor ke localStorage supaya peta cabaran boleh baca
@@ -17490,6 +18014,7 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
                     if (typeof updateProfilUI === 'function') {
                         try { updateProfilUI(); } catch(e) {}
                     }
+                    window.dispatchEvent(new CustomEvent('kemaskini-profil'));
                 }
             }
         }).catch(e => console.warn('Firebase student sync notice:', e));
@@ -23186,6 +23711,80 @@ window.pilihPeta = function (nomborPeta) {
 
 function initAppLogicOnReady() {
     mengendaliNavigasiURL();
+
+    // Pulihkan dan sync data murid aktif jika pengguna sedang dalam sesi murid/anak
+    const curStudent = window.namaMuridAktif || localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || localStorage.getItem('bunyiKataNamaMurid') || '';
+    if (curStudent && curStudent !== 'Tetamu' && curStudent !== 'Murid') {
+        const sTarget = (typeof window.studentData !== 'undefined') ? window.studentData : (typeof studentData !== 'undefined' ? studentData : null);
+        if (sTarget && sTarget[curStudent]) {
+            const sObj = sTarget[curStudent];
+            if (sObj.stars && typeof sObj.stars === 'object') {
+                Object.keys(sObj.stars).forEach(modKey => {
+                    const st = Number(sObj.stars[modKey] || 0);
+                    if (st > 0) localStorage.setItem('stars_' + modKey, String(st));
+                });
+            }
+            if (sObj.scores && typeof sObj.scores === 'object') {
+                Object.keys(sObj.scores).forEach(modKey => {
+                    const sc = Number(sObj.scores[modKey] || 0);
+                    if (sc > 0) localStorage.setItem('score_' + modKey, String(sc));
+                });
+            }
+        }
+
+        if (typeof window.fetchStudentProgressFromFirebase === 'function') {
+            const explicitId = localStorage.getItem('bunyiKataStudentId') || '';
+            window.fetchStudentProgressFromFirebase(curStudent, explicitId).then(remote => {
+                if (remote) {
+                    const target = (typeof window.studentData !== 'undefined') ? window.studentData : (typeof studentData !== 'undefined' ? studentData : null);
+                    if (target) {
+                        if (!target[curStudent]) {
+                            target[curStudent] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: window.selectedAvatarIcon || '/images/avatar/avatar1.png' };
+                        }
+                        if (remote.id) {
+                            target[curStudent].id = remote.id;
+                            localStorage.setItem('bunyiKataStudentId', remote.id);
+                        }
+                        if (remote.badges && Array.isArray(remote.badges) && remote.badges.length > 0) {
+                            target[curStudent].badges = Array.from(new Set([...(target[curStudent].badges || []), ...remote.badges]));
+                        }
+                        if (remote.scores && typeof remote.scores === 'object') {
+                            target[curStudent].scores = { ...(target[curStudent].scores || {}), ...remote.scores };
+                        }
+                        if (remote.stars && typeof remote.stars === 'object') {
+                            target[curStudent].stars = { ...(target[curStudent].stars || {}), ...remote.stars };
+                            Object.keys(remote.stars).forEach(modKey => {
+                                const st = Number(remote.stars[modKey] || 0);
+                                if (st > 0) localStorage.setItem('stars_' + modKey, String(st));
+                            });
+                        }
+                        if (remote.latihan && typeof remote.latihan === 'object') {
+                            target[curStudent].latihan = { ...(target[curStudent].latihan || {}), ...remote.latihan };
+                        }
+                        if (remote.totalBintang !== undefined && remote.totalBintang > 0) {
+                            target[curStudent].totalBintang = remote.totalBintang;
+                            target[curStudent].coins = remote.totalBintang;
+                        }
+                        if (typeof kiraLencanaMurid === 'function') {
+                            const earned = kiraLencanaMurid(target[curStudent]);
+                            if (Array.isArray(earned) && earned.length > 0) {
+                                target[curStudent].badges = Array.from(new Set([...(target[curStudent].badges || []), ...earned]));
+                            }
+                        }
+                        try {
+                            localStorage.setItem('bunyiKataStudentData', JSON.stringify(target));
+                        } catch (e) {}
+
+                        if (typeof updateProfilUI === 'function') {
+                            try { updateProfilUI(); } catch(e) {}
+                        }
+                        window.dispatchEvent(new CustomEvent('kemaskini-profil'));
+                    }
+                }
+            }).catch(e => console.warn('Startup student sync notice:', e));
+        }
+    }
+
     setTimeout(() => {
         let nKelas = localStorage.getItem('bunyiKataNamaKelas') || '-';
         let nGuru = localStorage.getItem('pdf_guru') || '';
@@ -24055,12 +24654,16 @@ function arCorrectAnswer() {
     const mobileStarsCount = document.getElementById('ar_header_stars_count');
     if (mobileStarsCount) mobileStarsCount.innerText = window.arSukuKataScore;
 
-    // Automatically update student profile stars & records!
-    const logFn = window.logProgress || (typeof logProgress === 'function' ? logProgress : null);
-    if (logFn) {
-        const arKemahiran = window.currentARKemahiran || 'umum';
-        const activityKey = arKemahiran === 'abc' ? 'ar_abc' : ('arSukuKata_' + arKemahiran);
-        logFn(activityKey, 'latihan', window.arSukuKataScore, 'arSukuKata');
+    // Automatically update student profile stars & records immediately!
+    const arKemahiran = window.currentARKemahiran || 'umum';
+    const activityKey = arKemahiran === 'abc' ? 'ar_abc' : ('arSukuKata_' + arKemahiran);
+    if (typeof window.tambahBintangGlobal === 'function') {
+        window.tambahBintangGlobal(activityKey, 1);
+    } else {
+        const logFn = window.logProgress || (typeof logProgress === 'function' ? logProgress : null);
+        if (logFn) {
+            logFn(activityKey, 'latihan', window.arSukuKataScore, 'arSukuKata');
+        }
     }
     if (typeof updateProfilUI === 'function') {
         updateProfilUI();
@@ -25027,9 +25630,11 @@ window.arKiraJariCorrectAnswer = function () {
         window.showStarPopupAR('view-ar-kirajari');
     }
 
-    // Save Progress to Profile
+    // Save Progress to Profile immediately
     const progressKey = mode === 'tambah' ? 'ar_tambah' : mode === 'tolak' ? 'ar_tolak' : 'ar_kira_jari';
-    if (typeof window.logProgress === 'function') {
+    if (typeof window.tambahBintangGlobal === 'function') {
+        window.tambahBintangGlobal(progressKey, 1);
+    } else if (typeof window.logProgress === 'function') {
         window.logProgress(progressKey, 'latihan', window.arKiraJariScore, progressKey);
     }
     if (typeof window.updateProfilUI === 'function') {

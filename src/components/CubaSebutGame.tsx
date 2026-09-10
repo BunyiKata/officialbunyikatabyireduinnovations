@@ -288,6 +288,29 @@ function playPopConfettiSound() {
   } catch (e) {}
 }
 
+function getNextKVSebutItems(rawPool: SebutItem[], mode: string): SebutItem[] {
+  const STORAGE_KEY = `cubasebut_used_kv_${mode}`;
+  let usedIds: string[] = [];
+  try {
+    const saved = sessionStorage.getItem(STORAGE_KEY);
+    if (saved) usedIds = JSON.parse(saved);
+  } catch (e) {}
+
+  let available = rawPool.filter(item => !usedIds.includes(item.id || item.text));
+  if (available.length < 10) {
+    usedIds = [];
+    available = [...rawPool];
+  }
+
+  const chosen = shuffle(available).slice(0, 10);
+  const newUsed = [...usedIds, ...chosen.map(c => c.id || c.text)];
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newUsed));
+  } catch (e) {}
+
+  return chosen;
+}
+
 export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
   mode,
   categoryKey,
@@ -298,12 +321,12 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
   // 1. Prepare randomized questions
   const initialItems = useMemo(() => {
     const raw = SEBUT_DATABASE[categoryKey] || SEBUT_DATABASE['kvkv'] || [];
-    // If KV, take 10 random items from 30 items so it's a nice manageable set
-    if (categoryKey === 'kv') {
-      return shuffle(raw).slice(0, 10);
+    // If KV, take 10 random unlearned items from the pool with rotation
+    if (categoryKey.toLowerCase() === 'kv') {
+      return getNextKVSebutItems(raw, mode);
     }
     return shuffle(raw);
-  }, [categoryKey]);
+  }, [categoryKey, mode]);
 
   const [items, setItems] = useState<SebutItem[]>(initialItems);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -619,7 +642,7 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
   const handleRestart = () => {
     isProcessingSuccessRef.current = false;
     const raw = SEBUT_DATABASE[categoryKey] || SEBUT_DATABASE['kvkv'] || [];
-    const fresh = categoryKey === 'kv' ? shuffle(raw).slice(0, 10) : shuffle(raw);
+    const fresh = categoryKey.toLowerCase() === 'kv' ? getNextKVSebutItems(raw, mode) : shuffle(raw);
     setItems(fresh);
     setCurrentIndex(0);
     setStarCount(0);
@@ -628,6 +651,23 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
     setTranscript('');
     setMatchStatus('idle');
   };
+
+  const isMountedRef = useRef(false);
+  useEffect(() => {
+    if (!isMountedRef.current) {
+      isMountedRef.current = true;
+      return;
+    }
+    const raw = SEBUT_DATABASE[categoryKey] || SEBUT_DATABASE['kvkv'] || [];
+    const fresh = categoryKey.toLowerCase() === 'kv' ? getNextKVSebutItems(raw, mode) : shuffle(raw);
+    setItems(fresh);
+    setCurrentIndex(0);
+    setStarCount(0);
+    setIsCompleted(false);
+    setFloatingStarActive(false);
+    setTranscript('');
+    setMatchStatus('idle');
+  }, [categoryKey, mode]);
 
   // Sync stars to Student Profile & Trigger celebratory confetti upon completion
   useEffect(() => {
@@ -1896,7 +1936,7 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
                       boxShadow: '0 4px 0 #0f172a'
                     }}
                   >
-                    <i className="fa-solid fa-bars"></i>
+                    <i className="fa-solid fa-house"></i>
                   </button>
                 </div>
               </motion.div>

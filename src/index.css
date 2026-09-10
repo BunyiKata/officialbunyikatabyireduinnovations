@@ -6524,9 +6524,20 @@ body:has(#login-screen.active) #student-global-nav {
 }
 
 body:not(.teacher-mode):not(.admin-mode):not(.parent-mode):has(#main-menu-screen.active) #student-global-nav,
-body:not(.teacher-mode):not(.admin-mode):not(.parent-mode):has(#leaderboard-screen.active) #student-global-nav,
 body:not(.teacher-mode):not(.admin-mode):not(.parent-mode):has(#prestasi-screen.active) #student-global-nav {
     display: flex !important;
+}
+
+/* Leaderboard: Paparkan nav hanya pada mobile, sembunyikan pada laptop/desktop */
+@media (max-width: 720px) {
+    body:not(.teacher-mode):not(.admin-mode):not(.parent-mode):has(#leaderboard-screen.active) #student-global-nav {
+        display: flex !important;
+    }
+}
+@media (min-width: 721px) {
+    body:not(.teacher-mode):not(.admin-mode):not(.parent-mode):has(#leaderboard-screen.active) #student-global-nav {
+        display: none !important;
+    }
 }
 
 @media (max-width: 720px) {
@@ -13524,11 +13535,33 @@ i.fa-brands {
     font-weight: 900 !important;
     font-size: 1.45rem !important;
     border-radius: 12px !important;
-    background: #ffffff !important;
-    color: #1e1b4b !important;
-    border: 2.5px solid #cbd5e1 !important;
-    box-shadow: 0 2px 0 #cbd5e1 !important;
+    background: #ffffff;
+    color: #1e1b4b;
+    border: 2.5px solid #cbd5e1;
+    box-shadow: 0 2px 0 #cbd5e1;
     cursor: pointer !important;
+    transition: transform 0.15s, background 0.15s, border-color 0.15s;
+}
+
+#modal-cabaran-lain-game #ws-grid .ws-cell:not([data-found="true"]):not(.ws-cell-selected) {
+    background: #ffffff;
+    color: #1e1b4b;
+    border: 2.5px solid #cbd5e1;
+    box-shadow: 0 2px 0 #cbd5e1;
+}
+
+#modal-cabaran-lain-game #ws-grid .ws-cell[data-found="true"],
+#modal-cabaran-lain-game #ws-grid .ws-cell.ws-cell-found {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+}
+
+#modal-cabaran-lain-game #ws-grid .ws-cell.ws-cell-selected:not([data-found="true"]) {
+    background: #8b5cf6 !important;
+    color: #ffffff !important;
+    border-color: #6d28d9 !important;
+    box-shadow: 0 3px 0 #6d28d9 !important;
+    transform: scale(1.08) !important;
 }
 
 /* FIX: Padanan Memori (Memory Match) - Enlarged Cards for Laptop View */

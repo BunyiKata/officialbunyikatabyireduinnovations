@@ -677,9 +677,20 @@ export async function syncStudentToFirebase(student: {
     console.warn('[Firebase RTDB] Simpanan disekat: nama murid tidak sah atau nama sistem —', student.nama);
     return null;
   }
+
+  const cleanName = student.nama.trim().toUpperCase();
+  const teacherName = (localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || '').trim().toUpperCase();
+  if (teacherName && cleanName === teacherName) {
+    console.warn('[Firebase RTDB] Simpanan disekat: Nama guru tidak boleh didaftarkan atau disimpan sebagai murid —', cleanName);
+    return null;
+  }
+  const activeUserId = localStorage.getItem('bunyiKataUserId') || '';
+  if (student.id && student.id === activeUserId) {
+    console.warn('[Firebase RTDB] Simpanan disekat: ID guru tidak boleh digunakan sebagai ID murid —', student.id);
+    return null;
+  }
   try {
     const now = new Date().toISOString();
-    const cleanName = student.nama.trim().toUpperCase();
 
     const activeUserId = localStorage.getItem('bunyiKataUserId') || '';
     const activeUserRole = localStorage.getItem('bunyiKataUserRole') || '';
@@ -1072,9 +1083,10 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
 
     if (remoteStudents.length > 0) {
       const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
+      const teacherName = (localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || '').trim().toLowerCase();
       const studentNames = remoteStudents
         .map(s => s.nama)
-        .filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()));
+        .filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()) && (n.trim().toLowerCase() !== teacherName));
       localStorage.setItem('bunyiKataStudentNames', JSON.stringify(studentNames));
 
       let rawLocalData: any = {};
@@ -1087,14 +1099,15 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
       const idMap: Record<string, string> = {};
       const cleanedStudentData: any = {};
       remoteStudents.forEach(st => {
-        if (!st.nama || GHOST_NAMES.includes(st.nama.trim().toLowerCase())) return;
+        if (!st.nama || GHOST_NAMES.includes(st.nama.trim().toLowerCase()) || (st.nama.trim().toLowerCase() === teacherName)) return;
         if (st.id) idMap[st.nama] = st.id;
         const prev = rawLocalData[st.nama] || {};
+        const remoteTotal = Number(st.total_bintang !== undefined ? st.total_bintang : (prev.totalBintang || 0));
         cleanedStudentData[st.nama] = {
           id: st.id,
           avatar: st.avatar_url || prev.avatar || '/images/avatar/avatar1.png',
-          coins: st.total_bintang !== undefined ? st.total_bintang : (prev.coins || 0),
-          totalBintang: st.total_bintang !== undefined ? st.total_bintang : (prev.totalBintang || 0),
+          coins: remoteTotal,
+          totalBintang: remoteTotal,
           spentStars: prev.spentStars || 0,
           kelas: st.nama_kelas || prev.kelas || localStorage.getItem('bunyiKataNamaKelas') || '',
           kod_kelas: st.kod_kelas || prev.kod_kelas || '',
@@ -1103,10 +1116,10 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
           kelas_id: st.kelas_id || prev.kelas_id || '',
           keluarga_id: st.keluarga_id || prev.keluarga_id || '',
           history: prev.history || [],
-          badges: Array.from(new Set([...(st.badges || []), ...(prev.badges || [])])),
-          scores: { ...(prev.scores || {}), ...(st.scores || {}) },
-          stars: { ...(prev.stars || {}), ...(st.stars || {}) },
-          latihan: { ...(prev.latihan || {}), ...(st.latihan || {}) },
+          badges: (remoteTotal === 0 && (!st.stars || Object.keys(st.stars).length === 0)) ? (st.badges || []) : Array.from(new Set([...(st.badges || []), ...(prev.badges || [])])),
+          scores: remoteTotal === 0 ? (st.scores || {}) : { ...(prev.scores || {}), ...(st.scores || {}) },
+          stars: remoteTotal === 0 ? (st.stars || {}) : { ...(prev.stars || {}), ...(st.stars || {}) },
+          latihan: remoteTotal === 0 ? (st.latihan || {}) : { ...(prev.latihan || {}), ...(st.latihan || {}) },
         };
       });
 
@@ -2530,17 +2543,18 @@ export async function syncParentSessionFromFirebase(userIdOrEmail?: string): Pro
             children.push(n);
             idMap[n] = c.key;
             const prev = rawLocalData[n] || {};
+            const remoteTotal = Number(sVal.total_bintang !== undefined ? sVal.total_bintang : (prev.totalBintang || 0));
             rawLocalData[n] = {
               ...prev,
               id: c.key,
               nama: n,
               avatar: sVal.avatar_url || prev.avatar || '/images/avatar/avatar1.png',
-              coins: sVal.total_bintang !== undefined ? sVal.total_bintang : (prev.coins || 0),
-              totalBintang: sVal.total_bintang !== undefined ? sVal.total_bintang : (prev.totalBintang || 0),
+              coins: remoteTotal,
+              totalBintang: remoteTotal,
               badges: Array.from(new Set([...(sVal.badges || []), ...(prev.badges || [])])),
-              scores: { ...(prev.scores || {}), ...(sVal.scores || {}) },
-              stars: { ...(prev.stars || {}), ...(sVal.stars || {}) },
-              latihan: { ...(prev.latihan || {}), ...(sVal.latihan || {}) },
+              scores: remoteTotal === 0 ? (sVal.scores || {}) : { ...(prev.scores || {}), ...(sVal.scores || {}) },
+              stars: remoteTotal === 0 ? (sVal.stars || {}) : { ...(prev.stars || {}), ...(sVal.stars || {}) },
+              latihan: remoteTotal === 0 ? (sVal.latihan || {}) : { ...(prev.latihan || {}), ...(sVal.latihan || {}) },
             };
           }
         });

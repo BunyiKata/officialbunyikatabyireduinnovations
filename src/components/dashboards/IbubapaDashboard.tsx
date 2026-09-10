@@ -707,7 +707,6 @@ export function IbubapaDashboard({
                 <option value="2">Suku Kata Asas</option>
                 <option value="3">Suku Kata Hero</option>
                 <option value="4">Bacaan Bergred</option>
-                <option value="5">Cabaran Lain</option>
               </select>
             </div>
           </div>

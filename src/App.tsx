@@ -126,17 +126,26 @@ if (typeof window !== "undefined") {
     (window as any).getCurrentProfileData = () => {
       const studentName = (window as any).namaMuridAktif || localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || localStorage.getItem('bunyiKataNamaMurid') || '';
       if (!studentName) return null;
-      if ((window as any).studentData && (window as any).studentData[studentName]) {
-        return (window as any).studentData[studentName];
+      let data = ((window as any).studentData && (window as any).studentData[studentName]) ? (window as any).studentData[studentName] : null;
+      if (!data) {
+        try {
+          const raw = localStorage.getItem('bunyiKataStudentData');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed[studentName]) {
+              data = parsed[studentName];
+              if ((window as any).studentData) (window as any).studentData[studentName] = data;
+            }
+          }
+        } catch (e) {}
       }
-      try {
-        const raw = localStorage.getItem('bunyiKataStudentData');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && parsed[studentName]) return parsed[studentName];
+      if (data && (!data.badges || data.badges.length === 0) && typeof (window as any).kiraLencanaMurid === 'function') {
+        const earned = (window as any).kiraLencanaMurid(data);
+        if (Array.isArray(earned) && earned.length > 0) {
+          data.badges = earned;
         }
-      } catch (e) {}
-      return null;
+      }
+      return data;
     };
   }
 
@@ -144,6 +153,13 @@ if (typeof window !== "undefined") {
     (window as any).isPetaCompleted = (petaId: any, data: any) => {
       const s = data || (window as any).getCurrentProfileData?.();
       if (!s) return false;
+      const existingBadges = (s && Array.isArray(s.badges)) ? s.badges : [];
+      if (petaId === 'all' || petaId === 'master' || petaId === 5) {
+        if (existingBadges.includes('badge_master')) return true;
+      } else {
+        const numId = Number(petaId);
+        if (numId >= 1 && numId <= 4 && existingBadges.includes(`badge_peta_${numId}`)) return true;
+      }
       if (typeof (window as any).kiraLencanaMurid === 'function') {
         const earned = (window as any).kiraLencanaMurid(s);
         if (petaId === 'all' || petaId === 'master' || petaId === 5) {
@@ -166,9 +182,18 @@ const backToModeSelection = (...args: any[]) =>
   (window as any).backToModeSelection?.(...args);
 const tutupSidePanel = (...args: any[]) => (window as any).tutupSidePanel?.(...args);
 const paparSkrin = (...args: any[]) => (window as any).paparSkrin?.(...args);
-const muatTurunSijil = (...args: any[]) => (window as any).muatTurunSijil?.(...args);
-const janaMuatTurunSijilPDF = (...args: any[]) =>
-  (window as any).janaMuatTurunSijilPDF?.(...args);
+const muatTurunSijil = (...args: any[]) => {
+  if (typeof (window as any).bukaModalSijilMurid === 'function') {
+    return (window as any).bukaModalSijilMurid(...args);
+  }
+  return (window as any).muatTurunSijil?.(...args);
+};
+const janaMuatTurunSijilPDF = (...args: any[]) => {
+  if (typeof (window as any).downloadCertificatePDF === 'function') {
+    return (window as any).downloadCertificatePDF(...args);
+  }
+  return (window as any).janaMuatTurunSijilPDF?.(...args);
+};
 const tutupBantuan = (...args) => (window as any).tutupBantuan?.(...args);
 const simpanProfilEdit = (...args) =>
   (window as any).simpanProfilEdit?.(...args);
@@ -5832,9 +5857,9 @@ export default function App() {
             style={{
               display: "flex",
               width: "100%",
-              maxWidth: "400px",
-              gap: "8px",
-              marginBottom: "5px",
+              maxWidth: "460px",
+              gap: "6px",
+              marginBottom: "8px",
               justifyContent: "center",
             }}
           >
@@ -5867,6 +5892,16 @@ export default function App() {
               }}
             >
               Bulanan
+            </button>
+            <button
+              id="btn-leaderboard-global"
+              className="neo-btn bg-white"
+              style={{ flex: 1, padding: "8px 5px", fontSize: "0.85rem" }}
+              onClick={(e) => {
+                (window as any).tukarCarta("global");
+              }}
+            >
+              Global
             </button>
           </div>
           <div className="grandstand" id="leaderboard-grandstand">
@@ -6130,7 +6165,6 @@ export default function App() {
                 <option value="2">Cabaran Suku Kata Asas</option>
                 <option value="3">Cabaran Suku Kata Hero</option>
                 <option value="4">Cabaran Bacaan Bergred</option>
-                <option value="5">Cabaran Lain</option>
               </select>
             </div>
           </div>
