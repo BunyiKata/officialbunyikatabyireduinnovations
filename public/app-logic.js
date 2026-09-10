@@ -5841,6 +5841,34 @@ async function renderLeaderboard(jenis = 'harian') {
         let targetNames = [];
         const sTarget = (typeof window.studentData !== 'undefined') ? window.studentData : (typeof studentData !== 'undefined' ? studentData : {});
 
+        // Muat turun data murid dari Firebase RTDB agar maklumat sentiasa terkini
+        let rtdbStudents = {};
+        try {
+            const sRes = await fetch('https://bunyi-kata-official-default-rtdb.asia-southeast1.firebasedatabase.app/students.json');
+            if (sRes.ok) {
+                const sJson = await sRes.json();
+                if (sJson) {
+                    rtdbStudents = sJson;
+                    for (const [sId, sObj] of Object.entries(sJson)) {
+                        if (sObj && sObj.nama) {
+                            const nUpper = sObj.nama.trim().toUpperCase();
+                            if (!sTarget[nUpper]) sTarget[nUpper] = {};
+                            sTarget[nUpper].id = sId;
+                            sTarget[nUpper].nama = sObj.nama;
+                            sTarget[nUpper].kelas = sObj.nama_kelas || sObj.kod_kelas || sTarget[nUpper].kelas || '';
+                            sTarget[nUpper].avatar = sObj.avatar_url || sTarget[nUpper].avatar || '/images/avatar/avatar1.png';
+                            sTarget[nUpper].total_bintang = Number(sObj.total_bintang || 0);
+                            sTarget[nUpper].dikemaskini_pada = sObj.dikemaskini_pada || '';
+                            sTarget[nUpper].stars = { ...(sTarget[nUpper].stars || {}), ...(sObj.stars || {}) };
+                            sTarget[nUpper].scores = { ...(sTarget[nUpper].scores || {}), ...(sObj.scores || {}) };
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn('Ralat muat turun students RTDB:', err);
+        }
+
         if (isParentChild) {
             // Hanya anak-anak di dalam keluarga pengguna sahaja
             const rawChildren = localStorage.getItem('bunyiKataChildNames') || localStorage.getItem('bunyiKataParentChildNames');
@@ -5904,10 +5932,63 @@ async function renderLeaderboard(jenis = 'harian') {
         const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         const sevenDaysAgoTime = now.getTime() - (7 * 24 * 60 * 60 * 1000);
 
+        const MAIN_CURRICULUM_MODULES = [
+            'kenali_huruf', 'vokal_konsonan', 'fonik_abc', 'suku_kata_kv',
+            'suku_kata_v_kv', 'suku_kata_kv_kv', 'suku_kata_kv_kvk',
+            'suku_kata_kvk_kv', 'suku_kata_kvk_kvk', 'ayat_pendek',
+            'ayat_panjang', 'petikan_tahap_1'
+        ];
+
         studentsArr = targetNames.map(nama => {
             const d = sTarget[nama] || {};
             const sId = d.id || '';
+            const totalStarsGlobal = Number(d.total_bintang || 0) || jumlahMarkah(d);
+
+            // Kira bintang daripada aktiviti utama sedia ada dalam d.stars
+            let mainStarsSum = 0;
+            if (d && d.stars) {
+                MAIN_CURRICULUM_MODULES.forEach(mKey => {
+                    if (d.stars[mKey] !== undefined) {
+                        mainStarsSum += Math.min(Math.max(Number(d.stars[mKey] || 0), 0), 3);
+                    }
+                });
+            }
+
+            // Kira bintang cabaran tambahan:
+            let explicitExtraStars = 0;
+            if (typeof EXTRA_CHALLENGES_DATA !== 'undefined' && d && d.stars) {
+                const extraCountedKeys = new Set();
+                Object.values(EXTRA_CHALLENGES_DATA).forEach(list => {
+                    if (Array.isArray(list)) {
+                        list.forEach(m => {
+                            const baseId = m.id;
+                            if (extraCountedKeys.has(baseId)) return;
+                            extraCountedKeys.add(baseId);
+                            let st = 0;
+                            if (d.stars[baseId] !== undefined) st = Math.max(st, Number(d.stars[baseId] || 0));
+                            if (d.stars['extra_' + baseId] !== undefined) st = Math.max(st, Number(d.stars['extra_' + baseId] || 0));
+                            explicitExtraStars += Math.min(Math.max(st, 0), 3);
+                        });
+                    }
+                });
+            }
+            if (explicitExtraStars === 0 && typeof EXTRA_CHALLENGES_DATA !== 'undefined' && nama.trim().toLowerCase() === curActiveName.trim().toLowerCase()) {
+                Object.values(EXTRA_CHALLENGES_DATA).forEach(list => {
+                    if (Array.isArray(list)) {
+                        list.forEach(m => {
+                            const lsVal = Number(localStorage.getItem('extra_stars_' + m.id) || 0);
+                            explicitExtraStars += Math.min(Math.max(lsVal, 0), 3);
+                        });
+                    }
+                });
+            }
+
+            // Beza antara total_bintang (global) dan aktiviti utama
+            const diffExtraStars = Math.max(0, totalStarsGlobal - mainStarsSum);
+            const extraStars = Math.max(explicitExtraStars, diffExtraStars);
+
             let computedStars = 0;
+            let hasScoreRecords = false;
 
             if (scoresList.length > 0 && sId) {
                 // Tapis skor mengikut student_id
@@ -5930,56 +6011,32 @@ async function renderLeaderboard(jenis = 'harian') {
                     }
 
                     if (include) {
+                        hasScoreRecords = true;
                         const actKey = sc.aktiviti_nama || sc.modul || 'act';
                         const bVal = Number(sc.bintang || 0);
                         bestByActivity[actKey] = Math.max(bestByActivity[actKey] || 0, bVal);
                     }
                 });
 
-                computedStars = Object.values(bestByActivity).reduce((sum, b) => sum + b, 0);
+                if (hasScoreRecords) {
+                    const timeframeMainStars = Object.values(bestByActivity).reduce((sum, b) => sum + b, 0);
+                    computedStars = timeframeMainStars + extraStars;
+                    if (totalStarsGlobal > 0 && computedStars > totalStarsGlobal) {
+                        computedStars = totalStarsGlobal;
+                    }
+                }
             }
 
-            // Tambah bintang Cabaran Tambahan (extra challenges) dari studentData
-            // Cabaran tambahan tidak direkodkan ke /scores, jadi perlu dicampur berasingan
-            let extraStars = 0;
-            if (typeof EXTRA_CHALLENGES_DATA !== 'undefined' && d && d.stars) {
-                const extraCountedKeys = new Set();
-                Object.values(EXTRA_CHALLENGES_DATA).forEach(list => {
-                    if (Array.isArray(list)) {
-                        list.forEach(m => {
-                            const baseId = m.id;
-                            if (extraCountedKeys.has(baseId)) return;
-                            extraCountedKeys.add(baseId);
-                            let st = 0;
-                            if (d.stars[baseId] !== undefined) st = Math.max(st, Number(d.stars[baseId] || 0));
-                            if (d.stars['extra_' + baseId] !== undefined) st = Math.max(st, Number(d.stars['extra_' + baseId] || 0));
-                            extraStars += Math.min(Math.max(st, 0), 3);
-                        });
-                    }
-                });
-            }
-            // Juga semak localStorage untuk cabaran tambahan jika studentData tiada
-            if (extraStars === 0 && typeof EXTRA_CHALLENGES_DATA !== 'undefined') {
-                Object.values(EXTRA_CHALLENGES_DATA).forEach(list => {
-                    if (Array.isArray(list)) {
-                        list.forEach(m => {
-                            const lsVal = Number(localStorage.getItem('extra_stars_' + m.id) || 0);
-                            extraStars += Math.min(Math.max(lsVal, 0), 3);
-                        });
-                    }
-                });
-            }
-            computedStars += extraStars;
-
-            // Fallback kepada jumlahMarkah jika masih 0 (tiada rekod /scores langsung)
+            // Fallback / pemadanan jika tiada rekod /scores bertarikh
             if (computedStars === 0) {
-                const baseline = jumlahMarkah(d);
-                if (jenis === 'bulanan') {
-                    computedStars = baseline;
-                } else if (jenis === 'mingguan') {
-                    computedStars = baseline;
+                if (jenis === 'bulanan' || jenis === 'mingguan') {
+                    computedStars = totalStarsGlobal;
                 } else if (jenis === 'harian') {
-                    if (nama === curActiveName && baseline > 0) computedStars = baseline;
+                    if (nama.trim().toLowerCase() === curActiveName.trim().toLowerCase() && totalStarsGlobal > 0) {
+                        computedStars = totalStarsGlobal;
+                    } else if (d.dikemaskini_pada && d.dikemaskini_pada.slice(0, 10) === todayStr) {
+                        computedStars = totalStarsGlobal;
+                    }
                 }
             }
 
