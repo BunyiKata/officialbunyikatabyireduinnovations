@@ -62,6 +62,23 @@ env:
     availability:
       - RUNTIME
 
+  # URL RTDB untuk Firebase Admin SDK di pelayan.
+  #
+  # WAJIB: getAdminApp() dalam server.js membaca FIREBASE_DATABASE_URL atau
+  # VITE_FIREBASE_DATABASE_URL. Kedua-duanya adalah BUILD-only sebelum ini,
+  # jadi pada masa RUNTIME databaseURL akan menjadi undefined dan setiap
+  # operasi pangkalan data di pelayan akan gagal.
+  - variable: FIREBASE_DATABASE_URL
+    value: https://bunyi-kata-official-default-rtdb.asia-southeast1.firebasedatabase.app
+    availability:
+      - RUNTIME
+
+  # ID projek untuk Admin SDK (ADC perlukan ini secara eksplisit).
+  - variable: FIREBASE_PROJECT_ID
+    value: bunyi-kata-official
+    availability:
+      - RUNTIME
+
   # Nota: FIREBASE_SERVICE_ACCOUNT tidak diperlukan di sini.
   # App Hosting menyediakan Application Default Credentials secara automatik,
   # dan getAdminApp() dalam server.js akan menggunakannya.
