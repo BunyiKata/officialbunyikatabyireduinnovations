@@ -11,6 +11,18 @@ export function PirateAvatar3DSwiper({
   onOpenProPackage,
   onRequestEntryChoice,
 }: PirateAvatar3DSwiperProps = {}) {
+  const isTrial = typeof (window as any).isEffectiveTrial === "function"
+    ? (window as any).isEffectiveTrial()
+    : Boolean(
+        typeof window !== "undefined" && (
+          (window as any).isGuestMode ||
+          (window as any).userAccessLevel === "trial" ||
+          localStorage.getItem("bunyiKataAccessLevel") === "trial" ||
+          !(window as any).namaMuridAktif ||
+          (window as any).namaMuridAktif === "Tetamu"
+        )
+      );
+
   const characters = [
     {
       id: 1,
@@ -30,22 +42,22 @@ export function PirateAvatar3DSwiper({
       id: 3,
       name: "Pendekar ABC",
       icon: "/images/avatar/avatar3.png",
-      unlocked: false,
-      tag: "Tahap 5",
+      unlocked: !isTrial,
+      tag: isTrial ? "Versi Pro" : "Terbuka",
     },
     {
       id: 4,
       name: "Laksamana Suku",
       icon: "/images/avatar/avatar4.png",
-      unlocked: false,
-      tag: "Tahap 10",
+      unlocked: !isTrial,
+      tag: isTrial ? "Versi Pro" : "Terbuka",
     },
     {
       id: 5,
       name: "Pengembara Vokal",
       icon: "/images/avatar/avatar5.png",
-      unlocked: false,
-      tag: "Tahap 15",
+      unlocked: !isTrial,
+      tag: isTrial ? "Versi Pro" : "Terbuka",
     },
   ];
 

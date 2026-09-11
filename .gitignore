@@ -10,3 +10,8 @@ scratch/
 .temp/
 supabase/.temp/
 .firebase/
+
+# Perancah alat pembangunan — bukan kod aplikasi, tidak perlu di-deploy.
+.agents/
+skills-lock.json
+malaysia-payment-gateway-main/

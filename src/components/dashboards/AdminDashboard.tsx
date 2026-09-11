@@ -6,6 +6,29 @@ interface AdminDashboardProps {
 }
 
 export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
+  React.useEffect(() => {
+    if (typeof (window as any).renderAdminTable === "function") {
+      try {
+        const sel = document.getElementById("admin-table-selector") as HTMLSelectElement | null;
+        (window as any).renderAdminTable(sel ? sel.value : "guru");
+      } catch (e) {
+        console.warn("renderAdminTable error in useEffect:", e);
+      }
+    }
+
+    const fetchFn = (window as any).fetchAdminDataFromFirebase;
+    if (typeof fetchFn === "function") {
+      fetchFn()
+        .then(() => {
+          if (typeof (window as any).renderAdminTable === "function") {
+            const sel = document.getElementById("admin-table-selector") as HTMLSelectElement | null;
+            (window as any).renderAdminTable(sel ? sel.value : "guru");
+          }
+        })
+        .catch((err: any) => console.warn("Fetch admin data notice:", err));
+    }
+  }, []);
+
   return (
     <>
       <div
@@ -916,7 +939,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
       </div>
 
       {/* Mod Admin - Pengurusan Sistem Admin */}
-      <div id="admin-urus" className="screen">
+      <div id="admin-urus" className={getScreenClass("admin-urus")}>
         <div
           style={{
             width: "100%",

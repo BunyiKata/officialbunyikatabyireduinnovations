@@ -8,6 +8,7 @@ import {
   getFamilyByCode,
   getStudentsByFamilyId,
 } from "../../services/firebaseService";
+import { cubaAksesAdmin, tetapkanSesiAdminTempatan } from "../../services/adminService";
 
 export interface EntryChoiceModalProps {
   isEntryChoiceModalOpen: boolean;
@@ -68,6 +69,10 @@ function syncRemoteStudentsToLocal(remoteList: any[], isParent: boolean = false)
       badges: Array.from(new Set([...(prev.badges || []), ...(s.badges || [])])),
       mapsUnlocked: s.mapsUnlocked || prev.mapsUnlocked || 4,
       avatar: s.avatar_url || s.avatar || prev.avatar || "/images/avatar/avatar1.png",
+      spentStars: s.spent_stars !== undefined ? s.spent_stars : (prev.spentStars || 0),
+      claimedAvatars: (s.claimed_avatars && Array.isArray(s.claimed_avatars))
+        ? Array.from(new Set([...(s.claimed_avatars || []), ...(prev.claimedAvatars || [])]))
+        : (prev.claimedAvatars || ["/images/avatar/avatar1.png", "/images/avatar/avatar2.png"]),
       scores: { ...(prev.scores || {}), ...(s.scores || {}) },
       stars: { ...(prev.stars || {}), ...(s.stars || {}) },
       latihan: { ...(prev.latihan || {}), ...(s.latihan || {}) },
@@ -381,21 +386,17 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         localStorage.getItem("bunyiKataKodAdmin") || "";
 
                       const entered = joinCode.trim().toUpperCase();
-                      if (
-                        entered === "ADMIN" ||
-                        entered === "ADMIN#01" ||
-                        entered === "ADMIN123" ||
-                        entered === "ADMIN@123" ||
-                        (kodAdmin && entered === kodAdmin.toUpperCase())
-                      ) {
+
+                      // Mod admin: kod TIDAK disemak di sini. Ia dihantar ke
+                      // pelayan (/api/admin/verify) yang memegang ADMIN_CODE.
+                      // Ini mengelakkan kod admin daripada terbenam dalam
+                      // bundle JavaScript yang boleh dibaca sesiapa.
+                      const hasilAdmin = await cubaAksesAdmin(entered);
+                      if (hasilAdmin.berjaya) {
                         setIsEntryChoiceModalOpen(false);
                         setIsCodeModalOpen(false);
                         setUserAccessLevel("pro");
-                        localStorage.setItem("bunyiKataAccessLevel", "pro");
-                        localStorage.setItem("bunyiKataUserRole", "admin");
-                        (window as any).userAccessLevel = "pro";
-                        (window as any).modAdminAktif = true;
-                        (window as any).isAdminMode = true;
+                        tetapkanSesiAdminTempatan();
                         if (typeof (window as any).masukModAdmin === "function") {
                           (window as any).masukModAdmin();
                         }
@@ -897,20 +898,14 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         localStorage.getItem("bunyiKataKodAdmin") || "";
 
                       const entered = joinCode.trim().toUpperCase();
-                      if (
-                        entered === "ADMIN" ||
-                        entered === "ADMIN#01" ||
-                        entered === "ADMIN123" ||
-                        entered === "ADMIN@123" ||
-                        (kodAdmin && entered === kodAdmin.toUpperCase())
-                      ) {
+
+                      // Lihat komen pada laluan admin di atas: pengesahan kod
+                      // admin dibuat di pelayan, bukan di dalam bundle klien.
+                      const hasilAdmin2 = await cubaAksesAdmin(entered);
+                      if (hasilAdmin2.berjaya) {
                         setIsCodeModalOpen(false);
                         setUserAccessLevel("pro");
-                        localStorage.setItem("bunyiKataAccessLevel", "pro");
-                        localStorage.setItem("bunyiKataUserRole", "admin");
-                        (window as any).userAccessLevel = "pro";
-                        (window as any).modAdminAktif = true;
-                        (window as any).isAdminMode = true;
+                        tetapkanSesiAdminTempatan();
                         if (typeof (window as any).masukModAdmin === "function") {
                           (window as any).masukModAdmin();
                         }

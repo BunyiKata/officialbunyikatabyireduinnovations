@@ -123,6 +123,71 @@ export function GuruDashboard(props: GuruDashboardProps) {
     handleSaveClassCode2,
   } = props;
 
+  const [syncedVersion, setSyncedVersion] = React.useState(0);
+  const [activeClassName, setActiveClassName] = React.useState(() => localStorage.getItem("bunyiKataNamaKelas") || "");
+  const [activeClassCode, setActiveClassCode] = React.useState(() => localStorage.getItem("bunyiKataKodKelas") || "");
+  const [activeSchoolName, setActiveSchoolName] = React.useState(() => localStorage.getItem("bunyiKataNamaSekolah") || "");
+  const [activeTeacherName, setActiveTeacherName] = React.useState(() => localStorage.getItem("bunyiKataNamaGuru") || localStorage.getItem("pdf_guru") || "");
+
+  React.useEffect(() => {
+    const handleSync = () => {
+      setSyncedVersion((v) => v + 1);
+      setActiveClassName(localStorage.getItem("bunyiKataNamaKelas") || "");
+      setActiveClassCode(localStorage.getItem("bunyiKataKodKelas") || "");
+      setActiveSchoolName(localStorage.getItem("bunyiKataNamaSekolah") || "");
+      setActiveTeacherName(localStorage.getItem("bunyiKataNamaGuru") || localStorage.getItem("pdf_guru") || "");
+    };
+    window.addEventListener("teacher-classes-synced", handleSync);
+    window.addEventListener("focus", handleSync);
+    handleSync();
+    return () => {
+      window.removeEventListener("teacher-classes-synced", handleSync);
+      window.removeEventListener("focus", handleSync);
+    };
+  }, []);
+
+  const currentStudentCount = React.useMemo(() => {
+    try {
+      const sData = JSON.parse(localStorage.getItem("bunyiKataStudentData") || "{}");
+      const sNames = JSON.parse(localStorage.getItem("bunyiKataStudentNames") || "[]");
+      const activeClass = (localStorage.getItem("bunyiKataNamaKelas") || "").trim().toLowerCase();
+      const GHOST_NAMES = ["tetamu", "murid", "guest", "student"];
+      const teacherName = (localStorage.getItem("bunyiKataNamaGuru") || localStorage.getItem("pdf_guru") || "").trim().toLowerCase();
+
+      let count = 0;
+      const list = Array.isArray(sNames) && sNames.length > 0 ? sNames : Object.keys(sData);
+      list.forEach((n: string) => {
+        const lower = (n || "").trim().toLowerCase();
+        if (!lower || GHOST_NAMES.includes(lower) || lower === teacherName) return;
+        const data = sData[n] || {};
+        const sKelas = (data.kelas || "").trim().toLowerCase();
+        if (!activeClass || !sKelas || sKelas === activeClass) {
+          count++;
+        }
+      });
+      return count;
+    } catch (e) {
+      return 0;
+    }
+  }, [syncedVersion, activeClassName]);
+
+  const currentAktivitiCount = React.useMemo(() => {
+    try {
+      const sData = JSON.parse(localStorage.getItem("bunyiKataStudentData") || "{}");
+      let total = 0;
+      Object.values(sData).forEach((data: any) => {
+        if (data && data.latihan) {
+          Object.values(data.latihan).forEach((done) => {
+            if (done) total++;
+          });
+        }
+      });
+      return total;
+    } catch (e) {
+      return 0;
+    }
+  }, [syncedVersion]);
+
   return (
     <>
       <div
@@ -262,7 +327,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                   paddingRight: "35px",
                 }}
               >
-                {localStorage.getItem("bunyiKataNamaKelas") || "(Belum Tetap Kelas)"}
+                {activeClassName || localStorage.getItem("bunyiKataNamaKelas") || "(Belum Tetap Kelas)"}
               </h2>
               <div
                 className="guru-stat-badges-container"
@@ -284,7 +349,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                     display: "inline-block",
                   }}
                 >
-                  Sekolah: <span id="guru-dashboard-nama-sekolah-title">{localStorage.getItem("bunyiKataNamaSekolah") || "SK TAMAN MELAWIS"}</span>
+                  Sekolah: <span id="guru-dashboard-nama-sekolah-title">{activeSchoolName || localStorage.getItem("bunyiKataNamaSekolah") || "SK TAMAN MELAWIS"}</span>
                 </div>
                 <div
                   className="stat-badge"
@@ -297,7 +362,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                     display: "inline-block",
                   }}
                 >
-                  Guru: <span id="guru-dashboard-nama-guru-title">{localStorage.getItem("pdf_guru") || "-"}</span>
+                  Guru: <span id="guru-dashboard-nama-guru-title">{activeTeacherName || localStorage.getItem("pdf_guru") || localStorage.getItem("bunyiKataNamaGuru") || "-"}</span>
                 </div>
                 {isEffectiveTrial ? (
                   /* LOCKED: Akaun Percuma */
@@ -335,7 +400,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                     }}
                   >
                     <span>
-                      Kod Kelas: <span id="guru-dashboard-kod-kelas-title">{localStorage.getItem("bunyiKataKodKelas") || "-"}</span>
+                      Kod Kelas: <span id="guru-dashboard-kod-kelas-title">{activeClassCode || localStorage.getItem("bunyiKataKodKelas") || "-"}</span>
                     </span>
                     <button
                       type="button"
@@ -563,7 +628,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                   fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
                 }}
               >
-                0
+                {currentStudentCount}
               </div>
             </div>
           </div>
@@ -658,7 +723,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                   fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
                 }}
               >
-                0
+                {currentAktivitiCount}
               </div>
             </div>
           </div>

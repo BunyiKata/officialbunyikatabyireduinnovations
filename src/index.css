@@ -14091,6 +14091,7 @@ i.fa-brands {
     min-width: 280px;
     max-width: 400px;
     cursor: pointer;
+    font-family: 'Century Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     transition: transform 0.2s ease, opacity 0.2s ease;
 }

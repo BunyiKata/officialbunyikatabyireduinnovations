@@ -404,7 +404,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                         <input
                           type="text"
                           maxLength={8}
-                          placeholder="CTH: ADMIN#01"
+                          placeholder="CTH: KOD#01"
                           value={editKodTemp}
                           onChange={(e) => {
                             setEditKodTemp(e.target.value.toUpperCase());
@@ -424,7 +424,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                           }}
                         />
                         <span style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px", display: "block", textAlign: "left" }}>
-                          * Wajib 8 aksara & sekurang-kurangnya 1 simbol (Cth: ADMIN#01)
+                          * Wajib 8 aksara & sekurang-kurangnya 1 simbol (Cth: KOD#01)
                         </span>
                       </div>
 

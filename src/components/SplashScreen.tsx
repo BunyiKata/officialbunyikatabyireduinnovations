@@ -8,22 +8,51 @@ export interface SplashScreenProps {
 export function SplashScreen({ onFinish }: SplashScreenProps) {
   const [progress, setProgress] = React.useState(0);
   const audioPlayedRef = React.useRef(false);
+  const isMountedRef = React.useRef(true);
+  const masterGainRef = React.useRef<GainNode | null>(null);
+  const activeOscsRef = React.useRef<OscillatorNode[]>([]);
+
+  const stopAndCleanupAudio = React.useCallback(() => {
+    isMountedRef.current = false;
+    if (masterGainRef.current) {
+      try {
+        masterGainRef.current.gain.setValueAtTime(0, 0);
+        masterGainRef.current.disconnect();
+      } catch (e) {}
+      masterGainRef.current = null;
+    }
+    activeOscsRef.current.forEach((osc) => {
+      try {
+        osc.stop();
+        osc.disconnect();
+      } catch (e) {}
+    });
+    activeOscsRef.current = [];
+  }, []);
 
   const playSplashSound = React.useCallback(() => {
-    if (audioPlayedRef.current) return;
+    if (audioPlayedRef.current || !isMountedRef.current) return;
     try {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioCtx) {
-        let ctx = (window as any)._globalAudioCtx;
-        if (!ctx) {
-          ctx = new AudioCtx();
-          (window as any)._globalAudioCtx = ctx;
-        }
-        if (ctx.state === "suspended") {
-          ctx.resume().catch(() => { });
-        }
+      if (!AudioCtx) return;
+
+      // Share the same AudioContext with app-logic.js via window._globalAudioCtx
+      let ctx = (window as any)._globalAudioCtx;
+      if (!ctx) {
+        ctx = new AudioCtx();
+        (window as any)._globalAudioCtx = ctx;
+      }
+
+      const startSynthesis = () => {
+        if (audioPlayedRef.current || !isMountedRef.current) return;
+        if (ctx.state !== "running") return;
 
         audioPlayedRef.current = true;
+
+        const masterGain = ctx.createGain();
+        masterGain.gain.setValueAtTime(1, ctx.currentTime);
+        masterGain.connect(ctx.destination);
+        masterGainRef.current = masterGain;
 
         // 1. Initial sci-fi rising chord shimmer
         const notes = [440, 554.37, 659.25, 880, 1108.73];
@@ -36,9 +65,10 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
           gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + idx * 0.08 + 0.04);
           gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + idx * 0.08 + 0.7);
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(masterGain);
           osc.start(ctx.currentTime + idx * 0.08);
           osc.stop(ctx.currentTime + idx * 0.08 + 0.75);
+          activeOscsRef.current.push(osc);
         });
 
         // 2. High-tech scanner radar pulse sweeps
@@ -53,12 +83,13 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
           sweepGain.gain.exponentialRampToValueAtTime(0.07, sweepTime + 0.05);
           sweepGain.gain.exponentialRampToValueAtTime(0.0001, sweepTime + 0.2);
           sweepOsc.connect(sweepGain);
-          sweepGain.connect(ctx.destination);
+          sweepGain.connect(masterGain);
           sweepOsc.start(sweepTime);
           sweepOsc.stop(sweepTime + 0.22);
+          activeOscsRef.current.push(sweepOsc);
         }
 
-        // 3. Completion sparkle chime at ~3.1s
+        // 3. Completion sparkle chime at ~3.05s
         const compTime = ctx.currentTime + 3.05;
         const compNotes = [659.25, 783.99, 1046.50, 1318.51];
         compNotes.forEach((freq: number, idx: number) => {
@@ -70,10 +101,33 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
           gain.gain.exponentialRampToValueAtTime(0.16, compTime + idx * 0.06 + 0.03);
           gain.gain.exponentialRampToValueAtTime(0.0001, compTime + idx * 0.06 + 0.6);
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(masterGain);
           osc.start(compTime + idx * 0.06);
           osc.stop(compTime + idx * 0.06 + 0.65);
+          activeOscsRef.current.push(osc);
         });
+      };
+
+      const tryResumeAndPlay = () => {
+        if (audioPlayedRef.current || !isMountedRef.current) return;
+        // Refresh ctx reference in case app-logic.js updated it
+        const latestCtx = (window as any)._globalAudioCtx || ctx;
+        if (latestCtx.state === "running") {
+          startSynthesis();
+        } else if (latestCtx.state === "suspended") {
+          latestCtx.resume()
+            .then(() => { if (isMountedRef.current) startSynthesis(); })
+            .catch(() => {});
+        }
+      };
+
+      // First attempt
+      tryResumeAndPlay();
+
+      // Retry after short delay (in case AudioContext was just created and still initializing)
+      if (!audioPlayedRef.current) {
+        setTimeout(() => { if (isMountedRef.current) tryResumeAndPlay(); }, 200);
+        setTimeout(() => { if (isMountedRef.current) tryResumeAndPlay(); }, 600);
       }
     } catch (e) {
       // Audio context error handled
@@ -81,27 +135,52 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
   }, []);
 
   React.useEffect(() => {
+    isMountedRef.current = true;
+
     // Attempt auto-play sound immediately
     playSplashSound();
 
-    // Mobile fallback: If audio was suspended, unlock & play on first touch anywhere
+    // Mobile/Desktop fallback: If audio was suspended by browser autoplay policy,
+    // unlock & play immediately upon user interaction during splash screen
     const handleFirstGesture = () => {
-      playSplashSound();
+      // Resume AudioContext directly (works even before app-logic.js loads)
+      const ctx = (window as any)._globalAudioCtx;
+      if (ctx && ctx.state === "suspended") {
+        ctx.resume().catch(() => {});
+      }
+      // Also call app-logic.js unlocker if available
       if (typeof (window as any).unlockMobileAudioSubsystem === "function") {
         (window as any).unlockMobileAudioSubsystem();
       }
+      playSplashSound();
     };
+
     window.addEventListener("touchstart", handleFirstGesture, { once: true, passive: true });
     window.addEventListener("pointerdown", handleFirstGesture, { once: true, passive: true });
     window.addEventListener("click", handleFirstGesture, { once: true, passive: true });
 
-    const totalDuration = 3400; // 3.4 seconds
+    // Poll to play audio as soon as AudioContext becomes "running"
+    // (catches the case where browser unblocks it shortly after load)
+    let pollCount = 0;
+    const pollInterval = setInterval(() => {
+      pollCount++;
+      if (pollCount > 10) { clearInterval(pollInterval); return; } // Stop after ~3s
+      if (!audioPlayedRef.current && isMountedRef.current) {
+        playSplashSound();
+      } else {
+        clearInterval(pollInterval);
+      }
+    }, 300);
+
     const intervalMs = 34; // 100 steps * 34ms = 3400ms
     const timer = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer);
-          setTimeout(onFinish, 300);
+          setTimeout(() => {
+            stopAndCleanupAudio();
+            onFinish();
+          }, 300);
           return 100;
         }
         return prev + 1;
@@ -110,11 +189,13 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
 
     return () => {
       clearInterval(timer);
+      clearInterval(pollInterval);
+      stopAndCleanupAudio();
       window.removeEventListener("touchstart", handleFirstGesture);
       window.removeEventListener("pointerdown", handleFirstGesture);
       window.removeEventListener("click", handleFirstGesture);
     };
-  }, [onFinish, playSplashSound]);
+  }, [onFinish, playSplashSound, stopAndCleanupAudio]);
 
   const radius = 98;
   const circumference = 2 * Math.PI * radius;
@@ -125,6 +206,8 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.03 }}
       transition={{ duration: 0.45, ease: "easeInOut" }}
+      onClick={playSplashSound}
+      onTouchStart={playSplashSound}
       style={{
         position: "fixed",
         inset: 0,
@@ -140,7 +223,8 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
         padding: "24px",
         overflow: "hidden",
         userSelect: "none",
-        pointerEvents: "none",
+        pointerEvents: "auto",
+        cursor: "pointer",
       }}
     >
       {/* Soft Ambient Light Behind Circle */}

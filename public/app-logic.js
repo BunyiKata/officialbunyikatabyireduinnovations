@@ -1,5 +1,15 @@
 
 
+window.normalizeAdminPlanName = function (rawPlan) {
+    if (!rawPlan) return '1 Bulan (Pro)';
+    const str = String(rawPlan).trim().toLowerCase();
+    if (str.includes('percuma') || str.includes('trial') || str === 'free') return 'Percuma';
+    if (str.includes('tahun') || str.includes('tahunan') || str === '1 year' || str === 'year') return '1 Tahun (Pro)';
+    if (str.includes('3 bulan') || str.includes('3 bulanan') || str === '3 months') return '3 Bulan (Pro)';
+    if (str.includes('bulan') || str.includes('bulanan') || str.includes('pro') || str === '1 month' || str === 'monthly') return '1 Bulan (Pro)';
+    return rawPlan;
+};
+
 window.toggleAdminPasswordVisibility = function () {
     const disp = document.getElementById('admin-pass-display');
     const icon = document.getElementById('admin-pass-toggle-icon');
@@ -24,7 +34,15 @@ window.showAppToast = function (title, contentHtml, type = 'success') {
         document.body.appendChild(container);
     }
 
-    const cleanTitle = (title || 'Pemberitahuan').replace(/<[^>]*>?/gm, '').trim();
+    // Helper untuk membetulkan simbol pembuka kata (“) dan penutup kata (”) yang tepat
+    const fixQuotes = (str) => {
+        if (!str) return '';
+        return str
+            .replace(/["”]([^"”]+)["”]/g, '“$1”') // Tukar pasangan penutup yang salah kepada pembuka “ dan penutup ”
+            .replace(/"/g, '“'); // Bersihkan baki tanda petik tunggal
+    };
+
+    const cleanTitle = fixQuotes((title || 'Pemberitahuan').replace(/<[^>]*>?/gm, '').trim());
     let cleanMsg = '';
     if (typeof contentHtml === 'string') {
         const tempDiv = document.createElement('div');
@@ -32,7 +50,7 @@ window.showAppToast = function (title, contentHtml, type = 'success') {
         const icons = tempDiv.querySelectorAll('i, svg');
         icons.forEach(ic => ic.remove());
         cleanMsg = tempDiv.textContent || tempDiv.innerText || '';
-        cleanMsg = cleanMsg.trim().replace(/\s+/g, ' ');
+        cleanMsg = fixQuotes(cleanMsg.trim().replace(/\s+/g, ' '));
     }
 
     const toast = document.createElement('div');
@@ -158,8 +176,8 @@ window.showAdminInfo = function (type, nama, extra) {
 
     const email = (extra && extra.email) || match.email || '';
     const realPass = (extra && extra.password) ? extra.password : (match.password || '');
-    const tempohStr = (extra && extra.tempoh) || (match.bakiHari !== undefined ? `${match.bakiHari} Hari (${match.langganan || '1 Bulan'})` : "30 Hari (1 Bulan)");
-    const langganan = (extra && extra.langganan) || match.langganan || '1 Bulan';
+    const rawLangganan = (extra && extra.langganan) || match.langganan || '1 Bulan (Pro)';
+    const langganan = window.normalizeAdminPlanName ? window.normalizeAdminPlanName(rawLangganan) : rawLangganan;
     const profileId = (extra && extra.id) || match.id || '';
     const sekolah = (extra && extra.sekolah) || match.sekolah || '-';
     const kodKelas = (extra && (extra.kodKelas || extra.kod_kelas)) || match.kod_kelas || '';
@@ -169,6 +187,7 @@ window.showAdminInfo = function (type, nama, extra) {
     const muridCount = (extra && extra.murid !== undefined) ? extra.murid : (match.murid !== undefined ? match.murid : 0);
     const anakCount = (extra && extra.anak !== undefined) ? extra.anak : (match.anak !== undefined ? match.anak : 0);
     const noTelefon = (extra && (extra.telefon || extra.no_telefon)) || match.no_telefon || '';
+    const tempohStr = (extra && extra.tempoh) || (match.bakiHari !== undefined ? `${match.bakiHari} Hari (${langganan})` : `30 Hari (${langganan})`);
 
     // Paparan status kata laluan
     let passHtml = '';
@@ -228,9 +247,9 @@ window.showAdminInfo = function (type, nama, extra) {
                     <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
                         <select class="neo-btn filter-select" style="padding:4px 8px; font-size:0.85rem; font-weight:bold; border-radius:8px; border:2px solid #ea580c; background:#ffffff; cursor:pointer;" onchange="window.tukarLanggananPengguna('${profileId}', 'guru', this.value)">
                             <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
-                            <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' || langganan === '1 Bulan' || langganan === 'Pro' ? 'selected' : ''}>1 Bulan (Pro)</option>
-                            <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' || langganan === '3 Bulan' ? 'selected' : ''}>3 Bulan (Pro)</option>
-                            <option value="1 Tahun (Pro)" ${langganan === '1 Tahun' || langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
+                            <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' ? 'selected' : ''}>1 Bulan (Pro)</option>
+                            <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' ? 'selected' : ''}>3 Bulan (Pro)</option>
+                            <option value="1 Tahun (Pro)" ${langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
                         </select>
                         <span style="font-size:0.75rem; color:#64748b; font-weight:bold;">(Tukar pelan terus)</span>
                     </div>
@@ -284,9 +303,9 @@ window.showAdminInfo = function (type, nama, extra) {
                     <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
                         <select class="neo-btn filter-select" style="padding:4px 8px; font-size:0.85rem; font-weight:bold; border-radius:8px; border:2px solid #0284c7; background:#ffffff; cursor:pointer;" onchange="window.tukarLanggananPengguna('${profileId}', 'ibubapa', this.value)">
                             <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
-                            <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' || langganan === '1 Bulan' || langganan === 'Pro' ? 'selected' : ''}>1 Bulan (Pro)</option>
-                            <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' || langganan === '3 Bulan' ? 'selected' : ''}>3 Bulan (Pro)</option>
-                            <option value="1 Tahun (Pro)" ${langganan === '1 Tahun' || langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
+                            <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' ? 'selected' : ''}>1 Bulan (Pro)</option>
+                            <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' ? 'selected' : ''}>3 Bulan (Pro)</option>
+                            <option value="1 Tahun (Pro)" ${langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
                         </select>
                         <span style="font-size:0.75rem; color:#64748b; font-weight:bold;">(Tukar pelan terus)</span>
                     </div>
@@ -381,7 +400,7 @@ window.renderAdminTable = function (type = 'guru') {
             return;
         }
         adminTeachers.forEach((t, index) => {
-            const langganan = t.langganan || '1 Bulan';
+            const langganan = window.normalizeAdminPlanName ? window.normalizeAdminPlanName(t.langganan) : (t.langganan || '1 Bulan (Pro)');
             const tempohText = `${t.bakiHari} Hari (${langganan})`;
             adminTbody.innerHTML += `
                         <tr class="admin-table-row" style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#ffffff' : '#fff7ed'}; transition: background 0.15s ease;">
@@ -438,7 +457,7 @@ window.renderAdminTable = function (type = 'guru') {
             return;
         }
         adminParents.forEach((t, index) => {
-            const langganan = t.langganan || '1 Bulan';
+            const langganan = window.normalizeAdminPlanName ? window.normalizeAdminPlanName(t.langganan) : (t.langganan || '1 Bulan (Pro)');
             const tempohText = `${t.bakiHari} Hari (${langganan})`;
             adminTbody.innerHTML += `
                         <tr class="admin-table-row" style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#ffffff' : '#f0f9ff'}; transition: background 0.15s ease;">
@@ -1383,13 +1402,6 @@ window.studentRecord = studentRecord;
         if (['1 cemerlang', '1 pintar'].includes((localStorage.getItem('pdf_kelas') || '').trim().toLowerCase())) {
             localStorage.removeItem('pdf_kelas');
         }
-        if (localStorage.getItem('bunyiKataAccessLevel') === 'trial') {
-            localStorage.removeItem('bunyiKataDaftarKelas');
-            localStorage.removeItem('bunyiKataNamaKelas');
-            localStorage.removeItem('bunyiKataKodKelas');
-            localStorage.removeItem('bunyiKataKodKelas2');
-            localStorage.removeItem('bunyiKataNamaKelas2');
-        }
 
         // Padam modul ujian lama dummy sahaja tanpa memadam bintang atau rekod kemajuan murid sah
         const keysToRemove = [];
@@ -1462,6 +1474,44 @@ allKnownNames.forEach(name => {
     }
 });
 window.studentData = studentData;
+
+function refreshAppStudentState() {
+    try {
+        const rawNames = localStorage.getItem('bunyiKataStudentNames');
+        if (rawNames) {
+            const parsed = JSON.parse(rawNames);
+            if (Array.isArray(parsed)) {
+                studentNames = parsed.filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()));
+                window.studentNames = studentNames;
+            }
+        }
+        const rawData = localStorage.getItem('bunyiKataStudentData');
+        if (rawData) {
+            const parsedD = JSON.parse(rawData);
+            if (parsedD && typeof parsedD === 'object') {
+                Object.keys(parsedD).forEach(k => {
+                    if (!GHOST_NAMES.includes(k.trim().toLowerCase())) {
+                        studentData[k] = { ...studentRecord(), ...(parsedD[k] || {}) };
+                    }
+                });
+                window.studentData = studentData;
+            }
+        }
+    } catch(e) {}
+}
+window.refreshAppStudentState = refreshAppStudentState;
+window.addEventListener('teacher-classes-synced', function () {
+    refreshAppStudentState();
+    if (typeof window.kemaskiniSemuaDropdownKelas === 'function') {
+        window.kemaskiniSemuaDropdownKelas();
+    }
+    if (typeof window.renderTeacherTable === 'function') {
+        window.renderTeacherTable();
+    }
+    if (typeof window.renderSenaraiMuridUrus === 'function') {
+        window.renderSenaraiMuridUrus();
+    }
+});
 
 function saveStudentData() {
     try {
@@ -1763,13 +1813,14 @@ function paparSkrin(screenId, skipHash) {
     const tajukSkrin = SCREEN_NAMES_MAP[screenId] || 'Bunyi Kata';
     document.title = `${tajukSkrin} | Bunyi Kata`;
 
+    const urlPath = (screenId === 'login-screen' || !screenId) ? '/' : '/' + screenId;
     if (!skipHash) {
         try {
-            history.pushState({ screenId: screenId }, tajukSkrin, '/' + screenId);
+            history.pushState({ screenId: screenId }, tajukSkrin, urlPath);
         } catch (e) { }
     } else {
         try {
-            history.replaceState({ screenId: screenId }, tajukSkrin, '/' + screenId);
+            history.replaceState({ screenId: screenId }, tajukSkrin, urlPath);
         } catch (e) { }
     }
 
@@ -1932,17 +1983,26 @@ function paparSkrin(screenId, skipHash) {
 
 window.paparSkrin = paparSkrin;
 function mengendaliNavigasiURL(e) {
+    // Jangan ganggu jika sedang memproses callback pembayaran
+    if (typeof window !== 'undefined' && window.location.search && (window.location.search.includes('payment=') || window.location.search.includes('status='))) {
+        return;
+    }
+
     let path = (e && e.state && e.state.screenId) ? e.state.screenId : window.location.pathname.replace(/^\/+/, '');
     if (!path && window.location.hash) {
         path = window.location.hash.replace('#', '');
     }
-    if (!path) {
+
+    // Jika di laluan utama / (kosong) atau muat semula (refresh), buka skrin mula (login-screen) secara lalai
+    if (!path || path === 'index.html' || path === 'guru-dashboard' || path === 'ibubapa-dashboard' || path === 'admin-dashboard') {
         path = 'login-screen';
     }
+
     if (path) {
         paparSkrin(path, true);
+        const urlPath = (path === 'login-screen') ? '/' : '/' + path;
         try {
-            history.replaceState({ screenId: path }, '', '/' + path);
+            history.replaceState({ screenId: path }, '', urlPath);
         } catch (err) { }
     }
 }
@@ -1950,6 +2010,10 @@ function mengendaliNavigasiURL(e) {
 window.addEventListener('popstate', mengendaliNavigasiURL);
 window.addEventListener('hashchange', mengendaliNavigasiURL);
 setTimeout(function () {
+    // Jalankan navigasi permulaan hanya jika tiada status pembayaran aktif
+    if (typeof window !== 'undefined' && window.location.search && (window.location.search.includes('payment=') || window.location.search.includes('status='))) {
+        return;
+    }
     mengendaliNavigasiURL();
 }, 100);
 
@@ -1971,24 +2035,33 @@ window.isEffectiveTrial = function () {
     if (window.isAdminMode || window.modAdminAktif) return false;
     if (localStorage.getItem('bunyiKataUserRole') === 'admin') return false;
 
-    if (window.isGuestMode || window.namaMuridAktif === 'Tetamu') return true;
-
     const teacherPlan = (localStorage.getItem('bunyiKataTeacherPlan') || '').toLowerCase().trim();
     const parentPlan = (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase().trim();
     const userRole = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
     const accessLvl = (localStorage.getItem('bunyiKataAccessLevel') || window.userAccessLevel || '').toLowerCase().trim();
 
-    if (teacherPlan === 'percuma' || teacherPlan === 'trial') return true;
-    if (parentPlan === 'percuma' || parentPlan === 'trial') return true;
-    if (accessLvl === 'trial') return true;
+    const isTeacherPaid = teacherPlan && teacherPlan !== 'percuma' && teacherPlan !== 'trial' && teacherPlan !== 'free';
+    const isParentPaid = parentPlan && parentPlan !== 'percuma' && parentPlan !== 'trial' && parentPlan !== 'free';
+    const isPaid = (userRole === 'admin') || (userRole === 'guru' && isTeacherPaid) || (userRole === 'ibubapa' && isParentPaid) || (accessLvl === 'pro');
 
-    const isTeacherPaid = teacherPlan && teacherPlan !== 'percuma' && teacherPlan !== 'trial';
-    const isParentPaid = parentPlan && parentPlan !== 'percuma' && parentPlan !== 'trial';
+    // Jika pengguna mempunyai pelan berbayar (Pro) yang sah, jangan sekali-kali jadikan mod percuma/tetamu
+    if (isPaid) {
+        window.isGuestMode = false;
+        return false;
+    }
 
-    if (userRole === 'guru' && !isTeacherPaid) return true;
-    if (userRole === 'ibubapa' && !isParentPaid) return true;
-    if (!userRole && !isTeacherPaid && !isParentPaid && accessLvl !== 'pro') return true;
+    if (window.isGuestMode || window.namaMuridAktif === 'Tetamu') return true;
 
+    if (userRole === 'guru') {
+        if (!isTeacherPaid || accessLvl === 'trial') return true;
+        return false;
+    }
+    if (userRole === 'ibubapa') {
+        if (!isParentPaid || accessLvl === 'trial') return true;
+        return false;
+    }
+
+    if (accessLvl === 'trial' || accessLvl === 'percuma') return true;
     return false;
 };
 
@@ -2000,6 +2073,7 @@ function masukModAdmin() {
     modIbuBapaAktif = false;
     window.modIbuBapaAktif = false;
     modAdminAktif = true;
+    window.modAdminAktif = true;
     window.isAdminMode = true;
     window.isGuestMode = false;
     window.namaMuridAktif = 'Admin';
@@ -2014,6 +2088,9 @@ function masukModAdmin() {
     document.body.classList.add('teacher-mode');
     document.body.classList.add('admin-mode');
     document.body.classList.remove('parent-mode');
+
+    const topBanner = document.getElementById('teacher-top-banner');
+    if (topBanner) topBanner.style.display = 'flex';
 
     const badge = document.getElementById('teacher-banner-badge');
     if (badge) badge.innerHTML = '<i class="fa-solid fa-user-shield"></i> MOD ADMIN';
@@ -2184,6 +2261,7 @@ function keluarModGuru() {
 
     paparSkrin('login-screen');
 }
+window.keluarModAdmin = keluarModGuru;
 
 // --- FUNGSI MOD IBU BAPA ---
 var modIbuBapaAktif = false;
@@ -4361,6 +4439,20 @@ var AVATAR_CONFIG = [
 
 var avatarList = AVATAR_CONFIG.map(a => a.icon);
 
+function isTrialAvatarCheck() {
+    if (typeof window.isEffectiveTrial === 'function') {
+        return window.isEffectiveTrial();
+    }
+    if (window.isUserAdmin && window.isUserAdmin()) return false;
+    if (window.isAdminMode || window.modAdminAktif) return false;
+    if (localStorage.getItem('bunyiKataUserRole') === 'admin') return false;
+    if (window.isGuestMode || window.namaMuridAktif === 'Tetamu' || !window.namaMuridAktif) return true;
+    const accessLvl = (localStorage.getItem('bunyiKataAccessLevel') || window.userAccessLevel || '').toLowerCase().trim();
+    if (accessLvl === 'pro') return false;
+    if (accessLvl === 'trial') return true;
+    return false;
+}
+
 window.claimAvatar = function (icon, reqStars) {
     const curStudent = (namaMuridAktif && studentData[namaMuridAktif]) ? studentData[namaMuridAktif] : null;
     if (!curStudent) return;
@@ -4373,17 +4465,36 @@ window.claimAvatar = function (icon, reqStars) {
     }
 
     if (!curStudent.claimedAvatars.includes(icon)) {
-        curStudent.claimedAvatars.push(icon);
-        if (!curStudent.spentStars) curStudent.spentStars = 0;
-        curStudent.spentStars += reqStars;
-        saveStudentData();
-    }
+        const total = typeof jumlahMarkah === 'function' ? jumlahMarkah(curStudent) : 0;
+        const spent = curStudent.spentStars || 0;
+        const balance = total - spent;
+        if (balance >= reqStars) {
+            curStudent.spentStars = spent + reqStars;
+            curStudent.claimedAvatars.push(icon);
+            window.tempSelectedAvatar = icon;
+            if (typeof saveStudentData === 'function') saveStudentData();
+            if (typeof updateProfilUI === 'function') updateProfilUI();
+            if (typeof window.playBubble === 'function') window.playBubble();
+            renderAvatarOptions();
 
-    window.tempSelectedAvatar = icon;
-    if (typeof window.sebutAudio === 'function') {
-        window.sebutAudio("Tahniah! Anda telah berjaya tuntut avatar baharu!");
+            // Segerakkan ke Firebase RTDB
+            if (typeof window.syncStudentToFirebase === 'function' && namaMuridAktif && namaMuridAktif !== 'Tetamu' && !window.isGuestMode) {
+                const stuId = curStudent.id || (window.studentFirebaseIds && window.studentFirebaseIds[namaMuridAktif]) || localStorage.getItem('bunyiKataStudentId');
+                const isPC = localStorage.getItem('bunyiKataIsParentChild') === 'true';
+                window.syncStudentToFirebase({
+                    id: stuId,
+                    nama: namaMuridAktif,
+                    avatarUrl: icon,
+                    claimedAvatars: curStudent.claimedAvatars,
+                    spentStars: curStudent.spentStars,
+                    totalBintang: total,
+                    isParentChild: isPC,
+                    kodKelas: isPC ? '' : (localStorage.getItem('bunyiKataKodKelas') || ''),
+                    kodKeluarga: isPC ? (localStorage.getItem('bunyiKataKodKeluarga') || '') : ''
+                }).catch(err => console.warn('Firebase claim avatar sync notice:', err));
+            }
+        }
     }
-    renderAvatarOptions();
 };
 
 window.bukaModalAvatar = function () {
@@ -4416,7 +4527,7 @@ window.profileSwiperNav = function (dir) {
     if (newIdx >= 0 && newIdx < AVATAR_CONFIG.length) {
         window.avatar3DActiveIndex = newIdx;
         var cfg = AVATAR_CONFIG[newIdx];
-        var isTrial = !window.isUserAdmin?.() && (window.userAccessLevel === 'trial' || window.isGuestMode || ((namaMuridAktif && studentData[namaMuridAktif]) ? !studentData[namaMuridAktif].isPro && !window.currentUser : true));
+        var isTrial = isTrialAvatarCheck();
         var isProAvatar = cfg.isPro || cfg.reqStars > 0;
 
         if (isTrial && isProAvatar) {
@@ -4442,7 +4553,7 @@ window.selectProfileAvatarIndex = function (idx) {
     if (idx >= 0 && idx < AVATAR_CONFIG.length) {
         window.avatar3DActiveIndex = idx;
         var cfg = AVATAR_CONFIG[idx];
-        var isTrial = !window.isUserAdmin?.() && (window.userAccessLevel === 'trial' || window.isGuestMode || ((namaMuridAktif && studentData[namaMuridAktif]) ? !studentData[namaMuridAktif].isPro && !window.currentUser : true));
+        var isTrial = isTrialAvatarCheck();
         var isProAvatar = cfg.isPro || cfg.reqStars > 0;
 
         if (isTrial && isProAvatar) {
@@ -4522,7 +4633,7 @@ function renderAvatarOptions() {
                 opacity = 0;
             }
 
-            const isTrial = !window.isUserAdmin?.() && (window.userAccessLevel === 'trial' || window.isGuestMode || ((namaMuridAktif && studentData[namaMuridAktif]) ? !studentData[namaMuridAktif].isPro && !window.currentUser : true));
+            const isTrial = isTrialAvatarCheck();
             const isProAvatar = cfg.isPro || cfg.reqStars > 0;
 
             let badgeHTML = '';
@@ -4625,7 +4736,7 @@ function renderAvatarOptions() {
             opacity = 0;
         }
 
-        const isTrial = !window.isUserAdmin?.() && (window.userAccessLevel === 'trial' || window.isGuestMode || ((namaMuridAktif && studentData[namaMuridAktif]) ? !studentData[namaMuridAktif].isPro && !window.currentUser : true));
+        const isTrial = isTrialAvatarCheck();
         const isProAvatar = cfg.isPro || cfg.reqStars > 0;
 
         let badgeHTML = '';
@@ -4814,7 +4925,7 @@ window.simpanProfilEdit = function () {
     let newName = document.getElementById('edit-nama-input').value.trim();
     if (!newName) return alert('Sila masukkan nama.');
 
-    var isTrial = !window.isUserAdmin?.() && (window.userAccessLevel === 'trial' || window.isGuestMode || ((namaMuridAktif && studentData[namaMuridAktif]) ? !studentData[namaMuridAktif].isPro && !window.currentUser : true));
+    var isTrial = isTrialAvatarCheck();
     var chosenCfg = AVATAR_CONFIG.find(function(a) { return a.icon === window.tempSelectedAvatar; });
     if (isTrial && chosenCfg && (chosenCfg.isPro || chosenCfg.reqStars > 0)) {
         if (typeof window.openPakejProModal === 'function') {
@@ -4837,6 +4948,25 @@ window.simpanProfilEdit = function () {
     window.selectedAvatarIcon = window.tempSelectedAvatar;
     saveStudentData();
     updateProfilUI();
+
+    // Segerakkan profil ke Firebase RTDB
+    if (typeof window.syncStudentToFirebase === 'function' && namaMuridAktif && namaMuridAktif !== 'Tetamu' && !window.isGuestMode) {
+        const curStudent = studentData[namaMuridAktif] || {};
+        const stuId = curStudent.id || (window.studentFirebaseIds && window.studentFirebaseIds[namaMuridAktif]) || localStorage.getItem('bunyiKataStudentId');
+        const isPC = localStorage.getItem('bunyiKataIsParentChild') === 'true';
+        const total = typeof jumlahMarkah === 'function' ? jumlahMarkah(curStudent) : (curStudent.coins || 0);
+        window.syncStudentToFirebase({
+            id: stuId,
+            nama: namaMuridAktif,
+            avatarUrl: window.selectedAvatarIcon,
+            claimedAvatars: curStudent.claimedAvatars || [],
+            spentStars: curStudent.spentStars || 0,
+            totalBintang: total,
+            isParentChild: isPC,
+            kodKelas: isPC ? '' : (localStorage.getItem('bunyiKataKodKelas') || ''),
+            kodKeluarga: isPC ? (localStorage.getItem('bunyiKataKodKeluarga') || '') : ''
+        }).catch(err => console.warn('Firebase save profile sync notice:', err));
+    }
 
     // force updates for all elements
     if (document.getElementById('profil-nama-besar')) {
@@ -5577,6 +5707,7 @@ window.resetProgresMurid = function (nama) {
 };
 
 window.renderTeacherTable = function () {
+    if (typeof refreshAppStudentState === 'function') refreshAppStudentState();
     const tbody = document.getElementById('guru-table-body');
     if (!tbody) return;
     tbody.innerHTML = ''; // Kosongkan jadual
@@ -5773,6 +5904,28 @@ window.tukarCarta = function (jenis) {
     renderLeaderboard(jenis);
 };
 
+// --- OPTIMASI FIREBASE RTDB: SMART IN-MEMORY CACHE ---
+window.RTDB_LEADERBOARD_CACHE = window.RTDB_LEADERBOARD_CACHE || {
+    classCache: {}, // { [cacheKey]: { data: [...], timestamp: number } }
+    globalCache: null, // { data: [...], timestamp: number }
+    TTL: 3 * 60 * 1000, // 3 minit TTL
+    GLOBAL_TTL: 5 * 60 * 1000 // 5 minit TTL untuk Global Top 10
+};
+
+window.invalidateLeaderboardCache = function() {
+    if (window.RTDB_LEADERBOARD_CACHE) {
+        window.RTDB_LEADERBOARD_CACHE.classCache = {};
+        window.RTDB_LEADERBOARD_CACHE.globalCache = null;
+    }
+};
+
+window.addEventListener('kemaskini-profil', () => {
+    if (typeof window.invalidateLeaderboardCache === 'function') window.invalidateLeaderboardCache();
+});
+window.addEventListener('bintang-dikemaskini', () => {
+    if (typeof window.invalidateLeaderboardCache === 'function') window.invalidateLeaderboardCache();
+});
+
 window.renderLeaderboard = renderLeaderboard;
 async function renderLeaderboard(jenis = 'harian') {
     const grandstandEl = document.getElementById('leaderboard-grandstand');
@@ -5787,90 +5940,140 @@ async function renderLeaderboard(jenis = 'harian') {
     const teacherName = (localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || '').trim().toLowerCase();
 
     let studentsArr = [];
+    const now = Date.now();
 
     if (jenis === 'global') {
-        // --- MOD KEDUDUKAN GLOBAL (TOP 10 BULANAN / KESELURUHAN) ---
-        try {
-            const res = await fetch('https://bunyi-kata-official-default-rtdb.asia-southeast1.firebasedatabase.app/students.json');
-            if (res.ok) {
-                const data = await res.json();
-                for (const [id, s] of Object.entries(data || {})) {
-                    if (!s || !s.nama) continue;
-                    const lower = s.nama.trim().toLowerCase();
-                    if (GHOST_NAMES.includes(lower)) continue;
-                    if (teacherName && lower === teacherName) continue;
-                    studentsArr.push({
-                        id: id,
-                        name: s.nama.trim().toUpperCase(),
-                        score: Number(s.total_bintang || 0),
-                        avatar: s.avatar_url || '/images/avatar/avatar1.png',
-                        kelas: s.nama_kelas || s.kod_kelas || s.nama_keluarga || ''
-                    });
+        // --- 1 & 3: MOD KEDUDUKAN GLOBAL (TOP 10 DENGAN 5 MINIT IN-MEMORY CACHE) ---
+        const gCache = window.RTDB_LEADERBOARD_CACHE.globalCache;
+        if (gCache && gCache.data && (now - gCache.timestamp < window.RTDB_LEADERBOARD_CACHE.GLOBAL_TTL)) {
+            studentsArr = [...gCache.data];
+        } else {
+            try {
+                const res = await fetch('https://bunyi-kata-official-default-rtdb.asia-southeast1.firebasedatabase.app/students.json');
+                if (res.ok) {
+                    const data = await res.json();
+                    const rawArr = [];
+                    for (const [id, s] of Object.entries(data || {})) {
+                        if (!s || !s.nama) continue;
+                        const lower = s.nama.trim().toLowerCase();
+                        if (GHOST_NAMES.includes(lower)) continue;
+                        if (teacherName && lower === teacherName) continue;
+                        rawArr.push({
+                            id: id,
+                            name: s.nama.trim().toUpperCase(),
+                            score: Number(s.total_bintang || 0),
+                            avatar: s.avatar_url || '/images/avatar/avatar1.png',
+                            kelas: s.nama_kelas || s.kod_kelas || s.nama_keluarga || ''
+                        });
+                    }
+                    rawArr.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ms'));
+                    studentsArr = rawArr.slice(0, 10);
+                    window.RTDB_LEADERBOARD_CACHE.globalCache = {
+                        data: [...studentsArr],
+                        timestamp: now
+                    };
                 }
+            } catch (err) {
+                console.warn('Ralat muat turun global students:', err);
             }
-        } catch (err) {
-            console.warn('Ralat muat turun global students:', err);
-        }
 
-        // Fallback jika fetch offline
-        if (studentsArr.length === 0 && typeof studentData !== 'undefined') {
-            Object.entries(studentData).forEach(([n, d]) => {
-                const lower = n.trim().toLowerCase();
-                if (GHOST_NAMES.includes(lower) || (teacherName && lower === teacherName)) return;
-                studentsArr.push({
-                    name: n.trim().toUpperCase(),
-                    score: jumlahMarkah(d),
-                    avatar: d.avatar || '/images/avatar/avatar1.png',
-                    kelas: d.kelas || ''
+            // Fallback jika fetch offline
+            if (studentsArr.length === 0 && typeof studentData !== 'undefined') {
+                const rawArr = [];
+                Object.entries(studentData).forEach(([n, d]) => {
+                    const lower = n.trim().toLowerCase();
+                    if (GHOST_NAMES.includes(lower) || (teacherName && lower === teacherName)) return;
+                    rawArr.push({
+                        name: n.trim().toUpperCase(),
+                        score: (typeof jumlahMarkah === 'function' ? jumlahMarkah(d) : Number(d.total_bintang || 0)),
+                        avatar: d.avatar || '/images/avatar/avatar1.png',
+                        kelas: d.kelas || ''
+                    });
                 });
-            });
+                rawArr.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ms'));
+                studentsArr = rawArr.slice(0, 10);
+            }
         }
-
-        // Susun markah bintang tertinggi (jika sama, susun mengikut abjad nama)
-        studentsArr.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ms'));
-        // Hadkan kepada TOP 10 SAHAJA untuk kedudukan Global
-        studentsArr = studentsArr.slice(0, 10);
     } else {
-        // --- MOD KEDUDUKAN KELAS / KELUARGA (HARIAN, MINGGUAN, BULANAN) ---
+        // --- 1, 2, 3: MOD KEDUDUKAN KELAS / KELUARGA (HARIAN, MINGGUAN, BULANAN) ---
         const isParentChild = Boolean(
             localStorage.getItem('bunyiKataIsParentChild') === 'true' ||
             window.modIbuBapaAktif ||
             (typeof document !== 'undefined' && document.body && document.body.classList.contains('parent-mode'))
         );
 
-        let targetNames = [];
         const sTarget = (typeof window.studentData !== 'undefined') ? window.studentData : (typeof studentData !== 'undefined' ? studentData : {});
+        const curStudentObj = sTarget[curActiveName] || {};
 
-        // Muat turun data murid dari Firebase RTDB agar maklumat sentiasa terkini
-        let rtdbStudents = {};
-        try {
-            const sRes = await fetch('https://bunyi-kata-official-default-rtdb.asia-southeast1.firebasedatabase.app/students.json');
-            if (sRes.ok) {
-                const sJson = await sRes.json();
-                if (sJson) {
-                    rtdbStudents = sJson;
-                    for (const [sId, sObj] of Object.entries(sJson)) {
-                        if (sObj && sObj.nama) {
-                            const nUpper = sObj.nama.trim().toUpperCase();
-                            if (!sTarget[nUpper]) sTarget[nUpper] = {};
-                            sTarget[nUpper].id = sId;
-                            sTarget[nUpper].nama = sObj.nama;
-                            sTarget[nUpper].kelas = sObj.nama_kelas || sObj.kod_kelas || sTarget[nUpper].kelas || '';
-                            sTarget[nUpper].avatar = sObj.avatar_url || sTarget[nUpper].avatar || '/images/avatar/avatar1.png';
-                            sTarget[nUpper].total_bintang = Number(sObj.total_bintang || 0);
-                            sTarget[nUpper].dikemaskini_pada = sObj.dikemaskini_pada || '';
-                            sTarget[nUpper].stars = { ...(sTarget[nUpper].stars || {}), ...(sObj.stars || {}) };
-                            sTarget[nUpper].scores = { ...(sTarget[nUpper].scores || {}), ...(sObj.scores || {}) };
-                        }
-                    }
-                }
-            }
-        } catch (err) {
-            console.warn('Ralat muat turun students RTDB:', err);
-        }
+        // Kenal pasti kod kelas atau kod keluarga murid
+        let activeCode = '';
+        let queryType = ''; // 'kod_kelas' atau 'kod_keluarga'
 
         if (isParentChild) {
-            // Hanya anak-anak di dalam keluarga pengguna sahaja
+            activeCode = (curStudentObj.kod_keluarga || localStorage.getItem('bunyiKataKodKeluarga') || '').trim().toUpperCase();
+            queryType = 'kod_keluarga';
+        } else {
+            activeCode = (curStudentObj.kod_kelas || curStudentObj.kelas || localStorage.getItem('bunyiKataKodKelas') || '').trim().toUpperCase();
+            queryType = 'kod_kelas';
+        }
+
+        const cacheKey = `${queryType}_${activeCode || 'LOCAL'}`;
+        const cachedClass = window.RTDB_LEADERBOARD_CACHE.classCache[cacheKey];
+
+        let classStudentRecords = [];
+
+        if (cachedClass && cachedClass.data && (now - cachedClass.timestamp < window.RTDB_LEADERBOARD_CACHE.TTL)) {
+            // Gunakan data cache in-memory pantas tanpa query rangkaian!
+            classStudentRecords = cachedClass.data;
+        } else {
+            // Query bersasar berindeks: hanya muat turun murid dalam kelas/keluarga ini sahaja (~9 rekod vs beribu rekod)
+            if (activeCode && queryType) {
+                try {
+                    const filterUrl = `https://bunyi-kata-official-default-rtdb.asia-southeast1.firebasedatabase.app/students.json?orderBy="${queryType}"&equalTo="${encodeURIComponent(JSON.stringify(activeCode))}"`;
+                    const sRes = await fetch(filterUrl);
+                    if (sRes.ok) {
+                        const sJson = await sRes.json();
+                        if (sJson && typeof sJson === 'object') {
+                            classStudentRecords = Object.entries(sJson).map(([sId, sObj]) => ({
+                                id: sId,
+                                ...sObj
+                            }));
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Ralat muat turun murid berfilter:', err);
+                }
+            }
+
+            // Simpan dalam cache in-memory
+            if (classStudentRecords.length > 0) {
+                window.RTDB_LEADERBOARD_CACHE.classCache[cacheKey] = {
+                    data: classStudentRecords,
+                    timestamp: now
+                };
+            }
+        }
+
+        // Gabungkan dengan sTarget tempatan untuk kemaskini tepat murid semasa
+        classStudentRecords.forEach(sObj => {
+            if (sObj && sObj.nama) {
+                const nUpper = sObj.nama.trim().toUpperCase();
+                if (!sTarget[nUpper]) sTarget[nUpper] = {};
+                sTarget[nUpper].id = sObj.id;
+                sTarget[nUpper].nama = sObj.nama;
+                sTarget[nUpper].kelas = sObj.nama_kelas || sObj.kod_kelas || sObj.nama_keluarga || sTarget[nUpper].kelas || '';
+                sTarget[nUpper].avatar = sObj.avatar_url || sTarget[nUpper].avatar || '/images/avatar/avatar1.png';
+                sTarget[nUpper].total_bintang = Number(sObj.total_bintang || 0);
+                sTarget[nUpper].dikemaskini_pada = sObj.dikemaskini_pada || '';
+                if (sObj.stars) sTarget[nUpper].stars = { ...(sTarget[nUpper].stars || {}), ...sObj.stars };
+            }
+        });
+
+        // Senarai nama sasaran untuk kedudukan
+        let targetNames = [];
+        if (classStudentRecords.length > 0) {
+            targetNames = classStudentRecords.map(s => (s.nama || '').trim().toUpperCase());
+        } else if (isParentChild) {
             const rawChildren = localStorage.getItem('bunyiKataChildNames') || localStorage.getItem('bunyiKataParentChildNames');
             if (rawChildren) {
                 try {
@@ -5889,8 +6092,7 @@ async function renderLeaderboard(jenis = 'harian') {
                 });
             }
         } else {
-            // Hanya murid-murid di dalam kelas murid aktif sahaja
-            const activeClass = (sTarget[curActiveName]?.kelas || localStorage.getItem('bunyiKataNamaKelas') || '').trim().toLowerCase();
+            const activeClass = (curStudentObj.kelas || localStorage.getItem('bunyiKataNamaKelas') || '').trim().toLowerCase();
             const allNames = (Array.isArray(studentNames) && studentNames.length > 0)
                 ? studentNames
                 : ((Array.isArray(window.studentNames) && window.studentNames.length > 0)
@@ -5908,142 +6110,28 @@ async function renderLeaderboard(jenis = 'harian') {
             });
         }
 
-        // Singkirkan duplikasi & pastikan murid aktif termasuk jika ada
+        // Tapis nama hantu & pastikan murid aktif terkandung
         targetNames = Array.from(new Set(targetNames.filter(n => {
+            if (!n) return false;
             const lower = n.trim().toLowerCase();
             return !GHOST_NAMES.includes(lower) && (lower !== teacherName);
         })));
-        if (curActiveName && !GHOST_NAMES.includes(curActiveName.toLowerCase()) && curActiveName.toLowerCase() !== teacherName && !targetNames.includes(curActiveName)) {
+        if (curActiveName && !GHOST_NAMES.includes(curActiveName.toLowerCase()) && curActiveName.toLowerCase() !== teacherName && !targetNames.some(t => t.toLowerCase() === curActiveName.toLowerCase())) {
             targetNames.push(curActiveName);
         }
 
-        // Muat turun rekod aktiviti dari Firebase /scores.json jika ada untuk kiraan harian/mingguan yang tepat
-        let scoresList = [];
-        try {
-            const scRes = await fetch('https://bunyi-kata-official-default-rtdb.asia-southeast1.firebasedatabase.app/scores.json');
-            if (scRes.ok) {
-                const scData = await scRes.json();
-                if (scData) scoresList = Object.values(scData);
-            }
-        } catch(e) {}
-
-        const now = new Date();
-        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-        const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        const sevenDaysAgoTime = now.getTime() - (7 * 24 * 60 * 60 * 1000);
-
-        const MAIN_CURRICULUM_MODULES = [
-            'kenali_huruf', 'vokal_konsonan', 'fonik_abc', 'suku_kata_kv',
-            'suku_kata_v_kv', 'suku_kata_kv_kv', 'suku_kata_kv_kvk',
-            'suku_kata_kvk_kv', 'suku_kata_kvk_kvk', 'ayat_pendek',
-            'ayat_panjang', 'petikan_tahap_1'
-        ];
-
+        // --- SOLUSI 2: RINGKASAN TERUS DARI REKOD MURID (TANPA DOWNLOAD /scores.json) ---
         studentsArr = targetNames.map(nama => {
             const d = sTarget[nama] || {};
-            const sId = d.id || '';
-            const totalStarsGlobal = Number(d.total_bintang || 0) || jumlahMarkah(d);
-
-            // Kira bintang daripada aktiviti utama sedia ada dalam d.stars
-            let mainStarsSum = 0;
-            if (d && d.stars) {
-                MAIN_CURRICULUM_MODULES.forEach(mKey => {
-                    if (d.stars[mKey] !== undefined) {
-                        mainStarsSum += Math.min(Math.max(Number(d.stars[mKey] || 0), 0), 3);
-                    }
-                });
-            }
-
-            // Kira bintang cabaran tambahan:
-            let explicitExtraStars = 0;
-            if (typeof EXTRA_CHALLENGES_DATA !== 'undefined' && d && d.stars) {
-                const extraCountedKeys = new Set();
-                Object.values(EXTRA_CHALLENGES_DATA).forEach(list => {
-                    if (Array.isArray(list)) {
-                        list.forEach(m => {
-                            const baseId = m.id;
-                            if (extraCountedKeys.has(baseId)) return;
-                            extraCountedKeys.add(baseId);
-                            let st = 0;
-                            if (d.stars[baseId] !== undefined) st = Math.max(st, Number(d.stars[baseId] || 0));
-                            if (d.stars['extra_' + baseId] !== undefined) st = Math.max(st, Number(d.stars['extra_' + baseId] || 0));
-                            explicitExtraStars += Math.min(Math.max(st, 0), 3);
-                        });
-                    }
-                });
-            }
-            if (explicitExtraStars === 0 && typeof EXTRA_CHALLENGES_DATA !== 'undefined' && nama.trim().toLowerCase() === curActiveName.trim().toLowerCase()) {
-                Object.values(EXTRA_CHALLENGES_DATA).forEach(list => {
-                    if (Array.isArray(list)) {
-                        list.forEach(m => {
-                            const lsVal = Number(localStorage.getItem('extra_stars_' + m.id) || 0);
-                            explicitExtraStars += Math.min(Math.max(lsVal, 0), 3);
-                        });
-                    }
-                });
-            }
-
-            // Beza antara total_bintang (global) dan aktiviti utama
-            const diffExtraStars = Math.max(0, totalStarsGlobal - mainStarsSum);
-            const extraStars = Math.max(explicitExtraStars, diffExtraStars);
-
-            let computedStars = 0;
-            let hasScoreRecords = false;
-
-            if (scoresList.length > 0 && sId) {
-                // Tapis skor mengikut student_id
-                const studentScores = scoresList.filter(sc => sc && sc.student_id === sId);
-                const bestByActivity = {};
-
-                studentScores.forEach(sc => {
-                    if (!sc || !sc.tarikh) return;
-                    const scTime = new Date(sc.tarikh).getTime();
-                    const scDateStr = sc.tarikh.slice(0, 10);
-                    const scMonthStr = sc.tarikh.slice(0, 7);
-
-                    let include = false;
-                    if (jenis === 'harian') {
-                        include = (scDateStr === todayStr);
-                    } else if (jenis === 'mingguan') {
-                        include = (scTime >= sevenDaysAgoTime);
-                    } else if (jenis === 'bulanan') {
-                        include = (scMonthStr === currentMonthStr);
-                    }
-
-                    if (include) {
-                        hasScoreRecords = true;
-                        const actKey = sc.aktiviti_nama || sc.modul || 'act';
-                        const bVal = Number(sc.bintang || 0);
-                        bestByActivity[actKey] = Math.max(bestByActivity[actKey] || 0, bVal);
-                    }
-                });
-
-                if (hasScoreRecords) {
-                    const timeframeMainStars = Object.values(bestByActivity).reduce((sum, b) => sum + b, 0);
-                    computedStars = timeframeMainStars + extraStars;
-                    if (totalStarsGlobal > 0 && computedStars > totalStarsGlobal) {
-                        computedStars = totalStarsGlobal;
-                    }
-                }
-            }
-
-            // Fallback / pemadanan jika tiada rekod /scores bertarikh
-            if (computedStars === 0) {
-                if (jenis === 'bulanan' || jenis === 'mingguan') {
-                    computedStars = totalStarsGlobal;
-                } else if (jenis === 'harian') {
-                    if (nama.trim().toLowerCase() === curActiveName.trim().toLowerCase() && totalStarsGlobal > 0) {
-                        computedStars = totalStarsGlobal;
-                    } else if (d.dikemaskini_pada && d.dikemaskini_pada.slice(0, 10) === todayStr) {
-                        computedStars = totalStarsGlobal;
-                    }
-                }
-            }
+            const isSelf = (nama.trim().toLowerCase() === curActiveName.trim().toLowerCase());
+            const totalStarsGlobal = isSelf && typeof jumlahMarkah === 'function'
+                ? jumlahMarkah(d)
+                : (Number(d.total_bintang || 0) || (typeof jumlahMarkah === 'function' ? jumlahMarkah(d) : 0));
 
             return {
                 name: nama,
-                score: computedStars,
-                avatar: d.avatar || "/images/avatar/avatar1.png"
+                score: totalStarsGlobal,
+                avatar: d.avatar || d.avatar_url || "/images/avatar/avatar1.png"
             };
         });
 
@@ -6575,7 +6663,7 @@ window.renderAdminUrus = function (tab) {
         } else {
             teachers.forEach((t, idx) => {
                 const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
-                const langganan = t.langganan || '1 Bulan';
+                const langganan = window.normalizeAdminPlanName ? window.normalizeAdminPlanName(t.langganan) : (t.langganan || '1 Bulan (Pro)');
                 const tempohText = `${t.bakiHari} Hari (${langganan})`;
                 rowsHtml += `
                     <tr style="background:${rowBg}; border-bottom:1px solid #e2e8f0; transition:background 0.15s ease;">
@@ -6586,9 +6674,9 @@ window.renderAdminUrus = function (tab) {
                         <td style="padding:8px 8px; text-align:center; border-right:1px solid #e2e8f0; white-space:nowrap;">
                             <select class="neo-btn filter-select" style="padding: 4px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 8px; border: 1.5px solid #ea580c; background: #fff; cursor: pointer; white-space: nowrap; width: auto; min-width: 145px; display: inline-block;" onchange="window.tukarLanggananPengguna('${t.id}', 'guru', this.value)">
                                 <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
-                                <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' || langganan === '1 Bulan' || langganan === 'Pro' ? 'selected' : ''}>1 Bulan (Pro)</option>
-                                <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' || langganan === '3 Bulan' ? 'selected' : ''}>3 Bulan (Pro)</option>
-                                <option value="1 Tahun (Pro)" ${langganan === '1 Tahun' || langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
+                                <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' ? 'selected' : ''}>1 Bulan (Pro)</option>
+                                <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' ? 'selected' : ''}>3 Bulan (Pro)</option>
+                                <option value="1 Tahun (Pro)" ${langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
                             </select>
                         </td>
                         <td style="padding:10px 10px; text-align:center; border-right:1px solid #e2e8f0;">
@@ -6670,7 +6758,7 @@ window.renderAdminUrus = function (tab) {
         } else {
             parents.forEach((p, idx) => {
                 const rowBg = idx % 2 === 0 ? '#ffffff' : '#f0f9ff';
-                const langganan = p.langganan || '1 Bulan';
+                const langganan = window.normalizeAdminPlanName ? window.normalizeAdminPlanName(p.langganan) : (p.langganan || '1 Bulan (Pro)');
                 const tempohText = `${p.bakiHari} Hari (${langganan})`;
                 rowsHtml += `
                     <tr style="background:${rowBg}; border-bottom:1px solid #e2e8f0; transition:background 0.15s ease;">
@@ -6680,9 +6768,9 @@ window.renderAdminUrus = function (tab) {
                         <td style="padding:8px 8px; text-align:center; border-right:1px solid #e2e8f0; white-space:nowrap;">
                             <select class="neo-btn filter-select" style="padding: 4px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 8px; border: 1.5px solid #0284c7; background: #fff; cursor: pointer; white-space: nowrap; width: auto; min-width: 145px; display: inline-block;" onchange="window.tukarLanggananPengguna('${p.id}', 'ibubapa', this.value)">
                                 <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
-                                <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' || langganan === '1 Bulan' || langganan === 'Pro' ? 'selected' : ''}>1 Bulan (Pro)</option>
-                                <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' || langganan === '3 Bulan' ? 'selected' : ''}>3 Bulan (Pro)</option>
-                                <option value="1 Tahun (Pro)" ${langganan === '1 Tahun' || langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
+                                <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' ? 'selected' : ''}>1 Bulan (Pro)</option>
+                                <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' ? 'selected' : ''}>3 Bulan (Pro)</option>
+                                <option value="1 Tahun (Pro)" ${langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
                             </select>
                         </td>
                         <td style="padding:10px 10px; text-align:center; border-right:1px solid #e2e8f0;">
@@ -17977,6 +18065,7 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
             window.studentData[studentName] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: window.selectedAvatarIcon || '/images/avatar/avatar1.png' };
         }
         if (explicitStudentId) window.studentData[studentName].id = explicitStudentId;
+        if (studentName !== 'Tetamu' && !isExplicitGuest) window.studentData[studentName].isPro = true;
         window.selectedAvatarIcon = window.studentData[studentName].avatar;
     }
     if (typeof studentData !== 'undefined') {
@@ -17984,6 +18073,7 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
             studentData[studentName] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: window.selectedAvatarIcon || '/images/avatar/avatar1.png' };
         }
         if (explicitStudentId) studentData[studentName].id = explicitStudentId;
+        if (studentName !== 'Tetamu' && !isExplicitGuest) studentData[studentName].isPro = true;
         window.selectedAvatarIcon = studentData[studentName].avatar;
     }
     if (!window.selectedAvatarIcon) {
@@ -18435,9 +18525,6 @@ function tutupModalSenaraiBacaan() {
 
 // --- PENGURUSAN MURID & KELAS ---
 window.getDaftarKelas = function () {
-    if (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : (window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial')) {
-        return [];
-    }
     let list = [];
     try {
         const raw = localStorage.getItem('bunyiKataDaftarKelas');
@@ -18445,6 +18532,14 @@ window.getDaftarKelas = function () {
     } catch (e) { }
 
     if (!Array.isArray(list)) list = [];
+
+    // Fallback jika bunyiKataNamaKelas wujud tetapi senarai daftar kelas belum diisi
+    if (list.length === 0) {
+        const k1 = (localStorage.getItem('bunyiKataNamaKelas') || '').trim();
+        const k2 = (localStorage.getItem('bunyiKataNamaKelas2') || '').trim();
+        if (k1) list.push(k1);
+        if (k2 && k2.toLowerCase() !== k1.toLowerCase()) list.push(k2);
+    }
 
     // Strict case-insensitive deduplication and sanitization
     const seen = new Set();
@@ -18468,9 +18563,6 @@ window.getDaftarKelas = function () {
 };
 
 window.getKelasAktif = function () {
-    if (typeof window.isEffectiveTrial === 'function' ? window.isEffectiveTrial() : (window.userAccessLevel === 'trial' || localStorage.getItem('bunyiKataAccessLevel') === 'trial')) {
-        return '';
-    }
     const list = window.getDaftarKelas();
     if (list.length === 0) {
         return '';
@@ -18638,9 +18730,9 @@ window.simpanKodKelasUrus = async function () {
             const collision = await checkFn(newKod, 'guru', undefined, isKelas2 ? 'kelas2' : 'kelas1');
             if (collision && collision.isUsed) {
                 if (typeof window.showAppToast === 'function') {
-                    window.showAppToast('Kod Telah Digunakan', `Kod "${newKod}" tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`, 'warning');
+                    window.showAppToast('Kod Telah Digunakan', `Kod “${newKod}” tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`, 'warning');
                 } else {
-                    alert(`Kod "${newKod}" telah digunakan oleh ${collision.usedBy}! Sila pilih kod lain.`);
+                    alert(`Kod “${newKod}” telah digunakan oleh ${collision.usedBy}! Sila pilih kod lain.`);
                 }
                 return;
             }
@@ -18949,6 +19041,7 @@ function updateStudentDropdown() {
 }
 
 function renderSenaraiMuridUrus() {
+    if (typeof refreshAppStudentState === 'function') refreshAppStudentState();
     const container = document.getElementById('senarai-murid-container');
     const countEl = document.getElementById('jumlah-murid-count');
     const searchInput = document.getElementById('carian-murid-urus');

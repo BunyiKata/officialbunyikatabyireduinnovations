@@ -11,7 +11,7 @@ import {
   limitToFirst,
   onValue 
 } from 'firebase/database';
-import { db, isFirebaseConfigured } from '../lib/firebase';
+import { auth, db, isFirebaseConfigured } from '../lib/firebase';
 
 export interface ClassRecord {
   id: string;
@@ -58,6 +58,8 @@ export interface StudentRecord {
   stars?: Record<string, number>;
   latihan?: Record<string, boolean>;
   badges?: string[];
+  claimed_avatars?: string[];
+  spent_stars?: number;
   dicipta_pada?: string;
   dikemaskini_pada?: string;
 }
@@ -237,20 +239,20 @@ export async function checkIsCodeAlreadyUsedInFirebase(
             // Periksa sama ada kod ini bertembung dengan kelas lain guru ini
             if (excludeClassOrFamilyKey === 'kelas1' && (c.kod_kelas === kGuru2 || child.key !== excludeClassOrFamilyKey)) {
               conflict = true;
-              conflictName = `Kelas Kedua Anda ("${c.nama_kelas || 'Kelas'}")`;
+              conflictName = `Kelas Kedua Anda (“${c.nama_kelas || 'Kelas'}”)`;
             } else if (excludeClassOrFamilyKey === 'kelas2' && (c.kod_kelas === kGuru1 || child.key !== excludeClassOrFamilyKey)) {
               conflict = true;
-              conflictName = `Kelas Pertama Anda ("${c.nama_kelas || 'Kelas'}")`;
+              conflictName = `Kelas Pertama Anda (“${c.nama_kelas || 'Kelas'}”)`;
             }
           } else {
-            // Milik guru lain
+            // Milik guru lain (Jaga privasi, jangan dedahkan nama guru lain)
             conflict = true;
-            conflictName = c.nama_guru ? `Guru Lain (${c.nama_guru})` : 'Guru Lain';
+            conflictName = 'Guru Lain';
           }
         } else {
           // Mod Ibu Bapa / Admin cuba guna kod kelas guru
           conflict = true;
-          conflictName = c.nama_guru ? `Guru (${c.nama_guru})` : 'Mod Guru (Kod Kelas)';
+          conflictName = 'Mod Guru (Kod Kelas)';
         }
       });
 
@@ -271,13 +273,14 @@ export async function checkIsCodeAlreadyUsedInFirebase(
           if (f.parent_id && userId && f.parent_id === userId) {
             // Milik akaun ibu bapa ini sendiri, dibenarkan jika kod keluarga sendiri
           } else {
+            // Milik keluarga lain (Jaga privasi)
             conflict = true;
-            conflictName = f.nama_keluarga ? `Keluarga Lain (${f.nama_keluarga})` : 'Keluarga Lain';
+            conflictName = 'Keluarga Lain';
           }
         } else {
           // Mod Guru / Admin cuba guna kod keluarga
           conflict = true;
-          conflictName = f.nama_keluarga ? `Keluarga (${f.nama_keluarga})` : 'Mod Ibu Bapa (Kod Keluarga)';
+          conflictName = 'Mod Ibu Bapa (Kod Keluarga)';
         }
       });
 
@@ -296,6 +299,70 @@ export async function checkIsCodeAlreadyUsedInFirebase(
 export async function getClassCountByGuruId(guruId: string): Promise<number> {
   const classes = await getTeacherClasses(guruId);
   return classes.length;
+}
+
+/**
+ * ---------------------------------------------------------------------------
+ * INDEKS KOD (code_index)
+ * ---------------------------------------------------------------------------
+ * Peraturan Realtime Database tidak boleh membuat query (orderByChild), ia
+ * hanya boleh mencari nod melalui kunci secara terus. Oleh itu kita simpan
+ * satu nod indeks ringkas:
+ *
+ *   code_index/<KOD>  =>  { jenis, kelas_id|keluarga_id, pemilik_id }
+ *
+ * Dengan indeks ini, peraturan boleh mengesahkan bahawa kod kelas/keluarga
+ * yang digunakan oleh murid (yang tiada akaun sendiri) memang wujud dan
+ * dimiliki oleh seorang guru/ibu bapa berdaftar. Kod rekaan akan ditolak,
+ * jadi rekod murid sentiasa terikat pada pemilik yang sah.
+ *
+ * Kunci RTDB tidak boleh mengandungi . $ # [ ] / — jadi kod dibersihkan.
+ */
+export function bersihkanKunciKod(kod: string): string {
+  return (kod || '').trim().toUpperCase().replace(/[.$#[\]/]/g, '_');
+}
+
+export async function tulisIndeksKod(params: {
+  kod: string;
+  jenis: 'kelas' | 'keluarga';
+  rujukanId?: string;
+  pemilikId?: string;
+  kodLama?: string;
+}): Promise<void> {
+  const kunci = bersihkanKunciKod(params.kod);
+  if (!kunci) return;
+
+  try {
+    // Buang indeks lama jika kod ditukar, supaya kod lapuk tidak kekal sah.
+    if (params.kodLama) {
+      const kunciLama = bersihkanKunciKod(params.kodLama);
+      if (kunciLama && kunciLama !== kunci) {
+        try {
+          await remove(ref(db, `code_index/${kunciLama}`));
+        } catch (e) {
+          console.warn('[Firebase RTDB] Gagal membuang indeks kod lama:', kunciLama);
+        }
+      }
+    }
+
+    const payload: Record<string, any> = {
+      kod: (params.kod || '').trim().toUpperCase(),
+      jenis: params.jenis,
+      dikemaskini_pada: new Date().toISOString(),
+    };
+    if (params.jenis === 'kelas') {
+      payload.kelas_id = params.rujukanId || null;
+      payload.guru_id = params.pemilikId || null;
+    } else {
+      payload.keluarga_id = params.rujukanId || null;
+      payload.parent_id = params.pemilikId || null;
+    }
+
+    await set(ref(db, `code_index/${kunci}`), payload);
+  } catch (err) {
+    // Kegagalan indeks tidak boleh menghalang penyimpanan kelas/keluarga.
+    console.warn('[Firebase RTDB] Gagal menulis code_index:', err);
+  }
 }
 
 /**
@@ -337,6 +404,7 @@ export async function saveClassToFirebase(classData: {
         existingDicipta = child.val()?.dicipta_pada || now;
       });
       await update(ref(db, `classes/${existingKey}`), payload);
+      await tulisIndeksKod({ kod: cleanCode, jenis: 'kelas', rujukanId: existingKey, pemilikId: guruId });
       return { id: existingKey, dicipta_pada: existingDicipta, ...payload } as ClassRecord;
     } else {
       const newRef = push(ref(db, 'classes'));
@@ -344,6 +412,7 @@ export async function saveClassToFirebase(classData: {
         ...payload,
         dicipta_pada: now,
       });
+      await tulisIndeksKod({ kod: cleanCode, jenis: 'kelas', rujukanId: newRef.key!, pemilikId: guruId });
       return { id: newRef.key!, dicipta_pada: now, ...payload } as ClassRecord;
     }
   } catch (err) {
@@ -373,6 +442,23 @@ export async function getTeacherClasses(guruIdOrEmail: string): Promise<ClassRec
     const q = query(ref(db, 'classes'), orderByChild('guru_id'), equalTo(guruId));
     const snap = await get(q);
     const classes = snapToArray<ClassRecord>(snap);
+
+    if (classes.length === 0) {
+      try {
+        const snapAll = await get(ref(db, 'classes'));
+        if (snapAll.exists()) {
+          snapAll.forEach(child => {
+            const val = child.val();
+            if (val && (val.guru_id === guruId || val.guru_id === guruIdOrEmail || (val.guru_email && val.guru_email.toLowerCase() === guruIdOrEmail.toLowerCase()))) {
+              classes.push({ id: child.key!, ...val });
+            }
+          });
+        }
+      } catch (scanErr) {
+        console.warn('[Firebase RTDB] Fallback classes scan notice:', scanErr);
+      }
+    }
+
     classes.sort((a, b) => (a.dicipta_pada || '').localeCompare(b.dicipta_pada || ''));
     return classes;
   } catch (err) {
@@ -407,6 +493,13 @@ export async function updateClassInFirebase(params: {
         aktif: true,
       });
       const d = await get(ref(db, `classes/${params.classId}`));
+      await tulisIndeksKod({
+        kod: cleanNew,
+        jenis: 'kelas',
+        rujukanId: params.classId,
+        pemilikId: params.guruId || d.val()?.guru_id || '',
+        kodLama: params.oldKodKelas,
+      });
       return { id: d.key!, ...d.val() } as ClassRecord;
     }
 
@@ -426,6 +519,13 @@ export async function updateClassInFirebase(params: {
           aktif: true,
         });
         const d = await get(ref(db, `classes/${targetId}`));
+        await tulisIndeksKod({
+          kod: cleanNew,
+          jenis: 'kelas',
+          rujukanId: targetId,
+          pemilikId: params.guruId || d.val()?.guru_id || '',
+          kodLama: cleanOld,
+        });
         return { id: d.key!, ...d.val() } as ClassRecord;
       }
     }
@@ -536,12 +636,26 @@ export async function saveFamilyToFirebase(familyData: {
     if (existingDocId) {
       await update(ref(db, `families/${existingDocId}`), payload);
       const d = await get(ref(db, `families/${existingDocId}`));
+      await tulisIndeksKod({
+        kod: cleanCode,
+        jenis: 'keluarga',
+        rujukanId: existingDocId,
+        pemilikId: parentId,
+        kodLama: familyData.oldKodKeluarga,
+      });
       return { id: d.key!, ...d.val() } as FamilyRecord;
     } else {
       const newRef = push(ref(db, 'families'));
       await set(newRef, {
         ...payload,
         dicipta_pada: now,
+      });
+      await tulisIndeksKod({
+        kod: cleanCode,
+        jenis: 'keluarga',
+        rujukanId: newRef.key!,
+        pemilikId: parentId,
+        kodLama: familyData.oldKodKeluarga,
       });
       return { id: newRef.key!, dicipta_pada: now, ...payload } as FamilyRecord;
     }
@@ -627,20 +741,31 @@ export async function getStudentsByCode(code: string): Promise<StudentRecord[]> 
   const clean = code.trim().toUpperCase();
   const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
   try {
-    const list: StudentRecord[] = [];
-    const snapAll = await get(ref(db, 'students'));
-    if (snapAll.exists()) {
-      snapAll.forEach(child => {
-        const val = child.val();
-        if (val && (
-          (val.kod_kelas && val.kod_kelas.toUpperCase() === clean) ||
-          (val.kod_keluarga && val.kod_keluarga.toUpperCase() === clean)
-        )) {
-          list.push({ id: child.key!, ...val });
-        }
-      });
-    }
-    return list.filter(s => s.nama && !GHOST_NAMES.includes(s.nama.trim().toLowerCase()));
+    const listMap = new Map<string, StudentRecord>();
+    
+    // 1. Cari mengikut kod_kelas secara berindeks
+    try {
+      const qClass = query(ref(db, 'students'), orderByChild('kod_kelas'), equalTo(clean));
+      const snapClass = await get(qClass);
+      if (snapClass.exists()) {
+        snapClass.forEach(child => {
+          listMap.set(child.key!, { id: child.key!, ...child.val() });
+        });
+      }
+    } catch (e) {}
+
+    // 2. Cari mengikut kod_keluarga secara berindeks
+    try {
+      const qFam = query(ref(db, 'students'), orderByChild('kod_keluarga'), equalTo(clean));
+      const snapFam = await get(qFam);
+      if (snapFam.exists()) {
+        snapFam.forEach(child => {
+          listMap.set(child.key!, { id: child.key!, ...child.val() });
+        });
+      }
+    } catch (e) {}
+
+    return Array.from(listMap.values()).filter(s => s.nama && !GHOST_NAMES.includes(s.nama.trim().toLowerCase()));
   } catch (err) {
     console.error('[Firebase RTDB] Ralat getStudentsByCode:', err);
     return [];
@@ -668,6 +793,8 @@ export async function syncStudentToFirebase(student: {
   avatarUrl?: string;
   isParentChild?: boolean;
   badges?: string[];
+  claimedAvatars?: string[];
+  spentStars?: number;
   scores?: Record<string, number>;
   stars?: Record<string, number>;
   latihan?: Record<string, boolean>;
@@ -901,6 +1028,12 @@ export async function syncStudentToFirebase(student: {
     if (student.avatarUrl) {
       payload.avatar_url = student.avatarUrl;
     }
+    if (student.claimedAvatars && Array.isArray(student.claimedAvatars)) {
+      payload.claimed_avatars = student.claimedAvatars;
+    }
+    if (student.spentStars !== undefined) {
+      payload.spent_stars = student.spentStars;
+    }
 
     if (existingDocId) {
       // Dapatkan data sedia ada dahulu supaya total_bintang / scores / stars tidak ditindih secara sengaja
@@ -908,12 +1041,24 @@ export async function syncStudentToFirebase(student: {
         const existSnap = await get(ref(db, `students/${existingDocId}`));
         if (existSnap.exists()) {
           const existVal = existSnap.val();
-          payload.total_bintang = Math.max(student.totalBintang || 0, existVal.total_bintang || 0);
+          payload.total_bintang = (student.totalBintang !== undefined && student.totalBintang !== null)
+            ? Number(student.totalBintang)
+            : (existVal.total_bintang || 0);
           if (existVal.scores) payload.scores = existVal.scores;
           if (existVal.stars) payload.stars = existVal.stars;
           if (existVal.latihan) payload.latihan = existVal.latihan;
           if (existVal.badges) {
             payload.badges = Array.from(new Set([...(existVal.badges || []), ...(student.badges || [])]));
+          }
+          if (student.claimedAvatars && Array.isArray(student.claimedAvatars)) {
+            payload.claimed_avatars = Array.from(new Set([...(existVal.claimed_avatars || []), ...(student.claimedAvatars || [])]));
+          } else if (existVal.claimed_avatars) {
+            payload.claimed_avatars = existVal.claimed_avatars;
+          }
+          if (student.spentStars !== undefined) {
+            payload.spent_stars = student.spentStars;
+          } else if (existVal.spent_stars !== undefined) {
+            payload.spent_stars = existVal.spent_stars;
           }
           if (isParentChild) {
             payload.guru_id = null;
@@ -1024,6 +1169,32 @@ export async function getStudentsForTeacher(params: {
       } catch (e) {}
     }
 
+    // 5. Fallback scan jika indexed query belum dapat pulangkan murid
+    if (studentsMap.size === 0 && (guruId || guruEmail || kodKelas || kelasId)) {
+      try {
+        const snapAll = await get(ref(db, 'students'));
+        if (snapAll.exists()) {
+          snapAll.forEach(child => {
+            const val = child.val();
+            if (!val) return;
+            if ((val.parent_id || val.keluarga_id || val.parent_email) && !val.guru_id && !val.kelas_id) return;
+            const matchGuru = guruId && val.guru_id === guruId;
+            const matchEmail = guruEmail && val.guru_email && val.guru_email.toLowerCase() === guruEmail.toLowerCase();
+            const matchKod = kodKelas && val.kod_kelas && val.kod_kelas.toUpperCase() === kodKelas.toUpperCase();
+            const matchKelasId = kelasId && val.kelas_id === kelasId;
+            if (matchGuru || matchEmail || matchKod || matchKelasId) {
+              const nama = (val.nama || '').trim().toUpperCase();
+              if (nama && !GHOST_NAMES.includes(nama.toLowerCase())) {
+                studentsMap.set(nama, { id: child.key!, ...val } as StudentRecord);
+              }
+            }
+          });
+        }
+      } catch (scanErr) {
+        console.warn('[Firebase RTDB] Fallback students scan notice:', scanErr);
+      }
+    }
+
     return Array.from(studentsMap.values());
   } catch (err) {
     console.error('[Firebase RTDB] Ralat getStudentsForTeacher:', err);
@@ -1042,7 +1213,7 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
     if (!guruIdOrEmail) return { classes: [], students: [] };
 
     let guruId = guruIdOrEmail;
-    let guruEmail = guruIdOrEmail;
+    let guruEmail = localStorage.getItem('bunyiKataGuruEmail') || (guruIdOrEmail.includes('@') ? guruIdOrEmail : '');
     if (guruIdOrEmail.includes('@')) {
       guruEmail = guruIdOrEmail.trim().toLowerCase();
       try {
@@ -1062,7 +1233,35 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
         if (pSnap.exists()) {
           const pData = pSnap.val();
           if (pData.tarikh_tamat) localStorage.setItem('bunyiKataTarikhTamat', pData.tarikh_tamat);
-          if (pData.langganan) localStorage.setItem('bunyiKataTeacherPlan', pData.langganan);
+          if (pData.nama) {
+            localStorage.setItem('bunyiKataNamaGuru', pData.nama);
+            localStorage.setItem('pdf_guru', pData.nama);
+          }
+          if (pData.nama_sekolah) {
+            localStorage.setItem('bunyiKataNamaSekolah', pData.nama_sekolah);
+            localStorage.setItem('pdf_sekolah', pData.nama_sekolah);
+          }
+          if (pData.email) {
+            guruEmail = pData.email.trim().toLowerCase();
+            localStorage.setItem('bunyiKataGuruEmail', guruEmail);
+          }
+          if (pData.langganan) {
+            let normalizedPlan = pData.langganan;
+            if (pData.langganan === 'Bulanan Pro' || pData.langganan === '1 Bulan' || pData.langganan === 'Pro') normalizedPlan = '1 Bulan (Pro)';
+            else if (pData.langganan === '3 Bulanan Pro' || pData.langganan === '3 Bulan') normalizedPlan = '3 Bulan (Pro)';
+            else if (pData.langganan === 'Tahunan Pro' || pData.langganan === '1 Tahun') normalizedPlan = '1 Tahun (Pro)';
+            
+            localStorage.setItem('bunyiKataTeacherPlan', normalizedPlan);
+            const isPaid = normalizedPlan.toLowerCase() !== 'percuma' && (!pData.tarikh_tamat || new Date(pData.tarikh_tamat) > new Date());
+            if (isPaid) {
+              localStorage.setItem('bunyiKataAccessLevel', 'pro');
+              if (typeof window !== 'undefined') {
+                (window as any).userAccessLevel = 'pro';
+                (window as any).currentUserPlan = normalizedPlan;
+                (window as any).isGuestMode = false;
+              }
+            }
+          }
         }
       } catch (e) {}
     }
@@ -1108,7 +1307,10 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
           avatar: st.avatar_url || prev.avatar || '/images/avatar/avatar1.png',
           coins: remoteTotal,
           totalBintang: remoteTotal,
-          spentStars: prev.spentStars || 0,
+          spentStars: st.spent_stars !== undefined ? st.spent_stars : (prev.spentStars || 0),
+          claimedAvatars: (st.claimed_avatars && Array.isArray(st.claimed_avatars))
+            ? Array.from(new Set([...(st.claimed_avatars || []), ...(prev.claimedAvatars || [])]))
+            : (prev.claimedAvatars || ['/images/avatar/avatar1.png', '/images/avatar/avatar2.png']),
           kelas: st.nama_kelas || prev.kelas || localStorage.getItem('bunyiKataNamaKelas') || '',
           kod_kelas: st.kod_kelas || prev.kod_kelas || '',
           nama_keluarga: st.nama_keluarga || prev.nama_keluarga || '',
@@ -1175,6 +1377,31 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
           (window as any).renderTeacherTable();
         }
       }
+    }
+
+    if (typeof window !== 'undefined') {
+      const activeClass = localStorage.getItem('bunyiKataNamaKelas') || (classes[0] ? classes[0].nama_kelas : '');
+      const activeKod = localStorage.getItem('bunyiKataKodKelas') || (classes[0] ? classes[0].kod_kelas : '');
+      const activeSekolah = localStorage.getItem('bunyiKataNamaSekolah') || '';
+      const activeGuru = localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || '';
+
+      const t1 = document.getElementById('guru-dashboard-nama-kelas-title');
+      if (t1 && activeClass) t1.innerText = activeClass;
+      const tKod = document.getElementById('guru-dashboard-kod-kelas-title');
+      if (tKod && activeKod) tKod.innerText = activeKod;
+      const tSekolah = document.getElementById('guru-dashboard-nama-sekolah-title');
+      if (tSekolah && activeSekolah) tSekolah.innerText = activeSekolah;
+      const tGuru = document.getElementById('guru-dashboard-nama-guru-title');
+      if (tGuru && activeGuru) tGuru.innerText = activeGuru;
+
+      if (typeof (window as any).kemaskiniSemuaDropdownKelas === 'function') {
+        (window as any).kemaskiniSemuaDropdownKelas();
+      }
+      if (typeof (window as any).renderTeacherTable === 'function') {
+        (window as any).renderTeacherTable();
+      }
+
+      window.dispatchEvent(new CustomEvent('teacher-classes-synced', { detail: { classes, students: remoteStudents } }));
     }
 
     return { classes, students: remoteStudents };
@@ -1279,18 +1506,33 @@ export async function saveScoreToFirebase(scoreData: {
 
         const bestScore = Math.max(prevScore, Number(scoreData.skor) || 0);
         const bestStar = Math.max(prevStar, Number(scoreData.bintang) || 0);
+        const currTotalStars = Number(sVal.total_bintang) || 0;
         const starDiff = Math.max(0, bestStar - prevStar);
-        const currTotalStars = sVal.total_bintang || 0;
-
         const updatePayload: any = {
           [`scores/${scoreData.aktivitiNama}`]: bestScore,
           [`stars/${scoreData.aktivitiNama}`]: bestStar,
           [`latihan/${scoreData.aktivitiNama}`]: true,
           dikemaskini_pada: now,
         };
-        if (starDiff > 0 || currTotalStars === 0) {
-          updatePayload.total_bintang = currTotalStars + (starDiff > 0 ? starDiff : bestStar);
+
+        const mergedStars = { ...oldStars, [scoreData.aktivitiNama]: bestStar };
+        let recalculatedStars = 0;
+        Object.values(mergedStars).forEach((v: any) => {
+          recalculatedStars += Math.min(Math.max(Number(v) || 0, 0), 3);
+        });
+
+        // Semak jika ada markah cabaran tambahan di peringkat tempatan
+        if (typeof window !== 'undefined' && sVal.nama && (window as any).studentData && (window as any).studentData[sVal.nama]) {
+          const localObj = (window as any).studentData[sVal.nama];
+          if (typeof (window as any).jumlahMarkah === 'function') {
+            const localTotal = (window as any).jumlahMarkah(localObj);
+            if (localTotal > recalculatedStars) {
+              recalculatedStars = localTotal;
+            }
+          }
         }
+
+        updatePayload.total_bintang = recalculatedStars > 0 ? recalculatedStars : (currTotalStars + (starDiff > 0 ? starDiff : bestStar));
 
         await update(sRef, updatePayload);
 
@@ -1588,6 +1830,16 @@ export async function fetchAdminDataFromFirebase(): Promise<{ teachers: any[]; p
     const studentsList = snapToArray(studentsSnap);
     const feedbacksList = snapToArray(feedbacksSnap);
 
+    const normalizePlanName = (rawPlan?: string): string => {
+      if (!rawPlan) return '1 Bulan (Pro)';
+      const str = String(rawPlan).trim().toLowerCase();
+      if (str.includes('percuma') || str.includes('trial') || str === 'free') return 'Percuma';
+      if (str.includes('tahun') || str.includes('tahunan')) return '1 Tahun (Pro)';
+      if (str.includes('3 bulan') || str.includes('3 bulanan')) return '3 Bulan (Pro)';
+      if (str.includes('bulan') || str.includes('bulanan') || str.includes('pro')) return '1 Bulan (Pro)';
+      return rawPlan;
+    };
+
     const formattedTeachers = teachers.map((t: any) => {
       let bakiHari = 30;
       if (t.tarikh_tamat) {
@@ -1615,7 +1867,7 @@ export async function fetchAdminDataFromFirebase(): Promise<{ teachers: any[]; p
         kod_kelas: allClassCodes || teacherClass?.kod_kelas || '',
         murid: studentCount,
         bakiHari,
-        langganan: t.langganan || '1 Bulan',
+        langganan: normalizePlanName(t.langganan),
         email: t.email || '',
         no_telefon: t.no_telefon || '',
         dicipta_pada: t.dicipta_pada || ''
@@ -1645,7 +1897,7 @@ export async function fetchAdminDataFromFirebase(): Promise<{ teachers: any[]; p
         kod_keluarga: parentFamily?.kod_keluarga || '',
         anak: childCount,
         bakiHari,
-        langganan: p.langganan || '1 Bulan',
+        langganan: normalizePlanName(p.langganan),
         email: p.email || '',
         no_telefon: parentFamily?.no_telefon || p.no_telefon || '',
         dicipta_pada: p.dicipta_pada || ''
@@ -2064,27 +2316,41 @@ export async function adminCreateProfile(userData: {
 
     if (userData.peranan === 'guru' && (userData.kod_kelas || userData.nama_kelas)) {
       const newClassRef = push(ref(db, 'classes'));
+      const kodKelasBaru = (userData.kod_kelas || generateUniqueCode('GURU')).toUpperCase();
       await set(newClassRef, {
         guru_id: newProfRef.key!,
         nama_kelas: userData.nama_kelas || 'Kelas 1',
-        kod_kelas: (userData.kod_kelas || generateUniqueCode('GURU')).toUpperCase(),
+        kod_kelas: kodKelasBaru,
         nama_sekolah: userData.nama_sekolah || 'SK TAMAN MELAWIS',
         nama_guru: userData.nama,
         aktif: true,
         dicipta_pada: new Date().toISOString(),
       });
+      await tulisIndeksKod({
+        kod: kodKelasBaru,
+        jenis: 'kelas',
+        rujukanId: newClassRef.key!,
+        pemilikId: newProfRef.key!,
+      });
     }
 
     if (userData.peranan === 'ibubapa' && (userData.kod_keluarga || userData.nama_keluarga)) {
       const newFamRef = push(ref(db, 'families'));
+      const kodKeluargaBaru = (userData.kod_keluarga || generateUniqueCode('FAM')).toUpperCase();
       await set(newFamRef, {
         parent_id: newProfRef.key!,
         nama_keluarga: userData.nama_keluarga || 'Keluarga Bahagia',
-        kod_keluarga: (userData.kod_keluarga || generateUniqueCode('FAM')).toUpperCase(),
+        kod_keluarga: kodKeluargaBaru,
         nama_ibubapa: userData.nama,
         no_telefon: userData.no_telefon || '',
         aktif: true,
         dicipta_pada: new Date().toISOString(),
+      });
+      await tulisIndeksKod({
+        kod: kodKeluargaBaru,
+        jenis: 'keluarga',
+        rujukanId: newFamRef.key!,
+        pemilikId: newProfRef.key!,
       });
     }
 
@@ -2482,7 +2748,27 @@ export async function syncParentSessionFromFirebase(userIdOrEmail?: string): Pro
             localStorage.setItem('bunyiKataTarikhTamat', pData.tarikh_tamat);
           }
           if (pData.langganan) {
-            localStorage.setItem('bunyiKataParentPlan', pData.langganan);
+            let normalizedPlan = pData.langganan;
+            if (pData.langganan === 'Bulanan Pro' || pData.langganan === '1 Bulan' || pData.langganan === 'Pro') normalizedPlan = '1 Bulan (Pro)';
+            else if (pData.langganan === '3 Bulanan Pro' || pData.langganan === '3 Bulan') normalizedPlan = '3 Bulan (Pro)';
+            else if (pData.langganan === 'Tahunan Pro' || pData.langganan === '1 Tahun') normalizedPlan = '1 Tahun (Pro)';
+
+            localStorage.setItem('bunyiKataParentPlan', normalizedPlan);
+            const isPaid = normalizedPlan.toLowerCase() !== 'percuma' && (!pData.tarikh_tamat || new Date(pData.tarikh_tamat) > new Date());
+            if (isPaid) {
+              localStorage.setItem('bunyiKataAccessLevel', 'pro');
+              if (typeof window !== 'undefined') {
+                (window as any).userAccessLevel = 'pro';
+                (window as any).currentUserPlan = normalizedPlan;
+                (window as any).isGuestMode = false;
+              }
+            } else {
+              localStorage.setItem('bunyiKataAccessLevel', 'trial');
+              if (typeof window !== 'undefined') {
+                (window as any).userAccessLevel = 'trial';
+                (window as any).currentUserPlan = 'Percuma';
+              }
+            }
           }
         }
       } catch (e) {}
@@ -2589,9 +2875,268 @@ export async function syncParentSessionFromFirebase(userIdOrEmail?: string): Pro
       }
     }
 
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('parent-family-synced', { detail: { namaKeluarga, kodKeluarga, children } }));
+    }
+
     return { namaKeluarga, kodKeluarga, children };
   } catch (err) {
     console.warn('[Firebase RTDB] Ralat syncParentSessionFromFirebase:', err);
     return null;
   }
 }
+
+/**
+ * Mengemas kini status langganan pengguna ke Pakej Pro di Firebase Realtime Database
+ * @param userEmailOrId Emel atau ID pengguna
+ * @param planInfo Maklumat pakej yang dibeli
+ */
+export async function naikTarafLanggananFirebase(
+  userEmailOrId?: string,
+  planInfo?: any
+): Promise<{ success: boolean; message: string; planName: string; tarikhTamat: string }> {
+  try {
+    const rawEmail = (userEmailOrId || localStorage.getItem('bunyiKataPendingEmail') || localStorage.getItem('bunyiKataGuruEmail') || localStorage.getItem('bunyiKataIbubapaEmail') || '').trim().toLowerCase();
+    const storedUid = localStorage.getItem('bunyiKataUserId') || '';
+
+    let targetPlanName = '1 Bulan (Pro)';
+    let durationDays = 30;
+
+    if (planInfo) {
+      const planStr = typeof planInfo === 'string' ? planInfo : (planInfo.name || planInfo.id || planInfo.period || '');
+      if (planStr.includes('1 Tahun') || planStr.includes('tahun') || planStr.includes('1tahun') || planStr.includes('year')) {
+        durationDays = 365;
+        targetPlanName = '1 Tahun (Pro)';
+      } else if (planStr.includes('3 Bulan') || planStr.includes('3bulan') || planStr.includes('3 bulan')) {
+        durationDays = 90;
+        targetPlanName = '3 Bulan (Pro)';
+      } else {
+        durationDays = 30;
+        targetPlanName = '1 Bulan (Pro)';
+      }
+    }
+
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + durationDays);
+    const expiryDateISO = expiryDate.toISOString();
+
+    // Tunggu auth state jika sedang initializing
+    if (typeof auth?.authStateReady === 'function') {
+      try {
+        await auth.authStateReady();
+      } catch (e) {}
+    }
+
+    // 1. Cari profil di Firebase Realtime Database
+    const matchedProfileKeys = new Set<string>();
+    let foundRole = '';
+
+    if (storedUid) matchedProfileKeys.add(storedUid);
+    if (auth?.currentUser?.uid) matchedProfileKeys.add(auth.currentUser.uid);
+
+    if (rawEmail) {
+      try {
+        const q = query(ref(db, 'profiles'), orderByChild('email'), equalTo(rawEmail));
+        const snap = await get(q);
+        if (snap.exists()) {
+          snap.forEach((c) => {
+            matchedProfileKeys.add(c.key!);
+            if (!foundRole && c.val()?.peranan) {
+              foundRole = c.val()?.peranan;
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('[Firebase RTDB] Carian profil emel:', e);
+      }
+
+      // Sandaran carian menyeluruh jika query berindeks belum mengembalikan profil
+      if (matchedProfileKeys.size === 0) {
+        try {
+          const allProfilesSnap = await get(ref(db, 'profiles'));
+          if (allProfilesSnap.exists()) {
+            allProfilesSnap.forEach((c) => {
+              const val = c.val();
+              if (val?.email && val.email.trim().toLowerCase() === rawEmail) {
+                matchedProfileKeys.add(c.key!);
+                if (!foundRole && val?.peranan) foundRole = val.peranan;
+              }
+            });
+          }
+        } catch (e) {}
+      }
+    }
+
+    // 2. Kemas kini semua dokumen profiles & families/classes di RTDB
+    if (matchedProfileKeys.size > 0) {
+      for (const pKey of matchedProfileKeys) {
+        try {
+          await update(ref(db, `profiles/${pKey}`), {
+            langganan: targetPlanName,
+            tarikh_tamat: expiryDateISO,
+            dikemaskini_pada: new Date().toISOString(),
+          });
+          console.log(`[Firebase RTDB] Profil ${pKey} (${rawEmail}) berjaya dinaik taraf ke ${targetPlanName}`);
+        } catch (e) {
+          console.warn(`[Firebase RTDB] Ralat mengemas kini profil ${pKey}:`, e);
+        }
+
+        // Kemas kini dokumen families jika berkenaan
+        try {
+          const qFam = query(ref(db, 'families'), orderByChild('parent_id'), equalTo(pKey));
+          const snapFam = await get(qFam);
+          if (snapFam.exists()) {
+            snapFam.forEach((f) => {
+              update(ref(db, `families/${f.key}`), {
+                langganan: targetPlanName,
+                tarikh_tamat: expiryDateISO,
+                dikemaskini_pada: new Date().toISOString(),
+              }).catch(() => {});
+            });
+          }
+        } catch (e) {}
+
+        // Kemas kini dokumen classes jika berkenaan
+        try {
+          const qClass = query(ref(db, 'classes'), orderByChild('guru_id'), equalTo(pKey));
+          const snapClass = await get(qClass);
+          if (snapClass.exists()) {
+            snapClass.forEach((cl) => {
+              update(ref(db, `classes/${cl.key}`), {
+                langganan: targetPlanName,
+                tarikh_tamat: expiryDateISO,
+                dikemaskini_pada: new Date().toISOString(),
+              }).catch(() => {});
+            });
+          }
+        } catch (e) {}
+      }
+    } else if (rawEmail) {
+      // Tiada profil sepadan dengan emel pembayaran.
+      // Ini berlaku apabila pengguna membayar menggunakan emel berbeza
+      // daripada emel akaun mereka. Kita cipta profil supaya bayaran tidak
+      // hilang, TETAPI tandakannya untuk semakan admin (rekonsiliasi manual).
+      const newKey = rawEmail.replace(/[^a-zA-Z0-9]/g, '_');
+      const role = localStorage.getItem('bunyiKataUserRole') || 'ibubapa';
+      await set(ref(db, `profiles/${newKey}`), {
+        id: newKey,
+        email: rawEmail,
+        nama: localStorage.getItem('bunyiKataNamaKeluarga') || localStorage.getItem('bunyiKataNamaGuru') || 'Pengguna Pro',
+        peranan: role,
+        langganan: targetPlanName,
+        tarikh_tamat: expiryDateISO,
+        dicipta_dari_bayaran: true,
+        perlu_semakan_admin: true,
+        dicipta_pada: new Date().toISOString(),
+        dikemaskini_pada: new Date().toISOString(),
+      });
+      console.warn(
+        `[Firebase RTDB] Profil baharu dicipta dari bayaran (${rawEmail}). ` +
+        `Emel bayaran mungkin berbeza dari emel akaun - perlu semakan admin.`
+      );
+    }
+
+
+    // 3. Kemas kini cache tempatan & localStorage
+    localStorage.setItem('bunyiKataAccessLevel', 'pro');
+    localStorage.setItem('bunyiKataTarikhTamat', expiryDateISO);
+    localStorage.removeItem('bunyiKataPendingPlan');
+
+    const activeRole = foundRole || localStorage.getItem('bunyiKataUserRole') || (localStorage.getItem('bunyiKataIbubapaEmail') ? 'ibubapa' : 'guru');
+    if (activeRole === 'guru') {
+      localStorage.setItem('bunyiKataTeacherPlan', targetPlanName);
+      try {
+        const teachers = JSON.parse(localStorage.getItem('bunyiKataAdminTeachers') || '[]');
+        const idx = teachers.findIndex((t: any) => t.email && t.email.toLowerCase() === rawEmail);
+        if (idx !== -1) {
+          teachers[idx].langganan = targetPlanName;
+          teachers[idx].bakiHari = durationDays;
+          localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(teachers));
+        }
+      } catch (e) {}
+    } else {
+      localStorage.setItem('bunyiKataParentPlan', targetPlanName);
+      try {
+        const parents = JSON.parse(localStorage.getItem('bunyiKataAdminParents') || '[]');
+        const idx = parents.findIndex((p: any) => p.email && p.email.toLowerCase() === rawEmail);
+        if (idx !== -1) {
+          parents[idx].langganan = targetPlanName;
+          parents[idx].bakiHari = durationDays;
+          localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));
+        }
+      } catch (e) {}
+    }
+
+    if (typeof window !== 'undefined') {
+      (window as any).userAccessLevel = 'pro';
+      (window as any).currentUserPlan = targetPlanName;
+    }
+
+    return {
+      success: true,
+      message: `Akaun berjaya dinaik taraf ke ${targetPlanName}!`,
+      planName: targetPlanName,
+      tarikhTamat: expiryDateISO,
+    };
+  } catch (err: any) {
+    console.error('[Firebase RTDB] Gagal naik taraf langganan:', err);
+    return {
+      success: false,
+      message: err?.message || 'Ralat semasa menaik taraf akaun.',
+      planName: 'Bulanan Pro',
+      tarikhTamat: '',
+    };
+  }
+}
+
+/**
+ * Merekodkan pesanan pembayaran yang TELAH disahkan oleh pelayan/CHIP.
+ *
+ * Tujuan: audit trail & rekonsiliasi. Tanpa rekod ini, tiada cara untuk
+ * menyemak semula aduan pelanggan atau mengesan bayaran berganda.
+ * Kunci rekod menggunakan purchase_id supaya bayaran sama tidak berganda.
+ */
+export async function rekodPesananFirebase(order: {
+  purchaseId: string;
+  email: string;
+  planName: string;
+  amount?: number;
+  currency?: string;
+}): Promise<boolean> {
+  if (!isFirebaseConfigured || !order?.purchaseId) return false;
+
+  try {
+    const safeKey = String(order.purchaseId).replace(/[.#$/[\]]/g, '_');
+    const orderRef = ref(db, `orders/${safeKey}`);
+
+    // Idempotent: jangan tulis semula jika rekod sudah wujud.
+    const existing = await get(orderRef);
+    if (existing.exists()) {
+      console.log('[Firebase RTDB] Pesanan sudah direkodkan sebelum ini:', order.purchaseId);
+      return true;
+    }
+
+    await set(orderRef, {
+      purchase_id: order.purchaseId,
+      email: (order.email || '').trim().toLowerCase(),
+      langganan: order.planName || '',
+      amount: order.amount ?? null,
+      currency: order.currency || 'MYR',
+      status: 'paid',
+      disahkan_pada: new Date().toISOString(),
+    });
+
+    console.log('[Firebase RTDB] Pesanan berjaya direkodkan:', order.purchaseId);
+    return true;
+  } catch (err) {
+    console.error('[Firebase RTDB] Ralat merekod pesanan:', err);
+    return false;
+  }
+}
+
+if (typeof window !== 'undefined') {
+  (window as any).naikTarafLanggananFirebase = naikTarafLanggananFirebase;
+  (window as any).rekodPesananFirebase = rekodPesananFirebase;
+}
+
+

@@ -1,6 +1,90 @@
 {
   "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null"
+    ".read": false,
+    ".write": false,
+
+    "profiles": {
+      ".read": true,
+      ".indexOn": ["email", "peranan"],
+      "$profileId": {
+        ".write": "auth != null && (auth.uid == $profileId || auth.token.admin == true || (data.exists() && data.child('email').val() == auth.token.email) || (!data.exists() && newData.child('email').val() == auth.token.email))"
+      }
+    },
+
+    "classes": {
+      ".read": true,
+      ".indexOn": ["guru_id", "kod_kelas", "guru_email"],
+      "$classId": {
+        ".write": "auth != null"
+      }
+    },
+
+    "families": {
+      ".read": true,
+      ".indexOn": ["parent_id", "kod_keluarga"],
+      "$familyId": {
+        ".write": "auth != null"
+      }
+    },
+
+    "code_index": {
+      ".read": true,
+      "$kod": {
+        ".write": "auth != null"
+      }
+    },
+
+    "students": {
+      ".read": true,
+      ".indexOn": [
+        "guru_id",
+        "guru_email",
+        "kelas_id",
+        "kod_kelas",
+        "parent_id",
+        "parent_email",
+        "keluarga_id",
+        "kod_keluarga",
+        "nama"
+      ],
+      "$studentId": {
+        ".write": "auth != null || (newData.exists() && (root.child('code_index').child(newData.child('kod_kelas').val()).exists() || root.child('code_index').child(newData.child('kod_keluarga').val()).exists())) || (data.exists() && newData.exists() && (root.child('code_index').child(data.child('kod_kelas').val()).exists() || root.child('code_index').child(data.child('kod_keluarga').val()).exists()))",
+        ".validate": "newData.hasChild('nama') && (newData.hasChild('kod_kelas') || newData.hasChild('kod_keluarga') || auth != null)"
+      }
+    },
+
+    "scores": {
+      ".read": true,
+      ".indexOn": ["student_id"],
+      "$scoreId": {
+        ".write": "auth != null || (newData.exists() && root.child('students').child(newData.child('student_id').val()).exists())",
+        ".validate": "newData.hasChild('student_id')"
+      }
+    },
+
+    "badges": {
+      ".read": true,
+      ".indexOn": ["student_id"],
+      "$badgeId": {
+        ".write": "auth != null || (newData.exists() && root.child('students').child(newData.child('student_id').val()).exists())"
+      }
+    },
+
+    "feedbacks": {
+      ".read": true,
+      ".indexOn": ["user_id", "email"],
+      "$feedbackId": {
+        ".write": "auth != null || !data.exists()"
+      }
+    },
+
+    "orders": {
+      ".read": "auth != null",
+      ".indexOn": ["email", "purchase_id", "status"],
+      "$orderId": {
+        ".write": "!data.exists() || auth.token.admin == true",
+        ".validate": "newData.hasChildren(['purchase_id', 'email', 'status'])"
+      }
+    }
   }
 }

@@ -196,6 +196,31 @@ export async function loginWithEmail(
       if (pSnap.exists()) {
         profileData = pSnap.val();
       }
+
+      // Jika profil di profiles/${uid} tiada atau langganan Percuma, semak jika ada profil berpadanan emel
+      if (!profileData || profileData.langganan === 'Percuma' || !profileData.langganan) {
+        const qEmail = query(ref(db, 'profiles'), orderByChild('email'), equalTo(cleanEmail));
+        const emailSnap = await get(qEmail);
+        if (emailSnap.exists()) {
+          emailSnap.forEach((c) => {
+            const val = c.val();
+            if (val) {
+              if (!profileData) {
+                profileData = val;
+              } else if (val.langganan && val.langganan !== 'Percuma') {
+                profileData.langganan = val.langganan;
+                profileData.tarikh_tamat = val.tarikh_tamat;
+              }
+              if (val.nama_keluarga && !profileData.nama_keluarga) {
+                profileData.nama_keluarga = val.nama_keluarga;
+              }
+              if (val.kod_keluarga && !profileData.kod_keluarga) {
+                profileData.kod_keluarga = val.kod_keluarga;
+              }
+            }
+          });
+        }
+      }
     } catch (e) {
       console.warn('[Firebase RTDB] Gagal membaca profil:', e);
     }
@@ -216,17 +241,33 @@ export async function loginWithEmail(
       try {
         await set(ref(db, `profiles/${cred.user.uid}`), profileData);
       } catch (err) {}
+    } else {
+      // Pastikan node profiles/${uid} sentiasa dikemaskini dengan data terkini
+      try {
+        await update(ref(db, `profiles/${cred.user.uid}`), {
+          ...profileData,
+          id: cred.user.uid,
+          email: cleanEmail,
+          dikemaskini_pada: new Date().toISOString(),
+        });
+      } catch (err) {}
     }
+
+    // Seragamkan format nama langganan
+    let rawPlan = profileData.langganan || 'Percuma';
+    if (rawPlan === 'Bulanan Pro' || rawPlan === '1 Bulan' || rawPlan === 'Pro') rawPlan = '1 Bulan (Pro)';
+    else if (rawPlan === '3 Bulanan Pro' || rawPlan === '3 Bulan') rawPlan = '3 Bulan (Pro)';
+    else if (rawPlan === 'Tahunan Pro' || rawPlan === '1 Tahun') rawPlan = '1 Tahun (Pro)';
 
     const userProfile: UserProfile = {
       id: cred.user.uid,
       email: cleanEmail,
-      nama: profileData.nama || cred.user.displayName || 'Pengguna',
+      nama: profileData.nama || profileData.nama_keluarga || cred.user.displayName || 'Pengguna',
       peranan: profileData.peranan || 'guru',
       nama_sekolah: profileData.nama_sekolah,
       no_telefon: profileData.no_telefon,
       avatar_url: profileData.avatar_url,
-      langganan: profileData.peranan === 'admin' || cleanEmail.includes('admin') ? 'Admin Penuh' : (profileData.langganan || 'Percuma'),
+      langganan: profileData.peranan === 'admin' || cleanEmail.includes('admin') ? 'Admin Penuh' : rawPlan,
       tarikh_tamat: profileData.tarikh_tamat || null,
     };
 

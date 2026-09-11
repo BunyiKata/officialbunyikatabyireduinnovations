@@ -24,6 +24,8 @@ import { AuthModal } from "./components/modals/AuthModal";
 import { PricingProModal } from "./components/modals/PricingProModal";
 import { EditProfileModal } from "./components/modals/EditProfileModal";
 import { EntryChoiceModal } from "./components/modals/EntryChoiceModal";
+import "./services/chipPaymentService";
+import { bukaBayaranChip, sahkanBayaranChip } from "./services/chipPaymentService";
 import "./utils/sijilGenerator";
 import "./index.css";
 import { motion, AnimatePresence } from "motion/react";
@@ -76,6 +78,8 @@ import {
   syncTeacherSessionFromFirebase,
   deleteStudentByNameFromFirebase,
   checkIsCodeAlreadyUsedInFirebase,
+  naikTarafLanggananFirebase,
+  rekodPesananFirebase,
 } from "./services/firebaseService";
 
 if (typeof window !== "undefined") {
@@ -273,6 +277,8 @@ export default function App() {
 
   const [showSplash, setShowSplash] = React.useState(() => {
     if (typeof window !== "undefined") {
+      const search = window.location.search || "";
+      if (search.includes("payment=") || search.includes("status=")) return false;
       const path = window.location.pathname.replace(/^\/+/, "");
       const hash = window.location.hash ? window.location.hash.replace("#", "") : "";
       if (path || hash) return false;
@@ -294,6 +300,11 @@ export default function App() {
 
   const [activeScreen, setActiveScreen] = React.useState<string>(() => {
     if (typeof window !== "undefined") {
+      const search = window.location.search || "";
+      if (search.includes("payment=success") || search.includes("status=success")) {
+        const role = localStorage.getItem("bunyiKataUserRole") || (localStorage.getItem("bunyiKataIbubapaEmail") ? "ibubapa" : "guru");
+        return role === "guru" ? "guru-dashboard" : "ibubapa-dashboard";
+      }
       const path = window.location.pathname.replace(/^\/+/, "");
       if (path) return path;
       if (window.location.hash) {
@@ -324,6 +335,15 @@ export default function App() {
     return localStorage.getItem("selectedAvatarIcon") || "/images/avatar/avatar1.png";
   });
   const [editModalMode, setEditModalMode] = React.useState<"guru" | "ibubapa" | "admin">("guru");
+  const [pendingSelectedPlan, setPendingSelectedPlan] = React.useState<any>(null);
+
+  const [paymentToast, setPaymentToast] = React.useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    type: "success" | "error" | "info";
+    planName?: string;
+  } | null>(null);
 
   React.useEffect(() => {
     const handleScreenChange = (e?: any) => {
@@ -335,9 +355,31 @@ export default function App() {
     window.addEventListener("screen-changed", handleScreenChange);
 
     const handleUrlNav = () => {
-      const path =
-        window.location.pathname.replace(/^\/+/, "") ||
-        (window.location.hash ? window.location.hash.replace("#", "") : "login-screen");
+      const rawPath = window.location.pathname.replace(/^\/+/, "");
+      let path = rawPath || (window.location.hash ? window.location.hash.replace("#", "") : "");
+      if (!path || path === "index.html") {
+        path = "login-screen";
+      } else if (path === "admin-dashboard" || path.startsWith("admin-")) {
+        const isAdmin = !!(
+          (window as any).modAdminAktif ||
+          (window as any).isAdminMode ||
+          localStorage.getItem("bunyiKataUserRole") === "admin" ||
+          (typeof document !== "undefined" && document.body?.classList?.contains("admin-mode"))
+        );
+        if (!isAdmin) {
+          path = "login-screen";
+        }
+      } else if (path === "guru-dashboard" || path.startsWith("guru-")) {
+        const isGuru = localStorage.getItem("bunyiKataUserRole") === "guru" || (window as any).modGuruAktif;
+        if (!isGuru) {
+          path = "login-screen";
+        }
+      } else if (path === "ibubapa-dashboard" || path.startsWith("ibubapa-")) {
+        const isParent = localStorage.getItem("bunyiKataUserRole") === "ibubapa" || (window as any).modIbuBapaAktif;
+        if (!isParent) {
+          path = "login-screen";
+        }
+      }
       if (path) {
         setActiveScreen(path);
         if (typeof (window as any).paparSkrin === "function") {
@@ -347,6 +389,213 @@ export default function App() {
     };
     window.addEventListener("popstate", handleUrlNav);
     window.addEventListener("hashchange", handleUrlNav);
+
+    // Semak callback status pembayaran daripada Chip Payment Gateway (?payment=success / ?status=success)
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentStatus = urlParams.get("payment") || urlParams.get("status");
+
+      if (
+        paymentStatus === "success" ||
+        paymentStatus === "paid" ||
+        paymentStatus === "successful" ||
+        paymentStatus === "pending"
+      ) {
+        setShowSplash(false);
+        setShowLoginModal(false);
+        setIsModeMenuOpen(false);
+        setIsProPricingModalOpen(false);
+
+        let targetCategory = "ibubapa";
+        let parsedPlan: any = null;
+        const savedPendingPlan = localStorage.getItem("bunyiKataPendingPlan");
+        if (savedPendingPlan) {
+          try {
+            parsedPlan = JSON.parse(savedPendingPlan);
+            if (parsedPlan?.category) targetCategory = parsedPlan.category;
+          } catch (e) {}
+        }
+
+        const processPaymentSuccess = async () => {
+          // LANGKAH KESELAMATAN: Jangan sesekali percaya parameter URL.
+          // Status pembayaran WAJIB disahkan oleh pelayan dengan CHIP.
+          const purchaseId =
+            urlParams.get("purchase_id") ||
+            localStorage.getItem("bunyiKataPendingPurchaseId") ||
+            "";
+
+          const verification = await sahkanBayaranChip(purchaseId);
+
+          if (!verification.paid) {
+            console.warn("[App] Pembayaran tidak dapat disahkan:", verification.message);
+            setPaymentToast({
+              show: true,
+              title: "Pembayaran Belum Disahkan",
+              message:
+                verification.message ||
+                "Kami belum menerima pengesahan pembayaran daripada CHIP. Jika anda telah membayar, sila tunggu sebentar atau hubungi kami.",
+              type: "error",
+            });
+            return;
+          }
+
+          // Emel & pakej diambil daripada rekod CHIP yang telah disahkan.
+          const verifiedEmail = (verification.email || "").trim().toLowerCase();
+          const verifiedPlanName = verification.planName || "1 Bulan (Pro)";
+
+          if (typeof naikTarafLanggananFirebase === "function") {
+            try {
+              await naikTarafLanggananFirebase(verifiedEmail, {
+                name: verifiedPlanName,
+                period: verifiedPlanName,
+              });
+            } catch (err) {
+              console.error("[App] Ralat naikTarafLanggananFirebase:", err);
+            }
+          }
+
+          // Simpan rekod pesanan untuk audit & rekonsiliasi.
+          if (typeof rekodPesananFirebase === "function") {
+            try {
+              await rekodPesananFirebase({
+                purchaseId: verification.purchaseId || purchaseId,
+                email: verifiedEmail,
+                planName: verifiedPlanName,
+                amount: verification.amount,
+              });
+            } catch (err) {
+              console.warn("[App] Ralat merekod pesanan:", err);
+            }
+          }
+
+          try {
+            localStorage.removeItem("bunyiKataPendingPurchaseId");
+          } catch (e) {}
+
+          localStorage.setItem("bunyiKataAccessLevel", "pro");
+          setUserAccessLevel("pro");
+
+          const planName = verifiedPlanName;
+          const returnEmail = verifiedEmail;
+
+          const userRole = localStorage.getItem("bunyiKataUserRole") || targetCategory;
+          const isParent = userRole === "ibubapa" || !!localStorage.getItem("bunyiKataIbubapaEmail") || targetCategory === "ibubapa";
+
+          setPaymentToast({
+            show: true,
+            title: "🎉 Langganan Pro Berjaya!",
+            message: `Tahniah! Akaun ${returnEmail ? `(${returnEmail})` : ""} kini telah dinaik taraf ke versi ${planName}. Semua profil, modul dan peta dibuka sepenuhnya!`,
+            type: "success",
+            planName: planName,
+          });
+
+          if (isParent) {
+
+            localStorage.setItem("bunyiKataUserRole", "ibubapa");
+            localStorage.setItem("bunyiKataIbubapaSetupDone", "true");
+            localStorage.setItem("bunyiKataParentPlan", planName);
+            document.body.classList.add("parent-mode");
+            document.body.classList.remove("teacher-mode", "admin-mode");
+            const pNav = document.getElementById("parent-sticky-nav");
+            if (pNav) pNav.style.display = "flex";
+            setActiveScreen("ibubapa-dashboard");
+            if (typeof syncParentSessionFromFirebase === "function") {
+              await syncParentSessionFromFirebase(returnEmail).catch(console.warn);
+            }
+            setTimeout(() => {
+              if (typeof (window as any).masukModIbubapa === "function") {
+                (window as any).masukModIbubapa();
+              } else if (typeof (window as any).masukModIbuBapa === "function") {
+                (window as any).masukModIbuBapa();
+              }
+              if (typeof (window as any).paparSkrin === "function") {
+                (window as any).paparSkrin("ibubapa-dashboard");
+              }
+            }, 100);
+          } else {
+            localStorage.setItem("bunyiKataUserRole", "guru");
+            localStorage.setItem("bunyiKataGuruSetupDone", "true");
+            localStorage.setItem("bunyiKataTeacherPlan", planName);
+            setTeacherPlanName(planName);
+            document.body.classList.add("teacher-mode");
+            document.body.classList.remove("parent-mode", "admin-mode");
+            const tNav = document.getElementById("teacher-sticky-nav");
+            if (tNav) tNav.style.display = "flex";
+            setActiveScreen("guru-dashboard");
+            if (typeof syncTeacherSessionFromFirebase === "function") {
+              await syncTeacherSessionFromFirebase(returnEmail).catch(console.warn);
+            }
+            setTimeout(() => {
+              if (typeof (window as any).masukModGuru === "function") {
+                (window as any).masukModGuru();
+              }
+              if (typeof (window as any).paparSkrin === "function") {
+                (window as any).paparSkrin("guru-dashboard");
+              }
+            }, 100);
+          }
+
+          // Bersihkan query param dari URL bar dan kekalkan laluan dashboard aktif
+          const targetDashPath = isParent ? "ibubapa-dashboard" : "guru-dashboard";
+          try {
+            window.history.replaceState({ screenId: targetDashPath }, document.title, "/" + targetDashPath);
+          } catch (e) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        };
+
+        processPaymentSuccess();
+      } else if (paymentStatus === "failed" || paymentStatus === "cancelled") {
+
+        setShowSplash(false);
+        setShowLoginModal(false);
+        setIsModeMenuOpen(false);
+        setIsProPricingModalOpen(false);
+
+        const userRole = localStorage.getItem("bunyiKataUserRole");
+        const isParent = userRole === "ibubapa" || !!localStorage.getItem("bunyiKataIbubapaEmail");
+        const isTeacher = userRole === "guru" || !!localStorage.getItem("bunyiKataGuruEmail");
+        const fallbackDash = isParent ? "ibubapa-dashboard" : "guru-dashboard";
+
+        if (isParent) {
+          document.body.classList.add("parent-mode");
+          document.body.classList.remove("teacher-mode", "admin-mode");
+          const pNav = document.getElementById("parent-sticky-nav");
+          if (pNav) pNav.style.display = "flex";
+          setActiveScreen("ibubapa-dashboard");
+          setTimeout(() => {
+            if (typeof (window as any).paparSkrin === "function") {
+              (window as any).paparSkrin("ibubapa-dashboard");
+            }
+          }, 100);
+        } else if (isTeacher) {
+          document.body.classList.add("teacher-mode");
+          document.body.classList.remove("parent-mode", "admin-mode");
+          const tNav = document.getElementById("teacher-sticky-nav");
+          if (tNav) tNav.style.display = "flex";
+          setActiveScreen("guru-dashboard");
+          setTimeout(() => {
+            if (typeof (window as any).paparSkrin === "function") {
+              (window as any).paparSkrin("guru-dashboard");
+            }
+          }, 100);
+        }
+
+        // Toast notifikasi status gagal / batal
+        setPaymentToast({
+          show: true,
+          title: "Pembayaran Dibatalkan / Tidak Selesai",
+          message: "Transaksi pembayaran belum selesai atau telah dibatalkan. Anda boleh memilih semula pakej dari dashboard bila-bila masa.",
+          type: "error",
+        });
+
+        try {
+          window.history.replaceState({ screenId: fallbackDash }, document.title, "/" + fallbackDash);
+        } catch (e) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+    }
 
     // Initial check on mount
     if (typeof window !== "undefined") {
@@ -669,7 +918,7 @@ export default function App() {
           "https://api.dicebear.com/7.x/shapes/svg?seed=school&backgroundColor=ffffff",
         );
         setEditKodTemp(
-          (localStorage.getItem("bunyiKataKodAdmin") || "ADMIN#01").toUpperCase(),
+          (localStorage.getItem("bunyiKataKodAdmin") || "").toUpperCase(),
         );
         setIsEditModalOpen(true);
       } else if (mode === "guru") {
@@ -855,14 +1104,6 @@ export default function App() {
   const isUserAdmin = React.useCallback(() => {
     try {
       if (typeof window === "undefined") return false;
-      if (
-        (window as any).isGuestMode ||
-        (window as any).userAccessLevel === "trial" ||
-        localStorage.getItem("bunyiKataAccessLevel") === "trial" ||
-        (window as any).namaMuridAktif === "Tetamu"
-      ) {
-        return false;
-      }
       return !!(
         (window as any).modAdminAktif ||
         (window as any).isAdminMode ||
@@ -881,14 +1122,6 @@ export default function App() {
   const [isAdminActive, setIsAdminActive] = React.useState<boolean>(() => {
     try {
       if (typeof window === "undefined") return false;
-      if (
-        (window as any).isGuestMode ||
-        (window as any).userAccessLevel === "trial" ||
-        localStorage.getItem("bunyiKataAccessLevel") === "trial" ||
-        (window as any).namaMuridAktif === "Tetamu"
-      ) {
-        return false;
-      }
       return !!(
         (window as any).modAdminAktif ||
         (window as any).isAdminMode ||
@@ -909,13 +1142,6 @@ export default function App() {
   const [userAccessLevel, setUserAccessLevel] = React.useState<"trial" | "pro">(() => {
     if (typeof window !== "undefined") {
       if (
-        (window as any).isGuestMode ||
-        (window as any).namaMuridAktif === "Tetamu" ||
-        localStorage.getItem("bunyiKataAccessLevel") === "trial"
-      ) {
-        return "trial";
-      }
-      if (
         localStorage.getItem("bunyiKataUserRole") === "admin" ||
         (typeof document !== "undefined" && (
           document.body?.classList?.contains("admin-mode") ||
@@ -926,6 +1152,13 @@ export default function App() {
       ) {
         return "pro";
       }
+      if (
+        (window as any).isGuestMode ||
+        (window as any).namaMuridAktif === "Tetamu" ||
+        localStorage.getItem("bunyiKataAccessLevel") === "trial"
+      ) {
+        return "trial";
+      }
       return (localStorage.getItem("bunyiKataAccessLevel") as "trial" | "pro") || "trial";
     }
     return "trial";
@@ -933,6 +1166,43 @@ export default function App() {
 
   React.useEffect(() => {
     const handleAdminSync = () => {
+      const admin = isUserAdmin();
+      if (admin) {
+        setIsAdminActive(true);
+        setUserAccessLevel("pro");
+        (window as any).userAccessLevel = "pro";
+        (window as any).modAdminAktif = true;
+        (window as any).isAdminMode = true;
+        (window as any).isGuestMode = false;
+        localStorage.setItem("bunyiKataAccessLevel", "pro");
+        localStorage.setItem("bunyiKataUserRole", "admin");
+        if (typeof document !== "undefined" && document.body) {
+          const bodyClasses = document.body.classList;
+          const needsAdminClasses =
+            !bodyClasses.contains("admin-mode") ||
+            !bodyClasses.contains("teacher-mode") ||
+            bodyClasses.contains("parent-mode");
+
+          // Elakkan gelung MutationObserver: jangan tulis atribut class jika
+          // body sudah berada dalam keadaan mod admin yang betul.
+          if (needsAdminClasses) {
+            bodyClasses.add("admin-mode", "teacher-mode");
+            bodyClasses.remove("parent-mode");
+          }
+        }
+        const aNav = document.getElementById("admin-sticky-nav");
+        if (aNav) aNav.style.display = "flex";
+        const tNav = document.getElementById("teacher-sticky-nav");
+        if (tNav) tNav.style.display = "none";
+        const pNav = document.getElementById("parent-sticky-nav");
+        if (pNav) pNav.style.display = "none";
+        const topBanner = document.getElementById("teacher-top-banner");
+        if (topBanner) topBanner.style.display = "flex";
+        return;
+      }
+
+      setIsAdminActive(false);
+
       const isGuest =
         (window as any).isGuestMode ||
         (window as any).userAccessLevel === "trial" ||
@@ -940,22 +1210,9 @@ export default function App() {
         (window as any).namaMuridAktif === "Tetamu";
 
       if (isGuest) {
-        setIsAdminActive(false);
         setUserAccessLevel("trial");
         (window as any).userAccessLevel = "trial";
         (window as any).isGuestMode = true;
-        return;
-      }
-
-      const admin = isUserAdmin();
-      setIsAdminActive(admin);
-      if (admin) {
-        setUserAccessLevel("pro");
-        (window as any).userAccessLevel = "pro";
-        (window as any).modAdminAktif = true;
-        (window as any).isAdminMode = true;
-        (window as any).isGuestMode = false;
-        localStorage.setItem("bunyiKataAccessLevel", "pro");
       }
     };
     handleAdminSync();
@@ -964,11 +1221,11 @@ export default function App() {
     window.addEventListener("focus", handleAdminSync);
 
     const observer = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        if (m.type === "attributes" && m.attributeName === "class") {
-          handleAdminSync();
-        }
-      }
+      const bodyClassChanged = mutations.some(
+        (mutation) =>
+          mutation.type === "attributes" && mutation.attributeName === "class",
+      );
+      if (bodyClassChanged) handleAdminSync();
     });
     if (typeof document !== "undefined" && document.body) {
       observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
@@ -981,18 +1238,37 @@ export default function App() {
     };
   }, [isUserAdmin]);
 
-  const isGuestModeActive = Boolean(
-    (window as any).isGuestMode ||
-    userAccessLevel === "trial" ||
-    localStorage.getItem("bunyiKataAccessLevel") === "trial" ||
-    (window as any).namaMuridAktif === "Tetamu"
-  );
+  // NOTA: state ini mesti diisytihar SEBELUM `rawActivePlan` di bawah,
+  // jika tidak akan berlaku ReferenceError (Temporal Dead Zone) & App gagal render.
+  const [teacherPlanName, setTeacherPlanName] = React.useState(() => localStorage.getItem("bunyiKataTeacherPlan") || "Percuma");
+
   const currentRole = localStorage.getItem("bunyiKataUserRole") || "";
   const isStudentRole = currentRole === "murid" || Boolean((window as any).namaMuridAktif && (window as any).namaMuridAktif !== "Tetamu");
-  const isPlanFree = !isStudentRole && (
-    localStorage.getItem("bunyiKataTeacherPlan")?.toLowerCase() === "percuma" ||
-    localStorage.getItem("bunyiKataParentPlan")?.toLowerCase() === "percuma"
+  const isParent = currentRole === "ibubapa" || (!currentRole && !!localStorage.getItem("bunyiKataIbubapaEmail"));
+  
+  const rawActivePlan = isParent
+    ? (localStorage.getItem("bunyiKataParentPlan") || "Percuma")
+    : (localStorage.getItem("bunyiKataTeacherPlan") || teacherPlanName || "Percuma");
+
+  const isPaidPlan = Boolean(
+    rawActivePlan &&
+    rawActivePlan.toLowerCase() !== "percuma" &&
+    rawActivePlan.toLowerCase() !== "trial" &&
+    rawActivePlan.toLowerCase() !== "free" &&
+    rawActivePlan.toLowerCase() !== "guest" &&
+    rawActivePlan.toLowerCase() !== ""
   );
+
+  const isGuestModeActive = Boolean(
+    !isPaidPlan && (
+      (window as any).isGuestMode ||
+      userAccessLevel === "trial" ||
+      localStorage.getItem("bunyiKataAccessLevel") === "trial" ||
+      (window as any).namaMuridAktif === "Tetamu"
+    )
+  );
+
+  const isPlanFree = !isStudentRole && !isPaidPlan;
   const isEffectiveTrial = isGuestModeActive || (isPlanFree && !isUserAdmin() && !isAdminActive);
   const isEffectivePro = !isEffectiveTrial;
 
@@ -1066,7 +1342,6 @@ export default function App() {
     const rawPlan = localStorage.getItem("bunyiKataTeacherPlan") || "";
     return accessLvl === "pro" && rawPlan.toLowerCase() !== "percuma";
   });
-  const [teacherPlanName, setTeacherPlanName] = React.useState(() => localStorage.getItem("bunyiKataTeacherPlan") || "Percuma");
   const [activeUrusKodKelas, setActiveUrusKodKelas] = React.useState(() => localStorage.getItem("bunyiKataKodKelas") || "");
   const [isEditingUrusKod, setIsEditingUrusKod] = React.useState(false);
   const [isChangingFamilyCode, setIsChangingFamilyCode] = React.useState(false);
@@ -1111,7 +1386,15 @@ export default function App() {
       : (localStorage.getItem("bunyiKataParentPlan") || "Percuma");
     const tarikhTamatStr = localStorage.getItem("bunyiKataTarikhTamat") || (window as any).currentUser?.tarikh_tamat;
 
-    const isFree = accessLvl === "trial" || planName.toLowerCase() === "percuma";
+    const isPlanPaid = Boolean(
+      planName &&
+      planName.toLowerCase() !== "percuma" &&
+      planName.toLowerCase() !== "trial" &&
+      planName.toLowerCase() !== "free" &&
+      (!tarikhTamatStr || new Date(tarikhTamatStr) > new Date())
+    );
+
+    const isFree = (!isPlanPaid && accessLvl === "trial") || planName.toLowerCase() === "percuma";
     if (isFree) {
       return {
         text: "Percuma",
@@ -1265,7 +1548,7 @@ export default function App() {
     if (clean !== oldCode) {
       const collision = await checkIsCodeAlreadyUsedInFirebase(clean, "guru", undefined, "kelas1");
       if (collision.isUsed) {
-        const msg = `Kod "${clean}" tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
+        const msg = `Kod “${clean}” tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
         if (typeof (window as any).showAppToast === "function") {
           (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
         } else {
@@ -1310,7 +1593,7 @@ export default function App() {
     if (kodGuru) kodGuru.innerText = clean;
     setIsChangingCode1(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 1 berjaya ditetapkan kepada "${clean}".`);
+      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 1 berjaya ditetapkan kepada “${clean}”.`);
     }
   };
 
@@ -1364,7 +1647,7 @@ export default function App() {
     }
     setIsChangingClassName2(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Nama Kelas 2 berjaya ditetapkan kepada "${clean}".`);
+      (window as any).showAppToast("Berjaya Disimpan", `Nama Kelas 2 berjaya ditetapkan kepada “${clean}”.`);
     }
   };
 
@@ -1388,7 +1671,7 @@ export default function App() {
     if (clean !== oldCode2) {
       const collision = await checkIsCodeAlreadyUsedInFirebase(clean, "guru", undefined, "kelas2");
       if (collision.isUsed) {
-        const msg = `Kod "${clean}" tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
+        const msg = `Kod “${clean}” tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
         if (typeof (window as any).showAppToast === "function") {
           (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
         } else {
@@ -1431,7 +1714,7 @@ export default function App() {
 
     setIsChangingCode2(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 2 berjaya ditetapkan kepada "${clean}".`);
+      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 2 berjaya ditetapkan kepada “${clean}”.`);
     }
   };
 
@@ -1475,7 +1758,7 @@ export default function App() {
     if (el2) el2.innerText = clean;
     setIsChangingFamilyName(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Nama Keluarga berjaya ditetapkan kepada "${clean}".`);
+      (window as any).showAppToast("Berjaya Disimpan", `Nama Keluarga berjaya ditetapkan kepada “${clean}”.`);
     }
   };
 
@@ -1499,7 +1782,7 @@ export default function App() {
     if (clean !== oldCode) {
       const collision = await checkIsCodeAlreadyUsedInFirebase(clean, "ibubapa");
       if (collision.isUsed) {
-        const msg = `Kod "${clean}" tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
+        const msg = `Kod “${clean}” tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
         if (typeof (window as any).showAppToast === "function") {
           (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
         } else {
@@ -1528,7 +1811,7 @@ export default function App() {
 
     setIsChangingFamilyCode(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Kod Keluarga berjaya ditetapkan kepada "${clean}".`);
+      (window as any).showAppToast("Berjaya Disimpan", `Kod Keluarga berjaya ditetapkan kepada “${clean}”.`);
     }
   };
 
@@ -2016,14 +2299,28 @@ export default function App() {
       <div id="teacher-top-banner" className="teacher-top-banner">
         <div className="teacher-banner-left">
           <span id="teacher-banner-badge" className="teacher-banner-badge">
-            <i className="fa-solid fa-chalkboard-user"></i> MOD GURU
+            {isAdminActive ? (
+              <>
+                <i className="fa-solid fa-user-shield"></i> MOD ADMIN
+              </>
+            ) : (
+              <>
+                <i className="fa-solid fa-chalkboard-user"></i> MOD GURU
+              </>
+            )}
           </span>
         </div>
         <div className="teacher-banner-right">
           <button
             className="teacher-banner-btn"
             onClick={() => {
-              if ((window as any).modIbuBapaAktif) {
+              if (isAdminActive || (window as any).modAdminAktif || (window as any).isAdminMode) {
+                if (typeof (window as any).keluarModGuru === "function") {
+                  (window as any).keluarModGuru();
+                } else {
+                  paparSkrin("login-screen");
+                }
+              } else if ((window as any).modIbuBapaAktif) {
                 (window as any).keluarModIbuBapa &&
                   (window as any).keluarModIbuBapa();
               } else if ((window as any).keluarModGuru) {
@@ -2042,6 +2339,7 @@ export default function App() {
         id="teacher-sticky-nav"
         className="teacher-sticky-nav student-nav-curved"
         aria-label="Navigasi mod guru"
+        style={{ display: isAdminActive ? "none" : undefined }}
       >
         <div className="student-nav-curved-backdrop mobile-nav-only" aria-hidden="true">
           <svg viewBox="0 0 400 70" preserveAspectRatio="none" className="student-nav-curved-svg">
@@ -2110,7 +2408,7 @@ export default function App() {
         id="admin-sticky-nav"
         className="teacher-sticky-nav student-nav-curved"
         aria-label="Navigasi mod admin"
-        style={{ display: "none" }}
+        style={{ display: isAdminActive ? "flex" : "none" }}
       >
         <div className="student-nav-curved-backdrop mobile-nav-only" aria-hidden="true">
           <svg viewBox="0 0 400 70" preserveAspectRatio="none" className="student-nav-curved-svg">
@@ -6345,7 +6643,7 @@ export default function App() {
           <div
             className="lencana-sub-info-text century-gothic-font"
             style={{
-              marginTop: "16px",
+              marginTop: "26px",
               textAlign: "center",
               color: "#ffffff",
               fontSize: "clamp(0.85rem, 2.2vw, 1.02rem)",
@@ -6455,7 +6753,7 @@ export default function App() {
       </div>
 
       {/* Senarai Perkataan Admin */}
-      <div id="admin-senarai-perkataan" className="screen">
+      <div id="admin-senarai-perkataan" className={getScreenClass("admin-senarai-perkataan")}>
         <div className="map-top-bar">
           <div
             className="neo-btn page-title century-gothic-font"
@@ -6648,7 +6946,7 @@ export default function App() {
       <AdminDashboard getScreenClass={getScreenClass} />
 
       {/* Mod Admin - Urus Sijil Bunyi Kata */}
-      <div id="admin-sijil" className="screen" style={{ paddingBottom: "100px" }}>
+      <div id="admin-sijil" className={getScreenClass("admin-sijil")} style={{ paddingBottom: "100px" }}>
         <AdminSijilManager />
       </div>
 
@@ -10558,7 +10856,11 @@ export default function App() {
             isOpen={showLoginModal}
             initialTab={authModalTab}
             pendingLoginMode={pendingLoginMode}
-            onClose={() => setShowLoginModal(false)}
+            pendingSelectedPlan={pendingSelectedPlan}
+            onClose={() => {
+              setShowLoginModal(false);
+              setPendingSelectedPlan(null);
+            }}
             setUserAccessLevel={setUserAccessLevel}
             setIsMandatorySetup={setIsMandatorySetup}
             setEditModalMode={setEditModalMode}
@@ -10574,11 +10876,63 @@ export default function App() {
               setIsModeMenuOpen(false);
               setIsProPricingModalOpen(false);
             }}
-            onSelectPlanRegister={(category) => {
-              setPendingLoginMode(category);
-              setAuthModalTab("register");
-              setAuthModalError("");
-              setShowLoginModal(true);
+            onSelectPlanRegister={(category, planInfo) => {
+              const isLoginScreen =
+                activeScreen === "login-screen" ||
+                (typeof document !== "undefined" &&
+                  document.getElementById("login-screen")?.classList.contains("active"));
+              const isGuest =
+                Boolean((window as any).isGuestMode) ||
+                (window as any).namaMuridAktif === "Tetamu";
+
+              const currentUser = (window as any).currentUser;
+              const userRole = localStorage.getItem("bunyiKataUserRole");
+
+              // Semak sama ada pengguna benar-benar sedang aktif log masuk dalam sesi dashboard (bukan tetamu & bukan di skrin mula)
+              const isUserActivelyLoggedIn =
+                !isLoginScreen &&
+                !isGuest &&
+                Boolean(currentUser) &&
+                ((category === "guru" &&
+                  (Boolean((window as any).modGuruAktif) || userRole === "guru" || activeScreen === "guru-dashboard")) ||
+                 (category === "ibubapa" &&
+                  (Boolean((window as any).modIbuBapaAktif) || userRole === "ibubapa" || activeScreen === "ibubapa-dashboard")));
+
+              if (isUserActivelyLoggedIn) {
+                // PENGGUNA SUDAH AKTIF LOG MASUK DI DASHBOARD:
+                // Terus ke saluran bayaran Chip dengan emel dan nama akaun yang sedia ada
+                const guruEmail = currentUser?.email || localStorage.getItem("bunyiKataGuruEmail") || "";
+                const ibubapaEmail = currentUser?.email || localStorage.getItem("bunyiKataIbubapaEmail") || "";
+                const currentEmail = (category === "guru" ? guruEmail : ibubapaEmail) || currentUser?.email || "";
+
+                const guruName = currentUser?.nama || localStorage.getItem("bunyiKataNamaGuru") || "Guru";
+                const famName = currentUser?.nama || localStorage.getItem("bunyiKataNamaKeluarga") || "Keluarga";
+                const currentName = (category === "guru" ? guruName : famName) || (currentEmail ? currentEmail.split("@")[0] : "Pelanggan Bunyi Kata");
+
+                setIsModeMenuOpen(false);
+                setIsProPricingModalOpen(false);
+                setPendingSelectedPlan(planInfo || null);
+                if (typeof (window as any).bukaBayaranChip === "function") {
+                  (window as any).bukaBayaranChip(planInfo, currentEmail, currentName);
+                } else {
+                  console.log(`[Bayaran Chip] Memproses bayaran untuk: ${currentName} (${currentEmail}), Pakej: ${planInfo?.name} (RM${planInfo?.price})`);
+                }
+              } else {
+                // PENGGUNA BELUM LOG MASUK (DARI SKRIN MULA / MOD TETAMU):
+                // Buka borang pendaftaran akaun baharu / log masuk dahulu
+                setIsModeMenuOpen(false);
+                setIsProPricingModalOpen(false);
+                setPendingLoginMode(category);
+                setPendingSelectedPlan(planInfo || null);
+                setAuthModalTab("register");
+                setLoginEmail("");
+                setLoginPassword("");
+                setRegGuruNama("");
+                setRegGuruSekolah("");
+                setRegNamaKeluarga("");
+                setAuthModalError("");
+                setShowLoginModal(true);
+              }
             }}
           />
 
@@ -11452,6 +11806,101 @@ export default function App() {
               }
             }}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Floating Side Toast Notification (Top-Right) */}
+      <AnimatePresence>
+        {paymentToast && paymentToast.show && (
+          <motion.div
+            initial={{ opacity: 0, x: 80, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 80, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+            style={{
+              position: "fixed",
+              top: "24px",
+              right: "24px",
+              zIndex: 99999999,
+              maxWidth: "420px",
+              width: "calc(100vw - 48px)",
+              background: paymentToast.type === "success" 
+                ? "linear-gradient(135deg, #064e3b 0%, #047857 100%)" 
+                : "linear-gradient(135deg, #7f1d1d 0%, #b91c1c 100%)",
+              color: "#ffffff",
+              borderRadius: "18px",
+              padding: "16px 20px",
+              border: "2.5px solid #ffffff",
+              boxShadow: "0 14px 35px rgba(0,0,0,0.35), 3px 3px 0 #000000",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "14px",
+            }}
+          >
+            <div
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "12px",
+                backgroundColor: paymentToast.type === "success" ? "#10b981" : "#ef4444",
+                border: "2px solid #ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "1.35rem",
+                flexShrink: 0,
+                boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+              }}
+            >
+              <i className={paymentToast.type === "success" ? "fa-solid fa-crown" : "fa-solid fa-circle-xmark"}></i>
+            </div>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                <h4 style={{ margin: 0, fontSize: "1.05rem", fontWeight: "900", color: "#fef08a" }}>
+                  {paymentToast.title}
+                </h4>
+                <button
+                  onClick={() => setPaymentToast(null)}
+                  style={{
+                    background: "rgba(255,255,255,0.2)",
+                    border: "none",
+                    borderRadius: "50%",
+                    width: "24px",
+                    height: "24px",
+                    color: "white",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.8rem",
+                  }}
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+              <p style={{ margin: 0, fontSize: "0.88rem", lineHeight: "1.4", color: "#f1f5f9", fontWeight: "500" }}>
+                {paymentToast.message}
+              </p>
+              {paymentToast.planName && (
+                <div style={{ marginTop: "8px" }}>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      backgroundColor: "rgba(255,255,255,0.25)",
+                      border: "1px solid rgba(255,255,255,0.4)",
+                      borderRadius: "6px",
+                      padding: "2px 8px",
+                      fontSize: "0.75rem",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Status: PRO AKTIF ({paymentToast.planName})
+                  </span>
+                </div>
+              )}
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

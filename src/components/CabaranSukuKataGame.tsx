@@ -3538,7 +3538,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                           lineHeight: '1.2',
                           marginTop: '2px'
                         }}>
-                          {isFullStars ? 'Anda telah berjaya membuka lencana ini.' : 'Latihan akan menjadikan anda lebih baik.'}
+                          {isFullStars ? 'Kumpul lencana sehingga peroleh sijil pencapaian!' : 'Latihan akan menjadikan anda lebih baik.'}
                         </div>
                       </div>
                     </div>
