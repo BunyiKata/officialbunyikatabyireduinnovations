@@ -48,7 +48,7 @@
         "nama"
       ],
       "$studentId": {
-        ".write": "auth != null || (newData.exists() && (root.child('code_index').child(newData.child('kod_kelas').val()).exists() || root.child('code_index').child(newData.child('kod_keluarga').val()).exists())) || (data.exists() && newData.exists() && (root.child('code_index').child(data.child('kod_kelas').val()).exists() || root.child('code_index').child(data.child('kod_keluarga').val()).exists()))",
+        ".write": "auth != null || (newData.exists() && ((newData.hasChild('kod_kelas') && root.child('code_index').child(newData.child('kod_kelas').val().toUpperCase().replace('#','_').replace('.','_').replace('$','_').replace('[','_').replace(']','_').replace('/','_')).exists()) || (newData.hasChild('kod_keluarga') && root.child('code_index').child(newData.child('kod_keluarga').val().toUpperCase().replace('#','_').replace('.','_').replace('$','_').replace('[','_').replace(']','_').replace('/','_')).exists()))) || (data.exists() && newData.exists() && ((data.hasChild('kod_kelas') && root.child('code_index').child(data.child('kod_kelas').val().toUpperCase().replace('#','_').replace('.','_').replace('$','_').replace('[','_').replace(']','_').replace('/','_')).exists()) || (data.hasChild('kod_keluarga') && root.child('code_index').child(data.child('kod_keluarga').val().toUpperCase().replace('#','_').replace('.','_').replace('$','_').replace('[','_').replace(']','_').replace('/','_')).exists())))",
         ".validate": "newData.hasChild('nama') && (newData.hasChild('kod_kelas') || newData.hasChild('kod_keluarga') || auth != null)"
       }
     },
