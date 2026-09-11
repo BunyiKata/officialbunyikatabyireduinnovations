@@ -3,8 +3,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import crypto from "crypto";
-import admin from "firebase-admin";
-import { getApps } from "firebase-admin/app";
+// firebase-admin v14 hanya menyediakan API modular. Import lalai `admin`
+// tidak lagi mendedahkan .apps/.auth/.credential, jadi kita import terus.
+import { getApps, initializeApp, cert, applicationDefault } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 
 dotenv.config();
 
@@ -48,13 +50,17 @@ function getAdminApp() {
       if (parsed.private_key) {
         parsed.private_key = parsed.private_key.replace(/\\n/g, "\n");
       }
-      adminApp = admin.initializeApp({
-        credential: admin.credential.cert(parsed),
+      adminApp = initializeApp({
+        credential: cert(parsed),
         databaseURL,
       });
     } else {
-      // Bergantung pada Application Default Credentials (Cloud Functions / Cloud Run).
-      adminApp = admin.initializeApp({ projectId, databaseURL });
+      // Bergantung pada Application Default Credentials (App Hosting / Cloud Run).
+      adminApp = initializeApp({
+        credential: applicationDefault(),
+        projectId,
+        databaseURL,
+      });
     }
 
     return adminApp;
@@ -205,7 +211,7 @@ async function startServer() {
       }
 
       const adminUid = process.env.ADMIN_UID || "bunyikata-admin";
-      const customToken = await admin.auth(appInstance).createCustomToken(adminUid, {
+      const customToken = await getAuth(appInstance).createCustomToken(adminUid, {
         admin: true,
         peranan: "admin",
       });
