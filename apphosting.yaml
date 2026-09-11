@@ -52,8 +52,13 @@ env:
       - RUNTIME
 
   # Brand ID CHIP untuk panggilan API pelayan.
+  #
+  # BUKAN rahsia: hanya pengenal jenama. Nilai yang SAMA sudah didedahkan
+  # kepada pelayar melalui VITE_CHIP_BRAND_ID di bawah, jadi menyimpannya
+  # dalam Secret Manager memberi sifar faedah keselamatan.
+  # Yang benar-benar rahsia ialah CHIP_SECRET_KEY sahaja.
   - variable: CHIP_BRAND_ID
-    secret: CHIP_BRAND_ID
+    value: 0436e9d2-e6ae-4f38-b315-98af6d06edce
     availability:
       - RUNTIME
 
@@ -65,8 +70,12 @@ env:
   # BUILD — dibundelkan ke dalam JavaScript pelayar. AWAM. Jangan letak rahsia.
   # ---------------------------------------------------------------------------
 
+  # Kunci API Firebase web. AWAM secara reka bentuk: ia dibundelkan ke dalam
+  # JavaScript pelayar dan boleh dibaca oleh sesiapa yang buka View Source.
+  # Keselamatan datang daripada database.rules.json, bukan daripada
+  # menyembunyikan kunci ini.
   - variable: VITE_FIREBASE_API_KEY
-    secret: VITE_FIREBASE_API_KEY
+    value: AIzaSyBLVyThW8CWIDyoSpfRzSuhQg2OFcM6SpQ
     availability:
       - BUILD
 
@@ -91,18 +100,18 @@ env:
       - BUILD
 
   - variable: VITE_FIREBASE_MESSAGING_SENDER_ID
-    secret: VITE_FIREBASE_MESSAGING_SENDER_ID
+    value: "275606412587"
     availability:
       - BUILD
 
   - variable: VITE_FIREBASE_APP_ID
-    secret: VITE_FIREBASE_APP_ID
+    value: "1:275606412587:web:1429636d9601afa285796e"
     availability:
       - BUILD
 
   # Brand ID juga diperlukan di pelayar untuk memaparkan pilihan pembayaran.
   # Ini bukan rahsia (hanya pengenal), berbeza daripada CHIP_SECRET_KEY.
   - variable: VITE_CHIP_BRAND_ID
-    secret: CHIP_BRAND_ID
+    value: 0436e9d2-e6ae-4f38-b315-98af6d06edce
     availability:
       - BUILD
