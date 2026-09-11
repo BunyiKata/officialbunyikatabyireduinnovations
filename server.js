@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import admin from "firebase-admin";
+import { getApps } from "firebase-admin/app";
 
 dotenv.config();
 
@@ -21,8 +22,13 @@ function getAdminApp() {
   if (adminInitError) return null;
 
   try {
-    if (admin.apps.length > 0) {
-      adminApp = admin.apps[0];
+    // firebase-admin v14 MEMBUANG `admin.apps` (ia hanya ada dalam v11 dan ke
+    // bawah). Menyentuh `.length` padanya melemparkan TypeError, ditangkap oleh
+    // blok catch di bawah, yang menetapkan adminInitError SECARA KEKAL — jadi
+    // /api/admin/verify sentiasa memulangkan 500. Guna getApps() moden.
+    const existing = getApps();
+    if (existing.length > 0) {
+      adminApp = existing[0];
       return adminApp;
     }
 
@@ -54,7 +60,9 @@ function getAdminApp() {
     return adminApp;
   } catch (err) {
     adminInitError = err;
-    console.error("[Firebase Admin] Gagal dimulakan:", err.message);
+    // Log jejak penuh: mesej sahaja menyembunyikan punca sebenar
+    // (cth. TypeError daripada API SDK yang berubah).
+    console.error("[Firebase Admin] Gagal dimulakan:", err);
     return null;
   }
 }
