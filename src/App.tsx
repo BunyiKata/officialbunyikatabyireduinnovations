@@ -24,6 +24,7 @@ import { AuthModal } from "./components/modals/AuthModal";
 import { PricingProModal } from "./components/modals/PricingProModal";
 import { EditProfileModal } from "./components/modals/EditProfileModal";
 import { EntryChoiceModal } from "./components/modals/EntryChoiceModal";
+import { ModeChoiceModal } from "./components/modals/ModeChoiceModal";
 import "./services/chipPaymentService";
 import { bukaBayaranChip, sahkanBayaranChip } from "./services/chipPaymentService";
 import "./utils/sijilGenerator";
@@ -1039,6 +1040,7 @@ export default function App() {
     };
   }, []);
   const [isModeMenuOpen, setIsModeMenuOpen] = React.useState(false);
+  const [isModeChoiceOpen, setIsModeChoiceOpen] = React.useState(false);
   const [activePakejCategory, setActivePakejCategory] = React.useState<
     "guru" | "ibubapa"
   >("guru");
@@ -2015,6 +2017,13 @@ export default function App() {
     try {
       initFirebaseRealtimeSubscriptions();
       fetchAdminDataFromFirebase();
+
+      // Muatkan sejarah langganan (nod `orders` + profil berbayar)
+      if (typeof (window as any).getSubscriptionHistory === "function") {
+        (window as any).getSubscriptionHistory().catch((e: any) =>
+          console.warn("Sejarah langganan notice:", e)
+        );
+      }
 
       const uid = localStorage.getItem("bunyiKataUserId");
       const role = localStorage.getItem("bunyiKataUserRole");
@@ -4102,7 +4111,7 @@ export default function App() {
               animation: "glow-outline 2s infinite",
             }}
             onClick={(e) => {
-              setIsModeMenuOpen(true);
+              setIsModeChoiceOpen(true);
             }}
             title="Pilih Mod"
           >
@@ -10835,9 +10844,8 @@ export default function App() {
             setIsCodeModalOpen={setIsCodeModalOpen}
             joinCode={joinCode}
             setJoinCode={setJoinCode}
-            setActiveStudentName={setActiveStudentName}
-            setActiveStudentAvatar={setActiveStudentAvatar}
             setIsModeMenuOpen={setIsModeMenuOpen}
+            setIsModeChoiceOpen={setIsModeChoiceOpen}
             setIsAdminActive={setIsAdminActive}
             setUserAccessLevel={setUserAccessLevel}
             setShowLoginModal={setShowLoginModal}
@@ -10849,6 +10857,17 @@ export default function App() {
             setRegGuruSekolah={setRegGuruSekolah}
             setRegNamaKeluarga={setRegNamaKeluarga}
             setAuthModalError={setAuthModalError}
+          />
+
+          {/* Modal Pilih Mod bagi Tujuan Langganan Pakej */}
+          <ModeChoiceModal
+            isOpen={isModeChoiceOpen}
+            onClose={() => setIsModeChoiceOpen(false)}
+            onSelectMode={(mode) => {
+              setProPricingTab(mode);
+              setIsModeChoiceOpen(false);
+              setIsProPricingModalOpen(true);
+            }}
           />
 
           {/* Modal Log Masuk */}

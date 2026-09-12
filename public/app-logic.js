@@ -738,46 +738,46 @@ window.getAudioPath = function (text) {
     var rawLower = rawText.toLowerCase();
     if (rawText.startsWith('/') || rawLower.endsWith('.mp3')) return rawText;
 
-    // Direct and normalized map for Graded Reading from folder AUDIO BACAAN BERGRED (.MP3)
+    // Direct and normalized map for Graded Reading from folder AUDIO BACAAN BERGRED (.mp3)
     var bacaanAudioMap = {
         // Ayat Pendek (10)
-        'saya suka makan nasi': '/AUDIO BACAAN BERGRED/audio ayat pendek/saya suka makan nasi.MP3',
-        'ibu memasak di dapur': '/AUDIO BACAAN BERGRED/audio ayat pendek/ibu memasak di dapur.MP3',
-        'kucing itu sangat comel': '/AUDIO BACAAN BERGRED/audio ayat pendek/kucing itu sangat comel.MP3',
-        'adik saya suka bermain': '/AUDIO BACAAN BERGRED/audio ayat pendek/adik saya suka bermain.MP3',
-        'bapa pergi ke pejabat': '/AUDIO BACAAN BERGRED/audio ayat pendek/bapa pergi ke pejabat.MP3',
-        'kakak membaca buku cerita': '/AUDIO BACAAN BERGRED/audio ayat pendek/kakak membaca buku cerita.MP3',
-        'kami pergi ke sekolah': '/AUDIO BACAAN BERGRED/audio ayat pendek/kami pergi ke sekolah.MP3',
-        'burung itu terbang tinggi': '/AUDIO BACAAN BERGRED/audio ayat pendek/burung itu terbang tinggi.MP3',
-        'saya minum air kosong': '/AUDIO BACAAN BERGRED/audio ayat pendek/saya minum air kosong.MP3',
-        'kami makan bersama': '/AUDIO BACAAN BERGRED/audio ayat pendek/kami makan bersama.MP3',
+        'saya suka makan nasi': '/audio/bacaan-bergred/audio ayat pendek/saya suka makan nasi.mp3',
+        'ibu memasak di dapur': '/audio/bacaan-bergred/audio ayat pendek/ibu memasak di dapur.mp3',
+        'kucing itu sangat comel': '/audio/bacaan-bergred/audio ayat pendek/kucing itu sangat comel.mp3',
+        'adik saya suka bermain': '/audio/bacaan-bergred/audio ayat pendek/adik saya suka bermain.mp3',
+        'bapa pergi ke pejabat': '/audio/bacaan-bergred/audio ayat pendek/bapa pergi ke pejabat.mp3',
+        'kakak membaca buku cerita': '/audio/bacaan-bergred/audio ayat pendek/kakak membaca buku cerita.mp3',
+        'kami pergi ke sekolah': '/audio/bacaan-bergred/audio ayat pendek/kami pergi ke sekolah.mp3',
+        'burung itu terbang tinggi': '/audio/bacaan-bergred/audio ayat pendek/burung itu terbang tinggi.mp3',
+        'saya minum air kosong': '/audio/bacaan-bergred/audio ayat pendek/saya minum air kosong.mp3',
+        'kami makan bersama': '/audio/bacaan-bergred/audio ayat pendek/kami makan bersama.mp3',
 
         // Ayat Panjang (10)
-        'ibu memasak nasi lemak untuk sarapan pagi ini': '/AUDIO BACAAN BERGRED/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.MP3',
-        'kami pergi ke taman permainan pada hari sabtu': '/AUDIO BACAAN BERGRED/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.MP3',
-        'bapa membeli buah buahan segar di pasar tani': '/AUDIO BACAAN BERGRED/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.MP3',
-        'bapa membeli buah-buahan segar di pasar tani': '/AUDIO BACAAN BERGRED/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.MP3',
-        'kucing kecil itu bermain dengan bola di halaman rumah': '/AUDIO BACAAN BERGRED/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.MP3',
-        'adik saya belajar membaca buku cerita setiap malam': '/AUDIO BACAAN BERGRED/audio ayat panjang/adik saya belajar membaca buku cerita setiap .MP3',
-        'guru mengajar kami menulis huruf abjad dengan rapi': '/AUDIO BACAAN BERGRED/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.MP3',
-        'kami menyanyi lagu sambil bertepuk tangan dengan gembira': '/AUDIO BACAAN BERGRED/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.MP3',
-        'burung kecil itu terbang tinggi di langit biru': '/AUDIO BACAAN BERGRED/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.MP3',
-        'kakak membantu ibu membasuh pinggan selepas makan malam': '/AUDIO BACAAN BERGRED/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.MP3',
-        'kami berkumpul di padang sekolah untuk beriadah pagi': '/AUDIO BACAAN BERGRED/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.MP3',
+        'ibu memasak nasi lemak untuk sarapan pagi ini': '/audio/bacaan-bergred/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.mp3',
+        'kami pergi ke taman permainan pada hari sabtu': '/audio/bacaan-bergred/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.mp3',
+        'bapa membeli buah buahan segar di pasar tani': '/audio/bacaan-bergred/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.mp3',
+        'bapa membeli buah-buahan segar di pasar tani': '/audio/bacaan-bergred/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.mp3',
+        'kucing kecil itu bermain dengan bola di halaman rumah': '/audio/bacaan-bergred/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.mp3',
+        'adik saya belajar membaca buku cerita setiap malam': '/audio/bacaan-bergred/audio ayat panjang/adik saya belajar membaca buku cerita setiap .mp3',
+        'guru mengajar kami menulis huruf abjad dengan rapi': '/audio/bacaan-bergred/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.mp3',
+        'kami menyanyi lagu sambil bertepuk tangan dengan gembira': '/audio/bacaan-bergred/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.mp3',
+        'burung kecil itu terbang tinggi di langit biru': '/audio/bacaan-bergred/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.mp3',
+        'kakak membantu ibu membasuh pinggan selepas makan malam': '/audio/bacaan-bergred/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.mp3',
+        'kami berkumpul di padang sekolah untuk beriadah pagi': '/audio/bacaan-bergred/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.mp3',
 
         // Petikan Tahap 1 (5)
-        'kereta ini kereta bapa kereta bapa biru bapa bawa kereta laju': '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 kereta.MP3',
-        'bola ini bola saya bola saya merah saya baling bola jauh': '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 bola.MP3',
-        'topi ini topi adik topi adik kuning adik pakai topi elok': '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 topi.MP3',
-        'beg ini beg kakak beg kakak hijau kakak bawa beg berat': '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 beg.MP3',
-        'basikal ini basikal abang basikal abang hitam abang kayuh basikal laju': '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 basikal.MP3',
+        'kereta ini kereta bapa kereta bapa biru bapa bawa kereta laju': '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.mp3',
+        'bola ini bola saya bola saya merah saya baling bola jauh': '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.mp3',
+        'topi ini topi adik topi adik kuning adik pakai topi elok': '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.mp3',
+        'beg ini beg kakak beg kakak hijau kakak bawa beg berat': '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.mp3',
+        'basikal ini basikal abang basikal abang hitam abang kayuh basikal laju': '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.mp3',
 
         // Petikan Tahap 2 (5)
-        'rumah ini rumah saya rumah saya besar saya tinggal di rumah besar saya tinggal di rumah besar bersama keluarga': '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 rumah.MP3',
-        'sekolah ini sekolah kami sekolah kami ceria kami belajar di sekolah ceria kami belajar di sekolah ceria setiap hari': '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 sekolah.MP3',
-        'kucing ini kucing saya kucing saya comel saya bermain dengan kucing comel saya bermain dengan kucing comel setiap petang': '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 kucing.MP3',
-        'taman ini taman kami taman kami luas kami berlari di taman luas kami berlari di taman luas pada waktu pagi': '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 taman.MP3',
-        'dapur ini dapur ibu dapur ibu bersih ibu memasak di dapur bersih ibu memasak di dapur bersih setiap petang': '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 dapur.MP3'
+        'rumah ini rumah saya rumah saya besar saya tinggal di rumah besar saya tinggal di rumah besar bersama keluarga': '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.mp3',
+        'sekolah ini sekolah kami sekolah kami ceria kami belajar di sekolah ceria kami belajar di sekolah ceria setiap hari': '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.mp3',
+        'kucing ini kucing saya kucing saya comel saya bermain dengan kucing comel saya bermain dengan kucing comel setiap petang': '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.mp3',
+        'taman ini taman kami taman kami luas kami berlari di taman luas kami berlari di taman luas pada waktu pagi': '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.mp3',
+        'dapur ini dapur ibu dapur ibu bersih ibu memasak di dapur bersih ibu memasak di dapur bersih setiap petang': '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.mp3'
     };
 
     var cleanSentence = rawLower.replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -785,59 +785,59 @@ window.getAudioPath = function (text) {
 
     // Fuzzy phrase matching for reading passages & sentences to AUDIO BACAAN BERGRED
     if (cleanSentence.indexOf('kereta bapa biru') !== -1 || cleanSentence.indexOf('ini kereta bapa') !== -1) {
-        return '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 kereta.MP3';
+        return '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.mp3';
     }
     if (cleanSentence.indexOf('bola saya merah') !== -1 || cleanSentence.indexOf('ini bola saya') !== -1) {
-        return '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 bola.MP3';
+        return '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.mp3';
     }
     if (cleanSentence.indexOf('topi adik kuning') !== -1 || cleanSentence.indexOf('ini topi adik') !== -1) {
-        return '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 topi.MP3';
+        return '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.mp3';
     }
     if (cleanSentence.indexOf('beg kakak hijau') !== -1 || cleanSentence.indexOf('ini beg kakak') !== -1) {
-        return '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 beg.MP3';
+        return '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.mp3';
     }
     if (cleanSentence.indexOf('basikal abang hitam') !== -1 || cleanSentence.indexOf('ini basikal abang') !== -1) {
-        return '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 basikal.MP3';
+        return '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.mp3';
     }
 
     if (cleanSentence.indexOf('rumah saya besar') !== -1 || cleanSentence.indexOf('ini rumah saya') !== -1) {
-        return '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 rumah.MP3';
+        return '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.mp3';
     }
     if (cleanSentence.indexOf('sekolah kami ceria') !== -1 || cleanSentence.indexOf('ini sekolah kami') !== -1) {
-        return '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 sekolah.MP3';
+        return '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.mp3';
     }
     if (cleanSentence.indexOf('kucing saya comel') !== -1 || cleanSentence.indexOf('ini kucing saya') !== -1) {
-        return '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 kucing.MP3';
+        return '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.mp3';
     }
     if (cleanSentence.indexOf('taman kami luas') !== -1 || cleanSentence.indexOf('ini taman kami') !== -1) {
-        return '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 taman.MP3';
+        return '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.mp3';
     }
     if (cleanSentence.indexOf('dapur ibu bersih') !== -1 || cleanSentence.indexOf('ini dapur ibu') !== -1) {
-        return '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 dapur.MP3';
+        return '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.mp3';
     }
 
     // Keyword matching for ayat pendek & panjang
-    if (cleanSentence.indexOf('suka makan nasi') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat pendek/saya suka makan nasi.MP3';
-    if (cleanSentence.indexOf('memasak di dapur') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat pendek/ibu memasak di dapur.MP3';
-    if (cleanSentence.indexOf('kucing itu sangat comel') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat pendek/kucing itu sangat comel.MP3';
-    if (cleanSentence.indexOf('suka bermain') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat pendek/adik saya suka bermain.MP3';
-    if (cleanSentence.indexOf('pergi ke pejabat') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat pendek/bapa pergi ke pejabat.MP3';
-    if (cleanSentence.indexOf('kakak membaca buku') !== -1 || (cleanSentence.indexOf('membaca buku cerita') !== -1 && cleanSentence.indexOf('malam') === -1)) return '/AUDIO BACAAN BERGRED/audio ayat pendek/kakak membaca buku cerita.MP3';
-    if (cleanSentence.indexOf('pergi ke sekolah') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat pendek/kami pergi ke sekolah.MP3';
-    if (cleanSentence.indexOf('burung itu terbang tinggi') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat pendek/burung itu terbang tinggi.MP3';
-    if (cleanSentence.indexOf('minum air kosong') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat pendek/saya minum air kosong.MP3';
-    if (cleanSentence.indexOf('makan bersama') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat pendek/kami makan bersama.MP3';
+    if (cleanSentence.indexOf('suka makan nasi') !== -1) return '/audio/bacaan-bergred/audio ayat pendek/saya suka makan nasi.mp3';
+    if (cleanSentence.indexOf('memasak di dapur') !== -1) return '/audio/bacaan-bergred/audio ayat pendek/ibu memasak di dapur.mp3';
+    if (cleanSentence.indexOf('kucing itu sangat comel') !== -1) return '/audio/bacaan-bergred/audio ayat pendek/kucing itu sangat comel.mp3';
+    if (cleanSentence.indexOf('suka bermain') !== -1) return '/audio/bacaan-bergred/audio ayat pendek/adik saya suka bermain.mp3';
+    if (cleanSentence.indexOf('pergi ke pejabat') !== -1) return '/audio/bacaan-bergred/audio ayat pendek/bapa pergi ke pejabat.mp3';
+    if (cleanSentence.indexOf('kakak membaca buku') !== -1 || (cleanSentence.indexOf('membaca buku cerita') !== -1 && cleanSentence.indexOf('malam') === -1)) return '/audio/bacaan-bergred/audio ayat pendek/kakak membaca buku cerita.mp3';
+    if (cleanSentence.indexOf('pergi ke sekolah') !== -1) return '/audio/bacaan-bergred/audio ayat pendek/kami pergi ke sekolah.mp3';
+    if (cleanSentence.indexOf('burung itu terbang tinggi') !== -1) return '/audio/bacaan-bergred/audio ayat pendek/burung itu terbang tinggi.mp3';
+    if (cleanSentence.indexOf('minum air kosong') !== -1) return '/audio/bacaan-bergred/audio ayat pendek/saya minum air kosong.mp3';
+    if (cleanSentence.indexOf('makan bersama') !== -1) return '/audio/bacaan-bergred/audio ayat pendek/kami makan bersama.mp3';
 
-    if (cleanSentence.indexOf('nasi lemak untuk sarapan') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.MP3';
-    if (cleanSentence.indexOf('taman permainan pada hari sabtu') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.MP3';
-    if (cleanSentence.indexOf('buah buahan segar') !== -1 || cleanSentence.indexOf('buah-buahan segar') !== -1 || cleanSentence.indexOf('pasar tani') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.MP3';
-    if (cleanSentence.indexOf('bola di halaman rumah') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.MP3';
-    if (cleanSentence.indexOf('membaca buku cerita setiap malam') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat panjang/adik saya belajar membaca buku cerita setiap .MP3';
-    if (cleanSentence.indexOf('menulis huruf abjad') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.MP3';
-    if (cleanSentence.indexOf('bertepuk tangan dengan gembira') !== -1 || cleanSentence.indexOf('menyanyi lagu') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.MP3';
-    if (cleanSentence.indexOf('burung kecil itu terbang tinggi') !== -1 || cleanSentence.indexOf('langit biru') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.MP3';
-    if (cleanSentence.indexOf('membasuh pinggan selepas makan') !== -1 || cleanSentence.indexOf('membasuh pinggan') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.MP3';
-    if (cleanSentence.indexOf('padang sekolah untuk beriadah') !== -1 || cleanSentence.indexOf('beriadah pagi') !== -1) return '/AUDIO BACAAN BERGRED/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.MP3';
+    if (cleanSentence.indexOf('nasi lemak untuk sarapan') !== -1) return '/audio/bacaan-bergred/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.mp3';
+    if (cleanSentence.indexOf('taman permainan pada hari sabtu') !== -1) return '/audio/bacaan-bergred/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.mp3';
+    if (cleanSentence.indexOf('buah buahan segar') !== -1 || cleanSentence.indexOf('buah-buahan segar') !== -1 || cleanSentence.indexOf('pasar tani') !== -1) return '/audio/bacaan-bergred/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.mp3';
+    if (cleanSentence.indexOf('bola di halaman rumah') !== -1) return '/audio/bacaan-bergred/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.mp3';
+    if (cleanSentence.indexOf('membaca buku cerita setiap malam') !== -1) return '/audio/bacaan-bergred/audio ayat panjang/adik saya belajar membaca buku cerita setiap .mp3';
+    if (cleanSentence.indexOf('menulis huruf abjad') !== -1) return '/audio/bacaan-bergred/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.mp3';
+    if (cleanSentence.indexOf('bertepuk tangan dengan gembira') !== -1 || cleanSentence.indexOf('menyanyi lagu') !== -1) return '/audio/bacaan-bergred/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.mp3';
+    if (cleanSentence.indexOf('burung kecil itu terbang tinggi') !== -1 || cleanSentence.indexOf('langit biru') !== -1) return '/audio/bacaan-bergred/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.mp3';
+    if (cleanSentence.indexOf('membasuh pinggan selepas makan') !== -1 || cleanSentence.indexOf('membasuh pinggan') !== -1) return '/audio/bacaan-bergred/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.mp3';
+    if (cleanSentence.indexOf('padang sekolah untuk beriadah') !== -1 || cleanSentence.indexOf('beriadah pagi') !== -1) return '/audio/bacaan-bergred/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.mp3';
 
     var raw = rawLower;
 
@@ -850,158 +850,158 @@ window.getAudioPath = function (text) {
     // --- INTEGRASI AUDIO TAMBAH & TOLAK ---
     var mathAudioMap = {
         // Tambah
-        '0+0': '/AUDIO TAMBAH TOLAK/audio tambah/sifar tambah sifar sama dengan sifar.MP3',
-        '0 + 0': '/AUDIO TAMBAH TOLAK/audio tambah/sifar tambah sifar sama dengan sifar.MP3',
-        'sifar tambah sifar': '/AUDIO TAMBAH TOLAK/audio tambah/sifar tambah sifar sama dengan sifar.MP3',
-        'sifar tambah sifar sama dengan sifar': '/AUDIO TAMBAH TOLAK/audio tambah/sifar tambah sifar sama dengan sifar.MP3',
+        '0+0': '/audio/tambah/sifar tambah sifar sama dengan sifar.mp3',
+        '0 + 0': '/audio/tambah/sifar tambah sifar sama dengan sifar.mp3',
+        'sifar tambah sifar': '/audio/tambah/sifar tambah sifar sama dengan sifar.mp3',
+        'sifar tambah sifar sama dengan sifar': '/audio/tambah/sifar tambah sifar sama dengan sifar.mp3',
 
-        '1+0': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sifar sama dengan satu.MP3',
-        '1 + 0': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sifar sama dengan satu.MP3',
-        '0+1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sifar sama dengan satu.MP3',
-        '0 + 1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sifar sama dengan satu.MP3',
-        'satu tambah sifar': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sifar sama dengan satu.MP3',
-        'satu tambah sifar sama dengan satu': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sifar sama dengan satu.MP3',
+        '1+0': '/audio/tambah/satu tambah sifar sama dengan satu.mp3',
+        '1 + 0': '/audio/tambah/satu tambah sifar sama dengan satu.mp3',
+        '0+1': '/audio/tambah/satu tambah sifar sama dengan satu.mp3',
+        '0 + 1': '/audio/tambah/satu tambah sifar sama dengan satu.mp3',
+        'satu tambah sifar': '/audio/tambah/satu tambah sifar sama dengan satu.mp3',
+        'satu tambah sifar sama dengan satu': '/audio/tambah/satu tambah sifar sama dengan satu.mp3',
 
-        '1+1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah satu sama dengan dua.MP3',
-        '1 + 1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah satu sama dengan dua.MP3',
-        'satu tambah satu': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah satu sama dengan dua.MP3',
-        'satu tambah satu sama dengan dua': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah satu sama dengan dua.MP3',
+        '1+1': '/audio/tambah/satu tambah satu sama dengan dua.mp3',
+        '1 + 1': '/audio/tambah/satu tambah satu sama dengan dua.mp3',
+        'satu tambah satu': '/audio/tambah/satu tambah satu sama dengan dua.mp3',
+        'satu tambah satu sama dengan dua': '/audio/tambah/satu tambah satu sama dengan dua.mp3',
 
-        '1+2': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah dua sama dengan tiga.MP3',
-        '1 + 2': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah dua sama dengan tiga.MP3',
-        '2+1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah dua sama dengan tiga.MP3',
-        '2 + 1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah dua sama dengan tiga.MP3',
-        'satu tambah dua': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah dua sama dengan tiga.MP3',
-        'dua tambah satu': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah dua sama dengan tiga.MP3',
-        'satu tambah dua sama dengan tiga': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah dua sama dengan tiga.MP3',
+        '1+2': '/audio/tambah/satu tambah dua sama dengan tiga.mp3',
+        '1 + 2': '/audio/tambah/satu tambah dua sama dengan tiga.mp3',
+        '2+1': '/audio/tambah/satu tambah dua sama dengan tiga.mp3',
+        '2 + 1': '/audio/tambah/satu tambah dua sama dengan tiga.mp3',
+        'satu tambah dua': '/audio/tambah/satu tambah dua sama dengan tiga.mp3',
+        'dua tambah satu': '/audio/tambah/satu tambah dua sama dengan tiga.mp3',
+        'satu tambah dua sama dengan tiga': '/audio/tambah/satu tambah dua sama dengan tiga.mp3',
 
-        '1+3': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tiga sama dengan empat.MP3',
-        '1 + 3': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tiga sama dengan empat.MP3',
-        '3+1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tiga sama dengan empat.MP3',
-        '3 + 1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tiga sama dengan empat.MP3',
-        'satu tambah tiga': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tiga sama dengan empat.MP3',
-        'tiga tambah satu': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tiga sama dengan empat.MP3',
-        'satu tambah tiga sama dengan empat': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tiga sama dengan empat.MP3',
+        '1+3': '/audio/tambah/satu tambah tiga sama dengan empat.mp3',
+        '1 + 3': '/audio/tambah/satu tambah tiga sama dengan empat.mp3',
+        '3+1': '/audio/tambah/satu tambah tiga sama dengan empat.mp3',
+        '3 + 1': '/audio/tambah/satu tambah tiga sama dengan empat.mp3',
+        'satu tambah tiga': '/audio/tambah/satu tambah tiga sama dengan empat.mp3',
+        'tiga tambah satu': '/audio/tambah/satu tambah tiga sama dengan empat.mp3',
+        'satu tambah tiga sama dengan empat': '/audio/tambah/satu tambah tiga sama dengan empat.mp3',
 
-        '1+4': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah empat sama dengan lima.MP3',
-        '1 + 4': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah empat sama dengan lima.MP3',
-        '4+1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah empat sama dengan lima.MP3',
-        '4 + 1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah empat sama dengan lima.MP3',
-        'satu tambah empat': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah empat sama dengan lima.MP3',
-        'empat tambah satu': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah empat sama dengan lima.MP3',
-        'satu tambah empat sama dengan lima': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah empat sama dengan lima.MP3',
+        '1+4': '/audio/tambah/satu tambah empat sama dengan lima.mp3',
+        '1 + 4': '/audio/tambah/satu tambah empat sama dengan lima.mp3',
+        '4+1': '/audio/tambah/satu tambah empat sama dengan lima.mp3',
+        '4 + 1': '/audio/tambah/satu tambah empat sama dengan lima.mp3',
+        'satu tambah empat': '/audio/tambah/satu tambah empat sama dengan lima.mp3',
+        'empat tambah satu': '/audio/tambah/satu tambah empat sama dengan lima.mp3',
+        'satu tambah empat sama dengan lima': '/audio/tambah/satu tambah empat sama dengan lima.mp3',
 
-        '1+5': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lima sama dengan enam.MP3',
-        '1 + 5': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lima sama dengan enam.MP3',
-        '5+1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lima sama dengan enam.MP3',
-        '5 + 1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lima sama dengan enam.MP3',
-        'satu tambah lima': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lima sama dengan enam.MP3',
-        'lima tambah satu': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lima sama dengan enam.MP3',
-        'satu tambah lima sama dengan enam': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lima sama dengan enam.MP3',
+        '1+5': '/audio/tambah/satu tambah lima sama dengan enam.mp3',
+        '1 + 5': '/audio/tambah/satu tambah lima sama dengan enam.mp3',
+        '5+1': '/audio/tambah/satu tambah lima sama dengan enam.mp3',
+        '5 + 1': '/audio/tambah/satu tambah lima sama dengan enam.mp3',
+        'satu tambah lima': '/audio/tambah/satu tambah lima sama dengan enam.mp3',
+        'lima tambah satu': '/audio/tambah/satu tambah lima sama dengan enam.mp3',
+        'satu tambah lima sama dengan enam': '/audio/tambah/satu tambah lima sama dengan enam.mp3',
 
-        '1+6': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah enam sama dengan tujuh.MP3',
-        '1 + 6': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah enam sama dengan tujuh.MP3',
-        '6+1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah enam sama dengan tujuh.MP3',
-        '6 + 1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah enam sama dengan tujuh.MP3',
-        'satu tambah enam': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah enam sama dengan tujuh.MP3',
-        'enam tambah satu': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah enam sama dengan tujuh.MP3',
-        'satu tambah enam sama dengan tujuh': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah enam sama dengan tujuh.MP3',
+        '1+6': '/audio/tambah/satu tambah enam sama dengan tujuh.mp3',
+        '1 + 6': '/audio/tambah/satu tambah enam sama dengan tujuh.mp3',
+        '6+1': '/audio/tambah/satu tambah enam sama dengan tujuh.mp3',
+        '6 + 1': '/audio/tambah/satu tambah enam sama dengan tujuh.mp3',
+        'satu tambah enam': '/audio/tambah/satu tambah enam sama dengan tujuh.mp3',
+        'enam tambah satu': '/audio/tambah/satu tambah enam sama dengan tujuh.mp3',
+        'satu tambah enam sama dengan tujuh': '/audio/tambah/satu tambah enam sama dengan tujuh.mp3',
 
-        '1+7': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tujuh sama dengan lapan.MP3',
-        '1 + 7': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tujuh sama dengan lapan.MP3',
-        '7+1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tujuh sama dengan lapan.MP3',
-        '7 + 1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tujuh sama dengan lapan.MP3',
-        'satu tambah tujuh': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tujuh sama dengan lapan.MP3',
-        'tujuh tambah satu': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tujuh sama dengan lapan.MP3',
-        'satu tambah tujuh sama dengan lapan': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah tujuh sama dengan lapan.MP3',
+        '1+7': '/audio/tambah/satu tambah tujuh sama dengan lapan.mp3',
+        '1 + 7': '/audio/tambah/satu tambah tujuh sama dengan lapan.mp3',
+        '7+1': '/audio/tambah/satu tambah tujuh sama dengan lapan.mp3',
+        '7 + 1': '/audio/tambah/satu tambah tujuh sama dengan lapan.mp3',
+        'satu tambah tujuh': '/audio/tambah/satu tambah tujuh sama dengan lapan.mp3',
+        'tujuh tambah satu': '/audio/tambah/satu tambah tujuh sama dengan lapan.mp3',
+        'satu tambah tujuh sama dengan lapan': '/audio/tambah/satu tambah tujuh sama dengan lapan.mp3',
 
-        '1+8': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lapan sama dengan sembilan.MP3',
-        '1 + 8': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lapan sama dengan sembilan.MP3',
-        '8+1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lapan sama dengan sembilan.MP3',
-        '8 + 1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lapan sama dengan sembilan.MP3',
-        'satu tambah lapan': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lapan sama dengan sembilan.MP3',
-        'lapan tambah satu': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lapan sama dengan sembilan.MP3',
-        'satu tambah lapan sama dengan sembilan': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah lapan sama dengan sembilan.MP3',
+        '1+8': '/audio/tambah/satu tambah lapan sama dengan sembilan.mp3',
+        '1 + 8': '/audio/tambah/satu tambah lapan sama dengan sembilan.mp3',
+        '8+1': '/audio/tambah/satu tambah lapan sama dengan sembilan.mp3',
+        '8 + 1': '/audio/tambah/satu tambah lapan sama dengan sembilan.mp3',
+        'satu tambah lapan': '/audio/tambah/satu tambah lapan sama dengan sembilan.mp3',
+        'lapan tambah satu': '/audio/tambah/satu tambah lapan sama dengan sembilan.mp3',
+        'satu tambah lapan sama dengan sembilan': '/audio/tambah/satu tambah lapan sama dengan sembilan.mp3',
 
-        '1+9': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sembilan sama dengan sepuluh.MP3',
-        '1 + 9': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sembilan sama dengan sepuluh.MP3',
-        '9+1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sembilan sama dengan sepuluh.MP3',
-        '9 + 1': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sembilan sama dengan sepuluh.MP3',
-        'satu tambah sembilan': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sembilan sama dengan sepuluh.MP3',
-        'sembilan tambah satu': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sembilan sama dengan sepuluh.MP3',
-        'satu tambah sembilan sama dengan sepuluh': '/AUDIO TAMBAH TOLAK/audio tambah/satu tambah sembilan sama dengan sepuluh.MP3',
+        '1+9': '/audio/tambah/satu tambah sembilan sama dengan sepuluh.mp3',
+        '1 + 9': '/audio/tambah/satu tambah sembilan sama dengan sepuluh.mp3',
+        '9+1': '/audio/tambah/satu tambah sembilan sama dengan sepuluh.mp3',
+        '9 + 1': '/audio/tambah/satu tambah sembilan sama dengan sepuluh.mp3',
+        'satu tambah sembilan': '/audio/tambah/satu tambah sembilan sama dengan sepuluh.mp3',
+        'sembilan tambah satu': '/audio/tambah/satu tambah sembilan sama dengan sepuluh.mp3',
+        'satu tambah sembilan sama dengan sepuluh': '/audio/tambah/satu tambah sembilan sama dengan sepuluh.mp3',
 
         // Tolak
-        '0-0': '/AUDIO TAMBAH TOLAK/audio tolak/sifar tolak sifar sama dengan sifar.MP3',
-        '0 - 0': '/AUDIO TAMBAH TOLAK/audio tolak/sifar tolak sifar sama dengan sifar.MP3',
-        'sifar tolak sifar': '/AUDIO TAMBAH TOLAK/audio tolak/sifar tolak sifar sama dengan sifar.MP3',
-        'sifar tolak sifar sama dengan sifar': '/AUDIO TAMBAH TOLAK/audio tolak/sifar tolak sifar sama dengan sifar.MP3',
+        '0-0': '/audio/tolak/sifar tolak sifar sama dengan sifar.mp3',
+        '0 - 0': '/audio/tolak/sifar tolak sifar sama dengan sifar.mp3',
+        'sifar tolak sifar': '/audio/tolak/sifar tolak sifar sama dengan sifar.mp3',
+        'sifar tolak sifar sama dengan sifar': '/audio/tolak/sifar tolak sifar sama dengan sifar.mp3',
 
-        '10-0': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sifar sama dengan sepuluh.MP3',
-        '10 - 0': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sifar sama dengan sepuluh.MP3',
-        '10 − 0': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sifar sama dengan sepuluh.MP3',
-        'sepuluh tolak sifar': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sifar sama dengan sepuluh.MP3',
-        'sepuluh tolak sifar sama dengan sepuluh': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sifar sama dengan sepuluh.MP3',
+        '10-0': '/audio/tolak/sepuluh tolak sifar sama dengan sepuluh.mp3',
+        '10 - 0': '/audio/tolak/sepuluh tolak sifar sama dengan sepuluh.mp3',
+        '10 − 0': '/audio/tolak/sepuluh tolak sifar sama dengan sepuluh.mp3',
+        'sepuluh tolak sifar': '/audio/tolak/sepuluh tolak sifar sama dengan sepuluh.mp3',
+        'sepuluh tolak sifar sama dengan sepuluh': '/audio/tolak/sepuluh tolak sifar sama dengan sepuluh.mp3',
 
-        '10-1': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak satu sama dengan sembilan.MP3',
-        '10 - 1': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak satu sama dengan sembilan.MP3',
-        '10 − 1': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak satu sama dengan sembilan.MP3',
-        'sepuluh tolak satu': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak satu sama dengan sembilan.MP3',
-        'sepuluh tolak satu sama dengan sembilan': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak satu sama dengan sembilan.MP3',
+        '10-1': '/audio/tolak/sepuluh tolak satu sama dengan sembilan.mp3',
+        '10 - 1': '/audio/tolak/sepuluh tolak satu sama dengan sembilan.mp3',
+        '10 − 1': '/audio/tolak/sepuluh tolak satu sama dengan sembilan.mp3',
+        'sepuluh tolak satu': '/audio/tolak/sepuluh tolak satu sama dengan sembilan.mp3',
+        'sepuluh tolak satu sama dengan sembilan': '/audio/tolak/sepuluh tolak satu sama dengan sembilan.mp3',
 
-        '10-2': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak dua sama dengan lapan.MP3',
-        '10 - 2': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak dua sama dengan lapan.MP3',
-        '10 − 2': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak dua sama dengan lapan.MP3',
-        'sepuluh tolak dua': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak dua sama dengan lapan.MP3',
-        'sepuluh tolak dua sama dengan lapan': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak dua sama dengan lapan.MP3',
+        '10-2': '/audio/tolak/sepuluh tolak dua sama dengan lapan.mp3',
+        '10 - 2': '/audio/tolak/sepuluh tolak dua sama dengan lapan.mp3',
+        '10 − 2': '/audio/tolak/sepuluh tolak dua sama dengan lapan.mp3',
+        'sepuluh tolak dua': '/audio/tolak/sepuluh tolak dua sama dengan lapan.mp3',
+        'sepuluh tolak dua sama dengan lapan': '/audio/tolak/sepuluh tolak dua sama dengan lapan.mp3',
 
-        '10-3': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak tiga sama dengan tujuh.MP3',
-        '10 - 3': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak tiga sama dengan tujuh.MP3',
-        '10 − 3': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak tiga sama dengan tujuh.MP3',
-        'sepuluh tolak tiga': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak tiga sama dengan tujuh.MP3',
-        'sepuluh tolak tiga sama dengan tujuh': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak tiga sama dengan tujuh.MP3',
+        '10-3': '/audio/tolak/sepuluh tolak tiga sama dengan tujuh.mp3',
+        '10 - 3': '/audio/tolak/sepuluh tolak tiga sama dengan tujuh.mp3',
+        '10 − 3': '/audio/tolak/sepuluh tolak tiga sama dengan tujuh.mp3',
+        'sepuluh tolak tiga': '/audio/tolak/sepuluh tolak tiga sama dengan tujuh.mp3',
+        'sepuluh tolak tiga sama dengan tujuh': '/audio/tolak/sepuluh tolak tiga sama dengan tujuh.mp3',
 
-        '10-4': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak empat sama dengan enam.MP3',
-        '10 - 4': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak empat sama dengan enam.MP3',
-        '10 − 4': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak empat sama dengan enam.MP3',
-        'sepuluh tolak empat': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak empat sama dengan enam.MP3',
-        'sepuluh tolak empat sama dengan enam': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak empat sama dengan enam.MP3',
+        '10-4': '/audio/tolak/sepuluh tolak empat sama dengan enam.mp3',
+        '10 - 4': '/audio/tolak/sepuluh tolak empat sama dengan enam.mp3',
+        '10 − 4': '/audio/tolak/sepuluh tolak empat sama dengan enam.mp3',
+        'sepuluh tolak empat': '/audio/tolak/sepuluh tolak empat sama dengan enam.mp3',
+        'sepuluh tolak empat sama dengan enam': '/audio/tolak/sepuluh tolak empat sama dengan enam.mp3',
 
-        '10-5': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak lima sama dengan lima.MP3',
-        '10 - 5': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak lima sama dengan lima.MP3',
-        '10 − 5': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak lima sama dengan lima.MP3',
-        'sepuluh tolak lima': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak lima sama dengan lima.MP3',
-        'sepuluh tolak lima sama dengan lima': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak lima sama dengan lima.MP3',
+        '10-5': '/audio/tolak/sepuluh tolak lima sama dengan lima.mp3',
+        '10 - 5': '/audio/tolak/sepuluh tolak lima sama dengan lima.mp3',
+        '10 − 5': '/audio/tolak/sepuluh tolak lima sama dengan lima.mp3',
+        'sepuluh tolak lima': '/audio/tolak/sepuluh tolak lima sama dengan lima.mp3',
+        'sepuluh tolak lima sama dengan lima': '/audio/tolak/sepuluh tolak lima sama dengan lima.mp3',
 
-        '10-6': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak enam sama dengan empat.MP3',
-        '10 - 6': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak enam sama dengan empat.MP3',
-        '10 − 6': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak enam sama dengan empat.MP3',
-        'sepuluh tolak enam': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak enam sama dengan empat.MP3',
-        'sepuluh tolak enam sama dengan empat': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak enam sama dengan empat.MP3',
+        '10-6': '/audio/tolak/sepuluh tolak enam sama dengan empat.mp3',
+        '10 - 6': '/audio/tolak/sepuluh tolak enam sama dengan empat.mp3',
+        '10 − 6': '/audio/tolak/sepuluh tolak enam sama dengan empat.mp3',
+        'sepuluh tolak enam': '/audio/tolak/sepuluh tolak enam sama dengan empat.mp3',
+        'sepuluh tolak enam sama dengan empat': '/audio/tolak/sepuluh tolak enam sama dengan empat.mp3',
 
-        '10-7': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak tujuh sama dengan tiga.MP3',
-        '10 - 7': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak tujuh sama dengan tiga.MP3',
-        '10 − 7': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak tujuh sama dengan tiga.MP3',
-        'sepuluh tolak tujuh': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak tujuh sama dengan tiga.MP3',
-        'sepuluh tolak tujuh sama dengan tiga': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak tujuh sama dengan tiga.MP3',
+        '10-7': '/audio/tolak/sepuluh tolak tujuh sama dengan tiga.mp3',
+        '10 - 7': '/audio/tolak/sepuluh tolak tujuh sama dengan tiga.mp3',
+        '10 − 7': '/audio/tolak/sepuluh tolak tujuh sama dengan tiga.mp3',
+        'sepuluh tolak tujuh': '/audio/tolak/sepuluh tolak tujuh sama dengan tiga.mp3',
+        'sepuluh tolak tujuh sama dengan tiga': '/audio/tolak/sepuluh tolak tujuh sama dengan tiga.mp3',
 
-        '10-8': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak lapan sama dengan dua.MP3',
-        '10 - 8': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak lapan sama dengan dua.MP3',
-        '10 − 8': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak lapan sama dengan dua.MP3',
-        'sepuluh tolak lapan': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak lapan sama dengan dua.MP3',
-        'sepuluh tolak lapan sama dengan dua': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak lapan sama dengan dua.MP3',
+        '10-8': '/audio/tolak/sepuluh tolak lapan sama dengan dua.mp3',
+        '10 - 8': '/audio/tolak/sepuluh tolak lapan sama dengan dua.mp3',
+        '10 − 8': '/audio/tolak/sepuluh tolak lapan sama dengan dua.mp3',
+        'sepuluh tolak lapan': '/audio/tolak/sepuluh tolak lapan sama dengan dua.mp3',
+        'sepuluh tolak lapan sama dengan dua': '/audio/tolak/sepuluh tolak lapan sama dengan dua.mp3',
 
-        '10-9': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sembilan sama dengan satu.MP3',
-        '10 - 9': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sembilan sama dengan satu.MP3',
-        '10 − 9': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sembilan sama dengan satu.MP3',
-        'sepuluh tolak sembilan': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sembilan sama dengan satu.MP3',
-        'sepuluh tolak sembilan sama dengan satu': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sembilan sama dengan satu.MP3',
+        '10-9': '/audio/tolak/sepuluh tolak sembilan sama dengan satu.mp3',
+        '10 - 9': '/audio/tolak/sepuluh tolak sembilan sama dengan satu.mp3',
+        '10 − 9': '/audio/tolak/sepuluh tolak sembilan sama dengan satu.mp3',
+        'sepuluh tolak sembilan': '/audio/tolak/sepuluh tolak sembilan sama dengan satu.mp3',
+        'sepuluh tolak sembilan sama dengan satu': '/audio/tolak/sepuluh tolak sembilan sama dengan satu.mp3',
 
-        '10-10': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sepuluh sama dengan sifar.MP3',
-        '10 - 10': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sepuluh sama dengan sifar.MP3',
-        '10 − 10': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sepuluh sama dengan sifar.MP3',
-        'sepuluh tolak sepuluh': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sepuluh sama dengan sifar.MP3',
-        'sepuluh tolak sepuluh sama dengan sifar': '/AUDIO TAMBAH TOLAK/audio tolak/sepuluh tolak sepuluh sama dengan sifar.MP3'
+        '10-10': '/audio/tolak/sepuluh tolak sepuluh sama dengan sifar.mp3',
+        '10 - 10': '/audio/tolak/sepuluh tolak sepuluh sama dengan sifar.mp3',
+        '10 − 10': '/audio/tolak/sepuluh tolak sepuluh sama dengan sifar.mp3',
+        'sepuluh tolak sepuluh': '/audio/tolak/sepuluh tolak sepuluh sama dengan sifar.mp3',
+        'sepuluh tolak sepuluh sama dengan sifar': '/audio/tolak/sepuluh tolak sepuluh sama dengan sifar.mp3'
     };
 
     var mathKey = raw.replace(/\s*=\s*\??/g, '').trim().toLowerCase();
@@ -1897,6 +1897,7 @@ function paparSkrin(screenId, skipHash) {
     if (screenId === 'guru-dashboard') {
         if (typeof window.kemaskiniSemuaDropdownKelas === 'function') window.kemaskiniSemuaDropdownKelas();
         if (typeof window.renderTeacherTable === 'function') window.renderTeacherTable();
+        if (typeof window.muatSejarahLangganan === 'function') window.muatSejarahLangganan('guru');
         if (typeof window.syncTeacherSessionFromFirebase === 'function') {
             const gId = localStorage.getItem('bunyiKataUserId') || '';
             const gEmail = localStorage.getItem('bunyiKataGuruEmail') || '';
@@ -1909,9 +1910,11 @@ function paparSkrin(screenId, skipHash) {
     }
     if (screenId === 'admin-dashboard') {
         if (typeof window.renderAdminTable === 'function') window.renderAdminTable('guru');
+        if (typeof window.muatSejarahLangganan === 'function') window.muatSejarahLangganan('admin');
     }
     if (screenId === 'ibubapa-dashboard') {
         if (typeof window.renderParentDashboard === 'function') window.renderParentDashboard();
+        if (typeof window.muatSejarahLangganan === 'function') window.muatSejarahLangganan('ibubapa');
     }
     if (screenId === 'guru-senarai-perkataan' || screenId === 'admin-senarai-perkataan' || screenId === 'ibubapa-senarai-perkataan') {
         if (window.renderGuruSenaraiPerkataan) window.renderGuruSenaraiPerkataan(null, screenId.split('-')[0]);
@@ -6616,6 +6619,124 @@ window.tukarLanggananPengguna = async function (id, role, newPlan) {
             if (typeof window.renderAdminTable === 'function') window.renderAdminTable(role);
         }
     );
+};
+
+// --- JADUAL SEJARAH LANGGANAN (Mod Guru / Ibu Bapa / Admin) ---
+window.sejarahLanggananPerananFilter = window.sejarahLanggananPerananFilter || 'semua';
+window.sejarahLanggananCarian = window.sejarahLanggananCarian || '';
+
+window.formatTarikhLangganan = function (iso) {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '-';
+    const bulan = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogo', 'Sep', 'Okt', 'Nov', 'Dis'];
+    return `${String(d.getDate()).padStart(2, '0')} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
+};
+
+window.getIdentitiLanggananSemasa = function (peranan) {
+    const userId = (localStorage.getItem('bunyiKataUserId') || '').trim().toLowerCase();
+    const emel = (peranan === 'ibubapa'
+        ? (localStorage.getItem('bunyiKataIbubapaEmail') || localStorage.getItem('bunyiKataParentEmail') || '')
+        : (localStorage.getItem('bunyiKataGuruEmail') || '')).trim().toLowerCase();
+    const nama = (peranan === 'ibubapa'
+        ? (localStorage.getItem('bunyiKataNamaKeluarga') || localStorage.getItem('bunyiKataNamaIbubapa') || '')
+        : (localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || '')).trim().toLowerCase();
+    return { userId, emel, nama };
+};
+
+window.tukarSejarahLanggananFilter = function (peranan, nilai) {
+    // Penapis peranan (Mod Admin sahaja): semua / guru / ibubapa
+    if (peranan === 'admin') {
+        window.sejarahLanggananPerananFilter = nilai || 'semua';
+    }
+    window.renderSejarahLangganan(peranan);
+};
+
+window.tukarCarianSejarahLangganan = function (peranan, nilai) {
+    // Carian nama / emel (Mod Admin sahaja)
+    window.sejarahLanggananCarian = nilai || '';
+    window.renderSejarahLangganan(peranan);
+};
+
+window.renderSejarahLangganan = function (peranan) {
+    const tbody = document.getElementById(`${peranan}-sejarah-langganan-body`);
+    if (!tbody) return;
+
+    const rekodSemua = Array.isArray(window.__sejarahLanggananCache) ? window.__sejarahLanggananCache : [];
+    let senarai = rekodSemua;
+
+    if (peranan === 'guru' || peranan === 'ibubapa') {
+        // Mod Guru / Ibu Bapa: hanya sejarah langganan pengguna itu sahaja.
+        const id = window.getIdentitiLanggananSemasa(peranan);
+        senarai = rekodSemua.filter(r => {
+            const emelRekod = String(r.email || '').trim().toLowerCase();
+            const namaRekod = String(r.nama || '').trim().toLowerCase();
+            if (id.emel && emelRekod && emelRekod === id.emel) return true;
+            if (id.userId && emelRekod === id.userId) return true;
+            if (id.nama && namaRekod && namaRekod === id.nama) return true;
+            return false;
+        });
+    } else {
+        // Mod Admin: tunjuk semua, dengan penapis peranan + carian nama/emel.
+        const penapis = window.sejarahLanggananPerananFilter || 'semua';
+        const carian = (window.sejarahLanggananCarian || '').trim().toLowerCase();
+        senarai = rekodSemua.filter(r => {
+            const perananRekod = String(r.peranan || '').trim().toLowerCase();
+            if (penapis !== 'semua' && perananRekod !== penapis) return false;
+            if (!carian) return true;
+            return String(r.nama || '').toLowerCase().includes(carian)
+                || String(r.email || '').toLowerCase().includes(carian);
+        });
+    }
+
+    if (senarai.length === 0) {
+        const mesej = (peranan === 'guru' || peranan === 'ibubapa')
+            ? 'Belum ada sejarah langganan untuk akaun ini.'
+            : 'Tiada rekod langganan yang sepadan dengan penapis ini.';
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" style="padding:30px 16px; text-align:center; color:#64748b; font-weight:bold; font-size:0.9rem;">
+                    <i class="fa-solid fa-clock-rotate-left" style="font-size:1.8rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
+                    ${mesej}
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    const isAdmin = peranan === 'admin';
+    const warnaZebra = isAdmin ? '#fff7ed' : '#f8fafc';
+    let html = '';
+
+    senarai.forEach((r, idx) => {
+        const rowBg = idx % 2 === 0 ? '#ffffff' : warnaZebra;
+        const tamatSudah = r.tarikhTamat && new Date(r.tarikhTamat).getTime() < Date.now();
+        const warnaTamat = tamatSudah ? '#dc2626' : '#0f766e';
+        html += `
+            <tr style="background:${rowBg}; border-bottom:1px solid #e2e8f0; transition:background 0.15s ease;">
+                <td style="padding:9px 8px; text-align:center; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${idx + 1}</td>
+                <td style="padding:9px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${r.nama || '-'}</td>
+                <td style="padding:9px 12px; color:#475569; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap; text-align:center;">${window.formatTarikhLangganan(r.tarikhLangganan)}</td>
+                <td style="padding:9px 12px; color:${warnaTamat}; font-weight:bold; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap; text-align:center;">${window.formatTarikhLangganan(r.tarikhTamat)}</td>
+                <td style="padding:9px 12px; text-align:center; font-size:0.85rem; white-space:nowrap;">
+                    <span style="display:inline-block; padding:3px 10px; border-radius:999px; font-weight:bold; font-size:0.78rem; border:1.5px solid ${r.jenisLangganan === 'Percuma' ? '#94a3b8' : '#0f766e'}; background:${r.jenisLangganan === 'Percuma' ? '#f1f5f9' : '#ccfbf1'}; color:${r.jenisLangganan === 'Percuma' ? '#475569' : '#0f766e'};">${r.jenisLangganan || '-'}</span>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+};
+
+window.muatSejarahLangganan = async function (peranan) {
+    if (typeof window.getSubscriptionHistory === 'function') {
+        try {
+            await window.getSubscriptionHistory();
+        } catch (e) {
+            console.warn('Ralat memuatkan sejarah langganan:', e);
+        }
+    }
+    window.renderSejarahLangganan(peranan);
 };
 
 window.tukarAdminUrusTab = function (tab) {
@@ -13323,29 +13444,29 @@ function sebutTeksPermainan(teks, audioPath, onEnd) {
 }
 
 const ARKED_DATA_AYAT_PENDEK = [
-    { text: "Saya suka makan nasi.", audio: "/AUDIO BACAAN BERGRED/audio ayat pendek/saya suka makan nasi.MP3", image: "/images/menu-kad/ayat pendek/saya suka makan nasi.png" },
-    { text: "Ibu memasak di dapur.", audio: "/AUDIO BACAAN BERGRED/audio ayat pendek/ibu memasak di dapur.MP3", image: "/images/menu-kad/ayat pendek/ibu memasak di dapur.png" },
-    { text: "Kucing itu sangat comel.", audio: "/AUDIO BACAAN BERGRED/audio ayat pendek/kucing itu sangat comel.MP3", image: "/images/menu-kad/ayat pendek/kucing itu sangat comel.png" },
-    { text: "Adik saya suka bermain.", audio: "/AUDIO BACAAN BERGRED/audio ayat pendek/adik saya suka bermain.MP3", image: "/images/menu-kad/ayat pendek/adik saya suka bermain.png" },
-    { text: "Bapa pergi ke pejabat.", audio: "/AUDIO BACAAN BERGRED/audio ayat pendek/bapa pergi ke pejabat.MP3", image: "/images/menu-kad/ayat pendek/bapa pergi ke pejabat.png" },
-    { text: "Kakak membaca buku cerita.", audio: "/AUDIO BACAAN BERGRED/audio ayat pendek/kakak membaca buku cerita.MP3", image: "/images/menu-kad/ayat pendek/kakak membaca buku cerita.png" },
-    { text: "Kami pergi ke sekolah.", audio: "/AUDIO BACAAN BERGRED/audio ayat pendek/kami pergi ke sekolah.MP3", image: "/images/menu-kad/ayat pendek/kami pergi ke sekolah.png" },
-    { text: "Burung itu terbang tinggi.", audio: "/AUDIO BACAAN BERGRED/audio ayat pendek/burung itu terbang tinggi.MP3", image: "/images/menu-kad/ayat pendek/burung itu terbang tinggi.png" },
-    { text: "Saya minum air kosong.", audio: "/AUDIO BACAAN BERGRED/audio ayat pendek/saya minum air kosong.MP3", image: "/images/menu-kad/ayat pendek/saya minum air kosong.png" },
-    { text: "Kami makan bersama.", audio: "/AUDIO BACAAN BERGRED/audio ayat pendek/kami makan bersama.MP3", image: "/images/menu-kad/ayat pendek/kami makan bersama.png" }
+    { text: "Saya suka makan nasi.", audio: "/audio/bacaan-bergred/audio ayat pendek/saya suka makan nasi.mp3", image: "/images/menu-kad/ayat pendek/saya suka makan nasi.png" },
+    { text: "Ibu memasak di dapur.", audio: "/audio/bacaan-bergred/audio ayat pendek/ibu memasak di dapur.mp3", image: "/images/menu-kad/ayat pendek/ibu memasak di dapur.png" },
+    { text: "Kucing itu sangat comel.", audio: "/audio/bacaan-bergred/audio ayat pendek/kucing itu sangat comel.mp3", image: "/images/menu-kad/ayat pendek/kucing itu sangat comel.png" },
+    { text: "Adik saya suka bermain.", audio: "/audio/bacaan-bergred/audio ayat pendek/adik saya suka bermain.mp3", image: "/images/menu-kad/ayat pendek/adik saya suka bermain.png" },
+    { text: "Bapa pergi ke pejabat.", audio: "/audio/bacaan-bergred/audio ayat pendek/bapa pergi ke pejabat.mp3", image: "/images/menu-kad/ayat pendek/bapa pergi ke pejabat.png" },
+    { text: "Kakak membaca buku cerita.", audio: "/audio/bacaan-bergred/audio ayat pendek/kakak membaca buku cerita.mp3", image: "/images/menu-kad/ayat pendek/kakak membaca buku cerita.png" },
+    { text: "Kami pergi ke sekolah.", audio: "/audio/bacaan-bergred/audio ayat pendek/kami pergi ke sekolah.mp3", image: "/images/menu-kad/ayat pendek/kami pergi ke sekolah.png" },
+    { text: "Burung itu terbang tinggi.", audio: "/audio/bacaan-bergred/audio ayat pendek/burung itu terbang tinggi.mp3", image: "/images/menu-kad/ayat pendek/burung itu terbang tinggi.png" },
+    { text: "Saya minum air kosong.", audio: "/audio/bacaan-bergred/audio ayat pendek/saya minum air kosong.mp3", image: "/images/menu-kad/ayat pendek/saya minum air kosong.png" },
+    { text: "Kami makan bersama.", audio: "/audio/bacaan-bergred/audio ayat pendek/kami makan bersama.mp3", image: "/images/menu-kad/ayat pendek/kami makan bersama.png" }
 ];
 
 const ARKED_DATA_AYAT_PANJANG = [
-    { text: "Ibu memasak nasi lemak untuk ______ pagi ini.", target: "sarapan", choices: ["sarapan", "riadah", "malam"], fullText: "Ibu memasak nasi lemak untuk sarapan pagi ini.", audio: "/AUDIO BACAAN BERGRED/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.MP3", image: "/images/menu-kad/ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.png" },
-    { text: "Kami pergi ke ______ permainan pada hari Sabtu.", target: "taman", choices: ["taman", "kedai", "dapur"], fullText: "Kami pergi ke taman permainan pada hari Sabtu.", audio: "/AUDIO BACAAN BERGRED/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.MP3", image: "/images/menu-kad/ayat panjang/kami pergi ke taman permainan pada hari sabtu.png" },
-    { text: "Bapa membeli buah-buahan segar di ______ tani.", target: "pasar", choices: ["pasar", "sekolah", "padang"], fullText: "Bapa membeli buah-buahan segar di pasar tani.", audio: "/AUDIO BACAAN BERGRED/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.MP3", image: "/images/menu-kad/ayat panjang/bapa membeli buah-buahan segar di pasar tani.png" },
-    { text: "Kucing kecil itu bermain dengan ______ di halaman rumah.", target: "bola", choices: ["bola", "buku", "pinggan"], fullText: "Kucing kecil itu bermain dengan bola di halaman rumah.", audio: "/AUDIO BACAAN BERGRED/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.MP3", image: "/images/menu-kad/ayat panjang/kucing kecil itu bermain dengan bola di halaman rumah.png" },
-    { text: "Adik saya belajar membaca ______ cerita setiap malam.", target: "buku", choices: ["buku", "surat", "teko"], fullText: "Adik saya belajar membaca buku cerita setiap malam.", audio: "/AUDIO BACAAN BERGRED/audio ayat panjang/adik saya belajar membaca buku cerita setiap .MP3", image: "/images/menu-kad/ayat panjang/adik saya belajar membaca buku cerita setiap malam.png" },
-    { text: "Guru mengajar kami menulis huruf ______ dengan rapi.", target: "abjad", choices: ["abjad", "nombor", "lagu"], fullText: "Guru mengajar kami menulis huruf abjad dengan rapi.", audio: "/AUDIO BACAAN BERGRED/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.MP3", image: "/images/menu-kad/ayat panjang/guru mengajar kami menulis huruf abjad dengan rapi.png" },
-    { text: "Kami menyanyi lagu sambil ______ tangan dengan gembira.", target: "bertepuk", choices: ["bertepuk", "berlari", "membasuh"], fullText: "Kami menyanyi lagu sambil bertepuk tangan dengan gembira.", audio: "/AUDIO BACAAN BERGRED/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.MP3", image: "/images/menu-kad/ayat panjang/kami menyanyi lagu sambil bertepuk tangan dengan gembira.png" },
-    { text: "Burung kecil itu terbang tinggi di ______ biru.", target: "langit", choices: ["langit", "laut", "tanah"], fullText: "Burung kecil itu terbang tinggi di langit biru.", audio: "/AUDIO BACAAN BERGRED/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.MP3", image: "/images/menu-kad/ayat panjang/burung kecil itu terbang tinggi di langit biru.png" },
-    { text: "Kakak membantu ibu membasuh ______ selepas makan malam.", target: "pinggan", choices: ["pinggan", "baju", "kereta"], fullText: "Kakak membantu ibu membasuh pinggan selepas makan malam.", audio: "/AUDIO BACAAN BERGRED/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.MP3", image: "/images/menu-kad/ayat panjang/kakak membantu ibu membasuh pinggan selepas makan malam.png" },
-    { text: "Kami berkumpul di ______ sekolah untuk beriadah pagi.", target: "padang", choices: ["padang", "dapur", "pasar"], fullText: "Kami berkumpul di padang sekolah untuk beriadah pagi.", audio: "/AUDIO BACAAN BERGRED/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.MP3", image: "/images/menu-kad/ayat panjang/kami berkumpul di padang sekolah untuk beriadah pagi.png" }
+    { text: "Ibu memasak nasi lemak untuk ______ pagi ini.", target: "sarapan", choices: ["sarapan", "riadah", "malam"], fullText: "Ibu memasak nasi lemak untuk sarapan pagi ini.", audio: "/audio/bacaan-bergred/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.mp3", image: "/images/menu-kad/ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.png" },
+    { text: "Kami pergi ke ______ permainan pada hari Sabtu.", target: "taman", choices: ["taman", "kedai", "dapur"], fullText: "Kami pergi ke taman permainan pada hari Sabtu.", audio: "/audio/bacaan-bergred/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.mp3", image: "/images/menu-kad/ayat panjang/kami pergi ke taman permainan pada hari sabtu.png" },
+    { text: "Bapa membeli buah-buahan segar di ______ tani.", target: "pasar", choices: ["pasar", "sekolah", "padang"], fullText: "Bapa membeli buah-buahan segar di pasar tani.", audio: "/audio/bacaan-bergred/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.mp3", image: "/images/menu-kad/ayat panjang/bapa membeli buah-buahan segar di pasar tani.png" },
+    { text: "Kucing kecil itu bermain dengan ______ di halaman rumah.", target: "bola", choices: ["bola", "buku", "pinggan"], fullText: "Kucing kecil itu bermain dengan bola di halaman rumah.", audio: "/audio/bacaan-bergred/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.mp3", image: "/images/menu-kad/ayat panjang/kucing kecil itu bermain dengan bola di halaman rumah.png" },
+    { text: "Adik saya belajar membaca ______ cerita setiap malam.", target: "buku", choices: ["buku", "surat", "teko"], fullText: "Adik saya belajar membaca buku cerita setiap malam.", audio: "/audio/bacaan-bergred/audio ayat panjang/adik saya belajar membaca buku cerita setiap .mp3", image: "/images/menu-kad/ayat panjang/adik saya belajar membaca buku cerita setiap malam.png" },
+    { text: "Guru mengajar kami menulis huruf ______ dengan rapi.", target: "abjad", choices: ["abjad", "nombor", "lagu"], fullText: "Guru mengajar kami menulis huruf abjad dengan rapi.", audio: "/audio/bacaan-bergred/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.mp3", image: "/images/menu-kad/ayat panjang/guru mengajar kami menulis huruf abjad dengan rapi.png" },
+    { text: "Kami menyanyi lagu sambil ______ tangan dengan gembira.", target: "bertepuk", choices: ["bertepuk", "berlari", "membasuh"], fullText: "Kami menyanyi lagu sambil bertepuk tangan dengan gembira.", audio: "/audio/bacaan-bergred/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.mp3", image: "/images/menu-kad/ayat panjang/kami menyanyi lagu sambil bertepuk tangan dengan gembira.png" },
+    { text: "Burung kecil itu terbang tinggi di ______ biru.", target: "langit", choices: ["langit", "laut", "tanah"], fullText: "Burung kecil itu terbang tinggi di langit biru.", audio: "/audio/bacaan-bergred/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.mp3", image: "/images/menu-kad/ayat panjang/burung kecil itu terbang tinggi di langit biru.png" },
+    { text: "Kakak membantu ibu membasuh ______ selepas makan malam.", target: "pinggan", choices: ["pinggan", "baju", "kereta"], fullText: "Kakak membantu ibu membasuh pinggan selepas makan malam.", audio: "/audio/bacaan-bergred/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.mp3", image: "/images/menu-kad/ayat panjang/kakak membantu ibu membasuh pinggan selepas makan malam.png" },
+    { text: "Kami berkumpul di ______ sekolah untuk beriadah pagi.", target: "padang", choices: ["padang", "dapur", "pasar"], fullText: "Kami berkumpul di padang sekolah untuk beriadah pagi.", audio: "/audio/bacaan-bergred/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.mp3", image: "/images/menu-kad/ayat panjang/kami berkumpul di padang sekolah untuk beriadah pagi.png" }
 ];
 
 const ARKED_DATA_PETIKAN_1 = [
@@ -13355,7 +13476,7 @@ const ARKED_DATA_PETIKAN_1 = [
         question: "Apakah warna kereta bapa?",
         choices: ["Biru", "Merah", "Kuning"],
         answer: "Biru",
-        audio: "/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 kereta.MP3",
+        audio: "/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.mp3",
         image: "/images/menu-kad/petikan tahap 1/petikan tahap 1 kereta.png"
     },
     {
@@ -13364,7 +13485,7 @@ const ARKED_DATA_PETIKAN_1 = [
         question: "Siapakah yang membaling bola jauh?",
         choices: ["Saya", "Bapa", "Kakak"],
         answer: "Saya",
-        audio: "/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 bola.MP3",
+        audio: "/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.mp3",
         image: "/images/menu-kad/petikan tahap 1/petikan tahap 1 bola.png"
     },
     {
@@ -13373,7 +13494,7 @@ const ARKED_DATA_PETIKAN_1 = [
         question: "Apakah warna topi adik?",
         choices: ["Kuning", "Hijau", "Hitam"],
         answer: "Kuning",
-        audio: "/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 topi.MP3",
+        audio: "/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.mp3",
         image: "/images/menu-kad/petikan tahap 1/petikan tahap 1 topi.png"
     },
     {
@@ -13382,7 +13503,7 @@ const ARKED_DATA_PETIKAN_1 = [
         question: "Bagaimanakah keadaan beg yang dibawa kakak?",
         choices: ["Berat", "Ringan", "Kecil"],
         answer: "Berat",
-        audio: "/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 beg.MP3",
+        audio: "/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.mp3",
         image: "/images/menu-kad/petikan tahap 1/petikan tahap 1 beg.png"
     },
     {
@@ -13391,7 +13512,7 @@ const ARKED_DATA_PETIKAN_1 = [
         question: "Apakah kenderaan abang yang berwarna hitam?",
         choices: ["Basikal", "Kereta", "Lori"],
         answer: "Basikal",
-        audio: "/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 basikal.MP3",
+        audio: "/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.mp3",
         image: "/images/menu-kad/petikan tahap 1/petikan tahap 1 basikal.png"
     }
 ];
@@ -13403,7 +13524,7 @@ const ARKED_DATA_PETIKAN_2 = [
         question: "Dengan siapakah saya tinggal di rumah besar?",
         choices: ["Bersama keluarga", "Bersama kawan", "Seorang diri"],
         answer: "Bersama keluarga",
-        audio: "/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 rumah.MP3",
+        audio: "/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.mp3",
         image: "/images/menu-kad/petikan tahap 2/petikan tahap 2 rumah.png"
     },
     {
@@ -13412,7 +13533,7 @@ const ARKED_DATA_PETIKAN_2 = [
         question: "Bilakah kami belajar di sekolah ceria?",
         choices: ["Setiap hari", "Setiap malam", "Hujung minggu"],
         answer: "Setiap hari",
-        audio: "/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 sekolah.MP3",
+        audio: "/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.mp3",
         image: "/images/menu-kad/petikan tahap 2/petikan tahap 2 sekolah.png"
     },
     {
@@ -13421,7 +13542,7 @@ const ARKED_DATA_PETIKAN_2 = [
         question: "Bilakah saya bermain dengan kucing comel?",
         choices: ["Setiap petang", "Waktu pagi", "Waktu malam"],
         answer: "Setiap petang",
-        audio: "/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 kucing.MP3",
+        audio: "/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.mp3",
         image: "/images/menu-kad/petikan tahap 2/petikan tahap 2 kucing.png"
     },
     {
@@ -13430,7 +13551,7 @@ const ARKED_DATA_PETIKAN_2 = [
         question: "Apakah aktiviti yang kami lakukan di taman luas?",
         choices: ["Berlari riang", "Berenang laju", "Memasak makanan"],
         answer: "Berlari riang",
-        audio: "/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 taman.MP3",
+        audio: "/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.mp3",
         image: "/images/menu-kad/petikan tahap 2/petikan tahap 2 taman.png"
     },
     {
@@ -13439,7 +13560,7 @@ const ARKED_DATA_PETIKAN_2 = [
         question: "Bagaimanakah keadaan dapur ibu?",
         choices: ["Bersih", "Kotor", "Gelap"],
         answer: "Bersih",
-        audio: "/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 dapur.MP3",
+        audio: "/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.mp3",
         image: "/images/menu-kad/petikan tahap 2/petikan tahap 2 dapur.png"
     }
 ];
@@ -16307,61 +16428,61 @@ var moduleContentData = {
     'ayat_pendek': {
         title: 'Ayat Pendek',
         items: [
-            { title: '1. Saya suka makan nasi.', text: 'Saya suka makan nasi.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/saya suka makan nasi.MP3', icon: '🍚', image: '/images/menu-kad/ayat pendek/saya suka makan nasi.png' },
-            { title: '2. Ibu memasak di dapur.', text: 'Ibu memasak di dapur.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/ibu memasak di dapur.MP3', icon: '🍳', image: '/images/menu-kad/ayat pendek/ibu memasak di dapur.png' },
-            { title: '3. Kucing itu sangat comel.', text: 'Kucing itu sangat comel.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/kucing itu sangat comel.MP3', icon: '🐱', image: '/images/menu-kad/ayat pendek/kucing itu sangat comel.png' },
-            { title: '4. Adik saya suka bermain.', text: 'Adik saya suka bermain.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/adik saya suka bermain.MP3', icon: '⚽', image: '/images/menu-kad/ayat pendek/adik saya suka bermain.png' },
-            { title: '5. Bapa pergi ke pejabat.', text: 'Bapa pergi ke pejabat.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/bapa pergi ke pejabat.MP3', icon: '🏢', image: '/images/menu-kad/ayat pendek/bapa pergi ke pejabat.png' },
-            { title: '6. Kakak membaca buku cerita.', text: 'Kakak membaca buku cerita.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/kakak membaca buku cerita.MP3', icon: '📖', image: '/images/menu-kad/ayat pendek/kakak membaca buku cerita.png' },
-            { title: '7. Kami pergi ke sekolah.', text: 'Kami pergi ke sekolah.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/kami pergi ke sekolah.MP3', icon: '🏫', image: '/images/menu-kad/ayat pendek/kami pergi ke sekolah.png' },
-            { title: '8. Burung itu terbang tinggi.', text: 'Burung itu terbang tinggi.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/burung itu terbang tinggi.MP3', icon: '🐦', image: '/images/menu-kad/ayat pendek/burung itu terbang tinggi.png' },
-            { title: '9. Saya minum air kosong.', text: 'Saya minum air kosong.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/saya minum air kosong.MP3', icon: '🥛', image: '/images/menu-kad/ayat pendek/saya minum air kosong.png' },
-            { title: '10. Kami makan bersama.', text: 'Kami makan bersama.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/kami makan bersama.MP3', icon: '🍽️', image: '/images/menu-kad/ayat pendek/kami makan bersama.png' }
+            { title: '1. Saya suka makan nasi.', text: 'Saya suka makan nasi.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya suka makan nasi.mp3', icon: '🍚', image: '/images/menu-kad/ayat pendek/saya suka makan nasi.png' },
+            { title: '2. Ibu memasak di dapur.', text: 'Ibu memasak di dapur.', audio: '/audio/bacaan-bergred/audio ayat pendek/ibu memasak di dapur.mp3', icon: '🍳', image: '/images/menu-kad/ayat pendek/ibu memasak di dapur.png' },
+            { title: '3. Kucing itu sangat comel.', text: 'Kucing itu sangat comel.', audio: '/audio/bacaan-bergred/audio ayat pendek/kucing itu sangat comel.mp3', icon: '🐱', image: '/images/menu-kad/ayat pendek/kucing itu sangat comel.png' },
+            { title: '4. Adik saya suka bermain.', text: 'Adik saya suka bermain.', audio: '/audio/bacaan-bergred/audio ayat pendek/adik saya suka bermain.mp3', icon: '⚽', image: '/images/menu-kad/ayat pendek/adik saya suka bermain.png' },
+            { title: '5. Bapa pergi ke pejabat.', text: 'Bapa pergi ke pejabat.', audio: '/audio/bacaan-bergred/audio ayat pendek/bapa pergi ke pejabat.mp3', icon: '🏢', image: '/images/menu-kad/ayat pendek/bapa pergi ke pejabat.png' },
+            { title: '6. Kakak membaca buku cerita.', text: 'Kakak membaca buku cerita.', audio: '/audio/bacaan-bergred/audio ayat pendek/kakak membaca buku cerita.mp3', icon: '📖', image: '/images/menu-kad/ayat pendek/kakak membaca buku cerita.png' },
+            { title: '7. Kami pergi ke sekolah.', text: 'Kami pergi ke sekolah.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami pergi ke sekolah.mp3', icon: '🏫', image: '/images/menu-kad/ayat pendek/kami pergi ke sekolah.png' },
+            { title: '8. Burung itu terbang tinggi.', text: 'Burung itu terbang tinggi.', audio: '/audio/bacaan-bergred/audio ayat pendek/burung itu terbang tinggi.mp3', icon: '🐦', image: '/images/menu-kad/ayat pendek/burung itu terbang tinggi.png' },
+            { title: '9. Saya minum air kosong.', text: 'Saya minum air kosong.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya minum air kosong.mp3', icon: '🥛', image: '/images/menu-kad/ayat pendek/saya minum air kosong.png' },
+            { title: '10. Kami makan bersama.', text: 'Kami makan bersama.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami makan bersama.mp3', icon: '🍽️', image: '/images/menu-kad/ayat pendek/kami makan bersama.png' }
         ]
     },
     'ayat_panjang': {
         title: 'Ayat Panjang',
         items: [
-            { title: '1. Ibu memasak nasi lemak untuk sarapan pagi ini.', text: 'Ibu memasak nasi lemak untuk sarapan pagi ini.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.MP3', icon: '🍚', image: '/images/menu-kad/ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.png' },
-            { title: '2. Kami pergi ke taman permainan pada hari Sabtu.', text: 'Kami pergi ke taman permainan pada hari Sabtu.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.MP3', icon: '🛝', image: '/images/menu-kad/ayat panjang/kami pergi ke taman permainan pada hari sabtu.png' },
-            { title: '3. Bapa membeli buah-buahan segar di pasar tani.', text: 'Bapa membeli buah-buahan segar di pasar tani.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.MP3', icon: '🧺', image: '/images/menu-kad/ayat panjang/bapa membeli buah-buahan segar di pasar tani.png' },
-            { title: '4. Kucing kecil itu bermain dengan bola di halaman rumah.', text: 'Kucing kecil itu bermain dengan bola di halaman rumah.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.MP3', icon: '🐱', image: '/images/menu-kad/ayat panjang/kucing kecil itu bermain dengan bola di halaman rumah.png' },
-            { title: '5. Adik saya belajar membaca buku cerita setiap malam.', text: 'Adik saya belajar membaca buku cerita setiap malam.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/adik saya belajar membaca buku cerita setiap .MP3', icon: '📖', image: '/images/menu-kad/ayat panjang/adik saya belajar membaca buku cerita setiap malam.png' },
-            { title: '6. Guru mengajar kami menulis huruf abjad dengan rapi.', text: 'Guru mengajar kami menulis huruf abjad dengan rapi.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.MP3', icon: '✏️', image: '/images/menu-kad/ayat panjang/guru mengajar kami menulis huruf abjad dengan rapi.png' },
-            { title: '7. Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', text: 'Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.MP3', icon: '🎵', image: '/images/menu-kad/ayat panjang/kami menyanyi lagu sambil bertepuk tangan dengan gembira.png' },
-            { title: '8. Burung kecil itu terbang tinggi di langit biru.', text: 'Burung kecil itu terbang tinggi di langit biru.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.MP3', icon: '🐦', image: '/images/menu-kad/ayat panjang/burung kecil itu terbang tinggi di langit biru.png' },
-            { title: '9. Kakak membantu ibu membasuh pinggan selepas makan malam.', text: 'Kakak membantu ibu membasuh pinggan selepas makan malam.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.MP3', icon: '🍽️', image: '/images/menu-kad/ayat panjang/kakak membantu ibu membasuh pinggan selepas makan malam.png' },
-            { title: '10. Kami berkumpul di padang sekolah untuk beriadah pagi.', text: 'Kami berkumpul di padang sekolah untuk beriadah pagi.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.MP3', icon: '🏃', image: '/images/menu-kad/ayat panjang/kami berkumpul di padang sekolah untuk beriadah pagi.png' }
+            { title: '1. Ibu memasak nasi lemak untuk sarapan pagi ini.', text: 'Ibu memasak nasi lemak untuk sarapan pagi ini.', audio: '/audio/bacaan-bergred/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.mp3', icon: '🍚', image: '/images/menu-kad/ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.png' },
+            { title: '2. Kami pergi ke taman permainan pada hari Sabtu.', text: 'Kami pergi ke taman permainan pada hari Sabtu.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.mp3', icon: '🛝', image: '/images/menu-kad/ayat panjang/kami pergi ke taman permainan pada hari sabtu.png' },
+            { title: '3. Bapa membeli buah-buahan segar di pasar tani.', text: 'Bapa membeli buah-buahan segar di pasar tani.', audio: '/audio/bacaan-bergred/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.mp3', icon: '🧺', image: '/images/menu-kad/ayat panjang/bapa membeli buah-buahan segar di pasar tani.png' },
+            { title: '4. Kucing kecil itu bermain dengan bola di halaman rumah.', text: 'Kucing kecil itu bermain dengan bola di halaman rumah.', audio: '/audio/bacaan-bergred/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.mp3', icon: '🐱', image: '/images/menu-kad/ayat panjang/kucing kecil itu bermain dengan bola di halaman rumah.png' },
+            { title: '5. Adik saya belajar membaca buku cerita setiap malam.', text: 'Adik saya belajar membaca buku cerita setiap malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/adik saya belajar membaca buku cerita setiap .mp3', icon: '📖', image: '/images/menu-kad/ayat panjang/adik saya belajar membaca buku cerita setiap malam.png' },
+            { title: '6. Guru mengajar kami menulis huruf abjad dengan rapi.', text: 'Guru mengajar kami menulis huruf abjad dengan rapi.', audio: '/audio/bacaan-bergred/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.mp3', icon: '✏️', image: '/images/menu-kad/ayat panjang/guru mengajar kami menulis huruf abjad dengan rapi.png' },
+            { title: '7. Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', text: 'Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.mp3', icon: '🎵', image: '/images/menu-kad/ayat panjang/kami menyanyi lagu sambil bertepuk tangan dengan gembira.png' },
+            { title: '8. Burung kecil itu terbang tinggi di langit biru.', text: 'Burung kecil itu terbang tinggi di langit biru.', audio: '/audio/bacaan-bergred/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.mp3', icon: '🐦', image: '/images/menu-kad/ayat panjang/burung kecil itu terbang tinggi di langit biru.png' },
+            { title: '9. Kakak membantu ibu membasuh pinggan selepas makan malam.', text: 'Kakak membantu ibu membasuh pinggan selepas makan malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.mp3', icon: '🍽️', image: '/images/menu-kad/ayat panjang/kakak membantu ibu membasuh pinggan selepas makan malam.png' },
+            { title: '10. Kami berkumpul di padang sekolah untuk beriadah pagi.', text: 'Kami berkumpul di padang sekolah untuk beriadah pagi.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.mp3', icon: '🏃', image: '/images/menu-kad/ayat panjang/kami berkumpul di padang sekolah untuk beriadah pagi.png' }
         ]
     },
     'petikan_tahap_1': {
         title: 'Petikan Tahap 1',
         items: [
-            { title: '1. Kereta', text: 'Kereta.\nIni kereta bapa.\nKereta bapa biru.\nBapa bawa kereta laju.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 kereta.MP3', icon: '🚗', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 kereta.png' },
-            { title: '2. Bola', text: 'Bola.\nIni bola saya.\nBola saya merah.\nSaya baling bola jauh.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 bola.MP3', icon: '⚽', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 bola.png' },
-            { title: '3. Topi', text: 'Topi.\nIni topi adik.\nTopi adik kuning.\nAdik pakai topi elok.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 topi.MP3', icon: '🧢', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 topi.png' },
-            { title: '4. Beg', text: 'Beg.\nIni beg kakak.\nBeg kakak hijau.\nKakak bawa beg berat.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 beg.MP3', icon: '🎒', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 beg.png' },
-            { title: '5. Basikal', text: 'Basikal.\nIni basikal abang.\nBasikal abang hitam.\nAbang kayuh basikal laju.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 basikal.MP3', icon: '🚲', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 basikal.png' }
+            { title: '1. Kereta', text: 'Kereta.\nIni kereta bapa.\nKereta bapa biru.\nBapa bawa kereta laju.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.mp3', icon: '🚗', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 kereta.png' },
+            { title: '2. Bola', text: 'Bola.\nIni bola saya.\nBola saya merah.\nSaya baling bola jauh.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.mp3', icon: '⚽', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 bola.png' },
+            { title: '3. Topi', text: 'Topi.\nIni topi adik.\nTopi adik kuning.\nAdik pakai topi elok.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.mp3', icon: '🧢', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 topi.png' },
+            { title: '4. Beg', text: 'Beg.\nIni beg kakak.\nBeg kakak hijau.\nKakak bawa beg berat.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.mp3', icon: '🎒', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 beg.png' },
+            { title: '5. Basikal', text: 'Basikal.\nIni basikal abang.\nBasikal abang hitam.\nAbang kayuh basikal laju.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.mp3', icon: '🚲', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 basikal.png' }
         ]
     },
     'petikan_tahap_2': {
         title: 'Petikan Tahap 2',
         items: [
-            { title: '1. Rumah', text: 'Rumah.\nIni rumah saya.\nRumah saya besar.\nSaya tinggal di rumah besar.\nSaya tinggal di rumah besar bersama\nkeluarga.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 rumah.MP3', icon: '🏠', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 rumah.png' },
-            { title: '2. Sekolah', text: 'Sekolah.\nIni sekolah kami.\nSekolah kami ceria.\nKami belajar di sekolah ceria.\nKami belajar di sekolah ceria setiap hari.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 sekolah.MP3', icon: '🏫', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 sekolah.png' },
-            { title: '3. Kucing', text: 'Kucing.\nIni kucing saya.\nKucing saya comel.\nSaya bermain dengan kucing comel.\nSaya bermain dengan kucing comel setiap\npetang.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 kucing.MP3', icon: '🐱', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 kucing.png' },
-            { title: '4. Taman', text: 'Taman.\nIni taman kami.\nTaman kami luas.\nKami berlari di taman luas.\nKami berlari di taman luas pada waktu pagi.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 taman.MP3', icon: '🌳', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 taman.png' },
-            { title: '5. Dapur', text: 'Dapur.\nIni dapur ibu.\nDapur ibu bersih.\nIbu memasak di dapur bersih.\nIbu memasak di dapur bersih setiap petang.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 dapur.MP3', icon: '🍳', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 dapur.png' }
+            { title: '1. Rumah', text: 'Rumah.\nIni rumah saya.\nRumah saya besar.\nSaya tinggal di rumah besar.\nSaya tinggal di rumah besar bersama\nkeluarga.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.mp3', icon: '🏠', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 rumah.png' },
+            { title: '2. Sekolah', text: 'Sekolah.\nIni sekolah kami.\nSekolah kami ceria.\nKami belajar di sekolah ceria.\nKami belajar di sekolah ceria setiap hari.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.mp3', icon: '🏫', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 sekolah.png' },
+            { title: '3. Kucing', text: 'Kucing.\nIni kucing saya.\nKucing saya comel.\nSaya bermain dengan kucing comel.\nSaya bermain dengan kucing comel setiap\npetang.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.mp3', icon: '🐱', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 kucing.png' },
+            { title: '4. Taman', text: 'Taman.\nIni taman kami.\nTaman kami luas.\nKami berlari di taman luas.\nKami berlari di taman luas pada waktu pagi.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.mp3', icon: '🌳', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 taman.png' },
+            { title: '5. Dapur', text: 'Dapur.\nIni dapur ibu.\nDapur ibu bersih.\nIbu memasak di dapur bersih.\nIbu memasak di dapur bersih setiap petang.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.mp3', icon: '🍳', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 dapur.png' }
         ]
     },
     'cerita_pendek': {
         title: 'Cerita Pendek',
         items: [
-            { title: '1. Kucing Comel', subTitle: 'Kucing Comel', text: 'Ini Comel. Comel ialah anak kucing yang sangat comel dan manja. Comel tinggal bersama Ali di sebuah rumah yang cantik. Setiap pagi, Comel berlari riang di halaman rumah. Comel suka makan ikan segar dan minum susu yang lazat. Ali sangat sayang akan Comel!', icon: '🐱', image: '/images/buku/b1coverpage.jpg' },
-            { title: '2. Hari Sukan Ani', subTitle: 'Hari Sukan Ani', text: 'Hari ini Hari Sukan sekolah! Padang sekolah meriah dengan khemah dan bendera berwarna-warni. Ani memakai baju sukan yang cantik dan bersedia di garisan mula. Wisel berbunyi dan Ani berlari pantas bagai angin menuju garisan penamat. Ani berjaya menjadi juara dan menerima pingat emas!', icon: '🏃', image: '/images/buku/b2coverpage.jpg' },
-            { title: '3. Pergi ke Pasar Bersama Ibu', subTitle: 'Pergi ke Pasar Bersama Ibu', text: 'Pada pagi Sabtu yang cerah, Ali teruja mengikut Ibu pergi ke pasar. Mereka memilih sayur hijau dan buah-buahan yang manis. Seterusnya, mereka membeli ikan segar di gerai ikan. Ali menolong membawa beg barang dengan cermat. Mereka pulang ke rumah dengan hati yang sangat gembira!', icon: '🧺', image: '/images/buku/b3coverpage.jpg' },
-            { title: '4. Pokok Mangga Amir', subTitle: 'Pokok Mangga Amir', text: 'Di halaman rumah Amir, ada sebatang pokok mangga yang besar dan rendang. Setiap tahun, pokok mangga itu berbuah dengan sangat lebat! Amir suka membantu memetik buah mangga yang manis dan masak ranum. Ibu membuat jeruk mangga yang sedap. Sekeluarga menikmati hidangan mangga dengan gembira!', icon: '🥭', image: '/images/buku/b4coverpage.jpg' },
-            { title: '5. Kelas Ceria Cikgu Nur', subTitle: 'Kelas Ceria Cikgu Nur', text: 'Cikgu Nur mengajar kelas prasekolah setiap hari dengan penuh mesra. Murid-murid belajar membaca dan menyanyi bersama-sama dengan penuh semangat. Ali dan Ani sangat suka membaca pelbagai buku di sudut bacaan. Kelas itu sentiasa ceria, riang dan dipenuhi gelak tawa!', icon: '🏫', image: '/images/buku/b5coverpage.jpg' }
+            { title: '1. Kucing Comel', subTitle: 'Kucing Comel', text: 'Ini Comel. Comel ialah anak kucing yang sangat comel dan manja. Comel tinggal bersama Ali di sebuah rumah yang cantik. Setiap pagi, Comel berlari riang di halaman rumah. Comel suka makan ikan segar dan minum susu yang lazat. Ali sangat sayang akan Comel!', audio: '/audio/cerita-pendek/cerita-pendek-comel.mp3', icon: '🐱', image: '/images/buku/b1coverpage.jpg' },
+            { title: '2. Hari Sukan Ani', subTitle: 'Hari Sukan Ani', text: 'Hari ini Hari Sukan sekolah! Padang sekolah meriah dengan khemah dan bendera berwarna-warni. Ani memakai baju sukan yang cantik dan bersedia di garisan mula. Wisel berbunyi dan Ani berlari pantas bagai angin menuju garisan penamat. Ani berjaya menjadi juara dan menerima pingat emas!', audio: '/audio/cerita-pendek/cerita-pendek-hari-sukan.mp3', icon: '🏃', image: '/images/buku/b2coverpage.jpg' },
+            { title: '3. Pergi ke Pasar Bersama Ibu', subTitle: 'Pergi ke Pasar Bersama Ibu', text: 'Pada pagi Sabtu yang cerah, Ali teruja mengikut Ibu pergi ke pasar. Mereka memilih sayur hijau dan buah-buahan yang manis. Seterusnya, mereka membeli ikan segar di gerai ikan. Ali menolong membawa beg barang dengan cermat. Mereka pulang ke rumah dengan hati yang sangat gembira!', audio: '/audio/cerita-pendek/cerita-pendek-pasar.mp3', icon: '🧺', image: '/images/buku/b3coverpage.jpg' },
+            { title: '4. Pokok Mangga Amir', subTitle: 'Pokok Mangga Amir', text: 'Di halaman rumah Amir, ada sebatang pokok mangga yang besar dan rendang. Setiap tahun, pokok mangga itu berbuah dengan sangat lebat! Amir suka membantu memetik buah mangga yang manis dan masak ranum. Ibu membuat jeruk mangga yang sedap. Sekeluarga menikmati hidangan mangga dengan gembira!', audio: '/audio/cerita-pendek/cerita-pendek-pokok-mangga.mp3', icon: '🥭', image: '/images/buku/b4coverpage.jpg' },
+            { title: '5. Kelas Ceria Cikgu Nur', subTitle: 'Kelas Ceria Cikgu Nur', text: 'Cikgu Nur mengajar kelas prasekolah setiap hari dengan penuh mesra. Murid-murid belajar membaca dan menyanyi bersama-sama dengan penuh semangat. Ali dan Ani sangat suka membaca pelbagai buku di sudut bacaan. Kelas itu sentiasa ceria, riang dan dipenuhi gelak tawa!', audio: '/audio/cerita-pendek/cerita-pendek-cikgu-nur.mp3', icon: '🏫', image: '/images/buku/b5coverpage.jpg' }
         ]
     },
     'fonik_abc': {
@@ -18242,9 +18363,8 @@ function initBelajarBacaan(id, title) {
 
     renderBelajarBacaan();
     paparSkrin('view-belajar-bacaan');
-    setTimeout(() => {
-        mainAudioBacaanSemasa();
-    }, 350);
+    // Audio TIDAK dimainkan secara automatik. Murid perlu tekan kad / butang
+    // pembesar suara untuk mendengar audio (mengikut permintaan).
 }
 
 function formatSukuKataTeks(text, textAlign = 'center') {
@@ -18467,7 +18587,6 @@ function nextBelajarBacaan() {
     if (currentBacaanIndex < activeBacaanItems.length - 1) {
         currentBacaanIndex++;
         renderBelajarBacaan();
-        mainAudioBacaanSemasa();
     }
 }
 
@@ -18475,7 +18594,6 @@ function prevBelajarBacaan() {
     if (currentBacaanIndex > 0) {
         currentBacaanIndex--;
         renderBelajarBacaan();
-        mainAudioBacaanSemasa();
     }
 }
 
@@ -20463,7 +20581,7 @@ const VR_STATION_DATA = {
         items: 'abcdefghijklmnopqrstuvwxyz'.split('').map(l => ({
             text: l,
             sound: l,
-            audio: l === 'w' ? '/audio/abc/w.mp3' : `/audio/fonik/fonik ${l}.MP3`,
+            audio: `/audio/fonik/fonik ${l}.mp3`,
             isFonik: true
         }))
     },
@@ -20513,16 +20631,16 @@ const VR_STATION_DATA = {
         color: '#10b981',
         isReading: true,
         items: [
-            { title: '1. Nasi', text: 'Saya suka makan nasi.', sound: 'Saya suka makan nasi.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/saya suka makan nasi.MP3', icon: '🍚', image: '/images/menu-kad/ayat pendek/saya suka makan nasi.png' },
-            { title: '2. Memasak', text: 'Ibu memasak di dapur.', sound: 'Ibu memasak di dapur.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/ibu memasak di dapur.MP3', icon: '🍳', image: '/images/menu-kad/ayat pendek/ibu memasak di dapur.png' },
-            { title: '3. Kucing', text: 'Kucing itu sangat comel.', sound: 'Kucing itu sangat comel.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/kucing itu sangat comel.MP3', icon: '🐱', image: '/images/menu-kad/ayat pendek/kucing itu sangat comel.png' },
-            { title: '4. Bermain', text: 'Adik saya suka bermain.', sound: 'Adik saya suka bermain.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/adik saya suka bermain.MP3', icon: '⚽', image: '/images/menu-kad/ayat pendek/adik saya suka bermain.png' },
-            { title: '5. Pejabat', text: 'Bapa pergi ke pejabat.', sound: 'Bapa pergi ke pejabat.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/bapa pergi ke pejabat.MP3', icon: '🏢', image: '/images/menu-kad/ayat pendek/bapa pergi ke pejabat.png' },
-            { title: '6. Buku Cerita', text: 'Kakak membaca buku cerita.', sound: 'Kakak membaca buku cerita.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/kakak membaca buku cerita.MP3', icon: '📖', image: '/images/menu-kad/ayat pendek/kakak membaca buku cerita.png' },
-            { title: '7. Sekolah', text: 'Kami pergi ke sekolah.', sound: 'Kami pergi ke sekolah.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/kami pergi ke sekolah.MP3', icon: '🏫', image: '/images/menu-kad/ayat pendek/kami pergi ke sekolah.png' },
-            { title: '8. Burung', text: 'Burung itu terbang tinggi.', sound: 'Burung itu terbang tinggi.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/burung itu terbang tinggi.MP3', icon: '🐦', image: '/images/menu-kad/ayat pendek/burung itu terbang tinggi.png' },
-            { title: '9. Minum', text: 'Saya minum air kosong.', sound: 'Saya minum air kosong.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/saya minum air kosong.MP3', icon: '🥛', image: '/images/menu-kad/ayat pendek/saya minum air kosong.png' },
-            { title: '10. Bersama', text: 'Kami makan bersama.', sound: 'Kami makan bersama.', audio: '/AUDIO BACAAN BERGRED/audio ayat pendek/kami makan bersama.MP3', icon: '🍽️', image: '/images/menu-kad/ayat pendek/kami makan bersama.png' }
+            { title: '1. Nasi', text: 'Saya suka makan nasi.', sound: 'Saya suka makan nasi.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya suka makan nasi.mp3', icon: '🍚', image: '/images/menu-kad/ayat pendek/saya suka makan nasi.png' },
+            { title: '2. Memasak', text: 'Ibu memasak di dapur.', sound: 'Ibu memasak di dapur.', audio: '/audio/bacaan-bergred/audio ayat pendek/ibu memasak di dapur.mp3', icon: '🍳', image: '/images/menu-kad/ayat pendek/ibu memasak di dapur.png' },
+            { title: '3. Kucing', text: 'Kucing itu sangat comel.', sound: 'Kucing itu sangat comel.', audio: '/audio/bacaan-bergred/audio ayat pendek/kucing itu sangat comel.mp3', icon: '🐱', image: '/images/menu-kad/ayat pendek/kucing itu sangat comel.png' },
+            { title: '4. Bermain', text: 'Adik saya suka bermain.', sound: 'Adik saya suka bermain.', audio: '/audio/bacaan-bergred/audio ayat pendek/adik saya suka bermain.mp3', icon: '⚽', image: '/images/menu-kad/ayat pendek/adik saya suka bermain.png' },
+            { title: '5. Pejabat', text: 'Bapa pergi ke pejabat.', sound: 'Bapa pergi ke pejabat.', audio: '/audio/bacaan-bergred/audio ayat pendek/bapa pergi ke pejabat.mp3', icon: '🏢', image: '/images/menu-kad/ayat pendek/bapa pergi ke pejabat.png' },
+            { title: '6. Buku Cerita', text: 'Kakak membaca buku cerita.', sound: 'Kakak membaca buku cerita.', audio: '/audio/bacaan-bergred/audio ayat pendek/kakak membaca buku cerita.mp3', icon: '📖', image: '/images/menu-kad/ayat pendek/kakak membaca buku cerita.png' },
+            { title: '7. Sekolah', text: 'Kami pergi ke sekolah.', sound: 'Kami pergi ke sekolah.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami pergi ke sekolah.mp3', icon: '🏫', image: '/images/menu-kad/ayat pendek/kami pergi ke sekolah.png' },
+            { title: '8. Burung', text: 'Burung itu terbang tinggi.', sound: 'Burung itu terbang tinggi.', audio: '/audio/bacaan-bergred/audio ayat pendek/burung itu terbang tinggi.mp3', icon: '🐦', image: '/images/menu-kad/ayat pendek/burung itu terbang tinggi.png' },
+            { title: '9. Minum', text: 'Saya minum air kosong.', sound: 'Saya minum air kosong.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya minum air kosong.mp3', icon: '🥛', image: '/images/menu-kad/ayat pendek/saya minum air kosong.png' },
+            { title: '10. Bersama', text: 'Kami makan bersama.', sound: 'Kami makan bersama.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami makan bersama.mp3', icon: '🍽️', image: '/images/menu-kad/ayat pendek/kami makan bersama.png' }
         ]
     },
     'bilik-ayat-panjang': {
@@ -20530,16 +20648,16 @@ const VR_STATION_DATA = {
         color: '#0ea5e9',
         isReading: true,
         items: [
-            { title: '1. Sarapan', text: 'Ibu memasak nasi lemak untuk sarapan pagi ini.', sound: 'Ibu memasak nasi lemak untuk sarapan pagi ini.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.MP3', icon: '🍚', image: '/images/menu-kad/ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.png' },
-            { title: '2. Taman', text: 'Kami pergi ke taman permainan pada hari Sabtu.', sound: 'Kami pergi ke taman permainan pada hari Sabtu.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.MP3', icon: '🛝', image: '/images/menu-kad/ayat panjang/kami pergi ke taman permainan pada hari sabtu.png' },
-            { title: '3. Pasar Tani', text: 'Bapa membeli buah-buahan segar di pasar tani.', sound: 'Bapa membeli buah-buahan segar di pasar tani.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.MP3', icon: '🧺', image: '/images/menu-kad/ayat panjang/bapa membeli buah-buahan segar di pasar tani.png' },
-            { title: '4. Halaman', text: 'Kucing kecil itu bermain dengan bola di halaman rumah.', sound: 'Kucing kecil itu bermain dengan bola di halaman rumah.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.MP3', icon: '🐱', image: '/images/menu-kad/ayat panjang/kucing kecil itu bermain dengan bola di halaman rumah.png' },
-            { title: '5. Membaca', text: 'Adik saya belajar membaca buku cerita setiap malam.', sound: 'Adik saya belajar membaca buku cerita setiap malam.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/adik saya belajar membaca buku cerita setiap .MP3', icon: '📖', image: '/images/menu-kad/ayat panjang/adik saya belajar membaca buku cerita setiap malam.png' },
-            { title: '6. Menulis', text: 'Guru mengajar kami menulis huruf abjad dengan rapi.', sound: 'Guru mengajar kami menulis huruf abjad dengan rapi.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.MP3', icon: '✏️', image: '/images/menu-kad/ayat panjang/guru mengajar kami menulis huruf abjad dengan rapi.png' },
-            { title: '7. Bernyanyi', text: 'Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', sound: 'Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.MP3', icon: '🎵', image: '/images/menu-kad/ayat panjang/kami menyanyi lagu sambil bertepuk tangan dengan gembira.png' },
-            { title: '8. Terbang', text: 'Burung kecil itu terbang tinggi di langit biru.', sound: 'Burung kecil itu terbang tinggi di langit biru.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.MP3', icon: '🐦', image: '/images/menu-kad/ayat panjang/burung kecil itu terbang tinggi di langit biru.png' },
-            { title: '9. Pinggan', text: 'Kakak membantu ibu membasuh pinggan selepas makan malam.', sound: 'Kakak membantu ibu membasuh pinggan selepas makan malam.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.MP3', icon: '🍽️', image: '/images/menu-kad/ayat panjang/kakak membantu ibu membasuh pinggan selepas makan malam.png' },
-            { title: '10. Padang', text: 'Kami berkumpul di padang sekolah untuk beriadah pagi.', sound: 'Kami berkumpul di padang sekolah untuk beriadah pagi.', audio: '/AUDIO BACAAN BERGRED/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.MP3', icon: '🏃', image: '/images/menu-kad/ayat panjang/kami berkumpul di padang sekolah untuk beriadah pagi.png' }
+            { title: '1. Sarapan', text: 'Ibu memasak nasi lemak untuk sarapan pagi ini.', sound: 'Ibu memasak nasi lemak untuk sarapan pagi ini.', audio: '/audio/bacaan-bergred/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.mp3', icon: '🍚', image: '/images/menu-kad/ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.png' },
+            { title: '2. Taman', text: 'Kami pergi ke taman permainan pada hari Sabtu.', sound: 'Kami pergi ke taman permainan pada hari Sabtu.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.mp3', icon: '🛝', image: '/images/menu-kad/ayat panjang/kami pergi ke taman permainan pada hari sabtu.png' },
+            { title: '3. Pasar Tani', text: 'Bapa membeli buah-buahan segar di pasar tani.', sound: 'Bapa membeli buah-buahan segar di pasar tani.', audio: '/audio/bacaan-bergred/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.mp3', icon: '🧺', image: '/images/menu-kad/ayat panjang/bapa membeli buah-buahan segar di pasar tani.png' },
+            { title: '4. Halaman', text: 'Kucing kecil itu bermain dengan bola di halaman rumah.', sound: 'Kucing kecil itu bermain dengan bola di halaman rumah.', audio: '/audio/bacaan-bergred/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.mp3', icon: '🐱', image: '/images/menu-kad/ayat panjang/kucing kecil itu bermain dengan bola di halaman rumah.png' },
+            { title: '5. Membaca', text: 'Adik saya belajar membaca buku cerita setiap malam.', sound: 'Adik saya belajar membaca buku cerita setiap malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/adik saya belajar membaca buku cerita setiap .mp3', icon: '📖', image: '/images/menu-kad/ayat panjang/adik saya belajar membaca buku cerita setiap malam.png' },
+            { title: '6. Menulis', text: 'Guru mengajar kami menulis huruf abjad dengan rapi.', sound: 'Guru mengajar kami menulis huruf abjad dengan rapi.', audio: '/audio/bacaan-bergred/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.mp3', icon: '✏️', image: '/images/menu-kad/ayat panjang/guru mengajar kami menulis huruf abjad dengan rapi.png' },
+            { title: '7. Bernyanyi', text: 'Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', sound: 'Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.mp3', icon: '🎵', image: '/images/menu-kad/ayat panjang/kami menyanyi lagu sambil bertepuk tangan dengan gembira.png' },
+            { title: '8. Terbang', text: 'Burung kecil itu terbang tinggi di langit biru.', sound: 'Burung kecil itu terbang tinggi di langit biru.', audio: '/audio/bacaan-bergred/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.mp3', icon: '🐦', image: '/images/menu-kad/ayat panjang/burung kecil itu terbang tinggi di langit biru.png' },
+            { title: '9. Pinggan', text: 'Kakak membantu ibu membasuh pinggan selepas makan malam.', sound: 'Kakak membantu ibu membasuh pinggan selepas makan malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.mp3', icon: '🍽️', image: '/images/menu-kad/ayat panjang/kakak membantu ibu membasuh pinggan selepas makan malam.png' },
+            { title: '10. Padang', text: 'Kami berkumpul di padang sekolah untuk beriadah pagi.', sound: 'Kami berkumpul di padang sekolah untuk beriadah pagi.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.mp3', icon: '🏃', image: '/images/menu-kad/ayat panjang/kami berkumpul di padang sekolah untuk beriadah pagi.png' }
         ]
     },
     'bilik-petikan-1': {
@@ -20547,11 +20665,11 @@ const VR_STATION_DATA = {
         color: '#f59e0b',
         isReading: true,
         items: [
-            { title: '1. Kereta', text: 'Kereta.\nIni kereta bapa.\nKereta bapa biru.\nBapa bawa kereta laju.', sound: 'Kereta. Ini kereta bapa. Kereta bapa biru. Bapa bawa kereta laju.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 kereta.MP3', icon: '🚗', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 kereta.png' },
-            { title: '2. Bola', text: 'Bola.\nIni bola saya.\nBola saya merah.\nSaya baling bola jauh.', sound: 'Bola. Ini bola saya. Bola saya merah. Saya baling bola jauh.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 bola.MP3', icon: '⚽', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 bola.png' },
-            { title: '3. Topi', text: 'Topi.\nIni topi adik.\nTopi adik kuning.\nAdik pakai topi elok.', sound: 'Topi. Ini topi adik. Topi adik kuning. Adik pakai topi elok.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 topi.MP3', icon: '🧢', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 topi.png' },
-            { title: '4. Beg', text: 'Beg.\nIni beg kakak.\nBeg kakak hijau.\nKakak bawa beg berat.', sound: 'Beg. Ini beg kakak. Beg kakak hijau. Kakak bawa beg berat.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 beg.MP3', icon: '🎒', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 beg.png' },
-            { title: '5. Basikal', text: 'Basikal.\nIni basikal abang.\nBasikal abang hitam.\nAbang kayuh basikal laju.', sound: 'Basikal. Ini basikal abang. Basikal abang hitam. Abang kayuh basikal laju.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 1/petikan tahap 1 basikal.MP3', icon: '🚲', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 basikal.png' }
+            { title: '1. Kereta', text: 'Kereta.\nIni kereta bapa.\nKereta bapa biru.\nBapa bawa kereta laju.', sound: 'Kereta. Ini kereta bapa. Kereta bapa biru. Bapa bawa kereta laju.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.mp3', icon: '🚗', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 kereta.png' },
+            { title: '2. Bola', text: 'Bola.\nIni bola saya.\nBola saya merah.\nSaya baling bola jauh.', sound: 'Bola. Ini bola saya. Bola saya merah. Saya baling bola jauh.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.mp3', icon: '⚽', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 bola.png' },
+            { title: '3. Topi', text: 'Topi.\nIni topi adik.\nTopi adik kuning.\nAdik pakai topi elok.', sound: 'Topi. Ini topi adik. Topi adik kuning. Adik pakai topi elok.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.mp3', icon: '🧢', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 topi.png' },
+            { title: '4. Beg', text: 'Beg.\nIni beg kakak.\nBeg kakak hijau.\nKakak bawa beg berat.', sound: 'Beg. Ini beg kakak. Beg kakak hijau. Kakak bawa beg berat.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.mp3', icon: '🎒', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 beg.png' },
+            { title: '5. Basikal', text: 'Basikal.\nIni basikal abang.\nBasikal abang hitam.\nAbang kayuh basikal laju.', sound: 'Basikal. Ini basikal abang. Basikal abang hitam. Abang kayuh basikal laju.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.mp3', icon: '🚲', image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 basikal.png' }
         ]
     },
     'bilik-petikan-2': {
@@ -20559,11 +20677,11 @@ const VR_STATION_DATA = {
         color: '#8b5cf6',
         isReading: true,
         items: [
-            { title: '1. Rumah', text: 'Rumah.\nIni rumah saya.\nRumah saya besar.\nSaya tinggal di rumah besar.\nSaya tinggal di rumah besar bersama keluarga.', sound: 'Rumah. Ini rumah saya. Rumah saya besar. Saya tinggal di rumah besar. Saya tinggal di rumah besar bersama keluarga.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 rumah.MP3', icon: '🏠', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 rumah.png' },
-            { title: '2. Sekolah', text: 'Sekolah.\nIni sekolah kami.\nSekolah kami ceria.\nKami belajar di sekolah ceria.\nKami belajar di sekolah ceria setiap hari.', sound: 'Sekolah. Ini sekolah kami. Sekolah kami ceria. Kami belajar di sekolah ceria. Kami belajar di sekolah ceria setiap hari.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 sekolah.MP3', icon: '🏫', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 sekolah.png' },
-            { title: '3. Kucing', text: 'Kucing.\nIni kucing saya.\nKucing saya comel.\nSaya bermain dengan kucing comel.\nSaya bermain dengan kucing comel setiap petang.', sound: 'Kucing. Ini kucing saya. Kucing saya comel. Saya bermain dengan kucing comel. Saya bermain dengan kucing comel setiap petang.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 kucing.MP3', icon: '🐱', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 kucing.png' },
-            { title: '4. Taman', text: 'Taman.\nIni taman kami.\nTaman kami luas.\nKami berlari di taman luas.\nKami berlari di taman luas pada waktu pagi.', sound: 'Taman. Ini taman kami. Taman kami luas. Kami berlari di taman luas. Kami berlari di taman luas pada waktu pagi.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 taman.MP3', icon: '🌳', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 taman.png' },
-            { title: '5. Dapur', text: 'Dapur.\nIni dapur ibu.\nDapur ibu bersih.\nIbu memasak di dapur bersih.\nIbu memasak di dapur bersih setiap petang.', sound: 'Dapur. Ini dapur ibu. Dapur ibu bersih. Ibu memasak di dapur bersih. Ibu memasak di dapur bersih setiap petang.', audio: '/AUDIO BACAAN BERGRED/audio petikan tahap 2/petikan tahap 2 dapur.MP3', icon: '🍳', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 dapur.png' }
+            { title: '1. Rumah', text: 'Rumah.\nIni rumah saya.\nRumah saya besar.\nSaya tinggal di rumah besar.\nSaya tinggal di rumah besar bersama keluarga.', sound: 'Rumah. Ini rumah saya. Rumah saya besar. Saya tinggal di rumah besar. Saya tinggal di rumah besar bersama keluarga.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.mp3', icon: '🏠', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 rumah.png' },
+            { title: '2. Sekolah', text: 'Sekolah.\nIni sekolah kami.\nSekolah kami ceria.\nKami belajar di sekolah ceria.\nKami belajar di sekolah ceria setiap hari.', sound: 'Sekolah. Ini sekolah kami. Sekolah kami ceria. Kami belajar di sekolah ceria. Kami belajar di sekolah ceria setiap hari.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.mp3', icon: '🏫', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 sekolah.png' },
+            { title: '3. Kucing', text: 'Kucing.\nIni kucing saya.\nKucing saya comel.\nSaya bermain dengan kucing comel.\nSaya bermain dengan kucing comel setiap petang.', sound: 'Kucing. Ini kucing saya. Kucing saya comel. Saya bermain dengan kucing comel. Saya bermain dengan kucing comel setiap petang.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.mp3', icon: '🐱', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 kucing.png' },
+            { title: '4. Taman', text: 'Taman.\nIni taman kami.\nTaman kami luas.\nKami berlari di taman luas.\nKami berlari di taman luas pada waktu pagi.', sound: 'Taman. Ini taman kami. Taman kami luas. Kami berlari di taman luas. Kami berlari di taman luas pada waktu pagi.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.mp3', icon: '🌳', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 taman.png' },
+            { title: '5. Dapur', text: 'Dapur.\nIni dapur ibu.\nDapur ibu bersih.\nIbu memasak di dapur bersih.\nIbu memasak di dapur bersih setiap petang.', sound: 'Dapur. Ini dapur ibu. Dapur ibu bersih. Ibu memasak di dapur bersih. Ibu memasak di dapur bersih setiap petang.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.mp3', icon: '🍳', image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 dapur.png' }
         ]
     },
     'bilik-cerita-pendek': {
@@ -20571,11 +20689,11 @@ const VR_STATION_DATA = {
         color: '#f43f5e',
         isReading: true,
         items: [
-            { title: '1. Kucing Comel', text: 'Comel ialah seekor kucing kecil. Comel tinggal bersama Ali di rumah. Setiap pagi, Comel bermain di halaman rumah. Comel suka makan ikan dan minum susu. Ali sangat sayang akan Comel.', sound: 'Comel ialah seekor kucing kecil. Comel tinggal bersama Ali di rumah. Setiap pagi, Comel bermain di halaman rumah. Comel suka makan ikan dan minum susu. Ali sangat sayang akan Comel.', icon: '🐱', image: '/images/buku/b1coverpage.jpg' },
-            { title: '2. Hari Sukan', text: 'Hari ini sekolah mengadakan hari sukan. Murid-murid memakai baju sukan berwarna-warni. Ani berlari pantas dalam pertandingan lari. Ani berjaya memenangi hadiah pertama. Semua murid bertepuk tangan dengan gembira.', sound: 'Hari ini sekolah mengadakan hari sukan. Murid-murid memakai baju sukan berwarna-warni. Ani berlari pantas dalam pertandingan lari. Ani berjaya memenangi hadiah pertama. Semua murid bertepuk tangan dengan gembira.', icon: '🏃', image: '/images/buku/b2coverpage.jpg' },
-            { title: '3. Pergi ke Pasar', text: 'Pada hari Sabtu, ibu pergi ke pasar. Ali turut serta bersama ibu ke pasar. Mereka membeli sayur, buah dan ikan segar. Ali membantu ibu membawa beg barang. Mereka pulang ke rumah dengan gembira.', sound: 'Pada hari Sabtu, ibu pergi ke pasar. Ali turut serta bersama ibu ke pasar. Mereka membeli sayur, buah dan ikan segar. Ali membantu ibu membawa beg barang. Mereka pulang ke rumah dengan gembira.', icon: '🧺', image: '/images/buku/b3coverpage.jpg' },
-            { title: '4. Pokok Mangga', text: 'Di halaman rumah Ali, ada sebatang pokok mangga. Setiap tahun, pokok itu berbuah lebat. Ali suka memetik buah mangga yang masak. Ibu memasak jeruk mangga yang sedap. Sekeluarga menikmati mangga bersama-sama.', sound: 'Di halaman rumah Ali, ada sebatang pokok mangga. Setiap tahun, pokok itu berbuah lebat. Ali suka memetik buah mangga yang masak. Ibu memasak jeruk mangga yang sedap. Sekeluarga menikmati mangga bersama-sama.', icon: '🥭', image: '/images/buku/b4coverpage.jpg' },
-            { title: '5. Kelas Ceria', text: 'Cikgu Nur mengajar kelas prasekolah setiap hari. Murid-murid belajar membaca dan menyanyi bersama. Ali dan Ani suka bermain di sudut buku. Cikgu Nur sentiasa sabar mengajar murid-muridnya. Kelas itu sentiasa ceria dan gembira.', sound: 'Cikgu Nur mengajar kelas prasekolah setiap hari. Murid-murid belajar membaca dan menyanyi bersama. Ali dan Ani suka bermain di sudut buku. Cikgu Nur sentiasa sabar mengajar murid-muridnya. Kelas itu sentiasa ceria dan gembira.', icon: '🏫', image: '/images/buku/b5coverpage.jpg' }
+            { title: '1. Kucing Comel', text: 'Comel ialah seekor kucing kecil. Comel tinggal bersama Ali di rumah. Setiap pagi, Comel bermain di halaman rumah. Comel suka makan ikan dan minum susu. Ali sangat sayang akan Comel.', sound: 'Comel ialah seekor kucing kecil. Comel tinggal bersama Ali di rumah. Setiap pagi, Comel bermain di halaman rumah. Comel suka makan ikan dan minum susu. Ali sangat sayang akan Comel.', audio: '/audio/cerita-pendek/cerita-pendek-comel.mp3', icon: '🐱', image: '/images/buku/b1coverpage.jpg' },
+            { title: '2. Hari Sukan', text: 'Hari ini sekolah mengadakan hari sukan. Murid-murid memakai baju sukan berwarna-warni. Ani berlari pantas dalam pertandingan lari. Ani berjaya memenangi hadiah pertama. Semua murid bertepuk tangan dengan gembira.', sound: 'Hari ini sekolah mengadakan hari sukan. Murid-murid memakai baju sukan berwarna-warni. Ani berlari pantas dalam pertandingan lari. Ani berjaya memenangi hadiah pertama. Semua murid bertepuk tangan dengan gembira.', audio: '/audio/cerita-pendek/cerita-pendek-hari-sukan.mp3', icon: '🏃', image: '/images/buku/b2coverpage.jpg' },
+            { title: '3. Pergi ke Pasar', text: 'Pada hari Sabtu, ibu pergi ke pasar. Ali turut serta bersama ibu ke pasar. Mereka membeli sayur, buah dan ikan segar. Ali membantu ibu membawa beg barang. Mereka pulang ke rumah dengan gembira.', sound: 'Pada hari Sabtu, ibu pergi ke pasar. Ali turut serta bersama ibu ke pasar. Mereka membeli sayur, buah dan ikan segar. Ali membantu ibu membawa beg barang. Mereka pulang ke rumah dengan gembira.', audio: '/audio/cerita-pendek/cerita-pendek-pasar.mp3', icon: '🧺', image: '/images/buku/b3coverpage.jpg' },
+            { title: '4. Pokok Mangga', text: 'Di halaman rumah Ali, ada sebatang pokok mangga. Setiap tahun, pokok itu berbuah lebat. Ali suka memetik buah mangga yang masak. Ibu memasak jeruk mangga yang sedap. Sekeluarga menikmati mangga bersama-sama.', sound: 'Di halaman rumah Ali, ada sebatang pokok mangga. Setiap tahun, pokok itu berbuah lebat. Ali suka memetik buah mangga yang masak. Ibu memasak jeruk mangga yang sedap. Sekeluarga menikmati mangga bersama-sama.', audio: '/audio/cerita-pendek/cerita-pendek-pokok-mangga.mp3', icon: '🥭', image: '/images/buku/b4coverpage.jpg' },
+            { title: '5. Kelas Ceria', text: 'Cikgu Nur mengajar kelas prasekolah setiap hari. Murid-murid belajar membaca dan menyanyi bersama. Ali dan Ani suka bermain di sudut buku. Cikgu Nur sentiasa sabar mengajar murid-muridnya. Kelas itu sentiasa ceria dan gembira.', sound: 'Cikgu Nur mengajar kelas prasekolah setiap hari. Murid-murid belajar membaca dan menyanyi bersama. Ali dan Ani suka bermain di sudut buku. Cikgu Nur sentiasa sabar mengajar murid-muridnya. Kelas itu sentiasa ceria dan gembira.', audio: '/audio/cerita-pendek/cerita-pendek-cikgu-nur.mp3', icon: '🏫', image: '/images/buku/b5coverpage.jpg' }
         ]
     }
 };
@@ -21087,12 +21205,12 @@ window.playVRStationVoice = function (teks, onEnd) {
         '100': '/audio/nombor/seratus.mp3', 'seratus': '/audio/nombor/seratus.mp3'
     };
 
-    if (typeof teks === 'string' && (teks.startsWith('/') || teks.endsWith('.mp3') || teks.endsWith('.MP3'))) {
+    if (typeof teks === 'string' && (teks.startsWith('/') || teks.endsWith('.mp3') || teks.endsWith('.mp3'))) {
         audioPath = teks;
     } else if (numAudioMap[rawKey]) {
         audioPath = numAudioMap[rawKey];
     } else if (window.currentVRStationId === 'front-abc-upper' || (VR_STATION_DATA[window.currentVRStationId] && VR_STATION_DATA[window.currentVRStationId].isFonik)) {
-        audioPath = rawKey === 'w' ? '/audio/abc/w.mp3' : `/audio/fonik/fonik ${rawKey}.MP3`;
+        audioPath = `/audio/fonik/fonik ${rawKey}.mp3`;
     } else if (typeof window.getAudioPath === 'function') {
         audioPath = window.getAudioPath(teks);
     }
@@ -21454,7 +21572,7 @@ function renderVRStationShowcaseCard() {
     const item = items[idx];
     const total = items.length;
 
-    const soundText = item.sound || item.word || item.text;
+    const soundText = item.audio || item.sound || item.word || item.text;
     const encodedSound = encodeURIComponent(soundText);
 
     // Style container as responsive flexbox
@@ -21641,7 +21759,7 @@ window.playVRItemAudio = function (soundText, index, isEncoded) {
     const itm = (window.currentVRStationItems && window.currentVRStationItems[index]) ? window.currentVRStationItems[index] : null;
     const curStation = VR_STATION_DATA[window.currentVRStationId];
     if (curStation && (curStation.isFonik || window.currentVRStationId === 'front-abc-upper')) {
-        soundText = (itm && itm.audio) ? itm.audio : (soundText === 'w' ? '/audio/abc/w.mp3' : `/audio/fonik/fonik ${soundText || (itm && itm.text)}.MP3`);
+        soundText = (itm && itm.audio) ? itm.audio : `/audio/fonik/fonik ${soundText || (itm && itm.text)}.mp3`;
     } else if (!soundText && itm) {
         soundText = itm.audio || itm.sound || itm.word || itm.text;
     }
@@ -25342,57 +25460,57 @@ const AR_KIRA_JARI_NUMBERS = [
 ];
 
 const AR_KIRA_JARI_TAMBAH = [
-    { a: 1, op: '+', b: 1, count: 2, equation: '1 + 1 = 2', audio: '/audio/tambah/satu tambah satu sama dengan dua.MP3' },
-    { a: 1, op: '+', b: 2, count: 3, equation: '1 + 2 = 3', audio: '/audio/tambah/satu tambah dua sama dengan tiga.MP3' },
-    { a: 2, op: '+', b: 1, count: 3, equation: '2 + 1 = 3', audio: '/audio/tambah/satu tambah dua sama dengan tiga.MP3' },
-    { a: 1, op: '+', b: 3, count: 4, equation: '1 + 3 = 4', audio: '/audio/tambah/satu tambah tiga sama dengan empat.MP3' },
+    { a: 1, op: '+', b: 1, count: 2, equation: '1 + 1 = 2', audio: '/audio/tambah/satu tambah satu sama dengan dua.mp3' },
+    { a: 1, op: '+', b: 2, count: 3, equation: '1 + 2 = 3', audio: '/audio/tambah/satu tambah dua sama dengan tiga.mp3' },
+    { a: 2, op: '+', b: 1, count: 3, equation: '2 + 1 = 3', audio: '/audio/tambah/satu tambah dua sama dengan tiga.mp3' },
+    { a: 1, op: '+', b: 3, count: 4, equation: '1 + 3 = 4', audio: '/audio/tambah/satu tambah tiga sama dengan empat.mp3' },
     { a: 2, op: '+', b: 2, count: 4, equation: '2 + 2 = 4', audio: '/audio/nombor/empat.mp3' },
-    { a: 3, op: '+', b: 1, count: 4, equation: '3 + 1 = 4', audio: '/audio/tambah/satu tambah tiga sama dengan empat.MP3' },
-    { a: 1, op: '+', b: 4, count: 5, equation: '1 + 4 = 5', audio: '/audio/tambah/satu tambah empat sama dengan lima.MP3' },
+    { a: 3, op: '+', b: 1, count: 4, equation: '3 + 1 = 4', audio: '/audio/tambah/satu tambah tiga sama dengan empat.mp3' },
+    { a: 1, op: '+', b: 4, count: 5, equation: '1 + 4 = 5', audio: '/audio/tambah/satu tambah empat sama dengan lima.mp3' },
     { a: 2, op: '+', b: 3, count: 5, equation: '2 + 3 = 5', audio: '/audio/nombor/lima.mp3' },
     { a: 3, op: '+', b: 2, count: 5, equation: '3 + 2 = 5', audio: '/audio/nombor/lima.mp3' },
-    { a: 4, op: '+', b: 1, count: 5, equation: '4 + 1 = 5', audio: '/audio/tambah/satu tambah empat sama dengan lima.MP3' },
-    { a: 1, op: '+', b: 5, count: 6, equation: '1 + 5 = 6', audio: '/audio/tambah/satu tambah lima sama dengan enam.MP3' },
+    { a: 4, op: '+', b: 1, count: 5, equation: '4 + 1 = 5', audio: '/audio/tambah/satu tambah empat sama dengan lima.mp3' },
+    { a: 1, op: '+', b: 5, count: 6, equation: '1 + 5 = 6', audio: '/audio/tambah/satu tambah lima sama dengan enam.mp3' },
     { a: 3, op: '+', b: 3, count: 6, equation: '3 + 3 = 6', audio: '/audio/nombor/enam.mp3' },
     { a: 2, op: '+', b: 4, count: 6, equation: '2 + 4 = 6', audio: '/audio/nombor/enam.mp3' },
-    { a: 1, op: '+', b: 6, count: 7, equation: '1 + 6 = 7', audio: '/audio/tambah/satu tambah enam sama dengan tujuh.MP3' },
+    { a: 1, op: '+', b: 6, count: 7, equation: '1 + 6 = 7', audio: '/audio/tambah/satu tambah enam sama dengan tujuh.mp3' },
     { a: 4, op: '+', b: 3, count: 7, equation: '4 + 3 = 7', audio: '/audio/nombor/tujuh.mp3' },
     { a: 5, op: '+', b: 2, count: 7, equation: '5 + 2 = 7', audio: '/audio/nombor/tujuh.mp3' },
-    { a: 1, op: '+', b: 7, count: 8, equation: '1 + 7 = 8', audio: '/audio/tambah/satu tambah tujuh sama dengan lapan.MP3' },
+    { a: 1, op: '+', b: 7, count: 8, equation: '1 + 7 = 8', audio: '/audio/tambah/satu tambah tujuh sama dengan lapan.mp3' },
     { a: 4, op: '+', b: 4, count: 8, equation: '4 + 4 = 8', audio: '/audio/nombor/lapan.mp3' },
     { a: 5, op: '+', b: 3, count: 8, equation: '5 + 3 = 8', audio: '/audio/nombor/lapan.mp3' },
-    { a: 1, op: '+', b: 8, count: 9, equation: '1 + 8 = 9', audio: '/audio/tambah/satu tambah lapan sama dengan sembilan.MP3' },
+    { a: 1, op: '+', b: 8, count: 9, equation: '1 + 8 = 9', audio: '/audio/tambah/satu tambah lapan sama dengan sembilan.mp3' },
     { a: 5, op: '+', b: 4, count: 9, equation: '5 + 4 = 9', audio: '/audio/nombor/sembilan.mp3' },
     { a: 6, op: '+', b: 3, count: 9, equation: '6 + 3 = 9', audio: '/audio/nombor/sembilan.mp3' },
-    { a: 1, op: '+', b: 9, count: 10, equation: '1 + 9 = 10', audio: '/audio/tambah/satu tambah sembilan sama dengan sepuluh.MP3' },
+    { a: 1, op: '+', b: 9, count: 10, equation: '1 + 9 = 10', audio: '/audio/tambah/satu tambah sembilan sama dengan sepuluh.mp3' },
     { a: 5, op: '+', b: 5, count: 10, equation: '5 + 5 = 10', audio: '/audio/nombor/sepuluh.mp3' }
 ];
 
 const AR_KIRA_JARI_TOLAK = [
     { a: 2, op: '-', b: 1, count: 1, equation: '2 - 1 = 1', audio: '/audio/nombor/satu.mp3' },
     { a: 3, op: '-', b: 2, count: 1, equation: '3 - 2 = 1', audio: '/audio/nombor/satu.mp3' },
-    { a: 10, op: '-', b: 9, count: 1, equation: '10 - 9 = 1', audio: '/audio/tolak/sepuluh tolak sembilan sama dengan satu.MP3' },
+    { a: 10, op: '-', b: 9, count: 1, equation: '10 - 9 = 1', audio: '/audio/tolak/sepuluh tolak sembilan sama dengan satu.mp3' },
     { a: 3, op: '-', b: 1, count: 2, equation: '3 - 1 = 2', audio: '/audio/nombor/dua.mp3' },
     { a: 4, op: '-', b: 2, count: 2, equation: '4 - 2 = 2', audio: '/audio/nombor/dua.mp3' },
-    { a: 10, op: '-', b: 8, count: 2, equation: '10 - 8 = 2', audio: '/audio/tolak/sepuluh tolak lapan sama dengan dua.MP3' },
+    { a: 10, op: '-', b: 8, count: 2, equation: '10 - 8 = 2', audio: '/audio/tolak/sepuluh tolak lapan sama dengan dua.mp3' },
     { a: 4, op: '-', b: 1, count: 3, equation: '4 - 1 = 3', audio: '/audio/nombor/tiga.mp3' },
     { a: 5, op: '-', b: 2, count: 3, equation: '5 - 2 = 3', audio: '/audio/nombor/tiga.mp3' },
-    { a: 10, op: '-', b: 7, count: 3, equation: '10 - 7 = 3', audio: '/audio/tolak/sepuluh tolak tujuh sama dengan tiga.MP3' },
+    { a: 10, op: '-', b: 7, count: 3, equation: '10 - 7 = 3', audio: '/audio/tolak/sepuluh tolak tujuh sama dengan tiga.mp3' },
     { a: 5, op: '-', b: 1, count: 4, equation: '5 - 1 = 4', audio: '/audio/nombor/empat.mp3' },
     { a: 6, op: '-', b: 2, count: 4, equation: '6 - 2 = 4', audio: '/audio/nombor/empat.mp3' },
-    { a: 10, op: '-', b: 6, count: 4, equation: '10 - 6 = 4', audio: '/audio/tolak/sepuluh tolak enam sama dengan empat.MP3' },
+    { a: 10, op: '-', b: 6, count: 4, equation: '10 - 6 = 4', audio: '/audio/tolak/sepuluh tolak enam sama dengan empat.mp3' },
     { a: 6, op: '-', b: 1, count: 5, equation: '6 - 1 = 5', audio: '/audio/nombor/lima.mp3' },
     { a: 7, op: '-', b: 2, count: 5, equation: '7 - 2 = 5', audio: '/audio/nombor/lima.mp3' },
-    { a: 10, op: '-', b: 5, count: 5, equation: '10 - 5 = 5', audio: '/audio/tolak/sepuluh tolak lima sama dengan lima.MP3' },
+    { a: 10, op: '-', b: 5, count: 5, equation: '10 - 5 = 5', audio: '/audio/tolak/sepuluh tolak lima sama dengan lima.mp3' },
     { a: 7, op: '-', b: 1, count: 6, equation: '7 - 1 = 6', audio: '/audio/nombor/enam.mp3' },
     { a: 8, op: '-', b: 2, count: 6, equation: '8 - 2 = 6', audio: '/audio/nombor/enam.mp3' },
-    { a: 10, op: '-', b: 4, count: 6, equation: '10 - 4 = 6', audio: '/audio/tolak/sepuluh tolak empat sama dengan enam.MP3' },
+    { a: 10, op: '-', b: 4, count: 6, equation: '10 - 4 = 6', audio: '/audio/tolak/sepuluh tolak empat sama dengan enam.mp3' },
     { a: 8, op: '-', b: 1, count: 7, equation: '8 - 1 = 7', audio: '/audio/nombor/tujuh.mp3' },
     { a: 9, op: '-', b: 2, count: 7, equation: '9 - 2 = 7', audio: '/audio/nombor/tujuh.mp3' },
-    { a: 10, op: '-', b: 3, count: 7, equation: '10 - 3 = 7', audio: '/audio/tolak/sepuluh tolak tiga sama dengan tujuh.MP3' },
+    { a: 10, op: '-', b: 3, count: 7, equation: '10 - 3 = 7', audio: '/audio/tolak/sepuluh tolak tiga sama dengan tujuh.mp3' },
     { a: 9, op: '-', b: 1, count: 8, equation: '9 - 1 = 8', audio: '/audio/nombor/lapan.mp3' },
-    { a: 10, op: '-', b: 2, count: 8, equation: '10 - 2 = 8', audio: '/audio/tolak/sepuluh tolak dua sama dengan lapan.MP3' },
-    { a: 10, op: '-', b: 1, count: 9, equation: '10 - 1 = 9', audio: '/audio/tolak/sepuluh tolak satu sama dengan sembilan.MP3' }
+    { a: 10, op: '-', b: 2, count: 8, equation: '10 - 2 = 8', audio: '/audio/tolak/sepuluh tolak dua sama dengan lapan.mp3' },
+    { a: 10, op: '-', b: 1, count: 9, equation: '10 - 1 = 9', audio: '/audio/tolak/sepuluh tolak satu sama dengan sembilan.mp3' }
 ];
 
 window.arKiraJariMode = 'nombor'; // 'nombor' | 'tambah' | 'tolak'

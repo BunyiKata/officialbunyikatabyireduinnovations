@@ -95,15 +95,13 @@ export interface PhonicsItem {
 export const getPhonicsAudio = (letter: string): string => {
   const l = (letter || '').toLowerCase().trim();
   if (l === 'é' || l === 'e taling' || l === 'e tailing') {
-    return '/audio/fonik/fonik e tailing.MP3';
+    return '/audio/fonik/fonik e tailing.mp3';
   }
   if (l === 'e' || l === 'e pepet') {
-    return '/audio/fonik/fonik e.MP3';
+    return '/audio/fonik/fonik e.mp3';
   }
-  if (l === 'w') {
-    return '/audio/abc/w.mp3';
-  }
-  return `/audio/fonik/fonik ${l}.MP3`;
+  // Huruf W juga mempunyai audio fonik tersendiri (fonik w.mp3).
+  return `/audio/fonik/fonik ${l}.mp3`;
 };
 
 export const PHONICS_DATABASE: PhonicsItem[] = [
@@ -170,7 +168,7 @@ export const PHONICS_DATABASE: PhonicsItem[] = [
   {
     letter: 'é',
     uppercase: 'É',
-    soundAudio: '/audio/fonik/fonik e tailing.MP3',
+    soundAudio: '/audio/fonik/fonik e tailing.mp3',
     word: 'epal',
     syllables: ['e', 'pal'],
     image: '/images/sukukata/epal.png',
@@ -185,8 +183,8 @@ export const PHONICS_DATABASE: PhonicsItem[] = [
     soundAudio: '/audio/abc/f.mp3',
     word: 'feri',
     syllables: ['fe', 'ri'],
-    image: '/images/sukukata/bot.png',
-    wordAudio: '/audio/abc/f.mp3',
+    image: '/images/gambar-feri-fonik/feri.png',
+    wordAudio: '/audio/fonik/feri.mp3',
     sampleWords: ['feri', 'foto', 'filem'],
     color: '#8b5cf6',
     bgColor: '#ede9fe'
@@ -386,6 +384,8 @@ export const PHONICS_DATABASE: PhonicsItem[] = [
   {
     letter: 'w',
     uppercase: 'W',
+    // Mod "Kenali Huruf" memainkan NAMA huruf, jadi kekalkan /audio/abc/w.mp3.
+    // Mod "Fonik ABC" memainkan BUNYI fonik melalui getPhonicsAudio() di atas.
     soundAudio: '/audio/abc/w.mp3',
     word: 'wang',
     syllables: ['wang'],
@@ -841,7 +841,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
         try {
           activeAudioRef.current.pause();
           activeAudioRef.current.currentTime = 0;
-        } catch (e) {}
+        } catch (e) { }
         activeAudioRef.current = null;
       }
       const audio = new Audio(src);

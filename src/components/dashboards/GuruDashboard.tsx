@@ -140,7 +140,20 @@ export function GuruDashboard(props: GuruDashboardProps) {
     window.addEventListener("teacher-classes-synced", handleSync);
     window.addEventListener("focus", handleSync);
     handleSync();
+
+    // Jadual Sejarah Langganan (hanya rekod guru ini)
+    const muatSejarah = () => {
+      if (typeof (window as any).muatSejarahLangganan === "function") {
+        (window as any).muatSejarahLangganan("guru");
+      } else if (typeof (window as any).renderSejarahLangganan === "function") {
+        (window as any).renderSejarahLangganan("guru");
+      }
+    };
+    muatSejarah();
+    const sejarahTimer = setTimeout(muatSejarah, 1200);
+
     return () => {
+      clearTimeout(sejarahTimer);
       window.removeEventListener("teacher-classes-synced", handleSync);
       window.removeEventListener("focus", handleSync);
     };
@@ -980,7 +993,96 @@ export function GuruDashboard(props: GuruDashboardProps) {
               </tbody>
             </table>
           </div>
+
         </div>
+
+        {/* Jadual Sejarah Langganan (Guru — hanya rekod sendiri) */}
+        <div
+          className="neo-box"
+          style={{
+            width: "100%",
+            maxWidth: "900px",
+            margin: "0 auto 20px",
+            padding: "20px",
+            borderRadius: "16px",
+            backgroundColor: "#ffffff",
+            backgroundImage:
+              "radial-gradient(circle, rgba(16, 24, 47, 0.14) 1.8px, transparent 1.8px)",
+            backgroundSize: "16px 16px",
+            textAlign: "left",
+          }}
+        >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "10px",
+                marginBottom: "12px",
+              }}
+            >
+              <div
+                id="guru-sejarah-langganan-title"
+                className="neo-btn"
+                style={{
+                  background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)",
+                  color: "white",
+                  padding: "7px 16px",
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  borderRadius: "12px",
+                  border: "2.5px solid var(--color-dark, #10182f)",
+                  boxShadow: "0 3px 0 var(--color-dark, #10182f)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  pointerEvents: "none",
+                  margin: 0,
+                }}
+              >
+                <i className="fa-solid fa-clock-rotate-left"></i>
+                <span style={{ fontFamily: "'AtlantaRoundedBlack', sans-serif" }}>
+                  Sejarah Langganan
+                </span>
+              </div>
+            </div>
+            <div
+              className="table-responsive sejarah-langganan-wrapper"
+              style={{
+                overflowX: "auto",
+                borderRadius: "12px",
+                border: "2px solid var(--color-dark)",
+                minHeight: "auto",
+                marginTop: 0,
+              }}
+            >
+              <table className="teacher-table" style={{ width: "100%", minWidth: "600px" }}>
+                <thead>
+                  <tr style={{ background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)", color: "white" }}>
+                    <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 8px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", borderRight: "1px solid rgba(255,255,255,0.2)", width: "50px" }}>
+                      BIL
+                    </th>
+                    <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 12px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", borderRight: "1px solid rgba(255,255,255,0.2)" }}>
+                      NAMA
+                    </th>
+                    <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 12px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", borderRight: "1px solid rgba(255,255,255,0.2)" }}>
+                      TARIKH LANGGANAN
+                    </th>
+                    <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 12px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", borderRight: "1px solid rgba(255,255,255,0.2)" }}>
+                      TARIKH TAMAT LANGGANAN
+                    </th>
+                    <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 12px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e" }}>
+                      JENIS LANGGANAN
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="guru-sejarah-langganan-body">
+                  {/* Populated by window.renderSejarahLangganan('guru') */}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
         <div
           id="guru-floating-dial-container"

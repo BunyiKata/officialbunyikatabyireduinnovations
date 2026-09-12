@@ -3134,9 +3134,149 @@ export async function rekodPesananFirebase(order: {
   }
 }
 
+/**
+ * Nama pelan langganan yang diseragamkan (versi modul-level).
+ */
+function normalizePlanLocal(rawPlan?: string): string {
+  if (!rawPlan) return '1 Bulan (Pro)';
+  const str = String(rawPlan).trim().toLowerCase();
+  if (str.includes('percuma') || str.includes('trial') || str === 'free') return 'Percuma';
+  if (str.includes('tahun') || str.includes('tahunan')) return '1 Tahun (Pro)';
+  if (str.includes('3 bulan') || str.includes('3 bulanan')) return '3 Bulan (Pro)';
+  if (str.includes('bulan') || str.includes('bulanan') || str.includes('pro')) return '1 Bulan (Pro)';
+  return rawPlan;
+}
+
+/**
+ * Bilangan hari bagi sesuatu pelan langganan (0 = Percuma).
+ */
+function planDaysLocal(planName?: string): number {
+  const plan = normalizePlanLocal(planName);
+  if (plan === 'Percuma') return 0;
+  if (plan === '1 Tahun (Pro)') return 365;
+  if (plan === '3 Bulan (Pro)') return 90;
+  return 30;
+}
+
+/**
+ * Kira tarikh tamat langganan daripada tarikh mula + jenis pelan.
+ */
+function kiraTarikhTamatLocal(tarikhMula: string, planName?: string): string {
+  const hari = planDaysLocal(planName);
+  if (hari <= 0) return '';
+  const mula = new Date(tarikhMula);
+  if (isNaN(mula.getTime())) return '';
+  mula.setDate(mula.getDate() + hari);
+  return mula.toISOString();
+}
+
+export interface SubscriptionHistoryRecord {
+  id: string;
+  nama: string;
+  email: string;
+  peranan: string;
+  tarikhLangganan: string;
+  tarikhTamat: string;
+  jenisLangganan: string;
+  sumber: 'pesanan' | 'profil';
+}
+
+/**
+ * Membaca sejarah langganan untuk dipaparkan dalam jadual "Sejarah Langganan".
+ *
+ * Sumber utama: nod `orders` (rekod pembayaran CHIP yang telah disahkan).
+ * Sumber sandaran: profil berbayar yang tiada rekod pesanan (contoh: pelan
+ * ditukar oleh admin melalui pengurusan sistem).
+ */
+export async function getSubscriptionHistory(): Promise<SubscriptionHistoryRecord[]> {
+  if (!isFirebaseConfigured) return [];
+
+  try {
+    // Nota: nod `orders` memerlukan `auth != null` mengikut database.rules.json.
+    // Jika bacaan ditolak (contoh: sesi tanpa Firebase Auth), kita teruskan
+    // dengan sumber sandaran `profiles` supaya jadual tidak kosong.
+    let ordersSnap: any = null;
+    try {
+      ordersSnap = await get(ref(db, 'orders'));
+    } catch (orderErr) {
+      console.warn('[Firebase RTDB] Tidak dapat membaca nod orders:', orderErr);
+    }
+    const profilesSnap = await get(ref(db, 'profiles'));
+
+    const profiles = snapToArray<any>(profilesSnap);
+    const profilMengikutEmel = new Map<string, any>();
+    profiles.forEach((p: any) => {
+      const emel = String(p.email || '').trim().toLowerCase();
+      if (emel) profilMengikutEmel.set(emel, p);
+    });
+
+    const rekod: SubscriptionHistoryRecord[] = [];
+    const emelAdaPesanan = new Set<string>();
+
+    // 1. Rekod pesanan pembayaran (audit trail CHIP)
+    snapToArray<any>(ordersSnap).forEach((o: any) => {
+      const emel = String(o.email || '').trim().toLowerCase();
+      const profil = profilMengikutEmel.get(emel);
+      const tarikhLangganan = o.disahkan_pada || o.dicipta_pada || '';
+      if (emel) emelAdaPesanan.add(emel);
+
+      rekod.push({
+        id: `pesanan_${o.id}`,
+        nama: (profil && profil.nama) || o.email || 'Pengguna',
+        email: emel,
+        peranan: (profil && profil.peranan) || '',
+        tarikhLangganan,
+        tarikhTamat: kiraTarikhTamatLocal(tarikhLangganan, o.langganan),
+        jenisLangganan: normalizePlanLocal(o.langganan),
+        sumber: 'pesanan',
+      });
+    });
+
+    // 2. Sandaran: profil berbayar tanpa rekod pesanan
+    profiles.forEach((p: any) => {
+      const emel = String(p.email || '').trim().toLowerCase();
+      if (!emel || emelAdaPesanan.has(emel)) return;
+
+      const plan = normalizePlanLocal(p.langganan);
+      if (plan === 'Percuma') return;
+
+      const tarikhLangganan = p.dikemaskini_pada || p.dicipta_pada || '';
+      rekod.push({
+        id: `profil_${p.id}`,
+        nama: p.nama || emel,
+        email: emel,
+        peranan: p.peranan || '',
+        tarikhLangganan,
+        tarikhTamat: p.tarikh_tamat || kiraTarikhTamatLocal(tarikhLangganan, plan),
+        jenisLangganan: plan,
+        sumber: 'profil',
+      });
+    });
+
+    rekod.sort((a, b) => new Date(b.tarikhLangganan).getTime() - new Date(a.tarikhLangganan).getTime());
+
+    if (typeof window !== 'undefined') {
+      (window as any).__sejarahLanggananCache = rekod;
+      ['guru', 'ibubapa', 'admin'].forEach((peranan) => {
+        if (typeof (window as any).renderSejarahLangganan === 'function') {
+          try {
+            (window as any).renderSejarahLangganan(peranan);
+          } catch (e) {}
+        }
+      });
+    }
+
+    return rekod;
+  } catch (err) {
+    console.error('[Firebase RTDB] Ralat getSubscriptionHistory:', err);
+    return [];
+  }
+}
+
 if (typeof window !== 'undefined') {
   (window as any).naikTarafLanggananFirebase = naikTarafLanggananFirebase;
   (window as any).rekodPesananFirebase = rekodPesananFirebase;
+  (window as any).getSubscriptionHistory = getSubscriptionHistory;
 }
 
 

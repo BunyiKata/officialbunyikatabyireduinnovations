@@ -360,16 +360,16 @@ function buildQuestionsForModule(id: string): any[] {
   // Handle Reading / Passages / Sentences (Map 4)
   if (id === 'ayat_pendek') {
     const defaultItems = [
-      { text: 'Saya suka makan nasi.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya suka makan nasi.MP3', image: '/images/menu-kad/ayat pendek/saya suka makan nasi.png' },
-      { text: 'Ibu memasak di dapur.', audio: '/audio/bacaan-bergred/audio ayat pendek/ibu memasak di dapur.MP3', image: '/images/menu-kad/ayat pendek/ibu memasak di dapur.png' },
-      { text: 'Kucing itu sangat comel.', audio: '/audio/bacaan-bergred/audio ayat pendek/kucing itu sangat comel.MP3', image: '/images/menu-kad/ayat pendek/kucing itu sangat comel.png' },
-      { text: 'Adik saya suka bermain.', audio: '/audio/bacaan-bergred/audio ayat pendek/adik saya suka bermain.MP3', image: '/images/menu-kad/ayat pendek/adik saya suka bermain.png' },
-      { text: 'Bapa pergi ke pejabat.', audio: '/audio/bacaan-bergred/audio ayat pendek/bapa pergi ke pejabat.MP3', image: '/images/menu-kad/ayat pendek/bapa pergi ke pejabat.png' },
-      { text: 'Kakak membaca buku cerita.', audio: '/audio/bacaan-bergred/audio ayat pendek/kakak membaca buku cerita.MP3', image: '/images/menu-kad/ayat pendek/kakak membaca buku cerita.png' },
-      { text: 'Kami pergi ke sekolah.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami pergi ke sekolah.MP3', image: '/images/menu-kad/ayat pendek/kami pergi ke sekolah.png' },
-      { text: 'Burung itu terbang tinggi.', audio: '/audio/bacaan-bergred/audio ayat pendek/burung itu terbang tinggi.MP3', image: '/images/menu-kad/ayat pendek/burung itu terbang tinggi.png' },
-      { text: 'Saya minum air kosong.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya minum air kosong.MP3', image: '/images/menu-kad/ayat pendek/saya minum air kosong.png' },
-      { text: 'Kami makan bersama.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami makan bersama.MP3', image: '/images/menu-kad/ayat pendek/kami makan bersama.png' }
+      { text: 'Saya suka makan nasi.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya suka makan nasi.mp3', image: '/images/menu-kad/ayat pendek/saya suka makan nasi.png' },
+      { text: 'Ibu memasak di dapur.', audio: '/audio/bacaan-bergred/audio ayat pendek/ibu memasak di dapur.mp3', image: '/images/menu-kad/ayat pendek/ibu memasak di dapur.png' },
+      { text: 'Kucing itu sangat comel.', audio: '/audio/bacaan-bergred/audio ayat pendek/kucing itu sangat comel.mp3', image: '/images/menu-kad/ayat pendek/kucing itu sangat comel.png' },
+      { text: 'Adik saya suka bermain.', audio: '/audio/bacaan-bergred/audio ayat pendek/adik saya suka bermain.mp3', image: '/images/menu-kad/ayat pendek/adik saya suka bermain.png' },
+      { text: 'Bapa pergi ke pejabat.', audio: '/audio/bacaan-bergred/audio ayat pendek/bapa pergi ke pejabat.mp3', image: '/images/menu-kad/ayat pendek/bapa pergi ke pejabat.png' },
+      { text: 'Kakak membaca buku cerita.', audio: '/audio/bacaan-bergred/audio ayat pendek/kakak membaca buku cerita.mp3', image: '/images/menu-kad/ayat pendek/kakak membaca buku cerita.png' },
+      { text: 'Kami pergi ke sekolah.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami pergi ke sekolah.mp3', image: '/images/menu-kad/ayat pendek/kami pergi ke sekolah.png' },
+      { text: 'Burung itu terbang tinggi.', audio: '/audio/bacaan-bergred/audio ayat pendek/burung itu terbang tinggi.mp3', image: '/images/menu-kad/ayat pendek/burung itu terbang tinggi.png' },
+      { text: 'Saya minum air kosong.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya minum air kosong.mp3', image: '/images/menu-kad/ayat pendek/saya minum air kosong.png' },
+      { text: 'Kami makan bersama.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami makan bersama.mp3', image: '/images/menu-kad/ayat pendek/kami makan bersama.png' }
     ];
     const sourceItems = (items && items.length > 0) ? items : defaultItems;
     const shuffledItems = shuffleArray(sourceItems);
@@ -393,16 +393,16 @@ function buildQuestionsForModule(id: string): any[] {
 
   if (id === 'ayat_panjang') {
     const defaultItems = [
-      { text: 'Ibu memasak nasi lemak untuk sarapan pagi ini.', audio: '/audio/bacaan-bergred/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.MP3', image: '/images/menu-kad/ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.png' },
-      { text: 'Kami pergi ke taman permainan pada hari Sabtu.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.MP3', image: '/images/menu-kad/ayat panjang/kami pergi ke taman permainan pada hari sabtu.png' },
-      { text: 'Bapa membeli buah-buahan segar di pasar tani.', audio: '/audio/bacaan-bergred/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.MP3', image: '/images/menu-kad/ayat panjang/bapa membeli buah-buahan segar di pasar tani.png' },
-      { text: 'Kucing kecil itu bermain dengan bola di halaman rumah.', audio: '/audio/bacaan-bergred/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.MP3', image: '/images/menu-kad/ayat panjang/kucing kecil itu bermain dengan bola di halaman rumah.png' },
-      { text: 'Adik saya belajar membaca buku cerita setiap malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/adik saya belajar membaca buku cerita setiap .MP3', image: '/images/menu-kad/ayat panjang/adik saya belajar membaca buku cerita setiap malam.png' },
-      { text: 'Guru mengajar kami menulis huruf abjad dengan rapi.', audio: '/audio/bacaan-bergred/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.MP3', image: '/images/menu-kad/ayat panjang/guru mengajar kami menulis huruf abjad dengan rapi.png' },
-      { text: 'Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.MP3', image: '/images/menu-kad/ayat panjang/kami menyanyi lagu sambil bertepuk tangan dengan gembira.png' },
-      { text: 'Burung kecil itu terbang tinggi di langit biru.', audio: '/audio/bacaan-bergred/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.MP3', image: '/images/menu-kad/ayat panjang/burung kecil itu terbang tinggi di langit biru.png' },
-      { text: 'Kakak membantu ibu membasuh pinggan selepas makan malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.MP3', image: '/images/menu-kad/ayat panjang/kakak membantu ibu membasuh pinggan selepas makan malam.png' },
-      { text: 'Kami berkumpul di padang sekolah untuk beriadah pagi.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.MP3', image: '/images/menu-kad/ayat panjang/kami berkumpul di padang sekolah untuk beriadah pagi.png' }
+      { text: 'Ibu memasak nasi lemak untuk sarapan pagi ini.', audio: '/audio/bacaan-bergred/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.mp3', image: '/images/menu-kad/ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.png' },
+      { text: 'Kami pergi ke taman permainan pada hari Sabtu.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.mp3', image: '/images/menu-kad/ayat panjang/kami pergi ke taman permainan pada hari sabtu.png' },
+      { text: 'Bapa membeli buah-buahan segar di pasar tani.', audio: '/audio/bacaan-bergred/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.mp3', image: '/images/menu-kad/ayat panjang/bapa membeli buah-buahan segar di pasar tani.png' },
+      { text: 'Kucing kecil itu bermain dengan bola di halaman rumah.', audio: '/audio/bacaan-bergred/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.mp3', image: '/images/menu-kad/ayat panjang/kucing kecil itu bermain dengan bola di halaman rumah.png' },
+      { text: 'Adik saya belajar membaca buku cerita setiap malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/adik saya belajar membaca buku cerita setiap .mp3', image: '/images/menu-kad/ayat panjang/adik saya belajar membaca buku cerita setiap malam.png' },
+      { text: 'Guru mengajar kami menulis huruf abjad dengan rapi.', audio: '/audio/bacaan-bergred/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.mp3', image: '/images/menu-kad/ayat panjang/guru mengajar kami menulis huruf abjad dengan rapi.png' },
+      { text: 'Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.mp3', image: '/images/menu-kad/ayat panjang/kami menyanyi lagu sambil bertepuk tangan dengan gembira.png' },
+      { text: 'Burung kecil itu terbang tinggi di langit biru.', audio: '/audio/bacaan-bergred/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.mp3', image: '/images/menu-kad/ayat panjang/burung kecil itu terbang tinggi di langit biru.png' },
+      { text: 'Kakak membantu ibu membasuh pinggan selepas makan malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.mp3', image: '/images/menu-kad/ayat panjang/kakak membantu ibu membasuh pinggan selepas makan malam.png' },
+      { text: 'Kami berkumpul di padang sekolah untuk beriadah pagi.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.mp3', image: '/images/menu-kad/ayat panjang/kami berkumpul di padang sekolah untuk beriadah pagi.png' }
     ];
     const sourceItems = (items && items.length > 0) ? items : defaultItems;
     const allImages = sourceItems.map((it: any) => it.image || it.icon).filter(Boolean);
@@ -430,7 +430,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 kereta.png',
         passage: 'Kereta.\nIni kereta bapa.\nKereta bapa biru.\nBapa bawa kereta laju.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.mp3',
         question: 'Kereta bapa berwarna apa?',
         answer: 'Biru',
         options: ['Biru', 'Merah', 'Kuning', 'Hijau']
@@ -438,7 +438,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 kereta.png',
         passage: 'Kereta.\nIni kereta bapa.\nKereta bapa biru.\nBapa bawa kereta laju.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.mp3',
         question: 'Siapakah yang membawa kereta laju?',
         answer: 'Bapa',
         options: ['Bapa', 'Adik', 'Abang', 'Kakak']
@@ -447,7 +447,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 bola.png',
         passage: 'Bola.\nIni bola saya.\nBola saya merah.\nSaya baling bola jauh.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.mp3',
         question: 'Bola saya berwarna apa?',
         answer: 'Merah',
         options: ['Merah', 'Biru', 'Putih', 'Hitam']
@@ -455,7 +455,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 bola.png',
         passage: 'Bola.\nIni bola saya.\nBola saya merah.\nSaya baling bola jauh.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.mp3',
         question: 'Saya baling bola ke mana?',
         answer: 'Jauh',
         options: ['Jauh', 'Dekat', 'Tinggi', 'Rendah']
@@ -464,7 +464,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 topi.png',
         passage: 'Topi.\nIni topi adik.\nTopi adik kuning.\nAdik pakai topi elok.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.mp3',
         question: 'Topi adik berwarna apa?',
         answer: 'Kuning',
         options: ['Kuning', 'Hijau', 'Coklat', 'Merah']
@@ -472,7 +472,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 topi.png',
         passage: 'Topi.\nIni topi adik.\nTopi adik kuning.\nAdik pakai topi elok.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.mp3',
         question: 'Bagaimanakah adik memakai topi?',
         answer: 'Elok',
         options: ['Elok', 'Senget', 'Ketat', 'Kotor']
@@ -481,7 +481,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 beg.png',
         passage: 'Beg.\nIni beg kakak.\nBeg kakak hijau.\nKakak bawa beg berat.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.mp3',
         question: 'Beg kakak berwarna apa?',
         answer: 'Hijau',
         options: ['Hijau', 'Kuning', 'Biru', 'Hitam']
@@ -489,7 +489,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 beg.png',
         passage: 'Beg.\nIni beg kakak.\nBeg kakak hijau.\nKakak bawa beg berat.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.mp3',
         question: 'Bagaimanakah beg yang kakak bawa?',
         answer: 'Berat',
         options: ['Berat', 'Ringan', 'Kecil', 'Kosong']
@@ -498,7 +498,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 basikal.png',
         passage: 'Basikal.\nIni basikal abang.\nBasikal abang hitam.\nAbang kayuh basikal laju.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.mp3',
         question: 'Basikal abang berwarna apa?',
         answer: 'Hitam',
         options: ['Hitam', 'Biru', 'Merah', 'Kuning']
@@ -506,7 +506,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 1/petikan tahap 1 basikal.png',
         passage: 'Basikal.\nIni basikal abang.\nBasikal abang hitam.\nAbang kayuh basikal laju.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.mp3',
         question: 'Bagaimanakah abang mengayuh basikal?',
         answer: 'Laju',
         options: ['Laju', 'Perlahan', 'Lambat', 'Jatuh']
@@ -530,7 +530,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 rumah.png',
         passage: 'Rumah.\nIni rumah saya.\nRumah saya besar.\nSaya tinggal di rumah besar bersama keluarga.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.mp3',
         question: 'Rumah saya bagaimana?',
         answer: 'Besar',
         options: ['Besar', 'Kecil', 'Tinggi', 'Lama']
@@ -538,7 +538,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 rumah.png',
         passage: 'Rumah.\nIni rumah saya.\nRumah saya besar.\nSaya tinggal di rumah besar bersama keluarga.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.mp3',
         question: 'Saya tinggal di rumah bersama siapa?',
         answer: 'Keluarga',
         options: ['Keluarga', 'Kawan', 'Jiran', 'Guru']
@@ -547,7 +547,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 sekolah.png',
         passage: 'Sekolah.\nIni sekolah kami.\nSekolah kami ceria.\nKami belajar di sekolah ceria setiap hari.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.mp3',
         question: 'Sekolah kami bagaimana?',
         answer: 'Ceria',
         options: ['Ceria', 'Sepi', 'Gelap', 'Kecil']
@@ -555,7 +555,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 sekolah.png',
         passage: 'Sekolah.\nIni sekolah kami.\nSekolah kami ceria.\nKami belajar di sekolah ceria setiap hari.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.mp3',
         question: 'Bilakah kami belajar di sekolah ceria?',
         answer: 'Setiap hari',
         options: ['Setiap hari', 'Setiap malam', 'Hari Ahad', 'Hari Sabtu']
@@ -564,7 +564,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 kucing.png',
         passage: 'Kucing.\nIni kucing saya.\nKucing saya comel.\nSaya bermain dengan kucing comel setiap petang.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.mp3',
         question: 'Kucing saya bagaimana?',
         answer: 'Comel',
         options: ['Comel', 'Galak', 'Besar', 'Hitam']
@@ -572,7 +572,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 kucing.png',
         passage: 'Kucing.\nIni kucing saya.\nKucing saya comel.\nSaya bermain dengan kucing comel setiap petang.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.mp3',
         question: 'Bilakah saya bermain dengan kucing comel?',
         answer: 'Setiap petang',
         options: ['Setiap petang', 'Setiap pagi', 'Waktu malam', 'Tengah hari']
@@ -581,7 +581,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 taman.png',
         passage: 'Taman.\nIni taman kami.\nTaman kami luas.\nKami berlari di taman luas pada waktu pagi.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.mp3',
         question: 'Taman kami bagaimana?',
         answer: 'Luas',
         options: ['Luas', 'Sempit', 'Kecil', 'Gelap']
@@ -589,7 +589,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 taman.png',
         passage: 'Taman.\nIni taman kami.\nTaman kami luas.\nKami berlari di taman luas pada waktu pagi.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.mp3',
         question: 'Bilakah kami berlari di taman luas?',
         answer: 'Waktu pagi',
         options: ['Waktu pagi', 'Waktu malam', 'Waktu petang', 'Tengah hari']
@@ -598,7 +598,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 dapur.png',
         passage: 'Dapur.\nIni dapur ibu.\nDapur ibu bersih.\nIbu memasak di dapur bersih setiap petang.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.mp3',
         question: 'Dapur ibu bagaimana?',
         answer: 'Bersih',
         options: ['Bersih', 'Kotor', 'Besar', 'Sempit']
@@ -606,7 +606,7 @@ function buildQuestionsForModule(id: string): any[] {
       {
         image: '/images/menu-kad/petikan tahap 2/petikan tahap 2 dapur.png',
         passage: 'Dapur.\nIni dapur ibu.\nDapur ibu bersih.\nIbu memasak di dapur bersih setiap petang.',
-        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.MP3',
+        audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.mp3',
         question: 'Ibu memasak di dapur pada waktu apa?',
         answer: 'Setiap petang',
         options: ['Setiap petang', 'Setiap pagi', 'Waktu malam', 'Tengah hari']
@@ -628,6 +628,7 @@ function buildQuestionsForModule(id: string): any[] {
     const Q_LIST = [
       {
         image: '/images/buku/b1coverpage.jpg',
+        audio: '/audio/cerita-pendek/cerita-pendek-comel.mp3',
         passage: 'Comel ialah seekor kucing kecil. Comel tinggal bersama Ali di rumah. Setiap pagi, Comel bermain di halaman rumah. Comel suka makan ikan dan minum susu. Ali sangat sayang akan Comel.',
         question: 'Apakah makanan kegemaran Comel?',
         answer: 'Ikan',
@@ -635,6 +636,7 @@ function buildQuestionsForModule(id: string): any[] {
       },
       {
         image: '/images/buku/b2coverpage.jpg',
+        audio: '/audio/cerita-pendek/cerita-pendek-hari-sukan.mp3',
         passage: 'Hari ini sekolah mengadakan hari sukan. Murid-murid memakai baju sukan berwarna-warni. Ani berlari pantas dalam pertandingan lari. Ani berjaya memenangi hadiah pertama. Semua murid bertepuk tangan dengan gembira.',
         question: 'Ani memenangi hadiah yang ke berapa?',
         answer: 'Pertama',
@@ -642,6 +644,7 @@ function buildQuestionsForModule(id: string): any[] {
       },
       {
         image: '/images/buku/b3coverpage.jpg',
+        audio: '/audio/cerita-pendek/cerita-pendek-pasar.mp3',
         passage: 'Pada hari Sabtu, ibu pergi ke pasar. Ali turut serta bersama ibu ke pasar. Mereka membeli sayur, buah dan ikan segar. Ali membantu ibu membawa beg barang. Mereka pulang ke rumah dengan gembira.',
         question: 'Siapakah yang pergi ke pasar bersama ibu?',
         answer: 'Ali',
@@ -649,6 +652,7 @@ function buildQuestionsForModule(id: string): any[] {
       },
       {
         image: '/images/buku/b4coverpage.jpg',
+        audio: '/audio/cerita-pendek/cerita-pendek-pokok-mangga.mp3',
         passage: 'Di halaman rumah Ali, ada sebatang pokok mangga. Setiap tahun, pokok itu berbuah lebat. Ali suka memetik buah mangga yang masak. Ibu memasak jeruk mangga yang sedap. Sekeluarga menikmati mangga bersama-sama.',
         question: 'Pokok apakah yang ada di halaman rumah Ali?',
         answer: 'Mangga',
@@ -656,6 +660,7 @@ function buildQuestionsForModule(id: string): any[] {
       },
       {
         image: '/images/buku/b5coverpage.jpg',
+        audio: '/audio/cerita-pendek/cerita-pendek-cikgu-nur.mp3',
         passage: 'Cikgu Nur mengajar kelas prasekolah setiap hari. Murid-murid belajar membaca dan menyanyi bersama. Ali dan Ani suka bermain di sudut buku. Cikgu Nur sentiasa sabar mengajar murid-muridnya. Kelas itu sentiasa ceria dan gembira.',
         question: 'Siapakah nama cikgu prasekolah?',
         answer: 'Cikgu Nur',
@@ -666,6 +671,7 @@ function buildQuestionsForModule(id: string): any[] {
       type: 'bacaan',
       image: q.image,
       imageText: q.passage.replace(/\n/g, ' '),
+      audio: q.audio,
       passage: q.passage,
       question: q.question,
       answer: q.answer,
@@ -2198,13 +2204,11 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
 
     if (cabaranId === 'fonik_abc' || cabaranId === 'fonik') {
       const clean = String(text).toLowerCase().trim();
-      let soundPath = `/audio/fonik/fonik ${clean}.MP3`;
+      let soundPath = `/audio/fonik/fonik ${clean}.mp3`;
       if (clean === 'é' || clean === 'e taling' || clean === 'e tailing' || clean === 'e-taling') {
-        soundPath = '/audio/fonik/fonik e tailing.MP3';
+        soundPath = '/audio/fonik/fonik e tailing.mp3';
       } else if (clean === 'e' || clean === 'e pepet' || clean === 'e-pepet') {
-        soundPath = '/audio/fonik/fonik e.MP3';
-      } else if (clean === 'w') {
-        soundPath = '/audio/abc/w.mp3';
+        soundPath = '/audio/fonik/fonik e.mp3';
       }
       try {
         const audio = new Audio(soundPath);
@@ -2239,7 +2243,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
       } catch (e) {}
     }
 
-    if (text.startsWith('/audio/') || text.endsWith('.mp3') || text.endsWith('.MP3')) {
+    if (text.startsWith('/audio/') || text.endsWith('.mp3') || text.endsWith('.mp3')) {
       try {
         const audio = new Audio(text);
         cabaranActiveAudioRef.current = audio;
@@ -2829,7 +2833,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                 {currentQ.imageText && (
                   <button
                     className="neo-btn bg-yellow cabaran-dengar-btn"
-                    onClick={(e) => { e.stopPropagation(); playAudio(currentQ.imageText); }}
+                    onClick={(e) => { e.stopPropagation(); playAudio(currentQ.audio || currentQ.imageText); }}
                     title="Dengar Audio"
                     aria-label="Dengar Audio"
                     style={{ position: 'absolute', top: '-12px', right: '-12px', width: '38px', height: '38px', borderRadius: '50%', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, aspectRatio: '1/1', flexShrink: 0 }}
@@ -2839,7 +2843,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                 )}
                 <div
                   className="cabaran-bacaan-passage"
-                  onClick={() => currentQ.imageText && playAudio(currentQ.imageText)}
+                  onClick={() => (currentQ.audio || currentQ.imageText) && playAudio(currentQ.audio || currentQ.imageText)}
                   title="Tekan teks untuk dengar audio"
                   style={{
                     fontSize: currentQ.passage && currentQ.passage.length > 120 ? '0.92rem' : '1.05rem',

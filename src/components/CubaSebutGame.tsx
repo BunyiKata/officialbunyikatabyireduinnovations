@@ -136,8 +136,7 @@ const SEBUT_DATABASE: Record<string, SebutItem[]> = {
     { id: 'gajah', text: 'gajah', syllables: ['ga', 'jah'], audio: '/audio/sukukata/gajah.mp3', category: 'kv_kvk' },
     { id: 'gelas', text: 'gelas', syllables: ['ge', 'las'], audio: '/audio/sukukata/gelas.mp3', category: 'kv_kvk' },
     { id: 'gitar', text: 'gitar', syllables: ['gi', 'tar'], audio: '/audio/sukukata/gitar.mp3', category: 'kv_kvk' },
-    { id: 'katil', text: 'katil', syllables: ['ka', 'til'], audio: '/audio/sukukata/katil.mp3', category: 'kv_kvk' },
-    { id: 'pokok', text: 'pokok', syllables: ['po', 'kok'], audio: '/audio/sukukata/pokok.mp3', category: 'kv_kvk' }
+    { id: 'katil', text: 'katil', syllables: ['ka', 'til'], audio: '/audio/sukukata/katil.mp3', category: 'kv_kvk' }
   ],
   'kvk_kv': [
     { id: 'baldi', text: 'baldi', syllables: ['bal', 'di'], audio: '/audio/sukukata/baldi.mp3', category: 'kvk_kv' },
@@ -192,49 +191,49 @@ const SEBUT_DATABASE: Record<string, SebutItem[]> = {
 
   // --- BACAAN BERGRED ---
   'ayat_pendek': [
-    { id: 'ap_1', text: 'Saya suka makan nasi.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya suka makan nasi.MP3', category: 'ayat_pendek' },
-    { id: 'ap_2', text: 'Ibu memasak di dapur.', audio: '/audio/bacaan-bergred/audio ayat pendek/ibu memasak di dapur.MP3', category: 'ayat_pendek' },
-    { id: 'ap_3', text: 'Kucing itu sangat comel.', audio: '/audio/bacaan-bergred/audio ayat pendek/kucing itu sangat comel.MP3', category: 'ayat_pendek' },
-    { id: 'ap_4', text: 'Adik saya suka bermain.', audio: '/audio/bacaan-bergred/audio ayat pendek/adik saya suka bermain.MP3', category: 'ayat_pendek' },
-    { id: 'ap_5', text: 'Bapa pergi ke pejabat.', audio: '/audio/bacaan-bergred/audio ayat pendek/bapa pergi ke pejabat.MP3', category: 'ayat_pendek' },
-    { id: 'ap_6', text: 'Kakak membaca buku cerita.', audio: '/audio/bacaan-bergred/audio ayat pendek/kakak membaca buku cerita.MP3', category: 'ayat_pendek' },
-    { id: 'ap_7', text: 'Kami pergi ke sekolah.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami pergi ke sekolah.MP3', category: 'ayat_pendek' },
-    { id: 'ap_8', text: 'Burung itu terbang tinggi.', audio: '/audio/bacaan-bergred/audio ayat pendek/burung itu terbang tinggi.MP3', category: 'ayat_pendek' },
-    { id: 'ap_9', text: 'Saya minum air kosong.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya minum air kosong.MP3', category: 'ayat_pendek' },
-    { id: 'ap_10', text: 'Kami makan bersama.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami makan bersama.MP3', category: 'ayat_pendek' }
+    { id: 'ap_1', text: 'Saya suka makan nasi.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya suka makan nasi.mp3', category: 'ayat_pendek' },
+    { id: 'ap_2', text: 'Ibu memasak di dapur.', audio: '/audio/bacaan-bergred/audio ayat pendek/ibu memasak di dapur.mp3', category: 'ayat_pendek' },
+    { id: 'ap_3', text: 'Kucing itu sangat comel.', audio: '/audio/bacaan-bergred/audio ayat pendek/kucing itu sangat comel.mp3', category: 'ayat_pendek' },
+    { id: 'ap_4', text: 'Adik saya suka bermain.', audio: '/audio/bacaan-bergred/audio ayat pendek/adik saya suka bermain.mp3', category: 'ayat_pendek' },
+    { id: 'ap_5', text: 'Bapa pergi ke pejabat.', audio: '/audio/bacaan-bergred/audio ayat pendek/bapa pergi ke pejabat.mp3', category: 'ayat_pendek' },
+    { id: 'ap_6', text: 'Kakak membaca buku cerita.', audio: '/audio/bacaan-bergred/audio ayat pendek/kakak membaca buku cerita.mp3', category: 'ayat_pendek' },
+    { id: 'ap_7', text: 'Kami pergi ke sekolah.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami pergi ke sekolah.mp3', category: 'ayat_pendek' },
+    { id: 'ap_8', text: 'Burung itu terbang tinggi.', audio: '/audio/bacaan-bergred/audio ayat pendek/burung itu terbang tinggi.mp3', category: 'ayat_pendek' },
+    { id: 'ap_9', text: 'Saya minum air kosong.', audio: '/audio/bacaan-bergred/audio ayat pendek/saya minum air kosong.mp3', category: 'ayat_pendek' },
+    { id: 'ap_10', text: 'Kami makan bersama.', audio: '/audio/bacaan-bergred/audio ayat pendek/kami makan bersama.mp3', category: 'ayat_pendek' }
   ],
   'ayat_panjang': [
-    { id: 'aj_1', text: 'Ibu memasak nasi lemak untuk sarapan pagi ini.', audio: '/audio/bacaan-bergred/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.MP3', category: 'ayat_panjang' },
-    { id: 'aj_2', text: 'Kami pergi ke taman permainan pada hari Sabtu.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.MP3', category: 'ayat_panjang' },
-    { id: 'aj_3', text: 'Bapa membeli buah-buahan segar di pasar tani.', audio: '/audio/bacaan-bergred/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.MP3', category: 'ayat_panjang' },
-    { id: 'aj_4', text: 'Kucing kecil itu bermain dengan bola di halaman rumah.', audio: '/audio/bacaan-bergred/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.MP3', category: 'ayat_panjang' },
-    { id: 'aj_5', text: 'Adik saya belajar membaca buku cerita setiap malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/adik saya belajar membaca buku cerita setiap .MP3', category: 'ayat_panjang' },
-    { id: 'aj_6', text: 'Guru mengajar kami menulis huruf abjad dengan rapi.', audio: '/audio/bacaan-bergred/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.MP3', category: 'ayat_panjang' },
-    { id: 'aj_7', text: 'Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.MP3', category: 'ayat_panjang' },
-    { id: 'aj_8', text: 'Burung kecil itu terbang tinggi di langit biru.', audio: '/audio/bacaan-bergred/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.MP3', category: 'ayat_panjang' },
-    { id: 'aj_9', text: 'Kakak membantu ibu membasuh pinggan selepas makan malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.MP3', category: 'ayat_panjang' },
-    { id: 'aj_10', text: 'Kami berkumpul di padang sekolah untuk beriadah pagi.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.MP3', category: 'ayat_panjang' }
+    { id: 'aj_1', text: 'Ibu memasak nasi lemak untuk sarapan pagi ini.', audio: '/audio/bacaan-bergred/audio ayat panjang/ibu memasak nasi lemak untuk sarapan pagi ini.mp3', category: 'ayat_panjang' },
+    { id: 'aj_2', text: 'Kami pergi ke taman permainan pada hari Sabtu.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami pergi ke taman permainan pada hari sabtu.mp3', category: 'ayat_panjang' },
+    { id: 'aj_3', text: 'Bapa membeli buah-buahan segar di pasar tani.', audio: '/audio/bacaan-bergred/audio ayat panjang/bapa membeli buah buahan segar di pasar tani.mp3', category: 'ayat_panjang' },
+    { id: 'aj_4', text: 'Kucing kecil itu bermain dengan bola di halaman rumah.', audio: '/audio/bacaan-bergred/audio ayat panjang/kucing kecil itu bermain dengan bola di halam.mp3', category: 'ayat_panjang' },
+    { id: 'aj_5', text: 'Adik saya belajar membaca buku cerita setiap malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/adik saya belajar membaca buku cerita setiap .mp3', category: 'ayat_panjang' },
+    { id: 'aj_6', text: 'Guru mengajar kami menulis huruf abjad dengan rapi.', audio: '/audio/bacaan-bergred/audio ayat panjang/guru mengajar kami menulis huruf abjad dengan.mp3', category: 'ayat_panjang' },
+    { id: 'aj_7', text: 'Kami menyanyi lagu sambil bertepuk tangan dengan gembira.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami menyanyi lagu sambil bertepuk tangan den.mp3', category: 'ayat_panjang' },
+    { id: 'aj_8', text: 'Burung kecil itu terbang tinggi di langit biru.', audio: '/audio/bacaan-bergred/audio ayat panjang/burung kecil itu terbang tinggi di langit bir.mp3', category: 'ayat_panjang' },
+    { id: 'aj_9', text: 'Kakak membantu ibu membasuh pinggan selepas makan malam.', audio: '/audio/bacaan-bergred/audio ayat panjang/kakak membantu ibu membasuh pinggan selepas m.mp3', category: 'ayat_panjang' },
+    { id: 'aj_10', text: 'Kami berkumpul di padang sekolah untuk beriadah pagi.', audio: '/audio/bacaan-bergred/audio ayat panjang/kami berkumpul di padang sekolah untuk beriad.mp3', category: 'ayat_panjang' }
   ],
   'petikan_1': [
-    { id: 'p1_1', text: 'Ini kereta bapa. Kereta bapa biru. Bapa bawa kereta laju.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.MP3', category: 'petikan_1' },
-    { id: 'p1_2', text: 'Ini bola saya. Bola saya merah. Saya baling bola jauh.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.MP3', category: 'petikan_1' },
-    { id: 'p1_3', text: 'Ini topi adik. Topi adik kuning. Adik pakai topi elok.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.MP3', category: 'petikan_1' },
-    { id: 'p1_4', text: 'Ini beg kakak. Beg kakak hijau. Kakak bawa beg berat.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.MP3', category: 'petikan_1' },
-    { id: 'p1_5', text: 'Ini basikal abang. Basikal abang hitam. Abang kayuh basikal laju.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.MP3', category: 'petikan_1' }
+    { id: 'p1_1', text: 'Ini kereta bapa. Kereta bapa biru. Bapa bawa kereta laju.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 kereta.mp3', category: 'petikan_1' },
+    { id: 'p1_2', text: 'Ini bola saya. Bola saya merah. Saya baling bola jauh.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 bola.mp3', category: 'petikan_1' },
+    { id: 'p1_3', text: 'Ini topi adik. Topi adik kuning. Adik pakai topi elok.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 topi.mp3', category: 'petikan_1' },
+    { id: 'p1_4', text: 'Ini beg kakak. Beg kakak hijau. Kakak bawa beg berat.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 beg.mp3', category: 'petikan_1' },
+    { id: 'p1_5', text: 'Ini basikal abang. Basikal abang hitam. Abang kayuh basikal laju.', audio: '/audio/bacaan-bergred/audio petikan tahap 1/petikan tahap 1 basikal.mp3', category: 'petikan_1' }
   ],
   'petikan_2': [
-    { id: 'p2_1', text: 'Ini rumah saya. Rumah saya besar. Saya tinggal di rumah besar bersama keluarga.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.MP3', category: 'petikan_2' },
-    { id: 'p2_2', text: 'Ini sekolah kami. Sekolah kami ceria. Kami belajar di sekolah ceria setiap hari.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.MP3', category: 'petikan_2' },
-    { id: 'p2_3', text: 'Ini kucing saya. Kucing saya comel. Saya bermain dengan kucing comel setiap petang.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.MP3', category: 'petikan_2' },
-    { id: 'p2_4', text: 'Ini taman kami. Taman kami luas. Kami berlari di taman luas pada waktu pagi.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.MP3', category: 'petikan_2' },
-    { id: 'p2_5', text: 'Ini dapur ibu. Dapur ibu bersih. Ibu memasak di dapur bersih setiap petang.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.MP3', category: 'petikan_2' }
+    { id: 'p2_1', text: 'Ini rumah saya. Rumah saya besar. Saya tinggal di rumah besar bersama keluarga.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 rumah.mp3', category: 'petikan_2' },
+    { id: 'p2_2', text: 'Ini sekolah kami. Sekolah kami ceria. Kami belajar di sekolah ceria setiap hari.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 sekolah.mp3', category: 'petikan_2' },
+    { id: 'p2_3', text: 'Ini kucing saya. Kucing saya comel. Saya bermain dengan kucing comel setiap petang.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 kucing.mp3', category: 'petikan_2' },
+    { id: 'p2_4', text: 'Ini taman kami. Taman kami luas. Kami berlari di taman luas pada waktu pagi.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 taman.mp3', category: 'petikan_2' },
+    { id: 'p2_5', text: 'Ini dapur ibu. Dapur ibu bersih. Ibu memasak di dapur bersih setiap petang.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.mp3', category: 'petikan_2' }
   ],
   'cerita_pendek': [
-    { id: 'cp_1', text: 'Comel ialah seekor kucing kecil. Comel tinggal bersama Ali di rumah. Setiap pagi, Comel bermain di halaman rumah.', audio: '', category: 'cerita_pendek' },
-    { id: 'cp_2', text: 'Hari ini sekolah mengadakan hari sukan. Murid-murid memakai baju sukan berwarna-warni. Ani berlari pantas dalam pertandingan lari.', audio: '', category: 'cerita_pendek' },
-    { id: 'cp_3', text: 'Pada hari Sabtu, ibu pergi ke pasar. Ali turut serta bersama ibu ke pasar. Mereka membeli sayur, buah dan ikan segar.', audio: '', category: 'cerita_pendek' },
-    { id: 'cp_4', text: 'Di halaman rumah Ali, ada sebatang pokok mangga. Setiap tahun, pokok itu berbuah lebat. Ali suka memetik buah mangga yang masak.', audio: '', category: 'cerita_pendek' },
-    { id: 'cp_5', text: 'Cikgu Nur mengajar kelas prasekolah setiap hari. Murid-murid belajar membaca dan menyanyi bersama. Kelas itu sentiasa ceria dan gembira.', audio: '', category: 'cerita_pendek' }
+    { id: 'cp_1', text: 'Comel ialah seekor kucing kecil. Comel tinggal bersama Ali di rumah. Setiap pagi, Comel bermain di halaman rumah.', audio: '/audio/cerita-pendek/cerita-pendek-comel.mp3', category: 'cerita_pendek' },
+    { id: 'cp_2', text: 'Hari ini sekolah mengadakan hari sukan. Murid-murid memakai baju sukan berwarna-warni. Ani berlari pantas dalam pertandingan lari.', audio: '/audio/cerita-pendek/cerita-pendek-hari-sukan.mp3', category: 'cerita_pendek' },
+    { id: 'cp_3', text: 'Pada hari Sabtu, ibu pergi ke pasar. Ali turut serta bersama ibu ke pasar. Mereka membeli sayur, buah dan ikan segar.', audio: '/audio/cerita-pendek/cerita-pendek-pasar.mp3', category: 'cerita_pendek' },
+    { id: 'cp_4', text: 'Di halaman rumah Ali, ada sebatang pokok mangga. Setiap tahun, pokok itu berbuah lebat. Ali suka memetik buah mangga yang masak.', audio: '/audio/cerita-pendek/cerita-pendek-pokok-mangga.mp3', category: 'cerita_pendek' },
+    { id: 'cp_5', text: 'Cikgu Nur mengajar kelas prasekolah setiap hari. Murid-murid belajar membaca dan menyanyi bersama. Kelas itu sentiasa ceria dan gembira.', audio: '/audio/cerita-pendek/cerita-pendek-cikgu-nur.mp3', category: 'cerita_pendek' }
   ]
 };
 

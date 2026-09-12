@@ -18,6 +18,7 @@ export interface EntryChoiceModalProps {
   joinCode: string;
   setJoinCode: React.Dispatch<React.SetStateAction<string>>;
   setIsModeMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsModeChoiceOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setIsAdminActive: React.Dispatch<React.SetStateAction<boolean>>;
   setUserAccessLevel: React.Dispatch<React.SetStateAction<"trial" | "pro">>;
   setShowLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -107,6 +108,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
     joinCode,
     setJoinCode,
     setIsModeMenuOpen,
+    setIsModeChoiceOpen,
     setIsAdminActive,
     setUserAccessLevel,
     setShowLoginModal,
@@ -224,6 +226,8 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                       width: "100%",
                       transition: "transform 0.1s ease",
                       marginBottom: "16px",
+                      animation:
+                        "outlineGlowGold 2.5s infinite, pulse-scale 2.5s infinite ease-in-out",
                     }}
                     onClick={() => {
                       if (typeof (window as any).playBubble === "function") (window as any).playBubble();
@@ -318,11 +322,10 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         fontSize: "0.78rem",
                         fontWeight: "800",
                         color: "#64748b",
-                        textTransform: "uppercase",
                         letterSpacing: "0.5px",
                       }}
                     >
-                      Atau Akses Penuh
+                      atau akses penuh
                     </span>
                     <div style={{ flex: 1, borderTop: "2px dashed #cbd5e1" }}></div>
                   </div>
@@ -723,7 +726,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                       }}
                       onClick={() => {
                         setIsEntryChoiceModalOpen(false);
-                        setIsModeMenuOpen(true);
+                        setIsModeChoiceOpen(true);
                       }}
                     >
                       dapatkan di sini
@@ -819,30 +822,6 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                   >
                     Masukkan kod kelas atau keluarga untuk memuatkan profil.
                   </p>
-
-                  {/* Nota format kod 8 aksara & simbol (Grey style & smaller font) */}
-                  <div
-                    style={{
-                      backgroundColor: "#f1f5f9",
-                      border: "1.5px solid #cbd5e1",
-                      borderRadius: "10px",
-                      padding: "8px 12px",
-                      marginBottom: "16px",
-                      fontSize: "0.78rem",
-                      color: "#475569",
-                      textAlign: "left",
-                      lineHeight: "1.35",
-                    }}
-                  >
-                    <div style={{ fontWeight: "bold", display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px", color: "#334155" }}>
-                      <i className="fa-solid fa-circle-info" style={{ fontSize: "0.85rem" }}></i> Format Kod:
-                    </div>
-                    <div>• Wajib <strong>8 aksara</strong></div>
-                    <div>• Sekurang-kurangnya <strong>1 simbol</strong></div>
-                    <div style={{ marginTop: "3px", fontSize: "0.74rem", color: "#64748b" }}>
-                      <strong>Contoh Format:</strong> 8 aksara unik (cth: <code style={{ backgroundColor: "#e2e8f0", padding: "1px 4px", borderRadius: "4px" }}>ABCD@123</code>)
-                    </div>
-                  </div>
 
                   <input
                     type="text"
@@ -1131,6 +1110,18 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                     Sahkan Kod
                   </button>
 
+                  {/* Nota ringkas di bawah ruangan kod */}
+                  <div
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "#64748b",
+                      marginTop: "7px",
+                      textAlign: "center",
+                    }}
+                  >
+                    * Kod 8 aksara unik (cth: <strong style={{ color: "#334155" }}>ABCD@123</strong>)
+                  </div>
+
                   {/* Garisan Pemisah */}
                   <div
                     style={{
@@ -1213,7 +1204,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                       }}
                       onClick={() => {
                         setIsCodeModalOpen(false);
-                        setIsModeMenuOpen(true);
+                        setIsModeChoiceOpen(true);
                       }}
                     >
                       dapatkan di sini

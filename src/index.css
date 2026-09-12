@@ -8193,6 +8193,19 @@ select::-ms-expand {
     flex-grow: 1;
 }
 
+/* Jadual Sejarah Langganan: jangan warisi min-height jadual prestasi */
+.table-responsive.sejarah-langganan-wrapper,
+#guru-dashboard .table-responsive.sejarah-langganan-wrapper,
+#ibubapa-dashboard .table-responsive.sejarah-langganan-wrapper {
+    min-height: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    margin-top: 0 !important;
+    overflow-y: visible !important;
+    box-shadow: none;
+    flex-grow: 0;
+}
+
 @media (max-width: 768px) {
 
     body.teacher-mode:not(.admin-mode) #teacher-sticky-nav .neo-btn.hide-on-mobile,

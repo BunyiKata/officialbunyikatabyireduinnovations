@@ -341,7 +341,7 @@ export const TAMBAH_NOMBOR_DATABASE: NomborItem[] = [
     name: 'sifar tambah sifar sama dengan sifar',
     syllables: ['0 + 0', '=', '0'],
     image: '/images/nombor/sifar.png',
-    audio: '/audio/tambah/sifar tambah sifar sama dengan sifar.MP3',
+    audio: '/audio/tambah/sifar tambah sifar sama dengan sifar.mp3',
     count: 0,
     color: '#ec4899',
     bgColor: '#fce7f3'
@@ -352,7 +352,7 @@ export const TAMBAH_NOMBOR_DATABASE: NomborItem[] = [
     name: 'satu tambah sifar sama dengan satu',
     syllables: ['1 + 0', '=', '1'],
     image: '/images/nombor/satu.png',
-    audio: '/audio/tambah/satu tambah sifar sama dengan satu.MP3',
+    audio: '/audio/tambah/satu tambah sifar sama dengan satu.mp3',
     count: 1,
     color: '#10b981',
     bgColor: '#d1fae5'
@@ -363,7 +363,7 @@ export const TAMBAH_NOMBOR_DATABASE: NomborItem[] = [
     name: 'satu tambah satu sama dengan dua',
     syllables: ['1 + 1', '=', '2'],
     image: '/images/nombor/dua.png',
-    audio: '/audio/tambah/satu tambah satu sama dengan dua.MP3',
+    audio: '/audio/tambah/satu tambah satu sama dengan dua.mp3',
     count: 2,
     color: '#3b82f6',
     bgColor: '#dbeafe'
@@ -374,7 +374,7 @@ export const TAMBAH_NOMBOR_DATABASE: NomborItem[] = [
     name: 'satu tambah dua sama dengan tiga',
     syllables: ['1 + 2', '=', '3'],
     image: '/images/nombor/tiga.png',
-    audio: '/audio/tambah/satu tambah dua sama dengan tiga.MP3',
+    audio: '/audio/tambah/satu tambah dua sama dengan tiga.mp3',
     count: 3,
     color: '#f59e0b',
     bgColor: '#fef3c7'
@@ -385,7 +385,7 @@ export const TAMBAH_NOMBOR_DATABASE: NomborItem[] = [
     name: 'satu tambah tiga sama dengan empat',
     syllables: ['1 + 3', '=', '4'],
     image: '/images/nombor/empat.png',
-    audio: '/audio/tambah/satu tambah tiga sama dengan empat.MP3',
+    audio: '/audio/tambah/satu tambah tiga sama dengan empat.mp3',
     count: 4,
     color: '#8b5cf6',
     bgColor: '#ede9fe'
@@ -396,7 +396,7 @@ export const TAMBAH_NOMBOR_DATABASE: NomborItem[] = [
     name: 'satu tambah empat sama dengan lima',
     syllables: ['1 + 4', '=', '5'],
     image: '/images/nombor/lima.png',
-    audio: '/audio/tambah/satu tambah empat sama dengan lima.MP3',
+    audio: '/audio/tambah/satu tambah empat sama dengan lima.mp3',
     count: 5,
     color: '#06b6d4',
     bgColor: '#cffafe'
@@ -407,7 +407,7 @@ export const TAMBAH_NOMBOR_DATABASE: NomborItem[] = [
     name: 'satu tambah lima sama dengan enam',
     syllables: ['1 + 5', '=', '6'],
     image: '/images/nombor/enam.png',
-    audio: '/audio/tambah/satu tambah lima sama dengan enam.MP3',
+    audio: '/audio/tambah/satu tambah lima sama dengan enam.mp3',
     count: 6,
     color: '#10b981',
     bgColor: '#d1fae5'
@@ -418,7 +418,7 @@ export const TAMBAH_NOMBOR_DATABASE: NomborItem[] = [
     name: 'satu tambah enam sama dengan tujuh',
     syllables: ['1 + 6', '=', '7'],
     image: '/images/nombor/tujuh.png',
-    audio: '/audio/tambah/satu tambah enam sama dengan tujuh.MP3',
+    audio: '/audio/tambah/satu tambah enam sama dengan tujuh.mp3',
     count: 7,
     color: '#f97316',
     bgColor: '#ffedd5'
@@ -429,7 +429,7 @@ export const TAMBAH_NOMBOR_DATABASE: NomborItem[] = [
     name: 'satu tambah tujuh sama dengan lapan',
     syllables: ['1 + 7', '=', '8'],
     image: '/images/nombor/lapan.png',
-    audio: '/audio/tambah/satu tambah tujuh sama dengan lapan.MP3',
+    audio: '/audio/tambah/satu tambah tujuh sama dengan lapan.mp3',
     count: 8,
     color: '#ef4444',
     bgColor: '#fee2e2'
@@ -440,7 +440,7 @@ export const TAMBAH_NOMBOR_DATABASE: NomborItem[] = [
     name: 'satu tambah lapan sama dengan sembilan',
     syllables: ['1 + 8', '=', '9'],
     image: '/images/nombor/sembilan.png',
-    audio: '/audio/tambah/satu tambah lapan sama dengan sembilan.MP3',
+    audio: '/audio/tambah/satu tambah lapan sama dengan sembilan.mp3',
     count: 9,
     color: '#8b5cf6',
     bgColor: '#ede9fe'
@@ -451,7 +451,7 @@ export const TAMBAH_NOMBOR_DATABASE: NomborItem[] = [
     name: 'satu tambah sembilan sama dengan sepuluh',
     syllables: ['1 + 9', '=', '10'],
     image: '/images/nombor/sepuluh.png',
-    audio: '/audio/tambah/satu tambah sembilan sama dengan sepuluh.MP3',
+    audio: '/audio/tambah/satu tambah sembilan sama dengan sepuluh.mp3',
     count: 10,
     color: '#059669',
     bgColor: '#a7f3d0'
@@ -465,7 +465,7 @@ export const TOLAK_NOMBOR_DATABASE: NomborItem[] = [
     name: 'sepuluh tolak sepuluh sama dengan sifar',
     syllables: ['10 - 10', '=', '0'],
     image: '/images/nombor/sifar.png',
-    audio: '/audio/tolak/sepuluh tolak sepuluh sama dengan sifar.MP3',
+    audio: '/audio/tolak/sepuluh tolak sepuluh sama dengan sifar.mp3',
     count: 0,
     color: '#ec4899',
     bgColor: '#fce7f3'
@@ -476,7 +476,7 @@ export const TOLAK_NOMBOR_DATABASE: NomborItem[] = [
     name: 'sepuluh tolak sembilan sama dengan satu',
     syllables: ['10 - 9', '=', '1'],
     image: '/images/nombor/satu.png',
-    audio: '/audio/tolak/sepuluh tolak sembilan sama dengan satu.MP3',
+    audio: '/audio/tolak/sepuluh tolak sembilan sama dengan satu.mp3',
     count: 1,
     color: '#10b981',
     bgColor: '#d1fae5'
@@ -487,7 +487,7 @@ export const TOLAK_NOMBOR_DATABASE: NomborItem[] = [
     name: 'sepuluh tolak lapan sama dengan dua',
     syllables: ['10 - 8', '=', '2'],
     image: '/images/nombor/dua.png',
-    audio: '/audio/tolak/sepuluh tolak lapan sama dengan dua.MP3',
+    audio: '/audio/tolak/sepuluh tolak lapan sama dengan dua.mp3',
     count: 2,
     color: '#3b82f6',
     bgColor: '#dbeafe'
@@ -498,7 +498,7 @@ export const TOLAK_NOMBOR_DATABASE: NomborItem[] = [
     name: 'sepuluh tolak tujuh sama dengan tiga',
     syllables: ['10 - 7', '=', '3'],
     image: '/images/nombor/tiga.png',
-    audio: '/audio/tolak/sepuluh tolak tujuh sama dengan tiga.MP3',
+    audio: '/audio/tolak/sepuluh tolak tujuh sama dengan tiga.mp3',
     count: 3,
     color: '#f59e0b',
     bgColor: '#fef3c7'
@@ -509,7 +509,7 @@ export const TOLAK_NOMBOR_DATABASE: NomborItem[] = [
     name: 'sepuluh tolak enam sama dengan empat',
     syllables: ['10 - 6', '=', '4'],
     image: '/images/nombor/empat.png',
-    audio: '/audio/tolak/sepuluh tolak enam sama dengan empat.MP3',
+    audio: '/audio/tolak/sepuluh tolak enam sama dengan empat.mp3',
     count: 4,
     color: '#8b5cf6',
     bgColor: '#ede9fe'
@@ -520,7 +520,7 @@ export const TOLAK_NOMBOR_DATABASE: NomborItem[] = [
     name: 'sepuluh tolak lima sama dengan lima',
     syllables: ['10 - 5', '=', '5'],
     image: '/images/nombor/lima.png',
-    audio: '/audio/tolak/sepuluh tolak lima sama dengan lima.MP3',
+    audio: '/audio/tolak/sepuluh tolak lima sama dengan lima.mp3',
     count: 5,
     color: '#06b6d4',
     bgColor: '#cffafe'
@@ -531,7 +531,7 @@ export const TOLAK_NOMBOR_DATABASE: NomborItem[] = [
     name: 'sepuluh tolak empat sama dengan enam',
     syllables: ['10 - 4', '=', '6'],
     image: '/images/nombor/enam.png',
-    audio: '/audio/tolak/sepuluh tolak empat sama dengan enam.MP3',
+    audio: '/audio/tolak/sepuluh tolak empat sama dengan enam.mp3',
     count: 6,
     color: '#10b981',
     bgColor: '#d1fae5'
@@ -542,7 +542,7 @@ export const TOLAK_NOMBOR_DATABASE: NomborItem[] = [
     name: 'sepuluh tolak tiga sama dengan tujuh',
     syllables: ['10 - 3', '=', '7'],
     image: '/images/nombor/tujuh.png',
-    audio: '/audio/tolak/sepuluh tolak tiga sama dengan tujuh.MP3',
+    audio: '/audio/tolak/sepuluh tolak tiga sama dengan tujuh.mp3',
     count: 7,
     color: '#f97316',
     bgColor: '#ffedd5'
@@ -553,7 +553,7 @@ export const TOLAK_NOMBOR_DATABASE: NomborItem[] = [
     name: 'sepuluh tolak dua sama dengan lapan',
     syllables: ['10 - 2', '=', '8'],
     image: '/images/nombor/lapan.png',
-    audio: '/audio/tolak/sepuluh tolak dua sama dengan lapan.MP3',
+    audio: '/audio/tolak/sepuluh tolak dua sama dengan lapan.mp3',
     count: 8,
     color: '#ef4444',
     bgColor: '#fee2e2'
@@ -564,7 +564,7 @@ export const TOLAK_NOMBOR_DATABASE: NomborItem[] = [
     name: 'sepuluh tolak satu sama dengan sembilan',
     syllables: ['10 - 1', '=', '9'],
     image: '/images/nombor/sembilan.png',
-    audio: '/audio/tolak/sepuluh tolak satu sama dengan sembilan.MP3',
+    audio: '/audio/tolak/sepuluh tolak satu sama dengan sembilan.mp3',
     count: 9,
     color: '#8b5cf6',
     bgColor: '#ede9fe'
@@ -575,7 +575,7 @@ export const TOLAK_NOMBOR_DATABASE: NomborItem[] = [
     name: 'sepuluh tolak sifar sama dengan sepuluh',
     syllables: ['10 - 0', '=', '10'],
     image: '/images/nombor/sepuluh.png',
-    audio: '/audio/tolak/sepuluh tolak sifar sama dengan sepuluh.MP3',
+    audio: '/audio/tolak/sepuluh tolak sifar sama dengan sepuluh.mp3',
     count: 10,
     color: '#059669',
     bgColor: '#a7f3d0'

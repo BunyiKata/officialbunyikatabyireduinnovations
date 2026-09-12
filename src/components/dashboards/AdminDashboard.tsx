@@ -27,6 +27,13 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
         })
         .catch((err: any) => console.warn("Fetch admin data notice:", err));
     }
+
+    // Jadual Sejarah Langganan (semua pengguna)
+    if (typeof (window as any).muatSejarahLangganan === "function") {
+      (window as any).muatSejarahLangganan("admin");
+    } else if (typeof (window as any).renderSejarahLangganan === "function") {
+      (window as any).renderSejarahLangganan("admin");
+    }
   }, []);
 
   return (
@@ -933,6 +940,159 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
                 </tr>
               </thead>
               <tbody id="admin-table-body">{/* Rendered by JS */}</tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Jadual Sejarah Langganan (Admin — semua rekod + penapis) */}
+        <div
+          className="neo-box"
+          style={{
+            width: "100%",
+            maxWidth: "900px",
+            margin: "0 auto 20px",
+            padding: "20px",
+            background: "#ffffff",
+            backgroundImage:
+              "radial-gradient(circle, rgba(16, 24, 47, 0.14) 1.8px, transparent 1.8px)",
+            backgroundSize: "16px 16px",
+            textAlign: "left",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "15px",
+              flexWrap: "wrap",
+              gap: "10px",
+            }}
+          >
+            <div
+              id="admin-sejarah-langganan-title"
+              className="neo-btn"
+              style={{
+                background: "linear-gradient(135deg, #ea580c 0%, #c2410c 100%)",
+                color: "white",
+                padding: "7px 16px",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                borderRadius: "12px",
+                border: "2.5px solid var(--color-dark, #10182f)",
+                boxShadow: "0 3px 0 var(--color-dark, #10182f)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                pointerEvents: "none",
+                margin: 0,
+              }}
+            >
+              <i className="fa-solid fa-clock-rotate-left"></i>
+              <span style={{ fontFamily: "'AtlantaRoundedBlack', sans-serif" }}>
+                Sejarah Langganan
+              </span>
+            </div>
+
+            <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+              <select
+                id="admin-sejarah-peranan-filter"
+                className="neo-btn filter-select"
+                style={{
+                  padding: "6px 32px 6px 10px",
+                  fontSize: "0.85rem",
+                  fontWeight: "bold",
+                  borderRadius: "10px",
+                  border: "2px solid var(--color-dark)",
+                  backgroundColor: "#f1f5f9",
+                  cursor: "pointer",
+                }}
+                onChange={(e) => {
+                  (window as any).tukarSejarahLanggananFilter &&
+                    (window as any).tukarSejarahLanggananFilter("admin", e.target.value);
+                }}
+              >
+                <option value="semua">Semua Pengguna</option>
+                <option value="guru">Guru Sahaja</option>
+                <option value="ibubapa">Ibu Bapa Sahaja</option>
+              </select>
+
+              <div style={{ position: "relative", minWidth: "170px" }}>
+                <i
+                  className="fa-solid fa-magnifying-glass"
+                  style={{
+                    position: "absolute",
+                    left: "10px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "#94a3b8",
+                    fontSize: "0.8rem",
+                  }}
+                ></i>
+                <input
+                  type="text"
+                  id="admin-sejarah-carian"
+                  className="neo-input"
+                  placeholder="Cari nama / emel..."
+                  style={{
+                    width: "100%",
+                    paddingLeft: "30px",
+                    paddingRight: "10px",
+                    fontSize: "0.85rem",
+                    height: "36px",
+                    borderRadius: "10px",
+                    border: "2px solid var(--color-dark)",
+                    boxSizing: "border-box",
+                  }}
+                  onInput={(e) => {
+                    (window as any).tukarCarianSejarahLangganan &&
+                      (window as any).tukarCarianSejarahLangganan(
+                        "admin",
+                        (e.target as HTMLInputElement).value
+                      );
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            style={{
+              overflowX: "auto",
+              borderRadius: "12px",
+              border: "2px solid var(--color-dark)",
+              WebkitOverflowScrolling: "touch",
+            }}
+          >
+            <table
+              style={{
+                width: "100%",
+                minWidth: "620px",
+                borderCollapse: "collapse",
+                textAlign: "left",
+              }}
+            >
+              <thead>
+                <tr style={{ background: "linear-gradient(135deg, #ea580c 0%, #c2410c 100%)", color: "white" }}>
+                  <th style={{ padding: "10px 8px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", borderRight: "1px solid rgba(255,255,255,0.25)", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", width: "48px", minWidth: "48px", textTransform: "uppercase" }}>
+                    BIL
+                  </th>
+                  <th style={{ padding: "10px 12px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", borderRight: "1px solid rgba(255,255,255,0.25)", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", minWidth: "150px", textTransform: "uppercase" }}>
+                    NAMA
+                  </th>
+                  <th style={{ padding: "10px 12px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", borderRight: "1px solid rgba(255,255,255,0.25)", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", minWidth: "130px", textTransform: "uppercase" }}>
+                    TARIKH LANGGANAN
+                  </th>
+                  <th style={{ padding: "10px 12px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", borderRight: "1px solid rgba(255,255,255,0.25)", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", minWidth: "150px", textTransform: "uppercase" }}>
+                    TARIKH TAMAT LANGGANAN
+                  </th>
+                  <th style={{ padding: "10px 12px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", minWidth: "135px", textTransform: "uppercase" }}>
+                    JENIS LANGGANAN
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="admin-sejarah-langganan-body">
+                {/* Populated by window.renderSejarahLangganan('admin') */}
+              </tbody>
             </table>
           </div>
         </div>
