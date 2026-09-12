@@ -436,8 +436,23 @@ async function startServer() {
       res.sendFile(path.join(distPath, 'sw.js'));
     });
 
-    // Fail baki di akar dist/ (styles.css, app-logic.js, manifest.json).
-    app.use(express.static(distPath, { index: false, maxAge: '7d' }));
+    // Fail baki di akar dist/ (styles.css, app-logic.js, surih-logic.js,
+    // surih-nombor-logic.js, manifest.json).
+    //
+    // PENTING: Fail-fail ini BUKAN berhash — namanya kekal sama walaupun
+    // kandungannya berubah setiap deploy. Jika dicache lama, pembetulan
+    // tidak akan sampai kepada pengguna sehingga mereka hard refresh.
+    // Setiap satunya dihantar dengan no-cache supaya sentiasa segar.
+    app.use(
+      express.static(distPath, {
+        index: false,
+        etag: true,
+        lastModified: true,
+        setHeaders: (res) => {
+          res.setHeader('Cache-Control', NO_STORE);
+        },
+      }),
+    );
 
     // SPA fallback: hanya untuk laluan NAVIGASI (bukan aset, bukan /api).
     // Tanpa penapis ini, permintaan aset yang tiada akan menerima HTML dengan

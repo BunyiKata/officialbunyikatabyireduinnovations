@@ -7343,18 +7343,57 @@ body.hide-top-banner .teacher-top-banner,
 body.hide-top-banner #teacher-top-banner,
 body:has(#view-tanduk-kata.active) .teacher-top-banner,
 body:has(#view-ar-sukukata.active) .teacher-top-banner,
+body:has(#view-ar-kirajari.active) .teacher-top-banner,
 body:has(#view-vr-abc.active) .teacher-top-banner,
 body:has(#view-perpustakaan.active) .teacher-top-banner,
 body:has(#view-surih-huruf.active) .teacher-top-banner,
+body:has(#view-surih-nombor.active) .teacher-top-banner,
 body:has(#view-puzzle-sukukata.active) .teacher-top-banner,
+body:has(#view-cantum-kata.active) .teacher-top-banner,
 body:has(#view-belajar-huruf.active) .teacher-top-banner,
 body:has(#view-belajar-sukukata.active) .teacher-top-banner,
 body:has(#view-belajar-bacaan.active) .teacher-top-banner,
 body:has(#view-cabaran-suku-kata.active) .teacher-top-banner,
-body:has([id^="view-"].active) .teacher-top-banner,
+body:has(#view-cuba-sebut.active) .teacher-top-banner,
 body:has([id^="game-"].active) .teacher-top-banner,
 body:has(#modal-cabaran-lain-game.modal-open) .teacher-top-banner {
     display: none !important;
+}
+
+/* NOTA: Baris `body:has([id^="view-"].active) .teacher-top-banner` telah
+   DIBUANG dengan sengaja. Ia menyembunyikan banner mod pada SEMUA skrin
+   aktiviti — termasuk Kenali Huruf ABC, Vokal & Konsonan, Tambah/Tolak dan
+   Kad Imbasan Nombor — sehingga guru / admin / ibu bapa tidak tahu mereka
+   berada dalam mod yang mana. Skrin yang benar-benar perlukan skrin penuh
+   disenaraikan secara eksplisit di atas. */
+
+/* Skrin pembelajaran asas: banner mod MESTI kelihatan supaya pengguna
+   tahu mereka berada dalam MOD GURU / MOD ADMIN / MOD IBU BAPA. */
+body.teacher-mode:has(#view-belajar-fonik.active) .teacher-top-banner,
+body.admin-mode:has(#view-belajar-fonik.active) .teacher-top-banner,
+body.parent-mode:has(#view-belajar-fonik.active) .teacher-top-banner,
+body.teacher-mode:has(#view-belajar-nombor.active) .teacher-top-banner,
+body.admin-mode:has(#view-belajar-nombor.active) .teacher-top-banner,
+body.parent-mode:has(#view-belajar-nombor.active) .teacher-top-banner,
+body.teacher-mode:has(#view-kad-imbasan-nombor.active) .teacher-top-banner,
+body.admin-mode:has(#view-kad-imbasan-nombor.active) .teacher-top-banner,
+body.parent-mode:has(#view-kad-imbasan-nombor.active) .teacher-top-banner {
+    display: flex !important;
+}
+
+/* Beri ruang 40px (tinggi banner) supaya banner TIDAK menutup butang
+   kembali / tajuk aktiviti pada skrin pembelajaran asas tersebut. */
+body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-belajar-fonik.active) #view-belajar-fonik,
+body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-belajar-nombor.active) #view-belajar-nombor,
+body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-kad-imbasan-nombor.active) #view-kad-imbasan-nombor {
+    padding-top: 40px !important;
+    box-sizing: border-box !important;
+}
+
+body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-belajar-fonik.active) #view-belajar-fonik > div,
+body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-belajar-nombor.active) #view-belajar-nombor > div,
+body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-kad-imbasan-nombor.active) #view-kad-imbasan-nombor > div {
+    min-height: calc(100vh - 40px) !important;
 }
 
 body.teacher-mode:not(.hide-top-banner):not(:has([id^="view-"].active)):not(:has(#login-screen.active)) .teacher-top-banner,
@@ -8216,9 +8255,13 @@ select::-ms-expand {
     }
 }
 
-/* Fix teacher nav persistence when not in teacher mode */
-body:not(.teacher-mode) #teacher-sticky-nav,
-body:not(.teacher-mode) .teacher-top-banner {
+/* Fix teacher nav persistence when not in teacher mode.
+   PENTING: `.teacher-top-banner` hanya disembunyikan apabila TIADA mod
+   aktif sama sekali. Sebelum ini peraturan ini menyembunyikan banner
+   dalam mod ibu bapa (body.parent-mode tidak mempunyai .teacher-mode),
+   jadi banner MOD IBU BAPA tidak pernah kelihatan. */
+body:not(.teacher-mode):not(.admin-mode):not(.parent-mode) #teacher-sticky-nav,
+body:not(.teacher-mode):not(.admin-mode):not(.parent-mode) .teacher-top-banner {
     display: none !important;
 }
 

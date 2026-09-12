@@ -32,10 +32,19 @@
 <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- PWA Service Worker: daftar dengan kemas kini automatik.
+         updateViaCache: 'none' memastikan fail sw.js SENTIASA diambil
+         semula daripada rangkaian, jadi pembetulan cache tidak perlu
+         hard refresh. -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(err => {
+          navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then((reg) => {
+            // Semak kemas kini setiap kali halaman dibuka.
+            if (reg && typeof reg.update === 'function') {
+              reg.update().catch(() => {});
+            }
+          }).catch(err => {
             console.log('SW registration notice:', err);
           });
         });

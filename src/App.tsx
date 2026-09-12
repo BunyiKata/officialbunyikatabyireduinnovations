@@ -38,6 +38,8 @@ import {
   sendPasswordResetEmail,
   updateUserPasswordInFirebase,
 } from "./services/authService";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth as firebaseAuth } from "./lib/firebase";
 import {
   getClassByCode,
   getFamilyByCode,
@@ -360,27 +362,33 @@ export default function App() {
       let path = rawPath || (window.location.hash ? window.location.hash.replace("#", "") : "");
       if (!path || path === "index.html") {
         path = "login-screen";
-      } else if (path === "admin-dashboard" || path.startsWith("admin-")) {
-        const isAdmin = !!(
-          (window as any).modAdminAktif ||
-          (window as any).isAdminMode ||
-          localStorage.getItem("bunyiKataUserRole") === "admin" ||
-          (typeof document !== "undefined" && document.body?.classList?.contains("admin-mode"))
-        );
-        if (!isAdmin) {
+      }
+
+      // Gunakan penjaga laluan BERKONGSI (window.bolehAksesSkrin) supaya
+      // App.tsx dan app-logic.js sentiasa sependapat. Ini juga menutup
+      // celah pautan yang ditampal terus (cth /main-menu-screen).
+      if (typeof (window as any).bolehAksesSkrin === "function") {
+        if (path !== "login-screen" && !(window as any).bolehAksesSkrin(path)) {
           path = "login-screen";
         }
-      } else if (path === "guru-dashboard" || path.startsWith("guru-")) {
-        const isGuru = localStorage.getItem("bunyiKataUserRole") === "guru" || (window as any).modGuruAktif;
-        if (!isGuru) {
-          path = "login-screen";
-        }
-      } else if (path === "ibubapa-dashboard" || path.startsWith("ibubapa-")) {
-        const isParent = localStorage.getItem("bunyiKataUserRole") === "ibubapa" || (window as any).modIbuBapaAktif;
-        if (!isParent) {
-          path = "login-screen";
+      } else {
+        // Rizab: jika app-logic.js belum dimuatkan lagi.
+        if (path === "admin-dashboard" || path.startsWith("admin-")) {
+          const isAdmin = !!(
+            (window as any).modAdminAktif ||
+            (window as any).isAdminMode ||
+            (window as any).adminClaimDisahkan === true
+          );
+          if (!isAdmin) path = "login-screen";
+        } else if (path === "guru-dashboard" || path.startsWith("guru-")) {
+          const isGuru = localStorage.getItem("bunyiKataUserRole") === "guru" || (window as any).modGuruAktif;
+          if (!isGuru) path = "login-screen";
+        } else if (path === "ibubapa-dashboard" || path.startsWith("ibubapa-")) {
+          const isParent = localStorage.getItem("bunyiKataUserRole") === "ibubapa" || (window as any).modIbuBapaAktif;
+          if (!isParent) path = "login-screen";
         }
       }
+
       if (path) {
         setActiveScreen(path);
         if (typeof (window as any).paparSkrin === "function") {
@@ -600,9 +608,24 @@ export default function App() {
 
     // Initial check on mount
     if (typeof window !== "undefined") {
-      const currentPath =
+      let currentPath =
         window.location.pathname.replace(/^\/+/, "") ||
         (window.location.hash ? window.location.hash.replace("#", "") : "");
+
+      // Penjaga laluan BERKONGSI — pautan yang ditampal terus (cth
+      // /main-menu-screen atau /admin-dashboard) oleh pelawat awam mesti
+      // kembali ke skrin log masuk. Jika tidak, mereka boleh masuk ke
+      // dalam mod Pro/Admin tanpa melalui aliran masuk yang sah.
+      if (currentPath && currentPath !== "login-screen" && typeof (window as any).bolehAksesSkrin === "function") {
+        if (!(window as any).bolehAksesSkrin(currentPath)) {
+          console.warn("[Navigasi] Laluan awal ditolak:", currentPath, "— kembali ke skrin log masuk.");
+          currentPath = "login-screen";
+          try {
+            window.history.replaceState({ screenId: "login-screen" }, document.title, "/");
+          } catch (e) {}
+        }
+      }
+
       if (currentPath && currentPath !== "login-screen") {
         setActiveScreen(currentPath);
         setShowSplash(false);
@@ -1106,15 +1129,19 @@ export default function App() {
   const isUserAdmin = React.useCallback(() => {
     try {
       if (typeof window === "undefined") return false;
+      // PENTING: 'bunyiKataUserRole' di dalam localStorage TIDAK boleh
+      // dijadikan bukti tunggal. Sisa nilai 'admin' daripada sesi lama
+      // menyebabkan pelawat awam terperangkap dalam Mod Admin selepas
+      // hard refresh. Identiti admin hanya sah jika:
+      //   1. bendera sesi RUNTIME masih aktif dalam tab ini, ATAU
+      //   2. sesi Firebase Auth semasa benar-benar membawa claim admin
+      //      (disemak secara tak segerak oleh semakSesiAdminFirebase()).
       return !!(
         (window as any).modAdminAktif ||
         (window as any).isAdminMode ||
-        localStorage.getItem("bunyiKataUserRole") === "admin" ||
-        (typeof document !== "undefined" && (
-          document.body?.classList?.contains("admin-mode") ||
-          false
-        )) ||
-        (window as any).currentUser?.peranan === "admin"
+        (window as any).adminClaimDisahkan === true ||
+        (typeof document !== "undefined" &&
+          document.body?.classList?.contains("admin-mode"))
       );
     } catch (e) {
       return false;
@@ -1127,12 +1154,7 @@ export default function App() {
       return !!(
         (window as any).modAdminAktif ||
         (window as any).isAdminMode ||
-        localStorage.getItem("bunyiKataUserRole") === "admin" ||
-        (typeof document !== "undefined" && (
-          document.body?.classList?.contains("admin-mode") ||
-          false
-        )) ||
-        (window as any).currentUser?.peranan === "admin"
+        (window as any).adminClaimDisahkan === true
       );
     } catch (e) {
       return false;
@@ -1143,17 +1165,22 @@ export default function App() {
   const [isCodeModalOpen, setIsCodeModalOpen] = React.useState(false);
   const [userAccessLevel, setUserAccessLevel] = React.useState<"trial" | "pro">(() => {
     if (typeof window !== "undefined") {
+      // Hanya sesi admin RUNTIME yang menjamin akses Pro.
       if (
-        localStorage.getItem("bunyiKataUserRole") === "admin" ||
-        (typeof document !== "undefined" && (
-          document.body?.classList?.contains("admin-mode") ||
-          false
-        )) ||
         (window as any).modAdminAktif ||
-        (window as any).isAdminMode
+        (window as any).isAdminMode ||
+        (window as any).adminClaimDisahkan === true
       ) {
         return "pro";
       }
+      // 'bunyiKataAccessLevel === "pro"' sahaja TIDAK cukup — ia boleh
+      // menjadi sisa sesi admin lama. Akses Pro hanya dikekalkan jika ada
+      // peranan sebenar yang menyokongnya.
+      const roleSemasa = (localStorage.getItem("bunyiKataUserRole") || "").toLowerCase().trim();
+      const adaPerananSah =
+        roleSemasa === "guru" ||
+        roleSemasa === "ibubapa" ||
+        roleSemasa === "murid";
       if (
         (window as any).isGuestMode ||
         (window as any).namaMuridAktif === "Tetamu" ||
@@ -1161,10 +1188,67 @@ export default function App() {
       ) {
         return "trial";
       }
+      if (!adaPerananSah) {
+        return "trial";
+      }
       return (localStorage.getItem("bunyiKataAccessLevel") as "trial" | "pro") || "trial";
     }
     return "trial";
   });
+
+  React.useEffect(() => {
+    // PENTING: Pulihkan identiti admin daripada SESI FIREBASE AUTH sebenar,
+    // bukan daripada localStorage. Token admin (claim { admin: true }) hanya
+    // dikeluarkan oleh pelayan selepas kod admin yang betul dimasukkan.
+    // Jika tiada claim admin, semua sisa sesi admin dalam localStorage
+    // dibersihkan supaya pelawat awam tidak terperangkap dalam Mod Admin.
+    const bersihkanSisaSesiAdmin = () => {
+      try {
+        if ((window as any).modAdminAktif || (window as any).isAdminMode) return;
+        if (localStorage.getItem("bunyiKataUserRole") === "admin") {
+          localStorage.removeItem("bunyiKataUserRole");
+        }
+        (window as any).adminClaimDisahkan = false;
+        (window as any).isAdminMode = false;
+        (window as any).modAdminAktif = false;
+        if (typeof document !== "undefined" && document.body) {
+          document.body.classList.remove("admin-mode");
+        }
+        const aNav = document.getElementById("admin-sticky-nav");
+        if (aNav) aNav.style.display = "none";
+        setIsAdminActive(false);
+      } catch (e) {}
+    };
+
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
+      if (!user) {
+        bersihkanSisaSesiAdmin();
+        return;
+      }
+      try {
+        const tokenResult = await user.getIdTokenResult();
+        const isAdminClaim = tokenResult?.claims?.admin === true;
+        if (isAdminClaim) {
+          (window as any).adminClaimDisahkan = true;
+          (window as any).isAdminMode = true;
+          (window as any).modAdminAktif = true;
+          (window as any).isGuestMode = false;
+          (window as any).userAccessLevel = "pro";
+          localStorage.setItem("bunyiKataUserRole", "admin");
+          localStorage.setItem("bunyiKataAccessLevel", "pro");
+          setIsAdminActive(true);
+          setUserAccessLevel("pro");
+        } else {
+          bersihkanSisaSesiAdmin();
+        }
+      } catch (err) {
+        console.warn("[Admin] Semakan claim admin gagal:", err);
+        bersihkanSisaSesiAdmin();
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   React.useEffect(() => {
     const handleAdminSync = () => {
@@ -1275,6 +1359,15 @@ export default function App() {
   const isEffectivePro = !isEffectiveTrial;
 
   React.useEffect(() => {
+    // PENTING: app-logic.js mentakrifkan versi kanonikal `isEffectiveTrial`
+    // yang menyemak peranan + pelan sebenar. Jika kita tindih ia di sini,
+    // dua sumber kebenaran akan bertelagah dan avatar Versi Pro boleh
+    // terbuka secara tidak menentu. Jadi kita hanya tetapkan versi rizab
+    // SEBELUM app-logic.js selesai dimuatkan.
+    if (typeof (window as any).bolehAksesSkrin === "function") {
+      // app-logic.js sudah sedia — jangan tindih.
+      return;
+    }
     (window as any).isEffectiveTrial = () => isEffectiveTrial;
     (window as any).isEffectivePro = () => isEffectivePro;
   }, [isEffectiveTrial, isEffectivePro]);
@@ -2046,7 +2139,10 @@ export default function App() {
 
     // We will load the logic here or via external file
     if (document.getElementById("app-logic-script")) return;
-    const v = new Date().getTime();
+    // PENTING: Gunakan versi build yang stabil (bukan Date.now()) supaya
+    // pelayar boleh menggunakan cache HTTP dengan betul. Nilai sentiasa
+    // berubah memaksa muat turun penuh pada setiap navigasi.
+    const v = (import.meta as any).env?.VITE_BUILD_ID || "dev";
     const script = document.createElement("script");
     script.id = "app-logic-script";
     script.src = `/app-logic.js?v=${v}`;

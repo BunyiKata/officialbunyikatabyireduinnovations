@@ -1777,6 +1777,18 @@ const SCREEN_NAMES_MAP = {
 
 function paparSkrin(screenId, skipHash) {
     if (!screenId) return;
+
+    // --- PENJAGA LALUAN (ROUTE GUARD) ---
+    // Laluan yang ditaip / ditampal terus (cth /main-menu-screen, /admin-dashboard)
+    // mesti melalui aliran masuk yang sah dahulu. Tanpa semakan ini, pelawat
+    // awam boleh menampal pautan dan terus masuk ke dalam mod Pro/Admin.
+    if (screenId !== 'login-screen' && typeof window.bolehAksesSkrin === 'function') {
+        if (!window.bolehAksesSkrin(screenId)) {
+            console.warn('[Navigasi] Akses ditolak untuk skrin:', screenId, '— kembali ke skrin log masuk.');
+            screenId = 'login-screen';
+        }
+    }
+
     const sasaran = document.getElementById(screenId);
     if (!sasaran) return;
 
@@ -1830,13 +1842,37 @@ function paparSkrin(screenId, skipHash) {
     const aNav = document.getElementById('admin-sticky-nav');
     const pNav = document.getElementById('parent-sticky-nav');
 
-    const isLearningOrGame = screenId.startsWith('view-') || 
-        screenId.startsWith('game-') || 
-        screenId.includes('learn') || 
-        screenId.includes('latihan') || 
-        ['view-tanduk-kata', 'view-ar-sukukata', 'view-vr-abc', 'view-perpustakaan', 'view-surih-huruf', 'view-puzzle-sukukata', 'view-belajar-huruf', 'view-belajar-sukukata', 'view-belajar-bacaan', 'view-cabaran-suku-kata'].includes(screenId);
+    // Skrin aktiviti yang menggunakan skrin penuh (VR/AR/permainan) —
+    // banner mod SENGAJA disembunyikan supaya tidak menutup permainan.
+    // SENARAI INI MESTI LENGKAP: dahulu ia menggunakan penapis luas
+    // `[id^="view-"]` yang turut menyembunyikan banner pada skrin
+    // pembelajaran asas (Kenali Huruf ABC, Vokal & Konsonan, Tambah/Tolak,
+    // Kad Imbasan Nombor) — itulah bug "banner mod tiada".
+    const SKRIN_PENUH_TANPA_BANNER = [
+        'view-tanduk-kata', 'view-ar-sukukata', 'view-vr-abc',
+        'view-perpustakaan', 'view-surih-huruf', 'view-puzzle-sukukata',
+        'view-belajar-huruf', 'view-belajar-sukukata', 'view-belajar-bacaan',
+        'view-cabaran-suku-kata', 'view-cuba-sebut',
+        'view-ar-kirajari', 'view-cantum-kata', 'view-surih-nombor'
+    ];
 
-    if (isLearningOrGame) {
+    // Skrin aktiviti PEMBELAJARAN ASAS (Kenali Huruf ABC, Vokal & Konsonan,
+    // Tambah/Tolak, Kad Imbasan) — banner mod MESTI KEKAL kelihatan supaya
+    // guru / admin / ibu bapa tahu mereka berada dalam mod yang mana.
+    const SKRIN_PAPAR_BANNER_MOD = [
+        'view-belajar-fonik', 'view-belajar-nombor', 'view-kad-imbasan-nombor'
+    ];
+
+    const isLearningOrGame = screenId.startsWith('view-') ||
+        screenId.startsWith('game-') ||
+        screenId.includes('learn') ||
+        screenId.includes('latihan') ||
+        SKRIN_PENUH_TANPA_BANNER.includes(screenId);
+
+    // Adakah skrin ini perlu menyembunyikan banner?
+    const sembunyiBanner = isLearningOrGame && !SKRIN_PAPAR_BANNER_MOD.includes(screenId);
+
+    if (sembunyiBanner) {
         document.body.classList.add('hide-top-banner');
         if (topBanner) topBanner.style.display = 'none';
     } else {
@@ -1848,7 +1884,7 @@ function paparSkrin(screenId, skipHash) {
         window.modIbuBapaAktif = false;
         document.body.classList.add('teacher-mode', 'admin-mode');
         document.body.classList.remove('parent-mode');
-        if (topBanner) topBanner.style.display = isLearningOrGame ? 'none' : 'flex';
+        if (topBanner) topBanner.style.display = sembunyiBanner ? 'none' : 'flex';
         if (badge) badge.innerHTML = '<i class="fa-solid fa-user-shield"></i> MOD ADMIN';
         if (aNav) aNav.style.display = 'flex';
         if (tNav) tNav.style.display = 'none';
@@ -1858,7 +1894,7 @@ function paparSkrin(screenId, skipHash) {
         window.modIbuBapaAktif = false;
         document.body.classList.add('teacher-mode');
         document.body.classList.remove('admin-mode', 'parent-mode');
-        if (topBanner) topBanner.style.display = isLearningOrGame ? 'none' : 'flex';
+        if (topBanner) topBanner.style.display = sembunyiBanner ? 'none' : 'flex';
         if (badge) badge.innerHTML = '<i class="fa-solid fa-graduation-cap"></i> MOD GURU';
         if (tNav) tNav.style.display = 'flex';
         if (aNav) aNav.style.display = 'none';
@@ -1868,7 +1904,7 @@ function paparSkrin(screenId, skipHash) {
         window.modGuruAktif = false;
         document.body.classList.add('parent-mode');
         document.body.classList.remove('teacher-mode', 'admin-mode');
-        if (topBanner) topBanner.style.display = isLearningOrGame ? 'none' : 'flex';
+        if (topBanner) topBanner.style.display = sembunyiBanner ? 'none' : 'flex';
         if (badge) badge.innerHTML = '<i class="fa-solid fa-user-group"></i> MOD IBU BAPA';
         if (pNav) pNav.style.display = 'flex';
         if (tNav) tNav.style.display = 'none';
@@ -1890,6 +1926,19 @@ function paparSkrin(screenId, skipHash) {
             } else {
                 document.body.classList.remove('hide-bottom-nav');
             }
+        }
+    }
+
+    // Jaring keselamatan: jika skrin ini sepatutnya memaparkan banner mod
+    // (cth Kenali Huruf ABC, Vokal & Konsonan, Tambah/Tolak, Kad Imbasan
+    // Nombor) tetapi cawangan di atas tidak mengendalikannya secara
+    // eksplisit, pastikan banner benar-benar kelihatan. Tanpa ini, guru /
+    // admin / ibu bapa tidak tahu mereka berada dalam mod yang mana.
+    if (!sembunyiBanner &&
+        (window.modGuruAktif || window.modIbuBapaAktif || window.modAdminAktif || window.isAdminMode)) {
+        if (topBanner) topBanner.style.display = 'flex';
+        if (!badge) {
+            /* badge tidak dijumpai — tiada tindakan */
         }
     }
 
@@ -2001,6 +2050,17 @@ function mengendaliNavigasiURL(e) {
         path = 'login-screen';
     }
 
+    // PENTING: Semak penjaga laluan SEBELUM menulis semula URL. Jika pautan
+    // yang ditampal tidak dibenarkan (cth pelawat awam membuka
+    // /main-menu-screen atau /admin-dashboard), URL dalam bar alamat mesti
+    // dikembalikan ke '/' — bukan dibiarkan seolah-olah akses berjaya.
+    if (path !== 'login-screen' && typeof window.bolehAksesSkrin === 'function') {
+        if (!window.bolehAksesSkrin(path)) {
+            console.warn('[Navigasi] Laluan ditolak:', path, '— URL dikembalikan ke /.');
+            path = 'login-screen';
+        }
+    }
+
     if (path) {
         paparSkrin(path, true);
         const urlPath = (path === 'login-screen') ? '/' : '/' + path;
@@ -2022,10 +2082,15 @@ setTimeout(function () {
 
 window.isUserAdmin = function () {
     try {
+        // PENTING: JANGAN percaya localStorage sahaja.
+        // Sebelum ini, nilai 'bunyiKataUserRole' === 'admin' yang tertinggal
+        // dalam localStorage menyebabkan sesi admin dihidupkan semula setiap
+        // kali halaman dimuat semula (hard refresh) — pelawat awam terpapar
+        // banner MOD ADMIN dan akses Pro. Mod admin kini hanya sah jika
+        // bendera sesi RUNTIME masih aktif dalam tab ini.
         return !!(
             window.modAdminAktif ||
             window.isAdminMode ||
-            localStorage.getItem('bunyiKataUserRole') === 'admin' ||
             (document.body && document.body.classList.contains('admin-mode')) ||
             (window.currentUser && window.currentUser.peranan === 'admin')
         );
@@ -2033,10 +2098,88 @@ window.isUserAdmin = function () {
         return false;
     }
 };
+
+/**
+ * Penjaga laluan (route guard) BERKONGSI.
+ *
+ * Dahulu hanya App.tsx mempunyai penjaga untuk laluan admin-* / guru-* /
+ * ibubapa-*, manakala app-logic.js memaparkan apa sahaja skrin yang diminta.
+ * Dua penghala yang tidak sependapat ini menyebabkan kelakuan tidak menentu:
+ * pengguna menampal pautan (cth /main-menu-screen) lalu terperangkap di dalam
+ * mod Pro tanpa melalui aliran masuk yang sah.
+ *
+ * Fungsi ini menjawab satu soalan: bolehkah skrin ini dibuka sekarang?
+ */
+window.bolehAksesSkrin = function (screenId) {
+    try {
+        if (!screenId) return false;
+        const id = String(screenId);
+
+        // 1) Skrin admin — hanya dengan sesi admin RUNTIME.
+        if (id === 'admin-dashboard' || id.startsWith('admin-')) {
+            return !!(
+                window.modAdminAktif ||
+                window.isAdminMode ||
+                window.adminClaimDisahkan === true ||
+                (document.body && document.body.classList.contains('admin-mode'))
+            );
+        }
+
+        // 2) Skrin guru.
+        if (id === 'guru-dashboard' || id.startsWith('guru-')) {
+            const role = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase();
+            return !!(window.modGuruAktif || role === 'guru' || role === 'admin');
+        }
+
+        // 3) Skrin ibu bapa.
+        if (id === 'ibubapa-dashboard' || id.startsWith('ibubapa-')) {
+            const role = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase();
+            return !!(window.modIbuBapaAktif || role === 'ibubapa');
+        }
+
+        // 4) Skrin MURID (menu utama, peta, semua view-*).
+        // Pelawat yang menampal pautan terus ke sini mesti melalui aliran
+        // masuk dahulu (Cuba Percuma / kod kelas / kod keluarga / log masuk).
+        const SKRIN_MURID = [
+            'main-menu-screen', 'map-screen', 'murid-menu-belajar',
+            'murid-menu-latihan', 'profile-screen', 'lencana-screen',
+            'prestasi-screen', 'leaderboard-screen'
+        ];
+        const ialahSkrinMurid = SKRIN_MURID.includes(id) ||
+            id.startsWith('view-') || id.startsWith('game-') ||
+            id.startsWith('murid-');
+        if (ialahSkrinMurid) {
+            const namaAktif = (window.namaMuridAktif ||
+                localStorage.getItem('muridAktif') ||
+                localStorage.getItem('bunyiKataCurrentMurid') || '').trim();
+            const role = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase();
+            const NAMA_BUKAN_MURID = ['', 'admin', 'guru', 'ibubapa', 'ibu bapa', 'guest', 'murid'];
+            const namaMuridSah = namaAktif &&
+                !NAMA_BUKAN_MURID.includes(namaAktif.toLowerCase()) &&
+                namaAktif !== 'Tetamu';
+            // Mod tetamu yang SAH (isGuestMode) dibenarkan walaupun tanpa nama.
+            const tetamuSah = window.isGuestMode === true && namaAktif === 'Tetamu';
+            return !!(
+                namaMuridSah ||
+                tetamuSah ||
+                role === 'murid' ||
+                window.modGuruAktif ||
+                window.modAdminAktif ||
+                window.modIbuBapaAktif ||
+                window.isAdminMode
+            );
+        }
+
+        // Skrin awam (login-screen, dsb.)
+        return true;
+    } catch (e) {
+        return true;
+    }
+};
 window.isEffectiveTrial = function () {
     if (window.isUserAdmin && window.isUserAdmin()) return false;
     if (window.isAdminMode || window.modAdminAktif) return false;
-    if (localStorage.getItem('bunyiKataUserRole') === 'admin') return false;
+    if (window.adminClaimDisahkan === true) return false;
 
     const teacherPlan = (localStorage.getItem('bunyiKataTeacherPlan') || '').toLowerCase().trim();
     const parentPlan = (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase().trim();
@@ -2045,7 +2188,10 @@ window.isEffectiveTrial = function () {
 
     const isTeacherPaid = teacherPlan && teacherPlan !== 'percuma' && teacherPlan !== 'trial' && teacherPlan !== 'free';
     const isParentPaid = parentPlan && parentPlan !== 'percuma' && parentPlan !== 'trial' && parentPlan !== 'free';
-    const isPaid = (userRole === 'admin') || (userRole === 'guru' && isTeacherPaid) || (userRole === 'ibubapa' && isParentPaid) || (accessLvl === 'pro');
+    // 'accessLvl === pro' TIDAK dikira sebagai bukti pembayaran dengan
+    // sendirinya — ia boleh menjadi sisa sesi admin lama. Hanya peranan
+    // sebenar (guru berbayar / ibu bapa berbayar) membenarkan Pro.
+    const isPaid = (userRole === 'guru' && isTeacherPaid) || (userRole === 'ibubapa' && isParentPaid);
 
     // Jika pengguna mempunyai pelan berbayar (Pro) yang sah, jangan sekali-kali jadikan mod percuma/tetamu
     if (isPaid) {
@@ -2064,8 +2210,14 @@ window.isEffectiveTrial = function () {
         return false;
     }
 
-    if (accessLvl === 'trial' || accessLvl === 'percuma') return true;
-    return false;
+    // Murid dengan profil sah dan akses Pro eksplisit.
+    if (userRole === 'murid' && accessLvl === 'pro') return false;
+
+    // SELAMAT SECARA LALAI: apa-apa keadaan lain (termasuk sisa sesi admin
+    // lama, peranan tidak dikenali, atau tetapan kosong) dianggap TRIAL.
+    // Sebelum ini fungsi ini memulangkan `false` (Pro) secara lalai — inilah
+    // sebab pelawat awam tiba-tiba mendapat akses Pro.
+    return true;
 };
 
 window.masukModAdmin = masukModAdmin;
@@ -2245,8 +2397,34 @@ function keluarModGuru() {
     modAdminAktif = false;
     window.modAdminAktif = false;
     window.isAdminMode = false;
+    window.adminClaimDisahkan = false;
     if (localStorage.getItem('bunyiKataUserRole') === 'admin') {
         localStorage.removeItem('bunyiKataUserRole');
+    }
+    // PENTING: Buang juga 'bunyiKataAccessLevel' jika ia hanya sisa sesi
+    // admin. Jika ditinggalkan sebagai 'pro', pelawat awam akan mendapati
+    // avatar Versi Pro pada skrin log masuk sudah TERBUKA walaupun tiada
+    // langganan sebenar.
+    const roleSelepasKeluar = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
+    const masihAdaLangganan = roleSelepasKeluar === 'guru' || roleSelepasKeluar === 'ibubapa' || roleSelepasKeluar === 'murid';
+    if (!masihAdaLangganan && localStorage.getItem('bunyiKataAccessLevel') === 'pro') {
+        localStorage.removeItem('bunyiKataAccessLevel');
+    }
+    // Buang nama 'Admin' yang tertinggal — jika tidak, penjaga laluan akan
+    // menyangka ada murid aktif dan membenarkan akses ke main-menu-screen.
+    const namaTersisa = (localStorage.getItem('muridAktif') || '').toLowerCase().trim();
+    if (!masihAdaLangganan && (namaTersisa === 'admin' || namaTersisa === 'guru')) {
+        localStorage.removeItem('muridAktif');
+        localStorage.removeItem('bunyiKataCurrentMurid');
+        window.namaMuridAktif = '';
+        if (typeof namaMuridAktif !== 'undefined') namaMuridAktif = '';
+    }
+    // Log keluar sebenar daripada Firebase Auth supaya token admin tidak
+    // boleh menghidupkan semula mod admin selepas muat semula halaman.
+    if (typeof window.firebaseLogout === 'function') {
+        try {
+            Promise.resolve(window.firebaseLogout()).catch(function () { });
+        } catch (e) { }
     }
     document.body.classList.remove('teacher-mode');
     document.body.classList.remove('admin-mode');
@@ -4448,10 +4626,13 @@ function isTrialAvatarCheck() {
     }
     if (window.isUserAdmin && window.isUserAdmin()) return false;
     if (window.isAdminMode || window.modAdminAktif) return false;
-    if (localStorage.getItem('bunyiKataUserRole') === 'admin') return false;
+    if (window.adminClaimDisahkan === true) return false;
     if (window.isGuestMode || window.namaMuridAktif === 'Tetamu' || !window.namaMuridAktif) return true;
+    // 'pro' dalam localStorage hanya sah dengan peranan sebenar.
+    const role = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
+    const adaPerananSah = role === 'guru' || role === 'ibubapa' || role === 'murid';
     const accessLvl = (localStorage.getItem('bunyiKataAccessLevel') || window.userAccessLevel || '').toLowerCase().trim();
-    if (accessLvl === 'pro') return false;
+    if (accessLvl === 'pro' && adaPerananSah) return false;
     if (accessLvl === 'trial') return true;
     return false;
 }
@@ -6206,11 +6387,21 @@ function kembaliKePilihPeta() {
 }
 
 function checkIsTrial() {
-    if (localStorage.getItem('bunyiKataAccessLevel') === 'pro' || window.userAccessLevel === 'pro') {
+    // Nilai 'pro' di dalam localStorage TIDAK boleh berdiri sendiri.
+    // Ia hanya sah jika ada peranan sebenar (guru / ibu bapa / murid) ATAU
+    // sesi mod yang aktif. PENTING: peranan 'admin' di dalam localStorage
+    // TIDAK dikira — sisa sesi admin lama mesti tidak membuka akses Pro.
+    const roleSemasa = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
+    const adaSesiSah = roleSemasa === 'guru' || roleSemasa === 'ibubapa' || roleSemasa === 'murid' ||
+        window.modGuruAktif || window.modIbuBapaAktif || window.modAdminAktif || window.isAdminMode ||
+        window.adminClaimDisahkan === true;
+    if ((localStorage.getItem('bunyiKataAccessLevel') === 'pro' || window.userAccessLevel === 'pro') && adaSesiSah) {
         return false;
     }
     const role = localStorage.getItem('bunyiKataUserRole') || '';
-    if (role === 'admin' || window.isAdminMode || window.modAdminAktif || (typeof document !== 'undefined' && document.body && document.body.classList.contains('admin-mode'))) {
+    // Sesi admin RUNTIME sahaja (bukan nilai localStorage semata-mata).
+    if (window.isAdminMode || window.modAdminAktif || window.adminClaimDisahkan === true ||
+        (typeof document !== 'undefined' && document.body && document.body.classList.contains('admin-mode'))) {
         return false;
     }
     if (role === 'guru' || window.modGuruAktif || (typeof document !== 'undefined' && document.body && document.body.classList.contains('teacher-mode'))) {
@@ -6223,9 +6414,11 @@ function checkIsTrial() {
         const access = localStorage.getItem('bunyiKataAccessLevel');
         return plan === 'percuma' || access === 'trial';
     }
-    // Jika murid aktif berdaftar (bukan Tetamu)
-    const activeStudent = window.namaMuridAktif || localStorage.getItem('muridAktif') || '';
-    if (activeStudent && activeStudent !== 'Tetamu' && activeStudent !== 'Murid') {
+    // Jika murid aktif berdaftar (bukan Tetamu dan bukan nama peranan).
+    // PENTING: 'Admin' / 'Guru' adalah sisa sesi peranan, BUKAN nama murid.
+    const activeStudent = (window.namaMuridAktif || localStorage.getItem('muridAktif') || '').trim();
+    const NAMA_BUKAN_MURID = ['tetamu', 'murid', 'guest', 'student', 'admin', 'guru', 'ibubapa', 'ibu bapa'];
+    if (activeStudent && !NAMA_BUKAN_MURID.includes(activeStudent.toLowerCase())) {
         return false;
     }
     // Jika tetamu / akaun percuma

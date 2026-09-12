@@ -694,12 +694,13 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
         }
         const isUserAdminCheck = () => {
           if (typeof window === 'undefined') return false;
+          // JANGAN percaya localStorage semata-mata — sisa 'admin' daripada
+          // sesi lama akan membuka akses Pro kepada pelawat awam.
           return !!(
             (window as any).modAdminAktif ||
             (window as any).isAdminMode ||
-            localStorage.getItem('bunyiKataUserRole') === 'admin' ||
-            (typeof document !== 'undefined' && document.body?.classList?.contains('admin-mode')) ||
-            (window as any).currentUser?.peranan === 'admin'
+            (window as any).adminClaimDisahkan === true ||
+            (typeof document !== 'undefined' && document.body?.classList?.contains('admin-mode'))
           );
         };
         const isTrialNow = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
@@ -728,12 +729,13 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
 
   const isUserAdminCheck = () => {
     if (typeof window === 'undefined') return false;
+    // JANGAN percaya localStorage semata-mata — sisa 'admin' daripada
+    // sesi lama akan membuka akses Pro kepada pelawat awam.
     return !!(
       (window as any).modAdminAktif ||
       (window as any).isAdminMode ||
-      localStorage.getItem('bunyiKataUserRole') === 'admin' ||
-      (typeof document !== 'undefined' && document.body?.classList?.contains('admin-mode')) ||
-      (window as any).currentUser?.peranan === 'admin'
+      (window as any).adminClaimDisahkan === true ||
+      (typeof document !== 'undefined' && document.body?.classList?.contains('admin-mode'))
     );
   };
 
