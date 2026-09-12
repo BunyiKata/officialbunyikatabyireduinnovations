@@ -376,8 +376,13 @@ async function startServer() {
     next();
   });
 
-  // Serve static files from public directory directly (handles audio, images, fonts)
-  app.use(express.static(path.join(__dirname, 'public')));
+  // Fail statik dalam public/ (audio, imej, fon, sw.js, app-logic.js) —
+  // hanya untuk mod pembangunan. Vite menyalin public/ ke dist/ semasa build,
+  // jadi dalam production kita hidangkan dist/ sahaja supaya fail lama dalam
+  // public/ tidak menutup fail yang baharu dibina.
+  if (process.env.NODE_ENV !== "production") {
+    app.use(express.static(path.join(__dirname, "public")));
+  }
 
   // Vite middleware untuk pembangunan sahaja.
   // Import dinamik: toolchain build tidak perlu dimuatkan dalam runtime
@@ -393,9 +398,58 @@ async function startServer() {
     // Guna __dirname (bukan process.cwd()) supaya laluan betul tanpa mengira
     // dari direktori mana proses dimulakan.
     const distPath = path.join(__dirname, 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+    const indexHtmlPath = path.join(distPath, 'index.html');
+
+    // PENTING: index.html TIDAK boleh dicache. Ia mengandungi nama fail
+    // bundle berhash yang berubah setiap deploy. Jika pelayar menyimpan
+    // index.html lama, ia akan meminta bundle lama yang sudah tiada dan
+    // halaman menjadi KOSONG.
+    // Nota: JANGAN tetapkan Cache-Control secara global di sini — express.static
+    // hanya menetapkan header cache jika ia belum wujud, jadi header global
+    // akan mematikan caching immutable untuk /assets.
+    const NO_STORE = 'no-cache, no-store, must-revalidate';
+
+    // Aset berhash kekal selamanya — namanya berubah apabila kandungan berubah.
+    // fallthrough dibiarkan lalai (true) supaya aset yang tiada jatuh ke
+    // catch-all di bawah dan menerima 404 yang jelas, bukan HTML.
+    app.use(
+      '/assets',
+      express.static(path.join(distPath, 'assets'), {
+        immutable: true,
+        maxAge: '1y',
+      }),
+    );
+
+    // Audio/imej/fon/model jarang berubah.
+    for (const dir of ['audio', 'images', 'fonts', 'models']) {
+      app.use(
+        '/' + dir,
+        express.static(path.join(distPath, dir), { maxAge: '7d' }),
+      );
+    }
+
+    // sw.js TIDAK boleh dicache lama — jika tidak pelayar akan terus
+    // menggunakan logik cache yang lama walaupun kita sudah menaik tarafnya.
+    app.get('/sw.js', (req, res) => {
+      res.setHeader('Cache-Control', NO_STORE);
+      res.setHeader('Service-Worker-Allowed', '/');
+      res.sendFile(path.join(distPath, 'sw.js'));
+    });
+
+    // Fail baki di akar dist/ (styles.css, app-logic.js, manifest.json).
+    app.use(express.static(distPath, { index: false, maxAge: '7d' }));
+
+    // SPA fallback: hanya untuk laluan NAVIGASI (bukan aset, bukan /api).
+    // Tanpa penapis ini, permintaan aset yang tiada akan menerima HTML dengan
+    // status 200, lalu pelayar gagal menghurai JS dan paparan menjadi kosong.
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api/')) return next();
+      if (/\.[a-z0-9]+$/i.test(req.path)) {
+        return res.status(404).type('text/plain').send('404 Not Found');
+      }
+      return res.sendFile(indexHtmlPath, {
+        headers: { 'Cache-Control': NO_STORE },
+      });
     });
   }
 

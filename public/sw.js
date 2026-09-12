@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bunyi-kata-v2';
+const CACHE_NAME = 'bunyi-kata-v3';
 const urlsToCache = [
   '/',
   '/index.html',
