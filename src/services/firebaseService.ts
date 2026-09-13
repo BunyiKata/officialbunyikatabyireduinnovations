@@ -3286,21 +3286,28 @@ export async function getSubscriptionHistory(): Promise<SubscriptionHistoryRecor
     const rekod: SubscriptionHistoryRecord[] = [];
     const emelAdaPesanan = new Set<string>();
 
-    // 1. Rekod pesanan (audit trail)
+    // 1. Rekod pesanan (audit trail).
+    //
+    // PENTING (Fasa 1.4): nod orders mempunyai DUA skema -
+    //   (a) klien/pembayaran: { email, langganan, disahkan_pada }
+    //   (b) pelayan/admin:     { emel, nama_pakej, tarikh, jenis, direkod_oleh }
+    // Kita mesti faham KEDUA-DUANYA, jika tidak rekod cipta akaun & lanjutan
+    // admin tidak akan muncul dalam Sejarah Langganan.
     snapToArray<any>(ordersSnap).forEach((o: any) => {
-      const emel = String(o.email || '').trim().toLowerCase();
+      const emel = String(o.email || o.emel || '').trim().toLowerCase();
       const profil = profilMengikutEmel.get(emel);
-      const tarikhLangganan = o.disahkan_pada || o.dicipta_pada || '';
+      const tarikhLangganan = o.disahkan_pada || o.dicipta_pada || o.tarikh || '';
+      const namaPelan = o.langganan || o.nama_pakej || o.pakej || '';
       if (emel) emelAdaPesanan.add(emel);
 
       rekod.push({
-        id: `pesanan_${o.id}`,
-        nama: (profil && profil.nama) || o.email || 'Pengguna',
+        id: `pesanan_${o.id || o.purchase_id || Math.random().toString(36).slice(2)}`,
+        nama: (profil && profil.nama) || o.nama || o.email || emel || 'Pengguna',
         email: emel,
-        peranan: (profil && profil.peranan) || '',
+        peranan: (profil && profil.peranan) || o.peranan || '',
         tarikhLangganan,
-        tarikhTamat: kiraTarikhTamatLocal(tarikhLangganan, o.langganan),
-        jenisLangganan: normalizePlanLocal(o.langganan),
+        tarikhTamat: kiraTarikhTamatLocal(tarikhLangganan, namaPelan),
+        jenisLangganan: normalizePlanLocal(namaPelan),
         sumber: 'pesanan',
       });
     });
