@@ -1942,7 +1942,12 @@ export async function fetchAdminDataFromFirebase(): Promise<{ teachers: any[]; p
       try { (window as any).renderTeacherTable(); } catch (e) {}
     }
     if (typeof (window as any).renderAdminTable === 'function') {
-      try { (window as any).renderAdminTable(); } catch (e) {}
+      try {
+        // PENTING: kekalkan pilihan penapis semasa (cth. 'perlu_semakan'). Memanggil
+        // tanpa argumen akan menetapkan semula jadual ke 'guru' selepas setiap muat.
+        const selEl = document.getElementById('admin-table-selector') as HTMLSelectElement | null;
+        (window as any).renderAdminTable(selEl ? selEl.value : 'guru');
+      } catch (e) {}
     }
     if (typeof (window as any).renderAdminUrus === 'function') {
       try { (window as any).renderAdminUrus(); } catch (e) {}

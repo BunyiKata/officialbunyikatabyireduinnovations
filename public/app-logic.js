@@ -553,11 +553,74 @@ window.renderAdminTable = function (type = 'guru') {
         };
 
         if (typeof window.getFeedbacksFromFirebase === 'function') {
-            window.getFeedbacksFromFirebase().then(renderFeedbackRows).catch(() => renderFeedbackRows([]));
-        } else {
-            renderFeedbackRows([]);
+    } else if (type === "perlu_semakan") {
+        // Fasa 1.3: senarai guru & ibu bapa yang PERLU DISEMAK - iaitu yang
+        // langganannya sudah luput atau hampir luput (dalam 3 hari). Admin
+        // boleh semak sama ada mereka telah bayar / perlu difollow-up.
+        if (title) {
+            title.className = "neo-btn";
+            title.style.cssText = "background:linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color:white; padding:7px 16px; font-weight:bold; font-size:1rem; border-radius:12px; border:2.5px solid var(--color-dark, #10182f); box-shadow:0 3px 0 var(--color-dark, #10182f); display:inline-flex; align-items:center; gap:8px; pointer-events:none; margin:0;";
+            title.innerHTML = "" + "<i class=\"fa-solid fa-triangle-exclamation\"></i> <span style=\"font-family:'AtlantaRoundedBlack', sans-serif;\">Perlu Semakan (Langganan)</span>";
         }
+        adminThead.innerHTML = `
+                    <tr style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white;">
+                        <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #7f1d1d; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; width:48px; min-width:48px; text-transform:uppercase;">BIL.</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #7f1d1d; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:170px; text-transform:uppercase;">NAMA</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #7f1d1d; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:120px; text-transform:uppercase;">PERANAN</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #7f1d1d; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:150px; text-transform:uppercase;">LANGGANAN</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #7f1d1d; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:130px; text-transform:uppercase;">TARIKH TAMAT</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #7f1d1d; text-align:center; font-size:0.85rem; font-weight:bold; min-width:130px; text-transform:uppercase;">STATUS</th>
+                    </tr>
+                `;
+        const senaraiGuru = typeof getAdminTeachersList === "function" ? getAdminTeachersList() : [];
+        const senaraiIbu = typeof getAdminParentsList === "function" ? getAdminParentsList() : [];
+        const calon = [];
+        const periksa = (rekod, peranan) => {
+            (rekod || []).forEach((r) => {
+                const langganan = window.normalizeAdminPlanName ? window.normalizeAdminPlanName(r.langganan) : (r.langganan || "");
+                if (String(langganan).toLowerCase() === "percuma") return;
+                const tarikhTamat = r.tarikh_tamat || "";
+                const baki = Number(r.bakiHari);
+                const perlu = !tarikhTamat || !isFinite(baki) || baki <= 3;
+                if (perlu) calon.push({ r, peranan, langganan, tarikhTamat, baki });
+            });
+        };
+        periksa(senaraiGuru, "Guru");
+        periksa(senaraiIbu, "Ibu Bapa");
+        calon.sort((a, b) => (a.baki || 0) - (b.baki || 0));
+        adminTbody.innerHTML = "";
+        if (calon.length === 0) {
+            adminTbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold;">
+                        <i class="fa-solid fa-circle-check" style="font-size: 2rem; color: #16a34a; display: block; margin-bottom: 10px;"></i>
+                        Tiada akaun yang perlu disemak. Semua langganan aktif.
+                    </td>
+              </tr>
+            `;
+            return;
+        }
+        calon.forEach((c, index) => {
+            const sudahLuput = !c.tarikhTamat || (isFinite(c.baki) && c.baki <= 0);
+            const statusTeks = sudahLuput ? "SUDAH LUPUT" : "HAMPIR LUPUT (" + c.baki + " hari)";
+            const warnaStatus = sudahLuput ? "#dc2626" : "#ea580c";
+            const latarStatus = sudahLuput ? "#fee2e2" : "#ffedd5";
+            const tarikhTeks = c.tarikhTamat ? window.formatTarikhLangganan(c.tarikhTamat) : "Tiada";
+            adminTbody.innerHTML += `
+                        <tr class="admin-table-row" style="border-bottom: 1px solid #e2e8f0; background: " + (index % 2 === 0 ? "#ffffff" : "#fef2f2") + ";">
+                            <td class="admin-td" style="padding: 9px 8px; font-weight: 600; color: #64748b; border-right: 1px solid #e2e8f0; text-align: center; font-size: 0.85rem;">" + (index + 1) + "</td>
+                            <td class="admin-td" style="padding: 9px 12px; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem;">" + (c.r.nama || "-") + "</td>
+                            <td class="admin-td" style="padding: 9px 12px; color: #475569; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem; text-align:center;">" + c.peranan + "</td>
+                            <td class="admin-td" style="padding: 9px 12px; color: #475569; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem; text-align:center;">" + c.langganan + "</td>
+                            <td class="admin-td" style="padding: 9px 12px; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem; text-align:center; color:" + warnaStatus + "; font-weight:bold;">" + tarikhTeks + "</td>
+                            <td class="admin-td" style="padding: 9px 12px; text-align:center;">
+                                <span style="background:" + latarStatus + "; color:" + warnaStatus + "; font-size:0.75rem; font-weight:bold; padding:4px 10px; border-radius:10px; border:1.5px solid " + warnaStatus + "; display:inline-block; white-space:nowrap;">" + statusTeks + "</span>
+                            </td>
+                        </tr>
+                    `;
+        });
     }
+};
 
     window.padamFeedback = async function (id) {
         if (!confirm("Adakah anda pasti mahu memadam maklum balas ini dari pangkalan data Firebase?")) return;
