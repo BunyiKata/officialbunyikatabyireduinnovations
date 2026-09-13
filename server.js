@@ -7,6 +7,7 @@ import crypto from "crypto";
 // tidak lagi mendedahkan .apps/.auth/.credential, jadi kita import terus.
 import { getApps, initializeApp, cert, applicationDefault } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { getDatabase } from "firebase-admin/database";
 
 dotenv.config();
 
@@ -82,6 +83,69 @@ function selamatSamaDengan(a, b) {
   const bufB = Buffer.from(String(b || ""), "utf8");
   if (bufA.length !== bufB.length) return false;
   return crypto.timingSafeEqual(bufA, bufB);
+}
+
+/**
+ * Menjana kata laluan sementara yang munasabah untuk dihantar melalui WhatsApp.
+ * Format: BunyiKata#<4 digit> — mudah dibaca melalui telefon, masih ada
+ * ~9000 kemungkinan jadi tidak boleh diteka secara pukal.
+ */
+function janaKataLaluan() {
+  return `BunyiKata#${crypto.randomInt(1000, 9999)}`;
+}
+
+/**
+ * Mengira tarikh tamat langganan.
+ * @param {number} days   bilangan hari pakej
+ * @param {string} [dariISO] tarikh mula (ISO). Jika tiada, guna sekarang.
+ */
+function kiraTarikhTamat(days, dariISO) {
+  const asas = dariISO ? new Date(dariISO) : new Date();
+  // Jika tarikh asas tidak sah, jatuh balik ke sekarang supaya tidak menghasilkan
+  // "Invalid Date" yang akan merosakkan rekod profil.
+  const masaAsas = Number.isNaN(asas.getTime()) ? new Date() : asas;
+  masaAsas.setDate(masaAsas.getDate() + days);
+  return masaAsas.toISOString();
+}
+
+/**
+ * Middleware pengesahan admin.
+ *
+ * Menerima ID token Firebase (bukan custom token) melalui header
+ * `Authorization: Bearer <idToken>`. Token ini diperoleh oleh klien selepas
+ * `signInWithCustomToken()` berjaya dalam /api/admin/verify.
+ *
+ * Kita HANYA mempercayai token yang ditandatangani Firebase dan mengandungi
+ * claim { admin: true }. Tiada nilai yang datang dari body permintaan
+ * dipercayai untuk tujuan kebenaran.
+ */
+async function requireAdmin(req, res, next) {
+  const header = String(req.headers.authorization || "");
+  const idToken = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+  if (!idToken) {
+    return res.status(401).json({ success: false, message: "Sesi admin diperlukan." });
+  }
+
+  const appInstance = getAdminApp();
+  if (!appInstance) {
+    return res.status(500).json({
+      success: false,
+      message: "Firebase Admin SDK belum dikonfigurasikan di pelayan.",
+    });
+  }
+
+  try {
+    const decoded = await getAuth(appInstance).verifyIdToken(idToken);
+    if (decoded.admin !== true) {
+      // Mesej generik: jangan dedahkan sebab sebenar penolakan.
+      return res.status(403).json({ success: false, message: "Akses ditolak." });
+    }
+    req.adminUid = decoded.uid;
+    return next();
+  } catch (err) {
+    console.warn("[Admin Auth] Token tidak sah:", err?.message || err);
+    return res.status(401).json({ success: false, message: "Token tidak sah atau tamat tempoh." });
+  }
 }
 
 const __filename = fileURLToPath(import.meta.url);
@@ -220,6 +284,247 @@ async function startServer() {
       return res.json({ success: true, token: customToken, uid: adminUid });
     } catch (err) {
       console.error("[Admin Verify Exception]", err);
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  });
+
+  /**
+   * Cipta akaun pengguna baharu (guru / ibu bapa).
+   *
+   * Ini menggantikan aliran pendaftaran sendiri: ADMIN sahaja yang mencipta
+   * akaun, dan pengguna menerima kata laluan sementara melalui WhatsApp.
+   *
+   * Menggunakan Firebase Admin SDK, jadi penulisan ke Realtime Database
+   * MEMINTAS peraturan keselamatan RTDB (Admin SDK sentiasa memintas).
+   * Ini bermakna kita tidak perlu melonggarkan database.rules.json.
+   *
+   * Kata laluan TIDAK PERNAH disimpan dalam pangkalan data — ia hanya
+   * dipulangkan sekali kepada admin untuk dihantar kepada pengguna.
+   */
+  app.post("/api/admin/create-account", requireAdmin, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(500).json({ success: false, message: "Firebase Admin SDK belum dikonfigurasikan." });
+      }
+
+      const {
+        nama = "",
+        email = "",
+        peranan = "",
+        no_telefon = "",
+        nama_sekolah = "",
+        nama_keluarga = "",
+        planKey = "",
+      } = req.body || {};
+
+      const namaBersih = String(nama).trim();
+      const emailBersih = String(email).trim().toLowerCase();
+      const perananBersih = String(peranan).trim().toLowerCase();
+      const planBersih = String(planKey).trim();
+
+      // --- Pengesahan input ---
+      if (!namaBersih || !emailBersih || !perananBersih || !planBersih) {
+        return res.status(400).json({ success: false, message: "Nama, emel, peranan dan pakej diperlukan." });
+      }
+      if (!["guru", "ibubapa"].includes(perananBersih)) {
+        return res.status(400).json({ success: false, message: "Peranan tidak sah (guru / ibubapa sahaja)." });
+      }
+      if (!PLAN_CATALOG[planBersih]) {
+        return res.status(400).json({ success: false, message: "Pakej tidak sah." });
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailBersih)) {
+        return res.status(400).json({ success: false, message: "Format emel tidak sah." });
+      }
+
+      const authAdmin = getAuth(appInstance);
+
+      // --- Pastikan emel belum digunakan ---
+      try {
+        const sediaAda = await authAdmin.getUserByEmail(emailBersih);
+        if (sediaAda) {
+          return res.status(409).json({
+            success: false,
+            message: "Emel ini sudah mempunyai akaun. Gunakan 'Reset Kata Laluan' sebagai ganti.",
+          });
+        }
+      } catch (err) {
+        // auth/user-not-found bermakna emel bebas — inilah keadaan yang kita mahu.
+        if (err?.code !== "auth/user-not-found") throw err;
+      }
+
+      // --- Jana kata laluan sementara (atau guna yang diberi admin) ---
+      const kataLaluan = String(req.body?.password || "").trim() || janaKataLaluan();
+
+      // --- Cipta pengguna Firebase Auth ---
+      const rekodAuth = await authAdmin.createUser({
+        email: emailBersih,
+        password: kataLaluan,
+        displayName: namaBersih,
+        emailVerified: false,
+      });
+      const uid = rekodAuth.uid;
+
+      // --- Kira tempoh langganan dari katalog pakej pelayan ---
+      const plan = PLAN_CATALOG[planBersih];
+      const tarikhMula = new Date().toISOString();
+      const tarikhTamat = kiraTarikhTamat(plan.days, tarikhMula);
+
+      const profilBaharu = {
+        nama: namaBersih,
+        emel: emailBersih,
+        email: emailBersih,
+        peranan: perananBersih,
+        no_telefon: String(no_telefon).trim(),
+        // Medan khusus mengikut peranan — simpan hanya yang berkaitan.
+        nama_sekolah: perananBersih === "guru" ? String(nama_sekolah).trim() : "",
+        nama_keluarga: perananBersih === "ibubapa" ? String(nama_keluarga).trim() : "",
+        langganan: plan.name,
+        pakej: planBersih,
+        tarikh_mula: tarikhMula,
+        tarikh_tamat: tarikhTamat,
+        dicipta_oleh: "admin",
+        sumber: "admin",
+        // Disediakan untuk fasa affiliate akan datang — sengaja dibiarkan kosong.
+        referred_by: "",
+        tarikh_dicipta: tarikhMula,
+      };
+
+      const db = getDatabase(appInstance);
+      await db.ref(`profiles/${uid}`).set(profilBaharu);
+
+      // Rekod pesanan manual (bayaran di luar sistem, direkod oleh admin).
+      await db.ref("orders").push({
+        uid,
+        nama: namaBersih,
+        emel: emailBersih,
+        peranan: perananBersih,
+        pakej: planBersih,
+        nama_pakej: plan.name,
+        harga_sen: plan.priceCents,
+        jumlah_hari: plan.days,
+        status: "paid",
+        kaedah: "manual",
+        jenis: "cipta_akaun",
+        direkod_oleh: "admin",
+        tarikh: tarikhMula,
+      });
+
+      console.log(`[Admin Cipta Akaun] Akaun dicipta: ${emailBersih} (${uid}) pakej=${planBersih}`);
+
+      // Kata laluan dipulangkan SEKALI sahaja — tidak disimpan di mana-mana.
+      return res.json({
+        success: true,
+        uid,
+        email: emailBersih,
+        nama: namaBersih,
+        password: kataLaluan,
+        plan: { key: planBersih, name: plan.name, days: plan.days },
+        tarikh_mula: tarikhMula,
+        tarikh_tamat: tarikhTamat,
+      });
+    } catch (err) {
+      console.error("[Admin Cipta Akaun Exception]", err);
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  });
+
+  /**
+   * Set semula kata laluan pengguna atas permintaan admin.
+   * Jika kata laluan tidak diberi, yang baharu akan dijana dan dipulangkan.
+   */
+  app.post("/api/admin/reset-password", requireAdmin, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(500).json({ success: false, message: "Firebase Admin SDK belum dikonfigurasikan." });
+      }
+
+      const uid = String(req.body?.uid || "").trim();
+      if (!uid) {
+        return res.status(400).json({ success: false, message: "UID diperlukan." });
+      }
+
+      const kataLaluan = String(req.body?.password || "").trim() || janaKataLaluan();
+      await getAuth(appInstance).updateUser(uid, { password: kataLaluan });
+
+      console.log(`[Admin Reset Kata Laluan] Kata laluan direset untuk uid=${uid}`);
+      return res.json({ success: true, uid, password: kataLaluan });
+    } catch (err) {
+      console.error("[Admin Reset Kata Laluan Exception]", err);
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  });
+
+  /**
+   * Panjangkan tempoh langganan pengguna.
+   * Tempoh baharu dikira dari tarikh tamat SEDIA ADA (bukan dari hari ini),
+   * supaya admin boleh menambah masa tanpa merugikan baki yang belum habis.
+   */
+  app.post("/api/admin/extend-expiry", requireAdmin, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(500).json({ success: false, message: "Firebase Admin SDK belum dikonfigurasikan." });
+      }
+
+      const uid = String(req.body?.uid || "").trim();
+      const planBersih = String(req.body?.planKey || "").trim();
+      if (!uid) {
+        return res.status(400).json({ success: false, message: "UID diperlukan." });
+      }
+      if (!PLAN_CATALOG[planBersih]) {
+        return res.status(400).json({ success: false, message: "Pakej tidak sah." });
+      }
+
+      const db = getDatabase(appInstance);
+      const profilSnap = await db.ref(`profiles/${uid}`).get();
+      if (!profilSnap.exists()) {
+        return res.status(404).json({ success: false, message: "Profil tidak dijumpai." });
+      }
+      const profil = profilSnap.val() || {};
+
+      // Lanjut dari tarikh tamat lama; jika tiada/tidak sah, mula dari sekarang.
+      const tarikhTamatLama = profil.tarikh_tamat || "";
+      const rujukan =
+        tarikhTamatLama && new Date(tarikhTamatLama).getTime() > Date.now()
+          ? tarikhTamatLama // masih aktif → sambung dari tarikh itu
+          : new Date().toISOString(); // sudah tamat → mula semula dari sekarang
+
+      const plan = PLAN_CATALOG[planBersih];
+      const tarikhTamatBaharu = kiraTarikhTamat(plan.days, rujukan);
+
+      await db.ref(`profiles/${uid}`).update({
+        langganan: plan.name,
+        pakej: planBersih,
+        tarikh_tamat: tarikhTamatBaharu,
+      });
+
+      await db.ref("orders").push({
+        uid,
+        nama: profil.nama || "",
+        emel: profil.email || profil.emel || "",
+        peranan: profil.peranan || "",
+        pakej: planBersih,
+        nama_pakej: plan.name,
+        harga_sen: plan.priceCents,
+        jumlah_hari: plan.days,
+        status: "paid",
+        kaedah: "manual",
+        jenis: "panjang_tempoh",
+        direkod_oleh: "admin",
+        tarikh: new Date().toISOString(),
+      });
+
+      console.log(`[Admin Panjang Tempoh] uid=${uid} pakej=${planBersih} → ${tarikhTamatBaharu}`);
+      return res.json({
+        success: true,
+        uid,
+        plan: { key: planBersih, name: plan.name, days: plan.days },
+        tarikh_tamat: tarikhTamatBaharu,
+      });
+    } catch (err) {
+      console.error("[Admin Panjang Tempoh Exception]", err);
       return res.status(500).json({ success: false, message: err.message });
     }
   });

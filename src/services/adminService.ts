@@ -72,6 +72,155 @@ export async function cubaAksesAdmin(kod: string): Promise<HasilAksesAdmin> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// API PENGURUSAN AKAUN (cipta akaun, reset kata laluan, panjang tempoh)
+//
+// Semua panggilan ini perlukan sesi admin yang sah. Selepas cubaAksesAdmin()
+// berjaya, auth.currentUser wujud (custom token ditukar kepada ID token oleh
+// Firebase), jadi getIdToken() boleh digunakan sebagai bukti kebenaran.
+// Pelayan mengesahkan token itu melalui middleware requireAdmin.
+// ---------------------------------------------------------------------------
+
+export type PerananPengguna = 'guru' | 'ibubapa';
+export type KunciPakej = '1bulan' | '3bulan' | '1tahun';
+
+export interface InputCiptaAkaun {
+  nama: string;
+  email: string;
+  peranan: PerananPengguna;
+  no_telefon?: string;
+  nama_sekolah?: string;
+  nama_keluarga?: string;
+  planKey: KunciPakej;
+  /** Kosongkan untuk jana kata laluan sementara di pelayan. */
+  password?: string;
+}
+
+export interface MaklumatPakej {
+  key: string;
+  name: string;
+  days: number;
+}
+
+export interface HasilCiptaAkaun {
+  berjaya: boolean;
+  mesej?: string;
+  uid?: string;
+  email?: string;
+  nama?: string;
+  /** Dipulangkan SEKALI sahaja — tidak disimpan di pelayan. */
+  password?: string;
+  plan?: MaklumatPakej;
+  tarikh_mula?: string;
+  tarikh_tamat?: string;
+}
+
+export interface HasilResetKataLaluan {
+  berjaya: boolean;
+  mesej?: string;
+  uid?: string;
+  password?: string;
+}
+
+export interface HasilPanjangTempoh {
+  berjaya: boolean;
+  mesej?: string;
+  uid?: string;
+  plan?: MaklumatPakej;
+  tarikh_tamat?: string;
+}
+
+/**
+ * Pembantu dalaman: hantar permintaan POST ke endpoint admin dengan ID token
+ * semasa. Memulangkan objek JSON, atau objek gagal yang seragam jika sesi
+ * tidak aktif / rangkaian bermasalah.
+ */
+async function panggilAdmin<T extends { berjaya: boolean }>(
+  path: string,
+  body: Record<string, unknown>,
+): Promise<T> {
+  try {
+    const pengguna = auth.currentUser;
+    if (!pengguna) {
+      return { berjaya: false, mesej: 'Sesi admin tidak aktif. Sila masuk semula.' } as unknown as T;
+    }
+
+    const token = await pengguna.getIdToken();
+    const res = await fetch(path, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.success) {
+      return {
+        berjaya: false,
+        mesej: data?.message || 'Operasi gagal. Sila cuba lagi.',
+      } as unknown as T;
+    }
+
+    // Pelayan memulangkan { success: true, ... } — tukar kepada bentuk klien.
+    const { success, ...baki } = data;
+    return { berjaya: true, ...baki } as unknown as T;
+  } catch (err: any) {
+    console.error('[Admin API] Ralat:', path, err?.message || err);
+    return { berjaya: false, mesej: 'Tidak dapat menghubungi pelayan.' } as unknown as T;
+  }
+}
+
+/** Cipta akaun guru / ibu bapa baharu dalam Firebase Auth + RTDB. */
+export async function ciptaAkaunAdmin(input: InputCiptaAkaun): Promise<HasilCiptaAkaun> {
+  return panggilAdmin<HasilCiptaAkaun>('/api/admin/create-account', {
+    nama: input.nama,
+    email: input.email,
+    peranan: input.peranan,
+    no_telefon: input.no_telefon || '',
+    nama_sekolah: input.nama_sekolah || '',
+    nama_keluarga: input.nama_keluarga || '',
+    planKey: input.planKey,
+    password: input.password || '',
+  });
+}
+
+/** Set semula kata laluan pengguna (jana sendiri jika tidak diberi). */
+export async function resetKataLaluanAdmin(
+  uid: string,
+  password?: string,
+): Promise<HasilResetKataLaluan> {
+  return panggilAdmin<HasilResetKataLaluan>('/api/admin/reset-password', {
+    uid,
+    password: password || '',
+  });
+}
+
+/** Panjangkan tempoh langganan pengguna mengikut pakej yang dipilih. */
+export async function panjangkanTempohAdmin(
+  uid: string,
+  planKey: KunciPakej,
+): Promise<HasilPanjangTempoh> {
+  return panggilAdmin<HasilPanjangTempoh>('/api/admin/extend-expiry', {
+    uid,
+    planKey,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// UNTUK TEST SAHAJA — dibuang apabila modal UI siap.
+// Dedahkan fungsi ke window supaya boleh dipanggil dari DevTools console
+// tanpa perlu membina UI dahulu.
+// ---------------------------------------------------------------------------
+if (typeof window !== 'undefined') {
+  (window as any).__adminApi = {
+    ciptaAkaunAdmin,
+    resetKataLaluanAdmin,
+    panjangkanTempohAdmin,
+  };
+}
+
 /**
  * Menetapkan keadaan tempatan bagi sesi admin.
  * Dipisahkan daripada cubaAksesAdmin supaya pemanggil mengawal susunan UI.

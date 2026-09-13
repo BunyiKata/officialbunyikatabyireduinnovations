@@ -1,11 +1,14 @@
 // @ts-nocheck
 import React from "react";
+import { CiptaAkaunModal } from "../modals/CiptaAkaunModal";
 
 interface AdminDashboardProps {
   getScreenClass: (id: string, extraClasses?: string) => string;
 }
 
 export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
+  const [modalCiptaAkaunTerbuka, setModalCiptaAkaunTerbuka] = React.useState(false);
+
   React.useEffect(() => {
     if (typeof (window as any).renderAdminTable === "function") {
       try {
@@ -177,6 +180,35 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
                 zIndex: "100",
               }}
             >
+              <button
+                onClick={() => {
+                  if ((window as any).playBubble) (window as any).playBubble();
+                  setModalCiptaAkaunTerbuka(true);
+                }}
+                className="neo-btn"
+                style={{
+                  background: "#ffffff",
+                  border: "2px solid var(--color-dark)",
+                  borderRadius: "50%",
+                  padding: "0",
+                  width: "34px",
+                  height: "34px",
+                  minWidth: "auto",
+                  minHeight: "auto",
+                  color: "#168f81",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 0 var(--color-dark)",
+                  fontWeight: "bold",
+                  fontSize: "0.95rem",
+                }}
+                title="Cipta Akaun Pengguna"
+                aria-label="Cipta Akaun Pengguna"
+              >
+                <i className="fa-solid fa-user-plus"></i>
+              </button>
               <button
                 onClick={() => {
                   if ((window as any).playBubble) (window as any).playBubble();
@@ -1225,6 +1257,12 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
           {/* Populated by JS renderAdminUrus */}
         </div>
       </div>
+
+      {/* Modal Cipta Akaun Pengguna */}
+      <CiptaAkaunModal
+        isOpen={modalCiptaAkaunTerbuka}
+        onClose={() => setModalCiptaAkaunTerbuka(false)}
+      />
 
     </>
   );

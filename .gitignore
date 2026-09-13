@@ -5,6 +5,7 @@ coverage/
 scratch/
 .DS_Store
 *.log
+*.bak
 .env*
 !.env.example
 .temp/

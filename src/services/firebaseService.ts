@@ -1078,6 +1078,19 @@ export async function syncStudentToFirebase(student: {
             if (!payload.guru_id && existVal.guru_id) payload.guru_id = existVal.guru_id;
             if (!payload.kelas_id && existVal.kelas_id) payload.kelas_id = existVal.kelas_id;
             if (!payload.kod_kelas && existVal.kod_kelas) payload.kod_kelas = existVal.kod_kelas;
+
+            // PERLINDUNGAN ANTI-RAMPAS MURID:
+            // Jika murid sedia ada sudah dimiliki oleh guru LAIN (guru_id berbeza),
+            // jangan sesekali tukar pemiliknya. Ini menghalang guru yang menaip kod
+            // kelas sama daripada "merampas" murid milik guru sebenar.
+            if (existVal.guru_id && payload.guru_id && existVal.guru_id !== payload.guru_id) {
+              console.warn('[Firebase RTDB] Perlindungan: murid', existingDocId, 'sudah dimiliki guru', existVal.guru_id, '- tidak ditukar kepada', payload.guru_id);
+              payload.guru_id = existVal.guru_id;
+              payload.guru_email = existVal.guru_email || null;
+              if (existVal.kelas_id) payload.kelas_id = existVal.kelas_id;
+              if (existVal.kod_kelas) payload.kod_kelas = existVal.kod_kelas;
+              if (existVal.nama_kelas) payload.nama_kelas = existVal.nama_kelas;
+            }
           }
         } else {
           payload.total_bintang = student.totalBintang || 0;

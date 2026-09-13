@@ -4297,7 +4297,8 @@ function getMaxScore(modId) {
     if (modId === 'suku_kata_v_kv') return 6;
     if (modId === 'suku_kata_kvk_kv') return 8;
     if (modId === 'suku_kata_kvkk') return 6;
-    if (modId === 'suku_kata_kv_kv_kvk') return 9;
+    if (modId === 'suku_kata_kv_kv_kv') return 10;   // 10 soalan rawak dari 14 perkataan KV+KV+KV
+    if (modId === 'suku_kata_kv_kv_kvk') return 9;   // 9 perkataan KV+KV+KVK -> 9 soalan
     if (modId === 'suku_kata_kvk_kv_kvk') return 6;
     return 10;
 }

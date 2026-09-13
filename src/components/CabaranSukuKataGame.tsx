@@ -743,6 +743,9 @@ function buildQuestionsForModule(id: string): any[] {
       });
     }
 
+    // KV+KV+KV (Peta 2) & KV+KV+KVK (Peta 3) kongsi penjana soalan "susun suku kata".
+    // Nota: data flashcards tetap diambil ikut id masing-masing di atas (moduleData[id] / MODULE_FLASHCARDS[id]),
+    // jadi modul ini TIDAK berkongsi senarai perkataan.
     if (id === 'suku_kata_kv_kv_kv' || id === 'suku_kata_kv_kv_kvk') {
       const count = flashcards.length <= 10 ? flashcards.length : 10;
       const shuffledCards = shuffleArray(flashcards).slice(0, count);
@@ -779,7 +782,7 @@ function buildQuestionsForModule(id: string): any[] {
       });
     }
 
-    // For suku_kata_kv_kvk and suku_kata_kvkk (and other modules using image-finding concept)
+    // Cara "padan" (padan gambar dengan perkataan) — contoh: suku_kata_kvk_kv
     if (id === 'suku_kata_kvk_kv') {
       const cards = flashcards && flashcards.length > 0 ? flashcards : (MODULE_FLASHCARDS.suku_kata_kvk_kv || []);
       const count = cards.length <= 10 ? cards.length : 10;
