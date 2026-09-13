@@ -144,7 +144,7 @@ export async function bukaBayaranChip(planInfo: any, userEmail?: string, userNam
 
   console.log(`[Chip Payment] Memproses bayaran untuk: ${resolvedName} (${resolvedEmail}), Pakej: ${planInfo?.name}`);
 
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://bunyi-kata-official.web.app";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://bunyikata--bunyi-kata-official.asia-southeast1.hosted.app";
 
   // 1. Minta pelayan mencipta sesi pembelian.
   //    Hanya pelayan memegang secret key & menetapkan harga rasmi.

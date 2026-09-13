@@ -305,24 +305,7 @@ export default function App() {
     if (typeof window !== "undefined") {
       const search = window.location.search || "";
       if (search.includes("payment=") || search.includes("status=")) {
-        let savedCategory = "";
-        let savedScreen = "";
-        try {
-          savedScreen = localStorage.getItem("bunyiKataReturnDashboard") || "";
-          const savedPending = localStorage.getItem("bunyiKataPendingPlan");
-          if (savedPending) {
-            const parsed = JSON.parse(savedPending);
-            if (parsed?.category) savedCategory = parsed.category;
-            if (parsed?.returnScreen) savedScreen = parsed.returnScreen;
-          }
-        } catch (e) {}
-
-        if (savedScreen && savedScreen !== "login-screen") return savedScreen;
-
-        const role = savedCategory || localStorage.getItem("bunyiKataUserRole") || (localStorage.getItem("bunyiKataIbubapaEmail") ? "ibubapa" : "guru");
-        if (role === "admin") return "admin-dashboard";
-        if (role === "ibubapa") return "ibubapa-dashboard";
-        return "guru-dashboard";
+        return "login-screen";
       }
       const path = window.location.pathname.replace(/^\/+/, "");
       if (path) return path;
@@ -432,26 +415,43 @@ export default function App() {
         setIsProPricingModalOpen(false);
 
         let targetCategory = "";
-        let returnScreen = "";
         let parsedPlan: any = null;
         try {
-          returnScreen = localStorage.getItem("bunyiKataReturnDashboard") || "";
           const savedPendingPlan = localStorage.getItem("bunyiKataPendingPlan");
           if (savedPendingPlan) {
             parsedPlan = JSON.parse(savedPendingPlan);
             if (parsedPlan?.category) targetCategory = parsedPlan.category;
-            if (parsedPlan?.returnScreen) returnScreen = parsedPlan.returnScreen;
           }
         } catch (e) {}
 
-        const userRole = targetCategory || localStorage.getItem("bunyiKataUserRole") || "";
-        const isParent = userRole === "ibubapa" || !!localStorage.getItem("bunyiKataIbubapaEmail") || returnScreen === "ibubapa-dashboard";
-        const isAdmin = userRole === "admin" || returnScreen === "admin-dashboard";
-        const fallbackDash = isParent ? "ibubapa-dashboard" : (isAdmin ? "admin-dashboard" : "guru-dashboard");
+        // Pembersihan Sesi Menyeluruh (Log Out Bersih: tiada top nav terapung di login screen)
+        const bersihkanSesiDanLogKeluar = () => {
+          (window as any).modGuruAktif = false;
+          (window as any).modIbuBapaAktif = false;
+          (window as any).modAdminAktif = false;
+          (window as any).isAdminMode = false;
+          (window as any).adminClaimDisahkan = false;
+          document.body.classList.remove("teacher-mode", "admin-mode", "parent-mode");
+
+          const tNav = document.getElementById("teacher-sticky-nav");
+          if (tNav) tNav.style.display = "none";
+          const aNav = document.getElementById("admin-sticky-nav");
+          if (aNav) aNav.style.display = "none";
+          const pNav = document.getElementById("parent-sticky-nav");
+          if (pNav) pNav.style.display = "none";
+          const topBanner = document.getElementById("teacher-top-banner");
+          if (topBanner) topBanner.style.display = "none";
+
+          setActiveScreen("login-screen");
+          if (typeof (window as any).paparSkrin === "function") {
+            (window as any).paparSkrin("login-screen", true);
+          }
+          try {
+            window.history.replaceState({ screenId: "login-screen" }, document.title, "/");
+          } catch (e) {}
+        };
 
         const processPaymentSuccess = async () => {
-          // LANGKAH KESELAMATAN: Jangan sesekali percaya parameter URL.
-          // Status pembayaran WAJIB disahkan oleh pelayan dengan CHIP.
           const purchaseId =
             urlParams.get("purchase_id") ||
             localStorage.getItem("bunyiKataPendingPurchaseId") ||
@@ -459,61 +459,22 @@ export default function App() {
 
           const verification = await sahkanBayaranChip(purchaseId);
 
+          // Log keluar sepenuhnya ke login screen tanpa top nav
+          bersihkanSesiDanLogKeluar();
+
           if (!verification.paid) {
             console.warn("[App] Pembayaran tidak dapat disahkan:", verification.message);
             setPaymentToast({
               show: true,
-              title: "Pembayaran Belum Disahkan",
+              title: "Pembayaran Belum Selesai",
               message:
                 verification.message ||
-                "Kami belum menerima pengesahan pembayaran daripada CHIP. Jika anda telah membayar, sila tunggu sebentar atau hubungi kami.",
+                "Transaksi pembayaran belum selesai atau belum disahkan oleh CHIP. Sila log masuk semula untuk menyemak.",
               type: "error",
             });
-
-            // Kekalkan pengguna di dashboard masing-masing
-            if (isParent) {
-              (window as any).modIbuBapaAktif = true;
-              (window as any).modGuruAktif = false;
-              (window as any).modAdminAktif = false;
-              localStorage.setItem("bunyiKataUserRole", "ibubapa");
-              document.body.classList.add("parent-mode");
-              document.body.classList.remove("teacher-mode", "admin-mode");
-              const pNav = document.getElementById("parent-sticky-nav");
-              if (pNav) pNav.style.display = "flex";
-              setActiveScreen("ibubapa-dashboard");
-              if (typeof (window as any).masukModIbuBapa === "function") (window as any).masukModIbuBapa();
-              if (typeof (window as any).paparSkrin === "function") (window as any).paparSkrin("ibubapa-dashboard", true);
-            } else if (isAdmin) {
-              (window as any).modAdminAktif = true;
-              (window as any).modGuruAktif = true;
-              (window as any).modIbuBapaAktif = false;
-              localStorage.setItem("bunyiKataUserRole", "admin");
-              document.body.classList.add("teacher-mode", "admin-mode");
-              document.body.classList.remove("parent-mode");
-              const aNav = document.getElementById("admin-sticky-nav");
-              if (aNav) aNav.style.display = "flex";
-              setActiveScreen("admin-dashboard");
-              if (typeof (window as any).masukModAdmin === "function") (window as any).masukModAdmin();
-              if (typeof (window as any).paparSkrin === "function") (window as any).paparSkrin("admin-dashboard", true);
-            } else {
-              (window as any).modGuruAktif = true;
-              (window as any).modIbuBapaAktif = false;
-              (window as any).modAdminAktif = false;
-              localStorage.setItem("bunyiKataUserRole", "guru");
-              document.body.classList.add("teacher-mode");
-              document.body.classList.remove("parent-mode", "admin-mode");
-              const tNav = document.getElementById("teacher-sticky-nav");
-              if (tNav) tNav.style.display = "flex";
-              setActiveScreen("guru-dashboard");
-              if (typeof (window as any).masukModGuru === "function") (window as any).masukModGuru();
-              if (typeof (window as any).paparSkrin === "function") (window as any).paparSkrin("guru-dashboard", true);
-            }
-
-            try {
-              window.history.replaceState({ screenId: fallbackDash }, document.title, "/" + fallbackDash);
-            } catch (e) {
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
+            setPendingLoginMode(targetCategory || "guru");
+            setAuthModalTab("login");
+            setShowLoginModal(true);
             return;
           }
 
@@ -553,179 +514,72 @@ export default function App() {
           localStorage.setItem("bunyiKataAccessLevel", "pro");
           setUserAccessLevel("pro");
 
-          const planName = verifiedPlanName;
-          const returnEmail = verifiedEmail;
-
           setPaymentToast({
             show: true,
             title: "🎉 Langganan Pro Berjaya!",
-            message: `Tahniah! Akaun ${returnEmail ? `(${returnEmail})` : ""} kini telah dinaik taraf ke versi ${planName}. Semua profil, modul dan peta dibuka sepenuhnya!`,
+            message: `Tahniah! Akaun ${verifiedEmail ? `(${verifiedEmail})` : ""} kini telah dinaik taraf ke versi ${verifiedPlanName}. Sila log masuk semula untuk memulakan sesi Pro anda.`,
             type: "success",
-            planName: planName,
+            planName: verifiedPlanName,
           });
 
-          if (isParent) {
-            localStorage.setItem("bunyiKataUserRole", "ibubapa");
-            localStorage.setItem("bunyiKataIbubapaSetupDone", "true");
-            localStorage.setItem("bunyiKataParentPlan", planName);
-            (window as any).modIbuBapaAktif = true;
-            (window as any).modGuruAktif = false;
-            (window as any).modAdminAktif = false;
-            document.body.classList.add("parent-mode");
-            document.body.classList.remove("teacher-mode", "admin-mode");
-            const pNav = document.getElementById("parent-sticky-nav");
-            if (pNav) pNav.style.display = "flex";
-            setActiveScreen("ibubapa-dashboard");
-            if (typeof syncParentSessionFromFirebase === "function") {
-              await syncParentSessionFromFirebase(returnEmail).catch(console.warn);
-            }
-            if (typeof (window as any).masukModIbubapa === "function") {
-              (window as any).masukModIbubapa();
-            } else if (typeof (window as any).masukModIbuBapa === "function") {
-              (window as any).masukModIbuBapa();
-            }
-            if (typeof (window as any).paparSkrin === "function") {
-              (window as any).paparSkrin("ibubapa-dashboard", true);
-            }
-          } else if (isAdmin) {
-            localStorage.setItem("bunyiKataUserRole", "admin");
-            (window as any).modAdminAktif = true;
-            (window as any).modGuruAktif = true;
-            (window as any).modIbuBapaAktif = false;
-            document.body.classList.add("teacher-mode", "admin-mode");
-            document.body.classList.remove("parent-mode");
-            const aNav = document.getElementById("admin-sticky-nav");
-            if (aNav) aNav.style.display = "flex";
-            setActiveScreen("admin-dashboard");
-            if (typeof (window as any).masukModAdmin === "function") {
-              (window as any).masukModAdmin();
-            }
-            if (typeof (window as any).paparSkrin === "function") {
-              (window as any).paparSkrin("admin-dashboard", true);
-            }
-          } else {
-            localStorage.setItem("bunyiKataUserRole", "guru");
-            localStorage.setItem("bunyiKataGuruSetupDone", "true");
-            localStorage.setItem("bunyiKataTeacherPlan", planName);
-            setTeacherPlanName(planName);
-            (window as any).modGuruAktif = true;
-            (window as any).modIbuBapaAktif = false;
-            (window as any).modAdminAktif = false;
-            document.body.classList.add("teacher-mode");
-            document.body.classList.remove("parent-mode", "admin-mode");
-            const tNav = document.getElementById("teacher-sticky-nav");
-            if (tNav) tNav.style.display = "flex";
-            setActiveScreen("guru-dashboard");
-            if (typeof syncTeacherSessionFromFirebase === "function") {
-              await syncTeacherSessionFromFirebase(returnEmail).catch(console.warn);
-            }
-            if (typeof (window as any).masukModGuru === "function") {
-              (window as any).masukModGuru();
-            }
-            if (typeof (window as any).paparSkrin === "function") {
-              (window as any).paparSkrin("guru-dashboard", true);
-            }
-          }
-
-          // Bersihkan query param dari URL bar dan kekalkan laluan dashboard aktif
-          const targetDashPath = isParent ? "ibubapa-dashboard" : (isAdmin ? "admin-dashboard" : "guru-dashboard");
-          try {
-            window.history.replaceState({ screenId: targetDashPath }, document.title, "/" + targetDashPath);
-          } catch (e) {
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
+          // Buka modal log masuk semula
+          setPendingLoginMode(targetCategory || "guru");
+          setAuthModalTab("login");
+          setShowLoginModal(true);
         };
 
         processPaymentSuccess();
       } else if (paymentStatus === "failed" || paymentStatus === "cancelled") {
-
         setShowSplash(false);
-        setShowLoginModal(false);
         setIsModeMenuOpen(false);
         setIsProPricingModalOpen(false);
 
         let targetCategory = "";
-        let returnScreen = "";
         try {
-          returnScreen = localStorage.getItem("bunyiKataReturnDashboard") || "";
           const savedPendingPlan = localStorage.getItem("bunyiKataPendingPlan");
           if (savedPendingPlan) {
             const parsed = JSON.parse(savedPendingPlan);
             if (parsed?.category) targetCategory = parsed.category;
-            if (parsed?.returnScreen) returnScreen = parsed.returnScreen;
           }
         } catch (e) {}
 
-        const userRole = targetCategory || localStorage.getItem("bunyiKataUserRole") || "";
-        const isParent = userRole === "ibubapa" || !!localStorage.getItem("bunyiKataIbubapaEmail") || returnScreen === "ibubapa-dashboard";
-        const isAdmin = userRole === "admin" || returnScreen === "admin-dashboard";
-        const fallbackDash = isParent ? "ibubapa-dashboard" : (isAdmin ? "admin-dashboard" : "guru-dashboard");
+        // Pembersihan sesi sepenuhnya: tiada sebarang top nav mod terapung
+        (window as any).modGuruAktif = false;
+        (window as any).modIbuBapaAktif = false;
+        (window as any).modAdminAktif = false;
+        (window as any).isAdminMode = false;
+        (window as any).adminClaimDisahkan = false;
+        document.body.classList.remove("teacher-mode", "admin-mode", "parent-mode");
 
-        if (isParent) {
-          (window as any).modIbuBapaAktif = true;
-          (window as any).modGuruAktif = false;
-          (window as any).modAdminAktif = false;
-          localStorage.setItem("bunyiKataUserRole", "ibubapa");
-          document.body.classList.add("parent-mode");
-          document.body.classList.remove("teacher-mode", "admin-mode");
-          const pNav = document.getElementById("parent-sticky-nav");
-          if (pNav) pNav.style.display = "flex";
-          setActiveScreen("ibubapa-dashboard");
-          if (typeof (window as any).masukModIbubapa === "function") {
-            (window as any).masukModIbubapa();
-          } else if (typeof (window as any).masukModIbuBapa === "function") {
-            (window as any).masukModIbuBapa();
-          }
-          if (typeof (window as any).paparSkrin === "function") {
-            (window as any).paparSkrin("ibubapa-dashboard", true);
-          }
-        } else if (isAdmin) {
-          (window as any).modAdminAktif = true;
-          (window as any).modGuruAktif = true;
-          (window as any).modIbuBapaAktif = false;
-          localStorage.setItem("bunyiKataUserRole", "admin");
-          document.body.classList.add("teacher-mode", "admin-mode");
-          document.body.classList.remove("parent-mode");
-          const aNav = document.getElementById("admin-sticky-nav");
-          if (aNav) aNav.style.display = "flex";
-          setActiveScreen("admin-dashboard");
-          if (typeof (window as any).masukModAdmin === "function") {
-            (window as any).masukModAdmin();
-          }
-          if (typeof (window as any).paparSkrin === "function") {
-            (window as any).paparSkrin("admin-dashboard", true);
-          }
-        } else {
-          (window as any).modGuruAktif = true;
-          (window as any).modIbuBapaAktif = false;
-          (window as any).modAdminAktif = false;
-          localStorage.setItem("bunyiKataUserRole", "guru");
-          document.body.classList.add("teacher-mode");
-          document.body.classList.remove("parent-mode", "admin-mode");
-          const tNav = document.getElementById("teacher-sticky-nav");
-          if (tNav) tNav.style.display = "flex";
-          setActiveScreen("guru-dashboard");
-          if (typeof (window as any).masukModGuru === "function") {
-            (window as any).masukModGuru();
-          }
-          if (typeof (window as any).paparSkrin === "function") {
-            (window as any).paparSkrin("guru-dashboard", true);
-          }
+        const tNav = document.getElementById("teacher-sticky-nav");
+        if (tNav) tNav.style.display = "none";
+        const aNav = document.getElementById("admin-sticky-nav");
+        if (aNav) aNav.style.display = "none";
+        const pNav = document.getElementById("parent-sticky-nav");
+        if (pNav) pNav.style.display = "none";
+        const topBanner = document.getElementById("teacher-top-banner");
+        if (topBanner) topBanner.style.display = "none";
+
+        setActiveScreen("login-screen");
+        if (typeof (window as any).paparSkrin === "function") {
+          (window as any).paparSkrin("login-screen", true);
         }
+        try {
+          window.history.replaceState({ screenId: "login-screen" }, document.title, "/");
+        } catch (e) {}
 
         // Toast notifikasi status gagal / batal
         setPaymentToast({
           show: true,
           title: "Pembayaran Dibatalkan / Tidak Selesai",
-          message: "Transaksi pembayaran belum selesai atau telah dibatalkan. Anda boleh memilih semula pakej dari dashboard bila-bila masa.",
+          message: "Transaksi pembayaran belum selesai atau telah dibatalkan. Sila log masuk semula untuk meneruskan.",
           type: "error",
         });
 
-        try {
-          window.history.replaceState({ screenId: fallbackDash }, document.title, "/" + fallbackDash);
-        } catch (e) {
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
+        // Buka modal log masuk semula
+        setPendingLoginMode(targetCategory || "guru");
+        setAuthModalTab("login");
+        setShowLoginModal(true);
       }
     }
 
@@ -733,7 +587,7 @@ export default function App() {
     if (typeof window !== "undefined") {
       const search = window.location.search || "";
       if (search.includes("payment=") || search.includes("status=")) {
-        // Jangan timpa laluan dashboard yang telah diselaraskan oleh callback pembayaran
+        // Jangan timpa laluan login yang telah diselaraskan oleh callback pembayaran
         return;
       }
       let currentPath =

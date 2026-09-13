@@ -247,7 +247,7 @@ async function startServer() {
       const planKey = resolvePlanKey(planInfo);
       const plan = PLAN_CATALOG[planKey];
       const origin =
-        redirectOrigin || req.headers.origin || "https://bunyi-kata-official.web.app";
+        redirectOrigin || req.headers.origin || "https://bunyikata--bunyi-kata-official.asia-southeast1.hosted.app";
       const clientName =
         fullName ||
         name ||

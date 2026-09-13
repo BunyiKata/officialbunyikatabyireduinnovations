@@ -1943,11 +1943,12 @@ function paparSkrin(screenId, skipHash) {
         document.body.classList.remove('hide-top-banner');
     }
 
-    const isCurrentAdmin = screenId === 'admin-dashboard' || screenId.startsWith('admin-') ||
-        ((document.body.classList.contains('admin-mode') || window.modAdminAktif || window.isAdminMode) && !window.modIbuBapaAktif);
-    const isCurrentParent = !isCurrentAdmin && (screenId === 'ibubapa-dashboard' || screenId.startsWith('ibubapa-') ||
+    const isLoginScreen = screenId === 'login-screen';
+    const isCurrentAdmin = !isLoginScreen && (screenId === 'admin-dashboard' || screenId.startsWith('admin-') ||
+        ((document.body.classList.contains('admin-mode') || window.modAdminAktif || window.isAdminMode) && !window.modIbuBapaAktif));
+    const isCurrentParent = !isLoginScreen && !isCurrentAdmin && (screenId === 'ibubapa-dashboard' || screenId.startsWith('ibubapa-') ||
         Boolean(window.modIbuBapaAktif) || document.body.classList.contains('parent-mode'));
-    const isCurrentTeacher = !isCurrentAdmin && !isCurrentParent && (screenId === 'guru-dashboard' || screenId.startsWith('guru-') ||
+    const isCurrentTeacher = !isLoginScreen && !isCurrentAdmin && !isCurrentParent && (screenId === 'guru-dashboard' || screenId.startsWith('guru-') ||
         Boolean(window.modGuruAktif) || document.body.classList.contains('teacher-mode'));
 
     if (isCurrentAdmin) {
@@ -1987,6 +1988,13 @@ function paparSkrin(screenId, skipHash) {
         if (screenId === 'login-screen') {
             window.modGuruAktif = false;
             window.modIbuBapaAktif = false;
+            window.modAdminAktif = false;
+            window.isAdminMode = false;
+            document.body.classList.remove('teacher-mode', 'parent-mode', 'admin-mode');
+            if (tNav) tNav.style.display = 'none';
+            if (aNav) aNav.style.display = 'none';
+            if (pNav) pNav.style.display = 'none';
+            if (topBanner) topBanner.style.display = 'none';
         }
         if (!window.modGuruAktif && !window.modIbuBapaAktif) {
             document.body.classList.remove('teacher-mode', 'parent-mode', 'admin-mode');
@@ -2004,11 +2012,7 @@ function paparSkrin(screenId, skipHash) {
     }
 
     // Jaring keselamatan: jika skrin ini sepatutnya memaparkan banner mod
-    // (cth Kenali Huruf ABC, Vokal & Konsonan, Tambah/Tolak, Kad Imbasan
-    // Nombor, Bacaan Bergred) tetapi cawangan di atas tidak mengendalikannya secara
-    // eksplisit, pastikan banner benar-benar kelihatan. Tanpa ini, guru /
-    // admin / ibu bapa tidak tahu mereka berada dalam mod yang mana.
-    if (!sembunyiBanner &&
+    if (!sembunyiBanner && screenId !== 'login-screen' &&
         (window.modGuruAktif || window.modIbuBapaAktif || window.modAdminAktif || window.isAdminMode ||
          document.body.classList.contains('admin-mode') || document.body.classList.contains('teacher-mode') || document.body.classList.contains('parent-mode'))) {
         if (topBanner) topBanner.style.display = 'flex';

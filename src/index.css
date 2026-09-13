@@ -14251,3 +14251,13 @@ i.fa-brands {
         padding: 18px 14px !important;
     }
 }
+
+/* Pastikan TIADA sebarang top nav, banner mod atau sticky nav terapung pada skrin log masuk */
+body:has(#login-screen.active) #teacher-top-banner,
+body:has(#login-screen.active) #teacher-sticky-nav,
+body:has(#login-screen.active) #parent-sticky-nav,
+body:has(#login-screen.active) #admin-sticky-nav,
+body:has(#login-screen.active) .teacher-top-banner,
+body:has(#login-screen.active) .teacher-nav-glass {
+    display: none !important;
+}
