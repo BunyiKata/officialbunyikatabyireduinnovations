@@ -1958,6 +1958,55 @@ export async function fetchAdminDataFromFirebase(): Promise<{ teachers: any[]; p
 /**
  * Menambah hari langganan profil pengguna (+30 hari dsb)
  */
+export interface HasilSemakLuput {
+  /** true hanya apabila pelayan mengesahkan langganan sudah luput. */
+  luput: boolean;
+  /** true apabila pelayan dapat dihubungi (jadi keputusan boleh dipercayai). */
+  sah: boolean;
+  langganan?: string;
+  tarikh_tamat?: string;
+}
+
+/**
+ * Semak sama ada langganan pengguna yang sedang log masuk sudah luput.
+ *
+ * Tarikh dinilai oleh PELAYAN (bukan peranti), jadi menukar jam telefon
+ * tidak boleh memanjangkan akses Pro.
+ *
+ * FAIL-SAFE: jika pelayan tidak dapat dihubungi / token tiada / ralat,
+ * kita memulangkan { luput: false, sah: false } - pengguna KEKAL dengan
+ * akses semasa. Kita TIDAK sekali-kali menurunkan akses secara membuta
+ * hanya kerana rangkaian gagal.
+ */
+export async function semakLuputLanggananFirebase(): Promise<HasilSemakLuput> {
+  const selamat = { luput: false, sah: false } as HasilSemakLuput;
+  try {
+    const pengguna = auth.currentUser;
+    if (!pengguna) return selamat;
+    const token = await pengguna.getIdToken();
+    const res = await fetch("/api/subscription/check", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data || data.success !== true) return selamat;
+    return {
+      luput: data.status === "diturunkan" || String(data.langganan || "").toLowerCase() === "percuma",
+      sah: true,
+      langganan: data.langganan || "",
+      tarikh_tamat: data.tarikh_tamat || "",
+    };
+  } catch (err) {
+    console.warn("[Langganan] Semakan luput gagal, kekalkan akses semasa:", err);
+    return selamat;
+  }
+}
+
+
 export async function updateProfileSubscription(profileId: string, daysToAdd: number = 30): Promise<boolean> {
   try {
     let targetKey = profileId;

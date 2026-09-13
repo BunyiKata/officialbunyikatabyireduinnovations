@@ -81,6 +81,7 @@ import {
   checkIsCodeAlreadyUsedInFirebase,
   naikTarafLanggananFirebase,
   rekodPesananFirebase,
+  semakLuputLanggananFirebase,
 } from "./services/firebaseService";
 
 if (typeof window !== "undefined") {
@@ -1952,6 +1953,30 @@ export default function App() {
       }
     } catch (e) {
       console.warn('Realtime init notice:', e);
+    }
+
+    // Fasa 1.2: semak luput langganan melalui pelayan (auto-expiry).
+    // Hanya berjalan apabila ada sesi pengguna sebenar, dan sekali sahaja
+    // setiap muat. Fail-safe: jika pelayan tak dapat dihubungi, akses kekal.
+    const uidSemak = localStorage.getItem("bunyiKataUserId");
+    const adaSesi = Boolean(uidSemak) && !isUserAdmin();
+    if (adaSesi) {
+      semakLuputLanggananFirebase()
+        .then((hasil) => {
+          if (!hasil.sah) return; // pelayan tak dapat dihubungi - jangan sentuh
+          if (hasil.luput) {
+            // Pelayan sudah menurunkan profil ke Percuma. Selaraskan UI.
+            try {
+              localStorage.removeItem("bunyiKataTarikhTamat");
+              localStorage.setItem("bunyiKataTeacherPlan", "Percuma");
+              localStorage.setItem("bunyiKataParentPlan", "Percuma");
+              localStorage.setItem("bunyiKataAccessLevel", "trial");
+            } catch (e) {}
+            setUserAccessLevel("trial");
+            try { window.dispatchEvent(new CustomEvent("akses-level-change")); } catch (e) {}
+          }
+        })
+        .catch(() => {});
     }
 
     // We will load the logic here or via external file

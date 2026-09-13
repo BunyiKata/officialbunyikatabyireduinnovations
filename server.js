@@ -196,6 +196,50 @@ function senaraiPakej() {
   }));
 }
 
+/** Tempoh tangguh hari selepas tarikh_tamat sebelum akses Pro diturunkan. */
+const GRACE_HARI = 3;
+
+/**
+ * Tentukan sama ada langganan profil sudah luput secara kekal.
+ *
+ * Peraturan (pelayan ialah sumber kebenaran):
+ *   - Tiada tarikh_tamat -> TIDAK pernah luput.
+ *   - tarikh_tamat + GRACE_HARI belum berlalu -> masih aktif (grace).
+ *   - Melebihi grace -> luput: akses Pro patut diturunkan.
+ *
+ * PENTING: kita TIDAK memadam tarikh_tamat - ia kekal sebagai rekod
+ * sejarah supaya baki & jejak masih ada bila pengguna bayar semula.
+ */
+function langgananLuput(profil, sekarangMs) {
+  const tarikh = profil && profil.tarikh_tamat;
+  if (!tarikh) return false;
+  const masaTamat = new Date(tarikh).getTime();
+  if (!Number.isFinite(masaTamat)) return false;
+  return sekarangMs > masaTamat + GRACE_HARI * 24 * 60 * 60 * 1000;
+}
+
+/**
+ * Turunkan profil yang sudah luput ke Percuma (jika belum).
+ * Memulangkan { berubah, profil } supaya pemanggil tahu keadaan terkini.
+ */
+async function turunkanJikaLuput(db, kunci, profil) {
+  const sekarang = Date.now();
+  if (!langgananLuput(profil, sekarang)) return { berubah: false, profil };
+  const namaSedia = String((profil && profil.langganan) || "").toLowerCase();
+  if (namaSedia.indexOf("percuma") !== -1) return { berubah: false, profil };
+  const kemaskini = {
+    langganan: "Percuma",
+    pakej: "percuma",
+    dikemaskini_pada: new Date().toISOString(),
+  };
+  await db.ref("profiles/" + kunci).update(kemaskini);
+  console.log("[Langganan Luput] " + kunci + " diturunkan ke Percuma.");
+  return { berubah: true, profil: Object.assign({}, profil, kemaskini) };
+}
+
+
+
+
 function resolvePlanKey(planInfo) {
   const raw = `${planInfo?.id || ""} ${planInfo?.name || ""} ${planInfo?.period || ""}`.toLowerCase();
   if (raw.includes("tahun") || raw.includes("year")) return "1tahun";
@@ -252,6 +296,69 @@ async function startServer() {
    * Klien kemudian signInWithCustomToken() supaya auth != null dan peraturan
    * pangkalan data boleh mempercayai token tersebut.
    */
+  /**
+   * Semak & turunkan langganan pengguna yang sudah luput (auto-expiry).
+   *
+   * Dipanggil oleh klien apabila aplikasi dimuatkan / dibuka semula. Ia
+   * menggunakan tarikh PELAYAN (Date.now di sini) - bukan tarikh peranti -
+   * supaya pengguna tidak boleh mengelak luput dengan menukar jam peranti.
+   *
+   * Fail-safe: jika pelayan tidak dapat dihubungi, klien TIDAK menurunkan
+   * apa-apa (lihat klien). Endpoint ini memulangkan keadaan terkini supaya
+   * klien boleh memutuskan tanpa logik tarikh sendiri.
+   */
+  app.post("/api/subscription/check", async (req, res) => {
+    try {
+      const header = (req.headers.authorization || "").toString();
+      const idToken = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+      if (!idToken) {
+        return res.status(401).json({ success: false, message: "Sesi diperlukan." });
+      }
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Pelayan belum sedia; kekalkan keadaan semasa." });
+      }
+      let decoded;
+      try {
+        decoded = await getAuth(appInstance).verifyIdToken(idToken);
+      } catch (err) {
+        return res.status(401).json({ success: false, message: "Token tidak sah atau tamat tempoh." });
+      }
+      const uid = decoded.uid;
+      const email = String(decoded.email || "").toLowerCase().trim();
+      const db = getDatabase(appInstance);
+      // Utamakan profil mengikut UID; jatuh balik kepada carian emel.
+      let kunci = null;
+      let profil = null;
+      const snapUid = await db.ref("profiles/" + uid).get();
+      if (snapUid.exists()) {
+        kunci = uid;
+        profil = snapUid.val();
+      } else if (email) {
+        kunci = await cariKunciProfil(db, null, email);
+        if (kunci) {
+          const snapE = await db.ref("profiles/" + kunci).get();
+          profil = snapE.exists() ? snapE.val() : null;
+        }
+      }
+      if (!kunci || !profil) {
+        return res.json({ success: true, status: "tiada_profil" });
+      }
+      const hasil = await turunkanJikaLuput(db, kunci, profil);
+      const terkini = hasil.profil || profil;
+      return res.json({
+        success: true,
+        status: hasil.berubah ? "diturunkan" : "kekal",
+        langganan: terkini.langganan || "",
+        tarikh_tamat: terkini.tarikh_tamat || "",
+      });
+    } catch (err) {
+      console.error("[Subscription Check]", err);
+      // Fail-safe: klien TIDAK menurunkan apa-apa jika berlaku ralat.
+      return res.status(500).json({ success: false, message: "Semakan gagal; kekalkan keadaan." });
+    }
+  });
+
   app.post("/api/admin/verify", async (req, res) => {
     try {
       const expectedCode = process.env.ADMIN_CODE;
