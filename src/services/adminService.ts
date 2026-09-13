@@ -284,6 +284,37 @@ export async function ambilSenaraiPakej(): Promise<PakejPenuh[]> {
   return janjiPakej;
 }
 
+export interface RekodAudit {
+  id: string;
+  tindakan: string;
+  butiran?: Record<string, unknown>;
+  oleh?: string;
+  tarikh?: string;
+}
+
+/**
+ * Fasa 1.6: ambil jejak audit tindakan admin daripada pelayan.
+ * Memulangkan senarai kosong jika gagal (fail-safe) - UI hanya tunjuk 'tiada log'.
+ */
+export async function ambilLogAudit(): Promise<RekodAudit[]> {
+  try {
+    const pengguna = auth.currentUser;
+    if (!pengguna) return [];
+    const token = await pengguna.getIdToken();
+    const res = await fetch("/api/admin/audit", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.success || !Array.isArray(data.log)) return [];
+    return data.log as RekodAudit[];
+  } catch (err) {
+    console.warn("[Admin Audit] Gagal memuatkan log audit:", err);
+    return [];
+  }
+}
+
+
 // ---------------------------------------------------------------------------
 // JAMBATAN KE public/app-logic.js
 //
@@ -298,6 +329,7 @@ if (typeof window !== 'undefined') {
     resetKataLaluanAdmin,
     panjangkanTempohAdmin,
     ambilSenaraiPakej,
+    ambilLogAudit,
   };
 }
 

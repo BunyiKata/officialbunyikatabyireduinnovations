@@ -263,6 +263,30 @@ function namaPelanSediaAda(rawPlan) {
   return rawPlan || "1 Bulan (Pro)";
 }
 
+/**
+ * Fasa 1.6: rekod jejak audit tindakan admin.
+ *
+ * Setiap tindakan penting admin (cipta akaun, reset kata laluan, lanjut
+ * tempoh) direkodkan supaya ada jejak siapa-buat-apa-bila. Tanpa ini, jika
+ * ada masalah langganan, tiada cara untuk menyiasat.
+ *
+ * Penulisan log SENGAJA tidak menghalang tindakan utama: jika log gagal,
+ * tindakan tetap berjaya (fail-safe, log sahaja yang hilang).
+ */
+async function rekodAudit(db, tindakan, butiran) {
+  try {
+    await db.ref("audit_log").push({
+      tindakan,
+      butiran: butiran || {},
+      oleh: "admin",
+      tarikh: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.warn("[Audit] Gagal merekod tindakan:", tindakan, err?.message || err);
+  }
+}
+
+
 async function startServer() {
   const app = express();
   // App Hosting / Cloud Run menyuntik PORT melalui persekitaran. Mesti dipatuhi,
@@ -414,6 +438,36 @@ async function startServer() {
    * Kata laluan TIDAK PERNAH disimpan dalam pangkalan data â€” ia hanya
    * dipulangkan sekali kepada admin untuk dihantar kepada pengguna.
    */
+  /**
+   * Fasa 1.6: ambil jejak audit tindakan admin (200 terbaharu).
+   *
+   * Hanya admin (requireAdmin) boleh melihat log ini - ia mengandungi emel
+   * dan detail langganan pengguna.
+   */
+  app.get("/api/admin/audit", requireAdmin, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
+      }
+      const db = getDatabase(appInstance);
+      const snap = await db.ref("audit_log").limitToLast(200).get();
+      const log = [];
+      if (snap.exists()) {
+        snap.forEach((anak) => {
+          log.push(Object.assign({ id: anak.key }, anak.val()));
+          return false;
+        });
+      }
+      // Terbaharu dahulu.
+      log.sort((a, b) => new Date(b.tarikh || 0).getTime() - new Date(a.tarikh || 0).getTime());
+      return res.json({ success: true, log });
+    } catch (err) {
+      console.error("[Admin Audit]", err);
+      return res.status(500).json({ success: false, message: "Gagal memuatkan log audit." });
+    }
+  });
+
   app.post("/api/admin/create-account", requireAdmin, async (req, res) => {
     try {
       const appInstance = getAdminApp();
@@ -523,6 +577,14 @@ async function startServer() {
         tarikh: tarikhMula,
       });
 
+      await rekodAudit(db, "cipta_akaun", {
+        uid,
+        emel: emailBersih,
+        peranan: perananBersih,
+        pakej: planBersih,
+        harga_sen: plan.priceCents,
+        jumlah_hari: plan.days,
+      });
       console.log(`[Admin Cipta Akaun] Akaun dicipta: ${emailBersih} (${uid}) pakej=${planBersih}`);
 
       // Kata laluan dipulangkan SEKALI sahaja â€” tidak disimpan di mana-mana.
@@ -619,6 +681,8 @@ async function startServer() {
         console.log(`[Admin Reset Kata Laluan] Diselesaikan melalui emel=${email} (uid asal tidak sah).`);
       }
 
+      const dbReset = getDatabase(appInstance);
+      await rekodAudit(dbReset, "reset_kata_laluan", { uid, emel: emailDiminta || "" });
       console.log(`[Admin Reset Kata Laluan] Kata laluan direset untuk uid=${uid}`);
       return res.json({ success: true, uid, password: kataLaluan });
     } catch (err) {
@@ -708,6 +772,15 @@ async function startServer() {
         tarikh: new Date().toISOString(),
       });
 
+      await rekodAudit(db, "lanjut_tempoh", {
+        uid,
+        kunci_profil: kunciProfil,
+        nama_pakej: plan.name,
+        jumlah_hari: plan.days,
+        harga_sen: plan.priceCents,
+        mod: gunaHari ? "hari" : "pakej",
+        tarikh_tamat_baharu: tarikhTamatBaharu,
+      });
       console.log(`[Admin Lanjutan Tempoh] uid=${uid} -> ${tarikhTamatBaharu} (${gunaHari ? hariDiminta + " hari" : planBersih})`);
       return res.json({
         success: true,

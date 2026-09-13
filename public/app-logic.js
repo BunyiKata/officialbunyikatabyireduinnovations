@@ -619,7 +619,81 @@ window.renderAdminTable = function (type = 'guru') {
                         </tr>
                     `;
         });
-    }
+    } else if (type === "audit") {
+        // Fasa 1.6: jejak audit tindakan admin (cipta akaun, reset, lanjut).
+        if (title) {
+            title.className = "neo-btn";
+            title.style.cssText = "background:linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color:white; padding:7px 16px; font-weight:bold; font-size:1rem; border-radius:12px; border:2.5px solid var(--color-dark, #10182f); box-shadow:0 3px 0 var(--color-dark, #10182f); display:inline-flex; align-items:center; gap:8px; pointer-events:none; margin:0;";
+            title.innerHTML = '<i class="fa-solid fa-clipboard-list"></i> <span style="font-family:\'AtlantaRoundedBlack\', sans-serif;">Log Audit Admin</span>';
+        }
+        adminThead.innerHTML = `
+                    <tr style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: white;">
+                        <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #312e81; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; width:48px; min-width:48px; text-transform:uppercase;">BIL.</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #312e81; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:150px; text-transform:uppercase;">TINDAKAN</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #312e81; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:220px; text-transform:uppercase;">BUTIRAN</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #312e81; text-align:center; font-size:0.85rem; font-weight:bold; min-width:150px; text-transform:uppercase;">TARIKH</th>
+                    </tr>
+                `;
+        adminTbody.innerHTML = `
+            <tr>
+                <td colspan="4" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold;">
+                    <i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Memuatkan log audit...
+                </td>
+            </tr>
+        `;
+        const labelTindakan = {
+            cipta_akaun: "Cipta Akaun",
+            reset_kata_laluan: "Reset Kata Laluan",
+            lanjut_tempoh: "Lanjut Tempoh"
+        };
+        const paparLog = (log) => {
+            const senarai = Array.isArray(log) ? log : [];
+            adminTbody.innerHTML = "";
+            if (senarai.length === 0) {
+                adminTbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="padding: 28px; text-align: center; color: #64748b; font-weight: bold;">
+                            <i class="fa-solid fa-clipboard" style="font-size: 2rem; margin-bottom: 8px; display: block; color: #cbd5e1;"></i>
+                            Tiada log audit lagi.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            senarai.forEach((r, index) => {
+                const b = r.butiran || {};
+                const bahagian = [];
+                if (b.emel) bahagian.push("Emel: " + b.emel);
+                if (b.peranan) bahagian.push("Peranan: " + b.peranan);
+                if (b.nama_pakej) bahagian.push("Pakej: " + b.nama_pakej);
+                if (b.jumlah_hari) bahagian.push(b.jumlah_hari + " hari");
+                if (b.mod) bahagian.push("Mod: " + b.mod);
+                if (b.tarikh_tamat_baharu) bahagian.push("Tamat: " + window.formatTarikhLangganan(b.tarikh_tamat_baharu));
+                const butiranTeks = bahagian.length ? bahagian.join(" | ") : "-";
+                const tarikhTeks = r.tarikh ? new Date(r.tarikh).toLocaleString("ms-MY") : "-";
+                adminTbody.innerHTML += `
+                    <tr class="admin-table-row" style="border-bottom:1px solid #e2e8f0; background: ${index % 2 === 0 ? "#ffffff" : "#eef2ff"};">
+                        <td class="admin-td" style="padding: 9px 8px; font-weight: 600; color: #64748b; border-right: 1px solid #e2e8f0; text-align: center; font-size: 0.85rem;">${index + 1}</td>
+                        <td class="admin-td" style="padding: 9px 12px; font-weight: bold; color: #3730a3; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem;">${labelTindakan[r.tindakan] || r.tindakan || "-"}</td>
+                        <td class="admin-td" style="padding: 9px 12px; color: #475569; border-right: 1px solid #e2e8f0; font-size: 0.82rem;">${butiranTeks}</td>
+                        <td class="admin-td" style="padding: 9px 12px; color: #475569; font-size: 0.82rem; text-align:center; white-space:nowrap;">${tarikhTeks}</td>
+                    </tr>
+                `;
+            });
+        };
+        const apiAudit = window.__adminApi;
+        if (apiAudit && typeof apiAudit.ambilLogAudit === "function") {
+            apiAudit.ambilLogAudit().then(paparLog).catch(() => paparLog([]));
+        } else {
+            _tungguAdminApi().then((apiSedia) => {
+                if (apiSedia && typeof apiSedia.ambilLogAudit === "function") {
+                    apiSedia.ambilLogAudit().then(paparLog).catch(() => paparLog([]));
+                } else {
+                    paparLog([]);
+                }
+            });
+        }
+    }
 };
 
     window.padamFeedback = async function (id) {

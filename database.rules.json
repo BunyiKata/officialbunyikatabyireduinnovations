@@ -85,6 +85,14 @@
         ".write": "!data.exists() || auth.token.admin == true",
         ".validate": "newData.hasChildren(['purchase_id', 'email', 'status'])"
       }
+    },
+
+    "audit_log": {
+      ".read": "auth != null && auth.token.admin == true",
+      ".indexOn": ["tarikh", "tindakan"],
+      "$logId": {
+        ".write": "auth != null && auth.token.admin == true"
+      }
     }
   }
 }
