@@ -6419,7 +6419,27 @@ function checkIsTrial() {
     const activeStudent = (window.namaMuridAktif || localStorage.getItem('muridAktif') || '').trim();
     const NAMA_BUKAN_MURID = ['tetamu', 'murid', 'guest', 'student', 'admin', 'guru', 'ibubapa', 'ibu bapa'];
     if (activeStudent && !NAMA_BUKAN_MURID.includes(activeStudent.toLowerCase())) {
-        return false;
+        // Murid berdaftar hanya Pro jika ada BUKTI langganan:
+        // 1) Pelan berbayar guru/ibubapa yang sah (bukan 'Percuma'),
+        // 2) Sesi admin runtime, ATAU
+        // 3) Akses 'pro' eksplisit dengan peranan 'murid' (aliran kod
+        //    kelas / kod keluarga / selepas pembayaran oleh guru).
+        // Sebelum ini blok ini memulangkan `false` (Pro) untuk SEMUA murid
+        // berdaftar — murid percuma nampak semua peta terbuka sedangkan
+        // tiada langganan. Kini murid percuma dianggap TRIAL (fail-closed)
+        // supaya overlay kunci + tetingkap pakej Pro muncul dengan betul.
+        const planGuru = (localStorage.getItem('bunyiKataTeacherPlan') || '').toLowerCase().trim();
+        const planIbuBapa = (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase().trim();
+        const adaPelanBerbayar = [planGuru, planIbuBapa].some(function (p) {
+            return !!p && p !== 'percuma' && p !== 'trial' && p !== 'free' && p !== 'tetamu';
+        });
+        const roleSkrg = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
+        const accessSkrg = (localStorage.getItem('bunyiKataAccessLevel') || '').toLowerCase().trim();
+        const aksesProEksplisit = roleSkrg === 'murid' && accessSkrg === 'pro';
+        if (adaPelanBerbayar || window.adminClaimDisahkan === true || window.isAdminMode || window.modAdminAktif || aksesProEksplisit) {
+            return false;
+        }
+        return true;
     }
     // Jika tetamu / akaun percuma
     return true;
@@ -6461,6 +6481,12 @@ function bukaModalPilihPeta(mod) {
             petaTajuk.classList.add('bg-orange');
         }
     }
+
+    // Beritahu React supaya menyegerakkan semula kunci peta (overlay Versi Pro)
+    // daripada sumber kebenaran tunggal checkIsTrial().
+    try {
+        window.dispatchEvent(new CustomEvent('akses-level-change'));
+    } catch (e) {}
 
     const btnTexts = document.querySelectorAll('#modal-pilih-peta .map-select-text');
     const mapImgs = document.querySelectorAll('#modal-pilih-peta .map-select-btn img');
@@ -18364,12 +18390,27 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
             window.setUserAccessLevel('trial');
         }
     } else {
+        // PENTING: Murid BERDAFTAR tidak semestinya Pro. Sebelum ini kod ini
+        // memaksa access 'pro' untuk SEMUA murid berdaftar — ini menyebabkan
+        // UI React fikir pengguna Pro (tiada overlay kunci peta 2/3/4) walaupun
+        // tiada langganan, manakala runtime checkIsTrial() menganggap Trial
+        // (fail-closed) — lalu timbul percanggahan: "peta nampak terbuka, tapi
+        // bila tekan keluar modal pakej Pro".
+        // Akses murid ditentukan oleh pelan GURU/IBU BAPA yang memilih profil:
+        // murid hanya Pro jika ada pelan berbayar yang sah (bukan 'Percuma').
         window.isGuestMode = false;
-        window.userAccessLevel = 'pro';
-        localStorage.setItem('bunyiKataAccessLevel', 'pro');
         localStorage.setItem('bunyiKataUserRole', 'murid');
+        const planGuru = (localStorage.getItem('bunyiKataTeacherPlan') || '').toLowerCase().trim();
+        const planIbuBapa = (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase().trim();
+        const adaPelanBerbayar = [planGuru, planIbuBapa].some(function (p) {
+            return !!p && p !== 'percuma' && p !== 'trial' && p !== 'free' && p !== 'tetamu';
+        });
+        // Juga hormati akses Pro eksplisit yang disahkan (cth. selepas pembayaran).
+        const isProStudent = adaPelanBerbayar || window.adminClaimDisahkan === true || window.isAdminMode || window.modAdminAktif;
+        window.userAccessLevel = isProStudent ? 'pro' : 'trial';
+        localStorage.setItem('bunyiKataAccessLevel', isProStudent ? 'pro' : 'trial');
         if (typeof window.setUserAccessLevel === 'function') {
-            window.setUserAccessLevel('pro');
+            window.setUserAccessLevel(isProStudent ? 'pro' : 'trial');
         }
     }
 
@@ -18379,7 +18420,16 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
             window.studentData[studentName] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: window.selectedAvatarIcon || '/images/avatar/avatar1.png' };
         }
         if (explicitStudentId) window.studentData[studentName].id = explicitStudentId;
-        if (studentName !== 'Tetamu' && !isExplicitGuest) window.studentData[studentName].isPro = true;
+        // PENTING: Jangan tandakan murid berdaftar sebagai Pro secara membuta
+        // tuli. `isPro` hanya benar jika pelan berbayar / sesi admin runtime
+        // (sepadan dengan `checkIsTrial` agar UI lock peta konsisten).
+        if (studentName !== 'Tetamu' && !isExplicitGuest) {
+            const planG = (localStorage.getItem('bunyiKataTeacherPlan') || '').toLowerCase().trim();
+            const planP = (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase().trim();
+            const paid = [planG, planP].some(function (p) { return !!p && p !== 'percuma' && p !== 'trial' && p !== 'free' && p !== 'tetamu'; });
+            window.studentData[studentName].isPro = paid || window.adminClaimDisahkan === true || window.isAdminMode || window.modAdminAktif ||
+                ((localStorage.getItem('bunyiKataUserRole') || '').toLowerCase() === 'murid' && (localStorage.getItem('bunyiKataAccessLevel') || '').toLowerCase() === 'pro');
+        }
         window.selectedAvatarIcon = window.studentData[studentName].avatar;
     }
     if (typeof studentData !== 'undefined') {
@@ -18387,7 +18437,13 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
             studentData[studentName] = typeof studentRecord === 'function' ? studentRecord() : { coins: 0, badges: [], mapsUnlocked: 1, avatar: window.selectedAvatarIcon || '/images/avatar/avatar1.png' };
         }
         if (explicitStudentId) studentData[studentName].id = explicitStudentId;
-        if (studentName !== 'Tetamu' && !isExplicitGuest) studentData[studentName].isPro = true;
+        if (studentName !== 'Tetamu' && !isExplicitGuest) {
+            const planG2 = (localStorage.getItem('bunyiKataTeacherPlan') || '').toLowerCase().trim();
+            const planP2 = (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase().trim();
+            const paid2 = [planG2, planP2].some(function (p) { return !!p && p !== 'percuma' && p !== 'trial' && p !== 'free' && p !== 'tetamu'; });
+            studentData[studentName].isPro = paid2 || window.adminClaimDisahkan === true || window.isAdminMode || window.modAdminAktif ||
+                ((localStorage.getItem('bunyiKataUserRole') || '').toLowerCase() === 'murid' && (localStorage.getItem('bunyiKataAccessLevel') || '').toLowerCase() === 'pro');
+        }
         window.selectedAvatarIcon = studentData[studentName].avatar;
     }
     if (!window.selectedAvatarIcon) {
@@ -18405,6 +18461,12 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
             el.style.backgroundRepeat = 'no-repeat';
         }
     });
+
+    // Beritahu React supaya menyegerakkan semula status trial/pro
+    // (overlay kunci peta, avatar Versi Pro, dan lain-lain).
+    try {
+        window.dispatchEvent(new CustomEvent('akses-level-change'));
+    } catch (e) {}
 
     // Muat turun rekod kemajuan murid (bintang, skor, lencana) dari Firebase Realtime Database jika ada
     if (studentName !== 'Tetamu' && typeof window.fetchStudentProgressFromFirebase === 'function') {

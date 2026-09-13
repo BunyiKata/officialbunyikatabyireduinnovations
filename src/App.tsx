@@ -1355,8 +1355,49 @@ export default function App() {
   );
 
   const isPlanFree = !isStudentRole && !isPaidPlan;
-  const isEffectiveTrial = isGuestModeActive || (isPlanFree && !isUserAdmin() && !isAdminActive);
+  // SUMBER KEBENARAN TUNGGAL: `checkIsTrial()` (fail-closed) dalam app-logic.js
+  // menyemak peranan + pelan + sesi admin RUNTIME. React jangan kira semula
+  // dari localStorage sendiri — ia akan bercanggah (cth. sisa pelan berbayar
+  // atau sisa nama 'Admin' membuat React fikir Pro sedangkan runtime kata
+  // Trial → peta 2/3/4 nampak terbuka tetapi tekan keluar modal pakej).
+  // Gunakan versi kanonik bila tersedia; fallback kepada pengiraan tempatan
+  // (fail-closed = trial) hanya sebelum app-logic.js dimuatkan.
+  const [efektifTrialState, setEfektifTrialState] = React.useState<boolean>(() => {
+    if (typeof (window as any).checkIsTrial === "function") {
+      try { return (window as any).checkIsTrial(); } catch (e) {}
+    }
+    return isGuestModeActive || (isPlanFree && !isUserAdmin() && !isAdminActive);
+  });
+
+  const isEffectiveTrial = efektifTrialState;
   const isEffectivePro = !isEffectiveTrial;
+
+  // Segerakkan semula bila sesi/akses bertukar (admin-mode-change, fokus,
+  // userAccessLevel berubah, atau sebarang event akses-level-change).
+  React.useEffect(() => {
+    const sync = () => {
+      let trialNow = false;
+      if (typeof (window as any).checkIsTrial === "function") {
+        try { trialNow = Boolean((window as any).checkIsTrial()); } catch (e) { trialNow = false; }
+      } else {
+        trialNow = isGuestModeActive || (isPlanFree && !isUserAdmin() && !isAdminActive);
+      }
+      setEfektifTrialState(trialNow);
+    };
+    sync();
+    window.addEventListener("admin-mode-change", sync);
+    window.addEventListener("focus", sync);
+    window.addEventListener("akses-level-change", sync);
+    // 'storage' — perubahan localStorage dari tab lain
+    window.addEventListener("storage", sync);
+    // Apabila userAccessLevel berubah (setUserAccessLevel), refresh juga
+    return () => {
+      window.removeEventListener("admin-mode-change", sync);
+      window.removeEventListener("focus", sync);
+      window.removeEventListener("akses-level-change", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, [isGuestModeActive, isPlanFree, isAdminActive, userAccessLevel, isUserAdmin]);
 
   React.useEffect(() => {
     // PENTING: app-logic.js mentakrifkan versi kanonikal `isEffectiveTrial`
@@ -2146,6 +2187,15 @@ export default function App() {
     const script = document.createElement("script");
     script.id = "app-logic-script";
     script.src = `/app-logic.js?v=${v}`;
+    // PENTING: selepas app-logic.js selesai dimuat (checkIsTrial & co wujud),
+    // beritahu React supaya menyegerakkan status trial/pro. Tanpa ini, React
+    // terperangkap dengan nilai fallback kiraan awal (belum tahu app-logic.js)
+    // dan tidak akan resync kerana tiada event ketibaannya.
+    script.onload = () => {
+      try {
+        window.dispatchEvent(new CustomEvent("akses-level-change"));
+      } catch (e) {}
+    };
     document.body.appendChild(script);
 
     const surihScript = document.createElement("script");

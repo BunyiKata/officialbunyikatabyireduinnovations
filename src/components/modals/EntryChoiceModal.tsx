@@ -330,7 +330,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                     <div style={{ flex: 1, borderTop: "2px dashed #cbd5e1" }}></div>
                   </div>
 
-                  {/* 2. Ruangan Masukkan Kod 8 Aksara */}
+                  {/* 2. Ruangan Masukkan Kod */}
                   <input
                     type="text"
                     className="neo-input century-gothic-font"
@@ -343,8 +343,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                       fontWeight: "bold",
                       letterSpacing: "1px",
                     }}
-                    placeholder="Masukkan Kod 8 Aksara"
-                    maxLength={8}
+                    placeholder="Masukkan Kod"
                     value={joinCode}
                     onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                   />
@@ -618,11 +617,11 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                             "Kod Tidak Sah",
                             `<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">
                               <i class="fa-solid fa-circle-exclamation" style="font-size:2.2rem; color:#ef4444; display:block; margin-bottom:8px;"></i>
-                              Kod tidak sah. Sila pastikan kod 8 aksara yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.
+                              Kod tidak sah. Sila pastikan kod yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.
                             </p>`
                           );
                         } else {
-                          alert("Kod tidak sah. Sila pastikan kod 8 aksara yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.");
+                          alert("Kod tidak sah. Sila pastikan kod yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.");
                         }
                       }
                     }}
@@ -639,7 +638,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                       textAlign: "center",
                     }}
                   >
-                    * Kod 8 aksara unik (cth: <strong style={{ color: "#334155" }}>ABCD@123</strong>)
+                    * Kod unik (cth: <strong style={{ color: "#334155" }}>ABCD@123</strong>)
                   </div>
 
                   {/* Garis Pemisah Putus-putus */}
@@ -835,8 +834,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                       fontWeight: "bold",
                       letterSpacing: "1px",
                     }}
-                    placeholder="Masukkan Kod 8 Aksara"
-                    maxLength={8}
+                    placeholder="Masukkan Kod"
                     value={joinCode}
                     onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                   />
@@ -1098,11 +1096,11 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                             "Kod Tidak Sah",
                             `<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">
                               <i class="fa-solid fa-circle-exclamation" style="font-size:2.2rem; color:#ef4444; display:block; margin-bottom:8px;"></i>
-                              Kod tidak sah. Sila pastikan kod 8 aksara yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.
+                              Kod tidak sah. Sila pastikan kod yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.
                             </p>`
                           );
                         } else {
-                          alert("Kod tidak sah. Sila pastikan kod 8 aksara yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.");
+                          alert("Kod tidak sah. Sila pastikan kod yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.");
                         }
                       }
                     }}
@@ -1119,7 +1117,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                       textAlign: "center",
                     }}
                   >
-                    * Kod 8 aksara unik (cth: <strong style={{ color: "#334155" }}>ABCD@123</strong>)
+                    * Kod unik (cth: <strong style={{ color: "#334155" }}>ABCD@123</strong>)
                   </div>
 
                   {/* Garisan Pemisah */}
