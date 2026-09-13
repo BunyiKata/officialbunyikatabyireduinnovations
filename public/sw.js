@@ -2,7 +2,7 @@
 // mungkin menyimpan index.html / app-logic.js basi. PENTING: strategi fetch
 // di bawah kini menggunakan "network-first untuk dokumen & skrip", jadi
 // pengguna TIDAK perlu hard refresh selepas deploy baharu.
-const CACHE_NAME = 'bunyi-kata-v4';
+const CACHE_NAME = 'bunyi-kata-v5';
 const urlsToCache = [
   '/',
   '/index.html',
