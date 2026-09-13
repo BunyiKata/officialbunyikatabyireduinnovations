@@ -16697,11 +16697,11 @@ var moduleContentData = {
     'cerita_pendek': {
         title: 'Cerita Pendek',
         items: [
-            { title: '1. Kucing Comel', subTitle: 'Kucing Comel', text: 'Ini Comel. Comel ialah anak kucing yang sangat comel dan manja. Comel tinggal bersama Ali di sebuah rumah yang cantik. Setiap pagi, Comel berlari riang di halaman rumah. Comel suka makan ikan segar dan minum susu yang lazat. Ali sangat sayang akan Comel!', audio: '/audio/cerita-pendek/cerita-pendek-comel.mp3', icon: '🐱', image: '/images/buku/b1coverpage.jpg' },
-            { title: '2. Hari Sukan Ani', subTitle: 'Hari Sukan Ani', text: 'Hari ini Hari Sukan sekolah! Padang sekolah meriah dengan khemah dan bendera berwarna-warni. Ani memakai baju sukan yang cantik dan bersedia di garisan mula. Wisel berbunyi dan Ani berlari pantas bagai angin menuju garisan penamat. Ani berjaya menjadi juara dan menerima pingat emas!', audio: '/audio/cerita-pendek/cerita-pendek-hari-sukan.mp3', icon: '🏃', image: '/images/buku/b2coverpage.jpg' },
-            { title: '3. Pergi ke Pasar Bersama Ibu', subTitle: 'Pergi ke Pasar Bersama Ibu', text: 'Pada pagi Sabtu yang cerah, Ali teruja mengikut Ibu pergi ke pasar. Mereka memilih sayur hijau dan buah-buahan yang manis. Seterusnya, mereka membeli ikan segar di gerai ikan. Ali menolong membawa beg barang dengan cermat. Mereka pulang ke rumah dengan hati yang sangat gembira!', audio: '/audio/cerita-pendek/cerita-pendek-pasar.mp3', icon: '🧺', image: '/images/buku/b3coverpage.jpg' },
-            { title: '4. Pokok Mangga Amir', subTitle: 'Pokok Mangga Amir', text: 'Di halaman rumah Amir, ada sebatang pokok mangga yang besar dan rendang. Setiap tahun, pokok mangga itu berbuah dengan sangat lebat! Amir suka membantu memetik buah mangga yang manis dan masak ranum. Ibu membuat jeruk mangga yang sedap. Sekeluarga menikmati hidangan mangga dengan gembira!', audio: '/audio/cerita-pendek/cerita-pendek-pokok-mangga.mp3', icon: '🥭', image: '/images/buku/b4coverpage.jpg' },
-            { title: '5. Kelas Ceria Cikgu Nur', subTitle: 'Kelas Ceria Cikgu Nur', text: 'Cikgu Nur mengajar kelas prasekolah setiap hari dengan penuh mesra. Murid-murid belajar membaca dan menyanyi bersama-sama dengan penuh semangat. Ali dan Ani sangat suka membaca pelbagai buku di sudut bacaan. Kelas itu sentiasa ceria, riang dan dipenuhi gelak tawa!', audio: '/audio/cerita-pendek/cerita-pendek-cikgu-nur.mp3', icon: '🏫', image: '/images/buku/b5coverpage.jpg' }
+            { title: '1. Kucing Comel', subTitle: 'Kucing Comel', text: 'Comel ialah seekor kucing kecil. Comel tinggal bersama Ali di rumah. Setiap pagi, Comel bermain di halaman rumah. Comel suka makan ikan dan minum susu. Ali sangat sayang akan Comel.', audio: '/audio/cerita-pendek/cerita-pendek-comel.mp3', icon: '🐱', image: '/images/buku/b1coverpage.jpg' },
+            { title: '2. Hari Sukan', subTitle: 'Hari Sukan', text: 'Hari ini sekolah mengadakan hari sukan. Murid-murid memakai baju sukan berwarna-warni. Ani berlari pantas dalam pertandingan lari. Ani berjaya memenangi hadiah pertama. Semua murid bertepuk tangan dengan gembira.', audio: '/audio/cerita-pendek/cerita-pendek-hari-sukan.mp3', icon: '🏃', image: '/images/buku/b2coverpage.jpg' },
+            { title: '3. Pergi ke Pasar', subTitle: 'Pergi ke Pasar', text: 'Pada hari Sabtu, ibu pergi ke pasar. Ali turut serta bersama ibu ke pasar. Mereka membeli sayur, buah dan ikan segar. Ali membantu ibu membawa beg barang. Mereka pulang ke rumah dengan gembira.', audio: '/audio/cerita-pendek/cerita-pendek-pasar.mp3', icon: '🧺', image: '/images/buku/b3coverpage.jpg' },
+            { title: '4. Pokok Mangga', subTitle: 'Pokok Mangga', text: 'Di halaman rumah Ali, ada sebatang pokok mangga. Setiap tahun, pokok itu berbuah lebat. Ali suka memetik buah mangga yang masak. Ibu memasak jeruk mangga yang sedap. Sekeluarga menikmati mangga bersama-sama.', audio: '/audio/cerita-pendek/cerita-pendek-pokok-mangga.mp3', icon: '🥭', image: '/images/buku/b4coverpage.jpg' },
+            { title: '5. Kelas Ceria', subTitle: 'Kelas Ceria', text: 'Cikgu Nur mengajar kelas prasekolah setiap hari. Murid-murid belajar membaca dan menyanyi bersama. Ali dan Ani suka bermain di sudut buku. Cikgu Nur sentiasa sabar mengajar murid-muridnya. Kelas itu sentiasa ceria dan gembira.', audio: '/audio/cerita-pendek/cerita-pendek-cikgu-nur.mp3', icon: '🏫', image: '/images/buku/b5coverpage.jpg' }
         ]
     },
     'fonik_abc': {
@@ -18622,99 +18622,399 @@ function initBelajarBacaan(id, title) {
     // pembesar suara untuk mendengar audio (mengikut permintaan).
 }
 
+const BACAAN_SYLLABLE_DICTIONARY = {
+    // Cerita Pendek, Ayat Pendek, Ayat Panjang, Petikan 1 & 2
+    'abang': ['a', 'bang'],
+    'abjad': ['ab', 'jad'],
+    'ada': ['a', 'da'],
+    'adik': ['a', 'dik'],
+    'air': ['a', 'ir'],
+    'akan': ['a', 'kan'],
+    'ali': ['a', 'li'],
+    'ani': ['a', 'ni'],
+    'baju': ['ba', 'ju'],
+    'baling': ['ba', 'ling'],
+    'bapa': ['ba', 'pa'],
+    'barang': ['ba', 'rang'],
+    'basikal': ['ba', 'si', 'kal'],
+    'bawa': ['ba', 'wa'],
+    'beg': ['beg'],
+    'belajar': ['be', 'la', 'jar'],
+    'berat': ['be', 'rat'],
+    'berbuah': ['ber', 'bu', 'ah'],
+    'beriadah': ['ber', 'ia', 'dah'],
+    'berjaya': ['ber', 'ja', 'ya'],
+    'berkumpul': ['ber', 'kum', 'pul'],
+    'berlari': ['ber', 'la', 'ri'],
+    'bermain': ['ber', 'ma', 'in'],
+    'bersama': ['ber', 'sa', 'ma'],
+    'bersama-sama': ['ber', 'sa', 'ma', '-', 'sa', 'ma'],
+    'bersih': ['ber', 'sih'],
+    'bertepuk': ['ber', 'te', 'puk'],
+    'berwarna-warni': ['ber', 'war', 'na', '-', 'war', 'ni'],
+    'besar': ['be', 'sar'],
+    'biru': ['bi', 'ru'],
+    'bola': ['bo', 'la'],
+    'buah': ['bu', 'ah'],
+    'buah-buahan': ['bu', 'ah', '-', 'bu', 'a', 'han'],
+    'buku': ['bu', 'ku'],
+    'burung': ['bu', 'rung'],
+    'ceria': ['ce', 'ri', 'a'],
+    'cerita': ['ce', 'ri', 'ta'],
+    'cikgu': ['cik', 'gu'],
+    'comel': ['co', 'mel'],
+    'dalam': ['da', 'lam'],
+    'dan': ['dan'],
+    'dapur': ['da', 'pur'],
+    'dengan': ['de', 'ngan'],
+    'di': ['di'],
+    'elok': ['e', 'lok'],
+    'gembira': ['gem', 'bi', 'ra'],
+    'guru': ['gu', 'ru'],
+    'hadiah': ['ha', 'diah'],
+    'halaman': ['ha', 'la', 'man'],
+    'hari': ['ha', 'ri'],
+    'hijau': ['hi', 'jau'],
+    'hitam': ['hi', 'tam'],
+    'huruf': ['hu', 'ruf'],
+    'ialah': ['ia', 'lah'],
+    'ibu': ['i', 'bu'],
+    'ikan': ['i', 'kan'],
+    'ini': ['i', 'ni'],
+    'itu': ['i', 'tu'],
+    'jauh': ['ja', 'uh'],
+    'jeruk': ['je', 'ruk'],
+    'kakak': ['ka', 'kak'],
+    'kami': ['ka', 'mi'],
+    'kayuh': ['ka', 'yuh'],
+    'ke': ['ke'],
+    'kecil': ['ke', 'cil'],
+    'kelas': ['ke', 'las'],
+    'keluarga': ['ke', 'lu', 'ar', 'ga'],
+    'kereta': ['ke', 're', 'ta'],
+    'kosong': ['ko', 'song'],
+    'kucing': ['ku', 'cing'],
+    'kuning': ['ku', 'ning'],
+    'lagu': ['la', 'gu'],
+    'laju': ['la', 'ju'],
+    'langit': ['la', 'ngit'],
+    'lari': ['la', 'ri'],
+    'lebat': ['le', 'bat'],
+    'lemak': ['le', 'mak'],
+    'luas': ['lu', 'as'],
+    'makan': ['ma', 'kan'],
+    'malam': ['ma', 'lam'],
+    'mangga': ['mang', 'ga'],
+    'masak': ['ma', 'sak'],
+    'memakai': ['me', 'ma', 'kai'],
+    'memasak': ['me', 'ma', 'sak'],
+    'membaca': ['mem', 'ba', 'ca'],
+    'membantu': ['mem', 'ban', 'tu'],
+    'membasuh': ['mem', 'ba', 'suh'],
+    'membawa': ['mem', 'ba', 'wa'],
+    'membeli': ['mem', 'be', 'li'],
+    'memenangi': ['me', 'me', 'na', 'ngi'],
+    'memetik': ['me', 'me', 'tik'],
+    'mengadakan': ['me', 'nga', 'da', 'kan'],
+    'mengajar': ['me', 'nga', 'jar'],
+    'menikmati': ['me', 'nik', 'ma', 'ti'],
+    'menulis': ['me', 'nu', 'lis'],
+    'menyanyi': ['me', 'nya', 'nyi'],
+    'merah': ['me', 'rah'],
+    'mereka': ['me', 're', 'ka'],
+    'minum': ['mi', 'num'],
+    'murid': ['mu', 'rid'],
+    'murid-murid': ['mu', 'rid', '-', 'mu', 'rid'],
+    'murid-muridnya': ['mu', 'rid', '-', 'mu', 'rid', 'nya'],
+    'nasi': ['na', 'si'],
+    'nur': ['nur'],
+    'pada': ['pa', 'da'],
+    'padang': ['pa', 'dang'],
+    'pagi': ['pa', 'gi'],
+    'pakai': ['pa', 'kai'],
+    'pantas': ['pan', 'tas'],
+    'pasar': ['pa', 'sar'],
+    'pejabat': ['pe', 'ja', 'bat'],
+    'pergi': ['per', 'gi'],
+    'permainan': ['per', 'ma', 'i', 'nan'],
+    'pertama': ['per', 'ta', 'ma'],
+    'pertandingan': ['per', 'tan', 'di', 'ngan'],
+    'petang': ['pe', 'tang'],
+    'pinggan': ['ping', 'gan'],
+    'pokok': ['po', 'kok'],
+    'prasekolah': ['pra', 'se', 'ko', 'lah'],
+    'pulang': ['pu', 'lang'],
+    'rapi': ['ra', 'pi'],
+    'rumah': ['ru', 'mah'],
+    'sabar': ['sa', 'bar'],
+    'sabtu': ['sab', 'tu'],
+    'sambil': ['sam', 'bil'],
+    'sangat': ['sa', 'ngat'],
+    'sarapan': ['sa', 'ra', 'pan'],
+    'saya': ['sa', 'ya'],
+    'sayang': ['sa', 'yang'],
+    'sayur': ['sa', 'yur'],
+    'sebatang': ['se', 'ba', 'tang'],
+    'sedap': ['se', 'dap'],
+    'seekor': ['se', 'e', 'kor'],
+    'segar': ['se', 'gar'],
+    'sekeluarga': ['se', 'ke', 'lu', 'ar', 'ga'],
+    'sekolah': ['se', 'ko', 'lah'],
+    'selepas': ['se', 'le', 'pas'],
+    'semua': ['se', 'mua'],
+    'sentiasa': ['sen', 'tia', 'sa'],
+    'serta': ['ser', 'ta'],
+    'setiap': ['se', 'tiap'],
+    'sudut': ['su', 'dut'],
+    'suka': ['su', 'ka'],
+    'sukan': ['su', 'kan'],
+    'susu': ['su', 'su'],
+    'tahun': ['ta', 'hun'],
+    'taman': ['ta', 'man'],
+    'tangan': ['ta', 'ngan'],
+    'tani': ['ta', 'ni'],
+    'terbang': ['ter', 'bang'],
+    'tinggal': ['ting', 'gal'],
+    'tinggi': ['ting', 'gi'],
+    'topi': ['to', 'pi'],
+    'turut': ['tu', 'rut'],
+    'untuk': ['un', 'tuk'],
+    'waktu': ['wak', 'tu'],
+    'yang': ['yang'],
+
+    // Tambahan kosa kata buku cerita
+    'anak': ['a', 'nak'],
+    'anjung': ['an', 'jung'],
+    'bacaan': ['ba', 'ca', 'an'],
+    'bagai': ['ba', 'gai'],
+    'baiknya': ['ba', 'ik', 'nya'],
+    'bendera': ['ben', 'de', 'ra'],
+    'berbunyi': ['ber', 'bu', 'nyi'],
+    'berjalan': ['ber', 'ja', 'lan'],
+    'berkilat': ['ber', 'ki', 'lat'],
+    'bersedia': ['ber', 'se', 'dia'],
+    'bersorak': ['ber', 'so', 'rak'],
+    'biar': ['bi', 'ar'],
+    'cantik': ['can', 'tik'],
+    'cerah': ['ce', 'rah'],
+    'cermat': ['cer', 'mat'],
+    'dipenuhi': ['di', 'pe', 'nu', 'hi'],
+    'emas': ['e', 'mas'],
+    'erat': ['e', 'rat'],
+    'garisan': ['ga', 'ri', 'san'],
+    'gelak': ['ge', 'lak'],
+    'gerai': ['ge', 'rai'],
+    'hati': ['ha', 'ti'],
+    'hidangan': ['hi', 'da', 'ngan'],
+    'juara': ['ju', 'a', 'ra'],
+    'kaki': ['ka', 'ki'],
+    'kasih': ['ka', 'sih'],
+    'kawan': ['ka', 'wan'],
+    'khemah': ['khe', 'mah'],
+    'kepalanya': ['ke', 'pa', 'la', 'nya'],
+    'kenyang': ['ke', 'nyang'],
+    'lapar': ['la', 'par'],
+    'lazat': ['la', 'zat'],
+    'lemah-lembut': ['le', 'mah', '-', 'lem', 'but'],
+    'manis': ['ma', 'nis'],
+    'manja': ['man', 'ja'],
+    'meletakkan': ['me', 'le', 'tak', 'kan'],
+    'melompat': ['me', 'lom', 'pat'],
+    'membimbing': ['mem', 'bim', 'bing'],
+    'membuat': ['mem', 'bu', 'at'],
+    'memegang': ['me', 'me', 'gang'],
+    'memeluk': ['me', 'me', 'luk'],
+    'memilih': ['me', 'mi', 'lih'],
+    'menerima': ['me', 'ne', 'ri', 'ma'],
+    'mengejar': ['me', 'nge', 'jar'],
+    'menggesel': ['meng', 'ge', 'sel'],
+    'mengikut': ['me', 'ngi', 'kut'],
+    'menjadi': ['men', 'ja', 'di'],
+    'menuju': ['me', 'nu', 'ju'],
+    'meriah': ['me', 'riah'],
+    'mesra': ['mes', 'ra'],
+    'miau': ['miau'],
+    'mula': ['mu', 'la'],
+    'pelbagai': ['pel', 'ba', 'gai'],
+    'penamat': ['pe', 'na', 'mat'],
+    'penuh': ['pe', 'nuh'],
+    'pingat': ['pi', 'ngat'],
+    'prriittt': ['prriittt'],
+    'putih': ['pu', 'tih'],
+    'rama-rama': ['ra', 'ma', '-', 'ra', 'ma'],
+    'ranum': ['ra', 'num'],
+    'rendang': ['ren', 'dang'],
+    'riang': ['riang'],
+    'sahabat': ['sa', 'ha', 'bat'],
+    'sampai': ['sam', 'pai'],
+    'sebuah': ['se', 'bu', 'ah'],
+    'sebutir': ['se', 'bu', 'tir'],
+    'semangat': ['se', 'ma', 'ngat'],
+    'semangkuk': ['se', 'mang', 'kuk'],
+    'seronok': ['se', 'ro', 'nok'],
+    'seterusnya': ['se', 'te', 'rus', 'nya'],
+    'slurp': ['slurp'],
+    'sudah': ['su', 'dah'],
+    'sungguh': ['sung', 'guh'],
+    'tanda': ['tan', 'da'],
+    'tawa': ['ta', 'wa'],
+    'terima': ['te', 'ri', 'ma'],
+    'teruja': ['te', 'ru', 'ja'],
+    'tolong': ['to', 'long'],
+    'wah': ['wah'],
+    'wisel': ['wi', 'sel'],
+    'yay': ['yay']
+};
+
+window.BACAAN_SYLLABLE_DICTIONARY = BACAAN_SYLLABLE_DICTIONARY;
+
+function splitMalayWordSyllables(cleanWord) {
+    if (!cleanWord) return [];
+    const lower = cleanWord.toLowerCase();
+
+    if (BACAAN_SYLLABLE_DICTIONARY[lower]) {
+        const dictParts = BACAAN_SYLLABLE_DICTIONARY[lower];
+        let cursor = 0;
+        const parts = dictParts.map(dp => {
+            const seg = cleanWord.substring(cursor, cursor + dp.length);
+            cursor += dp.length;
+            return seg;
+        });
+        if (cursor < cleanWord.length) {
+            parts.push(cleanWord.substring(cursor));
+        }
+        return parts;
+    }
+
+    if (cleanWord.length <= 1) return [cleanWord];
+
+    const vowels = 'aeiouAEIOU';
+    const isVowel = (ch) => vowels.includes(ch);
+    const isDigraph = (s) => s ? ['ny', 'ng', 'sy', 'kh', 'gh'].includes(s.toLowerCase()) : false;
+
+    const vIndices = [];
+    for (let i = 0; i < cleanWord.length; i++) {
+        if (isVowel(cleanWord[i])) {
+            vIndices.push(i);
+        }
+    }
+
+    if (vIndices.length <= 1) {
+        return [cleanWord];
+    }
+
+    const breaks = [];
+    for (let k = 0; k < vIndices.length - 1; k++) {
+        const v1 = vIndices[k];
+        const v2 = vIndices[k + 1];
+        const gap = v2 - v1 - 1;
+
+        if (gap === 0) {
+            breaks.push(v2);
+        } else if (gap === 1) {
+            breaks.push(v1 + 1);
+        } else if (gap === 2) {
+            const sub = cleanWord.substring(v1 + 1, v2);
+            if (isDigraph(sub)) {
+                breaks.push(v1 + 1);
+            } else {
+                breaks.push(v1 + 2);
+            }
+        } else if (gap >= 3) {
+            breaks.push(v1 + 2);
+        }
+    }
+
+    const syllables = [];
+    let start = 0;
+    for (const b of breaks) {
+        syllables.push(cleanWord.substring(start, b));
+        start = b;
+    }
+    syllables.push(cleanWord.substring(start));
+    return syllables;
+}
+
+window.splitMalayWordSyllables = splitMalayWordSyllables;
+
+// Format teks suku kata dengan konsep buku cerita:
+// Warna hitam (#0f172a) dan merah (#dc2626) berselang-seli secara berterusan merentasi perkataan.
+// Jika suku kata terakhir pada perkataan sebelumnya warna hitam, perkataan seterusnya bermula warna merah!
 function formatSukuKataTeks(text, textAlign = 'center') {
     if (!text) return '';
 
-    function formatSingleWord(word) {
-        if (!word) return '';
+    const COLOR_BLACK = '#0f172a';
+    const COLOR_RED = '#dc2626';
 
-        const match = word.match(/^([^\w]*)([\w]+)([^\w]*)$/);
-        if (!match) return word;
+    // Status warna berselang-seli (false = hitam, true = merah)
+    // Bermula dengan suku kata pertama warna hitam.
+    let isRed = false;
+
+    function parseWord(rawWord) {
+        if (!rawWord) return { prefix: '', syllables: [], suffix: '', isAllBlack: false };
+
+        // Asingkan tanda baca awalan & akhiran (cth: “Comel!, (Ani), kata:)
+        const match = rawWord.match(/^([^a-zA-ZÀ-ÿ0-9]*)([a-zA-ZÀ-ÿ0-9\-]+)([^a-zA-ZÀ-ÿ0-9]*)$/);
+        if (!match) {
+            return { prefix: '', syllables: [rawWord], suffix: '', isAllBlack: true };
+        }
 
         const prefix = match[1];
-        const coreWord = match[2];
+        const cleanWord = match[2];
         const suffix = match[3];
+        const lower = cleanWord.toLowerCase();
 
-        if (coreWord.length <= 1) {
-            return `${prefix}<span style="color: #0f172a;">${coreWord}</span>${suffix}`;
+        // Bunyi haiwan/onomatopoeia seperti 'miau', 'slurp' dikekalkan warna hitam
+        const isAllBlack = lower === 'miau' || lower === 'slurp' || lower === 'yay' || lower === 'prriittt';
+
+        if (cleanWord.includes('-')) {
+            const subWords = cleanWord.split('-');
+            const subParts = [];
+            subWords.forEach((sw, idx) => {
+                if (idx > 0) subParts.push('-');
+                subParts.push(...splitMalayWordSyllables(sw));
+            });
+            return { prefix, syllables: subParts, suffix, isAllBlack };
         }
 
-        const vowels = 'aeiouAEIOU';
-        const isVowel = (ch) => vowels.includes(ch);
-        const isDigraph = (s) => s ? ['ny', 'ng', 'sy', 'kh', 'gh'].includes(s.toLowerCase()) : false;
-
-        const vIndices = [];
-        for (let i = 0; i < coreWord.length; i++) {
-            if (isVowel(coreWord[i])) {
-                vIndices.push(i);
-            }
-        }
-
-        if (vIndices.length <= 1) {
-            return `${prefix}<span style="color: #0f172a;">${coreWord}</span>${suffix}`;
-        }
-
-        const breaks = [];
-        for (let k = 0; k < vIndices.length - 1; k++) {
-            const v1 = vIndices[k];
-            const v2 = vIndices[k + 1];
-            const gap = v2 - v1 - 1;
-
-            if (gap === 0) {
-                breaks.push(v2);
-            } else if (gap === 1) {
-                breaks.push(v1 + 1);
-            } else if (gap === 2) {
-                const sub = coreWord.substring(v1 + 1, v2);
-                if (isDigraph(sub)) {
-                    breaks.push(v1 + 1);
-                } else {
-                    breaks.push(v1 + 2);
-                }
-            } else if (gap >= 3) {
-                breaks.push(v1 + 2);
-            }
-        }
-
-        const syllables = [];
-        let start = 0;
-        for (const b of breaks) {
-            syllables.push(coreWord.substring(start, b));
-            start = b;
-        }
-        syllables.push(coreWord.substring(start));
-
-        const coloredSyllables = syllables.map((syll, idx) => {
-            const color = (idx % 2 === 0) ? '#0f172a' : '#dc2626';
-            return `<span style="color: ${color};">${syll}</span>`;
-        }).join('');
-
-        return prefix + coloredSyllables + suffix;
-    }
-
-    function formatWord(word) {
-        if (!word) return '';
-
-        if (word.includes('-')) {
-            const parts = word.split('-');
-            return parts.map(p => formatSingleWord(p)).join('<span style="color: #0f172a;">-</span>');
-        }
-
-        return formatSingleWord(word);
+        return { prefix, syllables: splitMalayWordSyllables(cleanWord), suffix, isAllBlack };
     }
 
     const lines = text.split('\n');
     const isAyatPanjang = (typeof currentModuleId !== 'undefined' && currentModuleId === 'ayat_panjang');
     const lHeight = isAyatPanjang ? '1.25' : '1.45';
+
     return lines.map(line => {
-        const words = line.split(/(\s+)/);
-        const formattedWords = words.map(w => {
-            if (/^\s+$/.test(w)) return w;
-            return formatWord(w);
+        const tokens = line.split(/(\s+)/);
+        const formattedTokens = tokens.map(token => {
+            if (/^\s+$/.test(token)) return token;
+
+            const { prefix, syllables, suffix, isAllBlack } = parseWord(token);
+
+            const prefixHtml = prefix ? `<span style="color: ${COLOR_BLACK} !important; font-weight: inherit;">${prefix}</span>` : '';
+            const suffixHtml = suffix ? `<span style="color: ${COLOR_BLACK} !important; font-weight: inherit;">${suffix}</span>` : '';
+
+            const syllablesHtml = syllables.map(syl => {
+                if (syl === '-') {
+                    return `<span style="color: ${COLOR_BLACK} !important; font-weight: inherit;">-</span>`;
+                }
+
+                // Suku kata berselang-seli secara berterusan merentasi perkataan
+                const color = (!isAllBlack && isRed) ? COLOR_RED : COLOR_BLACK;
+                if (!isAllBlack) {
+                    isRed = !isRed;
+                }
+                return `<span style="color: ${color} !important; font-weight: inherit;">${syl}</span>`;
+            }).join('');
+
+            return prefixHtml + syllablesHtml + suffixHtml;
         }).join('');
-        return `<p style="margin: 4px 0; line-height: ${lHeight}; text-align: ${textAlign};">${formattedWords}</p>`;
+
+        return `<p style="margin: 4px 0; line-height: ${lHeight}; text-align: ${textAlign};">${formattedTokens}</p>`;
     }).join('');
 }
+
+window.formatSukuKataTeks = formatSukuKataTeks;
 
 function renderBelajarBacaan() {
     const item = activeBacaanItems[currentBacaanIndex];
@@ -21091,6 +21391,7 @@ function formatVRSyllablesHtml(text) {
     if (!text) return '';
     const clean = text.replace(/[""]/g, '“').replace(/[""]/g, '”');
     const words = clean.split(' ');
+    let isRed = false;
     return words.map(w => {
         let prefix = '', suffix = '', cleanWord = w;
         const pMatch = cleanWord.match(/^([“"‘'(\[{]+)/);
@@ -21099,15 +21400,21 @@ function formatVRSyllablesHtml(text) {
         if (sMatch) { suffix = sMatch[1]; cleanWord = cleanWord.slice(0, -suffix.length); }
         const lower = cleanWord.toLowerCase();
         const isAllBlack = lower === 'miau' || lower === 'slurp' || lower === 'slurp!' || lower === 'yay' || lower === 'prriittt';
-        let syls = VR_SYLLABLE_MAP[lower];
+        let syls = (typeof BACAAN_SYLLABLE_DICTIONARY !== 'undefined' && BACAAN_SYLLABLE_DICTIONARY[lower]) || VR_SYLLABLE_MAP[lower];
         if (!syls) {
             syls = [cleanWord];
         } else if (cleanWord && cleanWord[0] === cleanWord[0].toUpperCase() && syls[0]) {
             syls = [syls[0].charAt(0).toUpperCase() + syls[0].slice(1), ...syls.slice(1)];
         }
-        const inner = syls.map((syl, sIdx) => {
-            const isRed = !isAllBlack && (sIdx % 2 === 1);
-            return `<span style="color: ${isRed ? '#dc2626' : '#1e293b'}; font-weight: 900;">${syl}</span>`;
+        const inner = syls.map((syl) => {
+            if (syl === '-') {
+                return `<span style="color: #1e293b; font-weight: 900;">-</span>`;
+            }
+            const color = (!isAllBlack && isRed) ? '#dc2626' : '#1e293b';
+            if (!isAllBlack) {
+                isRed = !isRed;
+            }
+            return `<span style="color: ${color}; font-weight: 900;">${syl}</span>`;
         }).join('');
         return `<span style="display: inline-block; margin-right: 0.38em;">${prefix ? `<span style="color:#1e293b; font-weight:900;">${prefix}</span>` : ''}${inner}${suffix ? `<span style="color:#1e293b; font-weight:900;">${suffix}</span>` : ''}</span>`;
     }).join(' ');

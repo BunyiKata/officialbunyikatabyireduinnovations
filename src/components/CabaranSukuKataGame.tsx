@@ -2860,9 +2860,12 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                     cursor: 'pointer',
                     userSelect: 'none'
                   }}
-                >
-                  {currentQ.passage}
-                </div>
+                  dangerouslySetInnerHTML={{
+                    __html: typeof (window as any).formatSukuKataTeks === 'function'
+                      ? (window as any).formatSukuKataTeks(currentQ.passage, 'left')
+                      : currentQ.passage
+                  }}
+                />
                 <div className="cabaran-bacaan-question" style={{ fontSize: '1.05rem', fontWeight: '800', color: '#168f81', marginTop: '8px' }}>
                   {currentQ.question}
                 </div>

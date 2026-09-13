@@ -4187,7 +4187,7 @@ body:has(#view-belajar-bacaan.active) #parent-sticky-nav {
     line-height: 1.95 !important;
     font-weight: 800 !important;
     font-family: 'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif !important;
-    color: #1e293b !important;
+    color: #1e293b;
     width: 100% !important;
     text-align: justify !important;
 }

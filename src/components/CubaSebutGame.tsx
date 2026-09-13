@@ -229,11 +229,11 @@ const SEBUT_DATABASE: Record<string, SebutItem[]> = {
     { id: 'p2_5', text: 'Ini dapur ibu. Dapur ibu bersih. Ibu memasak di dapur bersih setiap petang.', audio: '/audio/bacaan-bergred/audio petikan tahap 2/petikan tahap 2 dapur.mp3', category: 'petikan_2' }
   ],
   'cerita_pendek': [
-    { id: 'cp_1', text: 'Comel ialah seekor kucing kecil. Comel tinggal bersama Ali di rumah. Setiap pagi, Comel bermain di halaman rumah.', audio: '/audio/cerita-pendek/cerita-pendek-comel.mp3', category: 'cerita_pendek' },
-    { id: 'cp_2', text: 'Hari ini sekolah mengadakan hari sukan. Murid-murid memakai baju sukan berwarna-warni. Ani berlari pantas dalam pertandingan lari.', audio: '/audio/cerita-pendek/cerita-pendek-hari-sukan.mp3', category: 'cerita_pendek' },
-    { id: 'cp_3', text: 'Pada hari Sabtu, ibu pergi ke pasar. Ali turut serta bersama ibu ke pasar. Mereka membeli sayur, buah dan ikan segar.', audio: '/audio/cerita-pendek/cerita-pendek-pasar.mp3', category: 'cerita_pendek' },
-    { id: 'cp_4', text: 'Di halaman rumah Ali, ada sebatang pokok mangga. Setiap tahun, pokok itu berbuah lebat. Ali suka memetik buah mangga yang masak.', audio: '/audio/cerita-pendek/cerita-pendek-pokok-mangga.mp3', category: 'cerita_pendek' },
-    { id: 'cp_5', text: 'Cikgu Nur mengajar kelas prasekolah setiap hari. Murid-murid belajar membaca dan menyanyi bersama. Kelas itu sentiasa ceria dan gembira.', audio: '/audio/cerita-pendek/cerita-pendek-cikgu-nur.mp3', category: 'cerita_pendek' }
+    { id: 'cp_1', text: 'Comel ialah seekor kucing kecil. Comel tinggal bersama Ali di rumah. Setiap pagi, Comel bermain di halaman rumah. Comel suka makan ikan dan minum susu. Ali sangat sayang akan Comel.', audio: '/audio/cerita-pendek/cerita-pendek-comel.mp3', category: 'cerita_pendek' },
+    { id: 'cp_2', text: 'Hari ini sekolah mengadakan hari sukan. Murid-murid memakai baju sukan berwarna-warni. Ani berlari pantas dalam pertandingan lari. Ani berjaya memenangi hadiah pertama. Semua murid bertepuk tangan dengan gembira.', audio: '/audio/cerita-pendek/cerita-pendek-hari-sukan.mp3', category: 'cerita_pendek' },
+    { id: 'cp_3', text: 'Pada hari Sabtu, ibu pergi ke pasar. Ali turut serta bersama ibu ke pasar. Mereka membeli sayur, buah dan ikan segar. Ali membantu ibu membawa beg barang. Mereka pulang ke rumah dengan gembira.', audio: '/audio/cerita-pendek/cerita-pendek-pasar.mp3', category: 'cerita_pendek' },
+    { id: 'cp_4', text: 'Di halaman rumah Ali, ada sebatang pokok mangga. Setiap tahun, pokok itu berbuah lebat. Ali suka memetik buah mangga yang masak. Ibu memasak jeruk mangga yang sedap. Sekeluarga menikmati mangga bersama-sama.', audio: '/audio/cerita-pendek/cerita-pendek-pokok-mangga.mp3', category: 'cerita_pendek' },
+    { id: 'cp_5', text: 'Cikgu Nur mengajar kelas prasekolah setiap hari. Murid-murid belajar membaca dan menyanyi bersama. Ali dan Ani suka bermain di sudut buku. Cikgu Nur sentiasa sabar mengajar murid-muridnya. Kelas itu sentiasa ceria dan gembira.', audio: '/audio/cerita-pendek/cerita-pendek-cikgu-nur.mp3', category: 'cerita_pendek' }
   ]
 };
 
@@ -1188,7 +1188,17 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
                   ));
                 }
 
-                // For Reading Sentences: Clean formatting
+                // For Reading Sentences: Format using alternating black & red syllables
+                if (typeof (window as any).formatSukuKataTeks === 'function') {
+                  return (
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: (window as any).formatSukuKataTeks(currentItem.text, 'center')
+                      }}
+                    />
+                  );
+                }
+
                 return (
                   <span style={{ color: '#10182f' }}>
                     {currentItem.text}
