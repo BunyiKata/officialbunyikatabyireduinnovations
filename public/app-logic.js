@@ -7481,6 +7481,35 @@ window.tukarLanggananPengguna = async function (id, role, newPlan) {
 window.sejarahLanggananPerananFilter = window.sejarahLanggananPerananFilter || 'semua';
 window.sejarahLanggananCarian = window.sejarahLanggananCarian || '';
 
+/**
+ * Fasa 1.5: Papar/ sembunyi banner amaran luput langganan.
+ *
+ * @param {{luput:boolean, sah:boolean, langganan?:string, tarikh_tamat?:string}} hasil
+ *        Keputusan daripada /api/subscription/check.
+ */
+window.paparBannerLuput = function (hasil) {
+    const el = document.getElementById("banner-luput-langganan");
+    if (!el) return;
+    const teksEl = document.getElementById("banner-luput-teks");
+    const tutupBtn = document.getElementById("banner-luput-tutup");
+
+    if (!hasil || !hasil.sah || !hasil.luput) {
+        el.style.display = "none";
+        return;
+    }
+
+    const tarikh = hasil.tarikh_tamat ? window.formatTarikhLangganan(hasil.tarikh_tamat) : "";
+    if (teksEl) {
+        teksEl.innerHTML = tarikh
+            ? "Langganan Pro anda telah tamat (" + tarikh + "). Akaun kini dalam mod Percuma."
+            : "Langganan Pro anda telah tamat. Akaun kini dalam mod Percuma.";
+    }
+    el.style.cssText = "display:flex; align-items:center; gap:10px; position:sticky; top:0; z-index:400; width:100%; box-sizing:border-box; padding:9px 14px; background:linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color:#ffffff; font-family:'Baloo 2', 'Fredoka', sans-serif; font-weight:800; font-size:0.88rem; border-bottom:3px solid #7f1d1d;";
+    if (tutupBtn) {
+        tutupBtn.onclick = function () { el.style.display = "none"; };
+    }
+};
+
 window.formatTarikhLangganan = function (iso) {
     if (!iso) return '-';
     const d = new Date(iso);

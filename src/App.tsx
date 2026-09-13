@@ -1149,6 +1149,18 @@ export default function App() {
   const isEffectiveTrial = efektifTrialState;
   const isEffectivePro = !isEffectiveTrial;
 
+  // Fasa 1.5: papar banner luput langganan apabila app-logic.js sudah sedia.
+  // Dipanggil selepas semakan pelayan & selepas app-logic.js dimuatkan, kerana
+  // fungsi paparBannerLuput wujud dalam app-logic.js (bukan bundle React).
+  const cubaPaparBannerLuput = React.useCallback(() => {
+    const hasil = (window as any).__hasilLuputTerakhir;
+    if (!hasil) return;
+    const papar = (window as any).paparBannerLuput;
+    if (typeof papar === "function") {
+      try { papar(hasil); } catch (e) {}
+    }
+  }, []);
+
   // Segerakkan semula bila sesi/akses bertukar (admin-mode-change, fokus,
   // userAccessLevel berubah, atau sebarang event akses-level-change).
   React.useEffect(() => {
@@ -1956,8 +1968,6 @@ export default function App() {
     }
 
     // Fasa 1.2: semak luput langganan melalui pelayan (auto-expiry).
-    // Hanya berjalan apabila ada sesi pengguna sebenar, dan sekali sahaja
-    // setiap muat. Fail-safe: jika pelayan tak dapat dihubungi, akses kekal.
     const uidSemak = localStorage.getItem("bunyiKataUserId");
     const adaSesi = Boolean(uidSemak) && !isUserAdmin();
     if (adaSesi) {
@@ -1975,6 +1985,11 @@ export default function App() {
             setUserAccessLevel("trial");
             try { window.dispatchEvent(new CustomEvent("akses-level-change")); } catch (e) {}
           }
+          // Fasa 1.5: papar banner amaran (luput atau hampir luput).
+          // app-logic.js mungkin belum selesai dimuatkan, jadi kita cuba semula
+          // selepas ia dimuatkan (lihat script.onload di bawah).
+          (window as any).__hasilLuputTerakhir = hasil;
+          cubaPaparBannerLuput();
         })
         .catch(() => {});
     }
@@ -1996,6 +2011,9 @@ export default function App() {
       try {
         window.dispatchEvent(new CustomEvent("akses-level-change"));
       } catch (e) {}
+      // Fasa 1.5: app-logic.js kini sedia - papar banner jika hasil semakan
+      // luput sudah tiba sebelum skrip ini dimuatkan.
+      cubaPaparBannerLuput();
     };
     document.body.appendChild(script);
 
@@ -2309,6 +2327,29 @@ export default function App() {
             <i className="fa-solid fa-right-from-bracket"></i> Keluar
           </button>
         </div>
+      </div>
+
+      {/* Fasa 1.5: Banner amaran apabila langganan hampir/sudah luput.
+          Dipaparkan oleh JS (window.paparBannerLuput) selepas semakan pelayan. */}
+      <div id="banner-luput-langganan" style={{ display: "none" }}>
+        <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: "1.05rem" }}></i>
+        <span id="banner-luput-teks" style={{ flex: 1 }}></span>
+        <button
+          type="button"
+          id="banner-luput-tutup"
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "#ffffff",
+            cursor: "pointer",
+            fontSize: "1rem",
+            padding: "2px 6px",
+            opacity: 0.85,
+          }}
+          aria-label="Tutup"
+        >
+          <i className="fa-solid fa-xmark"></i>
+        </button>
       </div>
 
       <nav

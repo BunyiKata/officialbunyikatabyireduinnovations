@@ -1966,6 +1966,8 @@ export async function fetchAdminDataFromFirebase(): Promise<{ teachers: any[]; p
 export interface HasilSemakLuput {
   /** true hanya apabila pelayan mengesahkan langganan sudah luput. */
   luput: boolean;
+  /** true apabila langganan masih aktif tetapi tamat dalam masa <= 3 hari. */
+  hampirLuput: boolean;
   /** true apabila pelayan dapat dihubungi (jadi keputusan boleh dipercayai). */
   sah: boolean;
   langganan?: string;
@@ -1984,7 +1986,7 @@ export interface HasilSemakLuput {
  * hanya kerana rangkaian gagal.
  */
 export async function semakLuputLanggananFirebase(): Promise<HasilSemakLuput> {
-  const selamat = { luput: false, sah: false } as HasilSemakLuput;
+  const selamat = { luput: false, hampirLuput: false, sah: false } as HasilSemakLuput;
   try {
     const pengguna = auth.currentUser;
     if (!pengguna) return selamat;
@@ -1999,8 +2001,16 @@ export async function semakLuputLanggananFirebase(): Promise<HasilSemakLuput> {
     });
     const data = await res.json().catch(() => null);
     if (!res.ok || !data || data.success !== true) return selamat;
+    const luput = data.status === "diturunkan" || String(data.langganan || "").toLowerCase() === "percuma";
+    // Hampir luput: masih berbayar tetapi tamat dalam masa <= 3 hari.
+    let hampirLuput = false;
+    if (!luput && data.tarikh_tamat) {
+      const bakiHari = Math.ceil((new Date(data.tarikh_tamat).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      hampirLuput = Number.isFinite(bakiHari) && bakiHari <= 3;
+    }
     return {
-      luput: data.status === "diturunkan" || String(data.langganan || "").toLowerCase() === "percuma",
+      luput,
+      hampirLuput,
       sah: true,
       langganan: data.langganan || "",
       tarikh_tamat: data.tarikh_tamat || "",
