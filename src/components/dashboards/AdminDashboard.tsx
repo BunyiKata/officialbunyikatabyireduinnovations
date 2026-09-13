@@ -8,6 +8,23 @@ interface AdminDashboardProps {
 
 export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
   const [modalCiptaAkaunTerbuka, setModalCiptaAkaunTerbuka] = React.useState(false);
+  const [perananCiptaAkaun, setPerananCiptaAkaun] = React.useState<"guru" | "ibubapa">("guru");
+
+  // Jambatan ke public/app-logic.js: butang "+ Daftar Guru/Ibu Bapa Baharu"
+  // dalam tab Urus memanggil window.bukaModalDaftarAdmin(), yang kemudian
+  // mengarah ke sini supaya SATU borang sahaja digunakan — CiptaAkaunModal.
+  React.useEffect(() => {
+    (window as any).bukaCiptaAkaunAdmin = (peranan?: "guru" | "ibubapa") => {
+      if ((window as any).playBubble) (window as any).playBubble();
+      setPerananCiptaAkaun(peranan === "ibubapa" ? "ibubapa" : "guru");
+      setModalCiptaAkaunTerbuka(true);
+    };
+    return () => {
+      if ((window as any).bukaCiptaAkaunAdmin) {
+        delete (window as any).bukaCiptaAkaunAdmin;
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     if (typeof (window as any).renderAdminTable === "function") {
@@ -1262,6 +1279,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
       <CiptaAkaunModal
         isOpen={modalCiptaAkaunTerbuka}
         onClose={() => setModalCiptaAkaunTerbuka(false)}
+        perananAwal={perananCiptaAkaun}
       />
 
     </>

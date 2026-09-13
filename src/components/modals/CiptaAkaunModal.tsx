@@ -26,6 +26,52 @@ const PAKEJ_PILIHAN: { key: KunciPakej; label: string; harga: string }[] = [
   { key: "1tahun", label: "1 Tahun (Pro)", harga: "RM69" },
 ];
 
+/**
+ * Bunyi klik tempatan untuk modal ini.
+ *
+ * Kita TIDAK bergantung sepenuhnya pada listener global dalam `app-logic.js`
+ * kerana modal React ini boleh dipasang sebelum skrip legacy itu bersedia.
+ * Helper ini menggunakan `window.playBubble` (yang didaftarkan oleh
+ * `app-logic.js`) dan jatuh balik ke Web Audio API sendiri jika tiada.
+ */
+let _ctxModalCipta: AudioContext | null = null;
+function bunyiKlik() {
+  try {
+    if (typeof window !== "undefined" && typeof (window as any).playBubble === "function") {
+      (window as any).playBubble();
+      return;
+    }
+    if (typeof window === "undefined") return;
+    const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
+    if (!Ctx) return;
+    if (!_ctxModalCipta) _ctxModalCipta = new Ctx();
+    const ctx = _ctxModalCipta;
+    if (!ctx) return;
+    const mainkan = () => {
+      try {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        const now = ctx.currentTime;
+        osc.frequency.setValueAtTime(450, now);
+        osc.frequency.exponentialRampToValueAtTime(950, now + 0.08);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } catch {
+        /* abaikan */
+      }
+    };
+    if (ctx.state === "suspended") ctx.resume().then(mainkan).catch(() => {});
+    else mainkan();
+  } catch {
+    /* abaikan */
+  }
+}
+
 function formatTarikh(iso?: string): string {
   if (!iso) return "-";
   try {
@@ -62,10 +108,25 @@ function binaMesejWhatsApp(h: HasilCiptaAkaun): string {
 interface CiptaAkaunModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Peranan pratetap — butang "+ Daftar Guru/Ibu Bapa" dalam tab Urus. */
+  perananAwal?: PerananPengguna;
 }
 
-export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
-  const [peranan, setPeranan] = React.useState<PerananPengguna>("guru");
+export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: CiptaAkaunModalProps) {
+  const [peranan, setPeranan] = React.useState<PerananPengguna>(perananAwal);
+
+  // Selaraskan peranan pratetap setiap kali modal dibuka.
+  React.useEffect(() => {
+    if (isOpen) setPeranan(perananAwal);
+  }, [isOpen, perananAwal]);
+
+  // Unlock AudioContext pada interaksi pertama (iOS/Safari mewajibkan gesture).
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const unlock = () => bunyiKlik();
+    document.addEventListener("pointerdown", unlock, { once: true, capture: true });
+    return () => document.removeEventListener("pointerdown", unlock, { capture: true } as any);
+  }, [isOpen]);
   const [nama, setNama] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [noTelefon, setNoTelefon] = React.useState("");
@@ -78,6 +139,7 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
   const [disalin, setDisalin] = React.useState(false);
 
   const resetBorang = () => {
+    bunyiKlik();
     setNama("");
     setEmail("");
     setNoTelefon("");
@@ -90,6 +152,7 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
 
   const tutup = () => {
     if (sedangProses) return;
+    bunyiKlik();
     resetBorang();
     onClose();
   };
@@ -98,8 +161,10 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
     setRalat("");
     if (!nama.trim() || !email.trim()) {
       setRalat("Nama dan emel diperlukan.");
+      if (typeof (window as any).playOops === "function") (window as any).playOops();
       return;
     }
+    bunyiKlik();
     setSedangProses(true);
     const keputusan = await ciptaAkaunAdmin({
       nama: nama.trim(),
@@ -117,11 +182,12 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
       return;
     }
     setHasil(keputusan);
-    if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+    bunyiKlik();
   };
 
   const salinMesej = async () => {
     if (!hasil) return;
+    bunyiKlik();
     const mesej = binaMesejWhatsApp(hasil);
     try {
       await navigator.clipboard.writeText(mesej);
@@ -136,16 +202,6 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
       try { document.execCommand("copy"); setDisalin(true); } catch {}
       document.body.removeChild(ta);
     }
-  };
-
-  const bukaWhatsApp = () => {
-    if (!hasil) return;
-    const mesej = encodeURIComponent(binaMesejWhatsApp(hasil));
-    const noBersih = noTelefon.replace(/[^0-9]/g, "").replace(/^0/, "60");
-    const url = noBersih
-      ? `https://wa.me/${noBersih}?text=${mesej}`
-      : `https://wa.me/?text=${mesej}`;
-    window.open(url, "_blank");
   };
 
   const inputStyle: React.CSSProperties = {
@@ -246,7 +302,10 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                       <button
                         key={r}
                         type="button"
-                        onClick={() => setPeranan(r)}
+                        onClick={() => {
+                          bunyiKlik();
+                          setPeranan(r);
+                        }}
                         className="neo-btn"
                         style={{
                           flex: 1,
@@ -322,7 +381,10 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                   <select
                     style={inputStyle}
                     value={pakej}
-                    onChange={(e) => setPakej(e.target.value as KunciPakej)}
+                    onChange={(e) => {
+                      bunyiKlik();
+                      setPakej(e.target.value as KunciPakej);
+                    }}
                   >
                     {PAKEJ_PILIHAN.map((p) => (
                       <option key={p.key} value={p.key}>
@@ -419,9 +481,6 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                 >
                   <i className="fa-solid fa-circle-check"></i> Akaun Berjaya Dicipta
                 </div>
-                <p style={{ margin: "0 0 16px", fontSize: "0.84rem", color: "#475569", fontWeight: "bold" }}>
-                  Salin mesej di bawah dan hantar kepada pengguna melalui WhatsApp.
-                </p>
 
                 <div
                   style={{
@@ -468,40 +527,28 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                     type="button"
                     onClick={salinMesej}
                     className="neo-btn"
+                    title={disalin ? "Mesej Disalin!" : "Salin Mesej WhatsApp"}
+                    aria-label="Salin Mesej WhatsApp"
                     style={{
-                      padding: "13px",
+                      width: "52px",
+                      height: "52px",
+                      padding: 0,
+                      minWidth: "52px",
+                      minHeight: "52px",
+                      margin: "0 auto",
                       borderRadius: "12px",
                       border: "2px solid #0f172a",
                       background: disalin ? "#22c55e" : "#ffffff",
                       color: disalin ? "#ffffff" : "#0f172a",
-                      fontWeight: "bold",
+                      fontSize: "1.15rem",
                       cursor: "pointer",
                       boxShadow: "0 3px 0 #0f172a",
-                    }}
-                  >
-                    <i className={disalin ? "fa-solid fa-check" : "fa-solid fa-clipboard"}></i>
-                    {disalin ? "Mesej Disalin!" : "Salin Mesej WhatsApp"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={bukaWhatsApp}
-                    className="neo-btn"
-                    style={{
-                      padding: "13px",
-                      borderRadius: "12px",
-                      border: "2px solid #15803d",
-                      background: "#25D366",
-                      color: "#ffffff",
-                      fontWeight: "bold",
-                      cursor: "pointer",
-                      boxShadow: "0 3px 0 #15803d",
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      gap: "9px",
                     }}
                   >
-                    <i className="fa-brands fa-whatsapp" style={{ fontSize: "1.15rem" }}></i> Buka WhatsApp
+                    <i className={disalin ? "fa-solid fa-check" : "fa-solid fa-clipboard"}></i>
                   </button>
                   <div style={{ display: "flex", gap: "9px", marginTop: "4px" }}>
                     <button
@@ -512,11 +559,12 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                         flex: 1,
                         padding: "11px",
                         borderRadius: "12px",
-                        border: "2px solid #0f172a",
-                        background: "#f1f5f9",
+                        border: "2px solid #168f81",
+                        background: "#ffffff",
+                        color: "#168f81",
                         fontWeight: "bold",
                         cursor: "pointer",
-                        boxShadow: "0 3px 0 #0f172a",
+                        boxShadow: "0 3px 0 #168f81",
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -533,12 +581,12 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                         flex: 1,
                         padding: "11px",
                         borderRadius: "12px",
-                        border: "2px solid #0f172a",
-                        background: "#0f172a",
+                        border: "2px solid #0b5c53",
+                        background: "#168f81",
                         color: "#ffffff",
                         fontWeight: "bold",
                         cursor: "pointer",
-                        boxShadow: "0 3px 0 #000000",
+                        boxShadow: "0 3px 0 #0b5c53",
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -549,23 +597,6 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                     </button>
                   </div>
                 </div>
-
-                <p
-                  style={{
-                    marginTop: "12px",
-                    fontSize: "0.74rem",
-                    color: "#92400e",
-                    textAlign: "center",
-                    fontWeight: "bold",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "7px",
-                  }}
-                >
-                  <i className="fa-solid fa-triangle-exclamation"></i>
-                  Kata laluan hanya dipaparkan sekali sahaja. Salin dahulu sebelum tutup.
-                </p>
               </>
             )}
           </motion.div>

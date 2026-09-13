@@ -246,7 +246,6 @@ window.showAdminInfo = function (type, nama, extra) {
                     <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">JENIS LANGGANAN:</strong><br/>
                     <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
                         <select class="neo-btn filter-select" style="padding:4px 8px; font-size:0.85rem; font-weight:bold; border-radius:8px; border:2px solid #ea580c; background:#ffffff; cursor:pointer;" onchange="window.tukarLanggananPengguna('${profileId}', 'guru', this.value)">
-                            <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
                             <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' ? 'selected' : ''}>1 Bulan (Pro)</option>
                             <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' ? 'selected' : ''}>3 Bulan (Pro)</option>
                             <option value="1 Tahun (Pro)" ${langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
@@ -302,7 +301,6 @@ window.showAdminInfo = function (type, nama, extra) {
                     <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">JENIS LANGGANAN:</strong><br/>
                     <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
                         <select class="neo-btn filter-select" style="padding:4px 8px; font-size:0.85rem; font-weight:bold; border-radius:8px; border:2px solid #0284c7; background:#ffffff; cursor:pointer;" onchange="window.tukarLanggananPengguna('${profileId}', 'ibubapa', this.value)">
-                            <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
                             <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' ? 'selected' : ''}>1 Bulan (Pro)</option>
                             <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' ? 'selected' : ''}>3 Bulan (Pro)</option>
                             <option value="1 Tahun (Pro)" ${langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
@@ -346,9 +344,6 @@ window.showAdminInfo = function (type, nama, extra) {
             </div>
             <div style="margin-bottom:20px; background:#ffffff; border:2px solid #e2e8f0; border-radius:14px; padding:14px;">
                 ${contentHtml}
-            </div>
-            <div style="display:flex; justify-content:center;">
-                <button type="button" class="neo-btn bg-white" style="width:100%; padding:10px; font-weight:bold; border-radius:10px; border:2px solid var(--color-dark); cursor:pointer; font-size:0.95rem;" onclick="document.getElementById('app-admin-info-modal-overlay').style.display='none'">Tutup</button>
             </div>
             ${(type === 'guru' || type === 'ibubapa') && profileId ? `
             <div style="display:flex; gap:10px; margin-top:12px;">
@@ -6867,20 +6862,101 @@ window.resetKataLaluanAdminPopup = function (uid, type) {
         return;
     }
 
-    window.showAppModalConfirm(
-        'Reset Kata Laluan',
-        'Adakah anda ingin menjana <strong>kata laluan baharu</strong> untuk pengguna ini?<br/><span style="color:#b45309; font-size:0.85rem; display:inline-block; margin-top:6px;">Kata laluan lama akan terus tidak sah. Kata laluan baharu hanya dipaparkan SEKALI.</span>',
-        async function () {
-            const hasil = await api.resetKataLaluanAdmin(uid);
+    _bukaModalResetKataLaluan(uid, type);
+};
+/**
+ * Modal reset kata laluan admin.
+ *
+ * Membenarkan admin SAMA ADA menaip kata laluan baharu sendiri, ATAU
+ * membiarkannya kosong supaya pelayan menjana kata laluan rawak. Ini penting
+ * kerana pengguna yang terlupa kata laluan tidak dapat masuk untuk menukarnya
+ * sendiri, jadi admin perlu boleh menetapkan kata laluan baharu bagi pihak
+ * pengguna.
+ */
+function _bukaModalResetKataLaluan(uid, type) {
+    let modal = document.getElementById('app-admin-reset-pass-overlay');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'app-admin-reset-pass-overlay';
+        modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:100001; display:flex; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+        <div class="neo-box" style="background-color:#ffffff; background-image:radial-gradient(circle, rgba(16, 24, 47, 0.12) 1.8px, transparent 1.8px); background-size:16px 16px; max-width:420px; width:100%; box-sizing:border-box; padding:24px 20px 20px; border-radius:20px; border:3px solid var(--color-dark, #10182f); box-shadow:0 6px 0 var(--color-dark, #10182f); position:relative; text-align:left;">
+            <button type="button" class="neo-btn bg-red" style="position:absolute; top:12px; right:12px; width:34px; height:34px; min-width:34px; min-height:34px; padding:0; border-radius:10px; border:2px solid var(--color-dark); display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff;" onclick="document.getElementById('app-admin-reset-pass-overlay').style.display='none'">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div style="text-align:center; margin-bottom:16px;">
+                <div class="neo-btn" style="background-color:#168f81; color:white; font-size:1rem; margin:0 auto; display:inline-flex; align-items:center; gap:8px; pointer-events:none; padding:8px 22px; font-weight:bold; border-radius:12px;">
+                    <i class="fa-solid fa-key"></i> Reset Kata Laluan
+                </div>
+            </div>
+            <p style="margin:0 0 12px 0; font-size:0.86rem; color:#475569; font-weight:bold; text-align:center;">
+                Adakah anda pasti ingin menetapkan <strong>kata laluan baharu</strong> untuk pengguna ini?
+            </p>
+            <div style="background:#fffbeb; border:2px solid #fcd34d; border-radius:10px; padding:10px; margin-bottom:14px; font-size:0.8rem; color:#92400e; font-weight:bold; text-align:center;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                Kata laluan lama akan terus tidak sah.
+            </div>
+            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#334155; margin-bottom:5px;">Kata Laluan Baharu</label>
+            <input id="admin-reset-pass-input" type="text" autocomplete="off" placeholder="Kosongkan untuk jana automatik" style="width:100%; padding:10px 12px; border-radius:10px; border:2px solid #cbd5e1; font-size:0.95rem; font-family:monospace; outline:none; box-sizing:border-box; margin-bottom:12px; background:#ffffff;" />
+            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#334155; margin-bottom:5px;">Sahkan Kata Laluan Baharu</label>
+            <input id="admin-reset-pass-confirm" type="text" autocomplete="off" placeholder="Taip semula kata laluan" style="width:100%; padding:10px 12px; border-radius:10px; border:2px solid #cbd5e1; font-size:0.95rem; font-family:monospace; outline:none; box-sizing:border-box; margin-bottom:8px; background:#ffffff;" />
+            <div id="admin-reset-pass-err" style="display:none; color:#b91c1c; font-size:0.8rem; font-weight:bold; margin-bottom:8px; text-align:center;"></div>
+            <div style="display:flex; gap:10px; margin-top:6px;">
+                <button type="button" class="neo-btn bg-white" style="flex:1; padding:11px; font-weight:bold; border-radius:10px; border:2px solid var(--color-dark); cursor:pointer; font-size:0.9rem;" onclick="document.getElementById('app-admin-reset-pass-overlay').style.display='none'">Batal</button>
+                <button type="button" id="admin-reset-pass-ok" class="neo-btn" style="flex:1; padding:11px; font-weight:bold; border-radius:10px; border:2px solid #0b5c53; background:#168f81; color:#fff; cursor:pointer; font-size:0.9rem; display:inline-flex; align-items:center; justify-content:center; gap:7px; box-shadow:0 3px 0 #0b5c53;">
+                    <i class="fa-solid fa-check"></i> Sahkan
+                </button>
+            </div>
+        </div>
+    `;
+    modal.style.display = 'flex';
+
+    const input = document.getElementById('admin-reset-pass-input');
+    const confirm = document.getElementById('admin-reset-pass-confirm');
+    const err = document.getElementById('admin-reset-pass-err');
+    const okBtn = document.getElementById('admin-reset-pass-ok');
+
+    const tunjukErr = (m) => {
+        if (!err) return;
+        err.textContent = m;
+        err.style.display = 'block';
+    };
+
+    if (okBtn) {
+        okBtn.onclick = async function () {
+            const pass = (input && input.value || '').trim();
+            const konf = (confirm && confirm.value || '').trim();
+            if (err) err.style.display = 'none';
+
+            // Jika admin taip kata laluan, ia mesti sepadan dengan pengesahan.
+            if (pass || konf) {
+                if (pass.length < 6) { tunjukErr('Kata laluan mesti sekurang-kurangnya 6 aksara.'); return; }
+                if (pass !== konf) { tunjukErr('Kata laluan tidak sepadan. Sila taip semula.'); return; }
+            }
+
+            if (okBtn.disabled) return;
+            okBtn.disabled = true;
+            const asal = okBtn.innerHTML;
+            okBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+            // Kosong -> pelayan menjana kata laluan rawak.
+            const hasil = await api.resetKataLaluanAdmin(uid, pass || '');
             if (!hasil || !hasil.berjaya) {
+                okBtn.disabled = false;
+                okBtn.innerHTML = asal;
                 window.showAppToast('Gagal', (hasil && hasil.mesej) || 'Operasi gagal. Sila cuba lagi.');
                 return;
             }
+            modal.style.display = 'none';
             _tutupInfoAdmin();
-            _paparKataLaluanBaharu(hasil.password || '', type);
-        }
-    );
-};
+            _paparKataLaluanBaharu(hasil.password || pass || '', type);
+        };
+    }
+}
+
+
 
 /** Paparkan kata laluan baharu dalam modal berasingan (salinan mudah). */
 function _paparKataLaluanBaharu(password, type) {
@@ -6947,15 +7023,82 @@ window.panjangTempohAdminPopup = function (uid, type) {
         return;
     }
 
-    window.showAppModalConfirm(
-        'Panjang Tempoh Langganan',
-        'Adakah anda ingin memanjangkan tempoh langganan pengguna ini sebanyak <span style="color:#16a34a; font-weight:900;">+30 Hari (1 Bulan)</span>?',
-        async function () {
-            const hasil = await api.panjangkanTempohAdmin(uid, '1bulan');
+    _bukaModalPanjangTempoh(uid, type);
+};
+/**
+ * Modal pilih pakej untuk panjangkan tempoh langganan.
+ *
+ * Admin memilih berapa lama tempoh hendak ditambah. Setiap pakej menambah
+ * bilangan hari yang berbeza (1 Bulan = +30 hari, 3 Bulan = +90 hari,
+ * 1 Tahun = +365 hari), sama seperti pakej langganan biasa.
+ */
+function _bukaModalPanjangTempoh(uid, type) {
+    const pakej = [
+        { key: '1bulan', label: '1 Bulan', hari: '+30 Hari', harga: 'RM15', warna: '#168f81', gelap: '#0b5c53' },
+        { key: '3bulan', label: '3 Bulan', hari: '+90 Hari', harga: 'RM40', warna: '#ea580c', gelap: '#9a3412' },
+        { key: '1tahun', label: '1 Tahun', hari: '+365 Hari', harga: 'RM69', warna: '#0284c7', gelap: '#075985' },
+    ];
+
+    let modal = document.getElementById('app-admin-panjang-overlay');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'app-admin-panjang-overlay';
+        modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:100001; display:flex; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;';
+        document.body.appendChild(modal);
+    }
+
+    const butangPakej = pakej.map((p) => `
+        <button type="button" class="neo-btn" data-pakej="${p.key}" style="width:100%; padding:12px 14px; border-radius:12px; border:2px solid ${p.gelap}; background:${p.warna}; color:#fff; cursor:pointer; font-weight:bold; display:flex; align-items:center; justify-content:space-between; gap:10px; box-shadow:0 3px 0 ${p.gelap}; text-align:left;">
+            <span style="display:inline-flex; align-items:center; gap:9px;">
+                <i class="fa-solid fa-calendar-plus"></i>
+                <span>${p.label}</span>
+            </span>
+            <span style="display:inline-flex; align-items:center; gap:9px; font-size:0.82rem;">
+                <span style="background:rgba(255,255,255,0.25); padding:2px 8px; border-radius:8px;">${p.hari}</span>
+                <span>${p.harga}</span>
+            </span>
+        </button>
+    `).join('');
+
+    modal.innerHTML = `
+        <div class="neo-box" style="background-color:#ffffff; background-image:radial-gradient(circle, rgba(16, 24, 47, 0.12) 1.8px, transparent 1.8px); background-size:16px 16px; max-width:420px; width:100%; box-sizing:border-box; padding:24px 20px 20px; border-radius:20px; border:3px solid var(--color-dark, #10182f); box-shadow:0 6px 0 var(--color-dark, #10182f); position:relative; text-align:left;">
+            <button type="button" class="neo-btn bg-red" style="position:absolute; top:12px; right:12px; width:34px; height:34px; min-width:34px; min-height:34px; padding:0; border-radius:10px; border:2px solid var(--color-dark); display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff;" onclick="document.getElementById('app-admin-panjang-overlay').style.display='none'">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div style="text-align:center; margin-bottom:16px;">
+                <div class="neo-btn" style="background-color:#ea580c; color:white; font-size:1rem; margin:0 auto; display:inline-flex; align-items:center; gap:8px; pointer-events:none; padding:8px 22px; font-weight:bold; border-radius:12px;">
+                    <i class="fa-solid fa-calendar-plus"></i> Panjang Tempoh
+                </div>
+            </div>
+            <p style="margin:0 0 14px 0; font-size:0.86rem; color:#475569; font-weight:bold; text-align:center;">
+                Pilih pakej untuk dipanjangkan. Tempoh akan ditambah pada tarikh tamat semasa.
+            </p>
+            <div id="admin-panjang-err" style="display:none; color:#b91c1c; font-size:0.8rem; font-weight:bold; margin-bottom:8px; text-align:center;"></div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                ${butangPakej}
+            </div>
+            <button type="button" class="neo-btn bg-white" style="width:100%; margin-top:14px; padding:11px; font-weight:bold; border-radius:10px; border:2px solid var(--color-dark); cursor:pointer; font-size:0.9rem;" onclick="document.getElementById('app-admin-panjang-overlay').style.display='none'">Batal</button>
+        </div>
+    `;
+    modal.style.display = 'flex';
+
+    const err = document.getElementById('admin-panjang-err');
+    modal.querySelectorAll('button[data-pakej]').forEach((btn) => {
+        btn.onclick = async function () {
+            const kunci = btn.getAttribute('data-pakej');
+            if (btn.disabled) return;
+            modal.querySelectorAll('button[data-pakej]').forEach((b) => { b.disabled = true; });
+            const asal = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+            const hasil = await api.panjangkanTempohAdmin(uid, kunci);
             if (!hasil || !hasil.berjaya) {
-                window.showAppToast('Gagal', (hasil && hasil.mesej) || 'Operasi gagal. Sila cuba lagi.');
+                modal.querySelectorAll('button[data-pakej]').forEach((b) => { b.disabled = false; });
+                btn.innerHTML = asal;
+                if (err) { err.textContent = (hasil && hasil.mesej) || 'Operasi gagal. Sila cuba lagi.'; err.style.display = 'block'; }
                 return;
             }
+            modal.style.display = 'none';
             _tutupInfoAdmin();
             if (typeof window.fetchAdminDataFromFirebase === 'function') {
                 try { await window.fetchAdminDataFromFirebase(); } catch (e) { }
@@ -6970,9 +7113,11 @@ window.panjangTempohAdminPopup = function (uid, type) {
                 'Berjaya Dipanjangkan',
                 tkh ? `Tempoh langganan berjaya dipanjangkan sehingga ${tkh}.` : 'Tempoh langganan berjaya dipanjangkan.'
             );
-        }
-    );
-};
+        };
+    });
+}
+
+
 
 
 
@@ -7297,7 +7442,6 @@ window.renderAdminUrus = function (tab) {
                         <td style="padding:10px 10px; text-align:center; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${t.murid || 0}</td>
                         <td style="padding:8px 8px; text-align:center; border-right:1px solid #e2e8f0; white-space:nowrap;">
                             <select class="neo-btn filter-select" style="padding: 4px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 8px; border: 1.5px solid #ea580c; background: #fff; cursor: pointer; white-space: nowrap; width: auto; min-width: 145px; display: inline-block;" onchange="window.tukarLanggananPengguna('${t.id}', 'guru', this.value)">
-                                <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
                                 <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' ? 'selected' : ''}>1 Bulan (Pro)</option>
                                 <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' ? 'selected' : ''}>3 Bulan (Pro)</option>
                                 <option value="1 Tahun (Pro)" ${langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
@@ -7391,7 +7535,6 @@ window.renderAdminUrus = function (tab) {
                         <td style="padding:10px 10px; text-align:center; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${p.anak || 0}</td>
                         <td style="padding:8px 8px; text-align:center; border-right:1px solid #e2e8f0; white-space:nowrap;">
                             <select class="neo-btn filter-select" style="padding: 4px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 8px; border: 1.5px solid #0284c7; background: #fff; cursor: pointer; white-space: nowrap; width: auto; min-width: 145px; display: inline-block;" onchange="window.tukarLanggananPengguna('${p.id}', 'ibubapa', this.value)">
-                                <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
                                 <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' ? 'selected' : ''}>1 Bulan (Pro)</option>
                                 <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' ? 'selected' : ''}>3 Bulan (Pro)</option>
                                 <option value="1 Tahun (Pro)" ${langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
@@ -7463,7 +7606,17 @@ window.renderAdminUrus = function (tab) {
     }
 };
 
+// SATU LALUAN SAHAJA: butang "Daftar Guru/Ibu Bapa Baharu" dalam tab Urus
+// membuka modal React CiptaAkaunModal (AdminDashboard.tsx), yang menggunakan
+// endpoint pelayan /api/admin/create-account — ia mencipta akaun Firebase Auth,
+// profil RTDB dan rekod order dengan betul, serta memaparkan butang salin/WhatsApp.
+//
+// Overlay warisan di bawah hanya sebagai fallback jika jambatan React belum sedia.
 window.bukaModalDaftarAdmin = function (type) {
+    if (typeof window.bukaCiptaAkaunAdmin === 'function') {
+        window.bukaCiptaAkaunAdmin(type === 'ibubapa' ? 'ibubapa' : 'guru');
+        return;
+    }
     let overlay = document.getElementById('modal-admin-daftar-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
@@ -7555,167 +7708,24 @@ window.bukaModalDaftarAdmin = function (type) {
     overlay.style.display = 'flex';
 };
 
+// LALUAN WARISAN — dilencongkan ke CiptaAkaunModal (React).
+// Fungsi ini TIDAK lagi menulis rekod palsu ke localStorage; ia hanya membuka
+// borang React yang mencipta akaun Firebase Auth sebenar melalui pelayan.
 window.simpanDaftarGuruModal = async function () {
-    const namaEl = document.getElementById('modal-admin-guru-nama');
-    const emailEl = document.getElementById('modal-admin-guru-email');
-    const telEl = document.getElementById('modal-admin-guru-telefon');
-    const pakejEl = document.getElementById('modal-admin-guru-pakej');
-    if (!namaEl) return;
-
-    const nama = namaEl.value.trim();
-    const email = emailEl ? emailEl.value.trim() : '';
-    const noTelefon = telEl ? telEl.value.trim() : '';
-    const pakej = pakejEl ? pakejEl.value : '1bulan';
-    const pakejMap = { '1bulan': 30, '3bulan': 90, '1tahun': 365 };
-    const hari = pakejMap[pakej] || 30;
-    const labelPakej = hari >= 365 ? '1 Tahun' : (hari >= 90 ? '3 Bulan' : '1 Bulan');
-    // Nama sekolah dikosongkan — cikgu akan isi sendiri kemudian.
-    const sekolah = '';
-
-    if (!nama) {
-        alert('Sila masukkan nama guru!');
+    if (typeof window.bukaCiptaAkaunAdmin === 'function') {
+        window.bukaCiptaAkaunAdmin('guru');
         return;
     }
-
-    const cleanEmail = email || `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}@moe.edu.my`;
-
-    // Cipta profil dan kelas di pangkalan data Firebase
-    let profileId = null;
-    let kodKelas = null;
-    if (typeof window.adminCreateProfile === 'function') {
-        try {
-            const res = await window.adminCreateProfile({
-                nama: nama,
-                peranan: 'guru',
-                nama_sekolah: sekolah,
-                no_telefon: noTelefon,
-                email: cleanEmail,
-                hari: hari,
-                langganan: labelPakej
-            });
-            if (res && res.success) {
-                profileId = res.profile?.id;
-                kodKelas = res.classOrFamily?.kod_kelas;
-            }
-        } catch (err) {
-            console.warn('[Admin] Ralat daftar guru ke Firebase:', err);
-        }
-    }
-
-    const teachers = getAdminTeachersList();
-    const newTeacher = {
-        id: profileId || ('g_' + Date.now()),
-        nama: nama,
-        sekolah: sekolah,
-        no_telefon: noTelefon,
-        nama_kelas: 'KELAS 1',
-        kod_kelas: kodKelas || (typeof window.generateUniqueCode === 'function' ? window.generateUniqueCode('GURU') : 'GURU#101'),
-        email: cleanEmail,
-        password: `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}123`,
-        murid: 0,
-        bakiHari: hari,
-        langganan: labelPakej
-    };
-    teachers.push(newTeacher);
-    localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(teachers));
-
-    const overlay = document.getElementById('modal-admin-daftar-overlay');
-    if (overlay) overlay.style.display = 'none';
-
-    window.renderAdminUrus('guru');
-    if (typeof window.renderAdminTable === 'function') window.renderAdminTable('guru');
-    if (document.getElementById('admin-jumlah-guru')) {
-        document.getElementById('admin-jumlah-guru').innerText = teachers.length;
-    }
-
-    // Segerakkan data Firebase di latar belakang
-    if (typeof window.getRegisteredTeachers === 'function') {
-        window.getRegisteredTeachers().catch(e => console.warn(e));
-    }
-
-    alert(`Guru "${nama}" berjaya didaftarkan ke pangkalan data Firebase!\nKod Kelas: ${newTeacher.kod_kelas}`);
+    alert('Sila muat semula halaman. Borang cipta akaun tidak dimuatkan.');
 };
 
 window.simpanDaftarParentModal = async function () {
-    const namaEl = document.getElementById('modal-admin-parent-nama');
-    const emailEl = document.getElementById('modal-admin-parent-email');
-    const telEl = document.getElementById('modal-admin-parent-telefon');
-    const pakejEl = document.getElementById('modal-admin-parent-pakej');
-    if (!namaEl) return;
-
-    const nama = namaEl.value.trim();
-    const email = emailEl ? emailEl.value.trim() : '';
-    const noTelefon = telEl ? telEl.value.trim() : '';
-    const pakej = pakejEl ? pakejEl.value : '1bulan';
-    const pakejMap = { '1bulan': 30, '3bulan': 90, '1tahun': 365 };
-    const hari = pakejMap[pakej] || 30;
-    const labelPakej = hari >= 365 ? '1 Tahun' : (hari >= 90 ? '3 Bulan' : '1 Bulan');
-    const anak = 1;
-
-    if (!nama) {
-        alert('Sila masukkan nama ibu bapa!');
+    if (typeof window.bukaCiptaAkaunAdmin === 'function') {
+        window.bukaCiptaAkaunAdmin('ibubapa');
         return;
     }
-
-    const cleanEmail = email || `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}@gmail.com`;
-
-    // Cipta profil dan keluarga di pangkalan data Firebase
-    let profileId = null;
-    let kodKeluarga = null;
-    if (typeof window.adminCreateProfile === 'function') {
-        try {
-            const res = await window.adminCreateProfile({
-                nama: nama,
-                peranan: 'ibubapa',
-                no_telefon: noTelefon,
-                email: cleanEmail,
-                hari: hari,
-                langganan: labelPakej
-            });
-            if (res && res.success) {
-                profileId = res.profile?.id;
-                kodKeluarga = res.classOrFamily?.kod_keluarga;
-            }
-        } catch (err) {
-            console.warn('[Admin] Ralat daftar ibu bapa ke Firebase:', err);
-        }
-    }
-
-    const parents = getAdminParentsList();
-    const newParent = {
-        id: profileId || ('p_' + Date.now()),
-        nama: nama,
-        nama_keluarga: `KELUARGA ${nama.toUpperCase()}`,
-        kod_keluarga: kodKeluarga || (typeof window.generateUniqueCode === 'function' ? window.generateUniqueCode('FAM') : 'FAM#2026'),
-        anak: anak,
-        no_telefon: noTelefon,
-        email: cleanEmail,
-        password: `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}123`,
-        bakiHari: hari,
-        langganan: labelPakej
-    };
-    parents.push(newParent);
-    localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));
-
-    const overlay = document.getElementById('modal-admin-daftar-overlay');
-    if (overlay) overlay.style.display = 'none';
-
-    window.renderAdminUrus('ibubapa');
-    if (typeof window.renderAdminTable === 'function') window.renderAdminTable('ibubapa');
-    if (document.getElementById('admin-jumlah-ibubapa')) {
-        document.getElementById('admin-jumlah-ibubapa').innerText = parents.length;
-    }
-
-    // Segerakkan data Firebase di latar belakang
-    if (typeof window.getRegisteredParents === 'function') {
-        window.getRegisteredParents().catch(e => console.warn(e));
-    }
-
-    alert(`Ibu bapa "${nama}" berjaya didaftarkan ke pangkalan data Firebase!\nKod Keluarga: ${newParent.kod_keluarga}`);
+    alert('Sila muat semula halaman. Borang cipta akaun tidak dimuatkan.');
 };
-
-
-
 
 window.misi3DNext = function () {
     if (!window.currentMisiModules || window.currentMisiModules.length === 0) return;

@@ -456,6 +456,32 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         tunjukAmaranKonfigurasiAdmin(hasilAdmin.mesej);
                         return;
 
+                      } else if (hasilAdmin.ralatSambungan) {
+                        // Fetch gagal sepenuhnya — pelayan dev mungkin MATI.
+                        // Ini BUKAN "kod tidak sah"; beritahu punca sebenar
+                        // supaya tidak mengelirukan semasa membangun.
+                        console.error(
+                          "[Admin] Tidak dapat menghubungi pelayan pengesahan:",
+                          hasilAdmin.mesej,
+                        );
+                        if (typeof (window as any).showAppModalAlert === "function") {
+                          (window as any).showAppModalAlert(
+                            "Pelayan Tidak Dapat Dihubungi",
+                            `<p style="text-align:center; font-weight:bold; color:#b45309; margin:10px 0;">
+                              <i class="fa-solid fa-plug-circle-xmark" style="font-size:2.2rem; color:#ea580c; display:block; margin-bottom:8px;"></i>
+                              Tidak dapat menghubungi pelayan.
+                            </p>
+                            <p style="text-align:center; font-size:0.9rem; color:#475569; margin:8px 0 0;">
+                              Pastikan pelayan (npm run dev) sedang berjalan, kemudian cuba lagi.
+                            </p>`
+                          );
+                        } else {
+                          alert(
+                            "Tidak dapat menghubungi pelayan. Pastikan pelayan sedang berjalan.",
+                          );
+                        }
+                        return;
+
                       } else if (
                         (kodKelas && entered === kodKelas.toUpperCase()) ||
                         (kodKelas2 && entered === kodKelas2.toUpperCase())
@@ -948,6 +974,31 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                           hasilAdmin2.mesej,
                         );
                         tunjukAmaranKonfigurasiAdmin(hasilAdmin2.mesej);
+                        return;
+
+                      } else if (hasilAdmin2.ralatSambungan) {
+                        // Lihat komen pada laluan admin di atas: bezakan
+                        // "pelayan tak dapat dihubungi" daripada "kod salah".
+                        console.error(
+                          "[Admin] Tidak dapat menghubungi pelayan pengesahan:",
+                          hasilAdmin2.mesej,
+                        );
+                        if (typeof (window as any).showAppModalAlert === "function") {
+                          (window as any).showAppModalAlert(
+                            "Pelayan Tidak Dapat Dihubungi",
+                            `<p style="text-align:center; font-weight:bold; color:#b45309; margin:10px 0;">
+                              <i class="fa-solid fa-plug-circle-xmark" style="font-size:2.2rem; color:#ea580c; display:block; margin-bottom:8px;"></i>
+                              Tidak dapat menghubungi pelayan.
+                            </p>
+                            <p style="text-align:center; font-size:0.9rem; color:#475569; margin:8px 0 0;">
+                              Pastikan pelayan (npm run dev) sedang berjalan, kemudian cuba lagi.
+                            </p>`
+                          );
+                        } else {
+                          alert(
+                            "Tidak dapat menghubungi pelayan. Pastikan pelayan sedang berjalan.",
+                          );
+                        }
                         return;
 
                       } else if (

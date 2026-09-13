@@ -30,6 +30,15 @@ export interface HasilAksesAdmin {
    * jadi admin di localhost nampak seolah-olah "mod admin tidak berfungsi".
    */
   ralatKonfigurasi?: boolean;
+  /**
+   * Benar apabila permintaan fetch itu sendiri GAGAL (cth. pelayan dev tidak
+   * berjalan, rangkaian terputus, DNS gagal). Ini BERBEZA daripada 401 (kod
+   * salah) dan 5xx (konfigurasi pelayan).
+   *
+   * Tanpa bendera ini, pelayan yang MATI kelihatan seperti "kod tidak sah",
+   * yang sangat mengelirukan semasa membangun di localhost.
+   */
+  ralatSambungan?: boolean;
 }
 
 /**
@@ -80,7 +89,11 @@ export async function cubaAksesAdmin(kod: string): Promise<HasilAksesAdmin> {
     return { berjaya: true };
   } catch (err: any) {
     console.error('[Admin] Ralat semasa mengesahkan kod admin:', err?.message || err);
-    return { berjaya: false, mesej: 'Tidak dapat menghubungi pelayan pengesahan.' };
+    return {
+      berjaya: false,
+      mesej: 'Tidak dapat menghubungi pelayan pengesahan.',
+      ralatSambungan: true,
+    };
   }
 }
 
