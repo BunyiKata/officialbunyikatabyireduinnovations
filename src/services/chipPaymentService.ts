@@ -101,6 +101,11 @@ export async function bukaBayaranChip(planInfo: any, userEmail?: string, userNam
   }
 
   // Simpan data transaksi menunggu di localStorage untuk disahkan semasa redirect balik
+  const returnScreen =
+    (typeof window !== "undefined" && (window as any).currentActiveScreen && (window as any).currentActiveScreen !== "login-screen")
+      ? (window as any).currentActiveScreen
+      : (category === "ibubapa" ? "ibubapa-dashboard" : (category === "admin" ? "admin-dashboard" : "guru-dashboard"));
+
   const pendingData = {
     planId: planInfo.id,
     name: planInfo.name,
@@ -109,11 +114,14 @@ export async function bukaBayaranChip(planInfo: any, userEmail?: string, userNam
     category: category,
     email: resolvedEmail,
     fullName: resolvedName,
+    returnScreen: returnScreen,
     timestamp: Date.now(),
   };
 
   try {
     localStorage.setItem("bunyiKataPendingPlan", JSON.stringify(pendingData));
+    localStorage.setItem("bunyiKataReturnDashboard", returnScreen);
+    localStorage.setItem("bunyiKataUserRole", category);
     if (resolvedEmail) {
       localStorage.setItem("bunyiKataPendingEmail", resolvedEmail);
       if (category === "guru") {

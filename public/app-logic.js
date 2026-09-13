@@ -2202,8 +2202,19 @@ window.bolehAksesSkrin = function (screenId) {
         if (!screenId) return false;
         const id = String(screenId);
 
+        // Jika baru kembali daripada payment gateway (ada parameter URL payment atau status), benarkan akses dashboard
+        const search = (typeof window !== 'undefined' && window.location.search) ? window.location.search : '';
+        const adaPaymentCallback = search.includes('payment=') || search.includes('status=');
+        let pendingCat = '';
+        try {
+            const sp = localStorage.getItem('bunyiKataPendingPlan');
+            if (sp) pendingCat = (JSON.parse(sp).category || '').toLowerCase();
+        } catch (e) {}
+        const role = (localStorage.getItem('bunyiKataUserRole') || pendingCat || '').toLowerCase();
+
         // 1) Skrin admin — hanya dengan sesi admin RUNTIME.
         if (id === 'admin-dashboard' || id.startsWith('admin-')) {
+            if (adaPaymentCallback && role === 'admin') return true;
             return !!(
                 window.modAdminAktif ||
                 window.isAdminMode ||
@@ -2214,13 +2225,13 @@ window.bolehAksesSkrin = function (screenId) {
 
         // 2) Skrin guru.
         if (id === 'guru-dashboard' || id.startsWith('guru-')) {
-            const role = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase();
+            if (adaPaymentCallback && (role === 'guru' || (!role && !pendingCat))) return true;
             return !!(window.modGuruAktif || role === 'guru' || role === 'admin');
         }
 
         // 3) Skrin ibu bapa.
         if (id === 'ibubapa-dashboard' || id.startsWith('ibubapa-')) {
-            const role = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase();
+            if (adaPaymentCallback && role === 'ibubapa') return true;
             return !!(window.modIbuBapaAktif || role === 'ibubapa');
         }
 

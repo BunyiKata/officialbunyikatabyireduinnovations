@@ -304,9 +304,25 @@ export default function App() {
   const [activeScreen, setActiveScreen] = React.useState<string>(() => {
     if (typeof window !== "undefined") {
       const search = window.location.search || "";
-      if (search.includes("payment=success") || search.includes("status=success")) {
-        const role = localStorage.getItem("bunyiKataUserRole") || (localStorage.getItem("bunyiKataIbubapaEmail") ? "ibubapa" : "guru");
-        return role === "guru" ? "guru-dashboard" : "ibubapa-dashboard";
+      if (search.includes("payment=") || search.includes("status=")) {
+        let savedCategory = "";
+        let savedScreen = "";
+        try {
+          savedScreen = localStorage.getItem("bunyiKataReturnDashboard") || "";
+          const savedPending = localStorage.getItem("bunyiKataPendingPlan");
+          if (savedPending) {
+            const parsed = JSON.parse(savedPending);
+            if (parsed?.category) savedCategory = parsed.category;
+            if (parsed?.returnScreen) savedScreen = parsed.returnScreen;
+          }
+        } catch (e) {}
+
+        if (savedScreen && savedScreen !== "login-screen") return savedScreen;
+
+        const role = savedCategory || localStorage.getItem("bunyiKataUserRole") || (localStorage.getItem("bunyiKataIbubapaEmail") ? "ibubapa" : "guru");
+        if (role === "admin") return "admin-dashboard";
+        if (role === "ibubapa") return "ibubapa-dashboard";
+        return "guru-dashboard";
       }
       const path = window.location.pathname.replace(/^\/+/, "");
       if (path) return path;
@@ -415,15 +431,23 @@ export default function App() {
         setIsModeMenuOpen(false);
         setIsProPricingModalOpen(false);
 
-        let targetCategory = "ibubapa";
+        let targetCategory = "";
+        let returnScreen = "";
         let parsedPlan: any = null;
-        const savedPendingPlan = localStorage.getItem("bunyiKataPendingPlan");
-        if (savedPendingPlan) {
-          try {
+        try {
+          returnScreen = localStorage.getItem("bunyiKataReturnDashboard") || "";
+          const savedPendingPlan = localStorage.getItem("bunyiKataPendingPlan");
+          if (savedPendingPlan) {
             parsedPlan = JSON.parse(savedPendingPlan);
             if (parsedPlan?.category) targetCategory = parsedPlan.category;
-          } catch (e) {}
-        }
+            if (parsedPlan?.returnScreen) returnScreen = parsedPlan.returnScreen;
+          }
+        } catch (e) {}
+
+        const userRole = targetCategory || localStorage.getItem("bunyiKataUserRole") || "";
+        const isParent = userRole === "ibubapa" || !!localStorage.getItem("bunyiKataIbubapaEmail") || returnScreen === "ibubapa-dashboard";
+        const isAdmin = userRole === "admin" || returnScreen === "admin-dashboard";
+        const fallbackDash = isParent ? "ibubapa-dashboard" : (isAdmin ? "admin-dashboard" : "guru-dashboard");
 
         const processPaymentSuccess = async () => {
           // LANGKAH KESELAMATAN: Jangan sesekali percaya parameter URL.
@@ -445,6 +469,51 @@ export default function App() {
                 "Kami belum menerima pengesahan pembayaran daripada CHIP. Jika anda telah membayar, sila tunggu sebentar atau hubungi kami.",
               type: "error",
             });
+
+            // Kekalkan pengguna di dashboard masing-masing
+            if (isParent) {
+              (window as any).modIbuBapaAktif = true;
+              (window as any).modGuruAktif = false;
+              (window as any).modAdminAktif = false;
+              localStorage.setItem("bunyiKataUserRole", "ibubapa");
+              document.body.classList.add("parent-mode");
+              document.body.classList.remove("teacher-mode", "admin-mode");
+              const pNav = document.getElementById("parent-sticky-nav");
+              if (pNav) pNav.style.display = "flex";
+              setActiveScreen("ibubapa-dashboard");
+              if (typeof (window as any).masukModIbuBapa === "function") (window as any).masukModIbuBapa();
+              if (typeof (window as any).paparSkrin === "function") (window as any).paparSkrin("ibubapa-dashboard", true);
+            } else if (isAdmin) {
+              (window as any).modAdminAktif = true;
+              (window as any).modGuruAktif = true;
+              (window as any).modIbuBapaAktif = false;
+              localStorage.setItem("bunyiKataUserRole", "admin");
+              document.body.classList.add("teacher-mode", "admin-mode");
+              document.body.classList.remove("parent-mode");
+              const aNav = document.getElementById("admin-sticky-nav");
+              if (aNav) aNav.style.display = "flex";
+              setActiveScreen("admin-dashboard");
+              if (typeof (window as any).masukModAdmin === "function") (window as any).masukModAdmin();
+              if (typeof (window as any).paparSkrin === "function") (window as any).paparSkrin("admin-dashboard", true);
+            } else {
+              (window as any).modGuruAktif = true;
+              (window as any).modIbuBapaAktif = false;
+              (window as any).modAdminAktif = false;
+              localStorage.setItem("bunyiKataUserRole", "guru");
+              document.body.classList.add("teacher-mode");
+              document.body.classList.remove("parent-mode", "admin-mode");
+              const tNav = document.getElementById("teacher-sticky-nav");
+              if (tNav) tNav.style.display = "flex";
+              setActiveScreen("guru-dashboard");
+              if (typeof (window as any).masukModGuru === "function") (window as any).masukModGuru();
+              if (typeof (window as any).paparSkrin === "function") (window as any).paparSkrin("guru-dashboard", true);
+            }
+
+            try {
+              window.history.replaceState({ screenId: fallbackDash }, document.title, "/" + fallbackDash);
+            } catch (e) {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
             return;
           }
 
@@ -487,9 +556,6 @@ export default function App() {
           const planName = verifiedPlanName;
           const returnEmail = verifiedEmail;
 
-          const userRole = localStorage.getItem("bunyiKataUserRole") || targetCategory;
-          const isParent = userRole === "ibubapa" || !!localStorage.getItem("bunyiKataIbubapaEmail") || targetCategory === "ibubapa";
-
           setPaymentToast({
             show: true,
             title: "🎉 Langganan Pro Berjaya!",
@@ -499,10 +565,12 @@ export default function App() {
           });
 
           if (isParent) {
-
             localStorage.setItem("bunyiKataUserRole", "ibubapa");
             localStorage.setItem("bunyiKataIbubapaSetupDone", "true");
             localStorage.setItem("bunyiKataParentPlan", planName);
+            (window as any).modIbuBapaAktif = true;
+            (window as any).modGuruAktif = false;
+            (window as any).modAdminAktif = false;
             document.body.classList.add("parent-mode");
             document.body.classList.remove("teacher-mode", "admin-mode");
             const pNav = document.getElementById("parent-sticky-nav");
@@ -511,21 +579,38 @@ export default function App() {
             if (typeof syncParentSessionFromFirebase === "function") {
               await syncParentSessionFromFirebase(returnEmail).catch(console.warn);
             }
-            setTimeout(() => {
-              if (typeof (window as any).masukModIbubapa === "function") {
-                (window as any).masukModIbubapa();
-              } else if (typeof (window as any).masukModIbuBapa === "function") {
-                (window as any).masukModIbuBapa();
-              }
-              if (typeof (window as any).paparSkrin === "function") {
-                (window as any).paparSkrin("ibubapa-dashboard");
-              }
-            }, 100);
+            if (typeof (window as any).masukModIbubapa === "function") {
+              (window as any).masukModIbubapa();
+            } else if (typeof (window as any).masukModIbuBapa === "function") {
+              (window as any).masukModIbuBapa();
+            }
+            if (typeof (window as any).paparSkrin === "function") {
+              (window as any).paparSkrin("ibubapa-dashboard", true);
+            }
+          } else if (isAdmin) {
+            localStorage.setItem("bunyiKataUserRole", "admin");
+            (window as any).modAdminAktif = true;
+            (window as any).modGuruAktif = true;
+            (window as any).modIbuBapaAktif = false;
+            document.body.classList.add("teacher-mode", "admin-mode");
+            document.body.classList.remove("parent-mode");
+            const aNav = document.getElementById("admin-sticky-nav");
+            if (aNav) aNav.style.display = "flex";
+            setActiveScreen("admin-dashboard");
+            if (typeof (window as any).masukModAdmin === "function") {
+              (window as any).masukModAdmin();
+            }
+            if (typeof (window as any).paparSkrin === "function") {
+              (window as any).paparSkrin("admin-dashboard", true);
+            }
           } else {
             localStorage.setItem("bunyiKataUserRole", "guru");
             localStorage.setItem("bunyiKataGuruSetupDone", "true");
             localStorage.setItem("bunyiKataTeacherPlan", planName);
             setTeacherPlanName(planName);
+            (window as any).modGuruAktif = true;
+            (window as any).modIbuBapaAktif = false;
+            (window as any).modAdminAktif = false;
             document.body.classList.add("teacher-mode");
             document.body.classList.remove("parent-mode", "admin-mode");
             const tNav = document.getElementById("teacher-sticky-nav");
@@ -534,18 +619,16 @@ export default function App() {
             if (typeof syncTeacherSessionFromFirebase === "function") {
               await syncTeacherSessionFromFirebase(returnEmail).catch(console.warn);
             }
-            setTimeout(() => {
-              if (typeof (window as any).masukModGuru === "function") {
-                (window as any).masukModGuru();
-              }
-              if (typeof (window as any).paparSkrin === "function") {
-                (window as any).paparSkrin("guru-dashboard");
-              }
-            }, 100);
+            if (typeof (window as any).masukModGuru === "function") {
+              (window as any).masukModGuru();
+            }
+            if (typeof (window as any).paparSkrin === "function") {
+              (window as any).paparSkrin("guru-dashboard", true);
+            }
           }
 
           // Bersihkan query param dari URL bar dan kekalkan laluan dashboard aktif
-          const targetDashPath = isParent ? "ibubapa-dashboard" : "guru-dashboard";
+          const targetDashPath = isParent ? "ibubapa-dashboard" : (isAdmin ? "admin-dashboard" : "guru-dashboard");
           try {
             window.history.replaceState({ screenId: targetDashPath }, document.title, "/" + targetDashPath);
           } catch (e) {
@@ -561,33 +644,73 @@ export default function App() {
         setIsModeMenuOpen(false);
         setIsProPricingModalOpen(false);
 
-        const userRole = localStorage.getItem("bunyiKataUserRole");
-        const isParent = userRole === "ibubapa" || !!localStorage.getItem("bunyiKataIbubapaEmail");
-        const isTeacher = userRole === "guru" || !!localStorage.getItem("bunyiKataGuruEmail");
-        const fallbackDash = isParent ? "ibubapa-dashboard" : "guru-dashboard";
+        let targetCategory = "";
+        let returnScreen = "";
+        try {
+          returnScreen = localStorage.getItem("bunyiKataReturnDashboard") || "";
+          const savedPendingPlan = localStorage.getItem("bunyiKataPendingPlan");
+          if (savedPendingPlan) {
+            const parsed = JSON.parse(savedPendingPlan);
+            if (parsed?.category) targetCategory = parsed.category;
+            if (parsed?.returnScreen) returnScreen = parsed.returnScreen;
+          }
+        } catch (e) {}
+
+        const userRole = targetCategory || localStorage.getItem("bunyiKataUserRole") || "";
+        const isParent = userRole === "ibubapa" || !!localStorage.getItem("bunyiKataIbubapaEmail") || returnScreen === "ibubapa-dashboard";
+        const isAdmin = userRole === "admin" || returnScreen === "admin-dashboard";
+        const fallbackDash = isParent ? "ibubapa-dashboard" : (isAdmin ? "admin-dashboard" : "guru-dashboard");
 
         if (isParent) {
+          (window as any).modIbuBapaAktif = true;
+          (window as any).modGuruAktif = false;
+          (window as any).modAdminAktif = false;
+          localStorage.setItem("bunyiKataUserRole", "ibubapa");
           document.body.classList.add("parent-mode");
           document.body.classList.remove("teacher-mode", "admin-mode");
           const pNav = document.getElementById("parent-sticky-nav");
           if (pNav) pNav.style.display = "flex";
           setActiveScreen("ibubapa-dashboard");
-          setTimeout(() => {
-            if (typeof (window as any).paparSkrin === "function") {
-              (window as any).paparSkrin("ibubapa-dashboard");
-            }
-          }, 100);
-        } else if (isTeacher) {
+          if (typeof (window as any).masukModIbubapa === "function") {
+            (window as any).masukModIbubapa();
+          } else if (typeof (window as any).masukModIbuBapa === "function") {
+            (window as any).masukModIbuBapa();
+          }
+          if (typeof (window as any).paparSkrin === "function") {
+            (window as any).paparSkrin("ibubapa-dashboard", true);
+          }
+        } else if (isAdmin) {
+          (window as any).modAdminAktif = true;
+          (window as any).modGuruAktif = true;
+          (window as any).modIbuBapaAktif = false;
+          localStorage.setItem("bunyiKataUserRole", "admin");
+          document.body.classList.add("teacher-mode", "admin-mode");
+          document.body.classList.remove("parent-mode");
+          const aNav = document.getElementById("admin-sticky-nav");
+          if (aNav) aNav.style.display = "flex";
+          setActiveScreen("admin-dashboard");
+          if (typeof (window as any).masukModAdmin === "function") {
+            (window as any).masukModAdmin();
+          }
+          if (typeof (window as any).paparSkrin === "function") {
+            (window as any).paparSkrin("admin-dashboard", true);
+          }
+        } else {
+          (window as any).modGuruAktif = true;
+          (window as any).modIbuBapaAktif = false;
+          (window as any).modAdminAktif = false;
+          localStorage.setItem("bunyiKataUserRole", "guru");
           document.body.classList.add("teacher-mode");
           document.body.classList.remove("parent-mode", "admin-mode");
           const tNav = document.getElementById("teacher-sticky-nav");
           if (tNav) tNav.style.display = "flex";
           setActiveScreen("guru-dashboard");
-          setTimeout(() => {
-            if (typeof (window as any).paparSkrin === "function") {
-              (window as any).paparSkrin("guru-dashboard");
-            }
-          }, 100);
+          if (typeof (window as any).masukModGuru === "function") {
+            (window as any).masukModGuru();
+          }
+          if (typeof (window as any).paparSkrin === "function") {
+            (window as any).paparSkrin("guru-dashboard", true);
+          }
         }
 
         // Toast notifikasi status gagal / batal
@@ -608,6 +731,11 @@ export default function App() {
 
     // Initial check on mount
     if (typeof window !== "undefined") {
+      const search = window.location.search || "";
+      if (search.includes("payment=") || search.includes("status=")) {
+        // Jangan timpa laluan dashboard yang telah diselaraskan oleh callback pembayaran
+        return;
+      }
       let currentPath =
         window.location.pathname.replace(/^\/+/, "") ||
         (window.location.hash ? window.location.hash.replace("#", "") : "");
