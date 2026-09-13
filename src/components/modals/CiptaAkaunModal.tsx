@@ -21,6 +21,7 @@ import {
   ambilSenaraiPakej,
   type PakejPenuh,
 } from "../../services/adminService";
+import { ambilKodRujukan } from "../../config/contactAdmin";
 
 const PAKEJ_LALAI: PakejPenuh[] = [
   { key: "1bulan", name: "1 Bulan (Pro)", days: 30, priceCents: 1500, harga: "RM15" },
@@ -153,6 +154,13 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
   const [ralat, setRalat] = React.useState("");
   const [hasil, setHasil] = React.useState<HasilCiptaAkaun | null>(null);
   const [disalin, setDisalin] = React.useState(false);
+  // Fasa 2: kod affiliate pelanggan ini (dari ?ref=). Boleh dibetulkan admin.
+  const [kodRujukan, setKodRujukan] = React.useState("");
+
+  // Pra-isi kod rujukan dari storan setiap kali modal dibuka.
+  React.useEffect(() => {
+    if (isOpen) setKodRujukan(ambilKodRujukan());
+  }, [isOpen]);
 
   const resetBorang = () => {
     bunyiKlik();
@@ -160,6 +168,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
     setEmail("");
     setNoTelefon("");
     setPakej("1bulan");
+    setKodRujukan(ambilKodRujukan());
     setRalat("");
     setHasil(null);
     setDisalin(false);
@@ -192,6 +201,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
       // pelayan tidak menyimpan nilai palsu.
       nama_keluarga: "",
       planKey: pakej,
+      kod_rujukan: kodRujukan.trim().toUpperCase(),
     });
     setSedangProses(false);
 
@@ -379,6 +389,19 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                     value={noTelefon}
                     onChange={(e) => setNoTelefon(e.target.value)}
                     placeholder="cth. 0123456789"
+                  />
+                </div>
+
+                {/* Fasa 2: kod affiliate. Pra-isi dari ?ref= jika pelanggan
+                    datang melalui pautan affiliate; admin boleh betulkan. */}
+                <div style={fieldStyle}>
+                  <label style={labelStyle}>Kod Rujukan Affiliate (pilihan)</label>
+                  <input
+                    style={inputStyle}
+                    value={kodRujukan}
+                    onChange={(e) => setKodRujukan(e.target.value.toUpperCase())}
+                    placeholder="cth. BK7X2K — kosongkan jika tiada"
+                    maxLength={6}
                   />
                 </div>
 

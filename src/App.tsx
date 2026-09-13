@@ -25,7 +25,7 @@ import { PricingProModal } from "./components/modals/PricingProModal";
 import { EditProfileModal } from "./components/modals/EditProfileModal";
 import { EntryChoiceModal } from "./components/modals/EntryChoiceModal";
 import { ModeChoiceModal } from "./components/modals/ModeChoiceModal";
-import { hubungiAdminWhatsapp } from "./config/contactAdmin";
+import { hubungiAdminWhatsapp, mesejDaftarPakej } from "./config/contactAdmin";
 import "./utils/sijilGenerator";
 import "./index.css";
 import { motion, AnimatePresence } from "motion/react";
@@ -10923,17 +10923,16 @@ export default function App() {
               setIsModeMenuOpen(false);
               setIsProPricingModalOpen(false);
 
-              const namaPakej = planInfo?.name || planInfo?.period || "";
-              const harga =
-                planInfo?.price != null
-                  ? `RM${planInfo.price}${planInfo?.period ? ` / ${planInfo.period}` : ""}`
-                  : "";
-              const butiran = [namaPakej, harga].filter(Boolean).join(" - ");
-              const mesej =
-                `Hai admin Bunyi Kata, saya berminat untuk melanggan pakej Pro` +
-                `${butiran ? ` (${butiran})` : ""}` +
-                ` untuk ${category === "guru" ? "Guru" : "Ibu Bapa"}. ` +
-                `Boleh saya dapatkan maklumat lanjut untuk mendaftar?`;
+              // Fasa 2: nama pakej mengikut sebutan rasmi (cth. "3 Bulan (Pro)").
+              // `period` ialah label ringkas ("3 Bulan"); kita cantum nama Pro.
+              const namaPakej =
+                planInfo?.name && /pro/i.test(planInfo.name)
+                  ? planInfo.name
+                  : `${planInfo?.period || planInfo?.name || ""}${
+                      planInfo?.period ? " (Pro)" : ""
+                    }`;
+              // Mesej rasmi + kod affiliate (jika ada) dari storan.
+              const mesej = mesejDaftarPakej(namaPakej.trim());
 
               const berjaya = hubungiAdminWhatsapp(mesej);
 
