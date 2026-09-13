@@ -856,6 +856,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
               <option value="feedback">Senarai Maklum Balas</option>
               <option value="audit">🧾 Log Audit Admin</option>
               <option value="affiliate">🤝 Affiliate (Kod Rujukan)</option>
+              <option value="affiliate_bayar">💰 Laporan Pembayaran (2 Minggu)</option>
             </select>
           </div>
           <div

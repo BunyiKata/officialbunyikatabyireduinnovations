@@ -894,6 +894,126 @@ window.renderAdminTable = function (type = 'guru') {
         muatSenarai();
 
     }
+    } else if (type === "affiliate_bayar") {
+
+        // Fasa 2: laporan pembayaran komisen (kitaran 2 minggu, tahan 7 hari).
+
+        if (title) {
+            title.className = "neo-btn";
+            title.style.cssText = "background:linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color:white; padding:7px 16px; font-weight:bold; font-size:1rem; border-radius:12px; border:2.5px solid var(--color-dark, #10182f); box-shadow:0 3px 0 var(--color-dark, #10182f); display:inline-flex; align-items:center; gap:8px; pointer-events:none; margin:0;";
+            title.innerHTML = '<i class="fa-solid fa-money-bill-transfer"></i> <span style="font-family:\'AtlantaRoundedBlack\', sans-serif;">Laporan Pembayaran (2 Minggu)</span>';
+        }
+
+        adminThead.innerHTML = `
+                    <tr style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: white;">
+                        <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; width:44px; min-width:44px; text-transform:uppercase;">BIL.</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:left; font-size:0.85rem; font-weight:bold; min-width:150px; text-transform:uppercase;">AFFILIATE</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:90px; text-transform:uppercase;">KOD</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:100px; text-transform:uppercase;">BILANGAN</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:120px; text-transform:uppercase;">JUMLAH LAYAK</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; text-align:center; font-size:0.85rem; font-weight:bold; min-width:170px; text-transform:uppercase;">TINDAKAN</th>
+                    </tr>
+                `;
+
+        adminTbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold;">
+                    <i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Memuatkan laporan pembayaran...
+                </td>
+            </tr>
+        `;
+
+        const rmBayar = (sen) => "RM" + ((Number(sen) || 0) / 100).toFixed(2);
+
+
+        const paparLaporan = (hasil) => {
+            const ringkasan = (hasil && Array.isArray(hasil.ringkasan)) ? hasil.ringkasan : [];
+            const belumMatangSen = (hasil && Array.isArray(hasil.belum_matang))
+                ? hasil.belum_matang.reduce((s, it) => s + (Number(it.komisen_sen) || 0), 0) : 0;
+            const tahanHari = (hasil && hasil.tempoh_tahan_hari) || 7;
+
+            adminTbody.innerHTML = "";
+
+            if (ringkasan.length === 0) {
+                adminTbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="padding: 28px; text-align: center; color: #64748b; font-weight: bold;">
+                            <i class="fa-solid fa-money-bill-wave" style="font-size: 2rem; margin-bottom: 8px; display: block; color: #cbd5e1;"></i>
+                            Tiada komisen layak dibayar buat masa ini.
+                            ${belumMatangSen > 0 ? '<br/><span style="font-size:0.8rem; color:#94a3b8;">' + rmBayar(belumMatangSen) + " masih dalam tempoh tahan (" + tahanHari + " hari).</span>" : ""}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            ringkasan.forEach((r, index) => {
+                const row = document.createElement("tr");
+                row.className = "admin-table-row";
+                row.style.cssText = "border-bottom:1px solid #e2e8f0; background: " + (index % 2 === 0 ? "#ffffff" : "#f5f3ff") + ";";
+                row.innerHTML = `
+                    <td class="admin-td" style="padding:9px 8px; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; text-align:center; font-size:0.85rem;">${index + 1}</td>
+                    <td class="admin-td" style="padding:9px 12px; font-weight:bold; color:#0f172a; border-right:1px solid #e2e8f0; font-size:0.85rem;">${r.nama || "-"}</td>
+                    <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; letter-spacing:1px; color:#5b21b6;">${r.kod || "-"}</td>
+                    <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; color:#0f172a;">${Number(r.bil) || 0}</td>
+                    <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; color:#059669;">${rmBayar(r.jumlah_sen)}</td>
+                    <td class="admin-td" style="padding:9px 12px; text-align:center; white-space:nowrap;">
+                        <button type="button" class="neo-btn" data-bayar-kod="${r.kod}" style="margin:2px; padding:5px 10px; font-size:0.75rem; font-weight:bold; border-radius:8px; border:2px solid var(--color-dark,#10182f); background:#059669; color:white; cursor:pointer;">
+                            <i class="fa-solid fa-check"></i> Tanda Dibayar
+                        </button>
+                    </td>
+                `;
+                adminTbody.appendChild(row);
+            });
+        };
+
+        const muatLaporan = () => {
+            const api = window.__adminApi;
+            const guna = (apiObj) => {
+                if (apiObj && typeof apiObj.ambilLaporanBayaran === "function") {
+                    apiObj.ambilLaporanBayaran().then(paparLaporan).catch(() => paparLaporan(null));
+                } else {
+                    paparLaporan(null);
+                }
+            };
+            if (api && typeof api.ambilLaporanBayaran === "function") guna(api);
+            else _tungguAdminApi().then(guna);
+
+        // Pengendali "Tanda Dibayar" (delegasi, sekali sahaja).
+        if (!window.__bayarHandlerSedia) {
+            window.__bayarHandlerSedia = true;
+            document.addEventListener("click", function (ev) {
+                const sasaran = ev.target;
+                const btn = sasaran && sasaran.closest ? sasaran.closest("[data-bayar-kod]") : null;
+                if (!btn) return;
+                const kod = btn.getAttribute("data-bayar-kod");
+                if (!confirm("Tanda SEMUA komisen layak untuk " + kod + " sebagai sudah dibayar?")) return;
+                const api = window.__adminApi;
+                if (!api || typeof api.ambilLaporanBayaran !== "function" || typeof api.tandaKomisenDibayar !== "function") {
+                    alert("API affiliate belum sedia.");
+                    return;
+                }
+                // Ambil senarai baris layak untuk kod ini, kemudian tanda semua.
+                api.ambilLaporanBayaran().then(function (hasil) {
+                    const layak = (hasil && Array.isArray(hasil.layak)) ? hasil.layak : [];
+                    const items = layak.filter(function (it) { return it.kod === kod; })
+                        .map(function (it) { return { kod: it.kod, id: it.id }; });
+                    if (!items.length) { alert("Tiada baris layak untuk " + kod + "."); return; }
+                    return api.tandaKomisenDibayar(items).then(function (h) {
+                        if (h && h.berjaya) {
+                            alert("Ditanda dibayar: " + (h.dibayar_bil || 0) + " baris, " + rmBayar(h.jumlah_sen) + ".");
+                            window.renderAdminTable("affiliate_bayar");
+                        } else {
+                            alert((h && h.mesej) || "Gagal menanda dibayar.");
+                        }
+                    });
+                }).catch(function () { alert("Ralat rangkaian."); });
+            });
+        }
+
+        muatLaporan();
+
+    }
 };
 
     window.padamFeedback = async function (id) {
