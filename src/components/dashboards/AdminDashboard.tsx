@@ -855,6 +855,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
               <option value="perlu_semakan">⚠️ Perlu Semakan (Langganan)</option>
               <option value="feedback">Senarai Maklum Balas</option>
               <option value="audit">🧾 Log Audit Admin</option>
+              <option value="affiliate">🤝 Affiliate (Kod Rujukan)</option>
             </select>
           </div>
           <div
