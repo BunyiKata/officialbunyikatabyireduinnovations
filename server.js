@@ -175,6 +175,27 @@ const PLAN_CATALOG = {
   "1tahun": { name: "1 Tahun (Pro)", priceCents: 6900, days: 365 },
 };
 
+/** Susunan paparan pakej (bulan -> tahun), dihantar oleh /api/plans. */
+const SUSUNAN_PLAN = ["1bulan", "3bulan", "1tahun"];
+
+/**
+ * Bina senarai pakej untuk klien daripada PLAN_CATALOG.
+ *
+ * Ini SATU-SATUNYA sumber harga. Klien (React & app-logic.js) TIDAK boleh
+ * menyimpan harga sendiri-sendiri lagi - mereka mesti ambil dari endpoint ini.
+ * Jika tidak, harga di modal cipta akaun, modal lanjut tempoh dan pelayan boleh
+ * bercanggah (cth. admin nampak RM15 sedangkan pelayan merekod RM20).
+ */
+function senaraiPakej() {
+  return SUSUNAN_PLAN.filter((k) => PLAN_CATALOG[k]).map((k) => ({
+    key: k,
+    name: PLAN_CATALOG[k].name,
+    days: PLAN_CATALOG[k].days,
+    priceCents: PLAN_CATALOG[k].priceCents,
+    harga: "RM" + PLAN_CATALOG[k].priceCents / 100,
+  }));
+}
+
 function resolvePlanKey(planInfo) {
   const raw = `${planInfo?.id || ""} ${planInfo?.name || ""} ${planInfo?.period || ""}`.toLowerCase();
   if (raw.includes("tahun") || raw.includes("year")) return "1tahun";
@@ -205,6 +226,22 @@ async function startServer() {
   const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json());
+
+  /**
+   * Senarai pakej awam (harga + tempoh).
+   *
+   * Klien menggunakan ini supaya harga dipaparkan dalam modal cipta akaun dan
+   * modal lanjut tempoh sentiasa sepadan dengan apa yang pelayan akan rekod.
+   * Tiada data sensitif di sini - hanya katalog pakej.
+   */
+  app.get("/api/plans", (req, res) => {
+    try {
+      return res.json({ success: true, plans: senaraiPakej() });
+    } catch (err) {
+      console.error("[API Plans]", err);
+      return res.status(500).json({ success: false, message: "Gagal memuatkan senarai pakej." });
+    }
+  });
 
   /**
    * Pengesahan kod admin.

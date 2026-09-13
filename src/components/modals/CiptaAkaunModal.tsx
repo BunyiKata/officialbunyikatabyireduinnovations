@@ -18,12 +18,14 @@ import {
   type PerananPengguna,
   type KunciPakej,
   type HasilCiptaAkaun,
+  ambilSenaraiPakej,
+  type PakejPenuh,
 } from "../../services/adminService";
 
-const PAKEJ_PILIHAN: { key: KunciPakej; label: string; harga: string }[] = [
-  { key: "1bulan", label: "1 Bulan (Pro)", harga: "RM15" },
-  { key: "3bulan", label: "3 Bulan (Pro)", harga: "RM40" },
-  { key: "1tahun", label: "1 Tahun (Pro)", harga: "RM69" },
+const PAKEJ_LALAI: PakejPenuh[] = [
+  { key: "1bulan", name: "1 Bulan (Pro)", days: 30, priceCents: 1500, harga: "RM15" },
+  { key: "3bulan", name: "3 Bulan (Pro)", days: 90, priceCents: 4000, harga: "RM40" },
+  { key: "1tahun", name: "1 Tahun (Pro)", days: 365, priceCents: 6900, harga: "RM69" },
 ];
 
 /**
@@ -88,20 +90,20 @@ function formatTarikh(iso?: string): string {
 /** Membina mesej WhatsApp (Bahasa Melayu) untuk dihantar kepada pengguna. */
 function binaMesejWhatsApp(h: HasilCiptaAkaun): string {
   return [
-    `Salam ${h.nama || ""},`,
+    `Akaun Bunyi Kata anda telah sedia untuk digunakan! 🎊`,
     "",
-    "Akaun Bunyi Kata anda telah sedia untuk digunakan!",
+    "🔗 Pautan Bunyi Kata: https://bunyikata--bunyi-kata-official.asia-southeast1.hosted.app",
     "",
-    "Pautan: https://bunyikata--bunyi-kata-official.asia-southeast1.hosted.app",
-    `Emel: ${h.email || ""}`,
-    `Kata laluan sementara: ${h.password || ""}`,
+    `📧 Emel: ${h.email || "-"}`,
+    `🔑 Kata laluan sementara: ${h.password || "-"}`,
     "",
-    `Pakej: ${h.plan?.name || "-"}`,
-    `Sah sehingga: ${formatTarikh(h.tarikh_tamat)}`,
+    "📖 Cara menggunakannya:",
+    `📦 Pakej: ${h.plan?.name || "-"}`,
+    `📅 Sah sehingga: ${formatTarikh(h.tarikh_tamat)}`,
     "",
-    "Sila log masuk dan tukar kata laluan anda di menu Tetapan.",
+    "🔑 Sila log masuk dan tukar kata laluan anda di menu Tetapan.",
     "",
-    "Terima kasih kerana memilih Bunyi Kata!",
+    "Terima kasih kerana memilih Bunyi Kata! 🙏",
   ].join("\n");
 }
 
@@ -125,12 +127,27 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
     if (!isOpen) return;
     const unlock = () => bunyiKlik();
     document.addEventListener("pointerdown", unlock, { once: true, capture: true });
-    return () => document.removeEventListener("pointerdown", unlock, { capture: true } as any);
+  }, [isOpen]);
+
+  // Muat senarai pakej daripada /api/plans setiap kali modal dibuka.
+  React.useEffect(() => {
+    if (!isOpen) return;
+    let batal = false;
+    ambilSenaraiPakej()
+      .then((senarai) => {
+        if (!batal && Array.isArray(senarai) && senarai.length) setSenaraiPakej(senarai);
+      })
+      .catch(() => {});
+    return () => {
+      batal = true;
+    };
   }, [isOpen]);
   const [nama, setNama] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [noTelefon, setNoTelefon] = React.useState("");
   const [pakej, setPakej] = React.useState<KunciPakej>("1bulan");
+  // Senarai pakej dari pelayan (satu sumber harga). Guna nilai lalai sementara menunggu.
+  const [senaraiPakej, setSenaraiPakej] = React.useState<PakejPenuh[]>(PAKEJ_LALAI);
 
   const [sedangProses, setSedangProses] = React.useState(false);
   const [ralat, setRalat] = React.useState("");
@@ -383,9 +400,9 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                       setPakej(e.target.value as KunciPakej);
                     }}
                   >
-                    {PAKEJ_PILIHAN.map((p) => (
+                    {senaraiPakej.map((p) => (
                       <option key={p.key} value={p.key}>
-                        {p.label} — {p.harga}
+                        {p.name} — {p.harga}
                       </option>
                     ))}
                   </select>
@@ -527,25 +544,27 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                     title={disalin ? "Mesej Disalin!" : "Salin Mesej WhatsApp"}
                     aria-label="Salin Mesej WhatsApp"
                     style={{
-                      width: "52px",
+                      width: "100%",
+                      minWidth: "100%",
                       height: "52px",
-                      padding: 0,
-                      minWidth: "52px",
-                      minHeight: "52px",
+                      padding: "0 20px",
                       margin: "0 auto",
                       borderRadius: "12px",
                       border: "2px solid #0f172a",
                       background: disalin ? "#22c55e" : "#ffffff",
                       color: disalin ? "#ffffff" : "#0f172a",
-                      fontSize: "1.15rem",
+                      fontSize: "1.05rem",
+                      fontWeight: "bold",
                       cursor: "pointer",
                       boxShadow: "0 3px 0 #0f172a",
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      gap: "9px",
                     }}
                   >
                     <i className={disalin ? "fa-solid fa-check" : "fa-solid fa-clipboard"}></i>
+                    {disalin ? "Disalin!" : "Copy"}
                   </button>
                   <div style={{ display: "flex", gap: "9px", marginTop: "4px" }}>
                     <button

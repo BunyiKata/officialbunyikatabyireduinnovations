@@ -247,6 +247,43 @@ export async function panjangkanTempohAdmin(
   });
 }
 
+export interface PakejPenuh {
+  key: KunciPakej;
+  name: string;
+  days: number;
+  priceCents: number;
+  harga: string;
+}
+
+const PAKEJ_LALAI: PakejPenuh[] = [
+  { key: "1bulan", name: "1 Bulan (Pro)", days: 30, priceCents: 1500, harga: "RM15" },
+  { key: "3bulan", name: "3 Bulan (Pro)", days: 90, priceCents: 4000, harga: "RM40" },
+  { key: "1tahun", name: "1 Tahun (Pro)", days: 365, priceCents: 6900, harga: "RM69" },
+];
+
+let cachePakej: PakejPenuh[] | null = null;
+let janjiPakej: Promise<PakejPenuh[]> | null = null;
+
+export async function ambilSenaraiPakej(): Promise<PakejPenuh[]> {
+  if (cachePakej) return cachePakej;
+  if (janjiPakej) return janjiPakej;
+  janjiPakej = (async () => {
+    try {
+      const res = await fetch("/api/plans", { method: "GET" });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success && Array.isArray(data.plans) && data.plans.length) {
+        cachePakej = data.plans as PakejPenuh[];
+        return cachePakej;
+      }
+    } catch (err) {
+      console.warn("[Admin API] Gagal /api/plans, guna nilai lalai.", err);
+    }
+    cachePakej = PAKEJ_LALAI;
+    return cachePakej;
+  })();
+  return janjiPakej;
+}
+
 // ---------------------------------------------------------------------------
 // JAMBATAN KE public/app-logic.js
 //
@@ -260,6 +297,7 @@ if (typeof window !== 'undefined') {
     ciptaAkaunAdmin,
     resetKataLaluanAdmin,
     panjangkanTempohAdmin,
+    ambilSenaraiPakej,
   };
 }
 

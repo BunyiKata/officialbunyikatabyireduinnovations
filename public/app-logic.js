@@ -7091,12 +7091,62 @@ window.panjangTempohAdminPopup = window.lanjutanTempohAdminPopup;
  * Tempoh baharu SELALU ditambah pada tarikh tamat sedia ada (lihat
  * /api/admin/extend-expiry), jadi baki yang belum habis tidak dihanguskan.
  */
+var _cachePakejKlien = null;
+var _warnaPakej = [
+    { warna: '#168f81', gelap: '#0b5c53' },
+    { warna: '#ea580c', gelap: '#9a3412' },
+    { warna: '#0284c7', gelap: '#075985' },
+];
+var _PAKEJ_LALAI_KLIEN = [
+    { key: '1bulan', name: '1 Bulan', days: 30, harga: 'RM15' },
+    { key: '3bulan', name: '3 Bulan', days: 90, harga: 'RM40' },
+    { key: '1tahun', name: '1 Tahun', days: 365, harga: 'RM69' },
+];
+
+/**
+ * Ambil senarai pakej daripada /api/plans (satu sumber harga).
+ * Jika gagal, guna senarai lalai supaya modal tetap berfungsi.
+ */
+function _ambilPakejKlien() {
+    if (_cachePakejKlien) return Promise.resolve(_cachePakejKlien);
+    return fetch('/api/plans')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+            if (d && d.success && Array.isArray(d.plans) && d.plans.length) {
+                _cachePakejKlien = d.plans;
+            } else {
+                _cachePakejKlien = _PAKEJ_LALAI_KLIEN;
+            }
+            return _cachePakejKlien;
+        })
+        .catch(function () {
+            _cachePakejKlien = _PAKEJ_LALAI_KLIEN;
+            return _cachePakejKlien;
+        });
+}
+
+function _pakejUntukModal(senarai) {
+    return senarai.map(function (p, i) {
+        var w = _warnaPakej[i % _warnaPakej.length];
+        return {
+            key: p.key,
+            label: p.name || p.key,
+            hari: '+' + p.days + ' Hari',
+            harga: p.harga || '',
+            warna: w.warna,
+            gelap: w.gelap,
+        };
+    });
+}
 function _bukaModalLanjutanTempoh(uid, type, api) {
-    const pakej = [
-        { key: '1bulan', label: '1 Bulan', hari: '+30 Hari', harga: 'RM15', warna: '#168f81', gelap: '#0b5c53' },
-        { key: '3bulan', label: '3 Bulan', hari: '+90 Hari', harga: 'RM40', warna: '#ea580c', gelap: '#9a3412' },
-        { key: '1tahun', label: '1 Tahun', hari: '+365 Hari', harga: 'RM69', warna: '#0284c7', gelap: '#075985' },
-    ];
+    // Pakej + harga datang dari /api/plans (satu sumber harga). Modal hanya
+    // dipaparkan selepas senarai diterima supaya harga tidak pernah hardcode.
+    _ambilPakejKlien().then(function (senarai) {
+        _paparModalLanjutanTempoh(uid, type, api, _pakejUntukModal(senarai));
+    });
+}
+
+function _paparModalLanjutanTempoh(uid, type, api, pakej) {
 
     let modal = document.getElementById('app-admin-panjang-overlay');
     if (!modal) {
