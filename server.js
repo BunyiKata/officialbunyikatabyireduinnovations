@@ -43,6 +43,22 @@ function getAdminApp() {
       // Menyokong JSON mentah ATAU JSON yang dikodkan base64.
       let parsed;
       const trimmed = rawServiceAccount.trim();
+
+      // Kesan nilai placeholder daripada .env.example — beri mesej jelas
+      // daripada SyntaxError JSON yang mengelirukan.
+      if (
+        trimmed.includes("ISI_BASE64") ||
+        trimmed.includes("GANTIKAN_DENGAN") ||
+        trimmed.startsWith("ISI_")
+      ) {
+        console.error(
+          "[Firebase Admin] FIREBASE_SERVICE_ACCOUNT masih placeholder. " +
+            "Isi dengan service account sebenar (base64 atau JSON mentah).",
+        );
+        adminInitError = new Error("FIREBASE_SERVICE_ACCOUNT belum diisi.");
+        return null;
+      }
+
       if (trimmed.startsWith("{")) {
         parsed = JSON.parse(trimmed);
       } else {

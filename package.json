@@ -12,7 +12,9 @@
     "build": "vite build",
     "preview": "node server.js",
     "clean": "node -e \"const fs = require('fs'); if (fs.existsSync('dist')) fs.rmSync('dist', { recursive: true, force: true });\"",
-    "lint": "echo 'No lint step required'"
+    "lint": "echo 'No lint step required'",
+    "encode-sa": "node scripts/encode-service-account.mjs",
+    "check-admin": "node scripts/check-admin-setup.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.12.0",
