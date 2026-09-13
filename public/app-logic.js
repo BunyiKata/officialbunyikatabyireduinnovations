@@ -7484,25 +7484,26 @@ window.bukaModalDaftarAdmin = function (type) {
 
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <div>
-                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Nama Guru:</label>
+                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Nama Penuh:</label>
                         <input type="text" id="modal-admin-guru-nama" class="neo-input" placeholder="cth: Cikgu Noraini" style="width:100%; padding:8px 12px; font-size:0.9rem;" />
                     </div>
                     <div>
-                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Nama Sekolah:</label>
-                        <input type="text" id="modal-admin-guru-sekolah" class="neo-input" placeholder="cth: SK Bintang" style="width:100%; padding:8px 12px; font-size:0.9rem;" />
-                    </div>
-                    <div>
-                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Emel Guru:</label>
+                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Emel:</label>
                         <input type="email" id="modal-admin-guru-email" class="neo-input" placeholder="cikgu@moe.edu.my" style="width:100%; padding:8px 12px; font-size:0.9rem;" />
                     </div>
                     <div>
-                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Kata Laluan:</label>
-                        <input type="password" id="modal-admin-guru-password" class="neo-input" placeholder="Kata laluan..." style="width:100%; padding:8px 12px; font-size:0.9rem;" />
+                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">No. Telefon (WhatsApp):</label>
+                        <input type="text" id="modal-admin-guru-telefon" class="neo-input" placeholder="cth: 0123456789" style="width:100%; padding:8px 12px; font-size:0.9rem;" />
                     </div>
                     <div>
-                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Tempoh Akses (Hari):</label>
-                        <input type="number" id="modal-admin-guru-hari" class="neo-input" value="30" style="width:100%; padding:8px 12px; font-size:0.9rem;" />
+                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Pakej Langganan:</label>
+                        <select id="modal-admin-guru-pakej" class="neo-input" style="width:100%; padding:8px 12px; font-size:0.9rem;">
+                            <option value="1bulan">1 Bulan (Pro) &mdash; RM15</option>
+                            <option value="3bulan">3 Bulan (Pro) &mdash; RM40</option>
+                            <option value="1tahun">1 Tahun (Pro) &mdash; RM69</option>
+                        </select>
                     </div>
+                    <input type="hidden" id="modal-admin-guru-sekolah" value="" />
                     <div style="margin-top:10px;">
                         <button type="button" class="neo-btn" style="background:#ea580c; color:white; width:100%; padding:11px; font-weight:bold; font-size:0.95rem; border-radius:12px; cursor:pointer;" onclick="window.simpanDaftarGuruModal()">
                             <i class="fa-solid fa-floppy-disk" style="margin-right:6px;"></i> Simpan &amp; Daftar
@@ -7523,24 +7524,24 @@ window.bukaModalDaftarAdmin = function (type) {
 
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <div>
-                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Nama Ibu Bapa:</label>
+                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Nama Penuh:</label>
                         <input type="text" id="modal-admin-parent-nama" class="neo-input" placeholder="cth: Encik Rahman" style="width:100%; padding:8px 12px; font-size:0.9rem;" />
                     </div>
                     <div>
-                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Bilangan Anak:</label>
-                        <input type="number" id="modal-admin-parent-anak" class="neo-input" value="1" min="1" max="10" style="width:100%; padding:8px 12px; font-size:0.9rem;" />
-                    </div>
-                    <div>
-                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Emel Ibu Bapa:</label>
+                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Emel:</label>
                         <input type="email" id="modal-admin-parent-email" class="neo-input" placeholder="rahman@gmail.com" style="width:100%; padding:8px 12px; font-size:0.9rem;" />
                     </div>
                     <div>
-                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Kata Laluan:</label>
-                        <input type="password" id="modal-admin-parent-password" class="neo-input" placeholder="Kata laluan..." style="width:100%; padding:8px 12px; font-size:0.9rem;" />
+                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">No. Telefon (WhatsApp):</label>
+                        <input type="text" id="modal-admin-parent-telefon" class="neo-input" placeholder="cth: 0123456789" style="width:100%; padding:8px 12px; font-size:0.9rem;" />
                     </div>
                     <div>
-                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Tempoh Akses (Hari):</label>
-                        <input type="number" id="modal-admin-parent-hari" class="neo-input" value="30" style="width:100%; padding:8px 12px; font-size:0.9rem;" />
+                        <label style="display:block; font-size:0.75rem; font-weight:bold; color:#475569; margin-bottom:3px;">Pakej Langganan:</label>
+                        <select id="modal-admin-parent-pakej" class="neo-input" style="width:100%; padding:8px 12px; font-size:0.9rem;">
+                            <option value="1bulan">1 Bulan (Pro) &mdash; RM15</option>
+                            <option value="3bulan">3 Bulan (Pro) &mdash; RM40</option>
+                            <option value="1tahun">1 Tahun (Pro) &mdash; RM69</option>
+                        </select>
                     </div>
                     <div style="margin-top:10px;">
                         <button type="button" class="neo-btn" style="background:#0284c7; color:white; width:100%; padding:11px; font-weight:bold; font-size:0.95rem; border-radius:12px; cursor:pointer;" onclick="window.simpanDaftarParentModal()">
@@ -7556,17 +7557,20 @@ window.bukaModalDaftarAdmin = function (type) {
 
 window.simpanDaftarGuruModal = async function () {
     const namaEl = document.getElementById('modal-admin-guru-nama');
-    const sekEl = document.getElementById('modal-admin-guru-sekolah');
     const emailEl = document.getElementById('modal-admin-guru-email');
-    const passEl = document.getElementById('modal-admin-guru-password');
-    const hariEl = document.getElementById('modal-admin-guru-hari');
-    if (!namaEl || !sekEl) return;
+    const telEl = document.getElementById('modal-admin-guru-telefon');
+    const pakejEl = document.getElementById('modal-admin-guru-pakej');
+    if (!namaEl) return;
 
     const nama = namaEl.value.trim();
-    const sekolah = sekEl.value.trim() || 'SK Seri Bintang';
     const email = emailEl ? emailEl.value.trim() : '';
-    const password = passEl ? passEl.value.trim() : '';
-    const hari = parseInt(hariEl ? hariEl.value : '30') || 30;
+    const noTelefon = telEl ? telEl.value.trim() : '';
+    const pakej = pakejEl ? pakejEl.value : '1bulan';
+    const pakejMap = { '1bulan': 30, '3bulan': 90, '1tahun': 365 };
+    const hari = pakejMap[pakej] || 30;
+    const labelPakej = hari >= 365 ? '1 Tahun' : (hari >= 90 ? '3 Bulan' : '1 Bulan');
+    // Nama sekolah dikosongkan — cikgu akan isi sendiri kemudian.
+    const sekolah = '';
 
     if (!nama) {
         alert('Sila masukkan nama guru!');
@@ -7584,9 +7588,10 @@ window.simpanDaftarGuruModal = async function () {
                 nama: nama,
                 peranan: 'guru',
                 nama_sekolah: sekolah,
+                no_telefon: noTelefon,
                 email: cleanEmail,
                 hari: hari,
-                langganan: hari > 30 ? '1 Tahun' : '1 Bulan'
+                langganan: labelPakej
             });
             if (res && res.success) {
                 profileId = res.profile?.id;
@@ -7602,13 +7607,14 @@ window.simpanDaftarGuruModal = async function () {
         id: profileId || ('g_' + Date.now()),
         nama: nama,
         sekolah: sekolah,
+        no_telefon: noTelefon,
         nama_kelas: 'KELAS 1',
         kod_kelas: kodKelas || (typeof window.generateUniqueCode === 'function' ? window.generateUniqueCode('GURU') : 'GURU#101'),
         email: cleanEmail,
-        password: password || `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}123`,
+        password: `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}123`,
         murid: 0,
         bakiHari: hari,
-        langganan: hari > 30 ? '1 Tahun' : '1 Bulan'
+        langganan: labelPakej
     };
     teachers.push(newTeacher);
     localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(teachers));
@@ -7632,17 +7638,19 @@ window.simpanDaftarGuruModal = async function () {
 
 window.simpanDaftarParentModal = async function () {
     const namaEl = document.getElementById('modal-admin-parent-nama');
-    const anakEl = document.getElementById('modal-admin-parent-anak');
     const emailEl = document.getElementById('modal-admin-parent-email');
-    const passEl = document.getElementById('modal-admin-parent-password');
-    const hariEl = document.getElementById('modal-admin-parent-hari');
+    const telEl = document.getElementById('modal-admin-parent-telefon');
+    const pakejEl = document.getElementById('modal-admin-parent-pakej');
     if (!namaEl) return;
 
     const nama = namaEl.value.trim();
-    const anak = parseInt(anakEl ? anakEl.value : '1') || 1;
     const email = emailEl ? emailEl.value.trim() : '';
-    const password = passEl ? passEl.value.trim() : '';
-    const hari = parseInt(hariEl ? hariEl.value : '30') || 30;
+    const noTelefon = telEl ? telEl.value.trim() : '';
+    const pakej = pakejEl ? pakejEl.value : '1bulan';
+    const pakejMap = { '1bulan': 30, '3bulan': 90, '1tahun': 365 };
+    const hari = pakejMap[pakej] || 30;
+    const labelPakej = hari >= 365 ? '1 Tahun' : (hari >= 90 ? '3 Bulan' : '1 Bulan');
+    const anak = 1;
 
     if (!nama) {
         alert('Sila masukkan nama ibu bapa!');
@@ -7659,9 +7667,10 @@ window.simpanDaftarParentModal = async function () {
             const res = await window.adminCreateProfile({
                 nama: nama,
                 peranan: 'ibubapa',
+                no_telefon: noTelefon,
                 email: cleanEmail,
                 hari: hari,
-                langganan: hari > 30 ? '1 Tahun' : '1 Bulan'
+                langganan: labelPakej
             });
             if (res && res.success) {
                 profileId = res.profile?.id;
@@ -7679,10 +7688,11 @@ window.simpanDaftarParentModal = async function () {
         nama_keluarga: `KELUARGA ${nama.toUpperCase()}`,
         kod_keluarga: kodKeluarga || (typeof window.generateUniqueCode === 'function' ? window.generateUniqueCode('FAM') : 'FAM#2026'),
         anak: anak,
+        no_telefon: noTelefon,
         email: cleanEmail,
-        password: password || `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}123`,
+        password: `${nama.toLowerCase().replace(/[^a-z0-9]/g, '')}123`,
         bakiHari: hari,
-        langganan: hari > 30 ? '1 Tahun' : '1 Bulan'
+        langganan: labelPakej
     };
     parents.push(newParent);
     localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));

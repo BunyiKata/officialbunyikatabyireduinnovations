@@ -19,6 +19,17 @@ import { auth } from '../lib/firebase';
 export interface HasilAksesAdmin {
   berjaya: boolean;
   mesej?: string;
+  /**
+   * Benar apabila pelayan menjawab 5xx — iaitu pelayan HIDUP tetapi mod admin
+   * belum dikonfigurasikan (cth. ADMIN_CODE tiada, atau Firebase Admin SDK
+   * belum diberi kredensial). Ini BERBEZA daripada "kod salah" (401):
+   *   401 -> kod itu memang bukan kod admin, teruskan cuba kod kelas/keluarga.
+   *   5xx -> server rosak/tak lengkap; jangan senyapkan, beritahu pengguna.
+   *
+   * Tanpa bendera ini, kegagalan konfigurasi kelihatan sama seperti kod salah,
+   * jadi admin di localhost nampak seolah-olah "mod admin tidak berfungsi".
+   */
+  ralatKonfigurasi?: boolean;
 }
 
 /**
@@ -53,8 +64,9 @@ export async function cubaAksesAdmin(kod: string): Promise<HasilAksesAdmin> {
       } catch {
         /* biarkan mesej lalai */
       }
+      const ralatKonfigurasi = res.status >= 500;
       console.warn('[Admin] Pengesahan gagal:', res.status, mesej);
-      return { berjaya: false, mesej };
+      return { berjaya: false, mesej, ralatKonfigurasi };
     }
 
     const data = await res.json();

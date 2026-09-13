@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 /**
  * Modal Cipta Akaun (Mod Admin)
  *
@@ -69,7 +69,6 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
   const [nama, setNama] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [noTelefon, setNoTelefon] = React.useState("");
-  const [namaSekolah, setNamaSekolah] = React.useState("");
   const [namaKeluarga, setNamaKeluarga] = React.useState("");
   const [pakej, setPakej] = React.useState<KunciPakej>("1bulan");
 
@@ -82,7 +81,6 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
     setNama("");
     setEmail("");
     setNoTelefon("");
-    setNamaSekolah("");
     setNamaKeluarga("");
     setPakej("1bulan");
     setRalat("");
@@ -108,7 +106,7 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
       email: email.trim(),
       peranan,
       no_telefon: noTelefon.trim(),
-      nama_sekolah: peranan === "guru" ? namaSekolah.trim() : "",
+      nama_sekolah: "",
       nama_keluarga: peranan === "ibubapa" ? namaKeluarga.trim() : "",
       planKey: pakej,
     });
@@ -175,6 +173,12 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
     textAlign: "left",
   };
 
+  // Warna ikut mod (peranan terpilih): guru = oren, ibu bapa = biru.
+  const warnaMod =
+    peranan === "guru"
+      ? { utama: "#ea580c", gelap: "#c2410c" }
+      : { utama: "#0284c7", gelap: "#0369a1" };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -219,7 +223,7 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                 <div
                   className="neo-btn"
                   style={{
-                    backgroundColor: "#168f81",
+                    backgroundColor: warnaMod.utama,
                     color: "white",
                     fontSize: "clamp(1.02rem, 3.6vw, 1.22rem)",
                     margin: "0 auto 14px auto",
@@ -235,9 +239,6 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                 >
                   <i className="fa-solid fa-user-plus"></i> Cipta Akaun Pengguna
                 </div>
-                <p style={{ margin: "0 0 16px", fontSize: "0.85rem", color: "#475569", fontWeight: "bold" }}>
-                  Akaun dicipta di pelayan. Kata laluan sementara akan dipaparkan selepas ini.
-                </p>
                 <div style={fieldStyle}>
                   <label style={labelStyle}>Peranan</label>
                   <div style={{ display: "flex", gap: "8px" }}>
@@ -252,11 +253,14 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                           padding: "9px",
                           borderRadius: "10px",
                           border: "2px solid #0f172a",
-                          background: peranan === r ? "#168f81" : "#ffffff",
+                          background: peranan === r ? warnaMod.utama : "#ffffff",
                           color: peranan === r ? "#ffffff" : "#0f172a",
                           fontWeight: "bold",
                           cursor: "pointer",
-                          boxShadow: peranan === r ? "0 3px 0 #0b5c53" : "0 3px 0 #0f172a",
+                          boxShadow:
+                            peranan === r
+                              ? `0 3px 0 ${warnaMod.gelap}`
+                              : "0 3px 0 #0f172a",
                           display: "inline-flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -301,17 +305,7 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                   />
                 </div>
 
-                {peranan === "guru" ? (
-                  <div style={fieldStyle}>
-                    <label style={labelStyle}>Nama Sekolah</label>
-                    <input
-                      style={inputStyle}
-                      value={namaSekolah}
-                      onChange={(e) => setNamaSekolah(e.target.value)}
-                      placeholder="cth. SK Chengal"
-                    />
-                  </div>
-                ) : (
+                {peranan === "ibubapa" && (
                   <div style={fieldStyle}>
                     <label style={labelStyle}>Nama Keluarga</label>
                     <input
@@ -387,12 +381,12 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                       flex: 2,
                       padding: "12px",
                       borderRadius: "12px",
-                      border: "2px solid #0b5c53",
-                      background: sedangProses ? "#94a3b8" : "#168f81",
+                      border: `2px solid ${warnaMod.gelap}`,
+                      background: sedangProses ? "#94a3b8" : warnaMod.utama,
                       color: "#ffffff",
                       fontWeight: "bold",
                       cursor: sedangProses ? "wait" : "pointer",
-                      boxShadow: "0 3px 0 #0b5c53",
+                      boxShadow: `0 3px 0 ${warnaMod.gelap}`,
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",

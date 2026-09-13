@@ -10,6 +10,40 @@ import {
 } from "../../services/firebaseService";
 import { cubaAksesAdmin, tetapkanSesiAdminTempatan } from "../../services/adminService";
 
+/**
+ * Papar amaran spesifik apabila pelayan mengaku ia HIDUP tetapi mod admin
+ * belum dikonfigurasikan (HTTP 5xx dari /api/admin/verify).
+ *
+ * Kes ini mudah dikelirukan dengan "kod salah", jadi tanpa mesej ini admin
+ * yang membangun di localhost akan nampak seolah-olah mod admin tidak
+ * berfungsi, sedangkan puncanya ialah .env (ADMIN_CODE / Admin SDK).
+ */
+function tunjukAmaranKonfigurasiAdmin(mesejPelayan?: string) {
+  const butiran = mesejPelayan
+    ? `<p style="text-align:center; margin:6px 0; color:#475569;">${mesejPelayan}</p>`
+    : "";
+
+  const html = `
+    <p style="text-align:center; font-weight:bold; color:#b45309; margin:10px 0;">
+      <i class="fa-solid fa-triangle-exclamation" style="font-size:2.2rem; color:#ea580c; display:block; margin-bottom:8px;"></i>
+      Mod admin tidak dapat dimulakan.
+    </p>
+    ${butiran}
+    <p style="text-align:center; font-size:0.9rem; color:#475569; margin:8px 0 0;">
+      Ini masalah konfigurasi pelayan, bukan kod yang salah.
+    </p>
+  `;
+
+  if (typeof (window as any).showAppModalAlert === "function") {
+    (window as any).showAppModalAlert("Mod Admin Tidak Tersedia", html);
+  } else {
+    alert(
+      "Mod admin tidak dapat dimulakan — pelayan belum dikonfigurasikan." +
+        (mesejPelayan ? `\n\n${mesejPelayan}` : ""),
+    );
+  }
+}
+
 export interface EntryChoiceModalProps {
   isEntryChoiceModalOpen: boolean;
   setIsEntryChoiceModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -411,6 +445,17 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                             </p>`
                           );
                         }
+                      } else if (hasilAdmin.ralatKonfigurasi) {
+                        // Pelayan hidup tetapi mod admin belum dikonfigurasikan
+                        // (cth. .env tiada ADMIN_CODE / kredensial Admin SDK).
+                        // Jangan senyapkan — ini bukan "kod salah".
+                        console.error(
+                          "[Admin] Mod admin gagal atas sebab konfigurasi pelayan:",
+                          hasilAdmin.mesej,
+                        );
+                        tunjukAmaranKonfigurasiAdmin(hasilAdmin.mesej);
+                        return;
+
                       } else if (
                         (kodKelas && entered === kodKelas.toUpperCase()) ||
                         (kodKelas2 && entered === kodKelas2.toUpperCase())
@@ -895,6 +940,16 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                             </p>`
                           );
                         }
+                      } else if (hasilAdmin2.ralatKonfigurasi) {
+                        // Sama seperti laluan di atas: bezakan kegagalan
+                        // konfigurasi pelayan daripada kod yang salah.
+                        console.error(
+                          "[Admin] Mod admin gagal atas sebab konfigurasi pelayan:",
+                          hasilAdmin2.mesej,
+                        );
+                        tunjukAmaranKonfigurasiAdmin(hasilAdmin2.mesej);
+                        return;
+
                       } else if (
                         (kodKelas && entered === kodKelas.toUpperCase()) ||
                         (kodKelas2 && entered === kodKelas2.toUpperCase())
