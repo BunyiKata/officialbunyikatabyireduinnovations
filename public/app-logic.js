@@ -6826,15 +6826,10 @@ window.lanjutTempohGuru = async function (id) {
             if (typeof window.updateProfileSubscription === 'function') {
                 await window.updateProfileSubscription(id, 30);
             }
-            let teachers = getAdminTeachersList();
-            const t = teachers.find(item => item.id === id);
-            if (t) {
-                t.bakiHari = (t.bakiHari || 0) + 30;
-                localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(teachers));
-            }
+            // Fasa 1.2b: jangan kira baki sendiri (+30) — nilai itu salah bila
+            // baki sudah habis. Muat semula dari Firebase; ia membaca tarikh_tamat
+            // sebenar dan mengira baki yang betul.
             if (typeof window.fetchAdminDataFromFirebase === 'function') {
-                await window.fetchAdminDataFromFirebase();
-            } else if (typeof window.fetchAdminDataFromFirebase === 'function') {
                 await window.fetchAdminDataFromFirebase();
             }
             if (typeof window.renderAdminUrus === 'function') window.renderAdminUrus('guru');
@@ -7332,15 +7327,8 @@ window.lanjutTempohParent = async function (id) {
             if (typeof window.updateProfileSubscription === 'function') {
                 await window.updateProfileSubscription(id, 30);
             }
-            let parents = getAdminParentsList();
-            const p = parents.find(item => item.id === id);
-            if (p) {
-                p.bakiHari = (p.bakiHari || 0) + 30;
-                localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));
-            }
+            // Fasa 1.2b: muat semula dari Firebase (bukan +30 buta).
             if (typeof window.fetchAdminDataFromFirebase === 'function') {
-                await window.fetchAdminDataFromFirebase();
-            } else if (typeof window.fetchAdminDataFromFirebase === 'function') {
                 await window.fetchAdminDataFromFirebase();
             }
             if (typeof window.renderAdminUrus === 'function') window.renderAdminUrus('ibubapa');

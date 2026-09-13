@@ -2035,20 +2035,31 @@ export async function updateProfileSubscription(profileId: string, daysToAdd: nu
       dikemaskini_pada: new Date().toISOString(),
     });
 
-    // Kemaskini juga cache tempatan
+    // Kemaskini juga cache tempatan JADUAL ADMIN.
+    //
+    // PENTING (Fasa 1.2b): sebelum ini kita hanya menambah `+daysToAdd` pada
+    // `bakiHari`. Itu SALAH bila baki sedia ada sudah 0/hampir habis, atau bila
+    // admin menambah hari budi bicara — jadual memaparkan baki rekaan sehingga
+    // muat semula penuh. Kini kita tetapkan `tarikh_tamat` SEBENAR yang baru
+    // disimpan, dan biarkan jadual mengira semula baki daripada tarikh itu.
+    const bakiDaripadaTamat = (() => {
+      const diff = Math.ceil((new Date(newExpiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      return Math.max(0, diff);
+    })();
     try {
+      const kemasCache = (senarai: any[]) => {
+        const idx = senarai.findIndex((x: any) => x.id === profileId || (x.email && x.email.toLowerCase() === profileId.toLowerCase()));
+        if (idx > -1) {
+          senarai[idx].tarikh_tamat = newExpiry;
+          senarai[idx].bakiHari = bakiDaripadaTamat;
+        }
+      };
       const teachers = JSON.parse(localStorage.getItem('bunyiKataAdminTeachers') || '[]');
-      const tIdx = teachers.findIndex((t: any) => t.id === profileId || (t.email && t.email.toLowerCase() === profileId.toLowerCase()));
-      if (tIdx > -1) {
-        teachers[tIdx].bakiHari = Math.max(0, (teachers[tIdx].bakiHari || 0) + daysToAdd);
-        localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(teachers));
-      }
+      kemasCache(teachers);
+      localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(teachers));
       const parents = JSON.parse(localStorage.getItem('bunyiKataAdminParents') || '[]');
-      const pIdx = parents.findIndex((p: any) => p.id === profileId || (p.email && p.email.toLowerCase() === profileId.toLowerCase()));
-      if (pIdx > -1) {
-        parents[pIdx].bakiHari = Math.max(0, (parents[pIdx].bakiHari || 0) + daysToAdd);
-        localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));
-      }
+      kemasCache(parents);
+      localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));
     } catch (e) {}
 
     return true;
