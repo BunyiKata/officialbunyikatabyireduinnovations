@@ -119,6 +119,8 @@ export interface InputCiptaAkaun {
   planKey: KunciPakej;
   /** Kosongkan untuk jana kata laluan sementara di pelayan. */
   password?: string;
+  /** Fasa 2: kod affiliate (6 aksara) yang merujuk pembelian ini, jika ada. */
+  kod_rujukan?: string;
 }
 
 export interface MaklumatPakej {
@@ -208,6 +210,7 @@ export async function ciptaAkaunAdmin(input: InputCiptaAkaun): Promise<HasilCipt
     nama_keluarga: input.nama_keluarga || '',
     planKey: input.planKey,
     password: input.password || '',
+    kod_rujukan: input.kod_rujukan || '',
   });
 }
 
@@ -292,6 +295,119 @@ export interface RekodAudit {
   tarikh?: string;
 }
 
+// ---------------------------------------------------------------------------
+// Fasa 2: affiliate (kod rujukan) — jenis & panggilan API
+// ---------------------------------------------------------------------------
+
+export interface Affiliate {
+  kod: string;
+  nama: string;
+  whatsapp: string;
+  status: 'aktif' | 'gantung' | string;
+  dicipta_pada?: string;
+  // Agregat (dikira di pelayan daripada referrals):
+  jualan_bil?: number;
+  jumlah_jualan_sen?: number;
+  komisen_keseluruhan_sen?: number;
+  dibayar_sen?: number;
+  baki_sen?: number;
+  tarikh_bayar_terakhir?: string;
+}
+
+export interface HasilAffiliate {
+  berjaya: boolean;
+  mesej?: string;
+  affiliate?: Affiliate;
+  kod?: string;
+  status?: string;
+}
+
+export interface BarisKomisen {
+  kod: string;
+  id: string;
+  nama_affiliate?: string;
+  pelanggan_nama?: string;
+  pelanggan_emel?: string;
+  nama_pakej?: string;
+  harga_sen?: number;
+  komisen_sen?: number;
+  status?: string;
+  tarikh_beli?: string;
+  tarikh_bayar?: string;
+}
+
+export interface RingkasanBayaran {
+  kod: string;
+  nama: string;
+  bil: number;
+  jumlah_sen: number;
+}
+
+export interface HasilLaporanBayaran {
+  berjaya: boolean;
+  mesej?: string;
+  tempoh_tahan_hari?: number;
+  ringkasan?: RingkasanBayaran[];
+  layak?: BarisKomisen[];
+  belum_matang?: BarisKomisen[];
+  jumlah_layak_sen?: number;
+}
+
+async function panggilAdminGet<T extends { berjaya: boolean }>(path: string): Promise<T> {
+  try {
+    const pengguna = auth.currentUser;
+    if (!pengguna) {
+      return { berjaya: false, mesej: 'Sesi admin tidak aktif. Sila masuk semula.' } as unknown as T;
+    }
+    const token = await pengguna.getIdToken();
+    const res = await fetch(path, { method: 'GET', headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.success) {
+      return { berjaya: false, mesej: data?.message || 'Operasi gagal.' } as unknown as T;
+    }
+    const { success, ...baki } = data;
+    return { berjaya: true, ...baki } as unknown as T;
+  } catch (err: any) {
+    console.error('[Admin API GET] Ralat:', path, err?.message || err);
+    return { berjaya: false, mesej: 'Tidak dapat menghubungi pelayan.' } as unknown as T;
+  }
+}
+
+/** Fasa 2: senarai affiliate (fail-safe: [] jika gagal). */
+export async function ambilSenaraiAffiliate(): Promise<Affiliate[]> {
+  const hasil = await panggilAdminGet<{ berjaya: boolean; affiliates?: Affiliate[] }>(
+    '/api/admin/affiliate/list',
+  );
+  return Array.isArray(hasil.affiliates) ? hasil.affiliates : [];
+}
+
+/** Fasa 2: daftar affiliate baharu -> kod dijana di pelayan. */
+export async function ciptaAffiliate(nama: string, whatsapp: string): Promise<HasilAffiliate> {
+  return panggilAdmin<HasilAffiliate>('/api/admin/affiliate/create', { nama, whatsapp });
+}
+
+/** Fasa 2: tukar status affiliate (aktif / gantung). */
+export async function tukarStatusAffiliate(kod: string, status: 'aktif' | 'gantung'): Promise<HasilAffiliate> {
+  return panggilAdmin<HasilAffiliate>('/api/admin/affiliate/status', { kod, status });
+}
+
+/** Fasa 2: padam affiliate (pelayan blok jika ada baki belum dibayar). */
+export async function padamAffiliate(kod: string): Promise<HasilAffiliate> {
+  return panggilAdmin<HasilAffiliate>('/api/admin/affiliate/delete', { kod });
+}
+
+/** Fasa 2: laporan pembayaran komisen (kitaran 2 minggu). */
+export async function ambilLaporanBayaran(): Promise<HasilLaporanBayaran> {
+  return panggilAdminGet<HasilLaporanBayaran>('/api/admin/affiliate/payments');
+}
+
+/** Fasa 2: tanda baris komisen sudah dibayar. */
+export async function tandaKomisenDibayar(
+  items: Array<{ kod: string; id: string }>,
+): Promise<{ berjaya: boolean; mesej?: string; dibayar_bil?: number; jumlah_sen?: number }> {
+  return panggilAdmin('/api/admin/affiliate/mark-paid', { items });
+}
+
 /**
  * Fasa 1.6: ambil jejak audit tindakan admin daripada pelayan.
  * Memulangkan senarai kosong jika gagal (fail-safe) - UI hanya tunjuk 'tiada log'.
@@ -330,6 +446,13 @@ if (typeof window !== 'undefined') {
     panjangkanTempohAdmin,
     ambilSenaraiPakej,
     ambilLogAudit,
+    // Fasa 2: affiliate
+    ambilSenaraiAffiliate,
+    ciptaAffiliate,
+    tukarStatusAffiliate,
+    padamAffiliate,
+    ambilLaporanBayaran,
+    tandaKomisenDibayar,
   };
 }
 
