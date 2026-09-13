@@ -144,6 +144,24 @@ if (orders && Object.keys(orders).length > 0) {
   console.log('  SKIP  Ubah pesanan (tiada pesanan untuk diuji)');
 }
 
+// 10. Fasa 2: tulis affiliate tanpa auth -> mesti DITOLAK
+const j = await tulis('affiliates/PALSU1', {
+  nama: 'Penyerang',
+  whatsapp: '60123456789',
+  kod: 'PALSU1',
+  status: 'aktif',
+});
+lapor('Tulis affiliates tanpa auth DITOLAK', !j.ok, `sepatutnya ditolak, dapat ${j.status}`);
+if (j.ok) await buangSebagaiPemilik('affiliates/PALSU1');
+
+// 11. Fasa 2: tulis referrals (komisen) tanpa auth -> mesti DITOLAK
+const k2 = await tulis('referrals/PALSU1/xx1', {
+  komisen_sen: 999999,
+  status: 'dibayar',
+});
+lapor('Tulis referrals tanpa auth DITOLAK', !k2.ok, `sepatutnya ditolak, dapat ${k2.status}`);
+if (k2.ok) await buangSebagaiPemilik('referrals/PALSU1');
+
 const gagal = ujian.filter((u) => !u.lulus).length;
 console.log('');
 console.log(`Lulus: ${ujian.length - gagal}/${ujian.length}`);
