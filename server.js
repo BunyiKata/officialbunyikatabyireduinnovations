@@ -199,6 +199,50 @@ function senaraiPakej() {
 /** Tempoh tangguh hari selepas tarikh_tamat sebelum akses Pro diturunkan. */
 const GRACE_HARI = 3;
 
+// ---------------------------------------------------------------------------
+// Fasa 2: sistem affiliate (kod rujukan).
+// ---------------------------------------------------------------------------
+
+/** Peratus komisen untuk setiap pembelian berbayar yang dirujuk. */
+const KOMISEN_PERSEN = 30;
+
+/** Bilangan hari komisen perlu "matang" sebelum layak dibayar (elak refund). */
+const KOMISEN_TAHAN_HARI = 7;
+
+/** Huruf yang digunakan untuk menjana kod affiliate (huruf + nombor). */
+const AKSARA_KOD = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // buang I,O,0,1 (mudah keliru)
+
+/**
+ * Jana kod affiliate 6 aksara yang belum digunakan.
+ *
+ * Kod mesti unik kerana ia menjadi kunci nod `affiliates/{kod}` dan muncul
+ * dalam link kongsi. Kami cuba sehingga 12 kali; jika masih bertembung
+ * (sangat tidak mungkin dengan 32^6 ~ 1 bilion kombinasi), pulangkan null.
+ */
+async function janaKodAffiliate(db) {
+  for (let cuba = 0; cuba < 12; cuba++) {
+    let kod = "";
+    for (let i = 0; i < 6; i++) {
+      kod += AKSARA_KOD.charAt(Math.floor(Math.random() * AKSARA_KOD.length));
+    }
+    const snap = await db.ref(`affiliates/${kod}`).get();
+    if (!snap.exists()) return kod;
+  }
+  return null;
+}
+
+/** Normalisasi nombor WhatsApp: buang bukan-digit, tukar awalan 0 -> 60. */
+function bersihkanWhatsapp(input) {
+  let nombor = String(input || "").replace(/[^0-9]/g, "");
+  if (nombor.startsWith("0")) nombor = "6" + nombor; // 012xxx -> 6012xxx
+  return nombor;
+}
+
+/** Kira komisen (dalam sen) daripada harga pakej dalam sen. */
+function kiraKomisenSen(hargaSen) {
+  return Math.round((Number(hargaSen) || 0) * KOMISEN_PERSEN / 100);
+}
+
 /**
  * Tentukan sama ada langganan profil sudah luput secara kekal.
  *
@@ -465,6 +509,219 @@ async function startServer() {
     } catch (err) {
       console.error("[Admin Audit]", err);
       return res.status(500).json({ success: false, message: "Gagal memuatkan log audit." });
+    }
+  });
+
+  /**
+   * Fasa 2: senarai affiliate + agregat jualan/komisen/baki.
+   *
+   * Baki dan agregat DIKIRA daripada nod `referrals/{kod}` supaya angka di
+   * jadual admin sentiasa konsisten dengan rekod komisen sebenar (tiada
+   * pengiraan berasingan yang boleh menyimpang).
+   */
+  app.get("/api/admin/affiliate/list", requireAdmin, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
+      }
+      const db = getDatabase(appInstance);
+
+      const [snapAff, snapRef] = await Promise.all([
+        db.ref("affiliates").get(),
+        db.ref("referrals").get(),
+      ]);
+
+      // Kumpul agregat setiap kod affiliate.
+      const agregat = {};
+      if (snapRef.exists()) {
+        snapRef.forEach((kodSnap) => {
+          const kod = kodSnap.key;
+          const agg = {
+            jualan_bil: 0, jumlah_jualan_sen: 0, komisen_keseluruhan_sen: 0,
+            dibayar_sen: 0, baki_sen: 0, tarikh_bayar_terakhir: "",
+          };
+          kodSnap.forEach((rekod) => {
+            const r = rekod.val() || {};
+            // Hanya baris SAH/pending/dibayar dikira; `batal` diabaikan.
+            if (r.status === "batal") return false;
+            agg.jualan_bil += 1;
+            agg.jumlah_jualan_sen += Number(r.harga_sen) || 0;
+            const kom = Number(r.komisen_sen) || 0;
+            agg.komisen_keseluruhan_sen += kom;
+            if (r.status === "dibayar") {
+              agg.dibayar_sen += kom;
+            } else {
+              agg.baki_sen += kom;
+            }
+            if (r.tarikh_bayar && (!agg.tarikh_bayar_terakhir || r.tarikh_bayar > agg.tarikh_bayar_terakhir)) {
+              agg.tarikh_bayar_terakhir = r.tarikh_bayar;
+            }
+            return false;
+          });
+          agregat[kod] = agg;
+        });
+      }
+
+      const senarai = [];
+      if (snapAff.exists()) {
+        snapAff.forEach((anak) => {
+          const a = anak.val() || {};
+          const agg = agregat[anak.key] || {
+            jualan_bil: 0, jumlah_jualan_sen: 0, komisen_keseluruhan_sen: 0,
+            dibayar_sen: 0, baki_sen: 0, tarikh_bayar_terakhir: "",
+          };
+          senarai.push(Object.assign({ kod: anak.key }, a, agg));
+          return false;
+        });
+      }
+
+      // Terbaharu didaftar dahulu.
+      senarai.sort((a, b) => String(b.dicipta_pada || "").localeCompare(String(a.dicipta_pada || "")));
+      return res.json({ success: true, affiliates: senarai });
+    } catch (err) {
+      console.error("[Admin Affiliate List]", err);
+      return res.status(500).json({ success: false, message: "Gagal memuatkan senarai affiliate." });
+    }
+  });
+
+  /**
+   * Fasa 2: daftar affiliate baharu -> jana kod unik 6 aksara.
+   *
+   * Kod dijana di pelayan supaya ia tidak boleh diteka/dipalsukan dari pelayar,
+   * dan supaya pertembungan kekunci dapat disemak terhadap RTDB sebenar.
+   */
+  app.post("/api/admin/affiliate/create", requireAdmin, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
+      }
+      const db = getDatabase(appInstance);
+
+      const nama = String(req.body?.nama || "").trim();
+      const whatsapp = bersihkanWhatsapp(req.body?.whatsapp);
+      if (!nama) {
+        return res.status(400).json({ success: false, message: "Nama affiliate diperlukan." });
+      }
+      if (!whatsapp || whatsapp.length < 9) {
+        return res.status(400).json({ success: false, message: "Nombor WhatsApp tidak sah (cth. 60173955657)." });
+      }
+
+      const kod = await janaKodAffiliate(db);
+      if (!kod) {
+        return res.status(500).json({ success: false, message: "Gagal menjana kod unik. Cuba lagi." });
+      }
+
+      const rekod = {
+        nama,
+        whatsapp,
+        kod,
+        status: "aktif",
+        dicipta_pada: new Date().toISOString(),
+      };
+      await db.ref(`affiliates/${kod}`).set(rekod);
+      await rekodAudit(db, "affiliate_cipta", { kod, nama, whatsapp });
+
+      console.log(`[Affiliate] Didaftar: ${nama} (${kod})`);
+      return res.json({ success: true, affiliate: rekod });
+    } catch (err) {
+      console.error("[Admin Affiliate Create]", err);
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  });
+
+  /**
+   * Fasa 2: tukar status affiliate (aktif <-> gantung).
+   *
+   * Gantung mengekalkan sejarah & baki komisen; kod sahaja berhenti menerima
+   * rujukan baharu. Ini lebih selamat daripada padam (lihat /delete).
+   */
+  app.post("/api/admin/affiliate/status", requireAdmin, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
+      }
+      const db = getDatabase(appInstance);
+
+      const kod = String(req.body?.kod || "").trim().toUpperCase();
+      const status = String(req.body?.status || "").trim().toLowerCase();
+      if (!kod || ["aktif", "gantung"].indexOf(status) === -1) {
+        return res.status(400).json({ success: false, message: "Kod atau status tidak sah." });
+      }
+
+      const snap = await db.ref(`affiliates/${kod}`).get();
+      if (!snap.exists()) {
+        return res.status(404).json({ success: false, message: "Affiliate tidak ditemui." });
+      }
+
+      await db.ref(`affiliates/${kod}`).update({ status });
+      await rekodAudit(db, "affiliate_status", { kod, status });
+      return res.json({ success: true, kod, status });
+    } catch (err) {
+      console.error("[Admin Affiliate Status]", err);
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  });
+
+  /**
+   * Fasa 2: padam affiliate secara kekal.
+   *
+   * DIBLOK jika masih ada baki komisen belum dibayar - supaya hutang kepada
+   * affiliate tidak hilang begitu sahaja. Admin perlu bayar/tanda dahulu.
+   */
+  app.post("/api/admin/affiliate/delete", requireAdmin, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
+      }
+      const db = getDatabase(appInstance);
+
+      const kod = String(req.body?.kod || "").trim().toUpperCase();
+      if (!kod) {
+        return res.status(400).json({ success: false, message: "Kod affiliate diperlukan." });
+      }
+
+      const snap = await db.ref(`affiliates/${kod}`).get();
+      if (!snap.exists()) {
+        return res.status(404).json({ success: false, message: "Affiliate tidak ditemui." });
+      }
+
+      // Semak baki belum dibayar sebelum membenarkan padam.
+      const snapRef = await db.ref(`referrals/${kod}`).get();
+      let bakiSen = 0;
+      if (snapRef.exists()) {
+        snapRef.forEach((rekod) => {
+          const r = rekod.val() || {};
+          if (r.status !== "batal" && r.status !== "dibayar") {
+            bakiSen += Number(r.komisen_sen) || 0;
+          }
+          return false;
+        });
+      }
+      if (bakiSen > 0) {
+        return res.status(409).json({
+          success: false,
+          message: `Tidak boleh padam: masih ada baki komisen RM${(bakiSen / 100).toFixed(2)} belum dibayar.`,
+          baki_sen: bakiSen,
+        });
+      }
+
+      const rekodAsal = snap.val() || {};
+      await db.ref(`affiliates/${kod}`).remove();
+      await rekodAudit(db, "affiliate_padam", {
+        kod,
+        nama: rekodAsal.nama || "",
+        whatsapp: rekodAsal.whatsapp || "",
+      });
+
+      console.log(`[Affiliate] Dipadam: ${kod}`);
+      return res.json({ success: true, kod });
+    } catch (err) {
+      console.error("[Admin Affiliate Delete]", err);
+      return res.status(500).json({ success: false, message: err.message });
     }
   });
 

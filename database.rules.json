@@ -93,6 +93,23 @@
       "$logId": {
         ".write": "auth != null && auth.token.admin == true"
       }
+    },
+
+    "affiliates": {
+      ".read": "auth != null && auth.token.admin == true",
+      ".indexOn": ["kod", "status", "whatsapp", "dicipta_pada"],
+      "$kod": {
+        ".write": "auth != null && auth.token.admin == true"
+      }
+    },
+
+    "referrals": {
+      ".read": "auth != null && auth.token.admin == true",
+      ".indexOn": ["tarikh_beli", "status"],
+      "$kod": {
+        ".write": "auth != null && auth.token.admin == true",
+        ".indexOn": ["tarikh_beli", "status"]
+      }
     }
   }
 }
