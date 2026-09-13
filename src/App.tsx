@@ -2454,9 +2454,15 @@ export default function App() {
       <div id="teacher-top-banner" className="teacher-top-banner">
         <div className="teacher-banner-left">
           <span id="teacher-banner-badge" className="teacher-banner-badge">
-            {isAdminActive ? (
+            {isAdminActive || (typeof document !== "undefined" && document.body.classList.contains("admin-mode")) ? (
               <>
                 <i className="fa-solid fa-user-shield"></i> MOD ADMIN
+              </>
+            ) : (typeof window !== "undefined" && (window as any).modIbuBapaAktif) ||
+              (typeof document !== "undefined" && document.body.classList.contains("parent-mode")) ||
+              (typeof localStorage !== "undefined" && localStorage.getItem("bunyiKataUserRole") === "ibubapa") ? (
+              <>
+                <i className="fa-solid fa-user-group"></i> MOD IBU BAPA
               </>
             ) : (
               <>
@@ -2469,17 +2475,31 @@ export default function App() {
           <button
             className="teacher-banner-btn"
             onClick={() => {
-              if (isAdminActive || (window as any).modAdminAktif || (window as any).isAdminMode) {
+              if (
+                isAdminActive ||
+                (window as any).modAdminAktif ||
+                (window as any).isAdminMode ||
+                (typeof document !== "undefined" && document.body.classList.contains("admin-mode"))
+              ) {
                 if (typeof (window as any).keluarModGuru === "function") {
                   (window as any).keluarModGuru();
                 } else {
                   paparSkrin("login-screen");
                 }
-              } else if ((window as any).modIbuBapaAktif) {
-                (window as any).keluarModIbuBapa &&
+              } else if (
+                (window as any).modIbuBapaAktif ||
+                (typeof document !== "undefined" && document.body.classList.contains("parent-mode")) ||
+                (typeof localStorage !== "undefined" && localStorage.getItem("bunyiKataUserRole") === "ibubapa")
+              ) {
+                if (typeof (window as any).keluarModIbuBapa === "function") {
                   (window as any).keluarModIbuBapa();
-              } else if ((window as any).keluarModGuru) {
+                } else {
+                  paparSkrin("login-screen");
+                }
+              } else if (typeof (window as any).keluarModGuru === "function") {
                 (window as any).keluarModGuru();
+              } else {
+                paparSkrin("login-screen");
               }
             }}
             title="Keluar"
@@ -10471,6 +10491,9 @@ export default function App() {
               <button
                 className="neo-btn bg-yellow"
                 onClick={(e) => {
+                  if (typeof (window as any).hentikanAudioSemasa === "function") {
+                    (window as any).hentikanAudioSemasa();
+                  }
                   (window as any).bukaModalSenaraiBacaan &&
                     (window as any).bukaModalSenaraiBacaan();
                 }}
@@ -10620,8 +10643,13 @@ export default function App() {
                 }}
               >
                 <button
+                  id="btn-prev-bacaan"
                   className="neo-btn bg-purple"
                   onClick={(e) => {
+                    if (window.speechSynthesis) window.speechSynthesis.cancel();
+                    if (typeof (window as any).hentikanAudioSemasa === "function") {
+                      (window as any).hentikanAudioSemasa();
+                    }
                     (window as any).prevBelajarBacaan &&
                       (window as any).prevBelajarBacaan();
                   }}
@@ -10645,8 +10673,13 @@ export default function App() {
                 </button>
 
                 <button
+                  id="btn-next-bacaan"
                   className="neo-btn bg-purple"
                   onClick={(e) => {
+                    if (window.speechSynthesis) window.speechSynthesis.cancel();
+                    if (typeof (window as any).hentikanAudioSemasa === "function") {
+                      (window as any).hentikanAudioSemasa();
+                    }
                     (window as any).nextBelajarBacaan &&
                       (window as any).nextBelajarBacaan();
                   }}

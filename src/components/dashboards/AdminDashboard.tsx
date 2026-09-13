@@ -960,6 +960,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
           }}
         >
           <div
+            className="admin-sejarah-header-bar"
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -994,18 +995,32 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
               </span>
             </div>
 
-            <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+            <div
+              className="admin-sejarah-filter-row"
+              style={{
+                display: "flex",
+                gap: "8px",
+                alignItems: "center",
+                flexWrap: "nowrap",
+                width: "auto",
+              }}
+            >
               <select
                 id="admin-sejarah-peranan-filter"
                 className="neo-btn filter-select"
                 style={{
-                  padding: "6px 32px 6px 10px",
-                  fontSize: "0.85rem",
+                  flex: "1 1 45%",
+                  minWidth: "0",
+                  height: "38px",
+                  padding: "6px 26px 6px 10px",
+                  fontSize: "0.82rem",
                   fontWeight: "bold",
                   borderRadius: "10px",
                   border: "2px solid var(--color-dark)",
                   backgroundColor: "#f1f5f9",
                   cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  textOverflow: "ellipsis",
                 }}
                 onChange={(e) => {
                   (window as any).tukarSejarahLanggananFilter &&
@@ -1017,7 +1032,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
                 <option value="ibubapa">Ibu Bapa Sahaja</option>
               </select>
 
-              <div style={{ position: "relative", minWidth: "170px" }}>
+              <div style={{ flex: "1 1 55%", minWidth: "0", position: "relative", height: "38px" }}>
                 <i
                   className="fa-solid fa-magnifying-glass"
                   style={{
@@ -1036,10 +1051,10 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
                   placeholder="Cari nama / emel..."
                   style={{
                     width: "100%",
+                    height: "38px",
                     paddingLeft: "30px",
-                    paddingRight: "10px",
-                    fontSize: "0.85rem",
-                    height: "36px",
+                    paddingRight: "8px",
+                    fontSize: "0.82rem",
                     borderRadius: "10px",
                     border: "2px solid var(--color-dark)",
                     boxSizing: "border-box",
@@ -1056,6 +1071,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
             </div>
           </div>
           <div
+            className="table-responsive sejarah-langganan-wrapper"
             style={{
               overflowX: "auto",
               borderRadius: "12px",
@@ -1064,28 +1080,29 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
             }}
           >
             <table
+              id="admin-sejarah-table"
               style={{
                 width: "100%",
-                minWidth: "620px",
+                minWidth: "580px",
                 borderCollapse: "collapse",
                 textAlign: "left",
               }}
             >
-              <thead>
+              <thead id="admin-sejarah-table-head">
                 <tr style={{ background: "linear-gradient(135deg, #ea580c 0%, #c2410c 100%)", color: "white" }}>
                   <th style={{ padding: "10px 8px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", borderRight: "1px solid rgba(255,255,255,0.25)", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", width: "48px", minWidth: "48px", textTransform: "uppercase" }}>
-                    BIL
+                    BIL.
                   </th>
-                  <th style={{ padding: "10px 12px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", borderRight: "1px solid rgba(255,255,255,0.25)", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", minWidth: "150px", textTransform: "uppercase" }}>
+                  <th style={{ padding: "10px 12px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", borderRight: "1px solid rgba(255,255,255,0.25)", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", minWidth: "140px", textTransform: "uppercase" }}>
                     NAMA
                   </th>
-                  <th style={{ padding: "10px 12px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", borderRight: "1px solid rgba(255,255,255,0.25)", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", minWidth: "130px", textTransform: "uppercase" }}>
+                  <th style={{ padding: "10px 12px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", borderRight: "1px solid rgba(255,255,255,0.25)", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", minWidth: "125px", textTransform: "uppercase" }}>
                     TARIKH LANGGANAN
                   </th>
-                  <th style={{ padding: "10px 12px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", borderRight: "1px solid rgba(255,255,255,0.25)", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", minWidth: "150px", textTransform: "uppercase" }}>
+                  <th style={{ padding: "10px 12px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", borderRight: "1px solid rgba(255,255,255,0.25)", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", minWidth: "140px", textTransform: "uppercase" }}>
                     TARIKH TAMAT LANGGANAN
                   </th>
-                  <th style={{ padding: "10px 12px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", minWidth: "135px", textTransform: "uppercase" }}>
+                  <th style={{ padding: "10px 12px", background: "transparent", color: "white", borderBottom: "2px solid #9a3412", textAlign: "center", fontSize: "0.85rem", fontWeight: "bold", minWidth: "127px", textTransform: "uppercase" }}>
                     JENIS LANGGANAN
                   </th>
                 </tr>

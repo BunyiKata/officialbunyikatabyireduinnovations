@@ -826,22 +826,22 @@ export function IbubapaDashboard({
               marginTop: 0,
             }}
           >
-            <table className="teacher-table" style={{ width: "100%", minWidth: "600px" }}>
+            <table className="teacher-table" style={{ width: "100%", minWidth: "580px" }}>
               <thead>
                 <tr style={{ background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)", color: "white" }}>
-                  <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 8px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", borderRight: "1px solid rgba(255,255,255,0.2)", width: "50px" }}>
-                    BIL
+                  <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 8px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", borderRight: "1px solid rgba(255,255,255,0.2)", width: "48px", minWidth: "48px" }}>
+                    BIL.
                   </th>
-                  <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 12px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", borderRight: "1px solid rgba(255,255,255,0.2)" }}>
+                  <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 12px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", borderRight: "1px solid rgba(255,255,255,0.2)", minWidth: "140px" }}>
                     NAMA
                   </th>
-                  <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 12px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", borderRight: "1px solid rgba(255,255,255,0.2)" }}>
+                  <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 12px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", borderRight: "1px solid rgba(255,255,255,0.2)", minWidth: "125px" }}>
                     TARIKH LANGGANAN
                   </th>
-                  <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 12px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", borderRight: "1px solid rgba(255,255,255,0.2)" }}>
+                  <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 12px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", borderRight: "1px solid rgba(255,255,255,0.2)", minWidth: "140px" }}>
                     TARIKH TAMAT LANGGANAN
                   </th>
-                  <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 12px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e" }}>
+                  <th style={{ textAlign: "center", textTransform: "uppercase", padding: "10px 12px", fontSize: "0.82rem", fontWeight: "bold", borderBottom: "2px solid #042f2e", minWidth: "127px" }}>
                     JENIS LANGGANAN
                   </th>
                 </tr>

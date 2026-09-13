@@ -344,9 +344,9 @@ body.parent-mode #parent-sticky-nav {
     z-index: 1600;
 }
 
-body.teacher-mode .screen.active,
-body.admin-mode .screen.active,
-body.parent-mode .screen.active {
+body.teacher-mode .screen.active:not([id^="view-"]):not([id^="game-"]):not(#map-screen),
+body.admin-mode .screen.active:not([id^="view-"]):not([id^="game-"]):not(#map-screen),
+body.parent-mode .screen.active:not([id^="view-"]):not([id^="game-"]):not(#map-screen) {
     padding-top: 145px !important;
 }
 
@@ -6579,42 +6579,27 @@ body:has(.screen[id^="view-learn-"].active) #student-global-nav,
 body:has(#view-belajar-huruf.active) #student-global-nav,
 body:has(#view-belajar-sukukata.active) #student-global-nav,
 body:has(#view-belajar-bacaan.active) #student-global-nav,
-body:has(#view-cabaran-suku-kata.active) #teacher-sticky-nav,
-body:has(#view-cabaran-suku-kata.active) #admin-sticky-nav,
-body:has(#view-cabaran-suku-kata.active) #parent-sticky-nav,
-body:has(#view-tanduk-kata.active) #teacher-sticky-nav,
-body:has(#view-tanduk-kata.active) #admin-sticky-nav,
-body:has(#view-tanduk-kata.active) #parent-sticky-nav,
-body:has(#view-perpustakaan.active) #teacher-sticky-nav,
-body:has(#view-perpustakaan.active) #admin-sticky-nav,
-body:has(#view-perpustakaan.active) #parent-sticky-nav,
-body:has(#view-belajar-fonik.active) #teacher-sticky-nav,
-body:has(#view-belajar-fonik.active) #admin-sticky-nav,
-body:has(#view-belajar-fonik.active) #parent-sticky-nav,
-body:has(#view-belajar-nombor.active) #teacher-sticky-nav,
-body:has(#view-belajar-nombor.active) #admin-sticky-nav,
-body:has(#view-belajar-nombor.active) #parent-sticky-nav,
-body:has(#view-kad-imbasan-nombor.active) #teacher-sticky-nav,
-body:has(#view-kad-imbasan-nombor.active) #admin-sticky-nav,
-body:has(#view-kad-imbasan-nombor.active) #parent-sticky-nav,
+body:has([id^="view-"].active) #teacher-sticky-nav,
+body:has([id^="view-"].active) #admin-sticky-nav,
+body:has([id^="view-"].active) #parent-sticky-nav,
+body:has([id^="game-"].active) #teacher-sticky-nav,
+body:has([id^="game-"].active) #admin-sticky-nav,
+body:has([id^="game-"].active) #parent-sticky-nav,
+body:has(.screen[id^="view-"].active) #teacher-sticky-nav,
+body:has(.screen[id^="view-"].active) #admin-sticky-nav,
+body:has(.screen[id^="view-"].active) #parent-sticky-nav,
+body:has(.screen[id^="game-"].active) #teacher-sticky-nav,
+body:has(.screen[id^="game-"].active) #admin-sticky-nav,
+body:has(.screen[id^="game-"].active) #parent-sticky-nav,
 body:has(#map-screen.active) #teacher-sticky-nav,
 body:has(#map-screen.active) #admin-sticky-nav,
 body:has(#map-screen.active) #parent-sticky-nav,
-body:has(.screen[id^="view-latihan-"].active) #teacher-sticky-nav,
-body:has(.screen[id^="view-latihan-"].active) #admin-sticky-nav,
-body:has(.screen[id^="view-latihan-"].active) #parent-sticky-nav,
-body:has(.screen[id^="view-learn-"].active) #teacher-sticky-nav,
-body:has(.screen[id^="view-learn-"].active) #admin-sticky-nav,
-body:has(.screen[id^="view-learn-"].active) #parent-sticky-nav,
-body:has(#view-belajar-huruf.active) #teacher-sticky-nav,
-body:has(#view-belajar-huruf.active) #admin-sticky-nav,
-body:has(#view-belajar-huruf.active) #parent-sticky-nav,
-body:has(#view-belajar-sukukata.active) #teacher-sticky-nav,
-body:has(#view-belajar-sukukata.active) #admin-sticky-nav,
-body:has(#view-belajar-sukukata.active) #parent-sticky-nav,
-body:has(#view-belajar-bacaan.active) #teacher-sticky-nav,
-body:has(#view-belajar-bacaan.active) #admin-sticky-nav,
-body:has(#view-belajar-bacaan.active) #parent-sticky-nav {
+body:has(#murid-menu-belajar.active) #teacher-sticky-nav,
+body:has(#murid-menu-belajar.active) #admin-sticky-nav,
+body:has(#murid-menu-belajar.active) #parent-sticky-nav,
+body:has(#murid-menu-latihan.active) #teacher-sticky-nav,
+body:has(#murid-menu-latihan.active) #admin-sticky-nav,
+body:has(#murid-menu-latihan.active) #parent-sticky-nav {
     display: none !important;
 }
 
@@ -7339,6 +7324,13 @@ body.parent-mode #main-menu-mobile-header {
     box-sizing: border-box;
 }
 
+/* Sembunyikan banner mod HANYA pada 5 aktiviti skrin penuh berikut:
+   1. Tanduk Kata (view-tanduk-kata)
+   2. 3D Bacaan Bergred & 3D Bunyi Kata (view-vr-abc)
+   3. 3D Perpustakaan (view-perpustakaan)
+   4. AR Suku Kata (view-ar-sukukata)
+   5. AR Kira Jari (view-ar-kirajari)
+   Semua cara belajar lain untuk mod admin, guru, ibu bapa MESTI ADA BANNER. */
 body.hide-top-banner .teacher-top-banner,
 body.hide-top-banner #teacher-top-banner,
 body:has(#view-tanduk-kata.active) .teacher-top-banner,
@@ -7346,59 +7338,43 @@ body:has(#view-ar-sukukata.active) .teacher-top-banner,
 body:has(#view-ar-kirajari.active) .teacher-top-banner,
 body:has(#view-vr-abc.active) .teacher-top-banner,
 body:has(#view-perpustakaan.active) .teacher-top-banner,
-body:has(#view-surih-huruf.active) .teacher-top-banner,
-body:has(#view-surih-nombor.active) .teacher-top-banner,
-body:has(#view-puzzle-sukukata.active) .teacher-top-banner,
-body:has(#view-cantum-kata.active) .teacher-top-banner,
-body:has(#view-belajar-huruf.active) .teacher-top-banner,
-body:has(#view-belajar-sukukata.active) .teacher-top-banner,
-body:has(#view-belajar-bacaan.active) .teacher-top-banner,
-body:has(#view-cabaran-suku-kata.active) .teacher-top-banner,
-body:has(#view-cuba-sebut.active) .teacher-top-banner,
-body:has([id^="game-"].active) .teacher-top-banner,
-body:has(#modal-cabaran-lain-game.modal-open) .teacher-top-banner {
+body:has(#modal-cabaran-lain-game.modal-open) .teacher-top-banner,
+body:has(#login-screen.active) .teacher-top-banner {
     display: none !important;
 }
 
-/* NOTA: Baris `body:has([id^="view-"].active) .teacher-top-banner` telah
-   DIBUANG dengan sengaja. Ia menyembunyikan banner mod pada SEMUA skrin
-   aktiviti — termasuk Kenali Huruf ABC, Vokal & Konsonan, Tambah/Tolak dan
-   Kad Imbasan Nombor — sehingga guru / admin / ibu bapa tidak tahu mereka
-   berada dalam mod yang mana. Skrin yang benar-benar perlukan skrin penuh
-   disenaraikan secara eksplisit di atas. */
-
-/* Skrin pembelajaran asas: banner mod MESTI kelihatan supaya pengguna
-   tahu mereka berada dalam MOD GURU / MOD ADMIN / MOD IBU BAPA. */
-body.teacher-mode:has(#view-belajar-fonik.active) .teacher-top-banner,
-body.admin-mode:has(#view-belajar-fonik.active) .teacher-top-banner,
-body.parent-mode:has(#view-belajar-fonik.active) .teacher-top-banner,
-body.teacher-mode:has(#view-belajar-nombor.active) .teacher-top-banner,
-body.admin-mode:has(#view-belajar-nombor.active) .teacher-top-banner,
-body.parent-mode:has(#view-belajar-nombor.active) .teacher-top-banner,
-body.teacher-mode:has(#view-kad-imbasan-nombor.active) .teacher-top-banner,
-body.admin-mode:has(#view-kad-imbasan-nombor.active) .teacher-top-banner,
-body.parent-mode:has(#view-kad-imbasan-nombor.active) .teacher-top-banner {
+/* Paparkan banner mod pada semua skrin lain untuk mod admin, guru, dan ibu bapa */
+body.teacher-mode:not(.hide-top-banner):not(:has(#view-tanduk-kata.active)):not(:has(#view-ar-sukukata.active)):not(:has(#view-ar-kirajari.active)):not(:has(#view-vr-abc.active)):not(:has(#view-perpustakaan.active)):not(:has(#login-screen.active)) .teacher-top-banner,
+body.admin-mode:not(.hide-top-banner):not(:has(#view-tanduk-kata.active)):not(:has(#view-ar-sukukata.active)):not(:has(#view-ar-kirajari.active)):not(:has(#view-vr-abc.active)):not(:has(#view-perpustakaan.active)):not(:has(#login-screen.active)) .teacher-top-banner,
+body.parent-mode:not(.hide-top-banner):not(:has(#view-tanduk-kata.active)):not(:has(#view-ar-sukukata.active)):not(:has(#view-ar-kirajari.active)):not(:has(#view-vr-abc.active)):not(:has(#view-perpustakaan.active)):not(:has(#login-screen.active)) .teacher-top-banner {
     display: flex !important;
 }
 
-/* Beri ruang 40px (tinggi banner) supaya banner TIDAK menutup butang
-   kembali / tajuk aktiviti pada skrin pembelajaran asas tersebut. */
-body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-belajar-fonik.active) #view-belajar-fonik,
-body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-belajar-nombor.active) #view-belajar-nombor,
-body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-kad-imbasan-nombor.active) #view-kad-imbasan-nombor {
-    padding-top: 40px !important;
+/* Beri ruang padding-top 45px (tinggi banner 40px) supaya banner TIDAK menutup butang
+   kembali / tajuk aktiviti pada skrin cara belajar tersebut. */
+body:is(.teacher-mode, .admin-mode, .parent-mode):not(.hide-top-banner) [id^="view-"].active:not(#view-tanduk-kata):not(#view-vr-abc):not(#view-perpustakaan):not(#view-ar-sukukata):not(#view-ar-kirajari) {
+    padding-top: 45px !important;
     box-sizing: border-box !important;
+}
+
+body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-belajar-bacaan.active) #view-belajar-bacaan {
+    padding-top: 55px !important;
+    box-sizing: border-box !important;
+}
+
+/* Skrin tanpa banner kekalkan padding-top 0 */
+body:is(.teacher-mode, .admin-mode, .parent-mode) #view-tanduk-kata.active,
+body:is(.teacher-mode, .admin-mode, .parent-mode) #view-vr-abc.active,
+body:is(.teacher-mode, .admin-mode, .parent-mode) #view-perpustakaan.active,
+body:is(.teacher-mode, .admin-mode, .parent-mode) #view-ar-sukukata.active,
+body:is(.teacher-mode, .admin-mode, .parent-mode) #view-ar-kirajari.active {
+    padding-top: 0 !important;
 }
 
 body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-belajar-fonik.active) #view-belajar-fonik > div,
 body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-belajar-nombor.active) #view-belajar-nombor > div,
 body:is(.teacher-mode, .admin-mode, .parent-mode):has(#view-kad-imbasan-nombor.active) #view-kad-imbasan-nombor > div {
     min-height: calc(100vh - 40px) !important;
-}
-
-body.teacher-mode:not(.hide-top-banner):not(:has([id^="view-"].active)):not(:has(#login-screen.active)) .teacher-top-banner,
-body.parent-mode:not(.hide-top-banner):not(:has([id^="view-"].active)):not(:has(#login-screen.active)) .teacher-top-banner {
-    display: flex !important;
 }
 
 body.admin-mode .teacher-top-banner {
@@ -8729,16 +8705,49 @@ i.fa-brands {
 }
 
 #admin-table-head th,
-.admin-td {
+#admin-sejarah-table-head th,
+.admin-td,
+.admin-sejarah-td {
     font-size: 0.85rem !important;
 }
 
 @media (max-width: 600px) {
 
     #admin-table-head th,
-    .admin-td {
-        font-size: 0.7rem !important;
-        padding: 6px !important;
+    #admin-sejarah-table-head th,
+    .admin-td,
+    .admin-sejarah-td,
+    .sejarah-langganan-wrapper .teacher-table th,
+    .sejarah-langganan-wrapper .teacher-table td,
+    #guru-dashboard .sejarah-langganan-wrapper td,
+    #ibubapa-dashboard .sejarah-langganan-wrapper td {
+        font-size: 0.72rem !important;
+        padding: 6px 8px !important;
+    }
+
+    #admin-senarai-title,
+    #admin-sejarah-langganan-title,
+    #guru-table-title,
+    #guru-sejarah-langganan-title,
+    #ibubapa-sejarah-langganan-title {
+        font-size: 0.9rem !important;
+        padding: 6px 12px !important;
+    }
+
+    .admin-sejarah-filter-row {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .admin-sejarah-filter-row select,
+    .admin-sejarah-filter-row input {
+        font-size: 0.78rem !important;
+        height: 36px !important;
     }
 }
 

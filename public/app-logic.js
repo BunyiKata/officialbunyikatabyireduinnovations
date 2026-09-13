@@ -732,6 +732,70 @@ window.playBubble = playBubble;
 
 var currentAudioInstance = null;
 
+window.hentikanAudioSemasa = function () {
+    // 1. Batalkan sebarang timeout TTS tertangguh
+    if (window._ttsTimeout) {
+        clearTimeout(window._ttsTimeout);
+        window._ttsTimeout = null;
+    }
+
+    // 2. Hentikan window._sharedAudioInstance (yang memainkan fail .mp3 Bacaan Bergred)
+    if (window._sharedAudioInstance) {
+        try {
+            window._sharedAudioInstance.pause();
+            window._sharedAudioInstance.currentTime = 0;
+            window._sharedAudioInstance.removeAttribute('src');
+            window._sharedAudioInstance.load();
+        } catch (e) { }
+    }
+
+    // 3. Hentikan currentAudioInstance jika ada
+    if (typeof currentAudioInstance !== 'undefined' && currentAudioInstance) {
+        try {
+            currentAudioInstance.pause();
+            currentAudioInstance.currentTime = 0;
+            currentAudioInstance.removeAttribute('src');
+            currentAudioInstance.load();
+        } catch (e) { }
+    }
+    if (typeof window.currentAudioInstance !== 'undefined' && window.currentAudioInstance) {
+        try {
+            window.currentAudioInstance.pause();
+            window.currentAudioInstance.currentTime = 0;
+            window.currentAudioInstance.removeAttribute('src');
+            window.currentAudioInstance.load();
+        } catch (e) { }
+    }
+
+    // 4. Batalkan SpeechSynthesis sepenuhnya
+    if ('speechSynthesis' in window) {
+        try {
+            window.speechSynthesis.cancel();
+        } catch (e) { }
+    }
+
+    // 5. Hentikan semua tag audio di dalam DOM
+    try {
+        const allAudios = document.querySelectorAll('audio');
+        allAudios.forEach(a => {
+            try {
+                a.pause();
+                a.currentTime = 0;
+                a.removeAttribute('src');
+                a.load();
+            } catch (e) { }
+        });
+    } catch (e) { }
+
+    // 6. Gantung Web Audio Context jika ada
+    try {
+        if (window._globalAudioCtx && window._globalAudioCtx.state === 'running') {
+            window._globalAudioCtx.suspend().catch(() => {});
+        }
+    } catch (e) { }
+};
+var hentikanAudioSemasa = window.hentikanAudioSemasa;
+
 window.getAudioPath = function (text) {
     if (!text) return null;
     var rawText = String(text).trim();
@@ -1114,20 +1178,21 @@ window.sebutAudio = function (teks, onEnd) {
     if (!teks) return;
     window.unlockMobileAudioSubsystem();
 
-    const audio = window.getSharedAudioInstance();
-    try {
-        audio.pause();
-        audio.currentTime = 0;
-    } catch (e) {}
-
-    if ('speechSynthesis' in window) {
-        try { window.speechSynthesis.cancel(); } catch (e) {}
+    // Hentikan audio sebelumnya dahulu
+    if (typeof window.hentikanAudioSemasa === 'function') {
+        window.hentikanAudioSemasa();
     }
+
+    const audio = window.getSharedAudioInstance();
+    currentAudioInstance = audio;
+    window.currentAudioInstance = audio;
 
     var audioPath = window.getAudioPath(teks);
     if (audioPath) {
         audio.src = encodeURI(audioPath);
         audio.onended = function () {
+            currentAudioInstance = null;
+            window.currentAudioInstance = null;
             if (typeof onEnd === 'function') onEnd();
         };
         var fallbackDone = false;
@@ -1140,6 +1205,8 @@ window.sebutAudio = function (teks, onEnd) {
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.catch(function (err) {
+                // Jangan fallback jika dibatalkan oleh pengguna (cth navigasi / tekan kembali)
+                if (err && err.name === 'AbortError') return;
                 console.warn('Audio play failed, falling back to TTS:', err);
                 triggerFallback();
             });
@@ -1156,7 +1223,13 @@ function fallbackTTS(teks, onEnd) {
             if (window.speechSynthesis.paused) window.speechSynthesis.resume();
         } catch (e) { }
 
-        setTimeout(() => {
+        if (window._ttsTimeout) {
+            clearTimeout(window._ttsTimeout);
+            window._ttsTimeout = null;
+        }
+
+        window._ttsTimeout = setTimeout(() => {
+            window._ttsTimeout = null;
             var s = new SpeechSynthesisUtterance(String(teks).replace(/[-_]/g, ' '));
             s.lang = 'ms-MY';
             s.rate = 0.88;
@@ -1792,14 +1865,8 @@ function paparSkrin(screenId, skipHash) {
     const sasaran = document.getElementById(screenId);
     if (!sasaran) return;
 
-    if (typeof currentAudioInstance !== 'undefined' && currentAudioInstance) {
-        try {
-            currentAudioInstance.pause();
-            currentAudioInstance.currentTime = 0;
-        } catch (e) { }
-    }
-    if ('speechSynthesis' in window) {
-        try { window.speechSynthesis.cancel(); } catch (e) { }
+    if (typeof window.hentikanAudioSemasa === 'function') {
+        window.hentikanAudioSemasa();
     }
     if (typeof flashcardAttentionTimer !== 'undefined') {
         clearInterval(flashcardAttentionTimer);
@@ -1846,21 +1913,18 @@ function paparSkrin(screenId, skipHash) {
     // banner mod SENGAJA disembunyikan supaya tidak menutup permainan.
     // SENARAI INI MESTI LENGKAP: dahulu ia menggunakan penapis luas
     // `[id^="view-"]` yang turut menyembunyikan banner pada skrin
-    // pembelajaran asas (Kenali Huruf ABC, Vokal & Konsonan, Tambah/Tolak,
-    // Kad Imbasan Nombor) — itulah bug "banner mod tiada".
+    // Yang TIDAK PERLU banner adalah pada:
+    // 1. tanduk kata (view-tanduk-kata)
+    // 2. 3d bacaan bergred & 3d bunyi kata (view-vr-abc)
+    // 3. 3d perpustakaan (view-perpustakaan)
+    // 4. AR sahaja (view-ar-sukukata, view-ar-kirajari)
+    // Semua aktiviti cara belajar yang lain MESTI MEMAPARKAN BANNER.
     const SKRIN_PENUH_TANPA_BANNER = [
-        'view-tanduk-kata', 'view-ar-sukukata', 'view-vr-abc',
-        'view-perpustakaan', 'view-surih-huruf', 'view-puzzle-sukukata',
-        'view-belajar-huruf', 'view-belajar-sukukata', 'view-belajar-bacaan',
-        'view-cabaran-suku-kata', 'view-cuba-sebut',
-        'view-ar-kirajari', 'view-cantum-kata', 'view-surih-nombor'
-    ];
-
-    // Skrin aktiviti PEMBELAJARAN ASAS (Kenali Huruf ABC, Vokal & Konsonan,
-    // Tambah/Tolak, Kad Imbasan) — banner mod MESTI KEKAL kelihatan supaya
-    // guru / admin / ibu bapa tahu mereka berada dalam mod yang mana.
-    const SKRIN_PAPAR_BANNER_MOD = [
-        'view-belajar-fonik', 'view-belajar-nombor', 'view-kad-imbasan-nombor'
+        'view-tanduk-kata',
+        'view-vr-abc',
+        'view-perpustakaan',
+        'view-ar-sukukata',
+        'view-ar-kirajari'
     ];
 
     const isLearningOrGame = screenId.startsWith('view-') ||
@@ -1869,8 +1933,8 @@ function paparSkrin(screenId, skipHash) {
         screenId.includes('latihan') ||
         SKRIN_PENUH_TANPA_BANNER.includes(screenId);
 
-    // Adakah skrin ini perlu menyembunyikan banner?
-    const sembunyiBanner = isLearningOrGame && !SKRIN_PAPAR_BANNER_MOD.includes(screenId);
+    // Banner hanya disembunyikan pada 5 skrin khas ini:
+    const sembunyiBanner = SKRIN_PENUH_TANPA_BANNER.includes(screenId);
 
     if (sembunyiBanner) {
         document.body.classList.add('hide-top-banner');
@@ -1879,34 +1943,44 @@ function paparSkrin(screenId, skipHash) {
         document.body.classList.remove('hide-top-banner');
     }
 
-    if (screenId === 'admin-dashboard' || screenId.startsWith('admin-')) {
+    const isCurrentAdmin = screenId === 'admin-dashboard' || screenId.startsWith('admin-') ||
+        ((document.body.classList.contains('admin-mode') || window.modAdminAktif || window.isAdminMode) && !window.modIbuBapaAktif);
+    const isCurrentParent = !isCurrentAdmin && (screenId === 'ibubapa-dashboard' || screenId.startsWith('ibubapa-') ||
+        Boolean(window.modIbuBapaAktif) || document.body.classList.contains('parent-mode'));
+    const isCurrentTeacher = !isCurrentAdmin && !isCurrentParent && (screenId === 'guru-dashboard' || screenId.startsWith('guru-') ||
+        Boolean(window.modGuruAktif) || document.body.classList.contains('teacher-mode'));
+
+    if (isCurrentAdmin) {
         window.modGuruAktif = true;
         window.modIbuBapaAktif = false;
         document.body.classList.add('teacher-mode', 'admin-mode');
         document.body.classList.remove('parent-mode');
         if (topBanner) topBanner.style.display = sembunyiBanner ? 'none' : 'flex';
         if (badge) badge.innerHTML = '<i class="fa-solid fa-user-shield"></i> MOD ADMIN';
-        if (aNav) aNav.style.display = 'flex';
+        // Tiada top nav dalam cara belajar
+        if (aNav) aNav.style.display = isLearningOrGame ? 'none' : 'flex';
         if (tNav) tNav.style.display = 'none';
         if (pNav) pNav.style.display = 'none';
-    } else if (screenId === 'guru-dashboard' || screenId.startsWith('guru-') || (window.modGuruAktif && !document.body.classList.contains('admin-mode') && !window.modIbuBapaAktif)) {
+    } else if (isCurrentTeacher) {
         window.modGuruAktif = true;
         window.modIbuBapaAktif = false;
         document.body.classList.add('teacher-mode');
         document.body.classList.remove('admin-mode', 'parent-mode');
         if (topBanner) topBanner.style.display = sembunyiBanner ? 'none' : 'flex';
-        if (badge) badge.innerHTML = '<i class="fa-solid fa-graduation-cap"></i> MOD GURU';
-        if (tNav) tNav.style.display = 'flex';
+        if (badge) badge.innerHTML = '<i class="fa-solid fa-chalkboard-user"></i> MOD GURU';
+        // Tiada top nav dalam cara belajar
+        if (tNav) tNav.style.display = isLearningOrGame ? 'none' : 'flex';
         if (aNav) aNav.style.display = 'none';
         if (pNav) pNav.style.display = 'none';
-    } else if (screenId === 'ibubapa-dashboard' || screenId.startsWith('ibubapa-') || window.modIbuBapaAktif) {
+    } else if (isCurrentParent) {
         window.modIbuBapaAktif = true;
         window.modGuruAktif = false;
         document.body.classList.add('parent-mode');
         document.body.classList.remove('teacher-mode', 'admin-mode');
         if (topBanner) topBanner.style.display = sembunyiBanner ? 'none' : 'flex';
         if (badge) badge.innerHTML = '<i class="fa-solid fa-user-group"></i> MOD IBU BAPA';
-        if (pNav) pNav.style.display = 'flex';
+        // Tiada top nav dalam cara belajar
+        if (pNav) pNav.style.display = isLearningOrGame ? 'none' : 'flex';
         if (tNav) tNav.style.display = 'none';
         if (aNav) aNav.style.display = 'none';
     } else {
@@ -1931,15 +2005,28 @@ function paparSkrin(screenId, skipHash) {
 
     // Jaring keselamatan: jika skrin ini sepatutnya memaparkan banner mod
     // (cth Kenali Huruf ABC, Vokal & Konsonan, Tambah/Tolak, Kad Imbasan
-    // Nombor) tetapi cawangan di atas tidak mengendalikannya secara
+    // Nombor, Bacaan Bergred) tetapi cawangan di atas tidak mengendalikannya secara
     // eksplisit, pastikan banner benar-benar kelihatan. Tanpa ini, guru /
     // admin / ibu bapa tidak tahu mereka berada dalam mod yang mana.
     if (!sembunyiBanner &&
-        (window.modGuruAktif || window.modIbuBapaAktif || window.modAdminAktif || window.isAdminMode)) {
+        (window.modGuruAktif || window.modIbuBapaAktif || window.modAdminAktif || window.isAdminMode ||
+         document.body.classList.contains('admin-mode') || document.body.classList.contains('teacher-mode') || document.body.classList.contains('parent-mode'))) {
         if (topBanner) topBanner.style.display = 'flex';
-        if (!badge) {
-            /* badge tidak dijumpai — tiada tindakan */
+        if (badge) {
+            if (document.body.classList.contains('admin-mode')) {
+                badge.innerHTML = '<i class="fa-solid fa-user-shield"></i> MOD ADMIN';
+            } else if (document.body.classList.contains('parent-mode')) {
+                badge.innerHTML = '<i class="fa-solid fa-user-group"></i> MOD IBU BAPA';
+            } else if (document.body.classList.contains('teacher-mode')) {
+                badge.innerHTML = '<i class="fa-solid fa-chalkboard-user"></i> MOD GURU';
+            }
         }
+    }
+
+    if (isLearningOrGame) {
+        if (tNav) tNav.style.display = 'none';
+        if (aNav) aNav.style.display = 'none';
+        if (pNav) pNav.style.display = 'none';
     }
 
     // Jika buka dashboard guru, render jadual dan segerakkan data terkini dari Firebase
@@ -6931,13 +7018,14 @@ window.renderSejarahLangganan = function (peranan) {
         const rowBg = idx % 2 === 0 ? '#ffffff' : warnaZebra;
         const tamatSudah = r.tarikhTamat && new Date(r.tarikhTamat).getTime() < Date.now();
         const warnaTamat = tamatSudah ? '#dc2626' : '#0f766e';
+        const cellClass = isAdmin ? 'admin-sejarah-td admin-td' : 'admin-sejarah-td teacher-sejarah-td';
         html += `
             <tr style="background:${rowBg}; border-bottom:1px solid #e2e8f0; transition:background 0.15s ease;">
-                <td style="padding:9px 8px; text-align:center; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${idx + 1}</td>
-                <td style="padding:9px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${r.nama || '-'}</td>
-                <td style="padding:9px 12px; color:#475569; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap; text-align:center;">${window.formatTarikhLangganan(r.tarikhLangganan)}</td>
-                <td style="padding:9px 12px; color:${warnaTamat}; font-weight:bold; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap; text-align:center;">${window.formatTarikhLangganan(r.tarikhTamat)}</td>
-                <td style="padding:9px 12px; text-align:center; font-size:0.85rem; white-space:nowrap;">
+                <td class="${cellClass}" style="padding:9px 8px; text-align:center; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${idx + 1}</td>
+                <td class="${cellClass}" style="padding:9px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${r.nama || '-'}</td>
+                <td class="${cellClass}" style="padding:9px 12px; color:#475569; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap; text-align:center;">${window.formatTarikhLangganan(r.tarikhLangganan)}</td>
+                <td class="${cellClass}" style="padding:9px 12px; color:${warnaTamat}; font-weight:bold; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap; text-align:center;">${window.formatTarikhLangganan(r.tarikhTamat)}</td>
+                <td class="${cellClass}" style="padding:9px 12px; text-align:center; font-size:0.85rem; white-space:nowrap;">
                     <span style="display:inline-block; padding:3px 10px; border-radius:999px; font-weight:bold; font-size:0.78rem; border:1.5px solid ${r.jenisLangganan === 'Percuma' ? '#94a3b8' : '#0f766e'}; background:${r.jenisLangganan === 'Percuma' ? '#f1f5f9' : '#ccfbf1'}; color:${r.jenisLangganan === 'Percuma' ? '#475569' : '#0f766e'};">${r.jenisLangganan || '-'}</span>
                 </td>
             </tr>
@@ -18596,6 +18684,7 @@ var currentBacaanIndex = 0;
 var activeBacaanItems = [];
 
 function initBelajarBacaan(id, title) {
+    if (typeof window.hentikanAudioSemasa === 'function') window.hentikanAudioSemasa();
     currentModuleId = id;
     currentModuleTitle = title;
     currentBacaanIndex = 0;
@@ -19139,6 +19228,7 @@ function mainAudioBacaanSemasa() {
 }
 
 function nextBelajarBacaan() {
+    if (typeof window.hentikanAudioSemasa === 'function') window.hentikanAudioSemasa();
     if (currentBacaanIndex < activeBacaanItems.length - 1) {
         currentBacaanIndex++;
         renderBelajarBacaan();
@@ -19146,6 +19236,7 @@ function nextBelajarBacaan() {
 }
 
 function prevBelajarBacaan() {
+    if (typeof window.hentikanAudioSemasa === 'function') window.hentikanAudioSemasa();
     if (currentBacaanIndex > 0) {
         currentBacaanIndex--;
         renderBelajarBacaan();
@@ -19153,6 +19244,7 @@ function prevBelajarBacaan() {
 }
 
 function bukaModalSenaraiBacaan() {
+    if (typeof window.hentikanAudioSemasa === 'function') window.hentikanAudioSemasa();
     const modal = document.getElementById('modal-senarai-bacaan');
     const grid = document.getElementById('senarai-bacaan-grid');
     const modalTitle = document.getElementById('senarai-bacaan-title');
@@ -19180,6 +19272,7 @@ function bukaModalSenaraiBacaan() {
             }
 
             btn.onclick = () => {
+                if (typeof window.hentikanAudioSemasa === 'function') window.hentikanAudioSemasa();
                 currentBacaanIndex = idx;
                 renderBelajarBacaan();
                 tutupModalSenaraiBacaan();
