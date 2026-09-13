@@ -130,7 +130,6 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
   const [nama, setNama] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [noTelefon, setNoTelefon] = React.useState("");
-  const [namaKeluarga, setNamaKeluarga] = React.useState("");
   const [pakej, setPakej] = React.useState<KunciPakej>("1bulan");
 
   const [sedangProses, setSedangProses] = React.useState(false);
@@ -143,7 +142,6 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
     setNama("");
     setEmail("");
     setNoTelefon("");
-    setNamaKeluarga("");
     setPakej("1bulan");
     setRalat("");
     setHasil(null);
@@ -172,7 +170,10 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
       peranan,
       no_telefon: noTelefon.trim(),
       nama_sekolah: "",
-      nama_keluarga: peranan === "ibubapa" ? namaKeluarga.trim() : "",
+      // Nama keluarga tidak lagi diminta semasa cipta akaun — ibu bapa
+      // menetapkannya sendiri selepas log masuk pertama. Hantar kosong supaya
+      // pelayan tidak menyimpan nilai palsu.
+      nama_keluarga: "",
       planKey: pakej,
     });
     setSedangProses(false);
@@ -364,17 +365,13 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                   />
                 </div>
 
-                {peranan === "ibubapa" && (
-                  <div style={fieldStyle}>
-                    <label style={labelStyle}>Nama Keluarga</label>
-                    <input
-                      style={inputStyle}
-                      value={namaKeluarga}
-                      onChange={(e) => setNamaKeluarga(e.target.value)}
-                      placeholder="cth. Keluarga Ahmad"
-                    />
-                  </div>
-                )}
+                {/*
+                  Ruangan "Nama Keluarga" sengaja TIADA di sini.
+                  Nama keluarga ditetapkan sendiri oleh ibu bapa selepas mereka
+                  log masuk pertama kali (lihat EditProfileModal). Admin hanya
+                  perlu mencipta akaun; biarkan keluarga itu menyesuaikan nama
+                  mereka sendiri supaya tidak berlaku percanggahan.
+                */}
 
                 <div style={{ ...fieldStyle, marginBottom: "16px" }}>
                   <label style={labelStyle}>Pakej Langganan</label>

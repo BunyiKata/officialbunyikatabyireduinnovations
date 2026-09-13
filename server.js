@@ -182,6 +182,22 @@ function resolvePlanKey(planInfo) {
   return "1bulan";
 }
 
+/**
+ * Normalkan nama pelan sedia ada pengguna (untuk mod "tambah N hari").
+ *
+ * Apabila admin hanya menambah bilangan hari (bukan menukar pakej), jenis
+ * langganan pengguna TIDAK berubah. Fungsi ini hanya memastikan nama yang
+ * disimpan konsisten (cth. "1 Bulan (Pro)", "Percuma").
+ */
+function namaPelanSediaAda(rawPlan) {
+  const str = String(rawPlan || "").trim().toLowerCase();
+  if (str.includes("percuma") || str.includes("trial") || str === "free") return "Percuma";
+  if (str.includes("tahun") || str.includes("tahunan")) return "1 Tahun (Pro)";
+  if (str.includes("3 bulan") || str.includes("3bulan")) return "3 Bulan (Pro)";
+  if (str.includes("bulan") || str.includes("bulanan") || str.includes("pro")) return "1 Bulan (Pro)";
+  return rawPlan || "1 Bulan (Pro)";
+}
+
 async function startServer() {
   const app = express();
   // App Hosting / Cloud Run menyuntik PORT melalui persekitaran. Mesti dipatuhi,
@@ -383,6 +399,51 @@ async function startServer() {
   });
 
   /**
+   * Cari kunci profil dalam `profiles/`.
+   *
+   * Senarai admin menyimpan `id` yang kadang ialah UID Firebase, kadang kekunci
+   * profil (cth. emel disanitasi daripada aliran lama). Jadi kita cuba uid
+   * dahulu, kemudian jatuh balik ke carian emel.
+   */
+  async function cariKunciProfil(db, uid, email) {
+    const bersihUid = String(uid || "").trim();
+    if (bersihUid) {
+      const snap = await db.ref(`profiles/${bersihUid}`).get();
+      if (snap.exists()) return { kunci: bersihUid, profil: snap.val() || {} };
+    }
+
+    const bersihEmail = String(email || "").trim().toLowerCase();
+    if (bersihEmail) {
+      const snapMail = await db
+        .ref("profiles")
+        .orderByChild("email")
+        .equalTo(bersihEmail)
+        .get();
+      if (snapMail.exists()) {
+        let hasil = null;
+        snapMail.forEach((child) => {
+          if (!hasil) hasil = { kunci: child.key, profil: child.val() || {} };
+        });
+        if (hasil) return hasil;
+      }
+    }
+
+    return null;
+  }
+
+  /** Cuba dapatkan emel daripada profil (fallback bila `uid` bukan UID Auth). */
+  async function emailProfilDaripadaUid(appInstance, uid) {
+    try {
+      const snap = await getDatabase(appInstance).ref(`profiles/${uid}`).get();
+      if (!snap.exists()) return "";
+      const p = snap.val() || {};
+      return String(p.email || p.emel || "").trim();
+    } catch (e) {
+      return "";
+    }
+  }
+
+  /**
    * Set semula kata laluan pengguna atas permintaan admin.
    * Jika kata laluan tidak diberi, yang baharu akan dijana dan dipulangkan.
    */
@@ -399,7 +460,20 @@ async function startServer() {
       }
 
       const kataLaluan = String(req.body?.password || "").trim() || janaKataLaluan();
-      await getAuth(appInstance).updateUser(uid, { password: kataLaluan });
+      const emailDiminta = String(req.body?.email || "").trim();
+
+      try {
+        await getAuth(appInstance).updateUser(uid, { password: kataLaluan });
+      } catch (errUid) {
+        // `uid` mungkin bukan UID Firebase (cth. kekunci profil berasaskan emel),
+        // atau profil wujud dalam RTDB tetapi akaun Auth-nya tiada. Cuba cari
+        // akaun Auth mengikut emel sebagai jalan terakhir.
+        const email = (emailDiminta || (await emailProfilDaripadaUid(appInstance, uid)) || "").trim();
+        if (!email) throw errUid;
+        const rekod = await getAuth(appInstance).getUserByEmail(email);
+        await getAuth(appInstance).updateUser(rekod.uid, { password: kataLaluan });
+        console.log(`[Admin Reset Kata Laluan] Diselesaikan melalui emel=${email} (uid asal tidak sah).`);
+      }
 
       console.log(`[Admin Reset Kata Laluan] Kata laluan direset untuk uid=${uid}`);
       return res.json({ success: true, uid, password: kataLaluan });
@@ -410,9 +484,14 @@ async function startServer() {
   });
 
   /**
-   * Panjangkan tempoh langganan pengguna.
+   * Lanjutkan tempoh langganan pengguna.
    * Tempoh baharu dikira dari tarikh tamat SEDIA ADA (bukan dari hari ini),
    * supaya admin boleh menambah masa tanpa merugikan baki yang belum habis.
+   *
+   * Dua mod:
+   *   - `planKey` (cth. "1bulan") -> tambah ikut pakej katalog.
+   *   - `hari`    (cth. 10)       -> tambah bilangan hari budi bicara admin.
+   * Jika `hari` diberi, ia mengatasi `planKey`.
    */
   app.post("/api/admin/extend-expiry", requireAdmin, async (req, res) => {
     try {
@@ -423,61 +502,77 @@ async function startServer() {
 
       const uid = String(req.body?.uid || "").trim();
       const planBersih = String(req.body?.planKey || "").trim();
+      const emailDiminta = String(req.body?.email || "").trim();
+      const hariDiminta = Number(req.body?.hari || 0);
+
       if (!uid) {
         return res.status(400).json({ success: false, message: "UID diperlukan." });
       }
-      if (!PLAN_CATALOG[planBersih]) {
+
+      const gunaHari = Number.isFinite(hariDiminta) && hariDiminta > 0;
+      if (gunaHari) {
+        if (hariDiminta > 3650) {
+          return res.status(400).json({ success: false, message: "Maksimum 3650 hari (10 tahun) sekali gus." });
+        }
+      } else if (!PLAN_CATALOG[planBersih]) {
         return res.status(400).json({ success: false, message: "Pakej tidak sah." });
       }
 
       const db = getDatabase(appInstance);
-      const profilSnap = await db.ref(`profiles/${uid}`).get();
-      if (!profilSnap.exists()) {
+      const jumpa = await cariKunciProfil(db, uid, emailDiminta);
+      if (!jumpa) {
         return res.status(404).json({ success: false, message: "Profil tidak dijumpai." });
       }
-      const profil = profilSnap.val() || {};
+      const kunciProfil = jumpa.kunci;
+      const profil = jumpa.profil;
 
       // Lanjut dari tarikh tamat lama; jika tiada/tidak sah, mula dari sekarang.
       const tarikhTamatLama = profil.tarikh_tamat || "";
       const rujukan =
         tarikhTamatLama && new Date(tarikhTamatLama).getTime() > Date.now()
-          ? tarikhTamatLama // masih aktif â†’ sambung dari tarikh itu
-          : new Date().toISOString(); // sudah tamat â†’ mula semula dari sekarang
+          ? tarikhTamatLama
+          : new Date().toISOString();
 
-      const plan = PLAN_CATALOG[planBersih];
+      const plan = gunaHari
+        ? { key: "hari-" + hariDiminta, name: namaPelanSediaAda(profil.langganan), days: hariDiminta, priceCents: 0 }
+        : PLAN_CATALOG[planBersih];
       const tarikhTamatBaharu = kiraTarikhTamat(plan.days, rujukan);
 
-      await db.ref(`profiles/${uid}`).update({
-        langganan: plan.name,
-        pakej: planBersih,
-        tarikh_tamat: tarikhTamatBaharu,
-      });
+      const kemaskini = { tarikh_tamat: tarikhTamatBaharu };
+      // Mod pakej menetapkan semula nama langganan; mod hari hanya memanjangkan
+      // masa dan MENGEKALKAN jenis langganan sedia ada.
+      if (!gunaHari) {
+        kemaskini.langganan = plan.name;
+        kemaskini.pakej = planBersih;
+      }
+
+      await db.ref(`profiles/${kunciProfil}`).update(kemaskini);
 
       await db.ref("orders").push({
-        uid,
+        uid: kunciProfil,
         nama: profil.nama || "",
         emel: profil.email || profil.emel || "",
         peranan: profil.peranan || "",
-        pakej: planBersih,
+        pakej: plan.key,
         nama_pakej: plan.name,
         harga_sen: plan.priceCents,
         jumlah_hari: plan.days,
         status: "paid",
         kaedah: "manual",
-        jenis: "panjang_tempoh",
+        jenis: gunaHari ? "lanjutan_tempoh_hari" : "lanjutan_tempoh",
         direkod_oleh: "admin",
         tarikh: new Date().toISOString(),
       });
 
-      console.log(`[Admin Panjang Tempoh] uid=${uid} pakej=${planBersih} â†’ ${tarikhTamatBaharu}`);
+      console.log(`[Admin Lanjutan Tempoh] uid=${uid} -> ${tarikhTamatBaharu} (${gunaHari ? hariDiminta + " hari" : planBersih})`);
       return res.json({
         success: true,
         uid,
-        plan: { key: planBersih, name: plan.name, days: plan.days },
+        plan: { key: plan.key, name: plan.name, days: plan.days },
         tarikh_tamat: tarikhTamatBaharu,
       });
     } catch (err) {
-      console.error("[Admin Panjang Tempoh Exception]", err);
+      console.error("[Admin Lanjutan Tempoh Exception]", err);
       return res.status(500).json({ success: false, message: err.message });
     }
   });

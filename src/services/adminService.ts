@@ -215,21 +215,35 @@ export async function ciptaAkaunAdmin(input: InputCiptaAkaun): Promise<HasilCipt
 export async function resetKataLaluanAdmin(
   uid: string,
   password?: string,
+  email?: string,
 ): Promise<HasilResetKataLaluan> {
   return panggilAdmin<HasilResetKataLaluan>('/api/admin/reset-password', {
     uid,
+    // Emel pilihan: pelayan guna ini untuk mencari profil jika `uid` bukan UID
+    // Firebase sebenar (cth. kekunci profil berasaskan emel daripada aliran lama).
+    email: email || '',
     password: password || '',
   });
 }
 
-/** Panjangkan tempoh langganan pengguna mengikut pakej yang dipilih. */
+/**
+ * Lanjutkan tempoh langganan pengguna.
+ *
+ * Sama ada `planKey` (pakej tetap) ATAU `hari` (bilangan hari budi bicara
+ * admin) boleh diberi. Jika `hari` diberi, ia mengatasi `planKey` — ini
+ * membolehkan admin menambah cth. 10 hari walaupun cikgu membayar 1 bulan.
+ */
 export async function panjangkanTempohAdmin(
   uid: string,
-  planKey: KunciPakej,
+  planKey?: KunciPakej | string,
+  hari?: number,
+  email?: string,
 ): Promise<HasilPanjangTempoh> {
   return panggilAdmin<HasilPanjangTempoh>('/api/admin/extend-expiry', {
     uid,
-    planKey,
+    planKey: planKey || '',
+    hari: Number.isFinite(hari) ? hari : 0,
+    email: email || '',
   });
 }
 

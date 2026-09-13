@@ -162,13 +162,13 @@ window.showAdminInfo = function (type, nama, extra) {
     let match = {};
     if (type === 'guru') {
         const teachers = typeof getAdminTeachersList === 'function' ? getAdminTeachersList() : [];
-        match = teachers.find(item => 
+        match = teachers.find(item =>
             (extra && extra.id && String(item.id) === String(extra.id)) ||
             (item.nama && item.nama.trim().toLowerCase() === (nama || '').trim().toLowerCase())
         ) || {};
     } else {
         const parents = typeof getAdminParentsList === 'function' ? getAdminParentsList() : [];
-        match = parents.find(item => 
+        match = parents.find(item =>
             (extra && extra.id && String(item.id) === String(extra.id)) ||
             (item.nama && item.nama.trim().toLowerCase() === (nama || '').trim().toLowerCase())
         ) || {};
@@ -212,11 +212,11 @@ window.showAdminInfo = function (type, nama, extra) {
 
     if (type === 'guru') {
         title = "Maklumat Guru";
-        const emailDisplay = email 
+        const emailDisplay = email
             ? `<span style="color:#ea580c; font-weight:bold; word-break:break-all;">${email}</span>`
             : `<span style="color:#94a3b8; font-style:italic;">Tiada emel berdaftar</span>`;
 
-        const kodKelasDisplay = kodKelas 
+        const kodKelasDisplay = kodKelas
             ? `<span style="background:#fef3c7; color:#b45309; border:1.5px solid #d97706; padding:4px 12px; border-radius:8px; font-weight:bold; display:inline-block; margin-top:3px; letter-spacing:0.5px;">${kodKelas}${namaKelas ? ` (${namaKelas})` : ''}</span>`
             : `<span style="background:#f1f5f9; color:#64748b; border:1.5px dashed #cbd5e1; padding:4px 12px; border-radius:8px; font-weight:bold; display:inline-block; margin-top:3px;">Belum Ditetapkan</span>`;
 
@@ -271,11 +271,11 @@ window.showAdminInfo = function (type, nama, extra) {
         `;
     } else {
         title = "Maklumat Ibu Bapa";
-        const emailDisplay = email 
+        const emailDisplay = email
             ? `<span style="color:#0284c7; font-weight:bold; word-break:break-all;">${email}</span>`
             : `<span style="color:#94a3b8; font-style:italic;">Tiada emel berdaftar</span>`;
 
-        const kodKeluargaDisplay = kodKeluarga 
+        const kodKeluargaDisplay = kodKeluarga
             ? `<span style="background:#e0f2fe; color:#0369a1; border:1.5px solid #0284c7; padding:4px 12px; border-radius:8px; font-weight:bold; display:inline-block; margin-top:3px; letter-spacing:0.5px;">${kodKeluarga}${namaKeluarga ? ` (${namaKeluarga})` : ''}</span>`
             : `<span style="background:#f1f5f9; color:#64748b; border:1.5px dashed #cbd5e1; padding:4px 12px; border-radius:8px; font-weight:bold; display:inline-block; margin-top:3px;">Belum Ditetapkan</span>`;
 
@@ -350,8 +350,8 @@ window.showAdminInfo = function (type, nama, extra) {
                 <button type="button" class="neo-btn" style="flex:1; padding:11px; font-weight:bold; border-radius:10px; border:2px solid #0b5c53; background:#168f81; color:#fff; cursor:pointer; font-size:0.86rem; display:inline-flex; align-items:center; justify-content:center; gap:7px; box-shadow:0 3px 0 #0b5c53;" onclick="window.resetKataLaluanAdminPopup('${profileId}', ${JSON.stringify(type)})">
                     <i class="fa-solid fa-key"></i> Reset Kata Laluan
                 </button>
-                <button type="button" class="neo-btn" style="flex:1; padding:11px; font-weight:bold; border-radius:10px; border:2px solid #9a3412; background:#ea580c; color:#fff; cursor:pointer; font-size:0.86rem; display:inline-flex; align-items:center; justify-content:center; gap:7px; box-shadow:0 3px 0 #9a3412;" onclick="window.panjangTempohAdminPopup('${profileId}', ${JSON.stringify(type)})">
-                    <i class="fa-solid fa-calendar-plus"></i> Panjang Tempoh
+                <button type="button" class="neo-btn" style="flex:1; padding:11px; font-weight:bold; border-radius:10px; border:2px solid #9a3412; background:#ea580c; color:#fff; cursor:pointer; font-size:0.86rem; display:inline-flex; align-items:center; justify-content:center; gap:7px; box-shadow:0 3px 0 #9a3412;" onclick="window.lanjutanTempohAdminPopup('${profileId}', ${JSON.stringify(type)})">
+                    <i class="fa-solid fa-calendar-plus"></i> Lanjutan Tempoh
                 </button>
             </div>
             ` : ''}
@@ -611,9 +611,9 @@ function initAudioContext() {
             if (AudioContextClass) audioCtx = new AudioContextClass();
         }
         if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume().catch(() => {});
+            audioCtx.resume().catch(() => { });
         }
-    } catch (e) {}
+    } catch (e) { }
 }
 
 if (typeof document !== 'undefined') {
@@ -651,11 +651,11 @@ function playBubble() {
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
                 osc.start(now);
                 osc.stop(now + 0.08);
-            } catch (err) {}
+            } catch (err) { }
         };
 
         if (audioCtx.state === 'suspended') {
-            audioCtx.resume().then(triggerNote).catch(() => {});
+            audioCtx.resume().then(triggerNote).catch(() => { });
         } else {
             triggerNote();
         }
@@ -795,7 +795,7 @@ window.hentikanAudioSemasa = function () {
     // 6. Gantung Web Audio Context jika ada
     try {
         if (window._globalAudioCtx && window._globalAudioCtx.state === 'running') {
-            window._globalAudioCtx.suspend().catch(() => {});
+            window._globalAudioCtx.suspend().catch(() => { });
         }
     } catch (e) { }
 };
@@ -1138,9 +1138,9 @@ window.getGlobalAudioContext = function () {
             if (AudioCtx) window._globalAudioCtx = new AudioCtx();
         }
         if (window._globalAudioCtx && window._globalAudioCtx.state === 'suspended') {
-            window._globalAudioCtx.resume().catch(() => {});
+            window._globalAudioCtx.resume().catch(() => { });
         }
-    } catch (e) {}
+    } catch (e) { }
     return window._globalAudioCtx;
 };
 
@@ -1156,7 +1156,7 @@ window.getSharedAudioInstance = function () {
 window.unlockMobileAudioSubsystem = function () {
     const ctx = window.getGlobalAudioContext();
     if (ctx && ctx.state === 'suspended') {
-        ctx.resume().catch(() => {});
+        ctx.resume().catch(() => { });
     }
     const audio = window.getSharedAudioInstance();
     if (audio && !audio.hasBeenUnlocked) {
@@ -1165,13 +1165,13 @@ window.unlockMobileAudioSubsystem = function () {
         audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
         const p = audio.play();
         if (p) {
-            p.then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
+            p.then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => { });
         }
     }
     if ('speechSynthesis' in window) {
         try {
             if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-        } catch (e) {}
+        } catch (e) { }
     }
 };
 
@@ -1472,7 +1472,7 @@ window.studentRecord = studentRecord;
                         localStorage.setItem('bunyiKataDaftarKelas', JSON.stringify(storedC));
                     }
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
         if (['1 cemerlang', '1 pintar'].includes((localStorage.getItem('bunyiKataNamaKelas') || '').trim().toLowerCase())) {
             localStorage.removeItem('bunyiKataNamaKelas');
@@ -1575,7 +1575,7 @@ function refreshAppStudentState() {
                 window.studentData = studentData;
             }
         }
-    } catch(e) {}
+    } catch (e) { }
 }
 window.refreshAppStudentState = refreshAppStudentState;
 window.addEventListener('teacher-classes-synced', function () {
@@ -1629,7 +1629,7 @@ function saveStudentData() {
             const activeCode = localStorage.getItem('bunyiKataKodKelas') || '';
             const activeFam = localStorage.getItem('bunyiKataKodKeluarga') || '';
             const userRole = localStorage.getItem('bunyiKataUserRole') || '';
-            
+
             if ((userRole === 'guru' || userRole === 'admin') && Array.isArray(studentNames) && studentNames.length > 0) {
                 const gId = localStorage.getItem('bunyiKataUserId') || '';
                 const gEmail = localStorage.getItem('bunyiKataGuruEmail') || '';
@@ -1782,7 +1782,7 @@ window.resetTrialGuestProgress = function () {
         delete stored[guestName];
         delete stored["Murid"];
         localStorage.setItem('bunyiKataStudentData', JSON.stringify(stored));
-    } catch(e) {}
+    } catch (e) { }
 
     // Segerakkan UI profil dan paparan
     if (typeof updateProfilUI === 'function') updateProfilUI();
@@ -2019,7 +2019,7 @@ function paparSkrin(screenId, skipHash) {
     // Jaring keselamatan: jika skrin ini sepatutnya memaparkan banner mod
     if (!sembunyiBanner && screenId !== 'login-screen' &&
         (window.modGuruAktif || window.modIbuBapaAktif || window.modAdminAktif || window.isAdminMode ||
-         document.body.classList.contains('admin-mode') || document.body.classList.contains('teacher-mode') || document.body.classList.contains('parent-mode'))) {
+            document.body.classList.contains('admin-mode') || document.body.classList.contains('teacher-mode') || document.body.classList.contains('parent-mode'))) {
         if (topBanner) topBanner.style.display = 'flex';
         if (badge) {
             if (document.body.classList.contains('admin-mode')) {
@@ -2206,7 +2206,7 @@ window.bolehAksesSkrin = function (screenId) {
         try {
             const sp = localStorage.getItem('bunyiKataPendingPlan');
             if (sp) pendingCat = (JSON.parse(sp).category || '').toLowerCase();
-        } catch (e) {}
+        } catch (e) { }
         const role = (localStorage.getItem('bunyiKataUserRole') || pendingCat || '').toLowerCase();
 
         // 1) Skrin admin — hanya dengan sesi admin RUNTIME.
@@ -2479,7 +2479,7 @@ function masukModGuru() {
             const cleanStored = storedNames.filter(n => n && !GHOST_NAMES.includes(n.trim().toLowerCase()));
             localStorage.setItem('bunyiKataStudentNames', JSON.stringify(cleanStored));
         }
-    } catch (e) {}
+    } catch (e) { }
 
     const badge = document.getElementById('teacher-banner-badge');
     if (badge) badge.innerHTML = '<i class="fa-solid fa-graduation-cap"></i> MOD GURU';
@@ -2501,7 +2501,7 @@ function masukModGuru() {
     if (typeof window.syncTeacherSessionFromFirebase === 'function') {
         const teacherIdentifier = guruId || localStorage.getItem('bunyiKataGuruEmail') || '';
         if (teacherIdentifier) {
-            window.syncTeacherSessionFromFirebase(teacherIdentifier).catch(function(e) {
+            window.syncTeacherSessionFromFirebase(teacherIdentifier).catch(function (e) {
                 console.warn('Teacher sync notice:', e);
             });
         }
@@ -2512,12 +2512,12 @@ function masukModGuru() {
             namaSekolah: namaSekolah || '',
             namaGuru: namaGuru || '',
             guruId: guruId || undefined
-        }).catch(function() {});
+        }).catch(function () { });
     }
 
     if (Array.isArray(studentNames) && studentNames.length > 0 && typeof window.syncStudentToFirebase === 'function') {
         const teacherUpper = (namaGuru || '').trim().toUpperCase();
-        studentNames.forEach(function(stName) {
+        studentNames.forEach(function (stName) {
             if (stName && !GHOST_NAMES.includes(stName.trim().toLowerCase()) && stName.trim().toUpperCase() !== teacherUpper) {
                 window.syncStudentToFirebase({
                     nama: stName,
@@ -2526,7 +2526,7 @@ function masukModGuru() {
                     kodKelas: kodKelas || '',
                     namaKelas: namaKelas || '',
                     totalBintang: (studentData[stName] && (studentData[stName].coins || studentData[stName].bintang)) || 0
-                }).catch(function() {});
+                }).catch(function () { });
             }
         });
     }
@@ -2712,7 +2712,7 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
                     try {
                         const idMap = JSON.parse(localStorage.getItem('bunyiKataStudentFirebaseIds') || '{}');
                         if (idMap[name]) studentId = idMap[name];
-                    } catch (e) {}
+                    } catch (e) { }
                 }
 
                 const btnAnak = document.createElement('button');
@@ -2732,11 +2732,11 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
                 btnAnak.onclick = () => {
                     try {
                         window.tutupModalPilihAnak();
-                    } catch (e) {}
+                    } catch (e) { }
                     if (studentId) {
                         try {
                             localStorage.setItem('bunyiKataStudentId', studentId);
-                        } catch (e) {}
+                        } catch (e) { }
                     }
                     try {
                         window.masukModMurid(name, studentId);
@@ -2746,7 +2746,7 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
                     if (typeof window.paparSkrin === 'function') {
                         try {
                             window.paparSkrin('main-menu-screen');
-                        } catch (e) {}
+                        } catch (e) { }
                     }
                 };
                 container.appendChild(btnAnak);
@@ -2937,13 +2937,13 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
                                     parentIdOrEmail: parentId,
                                     avatarUrl: selectedAvatar,
                                     kodKeluarga: kodKeluarga
-                                }).catch(function(e) { console.warn('Ralat simpan anak:', e); });
+                                }).catch(function (e) { console.warn('Ralat simpan anak:', e); });
                             } else if (typeof window.syncStudentToFirebase === 'function') {
                                 window.syncStudentToFirebase({
                                     nama: finalName,
                                     kodKeluarga: kodKeluarga,
                                     totalBintang: 0
-                                }).catch(function() {});
+                                }).catch(function () { });
                             }
 
                             document.body.removeChild(overlay);
@@ -3049,32 +3049,32 @@ window.masukModIbuBapa = function (namaAnak) {
             namaKeluarga: namaKeluarga,
             parentIdOrEmail: parentId || '',
             kodKeluarga: kodKeluarga || ''
-        }).catch(function() {});
+        }).catch(function () { });
     } else if (kodKeluarga && namaKeluarga && typeof window.saveFamilyToFirebase === 'function') {
         window.saveFamilyToFirebase({
             kodKeluarga: kodKeluarga,
             namaKeluarga: namaKeluarga,
             namaIbubapa: window.namaIbubapaAktif || 'Ibu Bapa',
             parentId: parentId || undefined
-        }).catch(function() {});
+        }).catch(function () { });
     }
 
     const pChildren = window.parentChildNames || [];
     if (Array.isArray(pChildren) && pChildren.length > 0) {
-        pChildren.forEach(function(cName) {
+        pChildren.forEach(function (cName) {
             if (cName) {
                 if (typeof window.saveParentChildToFirebase === 'function') {
                     window.saveParentChildToFirebase({
                         namaAnak: cName,
                         parentIdOrEmail: parentId || '',
                         kodKeluarga: kodKeluarga || ''
-                    }).catch(function() {});
+                    }).catch(function () { });
                 } else if (kodKeluarga && typeof window.syncStudentToFirebase === 'function') {
                     window.syncStudentToFirebase({
                         nama: cName,
                         keluargaId: kodKeluarga,
                         totalBintang: 0
-                    }).catch(function() {});
+                    }).catch(function () { });
                 }
             }
         });
@@ -4671,7 +4671,7 @@ function jumlahMarkah(data) {
                     countedKeys.add(baseId);
                     countedKeys.add('extra_' + baseId);
                     countedKeys.add(baseId.replace(/^extra_/, ''));
-                    
+
                     let st = 0;
                     if (data && data.stars) {
                         if (data.stars[baseId] !== undefined) st = Math.max(st, Number(data.stars[baseId] || 0));
@@ -5260,7 +5260,7 @@ window.simpanProfilEdit = function () {
     if (!newName) return alert('Sila masukkan nama.');
 
     var isTrial = isTrialAvatarCheck();
-    var chosenCfg = AVATAR_CONFIG.find(function(a) { return a.icon === window.tempSelectedAvatar; });
+    var chosenCfg = AVATAR_CONFIG.find(function (a) { return a.icon === window.tempSelectedAvatar; });
     if (isTrial && chosenCfg && (chosenCfg.isPro || chosenCfg.reqStars > 0)) {
         if (typeof window.openPakejProModal === 'function') {
             window.openPakejProModal('guru');
@@ -5610,7 +5610,7 @@ function getCurrentProfileData() {
                     if (typeof window.studentData !== 'undefined' && window.studentData) window.studentData[studentName] = s;
                 }
             }
-        } catch (e) {}
+        } catch (e) { }
     }
     if (s && (!s.badges || s.badges.length === 0) && typeof kiraLencanaMurid === 'function') {
         const earned = kiraLencanaMurid(s);
@@ -5647,7 +5647,7 @@ window.isPetaCompleted = isPetaCompleted;
 // --- SISTEM PENGECAMAN PINTAR NAMA MURID (SMART PARSING) ---
 function parseStudentNamesInput(rawText) {
     if (!rawText || typeof rawText !== 'string') return [];
-    
+
     let text = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
     // Tangani format nombor turutan atas satu baris, cth: "1. Siti Aishah, 2. Muhammad Amir" atau "1) Ali 2) Abu"
@@ -6246,7 +6246,7 @@ window.RTDB_LEADERBOARD_CACHE = window.RTDB_LEADERBOARD_CACHE || {
     GLOBAL_TTL: 5 * 60 * 1000 // 5 minit TTL untuk Global Top 10
 };
 
-window.invalidateLeaderboardCache = function() {
+window.invalidateLeaderboardCache = function () {
     if (window.RTDB_LEADERBOARD_CACHE) {
         window.RTDB_LEADERBOARD_CACHE.classCache = {};
         window.RTDB_LEADERBOARD_CACHE.globalCache = null;
@@ -6413,7 +6413,7 @@ async function renderLeaderboard(jenis = 'harian') {
                 try {
                     const parsed = JSON.parse(rawChildren);
                     if (Array.isArray(parsed) && parsed.length > 0) targetNames = parsed;
-                } catch(e) {}
+                } catch (e) { }
             }
             if (targetNames.length === 0 && window.parentChildNames && Array.isArray(window.parentChildNames)) {
                 targetNames = [...window.parentChildNames];
@@ -6497,8 +6497,8 @@ async function renderLeaderboard(jenis = 'harian') {
                 <div class="podium ${pos.cls}" style="${highlightStyle}">
                     <div class="podium-avatar">
                         ${(pos.data.avatar && (pos.data.avatar.startsWith('http') || pos.data.avatar.startsWith('/') || pos.data.avatar.includes('.png')))
-                            ? `<div style="width:100%; height:100%; border-radius:50%; background-image:url('${pos.data.avatar}'); background-size:contain; background-position:center; background-repeat:no-repeat; background-color:white;"></div>`
-                            : `<i class="fa-solid ${pos.data.avatar}" style="${pos.iconColor}; text-shadow: 1px 1px 0 #000;"></i>`}
+                    ? `<div style="width:100%; height:100%; border-radius:50%; background-image:url('${pos.data.avatar}'); background-size:contain; background-position:center; background-repeat:no-repeat; background-color:white;"></div>`
+                    : `<i class="fa-solid ${pos.data.avatar}" style="${pos.iconColor}; text-shadow: 1px 1px 0 #000;"></i>`}
                         <div class="podium-rank-badge" style="position:absolute; top:-6px; right:-6px; background:var(--color-yellow); border: 2px solid var(--color-dark); border-radius:50%; width: 22px; height:22px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:0.75rem; color:var(--color-dark); box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${pos.rank}</div>
                     </div>
                     <div class="podium-name" style="${isCurrentUser ? 'color:var(--color-blue); font-weight:bold;' : ''}">${pos.data.name}</div>
@@ -6520,8 +6520,8 @@ async function renderLeaderboard(jenis = 'harian') {
                 <div class="leaderboard-item-rank">#${index + 4}</div>
                 <div class="leaderboard-item-name" style="${isCurrentUser ? 'color:var(--color-blue); font-weight:bold;' : ''}">
                     ${(student.avatar && (student.avatar.startsWith('http') || student.avatar.startsWith('/') || student.avatar.includes('.png')))
-                        ? `<div style="display:inline-block; width:24px; height:24px; margin-right:8px; border-radius:50%; background-image:url('${student.avatar}'); background-size:contain; background-position:center; background-repeat:no-repeat; vertical-align:middle;"></div>`
-                        : `<i class="fa-solid ${student.avatar}" style="margin-right:8px; opacity:0.8;"></i>`}
+                ? `<div style="display:inline-block; width:24px; height:24px; margin-right:8px; border-radius:50%; background-image:url('${student.avatar}'); background-size:contain; background-position:center; background-repeat:no-repeat; vertical-align:middle;"></div>`
+                : `<i class="fa-solid ${student.avatar}" style="margin-right:8px; opacity:0.8;"></i>`}
                     ${student.name}
                 </div>
                 <div class="leaderboard-item-score"><i class="fa-solid fa-star" style="color:#f59e0b; margin-right:4px;"></i>${student.score}</div>
@@ -6603,7 +6603,7 @@ function bukaModalPilihPeta(mod) {
     // Unlock AudioContext pada user gesture
     try {
         if (typeof playBubble === 'function') playBubble();
-    } catch (e) {}
+    } catch (e) { }
 
     const isGuestOrTrial = typeof checkIsTrial === 'function' ? checkIsTrial() : false;
     if (!isGuestOrTrial) {
@@ -6636,7 +6636,7 @@ function bukaModalPilihPeta(mod) {
     // daripada sumber kebenaran tunggal checkIsTrial().
     try {
         window.dispatchEvent(new CustomEvent('akses-level-change'));
-    } catch (e) {}
+    } catch (e) { }
 
     const btnTexts = document.querySelectorAll('#modal-pilih-peta .map-select-text');
     const mapImgs = document.querySelectorAll('#modal-pilih-peta .map-select-btn img');
@@ -6818,7 +6818,7 @@ function getAdminParentsList() {
 }
 window.getAdminParentsList = getAdminParentsList;
 
-window.lanjutTempohGuru = async function(id) {
+window.lanjutTempohGuru = async function (id) {
     window.showAppModalConfirm(
         'Tambah Tempoh Langganan',
         'Adakah anda ingin menambah tempoh langganan guru ini sebanyak <span style="color:#16a34a; font-weight:900;">+30 Hari</span>?',
@@ -6844,7 +6844,7 @@ window.lanjutTempohGuru = async function(id) {
     );
 };
 // ---------------------------------------------------------------------------
-// BUTANG TINDAKAN DALAM POPUP INFO ADMIN (Reset Kata Laluan / Panjang Tempoh)
+// BUTANG TINDAKAN DALAM POPUP INFO ADMIN (Reset Kata Laluan / Lanjutan Tempoh)
 // Fungsi pelayan didedahkan melalui window.__adminApi (lihat adminService.ts).
 // ---------------------------------------------------------------------------
 
@@ -6853,12 +6853,60 @@ function _tutupInfoAdmin() {
     if (overlay) overlay.style.display = 'none';
 }
 
+/**
+ * Tunggu sehingga jambatan __adminApi tersedia.
+ *
+ * PUNCA BUTANG "TAK BERFUNGSI": app-logic.js dimuatkan secara DINAMIK dalam
+ * useEffect React (lihat App.tsx), manakala __adminApi hanya wujud selepas
+ * bundle React selesai dimuatkan (adminService.ts). Jika admin menekan butang
+ * sebelum bundle siap (atau cache basi), api == null dan fungsi terus gagal
+ * dengan mesej "Sesi admin tidak aktif" — walaupun sesi sebenarnya sah.
+ *
+ * Di sini kita menunggu sehingga ~5 saat sebelum menyerah.
+ */
+function _tungguAdminApi() {
+    return new Promise(function (resolve) {
+        let cuba = 0;
+        const periksa = function () {
+            const api = window.__adminApi;
+            if (api && typeof api.panjangkanTempohAdmin === 'function') return resolve(api);
+            cuba += 1;
+            if (cuba >= 50) return resolve(null); // ~5s
+            setTimeout(periksa, 100);
+        };
+        periksa();
+    });
+}
+
+/**
+ * Selesaikan rujukan profil untuk API pelayan.
+ *
+ * Senarai admin menggunakan `id` yang boleh jadi UID Firebase ATAU kekunci
+ * profil (cth. emel yang disanitasi). Endpoint pelayan mencari `profiles/<uid>`,
+ * jadi jika id itu bukan UID, kita HANTAR EMAIL sebagai ganti supaya pelayan
+ * boleh mencari profil melalui carian emel. Tanpa ini, admin yang dicipta
+ * melalui aliran lama menerima "Profil tidak dijumpai".
+ */
+function _rujukanProfilAdmin(uid, type) {
+    const email = _emailPenggunaAdmin(uid, type);
+    return { uid: uid, email: email };
+}
+
+function _emailPenggunaAdmin(uid, type) {
+    try {
+        const list = type === 'ibubapa' ? getAdminParentsList() : getAdminTeachersList();
+        const rec = list.find(function (item) { return String(item.id) === String(uid); });
+        if (rec && rec.email) return String(rec.email).trim();
+    } catch (e) { }
+    return '';
+}
+
 /** Set semula kata laluan pengguna dan paparkan kata laluan baharu. */
-window.resetKataLaluanAdminPopup = function (uid, type) {
+window.resetKataLaluanAdminPopup = async function (uid, type) {
     if (!uid) { window.showAppToast('Ralat', 'ID pengguna tidak dijumpai.'); return; }
-    const api = window.__adminApi;
+    const api = await _tungguAdminApi();
     if (!api || typeof api.resetKataLaluanAdmin !== 'function') {
-        window.showAppToast('Ralat', 'Sesi admin tidak aktif. Sila masuk semula.');
+        window.showAppToast('Ralat', 'Sesi admin tidak aktif. Sila muat semula halaman dan masuk semula.');
         return;
     }
 
@@ -6942,7 +6990,9 @@ function _bukaModalResetKataLaluan(uid, type) {
             okBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
 
             // Kosong -> pelayan menjana kata laluan rawak.
-            const hasil = await api.resetKataLaluanAdmin(uid, pass || '');
+            // Hantar emel juga supaya pelayan boleh cari profil sekiranya `uid`
+            // sebenarnya ialah kekunci profil (cth. emel disanitasi) dan bukan UID.
+            const hasil = await api.resetKataLaluanAdmin(uid, pass || '', _emailPenggunaAdmin(uid, type));
             if (!hasil || !hasil.berjaya) {
                 okBtn.disabled = false;
                 okBtn.innerHTML = asal;
@@ -7014,25 +7064,34 @@ window.salinKataLaluanBaharu = async function (btn) {
 };
 
 
-/** Panjangkan tempoh langganan pengguna mengikut pakej (lalai 1 Bulan). */
-window.panjangTempohAdminPopup = function (uid, type) {
+/** Lanjutkan tempoh langganan pengguna (pakej atau bilangan hari tersuai). */
+window.lanjutanTempohAdminPopup = async function (uid, type) {
     if (!uid) { window.showAppToast('Ralat', 'ID pengguna tidak dijumpai.'); return; }
-    const api = window.__adminApi;
+    const api = await _tungguAdminApi();
     if (!api || typeof api.panjangkanTempohAdmin !== 'function') {
-        window.showAppToast('Ralat', 'Sesi admin tidak aktif. Sila masuk semula.');
+        window.showAppToast('Ralat', 'Sesi admin tidak aktif. Sila muat semula halaman dan masuk semula.');
         return;
     }
 
-    _bukaModalPanjangTempoh(uid, type);
+    _bukaModalLanjutanTempoh(uid, type, api);
 };
+
+/** Nama lama dikekalkan supaya pautan/bookmark lama tidak pecah. */
+window.panjangTempohAdminPopup = window.lanjutanTempohAdminPopup;
+
 /**
- * Modal pilih pakej untuk panjangkan tempoh langganan.
+ * Modal "Lanjutan Tempoh" langganan.
  *
- * Admin memilih berapa lama tempoh hendak ditambah. Setiap pakej menambah
- * bilangan hari yang berbeza (1 Bulan = +30 hari, 3 Bulan = +90 hari,
- * 1 Tahun = +365 hari), sama seperti pakej langganan biasa.
+ * Dua cara untuk admin menambah masa:
+ *   1. Pilih pakej (1 Bulan / 3 Bulan / 1 Tahun) — cara biasa.
+ *   2. Taip bilangan hari sendiri (cth. 10) — keputusan budi bicara admin,
+ *      walaupun cikgu hanya membayar untuk 1 bulan. Ini penting kerana admin
+ *      mungkin mahu memberi ganjaran percuma / pampasan tanpa ganti pakej.
+ *
+ * Tempoh baharu SELALU ditambah pada tarikh tamat sedia ada (lihat
+ * /api/admin/extend-expiry), jadi baki yang belum habis tidak dihanguskan.
  */
-function _bukaModalPanjangTempoh(uid, type) {
+function _bukaModalLanjutanTempoh(uid, type, api) {
     const pakej = [
         { key: '1bulan', label: '1 Bulan', hari: '+30 Hari', harga: 'RM15', warna: '#168f81', gelap: '#0b5c53' },
         { key: '3bulan', label: '3 Bulan', hari: '+90 Hari', harga: 'RM40', warna: '#ea580c', gelap: '#9a3412' },
@@ -7067,54 +7126,103 @@ function _bukaModalPanjangTempoh(uid, type) {
             </button>
             <div style="text-align:center; margin-bottom:16px;">
                 <div class="neo-btn" style="background-color:#ea580c; color:white; font-size:1rem; margin:0 auto; display:inline-flex; align-items:center; gap:8px; pointer-events:none; padding:8px 22px; font-weight:bold; border-radius:12px;">
-                    <i class="fa-solid fa-calendar-plus"></i> Panjang Tempoh
+                    <i class="fa-solid fa-calendar-plus"></i> Lanjutan Tempoh
                 </div>
             </div>
             <p style="margin:0 0 14px 0; font-size:0.86rem; color:#475569; font-weight:bold; text-align:center;">
-                Pilih pakej untuk dipanjangkan. Tempoh akan ditambah pada tarikh tamat semasa.
+                Tambah masa langganan. Tempoh akan ditambah pada <strong>tarikh tamat semasa</strong> — baki yang belum habis tidak hilang.
             </p>
             <div id="admin-panjang-err" style="display:none; color:#b91c1c; font-size:0.8rem; font-weight:bold; margin-bottom:8px; text-align:center;"></div>
+
+            <div style="font-size:0.78rem; font-weight:bold; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Cara 1 — Pilih Pakej</div>
             <div style="display:flex; flex-direction:column; gap:10px;">
                 ${butangPakej}
             </div>
+
+            <div style="display:flex; align-items:center; gap:10px; margin:16px 0 12px;">
+                <span style="flex:1; height:2px; background:#e2e8f0;"></span>
+                <span style="font-size:0.75rem; font-weight:bold; color:#94a3b8;">ATAU</span>
+                <span style="flex:1; height:2px; background:#e2e8f0;"></span>
+            </div>
+
+            <div style="font-size:0.78rem; font-weight:bold; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Cara 2 — Bilangan Hari Sendiri</div>
+            <div style="display:flex; gap:10px;">
+                <input id="admin-panjang-hari" type="number" min="1" max="3650" step="1" inputmode="numeric" placeholder="cth. 10" style="flex:1; padding:10px 12px; border-radius:10px; border:2px solid #cbd5e1; font-size:0.95rem; font-weight:bold; outline:none; box-sizing:border-box; background:#ffffff;" />
+                <button type="button" id="admin-panjang-hari-ok" class="neo-btn" style="padding:10px 16px; font-weight:bold; border-radius:10px; border:2px solid #075985; background:#0284c7; color:#fff; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:7px; box-shadow:0 3px 0 #075985; white-space:nowrap;">
+                    <i class="fa-solid fa-plus"></i> Tambah
+                </button>
+            </div>
+            <p style="margin:6px 0 0 0; font-size:0.72rem; color:#94a3b8; font-weight:bold;">Budi bicara admin — cth. tambah 10 hari sebagai ganjaran.</p>
+
             <button type="button" class="neo-btn bg-white" style="width:100%; margin-top:14px; padding:11px; font-weight:bold; border-radius:10px; border:2px solid var(--color-dark); cursor:pointer; font-size:0.9rem;" onclick="document.getElementById('app-admin-panjang-overlay').style.display='none'">Batal</button>
         </div>
     `;
     modal.style.display = 'flex';
 
     const err = document.getElementById('admin-panjang-err');
-    modal.querySelectorAll('button[data-pakej]').forEach((btn) => {
-        btn.onclick = async function () {
-            const kunci = btn.getAttribute('data-pakej');
-            if (btn.disabled) return;
-            modal.querySelectorAll('button[data-pakej]').forEach((b) => { b.disabled = true; });
-            const asal = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+    const semuaBtn = () => modal.querySelectorAll('button[data-pakej], #admin-panjang-hari-ok');
 
-            const hasil = await api.panjangkanTempohAdmin(uid, kunci);
-            if (!hasil || !hasil.berjaya) {
-                modal.querySelectorAll('button[data-pakej]').forEach((b) => { b.disabled = false; });
-                btn.innerHTML = asal;
-                if (err) { err.textContent = (hasil && hasil.mesej) || 'Operasi gagal. Sila cuba lagi.'; err.style.display = 'block'; }
-                return;
-            }
-            modal.style.display = 'none';
-            _tutupInfoAdmin();
-            if (typeof window.fetchAdminDataFromFirebase === 'function') {
-                try { await window.fetchAdminDataFromFirebase(); } catch (e) { }
-            }
-            if (typeof window.renderAdminTable === 'function') {
-                window.renderAdminTable(type === 'ibubapa' ? 'ibubapa' : 'guru');
-            }
-            const tkh = hasil.tarikh_tamat
-                ? new Date(hasil.tarikh_tamat).toLocaleDateString('ms-MY', { day: '2-digit', month: 'long', year: 'numeric' })
-                : '';
-            window.showAppToast(
-                'Berjaya Dipanjangkan',
-                tkh ? `Tempoh langganan berjaya dipanjangkan sehingga ${tkh}.` : 'Tempoh langganan berjaya dipanjangkan.'
-            );
+    /** Kongsi logik hantar: kekalkan keadaan butang, tunjuk ralat/toast. */
+    const hantar = async function (btn, muatan) {
+        if (btn.disabled) return;
+        semuaBtn().forEach((b) => { b.disabled = true; });
+        const asal = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+        if (err) err.style.display = 'none';
+
+        const hasil = await api.panjangkanTempohAdmin(uid, muatan.planKey, muatan.hari);
+
+        if (!hasil || !hasil.berjaya) {
+            semuaBtn().forEach((b) => { b.disabled = false; });
+            btn.innerHTML = asal;
+            if (err) { err.textContent = (hasil && hasil.mesej) || 'Operasi gagal. Sila cuba lagi.'; err.style.display = 'block'; }
+            return;
+        }
+
+        modal.style.display = 'none';
+        _tutupInfoAdmin();
+        if (typeof window.fetchAdminDataFromFirebase === 'function') {
+            try { await window.fetchAdminDataFromFirebase(); } catch (e) { }
+        }
+        if (typeof window.renderAdminTable === 'function') {
+            window.renderAdminTable(type === 'ibubapa' ? 'ibubapa' : 'guru');
+        }
+        const tkh = hasil.tarikh_tamat
+            ? new Date(hasil.tarikh_tamat).toLocaleDateString('ms-MY', { day: '2-digit', month: 'long', year: 'numeric' })
+            : '';
+        window.showAppToast(
+            'Berjaya Dilanjutkan',
+            tkh ? `Tempoh langganan berjaya dilanjutkan sehingga ${tkh}.` : 'Tempoh langganan berjaya dilanjutkan.'
+        );
+    };
+
+    modal.querySelectorAll('button[data-pakej]').forEach((btn) => {
+        btn.onclick = function () {
+            hantar(btn, { planKey: btn.getAttribute('data-pakej') });
         };
     });
+
+    const btnHari = document.getElementById('admin-panjang-hari-ok');
+    const inputHari = document.getElementById('admin-panjang-hari');
+    if (btnHari && inputHari) {
+        const hantarHari = function () {
+            const hari = parseInt(String(inputHari.value || '').trim(), 10);
+            if (!Number.isFinite(hari) || hari < 1) {
+                if (err) { err.textContent = 'Masukkan bilangan hari yang sah (sekurang-kurangnya 1).'; err.style.display = 'block'; }
+                inputHari.focus();
+                return;
+            }
+            if (hari > 3650) {
+                if (err) { err.textContent = 'Maksimum 3650 hari (10 tahun) sekali gus.'; err.style.display = 'block'; }
+                return;
+            }
+            hantar(btnHari, { hari: hari });
+        };
+        btnHari.onclick = hantarHari;
+        inputHari.addEventListener('keydown', function (ev) {
+            if (ev.key === 'Enter') { ev.preventDefault(); hantarHari(); }
+        });
+    }
 }
 
 
@@ -7122,7 +7230,7 @@ function _bukaModalPanjangTempoh(uid, type) {
 
 
 
-window.padamGuruAdmin = async function(id) {
+window.padamGuruAdmin = async function (id) {
     const teachers = getAdminTeachersList();
     const t = teachers.find(item => item.id === id);
     const namaGuru = t ? t.nama : 'guru ini';
@@ -7137,7 +7245,7 @@ window.padamGuruAdmin = async function(id) {
                 await window.deleteProfileInFirebase(id);
             }
             if (typeof window.cleanupOrphanedStudentsInFirebase === 'function') {
-                try { await window.cleanupOrphanedStudentsInFirebase(); } catch (e) {}
+                try { await window.cleanupOrphanedStudentsInFirebase(); } catch (e) { }
             }
             // Padam juga murid dan kelas guru ini daripada storan setempat
             try {
@@ -7147,7 +7255,7 @@ window.padamGuruAdmin = async function(id) {
                     localMurid = localMurid.filter(m => !kodKelasList.includes((m.kelasId || m.kelas || '').toUpperCase()));
                     localStorage.setItem('bunyiKataMurid', JSON.stringify(localMurid));
                 }
-            } catch (e) {}
+            } catch (e) { }
 
             let curTeachers = getAdminTeachersList().filter(item => item.id !== id);
             localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(curTeachers));
@@ -7166,7 +7274,7 @@ window.padamGuruAdmin = async function(id) {
     );
 };
 
-window.lanjutTempohParent = async function(id) {
+window.lanjutTempohParent = async function (id) {
     window.showAppModalConfirm(
         'Tambah Tempoh Langganan',
         'Adakah anda ingin menambah tempoh langganan ibu bapa ini sebanyak <span style="color:#16a34a; font-weight:900;">+30 Hari</span>?',
@@ -7192,7 +7300,7 @@ window.lanjutTempohParent = async function(id) {
     );
 };
 
-window.padamParentAdmin = async function(id) {
+window.padamParentAdmin = async function (id) {
     const parents = getAdminParentsList();
     const p = parents.find(item => item.id === id);
     const namaParent = p ? p.nama : 'ibu bapa ini';
@@ -7207,7 +7315,7 @@ window.padamParentAdmin = async function(id) {
                 await window.deleteProfileInFirebase(id);
             }
             if (typeof window.cleanupOrphanedStudentsInFirebase === 'function') {
-                try { await window.cleanupOrphanedStudentsInFirebase(); } catch (e) {}
+                try { await window.cleanupOrphanedStudentsInFirebase(); } catch (e) { }
             }
             // Padam juga profil anak ibu bapa ini daripada storan setempat
             try {
@@ -7217,7 +7325,7 @@ window.padamParentAdmin = async function(id) {
                     localMurid = localMurid.filter(m => (m.keluargaId || m.kod_keluarga || '').toUpperCase() !== kodFam);
                     localStorage.setItem('bunyiKataMurid', JSON.stringify(localMurid));
                 }
-            } catch (e) {}
+            } catch (e) { }
 
             let curParents = getAdminParentsList().filter(item => item.id !== id);
             localStorage.setItem('bunyiKataAdminParents', JSON.stringify(curParents));
@@ -7238,7 +7346,7 @@ window.padamParentAdmin = async function(id) {
 
 window.tukarLanggananPengguna = async function (id, role, newPlan) {
     if (!id || !newPlan) return;
-    
+
     window.showAppModalConfirm(
         'Pengesahan Tukar Pelan',
         `Adakah anda pasti mahu menukar jenis langganan pengguna ini kepada <span style="color:#ea580c; font-weight:900;">"${newPlan}"</span>?`,
@@ -7855,21 +7963,21 @@ var EXTRA_CHALLENGES_DATA = {
 
 // Word bank per map for extra challenges
 var EXTRA_WORD_BANKS = {
-    1: ["ABU","ALI","ANA","API","AYU","BAG","BAS","BEG","BOT","CAP","DAN","DUA","EKO","FAN","GAM","HAI","IBU","JAM","KAT","LAP"],
+    1: ["ABU", "ALI", "ANA", "API", "AYU", "BAG", "BAS", "BEG", "BOT", "CAP", "DAN", "DUA", "EKO", "FAN", "GAM", "HAI", "IBU", "JAM", "KAT", "LAP"],
     2: [
-        "BAJU","BOLA","BUKU","DADU","GULA","KUDA","LAGU","MAMA","NASI","PADI",
-        "RAJA","SIKU","SUDU","TAHU","WAJA","YOYO","JARI","KUKU","MATA","TOPI",
-        "LORI","ROTI","MEJA","PASU","GIGI","KAKI","BAPA","DURI","TALI","FERI",
-        "CIKU","CERI","BECA","LABU","SAWI","TEKO","PAKU","RUSA","RAGA","TEBU",
-        "LIDI","KERA","PENA","SOTO"
+        "BAJU", "BOLA", "BUKU", "DADU", "GULA", "KUDA", "LAGU", "MAMA", "NASI", "PADI",
+        "RAJA", "SIKU", "SUDU", "TAHU", "WAJA", "YOYO", "JARI", "KUKU", "MATA", "TOPI",
+        "LORI", "ROTI", "MEJA", "PASU", "GIGI", "KAKI", "BAPA", "DURI", "TALI", "FERI",
+        "CIKU", "CERI", "BECA", "LABU", "SAWI", "TEKO", "PAKU", "RUSA", "RAGA", "TEBU",
+        "LIDI", "KERA", "PENA", "SOTO"
     ],
     3: [
-        "BAKUL","BELON","BERUK","BETIK","BOTOL","CAWAN","CEREK","GAJAH","GELAS","GITAR",
-        "KAPAK","KAPAL","KASUT","KATIL","KETAM","KICAP","KILAT","KIPAS","LILIN","MAKAN",
-        "MARAH","NANAS","PAGAR","SABUN","SIKAT","TAYAR","BADAK","KATAK","CICAK","HUTAN",
-        "JARUM","KOLAM","LOBAK","POKOK","SEMUT","TIKUS","CAPAN","KOTAK","POLIS","RUMAH","SURAT"
+        "BAKUL", "BELON", "BERUK", "BETIK", "BOTOL", "CAWAN", "CEREK", "GAJAH", "GELAS", "GITAR",
+        "KAPAK", "KAPAL", "KASUT", "KATIL", "KETAM", "KICAP", "KILAT", "KIPAS", "LILIN", "MAKAN",
+        "MARAH", "NANAS", "PAGAR", "SABUN", "SIKAT", "TAYAR", "BADAK", "KATAK", "CICAK", "HUTAN",
+        "JARUM", "KOLAM", "LOBAK", "POKOK", "SEMUT", "TIKUS", "CAPAN", "KOTAK", "POLIS", "RUMAH", "SURAT"
     ],
-    4: ["BERMAIN","BERLARI","MEMBACA","MENULIS","BERNYANYI","MELIHAT","BERCAKAP","TERTIDUR","BERSEDIA","MENDENGAR"]
+    4: ["BERMAIN", "BERLARI", "MEMBACA", "MENULIS", "BERNYANYI", "MELIHAT", "BERCAKAP", "TERTIDUR", "BERSEDIA", "MENDENGAR"]
 };
 
 // --- CABARAN LAIN 3D SWIPER ENGINE ---
@@ -8257,7 +8365,7 @@ window.playSlashSound = function () {
         gain.connect(ctx.destination);
         osc.start(now);
         osc.stop(now + 0.12);
-    } catch (e) {}
+    } catch (e) { }
 };
 
 // Web Audio Synthesizer & Confetti Effects for Cabaran Lain
@@ -8279,7 +8387,7 @@ window.playBetulSound = function () {
             osc.start(now + i * 0.07);
             osc.stop(now + i * 0.07 + 0.22);
         });
-    } catch (e) {}
+    } catch (e) { }
 };
 
 window.playSalahSound = function () {
@@ -8298,7 +8406,7 @@ window.playSalahSound = function () {
         gain.connect(ctx.destination);
         osc.start(now);
         osc.stop(now + 0.28);
-    } catch (e) {}
+    } catch (e) { }
 };
 
 window.triggerConfettiEffect = function (isCelebration) {
@@ -8619,13 +8727,13 @@ window.initFruitSlashCanvas = function () {
         const count = (fruits.length < 2 && Math.random() < 0.35) ? 2 : 1;
         for (let k = 0; k < count; k++) {
             const fType = FRUIT_TYPES[Math.floor(Math.random() * FRUIT_TYPES.length)];
-            
+
             // 60% Even, 40% Odd
             const isEven = Math.random() < 0.60;
             const evens = [2, 4, 6, 8, 10];
             const odds = [1, 3, 5, 7, 9];
-            const num = isEven 
-                ? evens[Math.floor(Math.random() * evens.length)] 
+            const num = isEven
+                ? evens[Math.floor(Math.random() * evens.length)]
                 : odds[Math.floor(Math.random() * odds.length)];
 
             const startX = 60 + Math.random() * (C_WIDTH - 120);
@@ -9212,7 +9320,7 @@ window.generateWordSearchGame = function (area, words) {
 
     const size = 6;
     const petaId = window.currentPeta || 2;
-    
+
     // Choose pool based on current map
     let wordSource = [];
     if (petaId === 2) {
@@ -9565,7 +9673,7 @@ var MM_HERO_IMAGES = [
     "pembaris", "tempayan"
 ];
 
-var MM_LETTERS = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
+var MM_LETTERS = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 
 window.generateMemoryMatchGame = function (area, words) {
     const petaId = window.currentPeta || 1;
@@ -12710,7 +12818,7 @@ window.initSpaceShooterCanvas = function () {
                 osc.start(now);
                 osc.stop(now + 0.07);
             }
-        } catch (e) {}
+        } catch (e) { }
     }
 
     let isPointerDown = false;
@@ -13321,8 +13429,8 @@ window.sqAnswer = function (chosen, correct) {
 // ==========================================
 // KETUK HURUF VOKAL — WHACK-A-MOLE GAME
 // ==========================================
-var VW_VOWELS = ['a','e','i','o','u'];
-var VW_CONSONANTS = ['b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','y','z'];
+var VW_VOWELS = ['a', 'e', 'i', 'o', 'u'];
+var VW_CONSONANTS = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'];
 
 window.generateVowelWhackGame = function (area, mode) {
     window.vwMode = mode || 'vowel';
@@ -13335,7 +13443,7 @@ window.generateVowelWhackGame = function (area, mode) {
     if (window.vowelWhackTimer) { clearInterval(window.vowelWhackTimer); window.vowelWhackTimer = null; }
     if (window.vowelWhackSpawnTimer) { clearTimeout(window.vowelWhackSpawnTimer); window.vowelWhackSpawnTimer = null; }
     window.renderVowelWhackField(area);
-    setTimeout(function() { window.vowelWhackSpawnRound(); }, 700);
+    setTimeout(function () { window.vowelWhackSpawnRound(); }, 700);
 };
 
 window.renderVowelWhackField = function (area) {
@@ -13421,19 +13529,19 @@ window.renderVowelWhackField = function (area) {
     }
 
     // Small flowers decoration
-    var flowerPositions = [{l:8,t:15},{l:85,t:25},{l:12,t:75},{l:88,t:68},{l:50,t:8}];
-    flowerPositions.forEach(function(fp) {
+    var flowerPositions = [{ l: 8, t: 15 }, { l: 85, t: 25 }, { l: 12, t: 75 }, { l: 88, t: 68 }, { l: 50, t: 8 }];
+    flowerPositions.forEach(function (fp) {
         html += '<div style="position:absolute;left:' + fp.l + '%;top:' + fp.t + '%;font-size:10px;opacity:0.5;pointer-events:none;">🌼</div>';
     });
 
     // 6 holes in 2 columns x 3 rows grid
     var holePositions = [
-        {col:0, row:0}, {col:1, row:0},
-        {col:0, row:1}, {col:1, row:1},
-        {col:0, row:2}, {col:1, row:2}
+        { col: 0, row: 0 }, { col: 1, row: 0 },
+        { col: 0, row: 1 }, { col: 1, row: 1 },
+        { col: 0, row: 2 }, { col: 1, row: 2 }
     ];
 
-    holePositions.forEach(function(pos, idx) {
+    holePositions.forEach(function (pos, idx) {
         var leftPct = pos.col === 0 ? 25 : 75;
         var topPct = 18 + pos.row * 31;
 
@@ -13581,7 +13689,7 @@ window.renderVowelWhackField = function (area) {
     var fieldEl = document.getElementById('vw-field');
     var malletEl = document.getElementById('vw-mallet');
     if (fieldEl && malletEl) {
-        var updateMalletPos = function(clientX, clientY) {
+        var updateMalletPos = function (clientX, clientY) {
             var rect = fieldEl.getBoundingClientRect();
             var x = clientX - rect.left;
             var y = clientY - rect.top;
@@ -13592,11 +13700,11 @@ window.renderVowelWhackField = function (area) {
             }
         };
 
-        fieldEl.addEventListener('mousemove', function(e) {
+        fieldEl.addEventListener('mousemove', function (e) {
             updateMalletPos(e.clientX, e.clientY);
         });
 
-        fieldEl.addEventListener('touchmove', function(e) {
+        fieldEl.addEventListener('touchmove', function (e) {
             if (e.touches && e.touches[0]) {
                 updateMalletPos(e.touches[0].clientX, e.touches[0].clientY);
             }
@@ -13619,10 +13727,10 @@ window.vowelWhackSpawnRound = function () {
         if (!window.vwHoles[i]) availableHoles.push(i);
     }
     // Shuffle and pick
-    availableHoles.sort(function() { return Math.random() - 0.5; });
+    availableHoles.sort(function () { return Math.random() - 0.5; });
     var spawnHoles = availableHoles.slice(0, Math.min(numMoles, availableHoles.length));
 
-    spawnHoles.forEach(function(holeIdx) {
+    spawnHoles.forEach(function (holeIdx) {
         var isTarget = Math.random() < 0.65;
         var letter;
         if (window.vwMode === 'consonant') {
@@ -13656,7 +13764,7 @@ window.vowelWhackSpawnRound = function () {
 
         // Auto-hide after 2.4-3.2 seconds
         var hideDelay = 2400 + Math.random() * 800;
-        var timer = setTimeout(function() {
+        var timer = setTimeout(function () {
             window.vowelWhackHideMole(holeIdx, false);
         }, hideDelay);
         window.vwActiveTimers.push(timer);
@@ -13664,7 +13772,7 @@ window.vowelWhackSpawnRound = function () {
 
     // Schedule next spawn round
     var nextDelay = 1900 + Math.random() * 1000;
-    window.vowelWhackSpawnTimer = setTimeout(function() {
+    window.vowelWhackSpawnTimer = setTimeout(function () {
         window.vowelWhackSpawnRound();
     }, nextDelay);
 };
@@ -13680,7 +13788,7 @@ window.vowelWhackHideMole = function (holeIdx, wasHit) {
             moleEl.style.transform = 'translate(-50%, 115%)';
         }
     }
-    setTimeout(function() {
+    setTimeout(function () {
         window.vwHoles[holeIdx] = null;
         if (moleEl) {
             moleEl.style.animation = 'none';
@@ -13772,7 +13880,7 @@ window.vowelWhackTap = function (holeIdx, event) {
         var headerEl = document.querySelector('#cabaran-lain-game-area');
         if (headerEl) {
             var allDivs = headerEl.querySelectorAll('div');
-            allDivs.forEach(function(d) {
+            allDivs.forEach(function (d) {
                 if (d.textContent.indexOf('Soalan') !== -1 && d.style.fontWeight) {
                     d.textContent = 'Soalan ' + window.vwScore + '/' + window.vwTarget;
                 }
@@ -13783,7 +13891,7 @@ window.vowelWhackTap = function (holeIdx, event) {
 
         // Check win
         if (window.vwScore >= window.vwTarget) {
-            setTimeout(function() { window.vowelWhackEnd(); }, 500);
+            setTimeout(function () { window.vowelWhackEnd(); }, 500);
         }
     } else {
         // WRONG — tapped a trap!
@@ -13800,14 +13908,14 @@ window.vowelWhackTap = function (holeIdx, event) {
         }
         if (holeEl) {
             holeEl.style.animation = 'vwShake 0.4s ease';
-            setTimeout(function() { if (holeEl) holeEl.style.animation = 'none'; }, 450);
+            setTimeout(function () { if (holeEl) holeEl.style.animation = 'none'; }, 450);
         }
 
         window.vowelWhackHideMole(holeIdx, true);
 
         // Check game over
         if (window.clLives <= 0) {
-            setTimeout(function() { window.vowelWhackEnd(); }, 500);
+            setTimeout(function () { window.vowelWhackEnd(); }, 500);
         }
     }
 };
@@ -13817,7 +13925,7 @@ window.vowelWhackEnd = function () {
     // Clear all timers
     if (window.vowelWhackTimer) { clearInterval(window.vowelWhackTimer); window.vowelWhackTimer = null; }
     if (window.vowelWhackSpawnTimer) { clearTimeout(window.vowelWhackSpawnTimer); window.vowelWhackSpawnTimer = null; }
-    window.vwActiveTimers.forEach(function(t) { clearTimeout(t); });
+    window.vwActiveTimers.forEach(function (t) { clearTimeout(t); });
     window.vwActiveTimers = [];
 
     // Calculate stars
@@ -13837,7 +13945,7 @@ window.vowelWhackEnd = function () {
         window.saveCabaranLainScore(window.currentExtraChallenge.id, score, stars);
     }
 
-    setTimeout(function() {
+    setTimeout(function () {
         window.showCabaranLainStarPopup(score, stars);
     }, 400);
 };
@@ -13884,7 +13992,7 @@ window.saveCabaranLainScore = function (challengeId, score, stars) {
         if (validStars > prev) {
             studentData[currentStudent].stars[challengeId] = validStars;
             studentData[currentStudent].scores[challengeId] = validScore;
-            
+
             if (typeof saveStudentData === 'function') {
                 saveStudentData();
             } else if (typeof window.saveStudentData === 'function') {
@@ -14282,8 +14390,8 @@ window.initBurungPatukAyatCanvas = function () {
 
         // Pick 2 decoys that are different from target
         const decoys = allSentenceWords.filter(w => w.toLowerCase() !== currentTargetWord.toLowerCase())
-                                      .sort(() => Math.random() - 0.5)
-                                      .slice(0, 2);
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 2);
 
         const lanes = [55, 115, 175];
         lanes.sort(() => Math.random() - 0.5);
@@ -14331,7 +14439,7 @@ window.initBurungPatukAyatCanvas = function () {
         flapBird();
     };
 
-    
+
 
     window.bpaKeyHandler = function (e) {
         if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
@@ -14489,9 +14597,9 @@ window.initBurungPatukAyatCanvas = function () {
                         isAdvancing = true;
                         const badgeEl = document.getElementById('bpa-target-badge');
                         if (badgeEl) {
-        const fullTxt = (targetWords || []).join(' ');
-        badgeEl.innerHTML = `<span style="color:#059669;">${fullTxt}</span>`;
-    }
+                            const fullTxt = (targetWords || []).join(' ');
+                            badgeEl.innerHTML = `<span style="color:#059669;">${fullTxt}</span>`;
+                        }
 
                         if (window.triggerConfettiEffect) window.triggerConfettiEffect();
                         const q = window.bpaQuestions[window.bpaCurrent];
@@ -14881,8 +14989,8 @@ window.initLastikBurungCanvas = function () {
 
             // Collision with targets
             targets.forEach(t => {
-                if (!t.hit && bird.x + bird.r > t.x - t.w/2 && bird.x - bird.r < t.x + t.w/2 &&
-                    bird.y + bird.r > t.y - t.h/2 && bird.y - bird.r < t.y + t.h/2) {
+                if (!t.hit && bird.x + bird.r > t.x - t.w / 2 && bird.x - bird.r < t.x + t.w / 2 &&
+                    bird.y + bird.r > t.y - t.h / 2 && bird.y - bird.r < t.y + t.h / 2) {
                     t.hit = true;
                     t.isPopping = true;
                     t.popScale = 1.36;
@@ -15299,7 +15407,7 @@ window.initMeriamKataCanvas = function () {
         ctx.arc(280, 260, 90, 0, Math.PI * 2);
         ctx.fill();
 
-                // Draw Attractive Floating Sky Targets (Airship / Hot-Air Balloon with Golden Trim)
+        // Draw Attractive Floating Sky Targets (Airship / Hot-Air Balloon with Golden Trim)
         balloons.forEach((b, idx) => {
             if (b.popped) return;
             const themeGradients = [
@@ -15655,7 +15763,7 @@ window.initKatakLompatCanvas = function () {
             frog.y = frog.startY + (frog.targetY - frog.startY) * frog.jumpT - Math.sin(frog.jumpT * Math.PI) * arcHeight;
         }
 
-                // Time variable for river animation
+        // Time variable for river animation
         if (typeof frog.riverTime === 'undefined') frog.riverTime = 0;
         frog.riverTime += 0.035;
 
@@ -16143,7 +16251,7 @@ window.initTangkapCeritaCanvas = function () {
         ctx.fillStyle = '#15803d';
         ctx.fillRect(0, GROUND_Y, 340, 3.5);
 
-                // Draw Falling Items (Responsive Clean White Badges with Gold Star Accent)
+        // Draw Falling Items (Responsive Clean White Badges with Gold Star Accent)
         items.forEach((it) => {
             if (it.caught) return;
             ctx.save();
@@ -16340,7 +16448,7 @@ function bukaPeta(nomborPeta, skipScreenChange = false) {
         if (modSemasa === 'latihan') {
             const stars = isLocked ? 0 : Number(localStorage.getItem('stars_' + modul.id) || 0);
             if (isLocked) {
-                try { localStorage.removeItem('stars_' + modul.id); } catch(e){}
+                try { localStorage.removeItem('stars_' + modul.id); } catch (e) { }
             }
             let star1 = stars >= 1 ? 'earned' : '';
             let star2 = stars >= 2 ? 'earned' : '';
@@ -18581,7 +18689,7 @@ window.bukaModalSenaraiSukuKata = function () {
             textContainer.className = 'perkataan-text-container';
             const textEl = document.createElement('div');
             textEl.className = 'perkataan-text century-gothic-font';
-            
+
             let displayText = item.front || '';
             if (displayText.includes('-')) {
                 displayText = displayText.split('-').map(p => p.trim()).join(' - ');
@@ -18656,7 +18764,7 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
         try {
             const idMap = JSON.parse(localStorage.getItem('bunyiKataStudentFirebaseIds') || '{}');
             if (idMap[studentName]) explicitStudentId = idMap[studentName];
-        } catch (e) {}
+        } catch (e) { }
         if (!explicitStudentId) {
             explicitStudentId = localStorage.getItem('bunyiKataStudentId') || '';
         }
@@ -18669,7 +18777,7 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
     let pChildNames = [];
     try {
         pChildNames = JSON.parse(localStorage.getItem('bunyiKataParentChildNames') || '[]');
-    } catch(e){}
+    } catch (e) { }
     if (window.parentChildNames && Array.isArray(window.parentChildNames)) {
         pChildNames = Array.from(new Set([...pChildNames, ...window.parentChildNames]));
     }
@@ -18773,7 +18881,7 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
     // (overlay kunci peta, avatar Versi Pro, dan lain-lain).
     try {
         window.dispatchEvent(new CustomEvent('akses-level-change'));
-    } catch (e) {}
+    } catch (e) { }
 
     // Muat turun rekod kemajuan murid (bintang, skor, lencana) dari Firebase Realtime Database jika ada
     if (studentName !== 'Tetamu' && typeof window.fetchStudentProgressFromFirebase === 'function') {
@@ -18836,13 +18944,13 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
                         // Simpan juga ke bunyiKataStudentData
                         try {
                             localStorage.setItem('bunyiKataStudentData', JSON.stringify(sTarget));
-                        } catch (e) {}
+                        } catch (e) { }
                     } catch (syncErr) {
                         console.warn('localStorage stars sync notice:', syncErr);
                     }
 
                     if (typeof updateProfilUI === 'function') {
-                        try { updateProfilUI(); } catch(e) {}
+                        try { updateProfilUI(); } catch (e) { }
                     }
                     window.dispatchEvent(new CustomEvent('kemaskini-profil'));
                 }
@@ -19397,7 +19505,7 @@ function renderBelajarBacaan() {
             const formattedHtml = formatSukuKataTeks(textContent, 'center');
             const imgSrc = item.image || '';
             const iconEmoji = item.icon || '';
-            
+
             if (imgSrc || (iconEmoji && iconEmoji !== '📖')) {
                 let imageBoxInner = '';
                 if (imgSrc && (imgSrc.startsWith('http') || imgSrc.startsWith('/') || imgSrc.includes('.png') || imgSrc.includes('.jpg'))) {
@@ -21075,9 +21183,9 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['vr-player-controller'])
     AFRAME.registerComponent('vr-player-controller', {
         init: function () {
             const posAttr = this.el.getAttribute('position') || { x: 0, y: 0, z: 4.5 };
-            this.charPos = { 
-                x: (posAttr.x !== undefined && posAttr.x !== null) ? Number(posAttr.x) : 0, 
-                z: (posAttr.z !== undefined && posAttr.z !== null) ? Number(posAttr.z) : 4.5 
+            this.charPos = {
+                x: (posAttr.x !== undefined && posAttr.x !== null) ? Number(posAttr.x) : 0,
+                z: (posAttr.z !== undefined && posAttr.z !== null) ? Number(posAttr.z) : 4.5
             };
             this.charRotation = 0;
             this.animTime = 0;
@@ -21112,7 +21220,7 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['vr-player-controller'])
                         osc.start();
                         osc.stop(ctx.currentTime + 0.08);
                     }
-                } catch (e) {}
+                } catch (e) { }
             };
 
             this._playStationChime = () => {
@@ -21134,7 +21242,7 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['vr-player-controller'])
                             osc.stop(ctx.currentTime + idx * 0.08 + 0.35);
                         });
                     }
-                } catch (e) {}
+                } catch (e) { }
             };
 
             // Double tap to jump/cheer animation
@@ -21849,7 +21957,7 @@ window.tukarHalamanVRBuku = function (delta) {
             osc.start();
             osc.stop(ctx.currentTime + 0.04);
         }
-    } catch (e) {}
+    } catch (e) { }
 
     const pageCard = document.getElementById('vr-book-page-card');
     if (pageCard) {
@@ -22035,14 +22143,14 @@ window.playVRStationVoice = function (teks, onEnd) {
         try {
             window.currentVRStationAudio.pause();
             window.currentVRStationAudio.currentTime = 0;
-        } catch (e) {}
+        } catch (e) { }
         window.currentVRStationAudio = null;
     }
     if ('speechSynthesis' in window) {
         try {
             window.speechSynthesis.cancel();
             if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-        } catch (e) {}
+        } catch (e) { }
     }
 
     let finished = false;
@@ -22121,7 +22229,7 @@ function fallbackVoiceSpeech(teks, onEnd) {
     try {
         window.speechSynthesis.cancel();
         if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-    } catch (e) {}
+    } catch (e) { }
 
     const cleanText = String(teks).replace(/[-_/]/g, ' ').trim();
 
@@ -22643,8 +22751,8 @@ window.playVRItemAudio = function (soundText, index, isEncoded) {
     if (card) {
         card.style.transform = 'scale(0.97)';
         card.style.boxShadow = '0 0 0 3.5px #38bdf8, 0 8px 24px rgba(56,189,248,0.45)';
-        setTimeout(() => { 
-            card.style.transform = ''; 
+        setTimeout(() => {
+            card.style.transform = '';
             card.style.boxShadow = '';
         }, 200);
     }
@@ -22669,7 +22777,7 @@ window.playVRAutoAll = async function () {
     if (window.vrAutoPlayActive) {
         window.vrAutoPlayActive = false;
         if (window.currentVRStationAudio) {
-            try { window.currentVRStationAudio.pause(); } catch(e) {}
+            try { window.currentVRStationAudio.pause(); } catch (e) { }
         }
         if (window.speechSynthesis) window.speechSynthesis.cancel();
         if (autoBtn) {
@@ -22738,7 +22846,7 @@ window.playVRAutoAll = async function () {
 window.closeVRStationPopup = function () {
     window.vrAutoPlayActive = false;
     if (window.currentVRStationAudio) {
-        try { window.currentVRStationAudio.pause(); } catch(e) {}
+        try { window.currentVRStationAudio.pause(); } catch (e) { }
     }
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     const popup = document.getElementById('vr-station-popup');
@@ -23111,11 +23219,11 @@ function generateCreamWallTexture() {
         canvas.height = 256;
         const ctx = canvas.getContext('2d');
         if (!ctx) return '';
-        
+
         // Exact Warm Royal Museum Cream Base (#fef3c7)
         ctx.fillStyle = '#fef3c7';
         ctx.fillRect(0, 0, 256, 256);
-        
+
         // Very subtle micro-fine plaster grain (clean & uniform, no harsh dark patches)
         const imgData = ctx.getImageData(0, 0, 256, 256);
         const data = imgData.data;
@@ -23126,7 +23234,7 @@ function generateCreamWallTexture() {
             data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + noise * 0.7));
         }
         ctx.putImageData(imgData, 0, 0);
-        
+
         // Soft seamless warm light gleams (only delicate white highlights, NO dirty brown splotches)
         for (let j = 0; j < 16; j++) {
             const x = Math.random() * 256;
@@ -23191,15 +23299,15 @@ function vrGrandChandelier(px, py, pz) {
         <a-ring rotation="-90 0 0" position="0 0.08 0" radius-inner="0.75" radius-outer="1.05" color="#fbbf24"></a-ring>
         <a-octahedron position="0 -0.25 0" radius="0.38" color="#fef08a" material="emissive: #fef08a; emissiveIntensity: 0.85; opacity: 0.95; transparent: true;" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear"></a-octahedron>
         ${[0, 60, 120, 180, 240, 300].map(deg => {
-            const rad = deg * Math.PI / 180;
-            const lx = Math.cos(rad) * 0.92;
-            const lz = Math.sin(rad) * 0.92;
-            return `
+        const rad = deg * Math.PI / 180;
+        const lx = Math.cos(rad) * 0.92;
+        const lz = Math.sin(rad) * 0.92;
+        return `
                 <a-cylinder position="${lx} 0 ${lz}" radius="0.035" height="0.24" color="#d97706"></a-cylinder>
                 <a-cylinder position="${lx} 0.18 ${lz}" radius="0.1" height="0.18" color="#ffffff" material="emissive: #fffbeb; emissiveIntensity: 0.9; opacity: 0.95; transparent: true;"></a-cylinder>
                 <a-sphere position="${lx} 0.32 ${lz}" radius="0.07" color="#f59e0b" material="emissive: #fbbf24; emissiveIntensity: 1;"></a-sphere>
             `;
-        }).join('')}
+    }).join('')}
         <a-light type="point" color="#fef08a" intensity="0.5" distance="18" position="0 -0.5 0"></a-light>
     </a-entity>`;
 }
@@ -23208,15 +23316,15 @@ function vrGrandBookshelf(px, py, pz, rotY) {
     const colors1 = ['#dc2626', '#2563eb', '#16a34a', '#d97706', '#7c3aed', '#0284c7', '#e11d48', '#059669', '#ea580c'];
     const heights1 = [0.55, 0.62, 0.58, 0.65, 0.52, 0.64, 0.60, 0.56, 0.62];
     const books = [-0.95, -0.72, -0.48, -0.24, 0.0, 0.24, 0.48, 0.72, 0.95].map((bx, idx) => `
-        <a-box position="${bx} ${0.83 + heights1[idx]/2} 0.02" width="0.16" height="${heights1[idx]}" depth="0.32" color="${colors1[idx]}"></a-box>
-        <a-box position="${bx} ${0.83 + heights1[idx]/2} 0.17" width="0.14" height="${heights1[idx] - 0.04}" depth="0.03" color="#fef9c3"></a-box>
+        <a-box position="${bx} ${0.83 + heights1[idx] / 2} 0.02" width="0.16" height="${heights1[idx]}" depth="0.32" color="${colors1[idx]}"></a-box>
+        <a-box position="${bx} ${0.83 + heights1[idx] / 2} 0.17" width="0.14" height="${heights1[idx] - 0.04}" depth="0.03" color="#fef9c3"></a-box>
     `).join('');
 
     const colors2 = ['#0284c7', '#ea580c', '#10b981', '#6366f1', '#f59e0b', '#ec4899', '#14b8a6', '#8b5cf6', '#059669'];
     const heights2 = [0.58, 0.64, 0.54, 0.66, 0.60, 0.55, 0.62, 0.58, 0.60];
     const books2 = [-0.9, -0.68, -0.45, -0.22, 0.02, 0.25, 0.48, 0.72, 0.92].map((bx, idx) => `
-        <a-box position="${bx} ${1.68 + heights2[idx]/2} 0.02" width="0.16" height="${heights2[idx]}" depth="0.32" color="${colors2[idx]}"></a-box>
-        <a-box position="${bx} ${1.68 + heights2[idx]/2} 0.17" width="0.14" height="${heights2[idx] - 0.04}" depth="0.03" color="#fef9c3"></a-box>
+        <a-box position="${bx} ${1.68 + heights2[idx] / 2} 0.02" width="0.16" height="${heights2[idx]}" depth="0.32" color="${colors2[idx]}"></a-box>
+        <a-box position="${bx} ${1.68 + heights2[idx] / 2} 0.17" width="0.14" height="${heights2[idx] - 0.04}" depth="0.03" color="#fef9c3"></a-box>
     `).join('');
 
     return `<a-entity position="${px} ${py} ${pz}" rotation="0 ${rotY || 0} 0">
@@ -23922,7 +24030,7 @@ function startVRBacaanScene() {
         </a-entity>`;
     }
 
-        function vrStoryBookBannerEntity(px, py, pz, rotY, book) {
+    function vrStoryBookBannerEntity(px, py, pz, rotY, book) {
         if (!book) return '';
         const bannerTitleSvg = makeVrBannerTitleSvg(book.title, book.color);
         return `<a-entity position="${px} ${py} ${pz}" rotation="0 ${rotY || 0} 0" id="vr-banner-${book.id}">
@@ -24041,7 +24149,7 @@ function startVRBacaanScene() {
         shelfYs.forEach((sy, sIdx) => {
             shelfHtml += `<a-box position="0 ${sy} 0.05" width="2.38" height="0.06" depth="0.58" color="#78350f"></a-box>
             <a-box position="0 ${sy} 0.35" width="2.4" height="0.08" depth="0.04" color="#b8860b"></a-box>`;
-            
+
             const numBooks = 9;
             for (let b = 0; b < numBooks; b++) {
                 const bx = -0.95 + b * 0.235;
@@ -24074,16 +24182,16 @@ function startVRBacaanScene() {
             <a-cylinder position="0 -0.85 0" rotation="90 0 0" radius="0.02" height="2.7" color="#b8860b"></a-cylinder>
             <!-- 6 Glowing Candle Lanterns -->
             ${[0, 60, 120, 180, 240, 300].map(deg => {
-                const rad = deg * Math.PI / 180;
-                const lx = (Math.cos(rad) * 1.35).toFixed(3);
-                const lz = (Math.sin(rad) * 1.35).toFixed(3);
-                return `
+            const rad = deg * Math.PI / 180;
+            const lx = (Math.cos(rad) * 1.35).toFixed(3);
+            const lz = (Math.sin(rad) * 1.35).toFixed(3);
+            return `
                     <a-cylinder position="${lx} -0.85 ${lz}" radius="0.06" height="0.12" color="#b8860b"></a-cylinder>
                     <a-cylinder position="${lx} -0.73 ${lz}" radius="0.03" height="0.14" color="#fefce8"></a-cylinder>
                     <a-sphere position="${lx} -0.62 ${lz}" radius="0.07" color="#fbbf24" material="emissive: #fef08a; emissiveIntensity: 0.95;"></a-sphere>
                     
                 `;
-            }).join('')}
+        }).join('')}
             <!-- Central Crystal Orb -->
             <a-octahedron position="0 -1.2 0" radius="0.22" color="#38bdf8" material="opacity: 0.85; transparent: true; emissive: #38bdf8; emissiveIntensity: 0.4;"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear"></a-octahedron>
@@ -24915,10 +25023,10 @@ function initAppLogicOnReady() {
                         }
                         try {
                             localStorage.setItem('bunyiKataStudentData', JSON.stringify(target));
-                        } catch (e) {}
+                        } catch (e) { }
 
                         if (typeof updateProfilUI === 'function') {
-                            try { updateProfilUI(); } catch(e) {}
+                            try { updateProfilUI(); } catch (e) { }
                         }
                         window.dispatchEvent(new CustomEvent('kemaskini-profil'));
                     }
@@ -24963,7 +25071,7 @@ window.padamProfilAnakIbuBapa = function (namaAnak) {
                 window.deleteParentChildFromFirebase({
                     namaAnak: childName,
                     parentIdOrEmail: localStorage.getItem('bunyiKataUserId') || ''
-                }).catch(function(e) { console.warn('Ralat padam anak di Firebase:', e); });
+                }).catch(function (e) { console.warn('Ralat padam anak di Firebase:', e); });
             }
 
             if (window.anakTerpilih === childName) {
@@ -25128,285 +25236,285 @@ function initARCamera() {
         }).then(stream => {
             hideARCameraOverlay();
 
-        const faceMesh = new FaceMesh({
-            locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-            }
-        });
+            const faceMesh = new FaceMesh({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+                }
+            });
 
-        faceMesh.setOptions({
-            maxNumFaces: 1,
-            refineLandmarks: true,
-            minDetectionConfidence: 0.6,
-            minTrackingConfidence: 0.6
-        });
+            faceMesh.setOptions({
+                maxNumFaces: 1,
+                refineLandmarks: true,
+                minDetectionConfidence: 0.6,
+                minTrackingConfidence: 0.6
+            });
 
-        faceMesh.onResults((results) => {
+            faceMesh.onResults((results) => {
+                hideARCameraOverlay();
+
+                if (canvasElement.width !== (videoElement.videoWidth || 640)) {
+                    canvasElement.width = videoElement.videoWidth || 640;
+                    canvasElement.height = videoElement.videoHeight || 480;
+                }
+
+                canvasCtx.save();
+                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+                if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                    for (const landmarks of results.multiFaceLandmarks) {
+                        const getPt = (idx) => ({
+                            x: landmarks[idx].x * canvasElement.width,
+                            y: landmarks[idx].y * canvasElement.height
+                        });
+
+                        const nose = getPt(1);
+                        const leftFH = getPt(54);
+                        const rightFH = getPt(284);
+                        const leftCheek = getPt(205);
+                        const rightCheek = getPt(425);
+
+                        const filterMode = window.currentARFilter || 'bear';
+
+                        if (filterMode === 'bear') {
+                            // 🐻 BEAR FILTER
+                            // Telinga Luar
+                            canvasCtx.fillStyle = '#f472b6';
+                            canvasCtx.beginPath();
+                            canvasCtx.arc(leftFH.x - 10, leftFH.y - 30, 35, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+                            canvasCtx.beginPath();
+                            canvasCtx.arc(rightFH.x + 10, rightFH.y - 30, 35, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                            // Telinga Dalam
+                            canvasCtx.fillStyle = '#fdf2f8';
+                            canvasCtx.beginPath();
+                            canvasCtx.arc(leftFH.x - 10, leftFH.y - 30, 18, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+                            canvasCtx.beginPath();
+                            canvasCtx.arc(rightFH.x + 10, rightFH.y - 30, 18, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                            // Hidung
+                            canvasCtx.fillStyle = '#1f2937';
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(nose.x, nose.y, 15, 10, 0, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                            canvasCtx.fillStyle = '#ffffff';
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(nose.x - 4, nose.y - 3, 4, 2, 0, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                            // Blush Pipi
+                            canvasCtx.fillStyle = 'rgba(251, 113, 133, 0.5)';
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(leftCheek.x - 10, leftCheek.y, 25, 15, 0, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(rightCheek.x + 10, rightCheek.y, 25, 15, 0, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                        } else if (filterMode === 'cat') {
+                            // 🐱 CAT FILTER
+                            // Left Ear
+                            canvasCtx.fillStyle = '#fb923c';
+                            canvasCtx.beginPath();
+                            canvasCtx.moveTo(leftFH.x - 35, leftFH.y);
+                            canvasCtx.lineTo(leftFH.x - 20, leftFH.y - 75);
+                            canvasCtx.lineTo(leftFH.x + 10, leftFH.y - 15);
+                            canvasCtx.closePath();
+                            canvasCtx.fill();
+
+                            // Left Inner Ear
+                            canvasCtx.fillStyle = '#fef08a';
+                            canvasCtx.beginPath();
+                            canvasCtx.moveTo(leftFH.x - 27, leftFH.y - 5);
+                            canvasCtx.lineTo(leftFH.x - 20, leftFH.y - 55);
+                            canvasCtx.lineTo(leftFH.x + 2, leftFH.y - 15);
+                            canvasCtx.closePath();
+                            canvasCtx.fill();
+
+                            // Right Ear
+                            canvasCtx.fillStyle = '#fb923c';
+                            canvasCtx.beginPath();
+                            canvasCtx.moveTo(rightFH.x - 10, rightFH.y - 15);
+                            canvasCtx.lineTo(rightFH.x + 20, rightFH.y - 75);
+                            canvasCtx.lineTo(rightFH.x + 35, rightFH.y);
+                            canvasCtx.closePath();
+                            canvasCtx.fill();
+
+                            // Right Inner Ear
+                            canvasCtx.fillStyle = '#fef08a';
+                            canvasCtx.beginPath();
+                            canvasCtx.moveTo(rightFH.x - 2, rightFH.y - 15);
+                            canvasCtx.lineTo(rightFH.x + 20, rightFH.y - 55);
+                            canvasCtx.lineTo(rightFH.x + 27, rightFH.y - 5);
+                            canvasCtx.closePath();
+                            canvasCtx.fill();
+
+                            // Cat Nose
+                            canvasCtx.fillStyle = '#f43f5e';
+                            canvasCtx.beginPath();
+                            canvasCtx.moveTo(nose.x - 12, nose.y - 6);
+                            canvasCtx.lineTo(nose.x + 12, nose.y - 6);
+                            canvasCtx.lineTo(nose.x, nose.y + 10);
+                            canvasCtx.closePath();
+                            canvasCtx.fill();
+
+                            // Cat Whiskers
+                            canvasCtx.strokeStyle = '#1e293b';
+                            canvasCtx.lineWidth = 3;
+                            canvasCtx.lineCap = 'round';
+
+                            canvasCtx.beginPath();
+                            canvasCtx.moveTo(leftCheek.x, leftCheek.y - 8);
+                            canvasCtx.lineTo(leftCheek.x - 45, leftCheek.y - 18);
+                            canvasCtx.moveTo(leftCheek.x, leftCheek.y);
+                            canvasCtx.lineTo(leftCheek.x - 50, leftCheek.y);
+                            canvasCtx.moveTo(leftCheek.x, leftCheek.y + 8);
+                            canvasCtx.lineTo(leftCheek.x - 45, leftCheek.y + 18);
+                            canvasCtx.stroke();
+
+                            canvasCtx.beginPath();
+                            canvasCtx.moveTo(rightCheek.x, rightCheek.y - 8);
+                            canvasCtx.lineTo(rightCheek.x + 45, rightCheek.y - 18);
+                            canvasCtx.moveTo(rightCheek.x, rightCheek.y);
+                            canvasCtx.lineTo(rightCheek.x + 50, rightCheek.y);
+                            canvasCtx.moveTo(rightCheek.x, rightCheek.y + 8);
+                            canvasCtx.lineTo(rightCheek.x + 45, rightCheek.y + 18);
+                            canvasCtx.stroke();
+
+                            // Blush
+                            canvasCtx.fillStyle = 'rgba(251, 113, 133, 0.4)';
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(leftCheek.x, leftCheek.y, 20, 12, 0, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(rightCheek.x, rightCheek.y, 20, 12, 0, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                        } else if (filterMode === 'dog') {
+                            // 🐶 DOG FILTER
+                            // Floppy Dog Ears
+                            canvasCtx.fillStyle = '#b45309';
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(leftFH.x - 30, leftFH.y + 20, 22, 50, -0.2, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                            canvasCtx.fillStyle = '#fde68a';
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(leftFH.x - 30, leftFH.y + 20, 12, 35, -0.2, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                            canvasCtx.fillStyle = '#b45309';
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(rightFH.x + 30, rightFH.y + 20, 22, 50, 0.2, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                            canvasCtx.fillStyle = '#fde68a';
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(rightFH.x + 30, rightFH.y + 20, 12, 35, 0.2, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                            // Dog Snout & Nose
+                            canvasCtx.fillStyle = '#78350f';
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(nose.x, nose.y + 2, 18, 14, 0, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                            canvasCtx.fillStyle = '#1e293b';
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(nose.x, nose.y - 2, 12, 9, 0, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                            canvasCtx.fillStyle = '#ffffff';
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(nose.x - 3, nose.y - 4, 3, 2, 0, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                            // Dog Tongue
+                            const lipBottom = getPt(14);
+                            canvasCtx.fillStyle = '#f43f5e';
+                            canvasCtx.beginPath();
+                            canvasCtx.ellipse(lipBottom.x, lipBottom.y + 12, 10, 16, 0, 0, 2 * Math.PI);
+                            canvasCtx.fill();
+
+                            canvasCtx.strokeStyle = '#be123c';
+                            canvasCtx.lineWidth = 2;
+                            canvasCtx.beginPath();
+                            canvasCtx.moveTo(lipBottom.x, lipBottom.y + 2);
+                            canvasCtx.lineTo(lipBottom.x, lipBottom.y + 18);
+                            canvasCtx.stroke();
+                        }
+                    }
+                }
+                canvasCtx.restore();
+            });
+
+            window.arFaceMesh = faceMesh;
+
+            let isARActive = true;
+            window.arCamera = {
+                stop: () => {
+                    isARActive = false;
+                    stream.getTracks().forEach(t => t.stop());
+                },
+                start: async () => { } // Dummy start
+            };
+
+            const videoStream = new MediaStream(stream.getVideoTracks());
+            videoElement.srcObject = videoStream;
+            videoElement.play().then(() => hideARCameraOverlay()).catch(() => hideARCameraOverlay());
             hideARCameraOverlay();
 
-            if (canvasElement.width !== (videoElement.videoWidth || 640)) {
-                canvasElement.width = videoElement.videoWidth || 640;
-                canvasElement.height = videoElement.videoHeight || 480;
-            }
-
-            canvasCtx.save();
-            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-
-            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-                for (const landmarks of results.multiFaceLandmarks) {
-                    const getPt = (idx) => ({
-                        x: landmarks[idx].x * canvasElement.width,
-                        y: landmarks[idx].y * canvasElement.height
-                    });
-
-                    const nose = getPt(1);
-                    const leftFH = getPt(54);
-                    const rightFH = getPt(284);
-                    const leftCheek = getPt(205);
-                    const rightCheek = getPt(425);
-
-                    const filterMode = window.currentARFilter || 'bear';
-
-                    if (filterMode === 'bear') {
-                        // 🐻 BEAR FILTER
-                        // Telinga Luar
-                        canvasCtx.fillStyle = '#f472b6';
-                        canvasCtx.beginPath();
-                        canvasCtx.arc(leftFH.x - 10, leftFH.y - 30, 35, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-                        canvasCtx.beginPath();
-                        canvasCtx.arc(rightFH.x + 10, rightFH.y - 30, 35, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                        // Telinga Dalam
-                        canvasCtx.fillStyle = '#fdf2f8';
-                        canvasCtx.beginPath();
-                        canvasCtx.arc(leftFH.x - 10, leftFH.y - 30, 18, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-                        canvasCtx.beginPath();
-                        canvasCtx.arc(rightFH.x + 10, rightFH.y - 30, 18, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                        // Hidung
-                        canvasCtx.fillStyle = '#1f2937';
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(nose.x, nose.y, 15, 10, 0, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                        canvasCtx.fillStyle = '#ffffff';
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(nose.x - 4, nose.y - 3, 4, 2, 0, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                        // Blush Pipi
-                        canvasCtx.fillStyle = 'rgba(251, 113, 133, 0.5)';
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(leftCheek.x - 10, leftCheek.y, 25, 15, 0, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(rightCheek.x + 10, rightCheek.y, 25, 15, 0, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                    } else if (filterMode === 'cat') {
-                        // 🐱 CAT FILTER
-                        // Left Ear
-                        canvasCtx.fillStyle = '#fb923c';
-                        canvasCtx.beginPath();
-                        canvasCtx.moveTo(leftFH.x - 35, leftFH.y);
-                        canvasCtx.lineTo(leftFH.x - 20, leftFH.y - 75);
-                        canvasCtx.lineTo(leftFH.x + 10, leftFH.y - 15);
-                        canvasCtx.closePath();
-                        canvasCtx.fill();
-
-                        // Left Inner Ear
-                        canvasCtx.fillStyle = '#fef08a';
-                        canvasCtx.beginPath();
-                        canvasCtx.moveTo(leftFH.x - 27, leftFH.y - 5);
-                        canvasCtx.lineTo(leftFH.x - 20, leftFH.y - 55);
-                        canvasCtx.lineTo(leftFH.x + 2, leftFH.y - 15);
-                        canvasCtx.closePath();
-                        canvasCtx.fill();
-
-                        // Right Ear
-                        canvasCtx.fillStyle = '#fb923c';
-                        canvasCtx.beginPath();
-                        canvasCtx.moveTo(rightFH.x - 10, rightFH.y - 15);
-                        canvasCtx.lineTo(rightFH.x + 20, rightFH.y - 75);
-                        canvasCtx.lineTo(rightFH.x + 35, rightFH.y);
-                        canvasCtx.closePath();
-                        canvasCtx.fill();
-
-                        // Right Inner Ear
-                        canvasCtx.fillStyle = '#fef08a';
-                        canvasCtx.beginPath();
-                        canvasCtx.moveTo(rightFH.x - 2, rightFH.y - 15);
-                        canvasCtx.lineTo(rightFH.x + 20, rightFH.y - 55);
-                        canvasCtx.lineTo(rightFH.x + 27, rightFH.y - 5);
-                        canvasCtx.closePath();
-                        canvasCtx.fill();
-
-                        // Cat Nose
-                        canvasCtx.fillStyle = '#f43f5e';
-                        canvasCtx.beginPath();
-                        canvasCtx.moveTo(nose.x - 12, nose.y - 6);
-                        canvasCtx.lineTo(nose.x + 12, nose.y - 6);
-                        canvasCtx.lineTo(nose.x, nose.y + 10);
-                        canvasCtx.closePath();
-                        canvasCtx.fill();
-
-                        // Cat Whiskers
-                        canvasCtx.strokeStyle = '#1e293b';
-                        canvasCtx.lineWidth = 3;
-                        canvasCtx.lineCap = 'round';
-
-                        canvasCtx.beginPath();
-                        canvasCtx.moveTo(leftCheek.x, leftCheek.y - 8);
-                        canvasCtx.lineTo(leftCheek.x - 45, leftCheek.y - 18);
-                        canvasCtx.moveTo(leftCheek.x, leftCheek.y);
-                        canvasCtx.lineTo(leftCheek.x - 50, leftCheek.y);
-                        canvasCtx.moveTo(leftCheek.x, leftCheek.y + 8);
-                        canvasCtx.lineTo(leftCheek.x - 45, leftCheek.y + 18);
-                        canvasCtx.stroke();
-
-                        canvasCtx.beginPath();
-                        canvasCtx.moveTo(rightCheek.x, rightCheek.y - 8);
-                        canvasCtx.lineTo(rightCheek.x + 45, rightCheek.y - 18);
-                        canvasCtx.moveTo(rightCheek.x, rightCheek.y);
-                        canvasCtx.lineTo(rightCheek.x + 50, rightCheek.y);
-                        canvasCtx.moveTo(rightCheek.x, rightCheek.y + 8);
-                        canvasCtx.lineTo(rightCheek.x + 45, rightCheek.y + 18);
-                        canvasCtx.stroke();
-
-                        // Blush
-                        canvasCtx.fillStyle = 'rgba(251, 113, 133, 0.4)';
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(leftCheek.x, leftCheek.y, 20, 12, 0, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(rightCheek.x, rightCheek.y, 20, 12, 0, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                    } else if (filterMode === 'dog') {
-                        // 🐶 DOG FILTER
-                        // Floppy Dog Ears
-                        canvasCtx.fillStyle = '#b45309';
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(leftFH.x - 30, leftFH.y + 20, 22, 50, -0.2, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                        canvasCtx.fillStyle = '#fde68a';
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(leftFH.x - 30, leftFH.y + 20, 12, 35, -0.2, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                        canvasCtx.fillStyle = '#b45309';
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(rightFH.x + 30, rightFH.y + 20, 22, 50, 0.2, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                        canvasCtx.fillStyle = '#fde68a';
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(rightFH.x + 30, rightFH.y + 20, 12, 35, 0.2, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                        // Dog Snout & Nose
-                        canvasCtx.fillStyle = '#78350f';
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(nose.x, nose.y + 2, 18, 14, 0, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                        canvasCtx.fillStyle = '#1e293b';
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(nose.x, nose.y - 2, 12, 9, 0, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                        canvasCtx.fillStyle = '#ffffff';
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(nose.x - 3, nose.y - 4, 3, 2, 0, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                        // Dog Tongue
-                        const lipBottom = getPt(14);
-                        canvasCtx.fillStyle = '#f43f5e';
-                        canvasCtx.beginPath();
-                        canvasCtx.ellipse(lipBottom.x, lipBottom.y + 12, 10, 16, 0, 0, 2 * Math.PI);
-                        canvasCtx.fill();
-
-                        canvasCtx.strokeStyle = '#be123c';
-                        canvasCtx.lineWidth = 2;
-                        canvasCtx.beginPath();
-                        canvasCtx.moveTo(lipBottom.x, lipBottom.y + 2);
-                        canvasCtx.lineTo(lipBottom.x, lipBottom.y + 18);
-                        canvasCtx.stroke();
-                    }
-                }
-            }
-            canvasCtx.restore();
-        });
-
-        window.arFaceMesh = faceMesh;
-
-        let isARActive = true;
-        window.arCamera = {
-            stop: () => {
-                isARActive = false;
-                stream.getTracks().forEach(t => t.stop());
-            },
-            start: async () => { } // Dummy start
-        };
-
-        const videoStream = new MediaStream(stream.getVideoTracks());
-        videoElement.srcObject = videoStream;
-        videoElement.play().then(() => hideARCameraOverlay()).catch(() => hideARCameraOverlay());
-        hideARCameraOverlay();
-
-        let hasLoadedModel = false;
-        async function processVideo() {
-            if (!isARActive) return;
-            if (videoElement.readyState >= 2) {
-                try {
-                    // console.log("[AR Suku Kata] Menghantar frame ke FaceMesh...");
-                    await faceMesh.send({ image: videoElement });
-                    if (!hasLoadedModel) {
-                        hasLoadedModel = true;
-                        console.log("[AR Suku Kata] Frame berjaya diproses oleh FaceMesh!");
-                        hideARCameraOverlay();
-                    }
-                } catch (e) {
-                    if (!hasLoadedModel) {
-                        console.error("[AR Suku Kata] FaceMesh ralat semasa memproses frame:", e);
-                        if (overlay) {
-                            overlay.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-3x mb-3 text-red-500"></i><p class="text-xl font-bold text-white text-center">Ralat pemprosesan AR.</p><p class="text-sm text-center text-white">Sila muat semula halaman.</p>';
-                            setTimeout(() => hideARCameraOverlay(), 3000);
+            let hasLoadedModel = false;
+            async function processVideo() {
+                if (!isARActive) return;
+                if (videoElement.readyState >= 2) {
+                    try {
+                        // console.log("[AR Suku Kata] Menghantar frame ke FaceMesh...");
+                        await faceMesh.send({ image: videoElement });
+                        if (!hasLoadedModel) {
+                            hasLoadedModel = true;
+                            console.log("[AR Suku Kata] Frame berjaya diproses oleh FaceMesh!");
+                            hideARCameraOverlay();
                         }
-                        hasLoadedModel = true; // Stop spamming error
+                    } catch (e) {
+                        if (!hasLoadedModel) {
+                            console.error("[AR Suku Kata] FaceMesh ralat semasa memproses frame:", e);
+                            if (overlay) {
+                                overlay.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-3x mb-3 text-red-500"></i><p class="text-xl font-bold text-white text-center">Ralat pemprosesan AR.</p><p class="text-sm text-center text-white">Sila muat semula halaman.</p>';
+                                setTimeout(() => hideARCameraOverlay(), 3000);
+                            }
+                            hasLoadedModel = true; // Stop spamming error
+                        }
                     }
                 }
+                requestAnimationFrame(processVideo);
             }
-            requestAnimationFrame(processVideo);
-        }
 
-        console.log("[AR Suku Kata] Mula memuatkan FaceMesh (initialize)...");
-        faceMesh.initialize().then(() => {
-            console.log("[AR Suku Kata] FaceMesh berjaya dimuatkan!");
-            processVideo();
-        }).catch(e => {
-            console.error("[AR Suku Kata] Gagal memuatkan FaceMesh:", e);
+            console.log("[AR Suku Kata] Mula memuatkan FaceMesh (initialize)...");
+            faceMesh.initialize().then(() => {
+                console.log("[AR Suku Kata] FaceMesh berjaya dimuatkan!");
+                processVideo();
+            }).catch(e => {
+                console.error("[AR Suku Kata] Gagal memuatkan FaceMesh:", e);
+                if (overlay) {
+                    overlay.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-3x mb-3 text-red-500"></i><p class="text-xl font-bold text-white text-center">Gagal memuatkan model AR.</p><p class="text-sm text-center text-white">Sila pastikan sambungan internet stabil.</p>';
+                }
+                setTimeout(() => {
+                    hideARCameraOverlay();
+                }, 3000);
+            });
+
+        }).catch(err => {
+            console.error("Camera access denied: ", err);
             if (overlay) {
-                overlay.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-3x mb-3 text-red-500"></i><p class="text-xl font-bold text-white text-center">Gagal memuatkan model AR.</p><p class="text-sm text-center text-white">Sila pastikan sambungan internet stabil.</p>';
+                overlay.innerHTML = '<i class="fa-solid fa-triangle-exclamation fa-3x mb-3 text-red-500"></i><p class="text-xl font-bold text-red-500 text-center">Kamera diperlukan.</p><p class="text-sm text-center">Sila benarkan akses kamera untuk AR.</p>';
             }
-            setTimeout(() => {
-                hideARCameraOverlay();
-            }, 3000);
         });
-
-    }).catch(err => {
-        console.error("Camera access denied: ", err);
-        if (overlay) {
-            overlay.innerHTML = '<i class="fa-solid fa-triangle-exclamation fa-3x mb-3 text-red-500"></i><p class="text-xl font-bold text-red-500 text-center">Kamera diperlukan.</p><p class="text-sm text-center">Sila benarkan akses kamera untuk AR.</p>';
-        }
-    });
     }
 }
 
@@ -25425,7 +25533,7 @@ window.playPopConfettiSound = function () {
         }
         const ctx = window.globalAudioCtx;
         if (ctx.state === 'suspended') {
-            ctx.resume().catch(() => {});
+            ctx.resume().catch(() => { });
         }
         const now = ctx.currentTime;
 
@@ -25458,7 +25566,7 @@ window.playPopConfettiSound = function () {
             chimeOsc.start(now + 0.04 + idx * 0.06);
             chimeOsc.stop(now + 0.45 + idx * 0.06);
         });
-    } catch (e) {}
+    } catch (e) { }
 };
 
 function initSpeechRecognition() {
@@ -25548,7 +25656,7 @@ function initSpeechRecognition() {
                     const cleanDisplay = (typeof transliterateJawiToRumi === 'function' ? transliterateJawiToRumi(latestTranscript) : latestTranscript)
                         .replace(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g, '')
                         .trim() || latestTranscript;
-                    
+
                     if (isFinalResult) {
                         if (window.playOops) window.playOops();
                         statusEl.innerHTML = `Awak sebut: <b style="color: #dc2626; display: inline-block;">"${cleanDisplay}"</b>. Cuba lagi!`;
@@ -26748,12 +26856,12 @@ window.arKiraJariCorrectAnswer = function () {
         try {
             const audioObj = new Audio(q.audio);
             audioObj.play().catch(e => console.log("Audio play prevented:", e));
-        } catch (e) {}
+        } catch (e) { }
     } else if (q && q.name) {
         try {
             const audioObj = new Audio(`/audio/nombor/${q.name}.mp3`);
             audioObj.play().catch(e => console.log("Audio play prevented:", e));
-        } catch (e) {}
+        } catch (e) { }
     }
 
     // Confetti
@@ -27255,4 +27363,4 @@ try {
     if (typeof window !== 'undefined' && window.getDaftarKelas) {
         window.getDaftarKelas();
     }
-} catch(e) {}
+} catch (e) { }
