@@ -725,6 +725,121 @@ async function startServer() {
     }
   });
 
+  /**
+   * Fasa 2: laporan pembayaran komisen (kitaran 2 minggu).
+   *
+   * Hanya baris `pending` yang LEBIH TUA daripada tempoh tahan (7 hari) layak
+   * dibayar — ini melindungi daripada refund/chargeback sebelum komisen keluar.
+   * Baris `sah` (jika ada) juga dianggap layak.
+   */
+  app.get("/api/admin/affiliate/payments", requireAdmin, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
+      }
+      const db = getDatabase(appInstance);
+      const hadMasa = Date.now() - KOMISEN_TAHAN_HARI * 86400000;
+
+      const [snapAff, snapRef] = await Promise.all([
+        db.ref("affiliates").get(),
+        db.ref("referrals").get(),
+      ]);
+
+      const namaKod = {};
+      if (snapAff.exists()) {
+        snapAff.forEach((a) => { namaKod[a.key] = (a.val() || {}).nama || ""; return false; });
+      }
+
+      const layak = []; // baris komisen yang boleh dibayar sekarang.
+      const belumMatang = []; // baris pending tetapi masih dalam tempoh tahan.
+      if (snapRef.exists()) {
+        snapRef.forEach((kodSnap) => {
+          const kod = kodSnap.key;
+          kodSnap.forEach((rekod) => {
+            const r = rekod.val() || {};
+            if (r.status === "batal" || r.status === "dibayar") return false;
+            const item = Object.assign({ kod, id: rekod.key, nama_affiliate: namaKod[kod] || "" }, r);
+            const masaBeli = new Date(r.tarikh_beli || 0).getTime();
+            if (Number.isFinite(masaBeli) && masaBeli <= hadMasa) layak.push(item);
+            else belumMatang.push(item);
+            return false;
+          });
+          return false;
+        });
+      }
+
+      // Kumpulkan jumlah layak mengikut affiliate.
+      const ikutKod = {};
+      layak.forEach((it) => {
+        if (!ikutKod[it.kod]) {
+          ikutKod[it.kod] = { kod: it.kod, nama: it.nama_affiliate, bil: 0, jumlah_sen: 0 };
+        }
+        ikutKod[it.kod].bil += 1;
+        ikutKod[it.kod].jumlah_sen += Number(it.komisen_sen) || 0;
+      });
+      const ringkasan = Object.values(ikutKod).sort((a, b) => b.jumlah_sen - a.jumlah_sen);
+      const jumlahLayakSen = ringkasan.reduce((s, r) => s + r.jumlah_sen, 0);
+
+      return res.json({
+        success: true,
+        tempoh_tahan_hari: KOMISEN_TAHAN_HARI,
+        ringkasan,
+        layak,
+        belum_matang: belumMatang,
+        jumlah_layak_sen: jumlahLayakSen,
+      });
+    } catch (err) {
+      console.error("[Admin Affiliate Payments]", err);
+      return res.status(500).json({ success: false, message: "Gagal memuatkan laporan pembayaran." });
+    }
+  });
+
+  /**
+   * Fasa 2: tanda komisen dibayar (kitaran 2 minggu).
+   *
+   * Menerima senarai `ids` (atau `kod` untuk semua baris layak affiliate itu).
+   * Setiap baris ditanda `status: dibayar` + `tarikh_bayar` supaya kitaran
+   * mana sudah dibayar boleh diaudit kemudian.
+   */
+  app.post("/api/admin/affiliate/mark-paid", requireAdmin, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
+      }
+      const db = getDatabase(appInstance);
+      const tarikh = new Date().toISOString();
+
+      const senarai = Array.isArray(req.body?.items) ? req.body.items : [];
+      if (!senarai.length) {
+        return res.status(400).json({ success: false, message: "Tiada baris komisen dipilih." });
+      }
+
+      let dibayarBil = 0;
+      let jumlahSen = 0;
+      for (const it of senarai) {
+        const kod = String(it?.kod || "").trim().toUpperCase();
+        const id = String(it?.id || "").trim();
+        if (!kod || !id) continue;
+        const ref = db.ref(`referrals/${kod}/${id}`);
+        const snap = await ref.get();
+        if (!snap.exists()) continue;
+        const r = snap.val() || {};
+        if (r.status === "dibayar" || r.status === "batal") continue;
+        await ref.update({ status: "dibayar", tarikh_bayar: tarikh });
+        dibayarBil += 1;
+        jumlahSen += Number(r.komisen_sen) || 0;
+      }
+
+      await rekodAudit(db, "affiliate_bayar", { bil: dibayarBil, jumlah_sen: jumlahSen, tarikh });
+      return res.json({ success: true, dibayar_bil: dibayarBil, jumlah_sen: jumlahSen, tarikh });
+    } catch (err) {
+      console.error("[Admin Affiliate Mark Paid]", err);
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  });
+
   app.post("/api/admin/create-account", requireAdmin, async (req, res) => {
     try {
       const appInstance = getAdminApp();
@@ -740,12 +855,14 @@ async function startServer() {
         nama_sekolah = "",
         nama_keluarga = "",
         planKey = "",
+        kod_rujukan = "",
       } = req.body || {};
 
       const namaBersih = String(nama).trim();
       const emailBersih = String(email).trim().toLowerCase();
       const perananBersih = String(peranan).trim().toLowerCase();
       const planBersih = String(planKey).trim();
+      const kodRujukanBersih = String(kod_rujukan).trim().toUpperCase();
 
       // --- Pengesahan input ---
       if (!namaBersih || !emailBersih || !perananBersih || !planBersih) {
@@ -762,6 +879,26 @@ async function startServer() {
       }
 
       const authAdmin = getAuth(appInstance);
+      const db = getDatabase(appInstance);
+
+      // --- Fasa 2: sahkan kod rujukan (jika ada) ---
+      // Kod tidak dikenali / digantung TIDAK menghalang cipta akaun — ia hanya
+      // bermakna tiada komisen dikreditkan (fail-safe: jangan sekat jualan).
+      let affiliateSah = null;
+      if (kodRujukanBersih) {
+        try {
+          const snapAff = await db.ref(`affiliates/${kodRujukanBersih}`).get();
+          if (snapAff.exists()) {
+            const a = snapAff.val() || {};
+            if (a.status === "aktif") affiliateSah = a;
+            else console.warn(`[Affiliate] Kod ${kodRujukanBersih} digantung — tiada komisen.`);
+          } else {
+            console.warn(`[Affiliate] Kod ${kodRujukanBersih} tidak ditemui — tiada komisen.`);
+          }
+        } catch (err) {
+          console.warn("[Affiliate] Gagal menyemak kod rujukan:", err?.message || err);
+        }
+      }
 
       // --- Pastikan emel belum digunakan ---
       try {
@@ -809,12 +946,11 @@ async function startServer() {
         tarikh_tamat: tarikhTamat,
         dicipta_oleh: "admin",
         sumber: "admin",
-        // Disediakan untuk fasa affiliate akan datang â€” sengaja dibiarkan kosong.
-        referred_by: "",
+        // Fasa 2: jejak kod rujukan affiliate (kosong jika tiada).
+        referred_by: affiliateSah ? kodRujukanBersih : "",
         tarikh_dicipta: tarikhMula,
       };
 
-      const db = getDatabase(appInstance);
       await db.ref(`profiles/${uid}`).set(profilBaharu);
 
       // Rekod pesanan manual (bayaran di luar sistem, direkod oleh admin).
@@ -830,9 +966,32 @@ async function startServer() {
         status: "paid",
         kaedah: "manual",
         jenis: "cipta_akaun",
+        kod_rujukan: affiliateSah ? kodRujukanBersih : "",
         direkod_oleh: "admin",
         tarikh: tarikhMula,
       });
+
+      // --- Fasa 2: kreditkan komisen 30% kepada affiliate (fail-safe) ---
+      // Kegagalan kredit komisen TIDAK menghalang akaun dicipta; hanya log.
+      let komisenSen = 0;
+      if (affiliateSah) {
+        try {
+          komisenSen = kiraKomisenSen(plan.priceCents);
+          await db.ref(`referrals/${kodRujukanBersih}`).push({
+            pelanggan_uid: uid,
+            pelanggan_nama: namaBersih,
+            pelanggan_emel: emailBersih,
+            pakej: planBersih,
+            nama_pakej: plan.name,
+            harga_sen: plan.priceCents,
+            komisen_sen: komisenSen,
+            status: "pending",
+            tarikh_beli: tarikhMula,
+          });
+        } catch (err) {
+          console.warn("[Affiliate] Gagal merekod komisen:", err?.message || err);
+        }
+      }
 
       await rekodAudit(db, "cipta_akaun", {
         uid,
@@ -841,6 +1000,8 @@ async function startServer() {
         pakej: planBersih,
         harga_sen: plan.priceCents,
         jumlah_hari: plan.days,
+        kod_rujukan: affiliateSah ? kodRujukanBersih : "",
+        komisen_sen: komisenSen,
       });
       console.log(`[Admin Cipta Akaun] Akaun dicipta: ${emailBersih} (${uid}) pakej=${planBersih}`);
 
