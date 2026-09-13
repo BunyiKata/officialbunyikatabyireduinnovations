@@ -1,7 +1,8 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { loginWithEmail, registerWithEmail, sendPasswordResetEmail, logout } from "../../services/authService";
+import { loginWithEmail, sendPasswordResetEmail, logout } from "../../services/authService";
+import { hubungiAdminWhatsapp } from "../../config/contactAdmin";
 import {
   syncTeacherSessionFromFirebase,
   syncParentSessionFromFirebase,
@@ -17,7 +18,7 @@ export interface PlanInfo {
 
 export interface AuthModalProps {
   isOpen: boolean;
-  initialTab?: "masuk" | "daftar" | "login" | "register";
+  initialTab?: "masuk" | "login";
   pendingLoginMode: "guru" | "ibubapa" | "admin";
   pendingSelectedPlan?: PlanInfo | null;
   onClose: () => void;
@@ -40,32 +41,25 @@ export function AuthModal({
   setIsEditModalOpen,
   setTeacherPlanName,
 }: AuthModalProps) {
-  const [authModalTab, setAuthModalTab] = useState<"masuk" | "daftar" | "login" | "register">(initialTab);
+  const [authModalTab, setAuthModalTab] = useState<"masuk" | "login">("login");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-  const [regGuruNama, setRegGuruNama] = useState("");
-  const [regGuruSekolah, setRegGuruSekolah] = useState("");
-  const [regNamaKeluarga, setRegNamaKeluarga] = useState("");
   const [authModalError, setAuthModalError] = useState("");
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authSuccessMessage, setAuthSuccessMessage] = useState("");
 
   React.useEffect(() => {
     if (initialTab) {
-      setAuthModalTab(initialTab);
+      setAuthModalTab(initialTab === "masuk" ? "masuk" : "login");
     }
   }, [initialTab]);
 
   React.useEffect(() => {
     if (isOpen) {
-      if (pendingSelectedPlan || initialTab === "register" || initialTab === "daftar") {
-        // PENGGUNA DAFTAR BAHARU / LANGGAN PAKEJ:
-        // Kosongkan semua medan pendaftaran supaya tidak mencampur data sesi lama!
-        setRegGuruNama("");
-        setRegGuruSekolah("");
-        setRegNamaKeluarga("");
+      if (pendingSelectedPlan) {
+        // PENGGUNA LANGGAN PAKEJ:
+        // Kosongkan medan log masuk supaya tidak mencampur data sesi lama!
         setLoginEmail("");
         setLoginPassword("");
         setAuthModalError("");
@@ -229,7 +223,7 @@ export function AuthModal({
               {/* GARIS PEMBAHAGI TENGAH */}
               <div className="auth-modal-divider"></div>
 
-              {/* BAHAGIAN KANAN: Borang Log Masuk / Daftar */}
+              {/* BAHAGIAN KANAN: Borang Log Masuk */}
               <div className="auth-modal-right">
                 {/* Header Badge */}
                 <div style={{ textAlign: "center", marginTop: "4px" }}>
@@ -252,101 +246,39 @@ export function AuthModal({
                       lineHeight: "1.2",
                     }}
                   >
-                    {authModalTab === "register" && pendingLoginMode !== "admin"
-                      ? `Daftar Akaun ${pendingLoginMode === "guru" ? "Guru" : "Ibu Bapa"}`
-                      : `Log Masuk ${
-                          pendingLoginMode === "guru"
-                            ? "Guru"
-                            : pendingLoginMode === "ibubapa"
-                              ? "Ibu Bapa"
-                              : "Admin"
-                        }`}
+                    {`Log Masuk ${
+                      pendingLoginMode === "guru"
+                        ? "Guru"
+                        : pendingLoginMode === "ibubapa"
+                          ? "Ibu Bapa"
+                          : "Admin"
+                    }`}
                   </div>
                 </div>
 
-                {/* Tab Selector (Log Masuk vs Daftar Akaun) */}
+                {/* Log Masuk Sahaja — pendaftaran akaun dikendalikan oleh admin */}
                 {pendingLoginMode !== "admin" && (
                   <div
                     style={{
                       display: "flex",
-                      backgroundColor: "#f1f5f9",
+                      backgroundColor:
+                        pendingLoginMode === "guru"
+                          ? "var(--color-orange)"
+                          : "var(--color-blue)",
                       borderRadius: "14px",
-                      padding: "4px",
+                      padding: "8px 6px",
                       marginBottom: "16px",
                       border: "2px solid var(--color-dark)",
-                      gap: "4px",
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                      fontSize: "0.9rem",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
                     }}
                   >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                        setAuthModalTab("login");
-                        setAuthModalError("");
-                      }}
-                      style={{
-                        flex: 1,
-                        padding: "8px 6px",
-                        borderRadius: "10px",
-                        border:
-                          authModalTab === "login"
-                            ? "2px solid var(--color-dark)"
-                            : "2px solid transparent",
-                        backgroundColor:
-                          authModalTab === "login"
-                            ? pendingLoginMode === "guru"
-                              ? "var(--color-orange)"
-                              : "var(--color-blue)"
-                            : "transparent",
-                        color: authModalTab === "login" ? "#ffffff" : "#475569",
-                        fontWeight: "bold",
-                        fontSize: "0.88rem",
-                        cursor: "pointer",
-                        transition: "all 0.15s ease",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "6px",
-                      }}
-                    >
-                      <i className="fa-solid fa-right-to-bracket"></i>
-                      Log Masuk
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                        setAuthModalTab("register");
-                        setAuthModalError("");
-                      }}
-                      style={{
-                        flex: 1,
-                        padding: "8px 6px",
-                        borderRadius: "10px",
-                        border:
-                          authModalTab === "register"
-                            ? "2px solid var(--color-dark)"
-                            : "2px solid transparent",
-                        backgroundColor:
-                          authModalTab === "register"
-                            ? pendingLoginMode === "guru"
-                              ? "var(--color-orange)"
-                              : "var(--color-blue)"
-                            : "transparent",
-                        color: authModalTab === "register" ? "#ffffff" : "#475569",
-                        fontWeight: "bold",
-                        fontSize: "0.88rem",
-                        cursor: "pointer",
-                        transition: "all 0.15s ease",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "6px",
-                      }}
-                    >
-                      <i className="fa-solid fa-user-plus"></i>
-                      Daftar Baru
-                    </button>
+                    <i className="fa-solid fa-right-to-bracket"></i>
+                    Log Masuk Akaun
                   </div>
                 )}
 
@@ -397,7 +329,7 @@ export function AuthModal({
                 )}
 
                 {/* FORM FIELDS */}
-                {authModalTab === "login" || pendingLoginMode === "admin" ? (
+                {(authModalTab === "login" || authModalTab === "masuk" || pendingLoginMode === "admin") && (
                   /* TAB LOG MASUK */
                   <>
                     {pendingSelectedPlan && (
@@ -460,7 +392,7 @@ export function AuthModal({
                             </span>
                           </div>
                           <div style={{ fontSize: "0.75rem", color: "#475569", marginTop: "3px" }}>
-                            💡 Sila log masuk ke akaun anda untuk meneruskan pembayaran &amp; langganan pakej ini.
+                            Sila log masuk ke akaun anda untuk meneruskan langganan pakej ini. Langganan diuruskan oleh admin.
                           </div>
                         </div>
                       </div>
@@ -749,15 +681,6 @@ export function AuthModal({
                             const sekolahEl = document.getElementById("guru-dashboard-nama-sekolah-title");
                             if (sekolahEl) sekolahEl.innerText = gSekolah;
 
-                            if (pendingSelectedPlan) {
-                              localStorage.setItem("bunyiKataPendingPlan", JSON.stringify(pendingSelectedPlan));
-                              if (typeof (window as any).bukaBayaranChip === "function") {
-                                onClose();
-                                (window as any).bukaBayaranChip(pendingSelectedPlan, newEmail, gName);
-                                return;
-                              }
-                            }
-
                             try {
                               await syncTeacherSessionFromFirebase(res.user?.id || newEmail);
                             } catch (syncErr) {
@@ -785,15 +708,6 @@ export function AuthModal({
 
                             const famTitle = document.getElementById("ibubapa-nama-keluarga-title");
                             if (famTitle) famTitle.innerText = famName;
-
-                            if (pendingSelectedPlan) {
-                              localStorage.setItem("bunyiKataPendingPlan", JSON.stringify(pendingSelectedPlan));
-                              if (typeof (window as any).bukaBayaranChip === "function") {
-                                onClose();
-                                (window as any).bukaBayaranChip(pendingSelectedPlan, newEmail, famName);
-                                return;
-                              }
-                            }
 
                             try {
                               await syncParentSessionFromFirebase(res.user?.id || newEmail);
@@ -834,7 +748,7 @@ export function AuthModal({
                         </>
                       ) : (
                         <>
-                          {pendingSelectedPlan ? "Log Masuk & Teruskan Pembayaran" : "Log Masuk"}{" "}
+                          {pendingSelectedPlan ? "Log Masuk & Teruskan" : "Log Masuk"}{" "}
                           <i
                             className="fa-solid fa-right-to-bracket"
                             style={{ marginLeft: "8px" }}
@@ -848,11 +762,13 @@ export function AuthModal({
                         style={{
                           textAlign: "center",
                           marginTop: "16px",
-                          fontSize: "0.88rem",
+                          fontSize: "0.85rem",
                           color: "#475569",
+                          lineHeight: "1.5",
                         }}
                       >
-                        Belum mempunyai akaun?{" "}
+                        Belum mempunyai akaun? Akaun baharu dibuka oleh admin.
+                        <br />
                         <button
                           type="button"
                           style={{
@@ -867,638 +783,21 @@ export function AuthModal({
                             cursor: "pointer",
                             padding: "0",
                             textDecoration: "underline",
+                            marginTop: "4px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
                           }}
                           onClick={() => {
-                            setAuthModalTab("register");
-                            setAuthModalError("");
+                            if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                            hubungiAdminWhatsapp();
                           }}
                         >
-                          Daftar Akaun Baru
+                          <i className="fa-brands fa-whatsapp"></i>
+                          Hubungi Admin untuk Daftar
                         </button>
                       </div>
                     )}
-                  </>
-                ) : (
-                  /* TAB DAFTAR AKAUN */
-                  <>
-                    {pendingSelectedPlan && (
-                      <div
-                        style={{
-                          background:
-                            pendingLoginMode === "guru"
-                              ? "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)"
-                              : "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
-                          border: `2.5px solid ${pendingLoginMode === "guru" ? "var(--color-orange, #ea580c)" : "var(--color-blue, #2563eb)"}`,
-                          borderRadius: "14px",
-                          padding: "12px 14px",
-                          marginBottom: "16px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: "42px",
-                            height: "42px",
-                            borderRadius: "10px",
-                            backgroundColor: pendingLoginMode === "guru" ? "var(--color-orange, #ea580c)" : "var(--color-blue, #2563eb)",
-                            color: "#ffffff",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "1.25rem",
-                            flexShrink: 0,
-                            boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
-                          }}
-                        >
-                          <i className="fa-solid fa-crown"></i>
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div
-                            style={{
-                              fontSize: "0.74rem",
-                              fontWeight: "800",
-                              textTransform: "uppercase",
-                              color: pendingLoginMode === "guru" ? "#c2410c" : "#1d4ed8",
-                              letterSpacing: "0.5px",
-                            }}
-                          >
-                            Pakej Pilihan: {pendingSelectedPlan.name}
-                          </div>
-                          <div
-                            style={{
-                              fontSize: "1.05rem",
-                              fontWeight: "900",
-                              color: "var(--color-dark)",
-                              lineHeight: "1.2",
-                            }}
-                          >
-                            RM{pendingSelectedPlan.price}{" "}
-                            <span style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: "bold" }}>
-                              / {pendingSelectedPlan.period}
-                            </span>
-                          </div>
-                          <div style={{ fontSize: "0.75rem", color: "#475569", marginTop: "3px" }}>
-                            💡 Sila daftar akaun dahulu. Emel ini akan digunakan untuk pautan bayaran &amp; invois rasmi.
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {pendingLoginMode === "guru" ? (
-                      /* REGISTER GURU FIELDS */
-                      <>
-                        <div style={{ marginBottom: "12px" }}>
-                          <label
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginBottom: "6px",
-                              fontWeight: "bold",
-                              color: "var(--color-dark)",
-                              fontSize: "0.9rem",
-                            }}
-                          >
-                            <span>Nama Guru</span>
-                            <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.1rem" }}>*</span>
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Contoh: Cikgu Sarah / En. Razak"
-                            value={regGuruNama}
-                            onChange={(e) => {
-                              setRegGuruNama(e.target.value);
-                              if (authModalError) setAuthModalError("");
-                            }}
-                            style={{
-                              width: "100%",
-                              padding: "10px 12px",
-                              borderRadius: "10px",
-                              border: "2px solid var(--color-dark)",
-                              fontSize: "0.95rem",
-                              fontFamily: "inherit",
-                              boxSizing: "border-box",
-                            }}
-                          />
-                        </div>
-
-                        <div style={{ marginBottom: "12px" }}>
-                          <label
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginBottom: "6px",
-                              fontWeight: "bold",
-                              color: "var(--color-dark)",
-                              fontSize: "0.9rem",
-                            }}
-                          >
-                            <span>Nama Sekolah</span>
-                            <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.1rem" }}>*</span>
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Contoh: SK Taman Melati"
-                            value={regGuruSekolah}
-                            onChange={(e) => {
-                              setRegGuruSekolah(e.target.value);
-                              if (authModalError) setAuthModalError("");
-                            }}
-                            style={{
-                              width: "100%",
-                              padding: "10px 12px",
-                              borderRadius: "10px",
-                              border: "2px solid var(--color-dark)",
-                              fontSize: "0.95rem",
-                              fontFamily: "inherit",
-                              boxSizing: "border-box",
-                            }}
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      /* REGISTER IBU BAPA FIELDS */
-                      <div style={{ marginBottom: "12px" }}>
-                        <label
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            marginBottom: "6px",
-                            fontWeight: "bold",
-                            color: "var(--color-dark)",
-                            fontSize: "0.9rem",
-                          }}
-                        >
-                          <span>Nama Keluarga</span>
-                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.1rem" }}>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Contoh: Keluarga Azman / Pn. Siti"
-                          value={regNamaKeluarga}
-                          onChange={(e) => {
-                            setRegNamaKeluarga(e.target.value);
-                            if (authModalError) setAuthModalError("");
-                          }}
-                          style={{
-                            width: "100%",
-                            padding: "10px 12px",
-                            borderRadius: "10px",
-                            border: "2px solid var(--color-dark)",
-                            fontSize: "0.95rem",
-                            fontFamily: "inherit",
-                            boxSizing: "border-box",
-                          }}
-                        />
-                      </div>
-                    )}
-
-                    <div style={{ marginBottom: "12px" }}>
-                      <label
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          marginBottom: "6px",
-                          fontWeight: "bold",
-                          color: "var(--color-dark)",
-                          fontSize: "0.9rem",
-                        }}
-                      >
-                        <span>Emel</span>
-                        <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.1rem" }}>*</span>
-                      </label>
-                      <input
-                        type="email"
-                        placeholder={
-                          pendingLoginMode === "guru"
-                            ? "Contoh: guru@moe.edu.my"
-                            : "Contoh: ibubapa@gmail.com"
-                        }
-                        value={loginEmail}
-                        disabled={isAuthLoading}
-                        onChange={(e) => {
-                          setLoginEmail(e.target.value);
-                          if (authModalError) setAuthModalError("");
-                        }}
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          borderRadius: "10px",
-                          border: "2px solid var(--color-dark)",
-                          fontSize: "0.95rem",
-                          fontFamily: "inherit",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    </div>
-
-                    <div style={{ marginBottom: "18px" }}>
-                      <label
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          marginBottom: "6px",
-                          fontWeight: "bold",
-                          color: "var(--color-dark)",
-                          fontSize: "0.9rem",
-                        }}
-                      >
-                        <span>Kata Laluan</span>
-                        <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.1rem" }}>*</span>
-                      </label>
-                      <div style={{ position: "relative", width: "100%" }}>
-                        <input
-                          type={showRegisterPassword ? "text" : "password"}
-                          placeholder="Cipta kata laluan anda (min 6 aksara)"
-                          value={loginPassword}
-                          disabled={isAuthLoading}
-                          onChange={(e) => {
-                            setLoginPassword(e.target.value);
-                            if (authModalError) setAuthModalError("");
-                          }}
-                          style={{
-                            width: "100%",
-                            padding: "10px 44px 10px 12px",
-                            borderRadius: "10px",
-                            border: "2px solid var(--color-dark)",
-                            fontSize: "0.95rem",
-                            fontFamily: "inherit",
-                            boxSizing: "border-box",
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowRegisterPassword((prev) => !prev)}
-                          style={{
-                            position: "absolute",
-                            right: "10px",
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            color: showRegisterPassword ? "var(--color-orange, #ea580c)" : "#64748b",
-                            padding: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "1.05rem",
-                            zIndex: 2,
-                          }}
-                          title={showRegisterPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
-                          aria-label={showRegisterPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
-                        >
-                          <i className={`fa-solid ${showRegisterPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
-                        </button>
-                      </div>
-                    </div>
-
-                    <button
-                      className="neo-btn"
-                      disabled={isAuthLoading}
-                      style={{
-                        width: "100%",
-                        justifyContent: "center",
-                        fontSize: "1.05rem",
-                        padding: "12px",
-                        backgroundColor:
-                          pendingLoginMode === "guru"
-                            ? "var(--color-orange)"
-                            : "var(--color-blue)",
-                        color: "#ffffff",
-                        opacity: isAuthLoading ? 0.7 : 1,
-                        cursor: isAuthLoading ? "not-allowed" : "pointer",
-                      }}
-                      onClick={async () => {
-                        if (pendingLoginMode === "guru") {
-                          if (!regGuruNama.trim()) {
-                            setAuthModalError("Sila masukkan Nama Guru!");
-                            return;
-                          }
-                          if (!regGuruSekolah.trim()) {
-                            setAuthModalError("Sila masukkan Nama Sekolah!");
-                            return;
-                          }
-                          if (!loginEmail.trim() || !loginPassword.trim()) {
-                            setAuthModalError("Sila masukkan Emel dan Kata Laluan!");
-                            return;
-                          }
-                          if (loginPassword.length < 6) {
-                            setAuthModalError("Kata laluan mestilah sekurang-kurangnya 6 aksara.");
-                            return;
-                          }
-
-                          setIsAuthLoading(true);
-                          setAuthModalError("");
-                          setAuthSuccessMessage("");
-
-                          try {
-                            const cleanCheckEmail = loginEmail.trim().toLowerCase();
-                            try {
-                              const existingParents = JSON.parse(localStorage.getItem("bunyiKataAdminParents") || "[]");
-                              if (existingParents.some((p: any) => p.email && p.email.toLowerCase() === cleanCheckEmail)) {
-                                setAuthModalError(`Emel '${cleanCheckEmail}' telah pun didaftarkan untuk Mod Ibu Bapa. 1 emel hanya untuk 1 akaun sahaja. Sila gunakan 'Log Masuk'.`);
-                                setIsAuthLoading(false);
-                                return;
-                              }
-                            } catch (e) {}
-
-                            const res = await registerWithEmail({
-                              email: loginEmail,
-                              password: loginPassword,
-                              nama: regGuruNama.trim(),
-                              peranan: "guru",
-                              nama_sekolah: regGuruSekolah.trim(),
-                            });
-
-                            if (!res.success) {
-                              setAuthModalError(res.message);
-                              setIsAuthLoading(false);
-                              return;
-                            }
-
-                            if (res.user) {
-                              (window as any).currentUser = res.user;
-                              if (res.user.id) localStorage.setItem("bunyiKataUserId", res.user.id);
-                              setUserAccessLevel("trial");
-                              localStorage.setItem("bunyiKataAccessLevel", "trial");
-                              localStorage.setItem("bunyiKataTeacherPlan", "Percuma");
-                              localStorage.setItem("bunyiKataUserRole", "guru");
-                              if (typeof setTeacherPlanName === "function") {
-                                setTeacherPlanName("Percuma");
-                              }
-                            }
-
-                            const gName = regGuruNama.trim().toUpperCase();
-                            const gSekolah = regGuruSekolah.trim().toUpperCase();
-                            const gEmail = loginEmail.trim().toLowerCase();
-
-                            localStorage.setItem("bunyiKataNamaGuru", gName);
-                            localStorage.setItem("pdf_guru", gName);
-                            localStorage.setItem("bunyiKataNamaSekolah", gSekolah);
-                            if (gSekolah) localStorage.setItem("pdf_sekolah", gSekolah);
-                            localStorage.setItem("bunyiKataGuruEmail", gEmail);
-                            localStorage.setItem("bunyiKataGuruSetupDone", "true");
-                            localStorage.setItem("bunyiKataUserRole", "guru");
-
-                            // Kosongkan sebarang data murid/kelas terdahulu bagi akaun guru baharu
-                            localStorage.setItem("bunyiKataStudentNames", "[]");
-                            localStorage.setItem("bunyiKataStudentData", "{}");
-                            localStorage.setItem("bunyiKataDaftarKelas", "[]");
-                            localStorage.removeItem("bunyiKataNamaKelas");
-                            localStorage.removeItem("bunyiKataNamaKelas2");
-                            localStorage.removeItem("bunyiKataKodKelas");
-                            localStorage.removeItem("bunyiKataKodKelas2");
-                            (window as any).studentNames = [];
-                            (window as any).studentData = {};
-                            localStorage.removeItem("bunyiKataNamaKeluarga");
-                            localStorage.removeItem("bunyiKataKodKeluarga");
-                            localStorage.removeItem("bunyiKataParentChildNames");
-                            localStorage.removeItem("ibubapaAnakTerpilih");
-                            localStorage.removeItem("bunyiKataIbubapaEmail");
-                            localStorage.setItem("bunyiKataIsParentChild", "false");
-                            (window as any).parentChildNames = [];
-                            (window as any).anakTerpilih = "";
-
-                            try {
-                              const existingTeachers = JSON.parse(localStorage.getItem("bunyiKataAdminTeachers") || "[]");
-                              if (!existingTeachers.some((t: any) => t.id === res.user?.id || (t.email && t.email.toLowerCase() === gEmail))) {
-                                existingTeachers.unshift({
-                                  id: res.user?.id || ("g_" + Date.now()),
-                                  nama: gName,
-                                  sekolah: gSekolah || "-",
-                                  nama_kelas: "",
-                                  kod_kelas: "",
-                                  murid: 0,
-                                  bakiHari: 0,
-                                  langganan: "Percuma",
-                                  email: gEmail,
-                                  no_telefon: "",
-                                  dicipta_pada: new Date().toISOString()
-                                });
-                                localStorage.setItem("bunyiKataAdminTeachers", JSON.stringify(existingTeachers));
-                              }
-                            } catch (e) {}
-
-                            const guruEl = document.getElementById("guru-dashboard-nama-guru-title");
-                            if (guruEl) guruEl.innerText = gName;
-                            const sekolahEl = document.getElementById("guru-dashboard-nama-sekolah-title");
-                            if (sekolahEl) sekolahEl.innerText = gSekolah;
-
-                            if (pendingSelectedPlan) {
-                              localStorage.setItem("bunyiKataPendingPlan", JSON.stringify(pendingSelectedPlan));
-                              if (typeof (window as any).bukaBayaranChip === "function") {
-                                onClose();
-                                (window as any).bukaBayaranChip(pendingSelectedPlan, gEmail, gName);
-                                return;
-                              }
-                            }
-
-                            if (res.session) {
-                              try {
-                                await syncTeacherSessionFromFirebase(res.user?.id || gEmail);
-                              } catch (syncErr) {
-                                console.warn("[AuthModal] syncTeacherSessionFromFirebase reg error:", syncErr);
-                              }
-                              onClose();
-                              if (typeof (window as any).masukModGuru === "function") {
-                                (window as any).masukModGuru();
-                              }
-                              if (typeof (window as any).paparSkrin === "function") {
-                                (window as any).paparSkrin("guru-dashboard");
-                              }
-                            } else {
-                              setAuthSuccessMessage(
-                                res.message || "Akaun berjaya didaftarkan ke pangkalan data Firebase!"
-                              );
-                              setAuthModalTab("login");
-                            }
-                          } catch (err: any) {
-                            setAuthModalError(err?.message || "Ralat tidak dijangka semasa pendaftaran.");
-                          } finally {
-                            setIsAuthLoading(false);
-                          }
-                        } else if (pendingLoginMode === "ibubapa") {
-                          if (!regNamaKeluarga.trim()) {
-                            setAuthModalError("Sila masukkan Nama Keluarga!");
-                            return;
-                          }
-                          if (!loginEmail.trim() || !loginPassword.trim()) {
-                            setAuthModalError("Sila masukkan Emel dan Kata Laluan!");
-                            return;
-                          }
-                          if (loginPassword.length < 6) {
-                            setAuthModalError("Kata laluan mestilah sekurang-kurangnya 6 aksara.");
-                            return;
-                          }
-
-                          setIsAuthLoading(true);
-                          setAuthModalError("");
-                          setAuthSuccessMessage("");
-
-                          try {
-                            const cleanCheckEmail = loginEmail.trim().toLowerCase();
-                            try {
-                              const existingTeachers = JSON.parse(localStorage.getItem("bunyiKataAdminTeachers") || "[]");
-                              if (existingTeachers.some((t: any) => t.email && t.email.toLowerCase() === cleanCheckEmail)) {
-                                setAuthModalError(`Emel '${cleanCheckEmail}' telah pun didaftarkan untuk Mod Guru. 1 emel hanya untuk 1 akaun sahaja. Sila gunakan 'Log Masuk'.`);
-                                setIsAuthLoading(false);
-                                return;
-                              }
-                            } catch (e) {}
-
-                            const res = await registerWithEmail({
-                              email: loginEmail,
-                              password: loginPassword,
-                              nama: regNamaKeluarga.trim(),
-                              peranan: "ibubapa",
-                            });
-
-                            if (!res.success) {
-                              setAuthModalError(res.message);
-                              setIsAuthLoading(false);
-                              return;
-                            }
-
-                            if (res.user) {
-                              (window as any).currentUser = res.user;
-                              if (res.user.id) localStorage.setItem("bunyiKataUserId", res.user.id);
-                              setUserAccessLevel("trial");
-                              localStorage.setItem("bunyiKataAccessLevel", "trial");
-                              localStorage.setItem("bunyiKataParentPlan", "Percuma");
-                              localStorage.setItem("bunyiKataUserRole", "ibubapa");
-                            }
-
-                            const famName = regNamaKeluarga.trim().toUpperCase();
-                            const pEmail = loginEmail.trim().toLowerCase();
-
-                            localStorage.setItem("bunyiKataNamaKeluarga", famName);
-                            localStorage.setItem("bunyiKataIbubapaEmail", pEmail);
-                            localStorage.setItem("bunyiKataIbubapaSetupDone", "true");
-                            localStorage.setItem("bunyiKataUserRole", "ibubapa");
-
-                            // Kosongkan senarai anak & kod terdahulu bagi akaun ibu bapa baharu
-                            localStorage.setItem("bunyiKataParentChildNames", "[]");
-                            localStorage.removeItem("ibubapaAnakTerpilih");
-                            localStorage.removeItem("bunyiKataKodKeluarga");
-                            (window as any).parentChildNames = [];
-                            (window as any).anakTerpilih = "";
-
-                            try {
-                              const existingParents = JSON.parse(localStorage.getItem("bunyiKataAdminParents") || "[]");
-                              if (!existingParents.some((p: any) => p.id === res.user?.id || (p.email && p.email.toLowerCase() === pEmail))) {
-                                existingParents.unshift({
-                                  id: res.user?.id || ("p_" + Date.now()),
-                                  nama: famName,
-                                  nama_keluarga: famName,
-                                  kod_keluarga: "",
-                                  anak: 0,
-                                  bakiHari: 0,
-                                  langganan: "Percuma",
-                                  email: pEmail,
-                                  no_telefon: "",
-                                  dicipta_pada: new Date().toISOString()
-                                });
-                                localStorage.setItem("bunyiKataAdminParents", JSON.stringify(existingParents));
-                              }
-                            } catch (e) {}
-
-                            const famTitle = document.getElementById("ibubapa-nama-keluarga-title");
-                            if (famTitle) famTitle.innerText = famName;
-
-                            if (pendingSelectedPlan) {
-                              localStorage.setItem("bunyiKataPendingPlan", JSON.stringify(pendingSelectedPlan));
-                              if (typeof (window as any).bukaBayaranChip === "function") {
-                                onClose();
-                                (window as any).bukaBayaranChip(pendingSelectedPlan, pEmail, famName);
-                                return;
-                              }
-                            }
-
-                            if (res.session) {
-                              try {
-                                await syncParentSessionFromFirebase(res.user?.id || pEmail);
-                              } catch (syncErr) {
-                                console.warn("[AuthModal] syncParentSessionFromFirebase reg error:", syncErr);
-                              }
-                              onClose();
-                              if (typeof (window as any).masukModIbubapa === "function") {
-                                (window as any).masukModIbubapa();
-                              } else if (typeof (window as any).masukModIbuBapa === "function") {
-                                (window as any).masukModIbuBapa();
-                              }
-                              if (typeof (window as any).paparSkrin === "function") {
-                                (window as any).paparSkrin("ibubapa-dashboard");
-                              }
-                            } else {
-                              setAuthSuccessMessage(
-                                res.message || "Akaun berjaya didaftarkan ke pangkalan data Firebase!"
-                              );
-                              setAuthModalTab("login");
-                            }
-                          } catch (err: any) {
-                            setAuthModalError(err?.message || "Ralat tidak dijangka semasa pendaftaran.");
-                          } finally {
-                            setIsAuthLoading(false);
-                          }
-                        }
-                      }}
-                    >
-                      {isAuthLoading ? (
-                        <>
-                          <i className="fa-solid fa-circle-notch fa-spin" style={{ marginRight: "8px" }}></i>
-                          Sedang Mendaftar...
-                        </>
-                      ) : (
-                        <>
-                          {pendingSelectedPlan ? "Daftar & Teruskan Pembayaran" : `Daftar Akaun ${pendingLoginMode === "guru" ? "Guru" : "Ibu Bapa"}`}{" "}
-                          <i
-                            className="fa-solid fa-user-check"
-                            style={{ marginLeft: "8px" }}
-                          ></i>
-                        </>
-                      )}
-                    </button>
-
-                    <div
-                      style={{
-                        textAlign: "center",
-                        marginTop: "16px",
-                        fontSize: "0.88rem",
-                        color: "#475569",
-                      }}
-                    >
-                      Sudah mempunyai akaun?{" "}
-                      <button
-                        type="button"
-                        style={{
-                          background: "none",
-                          border: "none",
-                          color:
-                            pendingLoginMode === "guru"
-                              ? "var(--color-orange)"
-                              : "var(--color-blue)",
-                          fontWeight: "bold",
-                          fontSize: "0.88rem",
-                          cursor: "pointer",
-                          padding: "0",
-                          textDecoration: "underline",
-                        }}
-                        onClick={() => {
-                          setAuthModalTab("login");
-                          setAuthModalError("");
-                        }}
-                      >
-                        Log Masuk di sini
-                      </button>
-                    </div>
                   </>
                 )}
               </div>

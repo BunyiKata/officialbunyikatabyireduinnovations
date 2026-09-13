@@ -16,7 +16,7 @@ function lulus(ok) {
   console.log("   div#root    = " + lulus(adaRoot));
   console.log("   bundle JS   = " + lulus(adaAsset));
   // Rahsia TIDAK BOLEH muncul dalam HTML.
-  console.log("   tiada rahsia= " + lulus(!/sk_|CHIP_SECRET/i.test(html)));
+  console.log("   tiada rahsia= " + lulus(!/sk_|SECRET/i.test(html)));
   console.log("");
 }
 
@@ -36,32 +36,20 @@ function lulus(ok) {
   console.log("");
 }
 
-// 3) Endpoint CHIP mesti hidup dan rahsia mesti terbaca (bukan 500 config).
-{
-  const res = await fetch(BASE + "/api/chip/verify-purchase/id-palsu-tak-wujud");
-  const json = await res.json().catch(() => ({}));
-  const configHilang = /belum dikonfigurasikan/i.test(json.message || "");
-  console.log("3) GET /api/chip/verify-purchase/:id  (id palsu)");
-  console.log("   status      = " + res.status);
-  console.log("   rahsia dibaca = " + lulus(!configHilang));
-  console.log("   mesej       = " + (json.message || "-"));
-  console.log("");
-}
-
-// 4) Laluan audio warisan mesti masih berfungsi.
+// 3) Laluan audio warisan mesti masih berfungsi.
 {
   const res = await fetch(BASE + "/AUDIO%20FONIK/", { redirect: "manual" });
-  console.log("4) Middleware audio warisan");
+  console.log("3) Middleware audio warisan");
   console.log("   status      = " + res.status + "  (bukan 5xx = OK)");
   console.log("   " + lulus(res.status < 500));
   console.log("");
 }
 
-// 5) Fallback SPA: laluan tak dikenali mesti pulangkan index.html, bukan 404.
+// 4) Fallback SPA: laluan tak dikenali mesti pulangkan index.html, bukan 404.
 {
   const res = await fetch(BASE + "/laluan-rekaan-untuk-ujian");
   const html = await res.text();
-  console.log("5) Fallback SPA");
+  console.log("4) Fallback SPA");
   console.log("   status      = " + res.status + "  " + lulus(res.status === 200));
   console.log("   div#root    = " + lulus(html.includes('id="root"')));
 }

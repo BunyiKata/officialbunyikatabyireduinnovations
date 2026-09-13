@@ -60,11 +60,11 @@ semak(
 // --- 2. Tiada sisa ujian ----------------------------------------------------
 semak('tiada sisa ZZ_TEST_DELETE_ME', !/ZZ_TEST_DELETE_ME/.test(mentah));
 
-// --- 3. Hanya 2 rahsia sebenar ---------------------------------------------
+// --- 3. Hanya rahsia sebenar ----------------------------------------------
 const rahsia = entri.filter((e) => e.secret).map((e) => e.variable).sort();
 semak(
-  'tepat 2 rahsia: ADMIN_CODE + CHIP_SECRET_KEY',
-  JSON.stringify(rahsia) === JSON.stringify(['ADMIN_CODE', 'CHIP_SECRET_KEY']),
+  'tepat 1 rahsia: ADMIN_CODE',
+  JSON.stringify(rahsia) === JSON.stringify(['ADMIN_CODE']),
   `dijumpai: ${JSON.stringify(rahsia)}`
 );
 
@@ -97,8 +97,6 @@ const mestiSepadan = [
   'VITE_FIREBASE_STORAGE_BUCKET',
   'VITE_FIREBASE_MESSAGING_SENDER_ID',
   'VITE_FIREBASE_APP_ID',
-  'VITE_CHIP_BRAND_ID',
-  'CHIP_BRAND_ID',
 ];
 
 for (const nama of mestiSepadan) {
@@ -128,14 +126,8 @@ for (const nama of mestiSepadan) {
   );
 }
 
-// --- 7. CHIP_BRAND_ID dan VITE_CHIP_BRAND_ID mesti sama -------------------
-semak(
-  'CHIP_BRAND_ID == VITE_CHIP_BRAND_ID',
-  ikutNama.get('CHIP_BRAND_ID')?.value === ikutNama.get('VITE_CHIP_BRAND_ID')?.value
-);
-
-// --- 8. Rahsia RUNTIME sahaja, dan tiada nilai literal --------------------
-for (const nama of ['ADMIN_CODE', 'CHIP_SECRET_KEY']) {
+// --- 7. Rahsia RUNTIME sahaja, dan tiada nilai literal --------------------
+for (const nama of ['ADMIN_CODE']) {
   const e = ikutNama.get(nama);
   semak(`${nama} ditanda sebagai secret`, Boolean(e?.secret));
   semak(

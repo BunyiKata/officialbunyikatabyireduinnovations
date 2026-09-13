@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -79,13 +79,13 @@ export function PricingProModal({
       id: 2,
       question: "Apakah perbezaan Pakej Guru dan Pakej Ibu Bapa?",
       answer:
-        "• Pakej Guru: Menyokong pengurusan rekod sehingga 2 kelas murid, pantauan statistik latihan serta muat turun laporan prestasi murid.\n• Pakej Ibu Bapa: Menyokong pendaftaran dan rekod perkembangan sehingga 3 orang anak dalam satu akaun.",
+        "â€¢ Pakej Guru: Menyokong pengurusan rekod sehingga 2 kelas murid, pantauan statistik latihan serta muat turun laporan prestasi murid.\nâ€¢ Pakej Ibu Bapa: Menyokong pendaftaran dan rekod perkembangan sehingga 3 orang anak dalam satu akaun.",
     },
     {
       id: 3,
-      question: "Bagaimana cara mendaftar dan memulakan akaun?",
+      question: "Bagaimana cara melanggan dan memulakan akaun?",
       answer:
-        "Tekan butang 'Daftar' pada mana-mana pakej. Selepas akaun didaftarkan dan log masuk, anda boleh mendaftar rekod murid/anak serta merta!",
+        "Tekan butang 'Langgan via WhatsApp' pada pakej pilihan anda untuk menghubungi admin. Admin akan mencipta akaun dan mengaktifkan langganan anda. Selepas itu, anda boleh log masuk dan mula mendaftar rekod murid/anak.",
     },
   ];
 
@@ -417,7 +417,7 @@ export function PricingProModal({
                       onClose();
                     }}
                   >
-                    Daftar
+                    <i className="fa-brands fa-whatsapp" style={{ marginRight: "8px" }}></i>Langgan via WhatsApp
                   </button>
                 </div>
               </div>
@@ -563,7 +563,7 @@ export function PricingProModal({
                       onClose();
                     }}
                   >
-                    Daftar
+                    <i className="fa-brands fa-whatsapp" style={{ marginRight: "8px" }}></i>Langgan via WhatsApp
                   </button>
                 </div>
               </div>
@@ -709,7 +709,7 @@ export function PricingProModal({
                       onClose();
                     }}
                   >
-                    Daftar
+                    <i className="fa-brands fa-whatsapp" style={{ marginRight: "8px" }}></i>Langgan via WhatsApp
                   </button>
                 </div>
               </div>
@@ -850,7 +850,7 @@ export function PricingProModal({
                                     }}
                                   >
                                     <span className="faq-highlight-guru">
-                                      • Pakej Guru:
+                                      â€¢ Pakej Guru:
                                     </span>
                                     <span style={{ flex: "1 1 200px" }}>
                                       Menyokong pengurusan rekod sehingga 2 kelas murid, pantauan statistik latihan serta muat turun laporan prestasi murid.
@@ -866,7 +866,7 @@ export function PricingProModal({
                                     }}
                                   >
                                     <span className="faq-highlight-ibubapa">
-                                      • Pakej Ibu Bapa:
+                                      â€¢ Pakej Ibu Bapa:
                                     </span>
                                     <span style={{ flex: "1 1 200px" }}>
                                       Menyokong pendaftaran dan rekod perkembangan sehingga 3 orang anak dalam satu akaun.

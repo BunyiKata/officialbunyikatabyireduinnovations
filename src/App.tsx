@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import confetti from "canvas-confetti";
@@ -25,14 +25,12 @@ import { PricingProModal } from "./components/modals/PricingProModal";
 import { EditProfileModal } from "./components/modals/EditProfileModal";
 import { EntryChoiceModal } from "./components/modals/EntryChoiceModal";
 import { ModeChoiceModal } from "./components/modals/ModeChoiceModal";
-import "./services/chipPaymentService";
-import { bukaBayaranChip, sahkanBayaranChip } from "./services/chipPaymentService";
+import { hubungiAdminWhatsapp } from "./config/contactAdmin";
 import "./utils/sijilGenerator";
 import "./index.css";
 import { motion, AnimatePresence } from "motion/react";
 import {
   loginWithEmail,
-  registerWithEmail,
   logout as firebaseLogout,
   getCurrentUserProfile,
   sendPasswordResetEmail,
@@ -280,8 +278,6 @@ export default function App() {
 
   const [showSplash, setShowSplash] = React.useState(() => {
     if (typeof window !== "undefined") {
-      const search = window.location.search || "";
-      if (search.includes("payment=") || search.includes("status=")) return false;
       const path = window.location.pathname.replace(/^\/+/, "");
       const hash = window.location.hash ? window.location.hash.replace("#", "") : "";
       if (path || hash) return false;
@@ -303,10 +299,6 @@ export default function App() {
 
   const [activeScreen, setActiveScreen] = React.useState<string>(() => {
     if (typeof window !== "undefined") {
-      const search = window.location.search || "";
-      if (search.includes("payment=") || search.includes("status=")) {
-        return "login-screen";
-      }
       const path = window.location.pathname.replace(/^\/+/, "");
       if (path) return path;
       if (window.location.hash) {
@@ -338,14 +330,6 @@ export default function App() {
   });
   const [editModalMode, setEditModalMode] = React.useState<"guru" | "ibubapa" | "admin">("guru");
   const [pendingSelectedPlan, setPendingSelectedPlan] = React.useState<any>(null);
-
-  const [paymentToast, setPaymentToast] = React.useState<{
-    show: boolean;
-    title: string;
-    message: string;
-    type: "success" | "error" | "info";
-    planName?: string;
-  } | null>(null);
 
   React.useEffect(() => {
     const handleScreenChange = (e?: any) => {
@@ -398,209 +382,19 @@ export default function App() {
     window.addEventListener("popstate", handleUrlNav);
     window.addEventListener("hashchange", handleUrlNav);
 
-    // Semak callback status pembayaran daripada Chip Payment Gateway (?payment=success / ?status=success)
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      const paymentStatus = urlParams.get("payment") || urlParams.get("status");
-
-      if (
-        paymentStatus === "success" ||
-        paymentStatus === "paid" ||
-        paymentStatus === "successful" ||
-        paymentStatus === "pending"
-      ) {
-        setShowSplash(false);
-        setShowLoginModal(false);
-        setIsModeMenuOpen(false);
-        setIsProPricingModalOpen(false);
-
-        let targetCategory = "";
-        let parsedPlan: any = null;
-        try {
-          const savedPendingPlan = localStorage.getItem("bunyiKataPendingPlan");
-          if (savedPendingPlan) {
-            parsedPlan = JSON.parse(savedPendingPlan);
-            if (parsedPlan?.category) targetCategory = parsedPlan.category;
-          }
-        } catch (e) {}
-
-        // Pembersihan Sesi Menyeluruh (Log Out Bersih: tiada top nav terapung di login screen)
-        const bersihkanSesiDanLogKeluar = () => {
-          (window as any).modGuruAktif = false;
-          (window as any).modIbuBapaAktif = false;
-          (window as any).modAdminAktif = false;
-          (window as any).isAdminMode = false;
-          (window as any).adminClaimDisahkan = false;
-          document.body.classList.remove("teacher-mode", "admin-mode", "parent-mode");
-
-          const tNav = document.getElementById("teacher-sticky-nav");
-          if (tNav) tNav.style.display = "none";
-          const aNav = document.getElementById("admin-sticky-nav");
-          if (aNav) aNav.style.display = "none";
-          const pNav = document.getElementById("parent-sticky-nav");
-          if (pNav) pNav.style.display = "none";
-          const topBanner = document.getElementById("teacher-top-banner");
-          if (topBanner) topBanner.style.display = "none";
-
-          setActiveScreen("login-screen");
-          if (typeof (window as any).paparSkrin === "function") {
-            (window as any).paparSkrin("login-screen", true);
-          }
-          try {
-            window.history.replaceState({ screenId: "login-screen" }, document.title, "/");
-          } catch (e) {}
-        };
-
-        const processPaymentSuccess = async () => {
-          const purchaseId =
-            urlParams.get("purchase_id") ||
-            localStorage.getItem("bunyiKataPendingPurchaseId") ||
-            "";
-
-          const verification = await sahkanBayaranChip(purchaseId);
-
-          // Log keluar sepenuhnya ke login screen tanpa top nav
-          bersihkanSesiDanLogKeluar();
-
-          if (!verification.paid) {
-            console.warn("[App] Pembayaran tidak dapat disahkan:", verification.message);
-            setPaymentToast({
-              show: true,
-              title: "Pembayaran Belum Selesai",
-              message:
-                verification.message ||
-                "Transaksi pembayaran belum selesai atau belum disahkan oleh CHIP. Sila log masuk semula untuk menyemak.",
-              type: "error",
-            });
-            setPendingLoginMode(targetCategory || "guru");
-            setAuthModalTab("login");
-            setShowLoginModal(true);
-            return;
-          }
-
-          // Emel & pakej diambil daripada rekod CHIP yang telah disahkan.
-          const verifiedEmail = (verification.email || "").trim().toLowerCase();
-          const verifiedPlanName = verification.planName || "1 Bulan (Pro)";
-
-          if (typeof naikTarafLanggananFirebase === "function") {
-            try {
-              await naikTarafLanggananFirebase(verifiedEmail, {
-                name: verifiedPlanName,
-                period: verifiedPlanName,
-              });
-            } catch (err) {
-              console.error("[App] Ralat naikTarafLanggananFirebase:", err);
-            }
-          }
-
-          // Simpan rekod pesanan untuk audit & rekonsiliasi.
-          if (typeof rekodPesananFirebase === "function") {
-            try {
-              await rekodPesananFirebase({
-                purchaseId: verification.purchaseId || purchaseId,
-                email: verifiedEmail,
-                planName: verifiedPlanName,
-                amount: verification.amount,
-              });
-            } catch (err) {
-              console.warn("[App] Ralat merekod pesanan:", err);
-            }
-          }
-
-          try {
-            localStorage.removeItem("bunyiKataPendingPurchaseId");
-          } catch (e) {}
-
-          localStorage.setItem("bunyiKataAccessLevel", "pro");
-          setUserAccessLevel("pro");
-
-          setPaymentToast({
-            show: true,
-            title: "🎉 Langganan Pro Berjaya!",
-            message: `Tahniah! Akaun ${verifiedEmail ? `(${verifiedEmail})` : ""} kini telah dinaik taraf ke versi ${verifiedPlanName}. Sila log masuk semula untuk memulakan sesi Pro anda.`,
-            type: "success",
-            planName: verifiedPlanName,
-          });
-
-          // Buka modal log masuk semula
-          setPendingLoginMode(targetCategory || "guru");
-          setAuthModalTab("login");
-          setShowLoginModal(true);
-        };
-
-        processPaymentSuccess();
-      } else if (paymentStatus === "failed" || paymentStatus === "cancelled") {
-        setShowSplash(false);
-        setIsModeMenuOpen(false);
-        setIsProPricingModalOpen(false);
-
-        let targetCategory = "";
-        try {
-          const savedPendingPlan = localStorage.getItem("bunyiKataPendingPlan");
-          if (savedPendingPlan) {
-            const parsed = JSON.parse(savedPendingPlan);
-            if (parsed?.category) targetCategory = parsed.category;
-          }
-        } catch (e) {}
-
-        // Pembersihan sesi sepenuhnya: tiada sebarang top nav mod terapung
-        (window as any).modGuruAktif = false;
-        (window as any).modIbuBapaAktif = false;
-        (window as any).modAdminAktif = false;
-        (window as any).isAdminMode = false;
-        (window as any).adminClaimDisahkan = false;
-        document.body.classList.remove("teacher-mode", "admin-mode", "parent-mode");
-
-        const tNav = document.getElementById("teacher-sticky-nav");
-        if (tNav) tNav.style.display = "none";
-        const aNav = document.getElementById("admin-sticky-nav");
-        if (aNav) aNav.style.display = "none";
-        const pNav = document.getElementById("parent-sticky-nav");
-        if (pNav) pNav.style.display = "none";
-        const topBanner = document.getElementById("teacher-top-banner");
-        if (topBanner) topBanner.style.display = "none";
-
-        setActiveScreen("login-screen");
-        if (typeof (window as any).paparSkrin === "function") {
-          (window as any).paparSkrin("login-screen", true);
-        }
-        try {
-          window.history.replaceState({ screenId: "login-screen" }, document.title, "/");
-        } catch (e) {}
-
-        // Toast notifikasi status gagal / batal
-        setPaymentToast({
-          show: true,
-          title: "Pembayaran Dibatalkan / Tidak Selesai",
-          message: "Transaksi pembayaran belum selesai atau telah dibatalkan. Sila log masuk semula untuk meneruskan.",
-          type: "error",
-        });
-
-        // Buka modal log masuk semula
-        setPendingLoginMode(targetCategory || "guru");
-        setAuthModalTab("login");
-        setShowLoginModal(true);
-      }
-    }
-
     // Initial check on mount
     if (typeof window !== "undefined") {
-      const search = window.location.search || "";
-      if (search.includes("payment=") || search.includes("status=")) {
-        // Jangan timpa laluan login yang telah diselaraskan oleh callback pembayaran
-        return;
-      }
       let currentPath =
         window.location.pathname.replace(/^\/+/, "") ||
         (window.location.hash ? window.location.hash.replace("#", "") : "");
 
-      // Penjaga laluan BERKONGSI — pautan yang ditampal terus (cth
+      // Penjaga laluan BERKONGSI â€” pautan yang ditampal terus (cth
       // /main-menu-screen atau /admin-dashboard) oleh pelawat awam mesti
       // kembali ke skrin log masuk. Jika tidak, mereka boleh masuk ke
       // dalam mod Pro/Admin tanpa melalui aliran masuk yang sah.
       if (currentPath && currentPath !== "login-screen" && typeof (window as any).bolehAksesSkrin === "function") {
         if (!(window as any).bolehAksesSkrin(currentPath)) {
-          console.warn("[Navigasi] Laluan awal ditolak:", currentPath, "— kembali ke skrin log masuk.");
+          console.warn("[Navigasi] Laluan awal ditolak:", currentPath, "â€” kembali ke skrin log masuk.");
           currentPath = "login-screen";
           try {
             window.history.replaceState({ screenId: "login-screen" }, document.title, "/");
@@ -1098,7 +892,7 @@ export default function App() {
       id: 2,
       question: "Apakah perbezaan Pakej Guru dan Pakej Ibu Bapa?",
       answer:
-        "• Pakej Guru: Menyokong pengurusan rekod sehingga 2 kelas murid, pantauan statistik latihan serta muat turun laporan prestasi murid.\n• Pakej Ibu Bapa: Menyokong pendaftaran dan rekod perkembangan sehingga 3 orang anak dalam satu akaun.",
+        "â€¢ Pakej Guru: Menyokong pengurusan rekod sehingga 2 kelas murid, pantauan statistik latihan serta muat turun laporan prestasi murid.\nâ€¢ Pakej Ibu Bapa: Menyokong pendaftaran dan rekod perkembangan sehingga 3 orang anak dalam satu akaun.",
     },
     {
       id: 3,
@@ -1155,7 +949,7 @@ export default function App() {
       ) {
         return "pro";
       }
-      // 'bunyiKataAccessLevel === "pro"' sahaja TIDAK cukup — ia boleh
+      // 'bunyiKataAccessLevel === "pro"' sahaja TIDAK cukup â€” ia boleh
       // menjadi sisa sesi admin lama. Akses Pro hanya dikekalkan jika ada
       // peranan sebenar yang menyokongnya.
       const roleSemasa = (localStorage.getItem("bunyiKataUserRole") || "").toLowerCase().trim();
@@ -1339,9 +1133,9 @@ export default function App() {
   const isPlanFree = !isStudentRole && !isPaidPlan;
   // SUMBER KEBENARAN TUNGGAL: `checkIsTrial()` (fail-closed) dalam app-logic.js
   // menyemak peranan + pelan + sesi admin RUNTIME. React jangan kira semula
-  // dari localStorage sendiri — ia akan bercanggah (cth. sisa pelan berbayar
+  // dari localStorage sendiri â€” ia akan bercanggah (cth. sisa pelan berbayar
   // atau sisa nama 'Admin' membuat React fikir Pro sedangkan runtime kata
-  // Trial → peta 2/3/4 nampak terbuka tetapi tekan keluar modal pakej).
+  // Trial â†’ peta 2/3/4 nampak terbuka tetapi tekan keluar modal pakej).
   // Gunakan versi kanonik bila tersedia; fallback kepada pengiraan tempatan
   // (fail-closed = trial) hanya sebelum app-logic.js dimuatkan.
   const [efektifTrialState, setEfektifTrialState] = React.useState<boolean>(() => {
@@ -1370,7 +1164,7 @@ export default function App() {
     window.addEventListener("admin-mode-change", sync);
     window.addEventListener("focus", sync);
     window.addEventListener("akses-level-change", sync);
-    // 'storage' — perubahan localStorage dari tab lain
+    // 'storage' â€” perubahan localStorage dari tab lain
     window.addEventListener("storage", sync);
     // Apabila userAccessLevel berubah (setUserAccessLevel), refresh juga
     return () => {
@@ -1388,7 +1182,7 @@ export default function App() {
     // terbuka secara tidak menentu. Jadi kita hanya tetapkan versi rizab
     // SEBELUM app-logic.js selesai dimuatkan.
     if (typeof (window as any).bolehAksesSkrin === "function") {
-      // app-logic.js sudah sedia — jangan tindih.
+      // app-logic.js sudah sedia â€” jangan tindih.
       return;
     }
     (window as any).isEffectiveTrial = () => isEffectiveTrial;
@@ -1402,7 +1196,7 @@ export default function App() {
   const [joinCode, setJoinCode] = React.useState("");
   const [showLoginModal, setShowLoginModal] = React.useState(false);
   const [pendingLoginMode, setPendingLoginMode] = React.useState("");
-  const [authModalTab, setAuthModalTab] = React.useState<"login" | "register">("login");
+  const [authModalTab, setAuthModalTab] = React.useState<"masuk" | "login">("login");
   const [loginEmail, setLoginEmail] = React.useState("");
   const [loginPassword, setLoginPassword] = React.useState("");
   const [showLoginPassword, setShowLoginPassword] = React.useState(false);
@@ -1666,7 +1460,7 @@ export default function App() {
     if (clean !== oldCode) {
       const collision = await checkIsCodeAlreadyUsedInFirebase(clean, "guru", undefined, "kelas1");
       if (collision.isUsed) {
-        const msg = `Kod “${clean}” tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
+        const msg = `Kod â€œ${clean}â€ tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
         if (typeof (window as any).showAppToast === "function") {
           (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
         } else {
@@ -1711,7 +1505,7 @@ export default function App() {
     if (kodGuru) kodGuru.innerText = clean;
     setIsChangingCode1(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 1 berjaya ditetapkan kepada “${clean}”.`);
+      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 1 berjaya ditetapkan kepada â€œ${clean}â€.`);
     }
   };
 
@@ -1765,7 +1559,7 @@ export default function App() {
     }
     setIsChangingClassName2(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Nama Kelas 2 berjaya ditetapkan kepada “${clean}”.`);
+      (window as any).showAppToast("Berjaya Disimpan", `Nama Kelas 2 berjaya ditetapkan kepada â€œ${clean}â€.`);
     }
   };
 
@@ -1789,7 +1583,7 @@ export default function App() {
     if (clean !== oldCode2) {
       const collision = await checkIsCodeAlreadyUsedInFirebase(clean, "guru", undefined, "kelas2");
       if (collision.isUsed) {
-        const msg = `Kod “${clean}” tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
+        const msg = `Kod â€œ${clean}â€ tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
         if (typeof (window as any).showAppToast === "function") {
           (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
         } else {
@@ -1832,7 +1626,7 @@ export default function App() {
 
     setIsChangingCode2(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 2 berjaya ditetapkan kepada “${clean}”.`);
+      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 2 berjaya ditetapkan kepada â€œ${clean}â€.`);
     }
   };
 
@@ -1876,7 +1670,7 @@ export default function App() {
     if (el2) el2.innerText = clean;
     setIsChangingFamilyName(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Nama Keluarga berjaya ditetapkan kepada “${clean}”.`);
+      (window as any).showAppToast("Berjaya Disimpan", `Nama Keluarga berjaya ditetapkan kepada â€œ${clean}â€.`);
     }
   };
 
@@ -1900,7 +1694,7 @@ export default function App() {
     if (clean !== oldCode) {
       const collision = await checkIsCodeAlreadyUsedInFirebase(clean, "ibubapa");
       if (collision.isUsed) {
-        const msg = `Kod “${clean}” tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
+        const msg = `Kod â€œ${clean}â€ tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
         if (typeof (window as any).showAppToast === "function") {
           (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
         } else {
@@ -1929,7 +1723,7 @@ export default function App() {
 
     setIsChangingFamilyCode(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Kod Keluarga berjaya ditetapkan kepada “${clean}”.`);
+      (window as any).showAppToast("Berjaya Disimpan", `Kod Keluarga berjaya ditetapkan kepada â€œ${clean}â€.`);
     }
   };
 
@@ -4664,7 +4458,7 @@ export default function App() {
               fontWeight: "bold",
             }}
           >
-            <div>© 2026 Bunyi Kata. Hak Cipta Terpelihara.</div>
+            <div>Â© 2026 Bunyi Kata. Hak Cipta Terpelihara.</div>
             <div
               style={{
                 fontSize: "0.72rem",
@@ -6262,7 +6056,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Cabaran Tambahan Game View — rendered via portal to body so position:fixed works correctly outside .screen transform stacking context */}
+      {/* Cabaran Tambahan Game View â€” rendered via portal to body so position:fixed works correctly outside .screen transform stacking context */}
       {createPortal(
         <div id="modal-cabaran-lain-game" className="cabaran-tambahan-fullscreen-screen">
           {/* Top Bar matching Cabaran Utama */}
@@ -7497,9 +7291,9 @@ export default function App() {
                 fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
               }}
             >
-              <span style={{ color: "#f59e0b", margin: "0 4px" }}>•••••</span>
+              <span style={{ color: "#f59e0b", margin: "0 4px" }}>â€¢â€¢â€¢â€¢â€¢</span>
               BINTANG
-              <span style={{ color: "#f59e0b", margin: "0 4px" }}>•••••</span>
+              <span style={{ color: "#f59e0b", margin: "0 4px" }}>â€¢â€¢â€¢â€¢â€¢</span>
             </div>
           </div>
 
@@ -10280,10 +10074,10 @@ export default function App() {
                 }}
               >
                 {arKiraJariMode === 'tambah'
-                  ? 'Kira ayat matematik tambah (1–10) dan tunjukkan bilangan jari jawapan ke arah kamera untuk mengumpul bintang ganjaran!'
+                  ? 'Kira ayat matematik tambah (1â€“10) dan tunjukkan bilangan jari jawapan ke arah kamera untuk mengumpul bintang ganjaran!'
                   : arKiraJariMode === 'tolak'
-                    ? 'Kira ayat matematik tolak (1–10) dan tunjukkan bilangan jari jawapan ke arah kamera untuk mengumpul bintang ganjaran!'
-                    : 'Kira objek yang dipaparkan (1–10) dan tunjukkan bilangan jari yang sama ke arah kamera untuk mengumpul bintang ganjaran!'}
+                    ? 'Kira ayat matematik tolak (1â€“10) dan tunjukkan bilangan jari jawapan ke arah kamera untuk mengumpul bintang ganjaran!'
+                    : 'Kira objek yang dipaparkan (1â€“10) dan tunjukkan bilangan jari yang sama ke arah kamera untuk mengumpul bintang ganjaran!'}
               </p>
 
               <div
@@ -10551,7 +10345,7 @@ export default function App() {
                     id="bacaan-item-icon"
                     style={{ fontSize: "2.2rem", lineHeight: "1" }}
                   >
-                    📖
+                    ðŸ“–
                   </span>
                   <span
                     id="bacaan-item-title"
@@ -11057,61 +10851,32 @@ export default function App() {
               setIsProPricingModalOpen(false);
             }}
             onSelectPlanRegister={(category, planInfo) => {
-              const isLoginScreen =
-                activeScreen === "login-screen" ||
-                (typeof document !== "undefined" &&
-                  document.getElementById("login-screen")?.classList.contains("active"));
-              const isGuest =
-                Boolean((window as any).isGuestMode) ||
-                (window as any).namaMuridAktif === "Tetamu";
+              // PENDAFTARAN SENDIRI DITUTUP.
+              // Semua permintaan langganan dihalakan ke WhatsApp admin. Akaun
+              // hanya dicipta oleh admin (lihat adminService / panel admin).
+              setIsModeMenuOpen(false);
+              setIsProPricingModalOpen(false);
 
-              const currentUser = (window as any).currentUser;
-              const userRole = localStorage.getItem("bunyiKataUserRole");
+              const namaPakej = planInfo?.name || planInfo?.period || "";
+              const harga =
+                planInfo?.price != null
+                  ? `RM${planInfo.price}${planInfo?.period ? ` / ${planInfo.period}` : ""}`
+                  : "";
+              const butiran = [namaPakej, harga].filter(Boolean).join(" - ");
+              const mesej =
+                `Hai admin Bunyi Kata, saya berminat untuk melanggan pakej Pro` +
+                `${butiran ? ` (${butiran})` : ""}` +
+                ` untuk ${category === "guru" ? "Guru" : "Ibu Bapa"}. ` +
+                `Boleh saya dapatkan maklumat lanjut untuk mendaftar?`;
 
-              // Semak sama ada pengguna benar-benar sedang aktif log masuk dalam sesi dashboard (bukan tetamu & bukan di skrin mula)
-              const isUserActivelyLoggedIn =
-                !isLoginScreen &&
-                !isGuest &&
-                Boolean(currentUser) &&
-                ((category === "guru" &&
-                  (Boolean((window as any).modGuruAktif) || userRole === "guru" || activeScreen === "guru-dashboard")) ||
-                 (category === "ibubapa" &&
-                  (Boolean((window as any).modIbuBapaAktif) || userRole === "ibubapa" || activeScreen === "ibubapa-dashboard")));
+              const berjaya = hubungiAdminWhatsapp(mesej);
 
-              if (isUserActivelyLoggedIn) {
-                // PENGGUNA SUDAH AKTIF LOG MASUK DI DASHBOARD:
-                // Terus ke saluran bayaran Chip dengan emel dan nama akaun yang sedia ada
-                const guruEmail = currentUser?.email || localStorage.getItem("bunyiKataGuruEmail") || "";
-                const ibubapaEmail = currentUser?.email || localStorage.getItem("bunyiKataIbubapaEmail") || "";
-                const currentEmail = (category === "guru" ? guruEmail : ibubapaEmail) || currentUser?.email || "";
-
-                const guruName = currentUser?.nama || localStorage.getItem("bunyiKataNamaGuru") || "Guru";
-                const famName = currentUser?.nama || localStorage.getItem("bunyiKataNamaKeluarga") || "Keluarga";
-                const currentName = (category === "guru" ? guruName : famName) || (currentEmail ? currentEmail.split("@")[0] : "Pelanggan Bunyi Kata");
-
-                setIsModeMenuOpen(false);
-                setIsProPricingModalOpen(false);
-                setPendingSelectedPlan(planInfo || null);
-                if (typeof (window as any).bukaBayaranChip === "function") {
-                  (window as any).bukaBayaranChip(planInfo, currentEmail, currentName);
-                } else {
-                  console.log(`[Bayaran Chip] Memproses bayaran untuk: ${currentName} (${currentEmail}), Pakej: ${planInfo?.name} (RM${planInfo?.price})`);
-                }
-              } else {
-                // PENGGUNA BELUM LOG MASUK (DARI SKRIN MULA / MOD TETAMU):
-                // Buka borang pendaftaran akaun baharu / log masuk dahulu
-                setIsModeMenuOpen(false);
-                setIsProPricingModalOpen(false);
-                setPendingLoginMode(category);
-                setPendingSelectedPlan(planInfo || null);
-                setAuthModalTab("register");
-                setLoginEmail("");
-                setLoginPassword("");
-                setRegGuruNama("");
-                setRegGuruSekolah("");
-                setRegNamaKeluarga("");
-                setAuthModalError("");
-                setShowLoginModal(true);
+              if (typeof (window as any).paparNotifikasiUmum === "function") {
+                (window as any).paparNotifikasiUmum(
+                  berjaya
+                    ? "Pendaftaran akaun diuruskan oleh admin. Sila teruskan perbualan di WhatsApp untuk melanggan pakej."
+                    : "Pendaftaran akaun diuruskan oleh admin. Sila hubungi admin untuk melanggan pakej.",
+                );
               }
             }}
           />
@@ -11989,100 +11754,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Floating Side Toast Notification (Top-Right) */}
-      <AnimatePresence>
-        {paymentToast && paymentToast.show && (
-          <motion.div
-            initial={{ opacity: 0, x: 80, scale: 0.95 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 80, scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 350, damping: 25 }}
-            style={{
-              position: "fixed",
-              top: "24px",
-              right: "24px",
-              zIndex: 99999999,
-              maxWidth: "420px",
-              width: "calc(100vw - 48px)",
-              background: paymentToast.type === "success" 
-                ? "linear-gradient(135deg, #064e3b 0%, #047857 100%)" 
-                : "linear-gradient(135deg, #7f1d1d 0%, #b91c1c 100%)",
-              color: "#ffffff",
-              borderRadius: "18px",
-              padding: "16px 20px",
-              border: "2.5px solid #ffffff",
-              boxShadow: "0 14px 35px rgba(0,0,0,0.35), 3px 3px 0 #000000",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "14px",
-            }}
-          >
-            <div
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "12px",
-                backgroundColor: paymentToast.type === "success" ? "#10b981" : "#ef4444",
-                border: "2px solid #ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "1.35rem",
-                flexShrink: 0,
-                boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-              }}
-            >
-              <i className={paymentToast.type === "success" ? "fa-solid fa-crown" : "fa-solid fa-circle-xmark"}></i>
-            </div>
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                <h4 style={{ margin: 0, fontSize: "1.05rem", fontWeight: "900", color: "#fef08a" }}>
-                  {paymentToast.title}
-                </h4>
-                <button
-                  onClick={() => setPaymentToast(null)}
-                  style={{
-                    background: "rgba(255,255,255,0.2)",
-                    border: "none",
-                    borderRadius: "50%",
-                    width: "24px",
-                    height: "24px",
-                    color: "white",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "0.8rem",
-                  }}
-                >
-                  <i className="fa-solid fa-xmark"></i>
-                </button>
-              </div>
-              <p style={{ margin: 0, fontSize: "0.88rem", lineHeight: "1.4", color: "#f1f5f9", fontWeight: "500" }}>
-                {paymentToast.message}
-              </p>
-              {paymentToast.planName && (
-                <div style={{ marginTop: "8px" }}>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      backgroundColor: "rgba(255,255,255,0.25)",
-                      border: "1px solid rgba(255,255,255,0.4)",
-                      borderRadius: "6px",
-                      padding: "2px 8px",
-                      fontSize: "0.75rem",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Status: PRO AKTIF ({paymentToast.planName})
-                  </span>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

@@ -23,7 +23,7 @@ Write-Host '   2. Pilih branch    -> guna anak panah, pilih: main'
 Write-Host '   3. Deploy now?     -> taip: n   (WAJIB n, jangan Y)' -ForegroundColor Red
 Write-Host ''
 Write-Host ' Sebab kena jawab n: backend belum ada kebenaran baca' -ForegroundColor Gray
-Write-Host ' ADMIN_CODE & CHIP_SECRET_KEY. Rollout sekarang = build gagal.' -ForegroundColor Gray
+Write-Host ' ADMIN_CODE. Rollout sekarang = build gagal.' -ForegroundColor Gray
 Write-Host ''
 Read-Host ' Tekan Enter untuk mula (atau Ctrl+C untuk batal)'
 Write-Host ''
@@ -39,6 +39,6 @@ npx firebase apphosting:backends:create `
 Write-Host ''
 Write-Host '=====================================================' -ForegroundColor Cyan
 Write-Host ' Selesai. Beritahu agent supaya jalankan grantaccess' -ForegroundColor Cyan
-Write-Host ' untuk ADMIN_CODE & CHIP_SECRET_KEY sebelum push.' -ForegroundColor Cyan
+Write-Host ' untuk ADMIN_CODE sebelum push.' -ForegroundColor Cyan
 Write-Host '=====================================================' -ForegroundColor Cyan
 Write-Host ''

@@ -23,7 +23,7 @@ export interface EntryChoiceModalProps {
   setUserAccessLevel: React.Dispatch<React.SetStateAction<"trial" | "pro">>;
   setShowLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
   setPendingLoginMode: React.Dispatch<React.SetStateAction<string>>;
-  setAuthModalTab: React.Dispatch<React.SetStateAction<string>>;
+  setAuthModalTab: React.Dispatch<React.SetStateAction<"masuk" | "login">>;
   setLoginEmail: React.Dispatch<React.SetStateAction<string>>;
   setLoginPassword: React.Dispatch<React.SetStateAction<string>>;
   setRegGuruNama: React.Dispatch<React.SetStateAction<string>>;

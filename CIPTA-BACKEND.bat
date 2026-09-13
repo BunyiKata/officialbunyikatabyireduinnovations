@@ -20,7 +20,7 @@ echo     3. Branch          -^> main                        lalu Enter
 echo     4. Deploy now?     -^> taip huruf: n   lalu Enter   (WAJIB n, JANGAN Y)
 echo.
 echo  Sebab kena jawab n: backend belum ada kebenaran baca
-echo  ADMIN_CODE dan CHIP_SECRET_KEY. Kalau deploy sekarang, build GAGAL.
+echo  ADMIN_CODE. Kalau deploy sekarang, build GAGAL.
 echo.
 echo  TANDA BERJAYA yang kena cari di skrin:
 echo     "Successfully created backend"

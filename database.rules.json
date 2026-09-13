@@ -4,7 +4,7 @@
     ".write": false,
 
     "profiles": {
-      ".read": true,
+      ".read": "auth != null",
       ".indexOn": ["email", "peranan"],
       "$profileId": {
         ".write": "auth != null && (auth.uid == $profileId || auth.token.admin == true || (data.exists() && data.child('email').val() == auth.token.email) || (!data.exists() && newData.child('email').val() == auth.token.email))"

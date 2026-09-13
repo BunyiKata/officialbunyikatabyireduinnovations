@@ -8,8 +8,8 @@
  *
  * Selepas akaun dicipta, pelayan memulangkan kata laluan SEKALI sahaja.
  * Modal ini kemudian memaparkan kad hasil dengan butang:
- *   - 📋 Salin Mesej WhatsApp
- *   - 💬 Buka WhatsApp (wa.me deeplink)
+ *   - Salin Mesej WhatsApp
+ *   - Buka WhatsApp (wa.me deeplink)
  */
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -44,18 +44,18 @@ function binaMesejWhatsApp(h: HasilCiptaAkaun): string {
   return [
     `Salam ${h.nama || ""},`,
     "",
-    "Akaun Bunyi Kata anda telah sedia untuk digunakan! ✅",
+    "Akaun Bunyi Kata anda telah sedia untuk digunakan!",
     "",
-    "🔗 Pautan: https://bunyikata--bunyi-kata-official.asia-southeast1.hosted.app",
-    `📧 Emel: ${h.email || ""}`,
-    `🔑 Kata laluan sementara: ${h.password || ""}`,
+    "Pautan: https://bunyikata--bunyi-kata-official.asia-southeast1.hosted.app",
+    `Emel: ${h.email || ""}`,
+    `Kata laluan sementara: ${h.password || ""}`,
     "",
-    `📦 Pakej: ${h.plan?.name || "-"}`,
-    `📅 Sah sehingga: ${formatTarikh(h.tarikh_tamat)}`,
+    `Pakej: ${h.plan?.name || "-"}`,
+    `Sah sehingga: ${formatTarikh(h.tarikh_tamat)}`,
     "",
     "Sila log masuk dan tukar kata laluan anda di menu Tetapan.",
     "",
-    "Terima kasih kerana memilih Bunyi Kata! 🙏",
+    "Terima kasih kerana memilih Bunyi Kata!",
   ].join("\n");
 }
 
@@ -159,6 +159,8 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
     fontFamily: "inherit",
     outline: "none",
     boxSizing: "border-box",
+    textAlign: "left",
+    background: "#ffffff",
   };
   const labelStyle: React.CSSProperties = {
     display: "block",
@@ -166,6 +168,11 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
     fontWeight: "bold",
     color: "#334155",
     marginBottom: "5px",
+    textAlign: "left",
+  };
+  const fieldStyle: React.CSSProperties = {
+    marginBottom: "12px",
+    textAlign: "left",
   };
 
   return (
@@ -192,26 +199,46 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
             onClick={(e) => e.stopPropagation()}
+            className="neo-box"
             style={{
-              background: "#ffffff",
+              backgroundColor: "#fef9ec",
+              backgroundImage:
+                "radial-gradient(circle, rgba(16, 24, 47, .11) 1.5px, transparent 1.5px)",
+              backgroundSize: "15px 15px",
               borderRadius: "20px",
               width: "100%",
               maxWidth: "460px",
               maxHeight: "92vh",
               overflowY: "auto",
               padding: "22px",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.3)",
+              textAlign: "center",
             }}
           >
             {!hasil ? (
               <>
-                <h3 style={{ margin: "0 0 4px", fontSize: "1.25rem", color: "#0f172a" }}>
-                  ➕ Cipta Akaun Pengguna
-                </h3>
-                <p style={{ margin: "0 0 16px", fontSize: "0.85rem", color: "#64748b" }}>
+                <div
+                  className="neo-btn"
+                  style={{
+                    backgroundColor: "#168f81",
+                    color: "white",
+                    fontSize: "clamp(1.02rem, 3.6vw, 1.22rem)",
+                    margin: "0 auto 14px auto",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "9px",
+                    pointerEvents: "none",
+                    padding: "8px 22px",
+                    lineHeight: "1.2",
+                    fontWeight: "900",
+                    borderRadius: "12px",
+                  }}
+                >
+                  <i className="fa-solid fa-user-plus"></i> Cipta Akaun Pengguna
+                </div>
+                <p style={{ margin: "0 0 16px", fontSize: "0.85rem", color: "#475569", fontWeight: "bold" }}>
                   Akaun dicipta di pelayan. Kata laluan sementara akan dipaparkan selepas ini.
                 </p>
-                <div style={{ marginBottom: "14px" }}>
+                <div style={fieldStyle}>
                   <label style={labelStyle}>Peranan</label>
                   <div style={{ display: "flex", gap: "8px" }}>
                     {(["guru", "ibubapa"] as PerananPengguna[]).map((r) => (
@@ -230,15 +257,20 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                           fontWeight: "bold",
                           cursor: "pointer",
                           boxShadow: peranan === r ? "0 3px 0 #0b5c53" : "0 3px 0 #0f172a",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "7px",
                         }}
                       >
+                        <i className={r === "guru" ? "fa-solid fa-chalkboard-user" : "fa-solid fa-people-roof"}></i>
                         {r === "guru" ? "Guru" : "Ibu Bapa"}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div style={{ marginBottom: "12px" }}>
+                <div style={fieldStyle}>
                   <label style={labelStyle}>Nama Penuh *</label>
                   <input
                     style={inputStyle}
@@ -248,7 +280,7 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                   />
                 </div>
 
-                <div style={{ marginBottom: "12px" }}>
+                <div style={fieldStyle}>
                   <label style={labelStyle}>Emel *</label>
                   <input
                     style={inputStyle}
@@ -259,7 +291,7 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                   />
                 </div>
 
-                <div style={{ marginBottom: "12px" }}>
+                <div style={fieldStyle}>
                   <label style={labelStyle}>No. Telefon (WhatsApp)</label>
                   <input
                     style={inputStyle}
@@ -270,7 +302,7 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                 </div>
 
                 {peranan === "guru" ? (
-                  <div style={{ marginBottom: "12px" }}>
+                  <div style={fieldStyle}>
                     <label style={labelStyle}>Nama Sekolah</label>
                     <input
                       style={inputStyle}
@@ -280,7 +312,7 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                     />
                   </div>
                 ) : (
-                  <div style={{ marginBottom: "12px" }}>
+                  <div style={fieldStyle}>
                     <label style={labelStyle}>Nama Keluarga</label>
                     <input
                       style={inputStyle}
@@ -291,7 +323,7 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                   </div>
                 )}
 
-                <div style={{ marginBottom: "16px" }}>
+                <div style={{ ...fieldStyle, marginBottom: "16px" }}>
                   <label style={labelStyle}>Pakej Langganan</label>
                   <select
                     style={inputStyle}
@@ -313,12 +345,17 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                       padding: "10px 12px",
                       borderRadius: "10px",
                       background: "#fef2f2",
-                      border: "1px solid #fecaca",
+                      border: "2px solid #fecaca",
                       color: "#b91c1c",
                       fontSize: "0.85rem",
+                      fontWeight: "bold",
+                      textAlign: "left",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
                     }}
                   >
-                    ⚠️ {ralat}
+                    <i className="fa-solid fa-triangle-exclamation"></i> {ralat}
                   </div>
                 )}
 
@@ -356,45 +393,80 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                       fontWeight: "bold",
                       cursor: sedangProses ? "wait" : "pointer",
                       boxShadow: "0 3px 0 #0b5c53",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
                     }}
                   >
-                    {sedangProses ? "Mencipta..." : "✅ Cipta Akaun"}
+                    <i className={sedangProses ? "fa-solid fa-spinner fa-spin" : "fa-solid fa-circle-plus"}></i>
+                    {sedangProses ? "Mencipta..." : "Cipta Akaun"}
                   </button>
                 </div>
               </>
             ) : (
               <>
-                <div style={{ textAlign: "center", marginBottom: "14px" }}>
-                  <div style={{ fontSize: "2.4rem" }}>🎉</div>
-                  <h3 style={{ margin: "4px 0", fontSize: "1.2rem", color: "#0f172a" }}>
-                    Akaun Berjaya Dicipta!
-                  </h3>
-                  <p style={{ margin: 0, fontSize: "0.82rem", color: "#64748b" }}>
-                    Salin mesej di bawah dan hantar kepada pengguna melalui WhatsApp.
-                  </p>
+                <div
+                  className="neo-btn"
+                  style={{
+                    backgroundColor: "#168f81",
+                    color: "white",
+                    fontSize: "clamp(1rem, 3.5vw, 1.18rem)",
+                    margin: "0 auto 14px auto",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "9px",
+                    pointerEvents: "none",
+                    padding: "8px 22px",
+                    lineHeight: "1.2",
+                    fontWeight: "900",
+                    borderRadius: "12px",
+                  }}
+                >
+                  <i className="fa-solid fa-circle-check"></i> Akaun Berjaya Dicipta
                 </div>
+                <p style={{ margin: "0 0 16px", fontSize: "0.84rem", color: "#475569", fontWeight: "bold" }}>
+                  Salin mesej di bawah dan hantar kepada pengguna melalui WhatsApp.
+                </p>
 
                 <div
                   style={{
-                    background: "#f8fafc",
+                    background: "#ffffff",
                     border: "2px dashed #168f81",
                     borderRadius: "14px",
                     padding: "14px",
                     marginBottom: "14px",
                     fontSize: "0.9rem",
-                    lineHeight: "1.7",
+                    lineHeight: "1.9",
+                    textAlign: "left",
+                    boxShadow: "0 3px 0 #0f172a",
                   }}
                 >
-                  <div><b>👤 Nama:</b> {hasil.nama}</div>
-                  <div><b>📧 Emel:</b> {hasil.email}</div>
-                  <div>
-                    <b>🔑 Kata Laluan:</b>{" "}
-                    <span style={{ background: "#fef9c3", padding: "1px 6px", borderRadius: "5px", fontWeight: "bold" }}>
-                      {hasil.password}
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <i className="fa-solid fa-user" style={{ color: "#168f81", width: "16px" }}></i>
+                    <span><b>Nama:</b> {hasil.nama}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <i className="fa-solid fa-envelope" style={{ color: "#168f81", width: "16px" }}></i>
+                    <span><b>Emel:</b> {hasil.email}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <i className="fa-solid fa-key" style={{ color: "#168f81", width: "16px" }}></i>
+                    <span>
+                      <b>Kata Laluan:</b>{" "}
+                      <span style={{ background: "#fef9c3", padding: "1px 7px", borderRadius: "5px", fontWeight: "bold", border: "1px solid #fde047" }}>
+                        {hasil.password}
+                      </span>
                     </span>
                   </div>
-                  <div><b>📦 Pakej:</b> {hasil.plan?.name}</div>
-                  <div><b>📅 Sah sehingga:</b> {formatTarikh(hasil.tarikh_tamat)}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <i className="fa-solid fa-box-open" style={{ color: "#168f81", width: "16px" }}></i>
+                    <span><b>Pakej:</b> {hasil.plan?.name}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <i className="fa-solid fa-calendar-days" style={{ color: "#168f81", width: "16px" }}></i>
+                    <span><b>Sah sehingga:</b> {formatTarikh(hasil.tarikh_tamat)}</span>
+                  </div>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "9px" }}>
@@ -413,7 +485,8 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                       boxShadow: "0 3px 0 #0f172a",
                     }}
                   >
-                    {disalin ? "✅ Mesej Disalin!" : "📋 Salin Mesej WhatsApp"}
+                    <i className={disalin ? "fa-solid fa-check" : "fa-solid fa-clipboard"}></i>
+                    {disalin ? "Mesej Disalin!" : "Salin Mesej WhatsApp"}
                   </button>
                   <button
                     type="button"
@@ -428,9 +501,13 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                       fontWeight: "bold",
                       cursor: "pointer",
                       boxShadow: "0 3px 0 #15803d",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "9px",
                     }}
                   >
-                    💬 Buka WhatsApp
+                    <i className="fa-brands fa-whatsapp" style={{ fontSize: "1.15rem" }}></i> Buka WhatsApp
                   </button>
                   <div style={{ display: "flex", gap: "9px", marginTop: "4px" }}>
                     <button
@@ -446,9 +523,13 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                         fontWeight: "bold",
                         cursor: "pointer",
                         boxShadow: "0 3px 0 #0f172a",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "7px",
                       }}
                     >
-                      ➕ Cipta Lagi
+                      <i className="fa-solid fa-user-plus"></i> Cipta Lagi
                     </button>
                     <button
                       type="button"
@@ -464,15 +545,32 @@ export function CiptaAkaunModal({ isOpen, onClose }: CiptaAkaunModalProps) {
                         fontWeight: "bold",
                         cursor: "pointer",
                         boxShadow: "0 3px 0 #000000",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "7px",
                       }}
                     >
-                      Selesai
+                      <i className="fa-solid fa-circle-check"></i> Selesai
                     </button>
                   </div>
                 </div>
 
-                <p style={{ marginTop: "12px", fontSize: "0.72rem", color: "#94a3b8", textAlign: "center" }}>
-                  ⚠️ Kata laluan hanya dipaparkan sekali sahaja. Salin dahulu sebelum tutup.
+                <p
+                  style={{
+                    marginTop: "12px",
+                    fontSize: "0.74rem",
+                    color: "#92400e",
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "7px",
+                  }}
+                >
+                  <i className="fa-solid fa-triangle-exclamation"></i>
+                  Kata laluan hanya dipaparkan sekali sahaja. Salin dahulu sebelum tutup.
                 </p>
               </>
             )}

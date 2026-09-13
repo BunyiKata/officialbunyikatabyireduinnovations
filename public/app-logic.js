@@ -350,6 +350,16 @@ window.showAdminInfo = function (type, nama, extra) {
             <div style="display:flex; justify-content:center;">
                 <button type="button" class="neo-btn bg-white" style="width:100%; padding:10px; font-weight:bold; border-radius:10px; border:2px solid var(--color-dark); cursor:pointer; font-size:0.95rem;" onclick="document.getElementById('app-admin-info-modal-overlay').style.display='none'">Tutup</button>
             </div>
+            ${(type === 'guru' || type === 'ibubapa') && profileId ? `
+            <div style="display:flex; gap:10px; margin-top:12px;">
+                <button type="button" class="neo-btn" style="flex:1; padding:11px; font-weight:bold; border-radius:10px; border:2px solid #0b5c53; background:#168f81; color:#fff; cursor:pointer; font-size:0.86rem; display:inline-flex; align-items:center; justify-content:center; gap:7px; box-shadow:0 3px 0 #0b5c53;" onclick="window.resetKataLaluanAdminPopup('${profileId}', ${JSON.stringify(type)})">
+                    <i class="fa-solid fa-key"></i> Reset Kata Laluan
+                </button>
+                <button type="button" class="neo-btn" style="flex:1; padding:11px; font-weight:bold; border-radius:10px; border:2px solid #9a3412; background:#ea580c; color:#fff; cursor:pointer; font-size:0.86rem; display:inline-flex; align-items:center; justify-content:center; gap:7px; box-shadow:0 3px 0 #9a3412;" onclick="window.panjangTempohAdminPopup('${profileId}', ${JSON.stringify(type)})">
+                    <i class="fa-solid fa-calendar-plus"></i> Panjang Tempoh
+                </button>
+            </div>
+            ` : ''}
         </div>
     `;
     infoModal.style.display = 'flex';
@@ -2126,11 +2136,6 @@ function paparSkrin(screenId, skipHash) {
 
 window.paparSkrin = paparSkrin;
 function mengendaliNavigasiURL(e) {
-    // Jangan ganggu jika sedang memproses callback pembayaran
-    if (typeof window !== 'undefined' && window.location.search && (window.location.search.includes('payment=') || window.location.search.includes('status='))) {
-        return;
-    }
-
     let path = (e && e.state && e.state.screenId) ? e.state.screenId : window.location.pathname.replace(/^\/+/, '');
     if (!path && window.location.hash) {
         path = window.location.hash.replace('#', '');
@@ -2164,10 +2169,6 @@ function mengendaliNavigasiURL(e) {
 window.addEventListener('popstate', mengendaliNavigasiURL);
 window.addEventListener('hashchange', mengendaliNavigasiURL);
 setTimeout(function () {
-    // Jalankan navigasi permulaan hanya jika tiada status pembayaran aktif
-    if (typeof window !== 'undefined' && window.location.search && (window.location.search.includes('payment=') || window.location.search.includes('status='))) {
-        return;
-    }
     mengendaliNavigasiURL();
 }, 100);
 
@@ -2206,9 +2207,6 @@ window.bolehAksesSkrin = function (screenId) {
         if (!screenId) return false;
         const id = String(screenId);
 
-        // Jika baru kembali daripada payment gateway (ada parameter URL payment atau status), benarkan akses dashboard
-        const search = (typeof window !== 'undefined' && window.location.search) ? window.location.search : '';
-        const adaPaymentCallback = search.includes('payment=') || search.includes('status=');
         let pendingCat = '';
         try {
             const sp = localStorage.getItem('bunyiKataPendingPlan');
@@ -2218,7 +2216,6 @@ window.bolehAksesSkrin = function (screenId) {
 
         // 1) Skrin admin — hanya dengan sesi admin RUNTIME.
         if (id === 'admin-dashboard' || id.startsWith('admin-')) {
-            if (adaPaymentCallback && role === 'admin') return true;
             return !!(
                 window.modAdminAktif ||
                 window.isAdminMode ||
@@ -2229,13 +2226,11 @@ window.bolehAksesSkrin = function (screenId) {
 
         // 2) Skrin guru.
         if (id === 'guru-dashboard' || id.startsWith('guru-')) {
-            if (adaPaymentCallback && (role === 'guru' || (!role && !pendingCat))) return true;
             return !!(window.modGuruAktif || role === 'guru' || role === 'admin');
         }
 
         // 3) Skrin ibu bapa.
         if (id === 'ibubapa-dashboard' || id.startsWith('ibubapa-')) {
-            if (adaPaymentCallback && role === 'ibubapa') return true;
             return !!(window.modIbuBapaAktif || role === 'ibubapa');
         }
 
@@ -2322,11 +2317,56 @@ window.isEffectiveTrial = function () {
     return true;
 };
 
+/**
+ * Buang SEMUA sisa data & konteks sesi admin daripada memori dan localStorage.
+ *
+ * PENTING: Tanpa ini, selepas admin keluar, cache `bunyiKataAdminTeachers` /
+ * `bunyiKataAdminParents` (yang memuatkan SENARAI SEMUA guru & ibu bapa orang
+ * lain) kekal dalam pelayar. Bila pengguna lain masuk mod guru pada peranti
+ * yang sama, `renderAdminTable()` / `getAdminTeachersList()` masih membaca
+ * cache tersebut — inilah punca mod admin dan mod guru BERCAMPUR.
+ */
+function bersihkanSisaAdmin() {
+    // 1. Buang cache senarai pengguna (paling kritikal — data orang lain).
+    try {
+        localStorage.removeItem('bunyiKataAdminTeachers');
+        localStorage.removeItem('bunyiKataAdminParents');
+    } catch (e) { }
+
+    // 2. Kosongkan rujukan dalam memori.
+    if (Array.isArray(window.adminTeachers)) window.adminTeachers = [];
+    if (Array.isArray(window.adminParents)) window.adminParents = [];
+    if (window.adminDataGuru) window.adminDataGuru = [];
+
+    // 3. Kosongkan DOM jadual admin supaya tiada baris lama terpapar.
+    const tbody = document.getElementById('admin-table-body') || document.getElementById('admin-tbody');
+    if (tbody) tbody.innerHTML = '';
+    ['admin-jumlah-guru', 'admin-jumlah-ibubapa', 'admin-jumlah-murid', 'admin-jumlah-anak']
+        .forEach(function (id) {
+            const el = document.getElementById(id);
+            if (el) el.innerText = '0';
+        });
+
+    // 4. Keluarkan flag akses admin daripada localStorage.
+    try {
+        if (localStorage.getItem('bunyiKataUserRole') === 'admin') {
+            localStorage.removeItem('bunyiKataUserRole');
+        }
+    } catch (e) { }
+}
+window.bersihkanSisaAdmin = bersihkanSisaAdmin;
+
 window.masukModAdmin = masukModAdmin;
 
 function masukModAdmin() {
-    modGuruAktif = true;
-    window.modGuruAktif = true;
+    // Buang dahulu sebarang sisa sesi guru ORANG LAIN sebelum mula mod admin.
+    bersihkanSisaAdmin();
+
+    // NOTA: Mod admin BUKAN mod guru. Jangan sekali-kali set `modGuruAktif = true`
+    // di sini — dulu ini menyebabkan keupayaan mod guru (jadual kelas, senarai
+    // murid) bocor ke dalam mod admin, dan sebaliknya keadaan bercampur.
+    modGuruAktif = false;
+    window.modGuruAktif = false;
     modIbuBapaAktif = false;
     window.modIbuBapaAktif = false;
     modAdminAktif = true;
@@ -2342,7 +2382,9 @@ function masukModAdmin() {
     if (typeof window.setUserAccessLevel === 'function') {
         window.setUserAccessLevel('pro');
     }
-    document.body.classList.add('teacher-mode');
+    // JANGAN tambah 'teacher-mode' — mod admin ada kelas CSS sendiri
+    // ('admin-mode') supaya gaya/jadual guru tidak bocor masuk.
+    document.body.classList.remove('teacher-mode');
     document.body.classList.add('admin-mode');
     document.body.classList.remove('parent-mode');
 
@@ -2378,6 +2420,10 @@ function masukModAdmin() {
 }
 
 function masukModGuru() {
+    // Buang sisa sesi admin dahulu — kalau tidak, senarai guru orang lain
+    // (bunyiKataAdminTeachers) akan muncul dalam dashboard guru.
+    bersihkanSisaAdmin();
+
     modGuruAktif = true;
     window.modGuruAktif = true;
     modIbuBapaAktif = false;
@@ -2385,6 +2431,7 @@ function masukModGuru() {
     modAdminAktif = false;
     window.modAdminAktif = false;
     window.isAdminMode = false;
+    window.adminClaimDisahkan = false;
     window.isGuestMode = false;
     document.body.classList.add('teacher-mode');
     document.body.classList.remove('admin-mode');
@@ -2492,6 +2539,11 @@ function masukModGuru() {
 }
 
 function keluarModGuru() {
+    // Buang SEMUA sisa data admin (cache guru/ibu bapa orang lain, DOM jadual,
+    // flag akses). Ini penting supaya peranti yang sama boleh digunakan oleh
+    // pengguna seterusnya tanpa melihat data admin yang tertinggal.
+    bersihkanSisaAdmin();
+
     modGuruAktif = false;
     window.modGuruAktif = false;
     modIbuBapaAktif = false;
@@ -6796,6 +6848,134 @@ window.lanjutTempohGuru = async function(id) {
         }
     );
 };
+// ---------------------------------------------------------------------------
+// BUTANG TINDAKAN DALAM POPUP INFO ADMIN (Reset Kata Laluan / Panjang Tempoh)
+// Fungsi pelayan didedahkan melalui window.__adminApi (lihat adminService.ts).
+// ---------------------------------------------------------------------------
+
+function _tutupInfoAdmin() {
+    const overlay = document.getElementById('app-admin-info-modal-overlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+/** Set semula kata laluan pengguna dan paparkan kata laluan baharu. */
+window.resetKataLaluanAdminPopup = function (uid, type) {
+    if (!uid) { window.showAppToast('Ralat', 'ID pengguna tidak dijumpai.'); return; }
+    const api = window.__adminApi;
+    if (!api || typeof api.resetKataLaluanAdmin !== 'function') {
+        window.showAppToast('Ralat', 'Sesi admin tidak aktif. Sila masuk semula.');
+        return;
+    }
+
+    window.showAppModalConfirm(
+        'Reset Kata Laluan',
+        'Adakah anda ingin menjana <strong>kata laluan baharu</strong> untuk pengguna ini?<br/><span style="color:#b45309; font-size:0.85rem; display:inline-block; margin-top:6px;">Kata laluan lama akan terus tidak sah. Kata laluan baharu hanya dipaparkan SEKALI.</span>',
+        async function () {
+            const hasil = await api.resetKataLaluanAdmin(uid);
+            if (!hasil || !hasil.berjaya) {
+                window.showAppToast('Gagal', (hasil && hasil.mesej) || 'Operasi gagal. Sila cuba lagi.');
+                return;
+            }
+            _tutupInfoAdmin();
+            _paparKataLaluanBaharu(hasil.password || '', type);
+        }
+    );
+};
+
+/** Paparkan kata laluan baharu dalam modal berasingan (salinan mudah). */
+function _paparKataLaluanBaharu(password, type) {
+    let modal = document.getElementById('app-admin-pass-modal-overlay');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'app-admin-pass-modal-overlay';
+        modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:100000; display:flex; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+        <div class="neo-box" style="background-color:#fef9ec; background-image:radial-gradient(circle, rgba(16, 24, 47, 0.12) 1.8px, transparent 1.8px); background-size:16px 16px; max-width:400px; width:100%; box-sizing:border-box; padding:24px 20px 20px; border-radius:20px; border:3px solid var(--color-dark, #10182f); box-shadow:0 6px 0 var(--color-dark, #10182f); text-align:center;">
+            <div class="neo-btn" style="background-color:#168f81; color:white; font-size:1rem; margin:0 auto 16px auto; display:inline-flex; align-items:center; gap:8px; pointer-events:none; padding:8px 22px; font-weight:bold; border-radius:12px;">
+                <i class="fa-solid fa-key"></i> Kata Laluan Baharu
+            </div>
+            <p style="margin:0 0 14px 0; font-size:0.88rem; color:#475569; font-weight:bold;">
+                Salin dan berikan kata laluan ini kepada pengguna. Ia hanya dipaparkan sekali.
+            </p>
+            <div style="background:#ffffff; border:2px dashed #168f81; border-radius:14px; padding:16px; margin-bottom:16px; box-shadow:0 3px 0 #0f172a;">
+                <span id="admin-pass-baharu-teks" style="font-family:monospace; font-size:1.3rem; font-weight:900; color:#0f172a; letter-spacing:1px; word-break:break-all;">${password}</span>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button type="button" class="neo-btn" style="flex:1; padding:11px; font-weight:bold; border-radius:10px; border:2px solid #0f172a; background:#ffffff; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:7px; box-shadow:0 3px 0 #0f172a;" onclick="window.salinKataLaluanBaharu(this)">
+                    <i class="fa-solid fa-clipboard"></i> Salin
+                </button>
+                <button type="button" class="neo-btn" style="flex:1; padding:11px; font-weight:bold; border-radius:10px; border:2px solid #000000; background:#0f172a; color:#fff; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:7px; box-shadow:0 3px 0 #000000;" onclick="document.getElementById('app-admin-pass-modal-overlay').style.display='none'">
+                    <i class="fa-solid fa-circle-check"></i> Selesai
+                </button>
+            </div>
+        </div>
+    `;
+    modal.style.display = 'flex';
+}
+window._paparKataLaluanBaharu = _paparKataLaluanBaharu;
+
+window.salinKataLaluanBaharu = async function (btn) {
+    const el = document.getElementById('admin-pass-baharu-teks');
+    if (!el) return;
+    const teks = el.innerText.trim();
+    try {
+        await navigator.clipboard.writeText(teks);
+    } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = teks;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (err) { }
+        document.body.removeChild(ta);
+    }
+    if (btn) {
+        const asal = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Disalin!';
+        setTimeout(function () { btn.innerHTML = asal; }, 2000);
+    }
+};
+
+
+/** Panjangkan tempoh langganan pengguna mengikut pakej (lalai 1 Bulan). */
+window.panjangTempohAdminPopup = function (uid, type) {
+    if (!uid) { window.showAppToast('Ralat', 'ID pengguna tidak dijumpai.'); return; }
+    const api = window.__adminApi;
+    if (!api || typeof api.panjangkanTempohAdmin !== 'function') {
+        window.showAppToast('Ralat', 'Sesi admin tidak aktif. Sila masuk semula.');
+        return;
+    }
+
+    window.showAppModalConfirm(
+        'Panjang Tempoh Langganan',
+        'Adakah anda ingin memanjangkan tempoh langganan pengguna ini sebanyak <span style="color:#16a34a; font-weight:900;">+30 Hari (1 Bulan)</span>?',
+        async function () {
+            const hasil = await api.panjangkanTempohAdmin(uid, '1bulan');
+            if (!hasil || !hasil.berjaya) {
+                window.showAppToast('Gagal', (hasil && hasil.mesej) || 'Operasi gagal. Sila cuba lagi.');
+                return;
+            }
+            _tutupInfoAdmin();
+            if (typeof window.fetchAdminDataFromFirebase === 'function') {
+                try { await window.fetchAdminDataFromFirebase(); } catch (e) { }
+            }
+            if (typeof window.renderAdminTable === 'function') {
+                window.renderAdminTable(type === 'ibubapa' ? 'ibubapa' : 'guru');
+            }
+            const tkh = hasil.tarikh_tamat
+                ? new Date(hasil.tarikh_tamat).toLocaleDateString('ms-MY', { day: '2-digit', month: 'long', year: 'numeric' })
+                : '';
+            window.showAppToast(
+                'Berjaya Dipanjangkan',
+                tkh ? `Tempoh langganan berjaya dipanjangkan sehingga ${tkh}.` : 'Tempoh langganan berjaya dipanjangkan.'
+            );
+        }
+    );
+};
+
+
+
 
 window.padamGuruAdmin = async function(id) {
     const teachers = getAdminTeachersList();
@@ -18419,6 +18599,9 @@ window.mainAudioSukuKataSemasa = function () {
 }
 
 window.masukModMurid = function (namaAnak, stuIdParam) {
+    // Buang sisa data admin (cache guru/ibu bapa orang lain) sebelum sesi murid.
+    if (typeof window.bersihkanSisaAdmin === 'function') window.bersihkanSisaAdmin();
+
     window.modGuruAktif = false;
     if (typeof modGuruAktif !== 'undefined') modGuruAktif = false;
     window.modAdminAktif = false;

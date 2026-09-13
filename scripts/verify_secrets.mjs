@@ -31,7 +31,7 @@ function baca(nama) {
   return buf.toString('utf8');
 }
 
-for (const nama of ['ADMIN_CODE', 'CHIP_SECRET_KEY']) {
+for (const nama of ['ADMIN_CODE']) {
   console.log(`\n===== ${nama} =====`);
 
   let mentah;
@@ -61,7 +61,6 @@ for (const nama of ['ADMIN_CODE', 'CHIP_SECRET_KEY']) {
   // sepatutnya tiada ruang putih di hujung lagi.
   if (tanpaSatuNewline !== dipangkas) {
     console.log('  GAGAL  ada ruang/baris baru tambahan di hujung');
-    console.log('         ini akan menyebabkan CHIP memulangkan 401');
     gagal++;
   } else {
     console.log('  LULUS  bersih (tiada ruang/baris baru di hujung)');
@@ -86,15 +85,6 @@ for (const nama of ['ADMIN_CODE', 'CHIP_SECRET_KEY']) {
     }
     if (panjang < 6) {
       console.log('  AMARAN sangat pendek untuk kod admin');
-    }
-  }
-
-  if (nama === 'CHIP_SECRET_KEY') {
-    if (/\s/.test(dipangkas)) {
-      console.log('  GAGAL  mengandungi ruang di tengah — hampir pasti tersalin salah');
-      gagal++;
-    } else {
-      console.log('  LULUS  tiada ruang di tengah');
     }
   }
 }

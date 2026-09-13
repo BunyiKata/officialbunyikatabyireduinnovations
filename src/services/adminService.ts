@@ -209,9 +209,12 @@ export async function panjangkanTempohAdmin(
 }
 
 // ---------------------------------------------------------------------------
-// UNTUK TEST SAHAJA — dibuang apabila modal UI siap.
-// Dedahkan fungsi ke window supaya boleh dipanggil dari DevTools console
-// tanpa perlu membina UI dahulu.
+// JAMBATAN KE public/app-logic.js
+//
+// app-logic.js ialah JavaScript biasa (bukan modul ES) yang mengendalikan UI
+// dalam public/ — cth. popup reset kata laluan & panjang tempoh. Ia TIDAK
+// boleh `import` dari src/services, jadi kita dedahkan fungsi ini melalui
+// window.__adminApi sebagai satu-satunya titik sambungan yang sah.
 // ---------------------------------------------------------------------------
 if (typeof window !== 'undefined') {
   (window as any).__adminApi = {

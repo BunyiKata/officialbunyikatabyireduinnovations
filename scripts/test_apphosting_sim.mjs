@@ -41,7 +41,6 @@ if (!fs.existsSync('dist/index.html')) {
 // Tiru App Hosting: NODE_ENV=production, PORT disuntik, tiada rahsia .env.
 const env = { ...process.env, NODE_ENV: 'production', PORT: String(PORT) };
 delete env.ADMIN_CODE;
-delete env.CHIP_SECRET_KEY;
 delete env.FIREBASE_SERVICE_ACCOUNT;
 
 const pelayan = spawn('node', ['server.js'], {

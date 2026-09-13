@@ -3103,7 +3103,7 @@ export async function naikTarafLanggananFirebase(
 }
 
 /**
- * Merekodkan pesanan pembayaran yang TELAH disahkan oleh pelayan/CHIP.
+ * Merekodkan pesanan pembayaran yang TELAH disahkan (rekod pesanan manual/admin).
  *
  * Tujuan: audit trail & rekonsiliasi. Tanpa rekod ini, tiada cara untuk
  * menyemak semula aduan pelanggan atau mengesan bayaran berganda.
@@ -3197,7 +3197,7 @@ export interface SubscriptionHistoryRecord {
 /**
  * Membaca sejarah langganan untuk dipaparkan dalam jadual "Sejarah Langganan".
  *
- * Sumber utama: nod `orders` (rekod pembayaran CHIP yang telah disahkan).
+ * Sumber utama: nod `orders` (rekod pesanan yang telah disahkan/direkod).
  * Sumber sandaran: profil berbayar yang tiada rekod pesanan (contoh: pelan
  * ditukar oleh admin melalui pengurusan sistem).
  */
@@ -3226,7 +3226,7 @@ export async function getSubscriptionHistory(): Promise<SubscriptionHistoryRecor
     const rekod: SubscriptionHistoryRecord[] = [];
     const emelAdaPesanan = new Set<string>();
 
-    // 1. Rekod pesanan pembayaran (audit trail CHIP)
+    // 1. Rekod pesanan (audit trail)
     snapToArray<any>(ordersSnap).forEach((o: any) => {
       const emel = String(o.email || '').trim().toLowerCase();
       const profil = profilMengikutEmel.get(emel);

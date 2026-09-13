@@ -1,4 +1,4 @@
-# Menetapkan 2 rahsia sebenar untuk Firebase App Hosting.
+# Menetapkan rahsia sebenar untuk Firebase App Hosting.
 #
 # MENGAPA SKRIP INI ADA:
 #   `firebase apphosting:secrets:set` biasanya bertanya nilai secara
@@ -7,8 +7,6 @@
 #
 #   Jalan pintas yang jelas -- `echo nilai | firebase ... --data-file -` --
 #   ROSAK secara senyap di Windows: pipeline PowerShell menambah `\r\n`,
-#   jadi kunci 88-aksara disimpan sebagai 90 bait. CHIP kemudian memulangkan
-#   401 dengan mesej yang mengelirukan dan sangat sukar dijejak.
 #
 #   Skrip ini menggunakan [IO.File]::WriteAllText yang TIDAK menambah
 #   baris baru, kemudian mengesahkan panjang bait selepas menyimpan.
@@ -116,19 +114,13 @@ function Set-Rahsia {
 
 Write-Host ""
 Write-Host "Menetapkan rahsia App Hosting untuk projek: $projek" -ForegroundColor White
-Write-Host "Hanya 2 rahsia diperlukan. Yang lain adalah nilai awam" -ForegroundColor Gray
+Write-Host "Hanya 1 rahsia diperlukan. Yang lain adalah nilai awam" -ForegroundColor Gray
 Write-Host "dalam apphosting.yaml (kunci Firebase web memang awam)." -ForegroundColor Gray
 
 Set-Rahsia -Nama 'ADMIN_CODE' -Penerangan @"
 Kod admin yang anda taip dalam kotak kod biasa untuk masuk mod admin.
 Anda PILIH SENDIRI nilai ini (ia tiada dalam .env).
 Elakkan aksara:  #  .  `$  [  ]  /
-"@
-
-Set-Rahsia -Nama 'CHIP_SECRET_KEY' -Penerangan @"
-Kunci rahsia CHIP. GUNA KUNCI BAHARU dari portal CHIP.
-Kunci lama sudah terdedah dalam bundle JavaScript pelayar dan
-mesti dihapuskan di portal CHIP SELEPAS rollout ini disahkan berjaya.
 "@
 
 Write-Host ""
@@ -142,5 +134,5 @@ Write-Host "     npx firebase apphosting:backends:create --project $projek" -For
 Write-Host "     region=asia-southeast1, root=/, branch=main, TOLAK rollout serta-merta" -ForegroundColor Gray
 Write-Host ""
 Write-Host "  2. Beri backend akses kepada rahsia (WAJIB, selepas backend ada):" -ForegroundColor Gray
-Write-Host "     npx firebase apphosting:secrets:grantaccess ADMIN_CODE,CHIP_SECRET_KEY --project $projek --backend <ID>" -ForegroundColor Yellow
+Write-Host "     npx firebase apphosting:secrets:grantaccess ADMIN_CODE --project $projek --backend <ID>" -ForegroundColor Yellow
 Write-Host ""

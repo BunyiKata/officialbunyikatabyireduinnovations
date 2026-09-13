@@ -1,4 +1,4 @@
-import express from "express";
+﻿import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
@@ -12,7 +12,7 @@ import { getDatabase } from "firebase-admin/database";
 dotenv.config();
 
 /**
- * Firebase Admin SDK — dimulakan secara "lazy" supaya pelayan masih boleh
+ * Firebase Admin SDK â€” dimulakan secara "lazy" supaya pelayan masih boleh
  * berjalan walaupun kredensial admin belum ditetapkan (cth. semasa pembangunan
  * bahagian hadapan sahaja). Fungsi admin sahaja yang akan gagal, bukan
  * keseluruhan pelayan.
@@ -27,7 +27,7 @@ function getAdminApp() {
   try {
     // firebase-admin v14 MEMBUANG `admin.apps` (ia hanya ada dalam v11 dan ke
     // bawah). Menyentuh `.length` padanya melemparkan TypeError, ditangkap oleh
-    // blok catch di bawah, yang menetapkan adminInitError SECARA KEKAL — jadi
+    // blok catch di bawah, yang menetapkan adminInitError SECARA KEKAL â€” jadi
     // /api/admin/verify sentiasa memulangkan 500. Guna getApps() moden.
     const existing = getApps();
     if (existing.length > 0) {
@@ -44,7 +44,7 @@ function getAdminApp() {
       let parsed;
       const trimmed = rawServiceAccount.trim();
 
-      // Kesan nilai placeholder daripada .env.example — beri mesej jelas
+      // Kesan nilai placeholder daripada .env.example â€” beri mesej jelas
       // daripada SyntaxError JSON yang mengelirukan.
       if (
         trimmed.includes("ISI_BASE64") ||
@@ -103,7 +103,7 @@ function selamatSamaDengan(a, b) {
 
 /**
  * Menjana kata laluan sementara yang munasabah untuk dihantar melalui WhatsApp.
- * Format: BunyiKata#<4 digit> — mudah dibaca melalui telefon, masih ada
+ * Format: BunyiKata#<4 digit> â€” mudah dibaca melalui telefon, masih ada
  * ~9000 kemungkinan jadi tidak boleh diteka secara pukal.
  */
 function janaKataLaluan() {
@@ -167,8 +167,6 @@ async function requireAdmin(req, res, next) {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const CHIP_API_BASE = "https://gate.chip-in.asia/api/v1";
-
 // Harga rasmi setiap pakej dalam sen. Harga MESTI ditentukan di pelayan;
 // jangan sesekali percaya harga yang dihantar dari pelayar.
 const PLAN_CATALOG = {
@@ -184,72 +182,11 @@ function resolvePlanKey(planInfo) {
   return "1bulan";
 }
 
-function getChipCredentials() {
-  const secretKey = process.env.CHIP_SECRET_KEY;
-  const brandId = process.env.CHIP_BRAND_ID;
-  if (!secretKey || !brandId) return { ok: false };
-  return { ok: true, secretKey, brandId };
-}
-
-function normalizePublicKey(key) {
-  if (!key) return "";
-  const trimmed = key.trim().replace(/\\n/g, "\n");
-  if (trimmed.includes("BEGIN")) return trimmed;
-  return `-----BEGIN PUBLIC KEY-----\n${trimmed}\n-----END PUBLIC KEY-----`;
-}
-
-/**
- * Mengesahkan tandatangan callback/webhook CHIP.
- * CHIP menandatangani RAW body: base64 RSA PKCS#1 v1.5 bagi digest SHA256.
- */
-function verifyChipSignature(rawBody, signatureBase64, publicKeyPem) {
-  if (!rawBody || !signatureBase64 || !publicKeyPem) return false;
-  try {
-    const verifier = crypto.createVerify("RSA-SHA256");
-    verifier.update(rawBody);
-    verifier.end();
-    return verifier.verify(publicKeyPem, Buffer.from(signatureBase64, "base64"));
-  } catch (err) {
-    console.error("[Chip] Ralat pengesahan tandatangan:", err.message);
-    return false;
-  }
-}
-
 async function startServer() {
   const app = express();
   // App Hosting / Cloud Run menyuntik PORT melalui persekitaran. Mesti dipatuhi,
   // jika tidak health check akan gagal dan rollout ditolak.
   const PORT = Number(process.env.PORT) || 3000;
-
-  // Webhook CHIP perlukan RAW body untuk pengesahan tandatangan,
-  // jadi ia MESTI didaftarkan sebelum express.json().
-  app.post("/api/chip/webhook", express.raw({ type: "*/*" }), (req, res) => {
-    const publicKey = normalizePublicKey(process.env.CHIP_WEBHOOK_PUBLIC_KEY);
-    if (!publicKey) {
-      console.error("[Chip Webhook] CHIP_WEBHOOK_PUBLIC_KEY belum ditetapkan.");
-      return res.status(500).json({ success: false, message: "Webhook belum dikonfigurasikan." });
-    }
-
-    const rawBody = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || "");
-    if (!verifyChipSignature(rawBody, req.get("X-Signature"), publicKey)) {
-      console.warn("[Chip Webhook] Tandatangan tidak sah — callback ditolak.");
-      return res.status(401).json({ success: false, message: "Tandatangan tidak sah." });
-    }
-
-    let payload;
-    try {
-      payload = JSON.parse(rawBody.toString("utf8"));
-    } catch {
-      return res.status(400).json({ success: false, message: "Payload bukan JSON sah." });
-    }
-
-    console.log(
-      `[Chip Webhook] Disahkan: event=${payload?.event_type} id=${payload?.id} status=${payload?.status}`,
-    );
-
-    // Balas 200 supaya CHIP tidak menghantar berulang kali.
-    return res.status(200).json({ success: true });
-  });
 
   app.use(express.json());
 
@@ -314,7 +251,7 @@ async function startServer() {
    * MEMINTAS peraturan keselamatan RTDB (Admin SDK sentiasa memintas).
    * Ini bermakna kita tidak perlu melonggarkan database.rules.json.
    *
-   * Kata laluan TIDAK PERNAH disimpan dalam pangkalan data — ia hanya
+   * Kata laluan TIDAK PERNAH disimpan dalam pangkalan data â€” ia hanya
    * dipulangkan sekali kepada admin untuk dihantar kepada pengguna.
    */
   app.post("/api/admin/create-account", requireAdmin, async (req, res) => {
@@ -365,7 +302,7 @@ async function startServer() {
           });
         }
       } catch (err) {
-        // auth/user-not-found bermakna emel bebas — inilah keadaan yang kita mahu.
+        // auth/user-not-found bermakna emel bebas â€” inilah keadaan yang kita mahu.
         if (err?.code !== "auth/user-not-found") throw err;
       }
 
@@ -392,7 +329,7 @@ async function startServer() {
         email: emailBersih,
         peranan: perananBersih,
         no_telefon: String(no_telefon).trim(),
-        // Medan khusus mengikut peranan — simpan hanya yang berkaitan.
+        // Medan khusus mengikut peranan â€” simpan hanya yang berkaitan.
         nama_sekolah: perananBersih === "guru" ? String(nama_sekolah).trim() : "",
         nama_keluarga: perananBersih === "ibubapa" ? String(nama_keluarga).trim() : "",
         langganan: plan.name,
@@ -401,7 +338,7 @@ async function startServer() {
         tarikh_tamat: tarikhTamat,
         dicipta_oleh: "admin",
         sumber: "admin",
-        // Disediakan untuk fasa affiliate akan datang — sengaja dibiarkan kosong.
+        // Disediakan untuk fasa affiliate akan datang â€” sengaja dibiarkan kosong.
         referred_by: "",
         tarikh_dicipta: tarikhMula,
       };
@@ -428,7 +365,7 @@ async function startServer() {
 
       console.log(`[Admin Cipta Akaun] Akaun dicipta: ${emailBersih} (${uid}) pakej=${planBersih}`);
 
-      // Kata laluan dipulangkan SEKALI sahaja — tidak disimpan di mana-mana.
+      // Kata laluan dipulangkan SEKALI sahaja â€” tidak disimpan di mana-mana.
       return res.json({
         success: true,
         uid,
@@ -504,8 +441,8 @@ async function startServer() {
       const tarikhTamatLama = profil.tarikh_tamat || "";
       const rujukan =
         tarikhTamatLama && new Date(tarikhTamatLama).getTime() > Date.now()
-          ? tarikhTamatLama // masih aktif → sambung dari tarikh itu
-          : new Date().toISOString(); // sudah tamat → mula semula dari sekarang
+          ? tarikhTamatLama // masih aktif â†’ sambung dari tarikh itu
+          : new Date().toISOString(); // sudah tamat â†’ mula semula dari sekarang
 
       const plan = PLAN_CATALOG[planBersih];
       const tarikhTamatBaharu = kiraTarikhTamat(plan.days, rujukan);
@@ -532,7 +469,7 @@ async function startServer() {
         tarikh: new Date().toISOString(),
       });
 
-      console.log(`[Admin Panjang Tempoh] uid=${uid} pakej=${planBersih} → ${tarikhTamatBaharu}`);
+      console.log(`[Admin Panjang Tempoh] uid=${uid} pakej=${planBersih} â†’ ${tarikhTamatBaharu}`);
       return res.json({
         success: true,
         uid,
@@ -542,141 +479,6 @@ async function startServer() {
     } catch (err) {
       console.error("[Admin Panjang Tempoh Exception]", err);
       return res.status(500).json({ success: false, message: err.message });
-    }
-  });
-
-  // Menjana sesi pembelian CHIP. Semua rahsia kekal di pelayan.
-  app.post("/api/chip/create-purchase", async (req, res) => {
-    try {
-      const creds = getChipCredentials();
-      if (!creds.ok) {
-        return res.status(500).json({
-          success: false,
-          message: "CHIP_SECRET_KEY / CHIP_BRAND_ID belum ditetapkan dalam .env pelayan.",
-        });
-      }
-
-      const { email, name, fullName, planInfo, redirectOrigin } = req.body || {};
-      const clientEmail = (email || "").trim().toLowerCase();
-      if (!clientEmail) {
-        return res.status(400).json({
-          success: false,
-          message: "Emel diperlukan untuk memproses pembayaran.",
-        });
-      }
-
-      const planKey = resolvePlanKey(planInfo);
-      const plan = PLAN_CATALOG[planKey];
-      const origin =
-        redirectOrigin || req.headers.origin || "https://bunyikata--bunyi-kata-official.asia-southeast1.hosted.app";
-      const clientName =
-        fullName ||
-        name ||
-        (planInfo?.category === "guru" ? "Guru Bunyi Kata" : "Keluarga Bunyi Kata");
-
-      const purchasePayload = {
-        client: { email: clientEmail, full_name: clientName },
-        purchase: {
-          currency: "MYR",
-          products: [
-            { name: `Bunyi Kata - ${plan.name}`, price: plan.priceCents, quantity: 1 },
-          ],
-        },
-        brand_id: creds.brandId,
-        reference: `bunyikata_${planKey}_${Date.now()}`,
-        success_redirect: `${origin}/?payment=pending`,
-        failure_redirect: `${origin}/?payment=failed`,
-        cancel_redirect: `${origin}/?payment=cancelled`,
-      };
-
-      const chipResponse = await fetch(`${CHIP_API_BASE}/purchases/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${creds.secretKey}`,
-        },
-        body: JSON.stringify(purchasePayload),
-      });
-
-      const data = await chipResponse.json();
-      if (!chipResponse.ok) {
-        console.error("[Chip API Error]", data);
-        return res.status(chipResponse.status).json({ success: false, error: data });
-      }
-
-      return res.json({
-        success: true,
-        checkout_url: data.checkout_url,
-        purchase_id: data.id,
-        plan: { key: planKey, name: plan.name, days: plan.days },
-      });
-    } catch (err) {
-      console.error("[Chip API Exception]", err);
-      return res.status(500).json({ success: false, message: err.message });
-    }
-  });
-
-  /**
-   * Sumber kebenaran tunggal bagi status pembayaran.
-   * Klien TIDAK boleh mengaktifkan Pro sendiri; ia mesti bertanya di sini.
-   */
-  app.get("/api/chip/verify-purchase/:purchaseId", async (req, res) => {
-    try {
-      const creds = getChipCredentials();
-      if (!creds.ok) {
-        return res
-          .status(500)
-          .json({ success: false, paid: false, message: "CHIP belum dikonfigurasikan." });
-      }
-
-      const { purchaseId } = req.params;
-      const chipRes = await fetch(
-        `${CHIP_API_BASE}/purchases/${encodeURIComponent(purchaseId)}/`,
-        { headers: { Authorization: `Bearer ${creds.secretKey}` } },
-      );
-
-      if (!chipRes.ok) {
-        console.warn("[Chip Verify] Gagal mendapatkan purchase:", chipRes.status);
-        return res.status(chipRes.status).json({
-          success: false,
-          paid: false,
-          message: "Tidak dapat mengesahkan pembayaran dengan CHIP.",
-        });
-      }
-
-      const purchase = await chipRes.json();
-      const productName = purchase?.purchase?.products?.[0]?.name || "";
-      const planKey = resolvePlanKey({ name: productName });
-      const plan = PLAN_CATALOG[planKey];
-      const paidAmount = Number(purchase?.purchase?.total ?? purchase?.payment?.amount ?? 0);
-      const amountMatches = !paidAmount || paidAmount >= plan.priceCents;
-      const isPaid = purchase?.status === "paid";
-
-      if (!isPaid || !amountMatches) {
-        return res.json({
-          success: true,
-          paid: false,
-          status: purchase?.status || "unknown",
-          message: amountMatches
-            ? "Pembayaran belum selesai."
-            : "Jumlah bayaran tidak sepadan dengan pakej.",
-        });
-      }
-
-      // Emel diambil daripada CHIP, bukan daripada URL pelayar.
-      return res.json({
-        success: true,
-        paid: true,
-        status: purchase.status,
-        email: purchase?.client?.email || "",
-        purchase_id: purchase?.id,
-        amount: paidAmount,
-        currency: purchase?.purchase?.currency || "MYR",
-        plan: { key: planKey, name: plan.name, days: plan.days },
-      });
-    } catch (err) {
-      console.error("[Chip Verify Exception]", err);
-      return res.status(500).json({ success: false, paid: false, message: err.message });
     }
   });
 
@@ -697,7 +499,7 @@ async function startServer() {
     next();
   });
 
-  // Fail statik dalam public/ (audio, imej, fon, sw.js, app-logic.js) —
+  // Fail statik dalam public/ (audio, imej, fon, sw.js, app-logic.js) â€”
   // hanya untuk mod pembangunan. Vite menyalin public/ ke dist/ semasa build,
   // jadi dalam production kita hidangkan dist/ sahaja supaya fail lama dalam
   // public/ tidak menutup fail yang baharu dibina.
@@ -725,12 +527,12 @@ async function startServer() {
     // bundle berhash yang berubah setiap deploy. Jika pelayar menyimpan
     // index.html lama, ia akan meminta bundle lama yang sudah tiada dan
     // halaman menjadi KOSONG.
-    // Nota: JANGAN tetapkan Cache-Control secara global di sini — express.static
+    // Nota: JANGAN tetapkan Cache-Control secara global di sini â€” express.static
     // hanya menetapkan header cache jika ia belum wujud, jadi header global
     // akan mematikan caching immutable untuk /assets.
     const NO_STORE = 'no-cache, no-store, must-revalidate';
 
-    // Aset berhash kekal selamanya — namanya berubah apabila kandungan berubah.
+    // Aset berhash kekal selamanya â€” namanya berubah apabila kandungan berubah.
     // fallthrough dibiarkan lalai (true) supaya aset yang tiada jatuh ke
     // catch-all di bawah dan menerima 404 yang jelas, bukan HTML.
     app.use(
@@ -749,7 +551,7 @@ async function startServer() {
       );
     }
 
-    // sw.js TIDAK boleh dicache lama — jika tidak pelayar akan terus
+    // sw.js TIDAK boleh dicache lama â€” jika tidak pelayar akan terus
     // menggunakan logik cache yang lama walaupun kita sudah menaik tarafnya.
     app.get('/sw.js', (req, res) => {
       res.setHeader('Cache-Control', NO_STORE);
@@ -760,7 +562,7 @@ async function startServer() {
     // Fail baki di akar dist/ (styles.css, app-logic.js, surih-logic.js,
     // surih-nombor-logic.js, manifest.json).
     //
-    // PENTING: Fail-fail ini BUKAN berhash — namanya kekal sama walaupun
+    // PENTING: Fail-fail ini BUKAN berhash â€” namanya kekal sama walaupun
     // kandungannya berubah setiap deploy. Jika dicache lama, pembetulan
     // tidak akan sampai kepada pengguna sehingga mereka hard refresh.
     // Setiap satunya dihantar dengan no-cache supaya sentiasa segar.

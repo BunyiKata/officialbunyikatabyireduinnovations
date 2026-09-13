@@ -2,7 +2,7 @@
 import fs from "node:fs";
 
 const PROJECT = "bunyi-kata-official";
-const SECRETS = ["ADMIN_CODE", "CHIP_SECRET_KEY"];
+const SECRETS = ["ADMIN_CODE"];
 const EXPECT =
   "serviceAccount:firebase-app-hosting-compute@bunyi-kata-official.iam.gserviceaccount.com";
 

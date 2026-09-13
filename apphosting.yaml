@@ -42,26 +42,6 @@ env:
     availability:
       - RUNTIME
 
-  # Kunci rahsia CHIP. WAJIB guna kunci BAHARU — kunci lama telah terdedah
-  # dalam bundle pelayar dan mesti dihapuskan di portal CHIP selepas rollout
-  # ini disahkan berfungsi.
-  #   firebase apphosting:secrets:set CHIP_SECRET_KEY
-  - variable: CHIP_SECRET_KEY
-    secret: CHIP_SECRET_KEY
-    availability:
-      - RUNTIME
-
-  # Brand ID CHIP untuk panggilan API pelayan.
-  #
-  # BUKAN rahsia: hanya pengenal jenama. Nilai yang SAMA sudah didedahkan
-  # kepada pelayar melalui VITE_CHIP_BRAND_ID di bawah, jadi menyimpannya
-  # dalam Secret Manager memberi sifar faedah keselamatan.
-  # Yang benar-benar rahsia ialah CHIP_SECRET_KEY sahaja.
-  - variable: CHIP_BRAND_ID
-    value: 0436e9d2-e6ae-4f38-b315-98af6d06edce
-    availability:
-      - RUNTIME
-
   # URL RTDB untuk Firebase Admin SDK di pelayan.
   #
   # WAJIB: getAdminApp() dalam server.js membaca FIREBASE_DATABASE_URL atau
@@ -123,12 +103,5 @@ env:
 
   - variable: VITE_FIREBASE_APP_ID
     value: "1:275606412587:web:1429636d9601afa285796e"
-    availability:
-      - BUILD
-
-  # Brand ID juga diperlukan di pelayar untuk memaparkan pilihan pembayaran.
-  # Ini bukan rahsia (hanya pengenal), berbeza daripada CHIP_SECRET_KEY.
-  - variable: VITE_CHIP_BRAND_ID
-    value: 0436e9d2-e6ae-4f38-b315-98af6d06edce
     availability:
       - BUILD
