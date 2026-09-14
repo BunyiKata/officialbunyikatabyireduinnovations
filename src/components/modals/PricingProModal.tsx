@@ -79,13 +79,19 @@ export function PricingProModal({
       id: 2,
       question: "Apakah perbezaan Pakej Guru dan Pakej Ibu Bapa?",
       answer:
-        "â€¢ Pakej Guru: Menyokong pengurusan rekod sehingga 2 kelas murid, pantauan statistik latihan serta muat turun laporan prestasi murid.\nâ€¢ Pakej Ibu Bapa: Menyokong pendaftaran dan rekod perkembangan sehingga 3 orang anak dalam satu akaun.",
+        "• Pakej Guru: Dibina untuk guru kelas. Bulanan Biasa (RM15/bulan) membenarkan 1 kelas; 3 Bulanan Pro (RM40/3 bulan) dan Tahunan Pro (RM69/tahun) membenarkan sehingga 2 kelas serentak dengan 2 kod kelas unik, pantauan statistik latihan serta muat turun laporan & sijil prestasi murid.\n• Pakej Ibu Bapa: Dibina untuk ibu bapa di rumah. Bulanan Biasa (RM15/bulan) membenarkan 1 profil anak; 3 Bulanan Pro (RM40/3 bulan) dan Tahunan Pro (RM69/tahun) membenarkan sehingga 3 profil anak dengan satu Kod Keluarga Khas, laporan prestasi serta sijil setiap anak.",
     },
     {
       id: 3,
       question: "Bagaimana cara melanggan dan memulakan akaun?",
       answer:
-        "Tekan butang 'Daftar' pada pakej pilihan anda untuk menghubungi admin. Admin akan mencipta akaun dan mengaktifkan langganan anda. Selepas itu, anda boleh log masuk dan mula mendaftar rekod murid/anak.",
+        "Tekan 'dapatkan di sini' pada pengakhiran skrin log masuk, kemudian pilih pakej dalam senarai Pakej Pro dan tekan butang 'Daftar' untuk menghubungi admin melalui WhatsApp. Admin akan mencipta akaun dan mengaktifkan langganan anda. Selepas itu, anda boleh log masuk dan mula mendaftar rekod murid/anak.",
+    },
+    {
+      id: 4,
+      question: "Adakah data & kemajuan murid/anak saya disimpan?",
+      answer:
+        "Ya. Semua rekod murid/anak, kemajuan latihan, statistik dan sijil disimpan secara automatik dalam akaun anda. Ia akan dipulihkan apabila anda log masuk semula menggunakan peranti yang sama atau baharu.",
     },
   ];
 
@@ -850,10 +856,10 @@ export function PricingProModal({
                                     }}
                                   >
                                     <span className="faq-highlight-guru">
-                                      â€¢ Pakej Guru:
+                                      • Pakej Guru:
                                     </span>
                                     <span style={{ flex: "1 1 200px" }}>
-                                      Menyokong pengurusan rekod sehingga 2 kelas murid, pantauan statistik latihan serta muat turun laporan prestasi murid.
+                                      Bulanan Biasa (RM15/bln) = 1 kelas. 3 Bulanan Pro (RM40/3 bulan) &amp; Tahunan Pro (RM69/tahun) = sehingga 2 kelas serentak dengan 2 kod kelas unik, pantauan statistik latihan serta muat turun laporan &amp; sijil prestasi murid.
                                     </span>
                                   </div>
                                   <div
@@ -866,10 +872,10 @@ export function PricingProModal({
                                     }}
                                   >
                                     <span className="faq-highlight-ibubapa">
-                                      â€¢ Pakej Ibu Bapa:
+                                      • Pakej Ibu Bapa:
                                     </span>
                                     <span style={{ flex: "1 1 200px" }}>
-                                      Menyokong pendaftaran dan rekod perkembangan sehingga 3 orang anak dalam satu akaun.
+                                      Bulanan Biasa (RM15/bln) = 1 profil anak. 3 Bulanan Pro (RM40/3 bulan) &amp; Tahunan Pro (RM69/tahun) = sehingga 3 profil anak dengan satu Kod Keluarga Khas, laporan prestasi serta sijil setiap anak.
                                     </span>
                                   </div>
                                 </div>
