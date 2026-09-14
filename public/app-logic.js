@@ -634,6 +634,10 @@ window.renderAdminTable = function (type = 'guru') {
         };
 
         if (typeof window.getFeedbacksFromFirebase === 'function') {
+            window.getFeedbacksFromFirebase().then(renderFeedbackRows).catch(() => renderFeedbackRows([]));
+        } else {
+            renderFeedbackRows([]);
+        }
     } else if (type === "perlu_semakan") {
         // Fasa 1.3: senarai guru & ibu bapa yang PERLU DISEMAK - iaitu yang
         // langganannya sudah luput atau hampir luput (dalam 3 hari). Admin
@@ -774,7 +778,6 @@ window.renderAdminTable = function (type = 'guru') {
                 }
             });
         }
-    }
     } else if (type === "affiliate") {
         const affThead = document.getElementById('affiliate-table-head') || document.getElementById('affiliate-table-head-row');
         const affTbody = document.getElementById('affiliate-table-body');
