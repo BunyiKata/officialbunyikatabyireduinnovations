@@ -54,7 +54,22 @@ export default function LoginScreen({
           }}
           onClick={(e) => {
             if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-            setIsEntryChoiceModalOpen(true);
+            // PENTING: Butang bulat ini di sudut kanan atas skrin log masuk ialah
+            // "Pilih Mod". Sebelum ini ia memanggil setIsEntryChoiceModalOpen(true)
+            // lalu memaparkan popup "Pilih Cara Mula" — itu bug.
+            // Kini ia terus membuka modal Pakej Pro. Peranan ibu bapa diberi
+            // keutamaan (default), melainkan pengguna jelas seorang guru.
+            const role = (
+              (typeof localStorage !== "undefined" &&
+                localStorage.getItem("bunyiKataUserRole")) ||
+              ""
+            ).toLowerCase();
+            const tab = role === "guru" ? "guru" : "ibubapa";
+            if (typeof (window as any).openPakejProModal === "function") {
+              (window as any).openPakejProModal(tab);
+            } else {
+              setIsModeChoiceOpen(true);
+            }
           }}
           title="Pilih Mod"
         >

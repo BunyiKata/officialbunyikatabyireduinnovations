@@ -789,7 +789,7 @@ export function AuthModal({
                           lineHeight: "1.5",
                         }}
                       >
-                        Belum mempunyai akaun?
+                        Belum mempunyai akaun? Daftar Pakej Pro
                         <br />
                         <button
                           type="button"
@@ -812,11 +812,19 @@ export function AuthModal({
                           }}
                           onClick={() => {
                             if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                            hubungiAdminWhatsapp();
+                            // Tutup modal log masuk, kemudian buka modal Pilih Pakej Pro
+                            // (senarai harga) supaya pengguna boleh memilih pakej dahulu.
+                            onClose();
+                            const tab = pendingLoginMode === "guru" ? "guru" : "ibubapa";
+                            if (typeof (window as any).openPakejProModal === "function") {
+                              (window as any).openPakejProModal(tab);
+                            } else {
+                              hubungiAdminWhatsapp();
+                            }
                           }}
                         >
                           <i className="fa-brands fa-whatsapp"></i>
-                          Daftar
+                          dapatkan di sini
                         </button>
                       </div>
                     )}
