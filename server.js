@@ -12,7 +12,7 @@ import { getDatabase } from "firebase-admin/database";
 dotenv.config();
 
 /**
- * Firebase Admin SDK â€” dimulakan secara "lazy" supaya pelayan masih boleh
+ * Firebase Admin SDK — dimulakan secara "lazy" supaya pelayan masih boleh
  * berjalan walaupun kredensial admin belum ditetapkan (cth. semasa pembangunan
  * bahagian hadapan sahaja). Fungsi admin sahaja yang akan gagal, bukan
  * keseluruhan pelayan.
@@ -27,7 +27,7 @@ function getAdminApp() {
   try {
     // firebase-admin v14 MEMBUANG `admin.apps` (ia hanya ada dalam v11 dan ke
     // bawah). Menyentuh `.length` padanya melemparkan TypeError, ditangkap oleh
-    // blok catch di bawah, yang menetapkan adminInitError SECARA KEKAL â€” jadi
+    // blok catch di bawah, yang menetapkan adminInitError SECARA KEKAL — jadi
     // /api/admin/verify sentiasa memulangkan 500. Guna getApps() moden.
     const existing = getApps();
     if (existing.length > 0) {
@@ -44,7 +44,7 @@ function getAdminApp() {
       let parsed;
       const trimmed = rawServiceAccount.trim();
 
-      // Kesan nilai placeholder daripada .env.example â€” beri mesej jelas
+      // Kesan nilai placeholder daripada .env.example — beri mesej jelas
       // daripada SyntaxError JSON yang mengelirukan.
       if (
         trimmed.includes("ISI_BASE64") ||
@@ -103,7 +103,7 @@ function selamatSamaDengan(a, b) {
 
 /**
  * Menjana kata laluan sementara yang munasabah untuk dihantar melalui WhatsApp.
- * Format: BunyiKata#<4 digit> â€” mudah dibaca melalui telefon, masih ada
+ * Format: BunyiKata#<4 digit> — mudah dibaca melalui telefon, masih ada
  * ~9000 kemungkinan jadi tidak boleh diteka secara pukal.
  */
 function janaKataLaluan() {
@@ -517,7 +517,7 @@ async function startServer() {
    * MEMINTAS peraturan keselamatan RTDB (Admin SDK sentiasa memintas).
    * Ini bermakna kita tidak perlu melonggarkan database.rules.json.
    *
-   * Kata laluan TIDAK PERNAH disimpan dalam pangkalan data â€” ia hanya
+   * Kata laluan TIDAK PERNAH disimpan dalam pangkalan data — ia hanya
    * dipulangkan sekali kepada admin untuk dihantar kepada pengguna.
    */
   /**
@@ -1094,7 +1094,7 @@ async function startServer() {
           });
         }
       } catch (err) {
-        // auth/user-not-found bermakna emel bebas â€” inilah keadaan yang kita mahu.
+        // auth/user-not-found bermakna emel bebas — inilah keadaan yang kita mahu.
         if (err?.code !== "auth/user-not-found") throw err;
       }
 
@@ -1121,7 +1121,7 @@ async function startServer() {
         email: emailBersih,
         peranan: perananBersih,
         no_telefon: String(no_telefon).trim(),
-        // Medan khusus mengikut peranan â€” simpan hanya yang berkaitan.
+        // Medan khusus mengikut peranan — simpan hanya yang berkaitan.
         nama_sekolah: perananBersih === "guru" ? String(nama_sekolah).trim() : "",
         nama_keluarga: perananBersih === "ibubapa" ? String(nama_keluarga).trim() : "",
         langganan: plan.name,
@@ -1189,7 +1189,7 @@ async function startServer() {
       });
       console.log(`[Admin Cipta Akaun] Akaun dicipta: ${emailBersih} (${uid}) pakej=${planBersih}`);
 
-      // Kata laluan dipulangkan SEKALI sahaja â€” tidak disimpan di mana-mana.
+      // Kata laluan dipulangkan SEKALI sahaja — tidak disimpan di mana-mana.
       return res.json({
         success: true,
         uid,
@@ -1413,7 +1413,7 @@ async function startServer() {
     next();
   });
 
-  // Fail statik dalam public/ (audio, imej, fon, sw.js, app-logic.js) â€”
+  // Fail statik dalam public/ (audio, imej, fon, sw.js, app-logic.js) —
   // hanya untuk mod pembangunan. Vite menyalin public/ ke dist/ semasa build,
   // jadi dalam production kita hidangkan dist/ sahaja supaya fail lama dalam
   // public/ tidak menutup fail yang baharu dibina.
@@ -1459,12 +1459,12 @@ async function startServer() {
     // bundle berhash yang berubah setiap deploy. Jika pelayar menyimpan
     // index.html lama, ia akan meminta bundle lama yang sudah tiada dan
     // halaman menjadi KOSONG.
-    // Nota: JANGAN tetapkan Cache-Control secara global di sini â€” express.static
+    // Nota: JANGAN tetapkan Cache-Control secara global di sini — express.static
     // hanya menetapkan header cache jika ia belum wujud, jadi header global
     // akan mematikan caching immutable untuk /assets.
     const NO_STORE = 'no-cache, no-store, must-revalidate';
 
-    // Aset berhash kekal selamanya â€” namanya berubah apabila kandungan berubah.
+    // Aset berhash kekal selamanya — namanya berubah apabila kandungan berubah.
     // fallthrough dibiarkan lalai (true) supaya aset yang tiada jatuh ke
     // catch-all di bawah dan menerima 404 yang jelas, bukan HTML.
     app.use(
@@ -1483,7 +1483,7 @@ async function startServer() {
       );
     }
 
-    // sw.js TIDAK boleh dicache lama â€” jika tidak pelayar akan terus
+    // sw.js TIDAK boleh dicache lama — jika tidak pelayar akan terus
     // menggunakan logik cache yang lama walaupun kita sudah menaik tarafnya.
     app.get('/sw.js', (req, res) => {
       res.setHeader('Cache-Control', NO_STORE);
@@ -1494,7 +1494,7 @@ async function startServer() {
     // Fail baki di akar dist/ (styles.css, app-logic.js, surih-logic.js,
     // surih-nombor-logic.js, manifest.json).
     //
-    // PENTING: Fail-fail ini BUKAN berhash â€” namanya kekal sama walaupun
+    // PENTING: Fail-fail ini BUKAN berhash — namanya kekal sama walaupun
     // kandungannya berubah setiap deploy. Jika dicache lama, pembetulan
     // tidak akan sampai kepada pengguna sehingga mereka hard refresh.
     // Setiap satunya dihantar dengan no-cache supaya sentiasa segar.

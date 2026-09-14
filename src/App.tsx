@@ -403,13 +403,13 @@ export default function App() {
         window.location.pathname.replace(/^\/+/, "") ||
         (window.location.hash ? window.location.hash.replace("#", "") : "");
 
-      // Penjaga laluan BERKONGSI â€” pautan yang ditampal terus (cth
+      // Penjaga laluan BERKONGSI — pautan yang ditampal terus (cth
       // /main-menu-screen atau /admin-dashboard) oleh pelawat awam mesti
       // kembali ke skrin log masuk. Jika tidak, mereka boleh masuk ke
       // dalam mod Pro/Admin tanpa melalui aliran masuk yang sah.
       if (currentPath && currentPath !== "login-screen" && typeof (window as any).bolehAksesSkrin === "function") {
         if (!(window as any).bolehAksesSkrin(currentPath)) {
-          console.warn("[Navigasi] Laluan awal ditolak:", currentPath, "â€” kembali ke skrin log masuk.");
+          console.warn("[Navigasi] Laluan awal ditolak:", currentPath, "— kembali ke skrin log masuk.");
           currentPath = "login-screen";
           try {
             window.history.replaceState({ screenId: "login-screen" }, document.title, "/");
@@ -909,7 +909,7 @@ export default function App() {
       id: 2,
       question: "Apakah perbezaan Pakej Guru dan Pakej Ibu Bapa?",
       answer:
-        "â€¢ Pakej Guru: Menyokong pengurusan rekod sehingga 2 kelas murid, pantauan statistik latihan serta muat turun laporan prestasi murid.\nâ€¢ Pakej Ibu Bapa: Menyokong pendaftaran dan rekod perkembangan sehingga 3 orang anak dalam satu akaun.",
+        "• Pakej Guru: Bulanan Biasa (RM15/bln) = 1 kelas; 3 Bulanan Pro (RM40/3 bulan) & Tahunan Pro (RM69/tahun) = sehingga 2 kelas serentak dengan 2 kod kelas unik, pantauan statistik latihan serta muat turun laporan & sijil prestasi murid.\n• Pakej Ibu Bapa: Bulanan Biasa (RM15/bln) = 1 profil anak; 3 Bulanan Pro (RM40/3 bulan) & Tahunan Pro (RM69/tahun) = sehingga 3 profil anak dengan satu Kod Keluarga Khas, laporan prestasi serta sijil setiap anak.",
     },
     {
       id: 3,
@@ -976,7 +976,7 @@ export default function App() {
       ) {
         return "pro";
       }
-      // 'bunyiKataAccessLevel === "pro"' sahaja TIDAK cukup â€” ia boleh
+      // 'bunyiKataAccessLevel === "pro"' sahaja TIDAK cukup — ia boleh
       // menjadi sisa sesi admin lama. Akses Pro hanya dikekalkan jika ada
       // peranan sebenar yang menyokongnya.
       const roleSemasa = (localStorage.getItem("bunyiKataUserRole") || "").toLowerCase().trim();
@@ -1293,9 +1293,9 @@ export default function App() {
   const isPlanFree = !isStudentRole && !isPaidPlan;
   // SUMBER KEBENARAN TUNGGAL: `checkIsTrial()` (fail-closed) dalam app-logic.js
   // menyemak peranan + pelan + sesi admin RUNTIME. React jangan kira semula
-  // dari localStorage sendiri â€” ia akan bercanggah (cth. sisa pelan berbayar
+  // dari localStorage sendiri — ia akan bercanggah (cth. sisa pelan berbayar
   // atau sisa nama 'Admin' membuat React fikir Pro sedangkan runtime kata
-  // Trial â†’ peta 2/3/4 nampak terbuka tetapi tekan keluar modal pakej).
+  // Trial → peta 2/3/4 nampak terbuka tetapi tekan keluar modal pakej).
   // Gunakan versi kanonik bila tersedia; fallback kepada pengiraan tempatan
   // (fail-closed = trial) hanya sebelum app-logic.js dimuatkan.
   const [efektifTrialState, setEfektifTrialState] = React.useState<boolean>(() => {
@@ -1336,7 +1336,7 @@ export default function App() {
     window.addEventListener("admin-mode-change", sync);
     window.addEventListener("focus", sync);
     window.addEventListener("akses-level-change", sync);
-    // 'storage' â€” perubahan localStorage dari tab lain
+    // 'storage' — perubahan localStorage dari tab lain
     window.addEventListener("storage", sync);
     // Apabila userAccessLevel berubah (setUserAccessLevel), refresh juga
     return () => {
@@ -1354,7 +1354,7 @@ export default function App() {
     // terbuka secara tidak menentu. Jadi kita hanya tetapkan versi rizab
     // SEBELUM app-logic.js selesai dimuatkan.
     if (typeof (window as any).bolehAksesSkrin === "function") {
-      // app-logic.js sudah sedia â€” jangan tindih.
+      // app-logic.js sudah sedia — jangan tindih.
       return;
     }
     (window as any).isEffectiveTrial = () => isEffectiveTrial;
@@ -1632,7 +1632,7 @@ export default function App() {
     if (clean !== oldCode) {
       const collision = await checkIsCodeAlreadyUsedInFirebase(clean, "guru", undefined, "kelas1");
       if (collision.isUsed) {
-        const msg = `Kod â€œ${clean}â€ tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
+        const msg = `Kod “${clean}” tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
         if (typeof (window as any).showAppToast === "function") {
           (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
         } else {
@@ -1677,7 +1677,7 @@ export default function App() {
     if (kodGuru) kodGuru.innerText = clean;
     setIsChangingCode1(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 1 berjaya ditetapkan kepada â€œ${clean}â€.`);
+      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 1 berjaya ditetapkan kepada “${clean}”.`);
     }
   };
 
@@ -1731,7 +1731,7 @@ export default function App() {
     }
     setIsChangingClassName2(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Nama Kelas 2 berjaya ditetapkan kepada â€œ${clean}â€.`);
+      (window as any).showAppToast("Berjaya Disimpan", `Nama Kelas 2 berjaya ditetapkan kepada “${clean}”.`);
     }
   };
 
@@ -1755,7 +1755,7 @@ export default function App() {
     if (clean !== oldCode2) {
       const collision = await checkIsCodeAlreadyUsedInFirebase(clean, "guru", undefined, "kelas2");
       if (collision.isUsed) {
-        const msg = `Kod â€œ${clean}â€ tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
+        const msg = `Kod “${clean}” tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
         if (typeof (window as any).showAppToast === "function") {
           (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
         } else {
@@ -1798,7 +1798,7 @@ export default function App() {
 
     setIsChangingCode2(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 2 berjaya ditetapkan kepada â€œ${clean}â€.`);
+      (window as any).showAppToast("Berjaya Disimpan", `Kod Kelas 2 berjaya ditetapkan kepada “${clean}”.`);
     }
   };
 
@@ -1842,7 +1842,7 @@ export default function App() {
     if (el2) el2.innerText = clean;
     setIsChangingFamilyName(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Nama Keluarga berjaya ditetapkan kepada â€œ${clean}â€.`);
+      (window as any).showAppToast("Berjaya Disimpan", `Nama Keluarga berjaya ditetapkan kepada “${clean}”.`);
     }
   };
 
@@ -1866,7 +1866,7 @@ export default function App() {
     if (clean !== oldCode) {
       const collision = await checkIsCodeAlreadyUsedInFirebase(clean, "ibubapa");
       if (collision.isUsed) {
-        const msg = `Kod â€œ${clean}â€ tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
+        const msg = `Kod “${clean}” tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`;
         if (typeof (window as any).showAppToast === "function") {
           (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
         } else {
@@ -1895,7 +1895,7 @@ export default function App() {
 
     setIsChangingFamilyCode(false);
     if (typeof (window as any).showAppToast === "function") {
-      (window as any).showAppToast("Berjaya Disimpan", `Kod Keluarga berjaya ditetapkan kepada â€œ${clean}â€.`);
+      (window as any).showAppToast("Berjaya Disimpan", `Kod Keluarga berjaya ditetapkan kepada “${clean}”.`);
     }
   };
 
@@ -3874,7 +3874,7 @@ export default function App() {
         setIsDialOpen={setIsDialOpen}
       />
 
-      {/* Cabaran Tambahan Game View â€” rendered via portal to body so position:fixed works correctly outside .screen transform stacking context */}
+      {/* Cabaran Tambahan Game View — rendered via portal to body so position:fixed works correctly outside .screen transform stacking context */}
       {createPortal(
         <div id="modal-cabaran-lain-game" className="cabaran-tambahan-fullscreen-screen">
           {/* Top Bar matching Cabaran Utama */}
@@ -5147,9 +5147,9 @@ export default function App() {
                 fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
               }}
             >
-              <span style={{ color: "#f59e0b", margin: "0 4px" }}>â€¢â€¢â€¢â€¢â€¢</span>
+              <span style={{ color: "#f59e0b", margin: "0 4px" }}>•••••</span>
               BINTANG
-              <span style={{ color: "#f59e0b", margin: "0 4px" }}>â€¢â€¢â€¢â€¢â€¢</span>
+              <span style={{ color: "#f59e0b", margin: "0 4px" }}>•••••</span>
             </div>
           </div>
 
@@ -7948,10 +7948,10 @@ export default function App() {
                 }}
               >
                 {arKiraJariMode === 'tambah'
-                  ? 'Kira ayat matematik tambah (1â€“10) dan tunjukkan bilangan jari jawapan ke arah kamera untuk mengumpul bintang ganjaran!'
+                  ? 'Kira ayat matematik tambah (1–10) dan tunjukkan bilangan jari jawapan ke arah kamera untuk mengumpul bintang ganjaran!'
                   : arKiraJariMode === 'tolak'
-                    ? 'Kira ayat matematik tolak (1â€“10) dan tunjukkan bilangan jari jawapan ke arah kamera untuk mengumpul bintang ganjaran!'
-                    : 'Kira objek yang dipaparkan (1â€“10) dan tunjukkan bilangan jari yang sama ke arah kamera untuk mengumpul bintang ganjaran!'}
+                    ? 'Kira ayat matematik tolak (1–10) dan tunjukkan bilangan jari jawapan ke arah kamera untuk mengumpul bintang ganjaran!'
+                    : 'Kira objek yang dipaparkan (1–10) dan tunjukkan bilangan jari yang sama ke arah kamera untuk mengumpul bintang ganjaran!'}
               </p>
 
               <div
@@ -8219,7 +8219,7 @@ export default function App() {
                     id="bacaan-item-icon"
                     style={{ fontSize: "2.2rem", lineHeight: "1" }}
                   >
-                    ðŸ“–
+                    📖
                   </span>
                   <span
                     id="bacaan-item-title"

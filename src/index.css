@@ -3764,7 +3764,7 @@ select.filter-select option {
         }
 
         .exercise-card::after {
-            content: 'â˜…  â˜…  â˜…';
+            content: '★  ★  ★';
             position: absolute;
             left: 50%;
             bottom: 12px;
@@ -9979,7 +9979,7 @@ i.fa-brands {
     }
 }
 
-/* === Tanduk Kata Game â€” Mobile Controls ===
+/* === Tanduk Kata Game — Mobile Controls ===
    On desktop/laptop, hide the on-screen D-pad/jump buttons.
    Players use keyboard (WASD / Arrow keys) on desktop. */
 .tanduk-mobile-controls {
@@ -9995,7 +9995,7 @@ i.fa-brands {
 
 @media (min-width: 768px) and (pointer: fine) {
 
-    /* 768px+ AND mouse/trackpad (pointer:fine) = laptop/desktop â€” hide buttons */
+    /* 768px+ AND mouse/trackpad (pointer:fine) = laptop/desktop — hide buttons */
     .tanduk-mobile-controls {
         display: none !important;
     }
