@@ -344,10 +344,12 @@ body.parent-mode #parent-sticky-nav {
     z-index: 1600;
 }
 
-body.teacher-mode .screen.active:not([id^="view-"]):not([id^="game-"]):not(#map-screen),
-body.admin-mode .screen.active:not([id^="view-"]):not([id^="game-"]):not(#map-screen),
-body.parent-mode .screen.active:not([id^="view-"]):not([id^="game-"]):not(#map-screen) {
-    padding-top: 145px !important;
+@media (min-width: 769px) {
+    body.teacher-mode .screen.active:not([id^="view-"]):not([id^="game-"]):not(#map-screen),
+    body.admin-mode .screen.active:not([id^="view-"]):not([id^="game-"]):not(#map-screen),
+    body.parent-mode .screen.active:not([id^="view-"]):not([id^="game-"]):not(#map-screen) {
+        padding-top: 145px !important;
+    }
 }
 
 body.teacher-mode:not(.admin-mode) #teacher-sticky-nav .neo-btn,
@@ -6618,7 +6620,7 @@ body.parent-mode #main-menu-mobile-header {
     }
 }
 
-@media (min-width: 721px) {
+@media (min-width: 769px) {
 
     body.teacher-mode #main-menu-screen,
     body.admin-mode #main-menu-screen,
@@ -6804,24 +6806,37 @@ body.parent-mode #main-menu-mobile-header {
     }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
     #ibubapa-laporan-card {
         display: none !important;
     }
 
+    body.teacher-mode .screen.active:not([id^="view-"]):not([id^="game-"]):not(#map-screen),
+    body.admin-mode .screen.active:not([id^="view-"]):not([id^="game-"]):not(#map-screen),
+    body.parent-mode .screen.active:not([id^="view-"]):not([id^="game-"]):not(#map-screen),
     body.teacher-mode .screen.active,
     body.admin-mode .screen.active,
     body.parent-mode .screen.active,
+    #admin-dashboard,
     #admin-dashboard.active,
+    #admin-urus,
     #admin-urus.active,
+    #admin-sijil,
     #admin-sijil.active,
+    #guru-dashboard,
     #guru-dashboard.active,
+    #guru-urus-murid,
     #guru-urus-murid.active,
+    #ibubapa-dashboard,
     #ibubapa-dashboard.active,
+    #admin-senarai-perkataan,
     #admin-senarai-perkataan.active,
+    #guru-senarai-perkataan,
     #guru-senarai-perkataan.active,
-    #ibubapa-senarai-perkataan.active {
-        padding-top: 60px !important;
+    #ibubapa-senarai-perkataan,
+    #ibubapa-senarai-perkataan.active,
+    #main-menu-screen.active {
+        padding-top: 50px !important;
         padding-bottom: 95px !important;
     }
 
@@ -7421,8 +7436,12 @@ body.parent-mode #student-global-nav {
 @media (max-width: 720px) {
 
     body.parent-mode .screen.active,
-    body.teacher-mode .screen.active {
-        padding-top: 60px !important;
+    body.teacher-mode .screen.active,
+    body.admin-mode .screen.active {
+        /* Mobile: banner mod hanya 40px tinggi. Sebelum ini admin kekal
+           145px (peraturan desktop tanpa media query) -> ruang kosong besar
+           di bawah banner pada telefon. Selaraskan ketiga-tiga mod. */
+        padding-top: 52px !important;
         padding-bottom: 110px !important;
     }
 
@@ -8748,6 +8767,33 @@ i.fa-brands {
     .admin-sejarah-filter-row input {
         font-size: 0.78rem !important;
         height: 36px !important;
+    }
+
+    /* Kad Affiliate berasingan (tema ungu) — mudah alih */
+    #affiliate-table-head th,
+    #affiliate-bayar-table-head th,
+    .affiliate-box .admin-td {
+        font-size: 0.72rem !important;
+        padding: 6px 8px !important;
+    }
+
+    #affiliate-table-title,
+    #affiliate-bayar-title {
+        font-size: 0.9rem !important;
+        padding: 6px 12px !important;
+    }
+
+    .affiliate-box {
+        padding: 12px !important;
+    }
+
+    .affiliate-box .affiliate-filter {
+        font-size: 0.78rem !important;
+        height: 36px !important;
+    }
+
+    .affiliate-box .affiliate-add-btn {
+        font-size: 0.78rem !important;
     }
 }
 
@@ -12379,9 +12425,10 @@ i.fa-brands {
     }
 
     .admin-tab-switcher-btn {
-        flex: 1 1 calc(50% - 10px) !important;
-        padding: 10px 12px !important;
-        font-size: 0.88rem !important;
+        flex: 1 1 auto !important;
+        min-width: 100px !important;
+        padding: 9px 12px !important;
+        font-size: 0.85rem !important;
         justify-content: center !important;
     }
 

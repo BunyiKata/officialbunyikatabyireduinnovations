@@ -1,30 +1,53 @@
-﻿// @ts-nocheck
-import React, { useEffect, useState } from "react";
+// @ts-nocheck
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import { createPortal } from "react-dom";
-import confetti from "canvas-confetti";
-import { TandukKataGame } from "./components/TandukKataGame";
-import { PerpustakaanGame } from "./components/PerpustakaanGame";
-import { CabaranSukuKataGame } from "./components/CabaranSukuKataGame";
-import { PuzzleSukuKataGame } from "./components/PuzzleSukuKataGame";
-import { CantumKataGame } from "./components/CantumKataGame";
-import { FonikAbcGame } from "./components/FonikAbcGame";
-import { NomborGame } from "./components/NomborGame";
-import { KadImbasanNomborGame, KadImbasanNomborMode } from "./components/KadImbasanNomborGame";
-import { SukuKataPuzzleBar } from "./components/SukuKataPuzzleBar";
-import { BukuCeritaModal } from "./components/BukuCeritaModal";
-import { CubaSebutGame } from "./components/CubaSebutGame";
-import { AdminSijilManager } from "./components/AdminSijilManager";
-import { PirateAvatar3DSwiper } from "./components/PirateAvatar3DSwiper";
-import { Lencana3DSwiper } from "./components/Lencana3DSwiper";
-import { SplashScreen } from "./components/SplashScreen";
-import { AdminDashboard } from "./components/dashboards/AdminDashboard";
-import { IbubapaDashboard } from "./components/dashboards/IbubapaDashboard";
-import { GuruDashboard } from "./components/dashboards/GuruDashboard";
-import { AuthModal } from "./components/modals/AuthModal";
-import { PricingProModal } from "./components/modals/PricingProModal";
-import { EditProfileModal } from "./components/modals/EditProfileModal";
-import { EntryChoiceModal } from "./components/modals/EntryChoiceModal";
-import { ModeChoiceModal } from "./components/modals/ModeChoiceModal";
+import MuridSidePanel from "./components/panels/MuridSidePanel";
+import PilihPetaModal from "./components/modals/PilihPetaModal";
+import LoginScreen from "./components/screens/LoginScreen";
+import MapScreen from "./components/screens/MapScreen";
+import AppInfoModals from "./components/modals/AppInfoModals";
+// Lazy-load canvas-confetti: besar (~20KB) dan cuma dipakai selepas game tamat.
+// Defer supaya initial bundle kekal kecil dan tidak block render shell login.
+const confettiPromise = import("canvas-confetti").then((m) => m.default);
+let _confetti: any = null;
+const confetti = (...args: any[]) => {
+  if (!_confetti) {
+    // Fallback no-op sehingga chunk dimuat turun; canvas-confetti
+    // dimuat secara lazy oleh pengguna pada kali pertama ia dipanggil.
+    confettiPromise.then((m) => { _confetti = m; }).catch(() => {});
+    return undefined;
+  }
+  return _confetti(...args);
+};
+
+// Komponen berat — setiap satu cuma dipaparkan secara bersyarat
+// (di sebalik state flag / class skrin). Lazy-load supaya App.tsx tidak
+// perlu mem-parse semuanya sebelum shell login dapat dilukis.
+// Saiz awal App.tsx turun daripada ~476KB kepada ~50KB (hanya shell).
+const TandukKataGame = lazy(() => import("./components/TandukKataGame").then(m => ({ default: m.TandukKataGame })));
+const PerpustakaanGame = lazy(() => import("./components/PerpustakaanGame").then(m => ({ default: m.PerpustakaanGame })));
+const CabaranSukuKataGame = lazy(() => import("./components/CabaranSukuKataGame").then(m => ({ default: m.CabaranSukuKataGame })));
+const PuzzleSukuKataGame = lazy(() => import("./components/PuzzleSukuKataGame").then(m => ({ default: m.PuzzleSukuKataGame })));
+const CantumKataGame = lazy(() => import("./components/CantumKataGame").then(m => ({ default: m.CantumKataGame })));
+const FonikAbcGame = lazy(() => import("./components/FonikAbcGame").then(m => ({ default: m.FonikAbcGame })));
+const NomborGame = lazy(() => import("./components/NomborGame").then(m => ({ default: m.NomborGame })));
+const KadImbasanNomborGame = lazy(() => import("./components/KadImbasanNomborGame").then(m => ({ default: m.KadImbasanNomborGame })));
+import type { KadImbasanNomborMode } from "./components/KadImbasanNomborGame";
+const SukuKataPuzzleBar = lazy(() => import("./components/SukuKataPuzzleBar").then(m => ({ default: m.SukuKataPuzzleBar })));
+const BukuCeritaModal = lazy(() => import("./components/BukuCeritaModal").then(m => ({ default: m.BukuCeritaModal })));
+const CubaSebutGame = lazy(() => import("./components/CubaSebutGame").then(m => ({ default: m.CubaSebutGame })));
+const AdminSijilManager = lazy(() => import("./components/AdminSijilManager").then(m => ({ default: m.AdminSijilManager })));
+const PirateAvatar3DSwiper = lazy(() => import("./components/PirateAvatar3DSwiper").then(m => ({ default: m.PirateAvatar3DSwiper })));
+const Lencana3DSwiper = lazy(() => import("./components/Lencana3DSwiper").then(m => ({ default: m.Lencana3DSwiper })));
+const AdminDashboard = lazy(() => import("./components/dashboards/AdminDashboard").then(m => ({ default: m.AdminDashboard })));
+const IbubapaDashboard = lazy(() => import("./components/dashboards/IbubapaDashboard").then(m => ({ default: m.IbubapaDashboard })));
+const GuruDashboard = lazy(() => import("./components/dashboards/GuruDashboard").then(m => ({ default: m.GuruDashboard })));
+const AffiliateDashboard = lazy(() => import("./components/dashboards/AffiliateDashboard").then(m => ({ default: m.AffiliateDashboard })));
+const AuthModal = lazy(() => import("./components/modals/AuthModal").then(m => ({ default: m.AuthModal })));
+const PricingProModal = lazy(() => import("./components/modals/PricingProModal").then(m => ({ default: m.PricingProModal })));
+const EditProfileModal = lazy(() => import("./components/modals/EditProfileModal").then(m => ({ default: m.EditProfileModal })));
+const EntryChoiceModal = lazy(() => import("./components/modals/EntryChoiceModal").then(m => ({ default: m.EntryChoiceModal })));
+const ModeChoiceModal = lazy(() => import("./components/modals/ModeChoiceModal").then(m => ({ default: m.ModeChoiceModal })));
 import { hubungiAdminWhatsapp, mesejDaftarPakej } from "./config/contactAdmin";
 import "./utils/sijilGenerator";
 import "./index.css";
@@ -277,15 +300,6 @@ export default function App() {
     }
   };
 
-  const [showSplash, setShowSplash] = React.useState(() => {
-    if (typeof window !== "undefined") {
-      const path = window.location.pathname.replace(/^\/+/, "");
-      const hash = window.location.hash ? window.location.hash.replace("#", "") : "";
-      if (path || hash) return false;
-    }
-    return true;
-  });
-
   React.useEffect(() => {
     const handleDocumentClick = (e: MouseEvent) => {
       if (!(e.target as HTMLElement).closest(".exercise-card")) {
@@ -405,7 +419,6 @@ export default function App() {
 
       if (currentPath && currentPath !== "login-screen") {
         setActiveScreen(currentPath);
-        setShowSplash(false);
         if (currentPath === "ibubapa-dashboard" || currentPath.startsWith("ibubapa-")) {
           document.body.classList.add("parent-mode");
           document.body.classList.remove("teacher-mode", "admin-mode");
@@ -862,6 +875,9 @@ export default function App() {
   });
 
   React.useEffect(() => {
+    // Hanya jalankan timer apabila berada di login-screen supaya App tidak
+    // di-render semula setiap saat ketika pengguna sedang dalam permainan.
+    if (activeScreen !== "login-screen") return;
     const timer = setInterval(() => {
       setPromoSecondsLeft((prev) => {
         if (prev <= 1) {
@@ -873,7 +889,7 @@ export default function App() {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeScreen]);
 
   const formatPromoTimer = (secs: number) => {
     const h = Math.floor(secs / 3600);
@@ -938,6 +954,16 @@ export default function App() {
     }
   });
 
+  // Fasa 3: panel affiliate log masuk sendiri (role 'affiliate' dalam token).
+  const [isAffiliateActive, setIsAffiliateActive] = React.useState<boolean>(() => {
+    try {
+      if (typeof window === "undefined") return false;
+      return localStorage.getItem("bunyiKataUserRole") === "affiliate";
+    } catch (e) {
+      return false;
+    }
+  });
+
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [isCodeModalOpen, setIsCodeModalOpen] = React.useState(false);
   const [userAccessLevel, setUserAccessLevel] = React.useState<"trial" | "pro">(() => {
@@ -973,6 +999,60 @@ export default function App() {
     return "trial";
   });
 
+  // Semak sama ada kita sedang berada di SKRIN LOG MASUK.
+  // Ini penting: sesi Firebase Auth admin yang tersimpan (custom token) di
+  // IndexedDB akan dipulihkan oleh onAuthStateChanged pada SETIAP muat semula.
+  // Jika kita tidak menyemak skrin, pelawat yang berada di skrin log masuk
+  // akan tiba-tiba melihat "MOD ADMIN" + avatar Versi Pro TERBUKA (kerana
+  // isEffectiveTrial() -> false apabila isAdminMode/adminClaimDisahkan aktif).
+  const sedangDiSkrinLogin = React.useCallback(() => {
+    try {
+      if (typeof document === "undefined") return false;
+      const ls = document.getElementById("login-screen");
+      if (ls && ls.classList.contains("active")) return true;
+      // Simpanan: lastik URL semasa.
+      const path = window.location.pathname.replace(/^\/+/, "");
+      return !path || path === "index.html" || path === "login-screen";
+    } catch (e) {
+      return false;
+    }
+  }, []);
+
+  // Buang SEMUA sisa sesi mod admin sementara pengguna berada di skrin log
+  // masuk. Ini mencegah: banner "MOD ADMIN", kelas body.admin-mode, dan
+  // avatar Versi Pro terbuka akibat token admin yang dipulihkan.
+  const bersihkanModAdminDiSkrinLogin = React.useCallback(() => {
+    try {
+      (window as any).adminClaimDisahkan = false;
+      (window as any).isAdminMode = false;
+      (window as any).modAdminAktif = false;
+      if (typeof document !== "undefined" && document.body) {
+        document.body.classList.remove("admin-mode");
+      }
+      const aNavReset = document.getElementById("admin-sticky-nav");
+      if (aNavReset) aNavReset.style.display = "none";
+      const tbReset = document.getElementById("teacher-top-banner");
+      if (tbReset) tbReset.style.display = "none";
+      // Buang sisa localStorage yang boleh menghidupkan semula akses Pro
+      // (avatar terbuka) untuk pelawat di skrin log masuk.
+      if (localStorage.getItem("bunyiKataUserRole") === "admin") {
+        localStorage.removeItem("bunyiKataUserRole");
+      }
+      const roleMasihSah = ["guru", "ibubapa", "murid"].includes(
+        (localStorage.getItem("bunyiKataUserRole") || "").toLowerCase(),
+      );
+      if (!roleMasihSah && localStorage.getItem("bunyiKataAccessLevel") === "pro") {
+        localStorage.removeItem("bunyiKataAccessLevel");
+      }
+      // Beritahu komponen (cth. PirateAvatar3DSwiper) supaya mengira semula
+      // keadaan kunci. Tanpa ini, avatar kekal "Terbuka" sehingga muat semula.
+      // PENTING: gunakan 'akses-level-change' sahaja — JANGAN siarkan
+      // 'admin-mode-change' di sini kerana pengendalinya (handleAdminSync)
+      // memanggil fungsi ini semula -> gelung tak terhingga.
+      window.dispatchEvent(new CustomEvent("akses-level-change"));
+    } catch (e) {}
+  }, []);
+
   React.useEffect(() => {
     // PENTING: Pulihkan identiti admin daripada SESI FIREBASE AUTH sebenar,
     // bukan daripada localStorage. Token admin (claim { admin: true }) hanya
@@ -1006,6 +1086,19 @@ export default function App() {
         const tokenResult = await user.getIdTokenResult();
         const isAdminClaim = tokenResult?.claims?.admin === true;
         if (isAdminClaim) {
+          // PENTING: Jangan hidupkan semula Mod Admin secara senyap apabila
+          // pengguna sedang berada di SKRIN LOG MASUK. Token admin yang
+          // tersimpan akan dipulihkan pada setiap muat semula, dan tanpa
+          // semakan ini pelawat melihat banner "MOD ADMIN" serta avatar
+          // Versi Pro terbuka di skrin log masuk. Mod admin hanya
+          // diaktifkan semula apabila pengguna benar-benar berada dalam
+          // aliran selepas log masuk (bukan skrin login), ATAU selepas
+          // mereka menaip kod admin semula (-> tetapkanSesiAdminTempatan()).
+          if (sedangDiSkrinLogin()) {
+            bersihkanModAdminDiSkrinLogin();
+            setIsAdminActive(false);
+            return;
+          }
           (window as any).adminClaimDisahkan = true;
           (window as any).isAdminMode = true;
           (window as any).modAdminAktif = true;
@@ -1028,7 +1121,22 @@ export default function App() {
   }, []);
 
   React.useEffect(() => {
-    const handleAdminSync = () => {
+    const handleAdminSync = (ev?: any) => {
+      // Jika peristiwa "admin-mode-change" secara EKSPLISIT mengumumkan
+      // isAdmin: true (cth. selepas kod admin yang betul disahkan di skrin
+      // log masuk), JANGAN teardown — paparSkrin() belum sempat menukar
+      // kelas 'active' pada #login-screen lagi.
+      const niatAdminEksplisit = ev?.detail?.isAdmin === true;
+
+      // Langkau apabila berada di SKRIN LOG MASUK: jangan hidupkan semula
+      // banner "MOD ADMIN", kelas admin-mode, atau akses Pro. Sebaliknya,
+      // pastikan ia dibersihkan supaya avatar Versi Pro kekal TERKUNCI.
+      if (!niatAdminEksplisit && sedangDiSkrinLogin()) {
+        bersihkanModAdminDiSkrinLogin();
+        setIsAdminActive(false);
+        return;
+      }
+
       const admin = isUserAdmin();
       if (admin) {
         setIsAdminActive(true);
@@ -1083,12 +1191,26 @@ export default function App() {
     window.addEventListener("admin-mode-change", handleAdminSync);
     window.addEventListener("focus", handleAdminSync);
 
+    // PENTING: Gunakan guard 'isHandling' supaya MutationObserver tidak
+    // mencetuskan handleAdminSync secara berulang apabila handleAdminSync
+    // sendiri mengubah classList body (cth. tambah/buang "admin-mode").
+    // Tanpa guard ini, setiap pemanggilan handleAdminSync → tukar class →
+    // observer mencetuskan → handleAdminSync lagi → gelung tak terhingga
+    // yang membekukan tab (Page Unresponsive).
+    let isHandling = false;
     const observer = new MutationObserver((mutations) => {
+      if (isHandling) return; // elak re-entrancy
       const bodyClassChanged = mutations.some(
         (mutation) =>
           mutation.type === "attributes" && mutation.attributeName === "class",
       );
-      if (bodyClassChanged) handleAdminSync();
+      if (bodyClassChanged) {
+        isHandling = true;
+        handleAdminSync();
+        // Reset pada frame seterusnya supaya observer tetap aktif
+        // untuk perubahan class yang datang dari luar (cth. app-logic.js)
+        requestAnimationFrame(() => { isHandling = false; });
+      }
     });
     if (typeof document !== "undefined" && document.body) {
       observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
@@ -1100,6 +1222,43 @@ export default function App() {
       observer.disconnect();
     };
   }, [isUserAdmin]);
+
+  // Fasa 3: sync status panel affiliate daripada peristiwa/log_setempat.
+  React.useEffect(() => {
+    const syncAffiliate = () => {
+      let aktif = false;
+      try {
+        const role = localStorage.getItem("bunyiKataUserRole");
+        const skrinAff = document.getElementById("affiliate-dashboard");
+        aktif =
+          role === "affiliate" ||
+          (!!skrinAff && skrinAff.classList.contains("active"));
+      } catch (e) {
+        aktif = false;
+      }
+      setIsAffiliateActive(aktif);
+    };
+
+    const onAffiliateChange = (ev?: any) => {
+      if (ev?.detail?.isAffiliate === true) {
+        setIsAffiliateActive(true);
+        return;
+      }
+      syncAffiliate();
+    };
+
+    syncAffiliate();
+    window.addEventListener("affiliate-mode-change", onAffiliateChange);
+    window.addEventListener("screen-changed", syncAffiliate);
+    window.addEventListener("focus", syncAffiliate);
+    window.addEventListener("storage", syncAffiliate);
+    return () => {
+      window.removeEventListener("affiliate-mode-change", onAffiliateChange);
+      window.removeEventListener("screen-changed", syncAffiliate);
+      window.removeEventListener("focus", syncAffiliate);
+      window.removeEventListener("storage", syncAffiliate);
+    };
+  }, []);
 
   // NOTA: state ini mesti diisytihar SEBELUM `rawActivePlan` di bawah,
   // jika tidak akan berlaku ReferenceError (Temporal Dead Zone) & App gagal render.
@@ -2031,243 +2190,7 @@ export default function App() {
 
   return (
     <div id="app-root">
-      <AnimatePresence>
-        {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
-      </AnimatePresence>
-      <div
-        id="murid-side-panel-overlay"
-        className="modal-overlay"
-        style={{
-          zIndex: "2000",
-          justifyContent: "flex-start",
-          background: "rgba(0,0,0,0.5)",
-        }}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) tutupSidePanel();
-        }}
-      >
-        <div
-          className="murid-side-panel"
-          style={{
-            backgroundColor: "white",
-            backgroundImage:
-              "radial-gradient(rgba(0,0,0,0.06) 2px, transparent 2px)",
-            backgroundSize: "15px 15px",
-            width: "280px",
-            height: "100%",
-            borderRight: "var(--border-thick)",
-            display: "flex",
-            flexDirection: "column",
-            animation: "slideInLeft 0.3s forwards",
-          }}
-        >
-          <div
-            style={{
-              padding: "20px",
-              backgroundColor: "#168f81",
-              backgroundImage:
-                "linear-gradient(to bottom, transparent 50%, #168f81 100%), radial-gradient(rgba(255,255,255,0.15) 2px, transparent 2px)",
-              backgroundSize: "100% 100%, 15px 15px",
-              color: "white",
-              display: "flex",
-              alignItems: "center",
-              gap: "15px",
-              borderBottom: "var(--border-thick)",
-              position: "relative",
-            }}
-          >
-            <div
-              className="profile-card-avatar-box side-panel-avatar-box"
-              style={{
-                fontSize: "1.5rem",
-                background: "white",
-                width: "52px",
-                height: "52px",
-                borderRadius: "13px",
-                border: "3px solid #f59e0b",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: "0",
-                position: "relative",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                className="murid-info-avatar"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "9px",
-                  backgroundSize: "contain",
-                  backgroundPosition: "center",
-                  backgroundRepeat: "no-repeat",
-                  position: "relative",
-                  zIndex: 1,
-                }}
-              ></div>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "5px",
-                alignItems: "flex-start",
-              }}
-            >
-              <h2
-                className="murid-info-name"
-                style={{
-                  fontSize: "1.2rem",
-                  margin: "0",
-                  wordBreak: "break-word",
-                }}
-              >
-                {activeStudentName}
-              </h2>
-              <span
-                className="score-pill"
-                style={{
-                  fontSize: "0.85rem",
-                  padding: "4px 10px",
-                  background: "white",
-                  border: "1.5px solid var(--color-dark)",
-                  borderRadius: "20px",
-                  color: "var(--color-dark)",
-                  fontWeight: "bold",
-                  boxShadow: "0 2px 0 var(--color-dark)",
-                }}
-              >
-                <i
-                  className="fa-solid fa-star"
-                  style={{
-                    color: "#ffc107",
-                    WebkitTextStroke: "1px var(--color-dark)",
-                  }}
-                ></i>{" "}
-                <strong id="side-panel-jumlah-markah">0</strong>
-              </span>
-            </div>
-            <button
-              className="neo-btn bg-red"
-              style={{
-                display: "none",
-                marginLeft: "auto",
-                padding: "5px 10px",
-                minWidth: "auto",
-                minHeight: "auto",
-              }}
-              onClick={(e) => {
-                tutupSidePanel();
-              }}
-            >
-              <i className="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-
-          <div
-            style={{
-              padding: "20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-              overflowY: "auto",
-              flex: "1",
-            }}
-          >
-            <button
-              className="neo-btn bg-purple"
-              style={{
-                justifyContent: "flex-start",
-                fontSize: "1.1rem",
-                padding: "12px",
-              }}
-              onClick={(e) => {
-                tutupSidePanel();
-                paparSkrin("lencana-screen");
-              }}
-            >
-              <i className="fa-solid fa-medal" style={{ width: "30px" }}></i>{" "}
-              Lencana
-            </button>
-            <button
-              className="neo-btn bg-yellow"
-              style={{
-                justifyContent: "flex-start",
-                fontSize: "1.1rem",
-                padding: "12px",
-              }}
-              onClick={(e) => {
-                tutupSidePanel();
-                paparSkrin("leaderboard-screen");
-              }}
-            >
-              <i className="fa-solid fa-trophy" style={{ width: "30px" }}></i>{" "}
-              Kedudukan
-            </button>
-          </div>
-
-          <div
-            style={{
-              background: "transparent",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <div
-              style={{
-                padding: "20px",
-                paddingBottom: "15px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "12px",
-              }}
-            >
-              <button
-                className="neo-btn"
-                style={{
-                  backgroundColor: "#168f81",
-                  color: "white",
-                  justifyContent: "flex-start",
-                  fontSize: "1.1rem",
-                  padding: "12px",
-                }}
-                onClick={(e) => {
-                  tutupSidePanel();
-                  paparSkrin("profile-screen");
-                }}
-              >
-                <i className="fa-solid fa-user" style={{ width: "30px" }}></i>{" "}
-                Profil
-              </button>
-            </div>
-            <div
-              style={{
-                padding: "20px",
-                borderTop: "var(--border-thick)",
-                display: "flex",
-                flexDirection: "column",
-                gap: "12px",
-              }}
-            >
-              <button
-                className="neo-btn bg-red"
-                style={{
-                  width: "100%",
-                  justifyContent: "center",
-                  fontSize: "1.1rem",
-                }}
-                onClick={(e) => {
-                  tutupSidePanel();
-                  paparSkrin("login-screen");
-                }}
-              >
-                <i className="fa-solid fa-right-from-bracket"></i> Keluar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MuridSidePanel activeStudentName={activeStudentName} />
 
       {/* Banner Mod Guru & Ibu Bapa */}
       <div id="teacher-top-banner" className="teacher-top-banner">
@@ -3103,353 +3026,7 @@ export default function App() {
         </div>
       </div>
 
-      <div id="modal-pilih-peta" className="modal-overlay">
-        <div className="modal-content">
-          <button
-            className="neo-btn bg-red close-btn"
-            onClick={(e) => {
-              tutupModal();
-            }}
-            aria-label="Tutup"
-          >
-            <i className="fa-solid fa-xmark"></i>
-          </button>
-          <div
-            id="modal-pilih-peta-tajuk"
-            className="neo-btn bg-orange page-title"
-            style={{
-              margin: "0 auto 20px",
-              fontSize: "1.2rem",
-              pointerEvents: "none",
-              border: "3px solid var(--color-dark)",
-              display: "inline-flex",
-            }}
-          >
-            Pilih Peta Kembara
-          </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(140px, 250px))",
-              gap: "20px",
-              justifyContent: "center",
-            }}
-          >
-            <div
-              className="neo-box map-select-btn"
-              style={{
-                cursor: "pointer",
-                padding: "15px",
-                background: "white",
-                width: "100%",
-                maxWidth: "250px",
-                margin: "0 auto",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-              onClick={(e) => {
-                if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                if (typeof (window as any).pilihPeta === "function") {
-                  (window as any).pilihPeta(1);
-                } else if (typeof (window as any).bukaPeta === "function") {
-                  (window as any).bukaPeta(1);
-                }
-              }}
-            >
-              <img
-                referrerPolicy="no-referrer"
-                src="/images/sampingan/peta-misi-huruf.png"
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  maxHeight: "120px",
-                  objectFit: "contain",
-                  borderRadius: "8px",
-                  marginBottom: "10px",
-                }}
-                alt="Misi Asas Bunyi Kata"
-              />
-              <button
-                className="neo-btn bg-white map-select-text"
-                style={{ width: "100%", pointerEvents: "none" }}
-              >
-                Misi Asas Bunyi Kata
-              </button>
-            </div>
-            <div
-              className="neo-box map-select-btn"
-              style={{
-                cursor: "pointer",
-                padding: "15px",
-                background: "white",
-                width: "100%",
-                maxWidth: "250px",
-                margin: "0 auto",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                position: "relative",
-                overflow: "hidden",
-              }}
-              onClick={(e) => {
-                if (isEffectiveTrial) {
-                  if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                  (window as any).openPakejProModal?.("guru");
-                  return;
-                }
-                (window as any).pilihPeta(2);
-              }}
-            >
-              {isEffectiveTrial && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    borderRadius: "14px",
-                    backgroundColor: "rgba(15, 23, 42, 0.40)",
-                    backdropFilter: "blur(0.8px)",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    zIndex: 10,
-                    padding: "8px",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  <i
-                    className="fa-solid fa-lock"
-                    style={{
-                      fontSize: "2rem",
-                      color: "#ffffff",
-                      filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.85))",
-                      marginBottom: "4px",
-                    }}
-                  ></i>
-                  <div
-                    style={{
-                      fontSize: "0.78rem",
-                      fontWeight: "800",
-                      color: "#ffffff",
-                      backgroundColor: "#dc2626",
-                      border: "1.5px solid #ef4444",
-                      borderRadius: "10px",
-                      padding: "4px 12px",
-                      textAlign: "center",
-                      lineHeight: "1.2",
-                      boxShadow: "0 3px 8px rgba(0,0,0,0.45)",
-                      letterSpacing: "0.2px",
-                    }}
-                  >
-                    Versi Pro
-                  </div>
-                </div>
-              )}
-              <img
-                referrerPolicy="no-referrer"
-                src="/images/sampingan/peta-misi-suku-kata-asas.png"
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  maxHeight: "120px",
-                  objectFit: "contain",
-                  borderRadius: "8px",
-                  marginBottom: "10px",
-                  filter: isEffectiveTrial ? "brightness(75%) grayscale(20%)" : "none",
-                }}
-                alt="Misi Suku Kata Asas"
-              />
-              <button
-                className="neo-btn bg-white map-select-text"
-                style={{ width: "100%", pointerEvents: "none" }}
-              >
-                Misi Suku Kata Asas
-              </button>
-            </div>
-            <div
-              className="neo-box map-select-btn"
-              style={{
-                cursor: "pointer",
-                padding: "15px",
-                background: "white",
-                width: "100%",
-                maxWidth: "250px",
-                margin: "0 auto",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                position: "relative",
-                overflow: "hidden",
-              }}
-              onClick={(e) => {
-                if (isEffectiveTrial) {
-                  if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                  (window as any).openPakejProModal?.("guru");
-                  return;
-                }
-                (window as any).pilihPeta(3);
-              }}
-            >
-              {isEffectiveTrial && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    borderRadius: "14px",
-                    backgroundColor: "rgba(15, 23, 42, 0.40)",
-                    backdropFilter: "blur(0.8px)",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    zIndex: 10,
-                    padding: "8px",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  <i
-                    className="fa-solid fa-lock"
-                    style={{
-                      fontSize: "2rem",
-                      color: "#ffffff",
-                      filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.85))",
-                      marginBottom: "4px",
-                    }}
-                  ></i>
-                  <div
-                    style={{
-                      fontSize: "0.78rem",
-                      fontWeight: "800",
-                      color: "#ffffff",
-                      backgroundColor: "#dc2626",
-                      border: "1.5px solid #ef4444",
-                      borderRadius: "10px",
-                      padding: "4px 12px",
-                      textAlign: "center",
-                      lineHeight: "1.2",
-                      boxShadow: "0 3px 8px rgba(0,0,0,0.45)",
-                      letterSpacing: "0.2px",
-                    }}
-                  >
-                    Versi Pro
-                  </div>
-                </div>
-              )}
-              <img
-                referrerPolicy="no-referrer"
-                src="/images/sampingan/peta-misi-suku-kata-hero.png"
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  maxHeight: "120px",
-                  objectFit: "contain",
-                  borderRadius: "8px",
-                  marginBottom: "10px",
-                  filter: isEffectiveTrial ? "brightness(75%) grayscale(20%)" : "none",
-                }}
-                alt="Misi Suku Kata Hero"
-              />
-              <button
-                className="neo-btn bg-white map-select-text"
-                style={{ width: "100%", pointerEvents: "none" }}
-              >
-                Misi Suku Kata Hero
-              </button>
-            </div>
-            <div
-              className="neo-box map-select-btn"
-              style={{
-                cursor: "pointer",
-                padding: "15px",
-                background: "white",
-                width: "100%",
-                maxWidth: "250px",
-                margin: "0 auto",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                position: "relative",
-                overflow: "hidden",
-              }}
-              onClick={(e) => {
-                if (isEffectiveTrial) {
-                  if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                  (window as any).openPakejProModal?.("guru");
-                  return;
-                }
-                (window as any).pilihPeta(4);
-              }}
-            >
-              {isEffectiveTrial && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    borderRadius: "14px",
-                    backgroundColor: "rgba(15, 23, 42, 0.40)",
-                    backdropFilter: "blur(0.8px)",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    zIndex: 10,
-                    padding: "8px",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  <i
-                    className="fa-solid fa-lock"
-                    style={{
-                      fontSize: "2rem",
-                      color: "#ffffff",
-                      filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.85))",
-                      marginBottom: "4px",
-                    }}
-                  ></i>
-                  <div
-                    style={{
-                      fontSize: "0.78rem",
-                      fontWeight: "800",
-                      color: "#ffffff",
-                      backgroundColor: "#dc2626",
-                      border: "1.5px solid #ef4444",
-                      borderRadius: "10px",
-                      padding: "4px 12px",
-                      textAlign: "center",
-                      lineHeight: "1.2",
-                      boxShadow: "0 3px 8px rgba(0,0,0,0.45)",
-                      letterSpacing: "0.2px",
-                    }}
-                  >
-                    Versi Pro
-                  </div>
-                </div>
-              )}
-              <img
-                referrerPolicy="no-referrer"
-                src="/images/sampingan/peta-misi-bacaan-bergred.png"
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  maxHeight: "120px",
-                  objectFit: "contain",
-                  borderRadius: "8px",
-                  marginBottom: "10px",
-                  filter: isEffectiveTrial ? "brightness(75%) grayscale(20%)" : "none",
-                }}
-                alt="Misi Bacaan Bergred"
-              />
-              <button
-                className="neo-btn bg-white map-select-text"
-                style={{ width: "100%", pointerEvents: "none" }}
-              >
-                Misi Bacaan Bergred
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PilihPetaModal isEffectiveTrial={isEffectiveTrial} />
 
       <nav id="student-global-nav" className="student-nav-bar student-nav-curved">
         <div className="student-nav-curved-backdrop mobile-nav-only" aria-hidden="true">
@@ -4085,458 +3662,12 @@ export default function App() {
         <i className="fa-solid fa-bars"></i>
       </button>
 
-      <div
-        id="login-screen"
-        className={getScreenClass("login-screen")}
-        style={{
-          visibility: showSplash ? "hidden" : "visible",
-          opacity: showSplash ? 0 : 1,
-          transition: "opacity 0.4s ease-out",
-        }}
-      >
-        <div
-          style={{
-            position: "fixed",
-            top: "15px",
-            right: "15px",
-            display: "flex",
-            gap: "10px",
-            zIndex: "100",
-          }}
-        >
-          <button
-            className="neo-btn bg-yellow teacher-login-icon"
-            style={{
-              position: "static",
-              color: "var(--color-dark)",
-              width: "44px",
-              height: "44px",
-              borderRadius: "50%",
-              padding: "0",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              animation: "glow-outline 2s infinite",
-            }}
-            onClick={(e) => {
-              setIsModeChoiceOpen(true);
-            }}
-            title="Pilih Mod"
-          >
-            <i
-              className="fa-solid fa-bars"
-              style={{ margin: "0", fontSize: "1.2rem" }}
-            ></i>
-          </button>
-        </div>
-
-        <div className="login-hero-wrapper">
-          <div
-            className="logo-besar"
-            id="login-logo-container"
-            style={{
-              padding: "0",
-              background: "transparent",
-              boxShadow: "none",
-              border: "none",
-              transform: "none",
-              marginTop: "10px",
-              marginBottom: "10px",
-              textAlign: "center",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <img
-              referrerPolicy="no-referrer"
-              src="/images/sampingan/logo-login-screen.png"
-              alt="Bunyi Kata"
-              className="glitch-logo"
-              style={{ maxWidth: "100%", height: "auto", maxHeight: "190px" }}
-            />
-          </div>
-
-          <div
-            id="mode-buttons-container"
-            className="mode-buttons-container"
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginBottom: "20px",
-              width: "100%",
-            }}
-          >
-            <PirateAvatar3DSwiper
-              onRequestEntryChoice={() => {
-                setIsEntryChoiceModalOpen(true);
-              }}
-              onStart={() => {
-                (window as any).bukaModalAppInfo &&
-                  (window as any).bukaModalAppInfo("murid");
-              }}
-              onOpenProPackage={() => {
-                if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                (window as any).openPakejProModal?.("guru");
-              }}
-            />
-          </div>
-        </div>
-        <div
-          className="neo-box"
-          id="mode-selection-card"
-          style={{
-            width: "90%",
-            maxWidth: "485px",
-            textAlign: "center",
-            backgroundColor: "#168f81",
-            backgroundImage:
-              "linear-gradient(to bottom, transparent 50%, #168f81 100%), radial-gradient(rgba(255,255,255,0.15) 2px, transparent 2px)",
-            backgroundSize: "100% 100%, 15px 15px",
-            padding: "20px",
-            margin: "0 auto 25px auto",
-            cursor: "pointer",
-          }}
-          onClick={(e) => {
-            setIsCodeModalOpen(true);
-          }}
-        >
-          <div
-            style={{
-              fontSize: "clamp(0.85rem, 3vw, 1rem)",
-              fontWeight: "bold",
-              color: "white",
-            }}
-          >
-            Sudah ada kod kelas atau keluarga? <br className="mobile-only-br" />
-            <span
-              style={{
-                color: "#fef08a",
-                textDecoration: "underline",
-                display: "inline-block",
-                marginTop: "5px",
-              }}
-            >
-              Masukkan di sini
-            </span>
-          </div>
-        </div>
-
-        <div
-          className="neo-box"
-          id="student-login-card"
-          style={{
-            display: "none",
-            position: "relative",
-            width: "100%",
-            maxWidth: "340px",
-            textAlign: "center",
-            background: "#168f81",
-            padding: "20px",
-            margin: "0 auto 25px auto",
-          }}
-        >
-          <button
-            onClick={(e) => {
-              backToModeSelection();
-            }}
-            className="neo-btn bg-white"
-            style={{
-              position: "absolute",
-              top: "-15px",
-              left: "-15px",
-              padding: "8px 12px",
-              fontSize: "1rem",
-              minWidth: "auto",
-              minHeight: "auto",
-              borderRadius: "50%",
-            }}
-          >
-            <i className="fa-solid fa-arrow-left"></i>
-          </button>
-          <h2
-            id="login-title"
-            style={{
-              color: "white",
-              marginBottom: "15px",
-              fontSize: "1.25rem",
-            }}
-          >
-            <i className="fa-solid fa-hand-wave"></i> Sila Pilih Nama Anda
-          </h2>
-          <select
-            id="student-dropdown"
-            className="neo-input"
-            defaultValue=""
-            onChange={(e) => {
-              onStudentSelect(e.target.value);
-            }}
-          >
-            <option value="" disabled>
-              -- Senarai Nama Murid --
-            </option>
-          </select>
-
-          <h3
-            id="login-avatar-title"
-            style={{
-              color: "white",
-              marginTop: "15px",
-              marginBottom: "10px",
-              fontSize: "1.1rem",
-            }}
-          >
-            Pilih Avatar
-          </h3>
-          <div
-            id="avatar-selection"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "15px",
-              justifyItems: "center",
-              marginBottom: "20px",
-            }}
-          >
-            <div
-              className="avatar-option"
-              onClick={(e) => {
-                selectAvatar(
-                  "/images/avatar/avatar1.png",
-                  e.currentTarget,
-                );
-              }}
-              style={{
-                cursor: "pointer",
-                width: "80px",
-                height: "80px",
-                background: "white",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "4px solid var(--color-orange)",
-                transform: "scale(1.1)",
-                transition: "all 0.2s",
-                overflow: "hidden",
-              }}
-            >
-              <img
-                referrerPolicy="no-referrer"
-                src="/images/sampingan/logo-main-screen.png"
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            </div>
-            <div
-              className="avatar-option"
-              onClick={(e) => {
-                selectAvatar(
-                  "/images/avatar/avatar3.png",
-                  e.currentTarget,
-                );
-              }}
-              style={{
-                cursor: "pointer",
-                width: "80px",
-                height: "80px",
-                background: "white",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "4px solid transparent",
-                transition: "all 0.2s",
-                overflow: "hidden",
-              }}
-            >
-              <img
-                referrerPolicy="no-referrer"
-                src="/images/avatar/avatar3.png"
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            </div>
-            <div
-              className="avatar-option"
-              onClick={(e) => {
-                selectAvatar(
-                  "/images/avatar/avatar4.png",
-                  e.currentTarget,
-                );
-              }}
-              style={{
-                cursor: "pointer",
-                width: "80px",
-                height: "80px",
-                background: "white",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "4px solid transparent",
-                transition: "all 0.2s",
-                overflow: "hidden",
-              }}
-            >
-              <img
-                referrerPolicy="no-referrer"
-                src="/images/avatar/avatar4.png"
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            </div>
-            <div
-              className="avatar-option"
-              onClick={(e) => {
-                selectAvatar(
-                  "/images/avatar/avatar2.png",
-                  e.currentTarget,
-                );
-              }}
-              style={{
-                cursor: "pointer",
-                width: "80px",
-                height: "80px",
-                background: "white",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "4px solid transparent",
-                transition: "all 0.2s",
-                overflow: "hidden",
-              }}
-            >
-              <img
-                referrerPolicy="no-referrer"
-                src="/images/avatar/avatar2.png"
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            </div>
-            <div
-              className="avatar-option"
-              onClick={(e) => {
-                selectAvatar(
-                  "/images/avatar/avatar5.png",
-                  e.currentTarget,
-                );
-              }}
-              style={{
-                cursor: "pointer",
-                width: "80px",
-                height: "80px",
-                background: "white",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "4px solid transparent",
-                transition: "all 0.2s",
-                overflow: "hidden",
-              }}
-            >
-              <img
-                referrerPolicy="no-referrer"
-                src="/images/avatar/avatar5.png"
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            </div>
-            <div
-              className="avatar-option"
-              onClick={(e) => {
-                selectAvatar(
-                  "/images/avatar/avatar6.png",
-                  e.currentTarget,
-                );
-              }}
-              style={{
-                cursor: "pointer",
-                width: "80px",
-                height: "80px",
-                background: "white",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "4px solid transparent",
-                transition: "all 0.2s",
-                overflow: "hidden",
-              }}
-            >
-              <img
-                referrerPolicy="no-referrer"
-                src="/images/avatar/avatar6.png"
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            </div>
-          </div>
-          <button
-            className="neo-btn bg-yellow"
-            style={{
-              width: "min(75%, 220px)",
-              margin: "10px auto 0",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "1.1rem",
-              padding: "10px 16px",
-              animation: "pulse-scale 4s infinite",
-            }}
-            onClick={(e) => {
-              const select = document.getElementById(
-                "student-dropdown",
-              ) as HTMLSelectElement;
-              if (!select || !select.value) {
-                alert("Sila pilih nama dalam senarai!");
-                return;
-              }
-              (window as any).namaMuridAktif = select.value;
-              localStorage.setItem("muridAktif", select.value);
-              localStorage.setItem("bunyiKataCurrentMurid", select.value);
-              localStorage.setItem("bunyiKataNamaMurid", select.value);
-              (window as any).bukaModalAppInfo &&
-                (window as any).bukaModalAppInfo("murid");
-            }}
-          >
-            MULA BERMAIN! <i className="fa-solid fa-rocket"></i>
-          </button>
-        </div>
-
-        {/* Footer Minimalist (Bawah Screen Login Sahaja) */}
-        <footer
-          style={{
-            width: "100%",
-            marginTop: "auto",
-            marginBottom: "15px",
-            padding: "12px 20px",
-            backgroundColor: "transparent",
-            color: "#475569",
-            display: "flex",
-            justifyContent: "center",
-            textAlign: "center",
-            boxSizing: "border-box",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "3px",
-              fontSize: "0.78rem",
-              fontWeight: "bold",
-            }}
-          >
-            <div>Â© 2026 Bunyi Kata. Hak Cipta Terpelihara.</div>
-            <div
-              style={{
-                fontSize: "0.72rem",
-                fontWeight: "normal",
-                color: "#64748b",
-              }}
-            >
-              Aplikasi Pembelajaran Suku Kata &amp; Literasi Bahasa Melayu.
-            </div>
-          </div>
-        </footer>
-      </div>
+      <LoginScreen
+        getScreenClass={getScreenClass}
+        setIsModeChoiceOpen={setIsModeChoiceOpen}
+        setIsCodeModalOpen={setIsCodeModalOpen}
+        setIsEntryChoiceModalOpen={setIsEntryChoiceModalOpen}
+      />
 
       <div id="main-menu-screen" className={getScreenClass("main-menu-screen")}>
         {/* Mobile Top Header: Avatar, Nama, Bintang Murid & Butang Keluar */}
@@ -4734,1393 +3865,14 @@ export default function App() {
         </div>
       </div>
 
-      <div id="map-screen" className={getScreenClass("map-screen")}>
-        <div className="map-top-bar">
-          <button
-            id="map-back-btn"
-            className="neo-btn back-icon-btn"
-            onClick={(e) => {
-              kembaliKePilihPeta();
-            }}
-          >
-            <i className="fa-solid fa-arrow-left"></i>
-          </button>
-          <div
-            id="map-title-bar"
-            className="neo-btn page-title"
-            style={{
-              fontSize: "1.2rem",
-              pointerEvents: "none",
-              zIndex: "1",
-              whiteSpace: "nowrap",
-            }}
-          >
-            Peta Kembara 1
-          </div>
-          <div></div>
-        </div>
-        <div className="map-board" id="map-board-area">
-          {/*  Dijana oleh JS  */}
-        </div>
-        <div
-          id="cara-belajar-lain-section"
-          style={{
-            display: "none",
-            marginTop: "20px",
-            padding: "20px",
-            background: "#feedd6",
-            borderRadius: "24px",
-            border: "3px solid var(--color-dark)",
-            boxShadow: "inset 4px 4px 0px rgba(0,0,0,0.03), 0 3px 0 var(--color-dark)",
-            backgroundImage:
-              "radial-gradient(rgba(255,255,255,0.4) 2px, transparent 2px)",
-            backgroundSize: "15px 15px",
-            textAlign: "center",
-          }}
-        >
-          <h2 className="neo-btn bg-yellow cara-belajar-title">
-            <i className="fa-solid fa-wand-magic-sparkles"></i> Cara Belajar
-          </h2>
-          <div className="cara-belajar-btn-container">
-            <button
-              className="neo-btn bg-purple cara-belajar-btn untuk-huruf"
-              onClick={(e) => {
-                const modal = document.getElementById("modal-pilih-surih");
-                if (modal) modal.style.display = "flex";
-              }}
-            >
-              <i className="fa-solid fa-pen"></i>{" "}
-              <span className="cara-belajar-btn-text-full">Surih</span>
-              <span className="cara-belajar-btn-text-short">Surih</span>
-            </button>
-            <button
-              className="neo-btn bg-blue cara-belajar-btn untuk-huruf"
-              onClick={(e) => {
-                (window as any).bukaVR && (window as any).bukaVR();
-              }}
-            >
-              <i className="fa-solid fa-cube"></i>{" "}
-              <span className="cara-belajar-btn-text-full">3D Bunyi Kata</span>
-              <span className="cara-belajar-btn-text-short">3D</span>
-            </button>
-            <button
-              className="neo-btn bg-green cara-belajar-btn untuk-huruf"
-              onClick={(e) => {
-                const modal = document.getElementById("modal-pilih-ar");
-                if (modal) modal.style.display = "flex";
-              }}
-            >
-              <i className="fa-solid fa-camera"></i>{" "}
-              <span className="cara-belajar-btn-text-full">AR</span>
-              <span className="cara-belajar-btn-text-short">AR</span>
-            </button>
-            <button
-              className="neo-btn cara-belajar-btn untuk-huruf"
-              style={{ backgroundColor: "#ec4899", color: "white" }}
-              onClick={(e) => {
-                const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
-                if (modal) modal.style.display = "flex";
-              }}
-            >
-              <i className="fa-solid fa-clone"></i>{" "}
-              <span className="cara-belajar-btn-text-full">Kad Imbasan</span>
-              <span className="cara-belajar-btn-text-short">Kad Imbasan</span>
-            </button>
-            <button
-              className="neo-btn bg-pink cara-belajar-btn untuk-sukukata"
-              onClick={(e) => {
-                window.bukaTandukKata && window.bukaTandukKata();
-              }}
-            >
-              <i className="fa-solid fa-gamepad"></i>{" "}
-              <span className="cara-belajar-btn-text-full">Tanduk Kata</span>
-              <span className="cara-belajar-btn-text-short">Tanduk</span>
-            </button>
-            <button
-              className="neo-btn cara-belajar-btn untuk-sukukata"
-              style={{ backgroundColor: "#f59e0b", color: "white" }}
-              onClick={(e) => {
-                if (window.showPuzzleSukuKataModal) window.showPuzzleSukuKataModal();
-                else if (window.bukaPuzzleSukuKata) window.bukaPuzzleSukuKata();
-              }}
-            >
-              <i className="fa-solid fa-puzzle-piece"></i>{" "}
-              <span className="cara-belajar-btn-text-full">Puzzle</span>
-              <span className="cara-belajar-btn-text-short">Puzzle</span>
-            </button>
-            <button
-              className="neo-btn cara-belajar-btn untuk-sukukata cursor-pointer"
-              style={{ backgroundColor: "#8b5cf6", color: "white" }}
-              onClick={(e) => {
-                if ((window as any).showCantumKataModal) (window as any).showCantumKataModal();
-                else if ((window as any).bukaCantumKata) (window as any).bukaCantumKata();
-              }}
-            >
-              <i className="fa-solid fa-puzzle-piece"></i>{" "}
-              <span className="cara-belajar-btn-text-full">Cantum Kata</span>
-              <span className="cara-belajar-btn-text-short">Cantum</span>
-            </button>
-            <button
-              className="neo-btn bg-cyan cara-belajar-btn untuk-sukukata"
-              onClick={(e) => {
-                window.bukaPerpustakaan && window.bukaPerpustakaan();
-              }}
-              style={{ backgroundColor: "#06b6d4", color: "white" }}
-            >
-              <i className="fa-solid fa-book-open-reader"></i>{" "}
-              <span className="cara-belajar-btn-text-full">
-                Teroka Perpustakaan
-              </span>
-              <span className="cara-belajar-btn-text-short">Perpustakaan</span>
-            </button>
-            <button
-              className="neo-btn cara-belajar-btn untuk-sukukata cursor-pointer"
-              onClick={(e) => {
-                if ((window as any).showCubaSebutModal) (window as any).showCubaSebutModal();
-                else { const m = document.getElementById("modal-pilih-cuba-sebut-sukukata"); if (m) m.style.display = "flex"; }
-              }}
-              style={{ backgroundColor: "#ff751f", color: "white" }}
-            >
-              <i className="fa-solid fa-microphone-lines"></i>{" "}
-              <span className="cara-belajar-btn-text-full">Cuba Sebut</span>
-              <span className="cara-belajar-btn-text-short">Sebut</span>
-            </button>
-            <button
-              className="neo-btn bg-yellow cara-belajar-btn untuk-bacaan"
-              onClick={(e) => {
-                setShowBukuCeritaModal(true);
-              }}
-              style={{ backgroundColor: "#f59e0b", color: "white" }}
-            >
-              <i className="fa-solid fa-book-open"></i>{" "}
-              <span className="cara-belajar-btn-text-full">Rak Buku</span>
-              <span className="cara-belajar-btn-text-short">Rak Buku</span>
-            </button>
-            <button
-              className="neo-btn bg-purple cara-belajar-btn untuk-bacaan"
-              onClick={(e) => {
-                (window as any).bukaVRBacaan && (window as any).bukaVRBacaan();
-              }}
-              style={{ backgroundColor: "#8b5cf6", color: "white" }}
-            >
-              <i className="fa-solid fa-cube"></i>{" "}
-              <span className="cara-belajar-btn-text-full">3D Bacaan Bergred</span>
-              <span className="cara-belajar-btn-text-short">3D</span>
-            </button>
-            <button
-              className="neo-btn cara-belajar-btn untuk-bacaan cursor-pointer"
-              onClick={(e) => {
-                if ((window as any).showCubaBacaModal) (window as any).showCubaBacaModal();
-                else { const m = document.getElementById("modal-pilih-cuba-baca"); if (m) m.style.display = "flex"; }
-              }}
-              style={{ backgroundColor: "#10b981", color: "white" }}
-            >
-              <i className="fa-solid fa-book-open-reader"></i>{" "}
-              <span className="cara-belajar-btn-text-full">Cuba Baca</span>
-              <span className="cara-belajar-btn-text-short">Baca</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Cabaran Lain Section (Untuk Mod Latihan) */}
-        <div
-          id="cabaran-lain-section"
-          style={{
-            display: "none",
-            marginTop: "24px",
-            padding: "24px 14px 28px 14px",
-            backgroundColor: "#feedd6",
-            backgroundImage:
-              "radial-gradient(rgba(255, 255, 255, 0.4) 2px, transparent 2px)",
-            backgroundSize: "15px 15px",
-            borderRadius: "24px",
-            border: "3px solid var(--color-dark)",
-            boxShadow: "inset 4px 4px 0px rgba(0, 0, 0, 0.03), 0 3px 0 var(--color-dark)",
-            textAlign: "center",
-            position: "relative",
-            overflow: "visible"
-          }}
-        >
-          {/* Badge Cabaran Tambahan (Dinamik) */}
-          <div
-            id="cabaran-tambahan-title-badge"
-            className="neo-btn bg-purple cabaran-badge-title"
-            style={{
-              display: "none",
-              fontSize: "1.15rem",
-              fontWeight: "900",
-              color: "white",
-              padding: "6px 24px",
-              borderRadius: "20px",
-              border: "3px solid #1e293b",
-              boxShadow: "0 4px 0 #1e293b",
-              margin: "0 auto 12px auto",
-              alignItems: "center",
-              justifyContent: "center",
-              pointerEvents: "none",
-              textTransform: "none",
-              letterSpacing: "0.5px",
-              zIndex: 5,
-            }}
-          >
-            Cabaran Tambahan
-          </div>
-
-          {/* 3D Swiper Carousel */}
-          <div id="cabaran-lain-stage" className="cabaran-lain-stage-container">
-            <button
-              className="cabaran-lain-nav-btn prev-btn"
-              onClick={() => (window as any).cabaranLainPrev && (window as any).cabaranLainPrev()}
-              aria-label="Sebelumnya"
-            >
-              <i className="fa-solid fa-chevron-left"></i>
-            </button>
-
-            <div id="cabaran-lain-viewport" className="cabaran-lain-viewport">
-              {/* Dijana secara dinamik oleh JS */}
-            </div>
-
-            <button
-              className="cabaran-lain-nav-btn next-btn"
-              onClick={() => (window as any).cabaranLainNext && (window as any).cabaranLainNext()}
-              aria-label="Seterusnya"
-            >
-              <i className="fa-solid fa-chevron-right"></i>
-            </button>
-          </div>
-
-          {/* Dots Indicator */}
-          <div id="cabaran-lain-dots" className="cabaran-lain-dots-container">
-            {/* Dijana secara dinamik oleh JS */}
-          </div>
-        </div>
-
-        {/* Cabaran Tambahan Game View moved to createPortal below map-screen */}
-
-        {/* Modal Pilih Surih */}
-        <div id="modal-pilih-surih" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-          <div className="modal-content" style={{ maxWidth: "480px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-            <button
-              className="neo-btn bg-red close-btn"
-              onClick={(e) => {
-                const modal = document.getElementById("modal-pilih-surih");
-                if (modal) modal.style.display = "none";
-              }}
-              aria-label="Tutup"
-            >
-              <i className="fa-solid fa-xmark"></i>
-            </button>
-            <h2 className="modal-title-orange-badge" style={{ marginBottom: "20px" }}>
-              <i className="fa-solid fa-pen"></i> Pilih Mod Surih
-            </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "14px", width: "100%" }}>
-              {/* Card Surih Huruf */}
-              <div
-                className="neo-btn"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "20px 10px 16px",
-                  cursor: "pointer",
-                  borderRadius: "22px",
-                  border: "3.5px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                  transition: "all 0.15s ease",
-                  background: "linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)",
-                  gap: "14px",
-                  boxSizing: "border-box"
-                }}
-                onClick={() => {
-                  const modal = document.getElementById("modal-pilih-surih");
-                  if (modal) modal.style.display = "none";
-                  (window as any).bukaSurihHuruf && (window as any).bukaSurihHuruf();
-                }}
-              >
-                {/* Animated A, B, C Logo Tiles with Stars */}
-                <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                  {/* Sparkle Star 1 (Top-Left) */}
-                  <motion.div
-                    animate={{
-                      scale: [0.85, 1.25, 0.85],
-                      rotate: [0, 90, 180, 270, 360],
-                      opacity: [0.75, 1, 0.75]
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: "-12px",
-                      left: "-10px",
-                      width: "19px",
-                      height: "19px",
-                      pointerEvents: "none",
-                      userSelect: "none",
-                      zIndex: 2,
-                      filter: "drop-shadow(0 2px 4px rgba(250, 204, 21, 0.8))"
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                      <path
-                        d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"
-                        fill="url(#sparkle-grad-surih-huruf-tl)"
-                      />
-                      <defs>
-                        <linearGradient id="sparkle-grad-surih-huruf-tl" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#fffbeb" />
-                          <stop offset="50%" stopColor="#fde047" />
-                          <stop offset="100%" stopColor="#f59e0b" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                  </motion.div>
-
-                  {/* Sparkle Star 2 (Top-Right) */}
-                  <motion.div
-                    animate={{
-                      scale: [1.2, 0.8, 1.2],
-                      rotate: [360, 270, 180, 90, 0],
-                      opacity: [1, 0.65, 1]
-                    }}
-                    transition={{
-                      duration: 3.2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: "-11px",
-                      right: "-8px",
-                      width: "17px",
-                      height: "17px",
-                      pointerEvents: "none",
-                      userSelect: "none",
-                      zIndex: 2,
-                      filter: "drop-shadow(0 2px 4px rgba(251, 113, 133, 0.8))"
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                      <path
-                        d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z"
-                        fill="url(#star-grad-surih-huruf-tr)"
-                        stroke="#1e293b"
-                        strokeWidth="1.6"
-                        strokeLinejoin="round"
-                      />
-                      <defs>
-                        <linearGradient id="star-grad-surih-huruf-tr" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#fff1f2" />
-                          <stop offset="40%" stopColor="#fda4af" />
-                          <stop offset="100%" stopColor="#f43f5e" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                  </motion.div>
-
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                    className="popup-tile-1"
-                    style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    A
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                    className="popup-tile-2"
-                    style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    B
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                    className="popup-tile-3"
-                    style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    C
-                  </motion.div>
-                </div>
-                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                  Surih Huruf
-                </span>
-              </div>
-
-              {/* Card Surih Nombor */}
-              <div
-                className="neo-btn"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "20px 10px 16px",
-                  cursor: "pointer",
-                  borderRadius: "22px",
-                  border: "3.5px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                  transition: "all 0.15s ease",
-                  background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
-                  gap: "14px",
-                  boxSizing: "border-box"
-                }}
-                onClick={() => {
-                  const modal = document.getElementById("modal-pilih-surih");
-                  if (modal) modal.style.display = "none";
-                  (window as any).bukaSurihNombor && (window as any).bukaSurihNombor();
-                }}
-              >
-                {/* Animated 1, 2, 3 Logo Tiles with Stars */}
-                <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                  {/* Sparkle Star 1 (Top-Left) */}
-                  <motion.div
-                    animate={{
-                      scale: [0.85, 1.25, 0.85],
-                      rotate: [0, 90, 180, 270, 360],
-                      opacity: [0.75, 1, 0.75]
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: "-12px",
-                      left: "-10px",
-                      width: "19px",
-                      height: "19px",
-                      pointerEvents: "none",
-                      userSelect: "none",
-                      zIndex: 2,
-                      filter: "drop-shadow(0 2px 4px rgba(250, 204, 21, 0.8))"
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                      <path
-                        d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"
-                        fill="url(#sparkle-grad-surih-nombor-tl)"
-                      />
-                      <defs>
-                        <linearGradient id="sparkle-grad-surih-nombor-tl" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#fffbeb" />
-                          <stop offset="50%" stopColor="#fde047" />
-                          <stop offset="100%" stopColor="#f59e0b" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                  </motion.div>
-
-                  {/* Sparkle Star 2 (Top-Right) */}
-                  <motion.div
-                    animate={{
-                      scale: [1.2, 0.8, 1.2],
-                      rotate: [360, 270, 180, 90, 0],
-                      opacity: [1, 0.65, 1]
-                    }}
-                    transition={{
-                      duration: 3.2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: "-11px",
-                      right: "-8px",
-                      width: "17px",
-                      height: "17px",
-                      pointerEvents: "none",
-                      userSelect: "none",
-                      zIndex: 2,
-                      filter: "drop-shadow(0 2px 4px rgba(251, 113, 133, 0.8))"
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                      <path
-                        d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z"
-                        fill="url(#star-grad-surih-nombor-tr)"
-                        stroke="#1e293b"
-                        strokeWidth="1.6"
-                        strokeLinejoin="round"
-                      />
-                      <defs>
-                        <linearGradient id="star-grad-surih-nombor-tr" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#fff1f2" />
-                          <stop offset="40%" stopColor="#fda4af" />
-                          <stop offset="100%" stopColor="#f43f5e" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                  </motion.div>
-
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                    className="popup-tile-1"
-                    style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    1
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                    className="popup-tile-2"
-                    style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    2
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                    className="popup-tile-3"
-                    style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    3
-                  </motion.div>
-                </div>
-                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                  Surih Nombor
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Modal Pilih Kad Imbasan Nombor */}
-        <div id="modal-pilih-kad-imbasan-nombor" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-          <div className="modal-content" style={{ maxWidth: "480px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-            <button
-              className="neo-btn bg-red close-btn"
-              onClick={(e) => {
-                const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
-                if (modal) modal.style.display = "none";
-              }}
-              aria-label="Tutup"
-            >
-              <i className="fa-solid fa-xmark"></i>
-            </button>
-            <h2 className="modal-title-orange-badge" style={{ marginBottom: "20px" }}>
-              <i className="fa-solid fa-clone"></i> Kad Imbasan Nombor
-            </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "14px", width: "100%" }}>
-              {/* Square Card Nombor 0-10 */}
-              <div
-                className="neo-btn"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "20px 10px 16px",
-                  cursor: "pointer",
-                  borderRadius: "22px",
-                  border: "3.5px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                  transition: "all 0.15s ease",
-                  background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
-                  gap: "14px",
-                  boxSizing: "border-box"
-                }}
-                onClick={() => {
-                  const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
-                  if (modal) modal.style.display = "none";
-                  setKadImbasanNomborMode("bilang_0_10");
-                  if ((window as any).paparSkrin) (window as any).paparSkrin("view-kad-imbasan-nombor");
-                }}
-              >
-                {/* Animated 1, 2, 3 Logo Tiles with Stars */}
-                <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                  {/* Sparkle Star 1 (Top-Left) */}
-                  <motion.div
-                    animate={{
-                      scale: [0.85, 1.25, 0.85],
-                      rotate: [0, 90, 180, 270, 360],
-                      opacity: [0.75, 1, 0.75]
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: "-12px",
-                      left: "-10px",
-                      width: "19px",
-                      height: "19px",
-                      pointerEvents: "none",
-                      userSelect: "none",
-                      zIndex: 2,
-                      filter: "drop-shadow(0 2px 4px rgba(250, 204, 21, 0.8))"
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                      <path
-                        d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"
-                        fill="url(#sparkle-grad-popup-0-10-tl)"
-                      />
-                      <defs>
-                        <linearGradient id="sparkle-grad-popup-0-10-tl" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#fffbeb" />
-                          <stop offset="50%" stopColor="#fde047" />
-                          <stop offset="100%" stopColor="#f59e0b" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                  </motion.div>
-
-                  {/* Sparkle Star 2 (Top-Right) */}
-                  <motion.div
-                    animate={{
-                      scale: [1.2, 0.8, 1.2],
-                      rotate: [360, 270, 180, 90, 0],
-                      opacity: [1, 0.65, 1]
-                    }}
-                    transition={{
-                      duration: 3.2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: "-11px",
-                      right: "-8px",
-                      width: "17px",
-                      height: "17px",
-                      pointerEvents: "none",
-                      userSelect: "none",
-                      zIndex: 2,
-                      filter: "drop-shadow(0 2px 4px rgba(251, 113, 133, 0.8))"
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                      <path
-                        d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z"
-                        fill="url(#star-grad-popup-0-10-tr)"
-                        stroke="#1e293b"
-                        strokeWidth="1.6"
-                        strokeLinejoin="round"
-                      />
-                      <defs>
-                        <linearGradient id="star-grad-popup-0-10-tr" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#fff1f2" />
-                          <stop offset="40%" stopColor="#fda4af" />
-                          <stop offset="100%" stopColor="#f43f5e" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                  </motion.div>
-
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                    className="popup-tile-1"
-                    style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    1
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                    className="popup-tile-2"
-                    style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    2
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                    className="popup-tile-3"
-                    style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    3
-                  </motion.div>
-                </div>
-                {/* Ayat Nombor 0-10 di baris bawah */}
-                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                  Nombor 0-10
-                </span>
-              </div>
-
-              {/* Square Card Siri Nombor 10-100 */}
-              <div
-                className="neo-btn"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "20px 10px 16px",
-                  cursor: "pointer",
-                  borderRadius: "22px",
-                  border: "3.5px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                  transition: "all 0.15s ease",
-                  background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-                  gap: "14px",
-                  boxSizing: "border-box"
-                }}
-                onClick={() => {
-                  const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
-                  if (modal) modal.style.display = "none";
-                  setKadImbasanNomborMode("siri_nombor");
-                  if ((window as any).paparSkrin) (window as any).paparSkrin("view-kad-imbasan-nombor");
-                }}
-              >
-                {/* Animated 10, 20, 30 Logo Tiles with Stars */}
-                <div style={{ position: "relative", display: "inline-flex", gap: "5px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                  {/* Sparkle Star 1 (Top-Left) */}
-                  <motion.div
-                    animate={{
-                      scale: [0.85, 1.25, 0.85],
-                      rotate: [0, 90, 180, 270, 360],
-                      opacity: [0.75, 1, 0.75]
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: "-12px",
-                      left: "-10px",
-                      width: "19px",
-                      height: "19px",
-                      pointerEvents: "none",
-                      userSelect: "none",
-                      zIndex: 2,
-                      filter: "drop-shadow(0 2px 4px rgba(250, 204, 21, 0.8))"
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                      <path
-                        d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"
-                        fill="url(#sparkle-grad-popup-10-100-tl)"
-                      />
-                      <defs>
-                        <linearGradient id="sparkle-grad-popup-10-100-tl" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#fffbeb" />
-                          <stop offset="50%" stopColor="#fde047" />
-                          <stop offset="100%" stopColor="#f59e0b" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                  </motion.div>
-
-                  {/* Sparkle Star 2 (Top-Right) */}
-                  <motion.div
-                    animate={{
-                      scale: [1.2, 0.8, 1.2],
-                      rotate: [360, 270, 180, 90, 0],
-                      opacity: [1, 0.65, 1]
-                    }}
-                    transition={{
-                      duration: 3.2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: "-11px",
-                      right: "-8px",
-                      width: "17px",
-                      height: "17px",
-                      pointerEvents: "none",
-                      userSelect: "none",
-                      zIndex: 2,
-                      filter: "drop-shadow(0 2px 4px rgba(251, 113, 133, 0.8))"
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-                      <path
-                        d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z"
-                        fill="url(#star-grad-popup-10-100-tr)"
-                        stroke="#1e293b"
-                        strokeWidth="1.6"
-                        strokeLinejoin="round"
-                      />
-                      <defs>
-                        <linearGradient id="star-grad-popup-10-100-tr" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#fff1f2" />
-                          <stop offset="40%" stopColor="#fda4af" />
-                          <stop offset="100%" stopColor="#f43f5e" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                  </motion.div>
-
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                    className="popup-tile-1"
-                    style={{ minWidth: "38px", height: "36px", padding: "0 4px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.0rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    10
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                    className="popup-tile-2"
-                    style={{ minWidth: "38px", height: "36px", padding: "0 4px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.0rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    20
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                    className="popup-tile-3"
-                    style={{ minWidth: "38px", height: "36px", padding: "0 4px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.0rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    30
-                  </motion.div>
-                </div>
-                {/* Ayat Siri Nombor 10-100 di baris bawah */}
-                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                  Siri Nombor 10-100
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Modal Pilih AR (Huruf / ABC & Nombor) */}
-        <div id="modal-pilih-ar" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-          <div className="modal-content" style={{ maxWidth: "520px", width: "92%", textAlign: "center", padding: "28px 18px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-            <button
-              className="neo-btn bg-red close-btn"
-              onClick={(e) => {
-                const modal = document.getElementById("modal-pilih-ar");
-                if (modal) modal.style.display = "none";
-              }}
-              aria-label="Tutup"
-            >
-              <i className="fa-solid fa-xmark"></i>
-            </button>
-            <h2 className="modal-title-orange-badge" style={{ marginBottom: "20px" }}>
-              <i className="fa-solid fa-camera"></i> Pilih Mod AR
-            </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "14px", width: "100%" }}>
-
-              {/* Card 2: AR Nombor */}
-              <div
-                className="neo-btn"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "20px 8px 16px",
-                  cursor: "pointer",
-                  borderRadius: "22px",
-                  border: "3.5px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                  transition: "all 0.15s ease",
-                  background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-                  gap: "12px",
-                  boxSizing: "border-box",
-                  position: "relative"
-                }}
-                onClick={() => {
-                  const modal = document.getElementById("modal-pilih-ar");
-                  if (modal) modal.style.display = "none";
-                  setArKiraJariMode('nombor');
-                  if ((window as any).bukaARKiraJari) (window as any).bukaARKiraJari('nombor');
-                }}
-              >
-
-                {/* Animated 1, 2, 3 Tiles with Sparkles */}
-                <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                  <motion.div
-                    animate={{ scale: [0.85, 1.25, 0.85], rotate: [0, 90, 180, 270, 360], opacity: [0.75, 1, 0.75] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    style={{ position: "absolute", top: "-12px", left: "-10px", width: "18px", height: "18px", pointerEvents: "none", zIndex: 2 }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                      <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="#fef08a" />
-                    </svg>
-                  </motion.div>
-                  <motion.div
-                    animate={{ scale: [1.2, 0.8, 1.2], rotate: [360, 270, 180, 90, 0], opacity: [1, 0.65, 1] }}
-                    transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-                    style={{ position: "absolute", top: "-11px", right: "-8px", width: "16px", height: "16px", pointerEvents: "none", zIndex: 2 }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                      <path d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z" fill="#fde047" stroke="#10182f" strokeWidth="1.5" strokeLinejoin="round" />
-                    </svg>
-                  </motion.div>
-
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                    style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    1
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                    style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    2
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                    style={{ width: "36px", height: "36px", background: "#fb7185", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #e11d48, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    3
-                  </motion.div>
-                </div>
-
-                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                  AR Nombor
-                </span>
-              </div>
-
-              {/* Card 3: AR Tambah */}
-              <div
-                className="neo-btn"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "20px 8px 16px",
-                  cursor: "pointer",
-                  borderRadius: "22px",
-                  border: "3.5px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                  transition: "all 0.15s ease",
-                  background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
-                  gap: "12px",
-                  boxSizing: "border-box",
-                  position: "relative"
-                }}
-                onClick={() => {
-                  const modal = document.getElementById("modal-pilih-ar");
-                  if (modal) modal.style.display = "none";
-                  setArKiraJariMode('tambah');
-                  if ((window as any).bukaARKiraJari) (window as any).bukaARKiraJari('tambah');
-                }}
-              >
-
-                {/* Animated 1, +, 1 Tiles with Sparkles */}
-                <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                  <motion.div
-                    animate={{ scale: [0.85, 1.25, 0.85], rotate: [0, 90, 180, 270, 360], opacity: [0.75, 1, 0.75] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    style={{ position: "absolute", top: "-12px", left: "-10px", width: "18px", height: "18px", pointerEvents: "none", zIndex: 2 }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                      <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="#fef08a" />
-                    </svg>
-                  </motion.div>
-                  <motion.div
-                    animate={{ scale: [1.2, 0.8, 1.2], rotate: [360, 270, 180, 90, 0], opacity: [1, 0.65, 1] }}
-                    transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-                    style={{ position: "absolute", top: "-11px", right: "-8px", width: "16px", height: "16px", pointerEvents: "none", zIndex: 2 }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                      <path d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z" fill="#fda4af" stroke="#10182f" strokeWidth="1.5" strokeLinejoin="round" />
-                    </svg>
-                  </motion.div>
-
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                    style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    1
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                    style={{ width: "36px", height: "36px", background: "#10b981", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #059669, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.35rem", fontWeight: 900, color: "#ffffff", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    +
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                    style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    1
-                  </motion.div>
-                </div>
-
-                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                  AR Tambah
-                </span>
-              </div>
-
-              {/* Card 4: AR Tolak */}
-              <div
-                className="neo-btn"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "20px 8px 16px",
-                  cursor: "pointer",
-                  borderRadius: "22px",
-                  border: "3.5px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 6px 0 var(--color-dark, #10182f)",
-                  transition: "all 0.15s ease",
-                  background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-                  gap: "12px",
-                  boxSizing: "border-box",
-                  position: "relative"
-                }}
-                onClick={() => {
-                  const modal = document.getElementById("modal-pilih-ar");
-                  if (modal) modal.style.display = "none";
-                  setArKiraJariMode('tolak');
-                  if ((window as any).bukaARKiraJari) (window as any).bukaARKiraJari('tolak');
-                }}
-              >
-
-                {/* Animated 2, -, 1 Tiles with Sparkles */}
-                <div style={{ position: "relative", display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "center", padding: "6px 8px" }}>
-                  <motion.div
-                    animate={{ scale: [0.85, 1.25, 0.85], rotate: [0, 90, 180, 270, 360], opacity: [0.75, 1, 0.75] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    style={{ position: "absolute", top: "-12px", left: "-10px", width: "18px", height: "18px", pointerEvents: "none", zIndex: 2 }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                      <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="#fef08a" />
-                    </svg>
-                  </motion.div>
-                  <motion.div
-                    animate={{ scale: [1.2, 0.8, 1.2], rotate: [360, 270, 180, 90, 0], opacity: [1, 0.65, 1] }}
-                    transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-                    style={{ position: "absolute", top: "-11px", right: "-8px", width: "16px", height: "16px", pointerEvents: "none", zIndex: 2 }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-                      <path d="M12 1.5L14.9 8.2L22 9.1L16.8 13.9L18.3 21L12 17.4L5.7 21L7.2 13.9L2 9.1L9.1 8.2L12 1.5Z" fill="#93c5fd" stroke="#10182f" strokeWidth="1.5" strokeLinejoin="round" />
-                    </svg>
-                  </motion.div>
-
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [-3, 2, -3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                    style={{ width: "36px", height: "36px", background: "#facc15", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #ca8a04, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    2
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [0, -2.5, 0, 2.5, 0] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.28 }}
-                    style={{ width: "36px", height: "36px", background: "#f43f5e", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #be123c, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.35rem", fontWeight: 900, color: "#ffffff", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    -
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -4, 0, 1.5, 0], rotate: [3, -2, 3] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: 0.56 }}
-                    style={{ width: "36px", height: "36px", background: "#38bdf8", borderRadius: "10px", border: "2.5px solid #10182f", boxShadow: "0 3px 0 #0284c7, 0 3px 6px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 900, color: "#10182f", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif" }}
-                  >
-                    1
-                  </motion.div>
-                </div>
-
-                <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
-                  AR Tolak
-                </span>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        {/* Modal Pilih AR Suku Kata */}
-        <div id="modal-pilih-ar-sukukata" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-          <div className="modal-content" style={{ maxWidth: "450px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-            <button
-              className="neo-btn bg-red close-btn"
-              onClick={(e) => {
-                const modal = document.getElementById("modal-pilih-ar-sukukata");
-                if (modal) modal.style.display = "none";
-              }}
-              aria-label="Tutup"
-            >
-              <i className="fa-solid fa-xmark"></i>
-            </button>
-            <h2 className="modal-title-orange-badge" style={{ marginBottom: "12px" }}>
-              <i className="fa-solid fa-camera"></i> AR Suku Kata
-            </h2>
-            <p style={{ marginBottom: "20px", fontSize: "1rem", color: "#475569" }}>
-              Pilih kemahiran suku kata untuk mula bermain:
-            </p>
-            <div id="ar-sukukata-buttons-container" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", width: "100%" }}>
-              {/* Populated dynamically via window.showARSukuKataModal() */}
-            </div>
-          </div>
-        </div>
-
-        {/* Modal Pilih Puzzle Suku Kata */}
-        <div id="modal-pilih-puzzle-sukukata" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-          <div className="modal-content" style={{ maxWidth: "450px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-            <button
-              className="neo-btn bg-red close-btn cursor-pointer"
-              onClick={(e) => {
-                const modal = document.getElementById("modal-pilih-puzzle-sukukata");
-                if (modal) modal.style.display = "none";
-              }}
-              aria-label="Tutup"
-            >
-              <i className="fa-solid fa-xmark"></i>
-            </button>
-            <h2 className="modal-title-orange-badge" style={{ marginBottom: "12px" }}>
-              <i className="fa-solid fa-puzzle-piece"></i> Puzzle Suku Kata
-            </h2>
-            <p style={{ marginBottom: "20px", fontSize: "1rem", color: "#475569" }}>
-              Pilih kemahiran suku kata untuk mula bermain:
-            </p>
-            <div id="puzzle-sukukata-buttons-container" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", width: "100%" }}>
-              {/* Populated dynamically via window.showPuzzleSukuKataModal() */}
-            </div>
-          </div>
-        </div>
-
-        {/* Modal Pilih Cantum Kata */}
-        <div id="modal-pilih-cantum-kata" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-          <div className="modal-content" style={{ maxWidth: "450px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-            <button
-              className="neo-btn bg-red close-btn cursor-pointer"
-              onClick={(e) => {
-                const modal = document.getElementById("modal-pilih-cantum-kata");
-                if (modal) modal.style.display = "none";
-              }}
-              aria-label="Tutup"
-            >
-              <i className="fa-solid fa-xmark"></i>
-            </button>
-            <h2 className="modal-title-orange-badge" style={{ marginBottom: "12px", background: "#8b5cf6", color: "white" }}>
-              <i className="fa-solid fa-puzzle-piece"></i> Cantum Kata
-            </h2>
-            <p style={{ marginBottom: "20px", fontSize: "1rem", color: "#475569" }}>
-              Pilih kemahiran suku kata untuk mula bermain:
-            </p>
-            <div id="cantum-kata-buttons-container" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", width: "100%" }}>
-              {/* Populated dynamically via window.showCantumKataModal() */}
-            </div>
-          </div>
-        </div>
-
-        {/* Modal Pilih Cuba Sebut (Suku Kata Asas & Hero) */}
-        <div id="modal-pilih-cuba-sebut-sukukata" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-          <div className="modal-content" style={{ maxWidth: "460px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-            <button
-              className="neo-btn bg-red close-btn cursor-pointer"
-              onClick={(e) => {
-                const modal = document.getElementById("modal-pilih-cuba-sebut-sukukata");
-                if (modal) modal.style.display = "none";
-              }}
-              aria-label="Tutup"
-            >
-              <i className="fa-solid fa-xmark"></i>
-            </button>
-            <h2 className="modal-title-orange-badge" style={{ marginBottom: "12px", background: "#ff751f", color: "white" }}>
-              <i className="fa-solid fa-microphone-lines"></i> Cuba Sebut
-            </h2>
-            <p style={{ marginBottom: "20px", fontSize: "1rem", color: "#475569" }}>
-              Pilih kemahiran suku kata untuk mula belajar:
-            </p>
-            <div id="cuba-sebut-sukukata-buttons-container" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", width: "100%" }}>
-              {/* Populated dynamically via window.showCubaSebutModal() */}
-            </div>
-          </div>
-        </div>
-
-        {/* Modal Pilih Cuba Baca (Bacaan Bergred) */}
-        <div id="modal-pilih-cuba-baca" className="modal-overlay" style={{ display: "none", zIndex: 4000, backgroundColor: "rgba(0,0,0,0.85)" }}>
-          <div className="modal-content" style={{ maxWidth: "460px", width: "90%", textAlign: "center", padding: "28px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", position: "relative" }}>
-            <button
-              className="neo-btn bg-red close-btn cursor-pointer"
-              onClick={(e) => {
-                const modal = document.getElementById("modal-pilih-cuba-baca");
-                if (modal) modal.style.display = "none";
-              }}
-              aria-label="Tutup"
-            >
-              <i className="fa-solid fa-xmark"></i>
-            </button>
-            <h2 className="modal-title-orange-badge" style={{ marginBottom: "12px", background: "#10b981", color: "white" }}>
-              <i className="fa-solid fa-book-open-reader"></i> Cuba Baca
-            </h2>
-            <p style={{ marginBottom: "20px", fontSize: "1rem", color: "#475569" }}>
-              Pilih kategori bacaan untuk mula belajar:
-            </p>
-            <div id="cuba-baca-buttons-container" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", width: "100%" }}>
-              {/* Populated dynamically via window.showCubaBacaModal() */}
-            </div>
-          </div>
-        </div>
-        {/* VR button now directly calls bukaVR() - no modal needed */}
-
-        <div
-          id="mobile-floating-dial-container"
-          className={isDialOpen ? "open" : ""}
-        >
-          <div className="mobile-dial-options">
-            <button
-              className="neo-btn bg-purple cara-belajar-btn untuk-huruf"
-              onClick={(e) => {
-                setIsDialOpen(false);
-                const modal = document.getElementById("modal-pilih-surih");
-                if (modal) modal.style.display = "flex";
-              }}
-            >
-              <span className="cara-belajar-btn-text-short">Surih</span>
-              <i className="fa-solid fa-pen"></i>
-            </button>
-            <button
-              className="neo-btn bg-blue cara-belajar-btn untuk-huruf"
-              onClick={(e) => {
-                setIsDialOpen(false);
-                (window as any).bukaVR && (window as any).bukaVR();
-              }}
-            >
-              <span className="cara-belajar-btn-text-short">3D</span>
-              <i className="fa-solid fa-cube"></i>
-            </button>
-            <button
-              className="neo-btn bg-green cara-belajar-btn untuk-huruf"
-              onClick={(e) => {
-                setIsDialOpen(false);
-                const modal = document.getElementById("modal-pilih-ar");
-                if (modal) modal.style.display = "flex";
-              }}
-            >
-              <span className="cara-belajar-btn-text-short">AR</span>
-              <i className="fa-solid fa-camera"></i>
-            </button>
-            <button
-              className="neo-btn cara-belajar-btn untuk-huruf"
-              style={{ backgroundColor: "#ec4899", color: "white" }}
-              onClick={(e) => {
-                setIsDialOpen(false);
-                const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
-                if (modal) modal.style.display = "flex";
-              }}
-            >
-              <span className="cara-belajar-btn-text-short">Kad Imbasan</span>
-              <i className="fa-solid fa-clone"></i>
-            </button>
-            <button
-              className="neo-btn bg-pink cara-belajar-btn untuk-sukukata"
-              onClick={(e) => {
-                setIsDialOpen(false);
-                window.bukaTandukKata && window.bukaTandukKata();
-              }}
-            >
-              <span className="cara-belajar-btn-text-short">Tanduk Kata</span>
-              <i className="fa-solid fa-gamepad"></i>
-            </button>
-            <button
-              className="neo-btn cara-belajar-btn untuk-sukukata"
-              style={{ backgroundColor: "#f59e0b", color: "white" }}
-              onClick={(e) => {
-                setIsDialOpen(false);
-                if (window.showPuzzleSukuKataModal) window.showPuzzleSukuKataModal();
-                else if (window.bukaPuzzleSukuKata) window.bukaPuzzleSukuKata();
-              }}
-            >
-              <span className="cara-belajar-btn-text-short">Puzzle</span>
-              <i className="fa-solid fa-puzzle-piece"></i>
-            </button>
-            <button
-              className="neo-btn cara-belajar-btn untuk-sukukata cursor-pointer"
-              style={{ backgroundColor: "#8b5cf6", color: "white" }}
-              onClick={(e) => {
-                setIsDialOpen(false);
-                if ((window as any).showCantumKataModal) (window as any).showCantumKataModal();
-                else if ((window as any).bukaCantumKata) (window as any).bukaCantumKata();
-              }}
-            >
-              <span className="cara-belajar-btn-text-short">Cantum Kata</span>
-              <i className="fa-solid fa-puzzle-piece"></i>
-            </button>
-            <button
-              className="neo-btn bg-cyan cara-belajar-btn untuk-sukukata"
-              onClick={(e) => {
-                setIsDialOpen(false);
-                window.bukaPerpustakaan && window.bukaPerpustakaan();
-              }}
-              style={{ backgroundColor: "#06b6d4", color: "white" }}
-            >
-              <span className="cara-belajar-btn-text-short">Perpustakaan</span>
-              <i className="fa-solid fa-book-open-reader"></i>
-            </button>
-            <button
-              className="neo-btn cara-belajar-btn untuk-sukukata cursor-pointer"
-              style={{ backgroundColor: "#ff751f", color: "white" }}
-              onClick={(e) => {
-                setIsDialOpen(false);
-                if ((window as any).showCubaSebutModal) (window as any).showCubaSebutModal();
-                else { const m = document.getElementById("modal-pilih-cuba-sebut-sukukata"); if (m) m.style.display = "flex"; }
-              }}
-            >
-              <span className="cara-belajar-btn-text-short">Cuba Sebut</span>
-              <i className="fa-solid fa-microphone-lines"></i>
-            </button>
-            <button
-              className="neo-btn bg-yellow cara-belajar-btn untuk-bacaan"
-              onClick={(e) => {
-                setIsDialOpen(false);
-                setShowBukuCeritaModal(true);
-              }}
-              style={{ backgroundColor: "#f59e0b", color: "white" }}
-            >
-              <span className="cara-belajar-btn-text-short">Rak Buku</span>
-              <i className="fa-solid fa-book-open"></i>
-            </button>
-            <button
-              className="neo-btn bg-purple cara-belajar-btn untuk-bacaan"
-              onClick={(e) => {
-                setIsDialOpen(false);
-                (window as any).bukaVRBacaan && (window as any).bukaVRBacaan();
-              }}
-              style={{ backgroundColor: "#8b5cf6", color: "white" }}
-            >
-              <span className="cara-belajar-btn-text-short">3D</span>
-              <i className="fa-solid fa-cube"></i>
-            </button>
-            <button
-              className="neo-btn cara-belajar-btn untuk-bacaan cursor-pointer"
-              style={{ backgroundColor: "#10b981", color: "white" }}
-              onClick={(e) => {
-                setIsDialOpen(false);
-                if ((window as any).showCubaBacaModal) (window as any).showCubaBacaModal();
-                else { const m = document.getElementById("modal-pilih-cuba-baca"); if (m) m.style.display = "flex"; }
-              }}
-            >
-              <span className="cara-belajar-btn-text-short">Cuba Baca</span>
-              <i className="fa-solid fa-book-open-reader"></i>
-            </button>
-          </div>
-
-          <button
-            id="mobile-floating-cta"
-            className="neo-btn bg-yellow"
-            onClick={(e) => {
-              setIsDialOpen(!isDialOpen);
-            }}
-            aria-label="Cara Belajar"
-          >
-            <i
-              className={`fa-solid ${isDialOpen ? "fa-xmark" : "fa-wand-magic-sparkles"}`}
-            ></i>
-          </button>
-        </div>
-      </div>
+      <MapScreen
+        getScreenClass={getScreenClass}
+        setShowBukuCeritaModal={setShowBukuCeritaModal}
+        setKadImbasanNomborMode={setKadImbasanNomborMode}
+        setArKiraJariMode={setArKiraJariMode}
+        isDialOpen={isDialOpen}
+        setIsDialOpen={setIsDialOpen}
+      />
 
       {/* Cabaran Tambahan Game View â€” rendered via portal to body so position:fixed works correctly outside .screen transform stacking context */}
       {createPortal(
@@ -6600,7 +4352,9 @@ export default function App() {
           </div>
 
           {/* 3D Swipe Carousel for 5 Badges displaying 2 in main view */}
-          <Lencana3DSwiper />
+          <Suspense fallback={null}>
+            <Lencana3DSwiper />
+          </Suspense>
 
           {/* Hidden legacy grid for background script compatibility */}
           <div className="badge-grid" id="badge-grid" style={{ display: "none" }}></div>
@@ -6960,15 +4714,20 @@ export default function App() {
       </div>
 
       {/*  Mod Admin (Dashboard Sistem)  */}
-      <AdminDashboard getScreenClass={getScreenClass} />
+      <Suspense fallback={null}>
+        <AdminDashboard getScreenClass={getScreenClass} />
+      </Suspense>
 
       {/* Mod Admin - Urus Sijil Bunyi Kata */}
       <div id="admin-sijil" className={getScreenClass("admin-sijil")} style={{ paddingBottom: "100px" }}>
-        <AdminSijilManager />
+        <Suspense fallback={null}>
+          <AdminSijilManager />
+        </Suspense>
       </div>
 
       {/*  Mod Guru (Dashboard Live Tracking)  */}
-      <GuruDashboard
+      <Suspense fallback={null}>
+        <GuruDashboard
         getScreenClass={getScreenClass}
         userAccessLevel={userAccessLevel}
         isEffectiveTrial={isEffectiveTrial}
@@ -7027,6 +4786,7 @@ export default function App() {
         handleSaveClassName2={handleSaveClassName2}
         handleSaveClassCode2={handleSaveClassCode2}
       />
+      </Suspense>
 
       {/* Modal: Sijil Pencapaian (Mod Guru) */}
       {showGuruSijilModal && (
@@ -7070,21 +4830,51 @@ export default function App() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <AdminSijilManager isGuruMode={true} onClose={() => {
-              if ((window as any).playBubble) (window as any).playBubble();
-              setShowGuruSijilModal(false);
-            }} />
+            <Suspense fallback={null}>
+              <AdminSijilManager isGuruMode={true} onClose={() => {
+                if ((window as any).playBubble) (window as any).playBubble();
+                setShowGuruSijilModal(false);
+              }} />
+            </Suspense>
           </div>
         </div>
       )}
 
       {/* Screen: Mod Ibu Bapa (Dashboard Statistik Anak) */}
-      <IbubapaDashboard
-        getScreenClass={getScreenClass}
-        getSubscriptionBadgeInfo={getSubscriptionBadgeInfo}
-        onOpenProPricing={() => setIsProPricingModalOpen(true)}
-        onEditProfile={handleEditIbubapaProfile}
-      />
+      <Suspense fallback={null}>
+        <IbubapaDashboard
+          getScreenClass={getScreenClass}
+          getSubscriptionBadgeInfo={getSubscriptionBadgeInfo}
+          onOpenProPricing={() => setIsProPricingModalOpen(true)}
+          onEditProfile={handleEditIbubapaProfile}
+        />
+      </Suspense>
+
+      {/* Screen: Mod Affiliate (Fasa 3 — panel kendiri affiliate) */}
+      <Suspense fallback={null}>
+        <AffiliateDashboard
+          getScreenClass={getScreenClass}
+          onLogout={async () => {
+            try {
+              const { logout } = await import("./services/authService");
+              await logout();
+            } catch (e) {
+              /* abaikan */
+            }
+            localStorage.removeItem("bunyiKataUserRole");
+            localStorage.removeItem("bunyiKataNamaAffiliate");
+            (window as any).modAffiliateAktif = false;
+            setIsAffiliateActive(false);
+            if (typeof (window as any).keluarKeSkrinLogin === "function") {
+              (window as any).keluarKeSkrinLogin();
+            } else if (typeof (window as any).paparSkrin === "function") {
+              (window as any).paparSkrin("login-screen");
+            } else {
+              window.location.reload();
+            }
+          }}
+        />
+      </Suspense>
 
       {/*  Modal Bantuan  */}
       <div
@@ -8624,15 +6414,17 @@ export default function App() {
           overflow: "hidden",
         }}
       >
-        <TandukKataGame
-          onClose={() => {
-            const event = new CustomEvent("tukar-skrin", {
-              detail: { skrin: "map-screen" },
-            });
-            window.dispatchEvent(event);
-            if (window.paparSkrin) window.paparSkrin("map-screen");
-          }}
-        />
+        <Suspense fallback={null}>
+          <TandukKataGame
+            onClose={() => {
+              const event = new CustomEvent("tukar-skrin", {
+                detail: { skrin: "map-screen" },
+              });
+              window.dispatchEvent(event);
+              if (window.paparSkrin) window.paparSkrin("map-screen");
+            }}
+          />
+        </Suspense>
       </div>
 
       {/* Perpustakaan Game */}
@@ -8652,17 +6444,19 @@ export default function App() {
         }}
       >
         {isPerpustakaanOpen && (
-          <PerpustakaanGame
-            isHeroMode={isPerpustakaanHeroMode}
-            onClose={() => {
-              setIsPerpustakaanOpen(false);
-              const event = new CustomEvent("tukar-skrin", {
-                detail: { skrin: "map-screen" },
-              });
-              window.dispatchEvent(event);
-              if (window.paparSkrin) window.paparSkrin("map-screen");
-            }}
-          />
+          <Suspense fallback={null}>
+            <PerpustakaanGame
+              isHeroMode={isPerpustakaanHeroMode}
+              onClose={() => {
+                setIsPerpustakaanOpen(false);
+                const event = new CustomEvent("tukar-skrin", {
+                  detail: { skrin: "map-screen" },
+                });
+                window.dispatchEvent(event);
+                if (window.paparSkrin) window.paparSkrin("map-screen");
+              }}
+            />
+          </Suspense>
         )}
       </div>
 
@@ -8677,15 +6471,17 @@ export default function App() {
           overflow: "hidden",
         }}
       >
-        <PuzzleSukuKataGame
-          onClose={() => {
-            const event = new CustomEvent("tukar-skrin", {
-              detail: { skrin: "map-screen" },
-            });
-            window.dispatchEvent(event);
-            if (window.paparSkrin) window.paparSkrin("map-screen");
-          }}
-        />
+        <Suspense fallback={null}>
+          <PuzzleSukuKataGame
+            onClose={() => {
+              const event = new CustomEvent("tukar-skrin", {
+                detail: { skrin: "map-screen" },
+              });
+              window.dispatchEvent(event);
+              if (window.paparSkrin) window.paparSkrin("map-screen");
+            }}
+          />
+        </Suspense>
       </div>
 
       {/* Cantum Kata Game */}
@@ -8699,15 +6495,17 @@ export default function App() {
           overflow: "hidden",
         }}
       >
-        <CantumKataGame
-          onClose={() => {
-            const event = new CustomEvent("tukar-skrin", {
-              detail: { skrin: "map-screen" },
-            });
-            window.dispatchEvent(event);
-            if (window.paparSkrin) window.paparSkrin("map-screen");
-          }}
-        />
+        <Suspense fallback={null}>
+          <CantumKataGame
+            onClose={() => {
+              const event = new CustomEvent("tukar-skrin", {
+                detail: { skrin: "map-screen" },
+              });
+              window.dispatchEvent(event);
+              if (window.paparSkrin) window.paparSkrin("map-screen");
+            }}
+          />
+        </Suspense>
       </div>
 
       {/* Cabaran Suku Kata Game */}
@@ -8721,15 +6519,17 @@ export default function App() {
           overflow: "hidden",
         }}
       >
-        <CabaranSukuKataGame
-          onClose={() => {
-            if ((window as any).currentPeta && (window as any).bukaPeta) {
-              (window as any).bukaPeta((window as any).currentPeta, true);
-            }
-            if ((window as any).paparSkrin)
-              (window as any).paparSkrin("map-screen");
-          }}
-        />
+        <Suspense fallback={null}>
+          <CabaranSukuKataGame
+            onClose={() => {
+              if ((window as any).currentPeta && (window as any).bukaPeta) {
+                (window as any).bukaPeta((window as any).currentPeta, true);
+              }
+              if ((window as any).paparSkrin)
+                (window as any).paparSkrin("map-screen");
+            }}
+          />
+        </Suspense>
       </div>
 
       {/* Pembelajaran Fonik ABC Game */}
@@ -8743,15 +6543,17 @@ export default function App() {
           overflow: "hidden",
         }}
       >
-        <FonikAbcGame
-          onClose={() => {
-            if ((window as any).currentPeta && (window as any).bukaPeta) {
-              (window as any).bukaPeta((window as any).currentPeta, true);
-            }
-            if ((window as any).paparSkrin)
-              (window as any).paparSkrin("map-screen");
-          }}
-        />
+        <Suspense fallback={null}>
+          <FonikAbcGame
+            onClose={() => {
+              if ((window as any).currentPeta && (window as any).bukaPeta) {
+                (window as any).bukaPeta((window as any).currentPeta, true);
+              }
+              if ((window as any).paparSkrin)
+                (window as any).paparSkrin("map-screen");
+            }}
+          />
+        </Suspense>
       </div>
 
       {/* Pembelajaran Nombor (Asas, Tambah, Tolak) */}
@@ -8765,15 +6567,17 @@ export default function App() {
           overflow: "hidden",
         }}
       >
-        <NomborGame
-          onClose={() => {
-            if ((window as any).currentPeta && (window as any).bukaPeta) {
-              (window as any).bukaPeta((window as any).currentPeta, true);
-            }
-            if ((window as any).paparSkrin)
-              (window as any).paparSkrin("map-screen");
-          }}
-        />
+        <Suspense fallback={null}>
+          <NomborGame
+            onClose={() => {
+              if ((window as any).currentPeta && (window as any).bukaPeta) {
+                (window as any).bukaPeta((window as any).currentPeta, true);
+              }
+              if ((window as any).paparSkrin)
+                (window as any).paparSkrin("map-screen");
+            }}
+          />
+        </Suspense>
       </div>
 
       {/* Kad Imbasan Nombor (Asas 0-10 & Siri Nombor) */}
@@ -8787,13 +6591,15 @@ export default function App() {
           overflow: "auto",
         }}
       >
-        <KadImbasanNomborGame
-          key={kadImbasanNomborMode}
-          initialMode={kadImbasanNomborMode}
-          onBack={() => {
-            if ((window as any).paparSkrin) (window as any).paparSkrin("map-screen");
-          }}
-        />
+        <Suspense fallback={null}>
+          <KadImbasanNomborGame
+            key={kadImbasanNomborMode}
+            initialMode={kadImbasanNomborMode}
+            onBack={() => {
+              if ((window as any).paparSkrin) (window as any).paparSkrin("map-screen");
+            }}
+          />
+        </Suspense>
       </div>
 
       {/* VR ABC */}
@@ -9379,7 +7185,9 @@ export default function App() {
             </div>
           </div>
           {/* Galeri Puzzle Cantuman Suku Kata (di bawah kad imbasan) */}
-          <SukuKataPuzzleBar />
+          <Suspense fallback={null}>
+            <SukuKataPuzzleBar />
+          </Suspense>
         </div>
       </div>
       {/*  Modal Senarai Suku Kata  */}
@@ -10637,7 +8445,8 @@ export default function App() {
       {/* Modal Edit Maklumat Kelas */}
       {typeof document !== 'undefined' && createPortal(
         <>
-          <EditProfileModal
+          <Suspense fallback={null}>
+            <EditProfileModal
             isOpen={isEditModalOpen}
             onClose={() => setIsEditModalOpen(false)}
             editModalMode={editModalMode}
@@ -10707,6 +8516,7 @@ export default function App() {
             isEffectiveTrial={isEffectiveTrial}
             isEffectivePro={isEffectivePro}
           />
+          </Suspense>
 
           {/* Modal Panduan 3D Bunyi Kata */}
           <AnimatePresence>
@@ -10858,7 +8668,8 @@ export default function App() {
 
 
           {/* Modal Pilihan Cara Mula */}
-          <EntryChoiceModal
+          <Suspense fallback={null}>
+            <EntryChoiceModal
             isEntryChoiceModalOpen={isEntryChoiceModalOpen}
             setIsEntryChoiceModalOpen={setIsEntryChoiceModalOpen}
             isCodeModalOpen={isCodeModalOpen}
@@ -10879,9 +8690,11 @@ export default function App() {
             setRegNamaKeluarga={setRegNamaKeluarga}
             setAuthModalError={setAuthModalError}
           />
+          </Suspense>
 
           {/* Modal Pilih Mod bagi Tujuan Langganan Pakej */}
-          <ModeChoiceModal
+          <Suspense fallback={null}>
+            <ModeChoiceModal
             isOpen={isModeChoiceOpen}
             onClose={() => setIsModeChoiceOpen(false)}
             onSelectMode={(mode) => {
@@ -10890,9 +8703,11 @@ export default function App() {
               setIsProPricingModalOpen(true);
             }}
           />
+          </Suspense>
 
           {/* Modal Log Masuk */}
-          <AuthModal
+          <Suspense fallback={null}>
+            <AuthModal
             isOpen={showLoginModal}
             initialTab={authModalTab}
             pendingLoginMode={pendingLoginMode}
@@ -10907,9 +8722,11 @@ export default function App() {
             setIsEditModalOpen={setIsEditModalOpen}
             setTeacherPlanName={setTeacherPlanName}
           />
+          </Suspense>
 
           {/* Modal Pilih Mod -> Pakej Bunyi Kata */}
-          <PricingProModal
+          <Suspense fallback={null}>
+            <PricingProModal
             isOpen={isModeMenuOpen || isProPricingModalOpen}
             initialTab={proPricingTab || "guru"}
             onClose={() => {
@@ -10945,840 +8762,19 @@ export default function App() {
               }
             }}
           />
+          </Suspense>
 
           {/* Modal Maklumat Koleksi Lencana Utama & Sijil */}
-          <div
-            id="modal-info-lencana"
-            className="modal-overlay"
-            style={{
-              display: "none",
-              zIndex: 999999,
-              backgroundColor: "rgba(0,0,0,0.85)",
-              backdropFilter: "blur(4px)",
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100vw",
-              height: "100vh",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "16px",
-            }}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                (window as any).tutupModalInfoLencana &&
-                  (window as any).tutupModalInfoLencana();
-              }
-            }}
-          >
-            <div
-              className="modal-content neo-box"
-              style={{
-                maxWidth: "540px",
-                width: "100%",
-                maxHeight: "90vh",
-                overflowY: "auto",
-                textAlign: "center",
-                padding: "24px 18px 20px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                margin: "auto",
-                position: "relative",
-                backgroundColor: "#ffffff",
-                backgroundImage:
-                  "radial-gradient(circle, rgba(16, 24, 47, 0.08) 1.5px, transparent 1.5px)",
-                backgroundSize: "18px 18px",
-                borderRadius: "24px",
-                border: "4px solid var(--color-dark, #10182f)",
-                boxShadow: "0 8px 0 var(--color-dark, #10182f)",
-              }}
-            >
-              {/* Square Red Close Button */}
-              <button
-                className="neo-btn bg-red close-btn"
-                style={{
-                  position: "absolute",
-                  top: "14px",
-                  right: "14px",
-                  width: "38px",
-                  height: "38px",
-                  minWidth: "38px",
-                  minHeight: "38px",
-                  padding: "0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: "12px",
-                  fontSize: "1.15rem",
-                  color: "white",
-                  border: "2.5px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 2.5px 0 var(--color-dark, #10182f)",
-                  cursor: "pointer",
-                  zIndex: 10,
-                }}
-                onClick={() => {
-                  (window as any).tutupModalInfoLencana &&
-                    (window as any).tutupModalInfoLencana();
-                }}
-                title="Tutup"
-                aria-label="Tutup"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-
-              {/* Purple Title Badge */}
-              <div
-                className="neo-btn bg-purple"
-                style={{
-                  fontSize: "clamp(1.15rem, 3.8vw, 1.35rem)",
-                  fontWeight: "900",
-                  color: "white",
-                  padding: "8px 28px",
-                  borderRadius: "20px",
-                  border: "3px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 4px 0 var(--color-dark, #10182f)",
-                  margin: "4px auto 14px",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  pointerEvents: "none",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Panduan Koleksi Lencana
-              </div>
-
-              {/* Card 1: Syarat Buka 4 Lencana Utama */}
-              <div
-                style={{
-                  width: "100%",
-                  background: "#f0fdf4",
-                  border: "2.5px solid #16a34a",
-                  borderRadius: "18px",
-                  padding: "12px 12px 10px",
-                  marginBottom: "12px",
-                  textAlign: "left",
-                  boxSizing: "border-box",
-                }}
-              >
-                {/* Green Header Badge */}
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    background: "#16a34a",
-                    color: "white",
-                    padding: "5px 14px",
-                    borderRadius: "14px",
-                    fontWeight: "900",
-                    fontSize: "0.88rem",
-                    border: "2px solid var(--color-dark, #10182f)",
-                    boxShadow: "0 2px 0 var(--color-dark, #10182f)",
-                    marginBottom: "8px",
-                  }}
-                >
-                  <i className="fa-solid fa-trophy" style={{ color: "#fef08a" }}></i>
-                  <span>Syarat Buka 4 Lencana Utama</span>
-                </div>
-
-                <div
-                  style={{
-                    fontSize: "0.82rem",
-                    color: "#1e293b",
-                    lineHeight: "1.4",
-                    fontWeight: "700",
-                  }}
-                >
-                  Dapatkan <span style={{ background: "#fef08a", color: "#854d0e", padding: "1px 6px", borderRadius: "6px", fontWeight: "800" }}>3 Bintang Penuh</span> dalam sekurang-kurangnya <span style={{ textDecoration: "underline", fontWeight: "800" }}>3 aktiviti</span> bagi setiap cabaran:
-                </div>
-
-                {/* Visual 4 Badges Cards Grid */}
-                <div
-                  style={{
-                    marginTop: "8px",
-                    display: "grid",
-                    gridTemplateColumns: "repeat(2, 1fr)",
-                    gap: "8px",
-                  }}
-                >
-                  {/* Badge 1 */}
-                  <div
-                    style={{
-                      background: "white",
-                      border: "2px solid #cbd5e1",
-                      borderRadius: "12px",
-                      padding: "8px 10px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      boxShadow: "0 2px 0 #cbd5e1",
-                    }}
-                  >
-                    <img
-                      src="/images/lencana/lencana-penjelajah-alfabet.png"
-                      alt="Kenal Huruf"
-                      style={{ width: "42px", height: "42px", objectFit: "contain", flexShrink: 0 }}
-                    />
-                    <div style={{ overflow: "hidden" }}>
-                      <div style={{ fontSize: "0.84rem", fontWeight: "900", color: "#10182f", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        Kenal Huruf
-                      </div>
-                      <div style={{ display: "flex", gap: "2px", fontSize: "0.72rem", marginTop: "2px", color: "#eab308" }}>
-                        <i className="fa-solid fa-star"></i>
-                        <i className="fa-solid fa-star"></i>
-                        <i className="fa-solid fa-star"></i>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Badge 2 */}
-                  <div
-                    style={{
-                      background: "white",
-                      border: "2px solid #cbd5e1",
-                      borderRadius: "12px",
-                      padding: "8px 10px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      boxShadow: "0 2px 0 #cbd5e1",
-                    }}
-                  >
-                    <img
-                      src="/images/lencana/lencana-pemburu-suku-kata.png"
-                      alt="Suku Kata Asas"
-                      style={{ width: "42px", height: "42px", objectFit: "contain", flexShrink: 0 }}
-                    />
-                    <div style={{ overflow: "hidden" }}>
-                      <div style={{ fontSize: "0.84rem", fontWeight: "900", color: "#10182f", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        Suku Kata Asas
-                      </div>
-                      <div style={{ display: "flex", gap: "2px", fontSize: "0.72rem", marginTop: "2px", color: "#eab308" }}>
-                        <i className="fa-solid fa-star"></i>
-                        <i className="fa-solid fa-star"></i>
-                        <i className="fa-solid fa-star"></i>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Badge 3 */}
-                  <div
-                    style={{
-                      background: "white",
-                      border: "2px solid #cbd5e1",
-                      borderRadius: "12px",
-                      padding: "8px 10px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      boxShadow: "0 2px 0 #cbd5e1",
-                    }}
-                  >
-                    <img
-                      src="/images/lencana/lencana-wira-pulau.png"
-                      alt="Suku Kata Hero"
-                      style={{ width: "42px", height: "42px", objectFit: "contain", flexShrink: 0 }}
-                    />
-                    <div style={{ overflow: "hidden" }}>
-                      <div style={{ fontSize: "0.84rem", fontWeight: "900", color: "#10182f", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        Suku Kata Hero
-                      </div>
-                      <div style={{ display: "flex", gap: "2px", fontSize: "0.72rem", marginTop: "2px", color: "#eab308" }}>
-                        <i className="fa-solid fa-star"></i>
-                        <i className="fa-solid fa-star"></i>
-                        <i className="fa-solid fa-star"></i>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Badge 4 */}
-                  <div
-                    style={{
-                      background: "white",
-                      border: "2px solid #cbd5e1",
-                      borderRadius: "12px",
-                      padding: "8px 10px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      boxShadow: "0 2px 0 #cbd5e1",
-                    }}
-                  >
-                    <img
-                      src="/images/lencana/lencana-naib-raja-bacaan.png"
-                      alt="Bacaan Bergred"
-                      style={{ width: "42px", height: "42px", objectFit: "contain", flexShrink: 0 }}
-                    />
-                    <div style={{ overflow: "hidden" }}>
-                      <div style={{ fontSize: "0.84rem", fontWeight: "900", color: "#10182f", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        Bacaan Bergred
-                      </div>
-                      <div style={{ display: "flex", gap: "2px", fontSize: "0.72rem", marginTop: "2px", color: "#eab308" }}>
-                        <i className="fa-solid fa-star"></i>
-                        <i className="fa-solid fa-star"></i>
-                        <i className="fa-solid fa-star"></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: Syarat Buka Sijil & Lencana Master */}
-              <div
-                style={{
-                  width: "100%",
-                  background: "#fefce8",
-                  border: "2.5px solid #ca8a04",
-                  borderRadius: "18px",
-                  padding: "12px 12px 12px",
-                  marginBottom: "14px",
-                  textAlign: "left",
-                  boxSizing: "border-box",
-                }}
-              >
-                {/* Gold/Brown Header Badge */}
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    background: "#ca8a04",
-                    color: "white",
-                    padding: "5px 14px",
-                    borderRadius: "14px",
-                    fontWeight: "900",
-                    fontSize: "0.88rem",
-                    border: "2px solid var(--color-dark, #10182f)",
-                    boxShadow: "0 2px 0 var(--color-dark, #10182f)",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <i className="fa-solid fa-certificate" style={{ color: "#fef08a" }}></i>
-                  <span>Syarat Buka Sijil & Lencana Master</span>
-                </div>
-
-                {/* Visual Workflow: 4 Badges -> Arrow -> Master Badge + Sijil (Centered & Prominent) */}
-                <div
-                  style={{
-                    background: "white",
-                    border: "2px solid #e2e8f0",
-                    borderRadius: "14px",
-                    padding: "10px 12px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "clamp(8px, 2.5vw, 16px)",
-                    boxShadow: "0 2px 0 #e2e8f0",
-                  }}
-                >
-                  {/* 4 Mini Badges (Larger & Rapat) */}
-                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                    <img src="/images/lencana/lencana-penjelajah-alfabet.png" alt="Kenal Huruf" title="Kenal Huruf" style={{ width: "38px", height: "38px", objectFit: "contain" }} />
-                    <img src="/images/lencana/lencana-pemburu-suku-kata.png" alt="Suku Kata Asas" title="Suku Kata Asas" style={{ width: "38px", height: "38px", objectFit: "contain" }} />
-                    <img src="/images/lencana/lencana-wira-pulau.png" alt="Suku Kata Hero" title="Suku Kata Hero" style={{ width: "38px", height: "38px", objectFit: "contain" }} />
-                    <img src="/images/lencana/lencana-naib-raja-bacaan.png" alt="Bacaan Bergred" title="Bacaan Bergred" style={{ width: "38px", height: "38px", objectFit: "contain" }} />
-                  </div>
-
-                  <i className="fa-solid fa-arrow-right" style={{ color: "#ca8a04", fontSize: "1.25rem", margin: "0 2px" }}></i>
-
-                  {/* Master Badge & Certificate (No KAPTEN label) */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <img
-                      src="/images/lencana/lencana-kapten-harta-karun.png"
-                      alt="Master Badge"
-                      title="Kapten Harta Karun"
-                      style={{ width: "46px", height: "46px", objectFit: "contain" }}
-                    />
-                    <div style={{ height: "36px", width: "2px", background: "#cbd5e1" }}></div>
-                    <div style={{ textAlign: "center" }}>
-                      <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "#fef3c7", border: "2px solid #d97706", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <i className="fa-solid fa-file-pdf" style={{ color: "#dc2626", fontSize: "1.25rem" }}></i>
-                      </div>
-                      <div style={{ fontSize: "0.68rem", fontWeight: "900", color: "#b45309", marginTop: "2px" }}>SIJIL</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Close Button */}
-              <button
-                className="neo-btn bg-purple"
-                style={{
-                  width: "100%",
-                  padding: "13px 20px",
-                  fontSize: "1.05rem",
-                  fontWeight: "900",
-                  color: "white",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                  borderRadius: "16px",
-                  border: "3px solid var(--color-dark, #10182f)",
-                  boxShadow: "0 4px 0 var(--color-dark, #10182f)",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
-                  (window as any).tutupModalInfoLencana &&
-                    (window as any).tutupModalInfoLencana();
-                }}
-              >
-                <i className="fa-solid fa-circle-check" style={{ fontSize: "1.2rem" }}></i>
-                <span>Faham & Mula Kumpul Lencana!</span>
-              </button>
-            </div>
-          </div>
-
-          <div
-            id="app-info-modal"
-            className="modal-overlay"
-            style={{
-              display: "none",
-              zIndex: 999999,
-              backgroundColor: "rgba(0,0,0,0.85)",
-            }}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                (window as any).tutupModalAppInfo &&
-                  (window as any).tutupModalAppInfo();
-              }
-            }}
-          >
-            <div
-              className="modal-content"
-              style={{
-                maxWidth: "500px",
-                width: "90%",
-                textAlign: "center",
-                padding: "24px 20px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                margin: "auto",
-                position: "relative",
-                backgroundColor: "#ffffff",
-                backgroundImage:
-                  "radial-gradient(circle, rgba(16, 24, 47, 0.11) 1.5px, transparent 1.5px), linear-gradient(#ffffff, #ffffff)",
-                backgroundSize: "18px 18px, auto",
-              }}
-            >
-              <button
-                className="neo-btn bg-red"
-                style={{
-                  position: "absolute",
-                  top: "14px",
-                  right: "14px",
-                  width: "36px",
-                  height: "36px",
-                  minWidth: "36px",
-                  minHeight: "36px",
-                  padding: "0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: "10px",
-                  zIndex: 10,
-                }}
-                onClick={() => {
-                  (window as any).tutupModalAppInfo &&
-                    (window as any).tutupModalAppInfo();
-                }}
-                aria-label="Tutup"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-              <div
-                className="app-info-logo-wrapper"
-                style={{
-                  padding: "0",
-                  background: "transparent",
-                  boxShadow: "none",
-                  border: "none",
-                  textAlign: "center",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: "100%",
-                  margin: "0 auto 15px auto",
-                }}
-              >
-                <img
-                  referrerPolicy="no-referrer"
-                  src="/images/sampingan/logo-login-screen.png"
-                  alt="Bunyi Kata"
-                  className="glitch-logo"
-                  style={{
-                    maxWidth: "180px",
-                    width: "45vw",
-                    height: "auto",
-                    display: "block",
-                    margin: "0 auto",
-                  }}
-                />
-              </div>
-              <p
-                style={{
-                  fontSize: "clamp(0.7rem, 3.5vw, 0.95rem)",
-                  lineHeight: "1.6",
-                  color: "var(--color-dark)",
-                  marginBottom: "15px",
-                  textAlign: "justify",
-                  width: "100%",
-                }}
-              >
-                Aplikasi ini adalah satu aplikasi mengenal huruf dan suku kata
-                yang sesuai untuk murid Prasekolah dan murid Pemulihan Khas.
-                Aplikasi ini terbahagi kepada dua bahagian utama iaitu
-                Pembelajaran dan Latihan. Elemen gamifikasi yang ditekankan
-                membawa kepada keseronokan dalam pembelajaran. Di akhir
-                pembelajaran dan latihan, murid akan memperoleh hadiah yang
-                menarik!
-              </p>
-              <p
-                style={{
-                  fontSize: "clamp(0.65rem, 3vw, 0.9rem)",
-                  color: "var(--color-dark)",
-                  fontWeight: "bold",
-                  marginBottom: "12px",
-                  width: "100%",
-                  textAlign: "center",
-                }}
-              >
-                Aplikasi ini dibangunkan sepenuhnya oleh
-                <br />
-                IR EduInnovations.
-              </p>
-
-              {/* Butang Ikon Media Sosial (Website, Telegram, Google Play Store, Apple App Store) */}
-              <div
-                id="app-info-social-buttons-container"
-                className="app-info-social-row"
-                style={{
-                  margin: "6px auto 14px auto",
-                }}
-              >
-                {/* Website */}
-                <button
-                  type="button"
-                  className="app-info-social-btn btn-web"
-                  title="Laman Web Rasmi (bunyikata.my)"
-                  aria-label="Laman Web Rasmi"
-                  onClick={() => {
-                    if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                    window.open("https://bunyikata.my", "_blank");
-                  }}
-                >
-                  <i className="fa-solid fa-globe"></i>
-                </button>
-
-                {/* Telegram */}
-                <button
-                  type="button"
-                  className="app-info-social-btn btn-telegram"
-                  title="Saluran Telegram"
-                  aria-label="Saluran Telegram"
-                  onClick={() => {
-                    if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                    window.open("https://t.me/+YHsrwwqA-eE5N2Vl", "_blank");
-                  }}
-                >
-                  <i className="fa-brands fa-telegram"></i>
-                </button>
-
-                {/* Google Play Store */}
-                <button
-                  type="button"
-                  className="app-info-social-btn btn-playstore"
-                  title="Google Play Store"
-                  aria-label="Google Play Store"
-                  onClick={() => {
-                    if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                    window.open("https://play.google.com/store/apps/details?id=com.bunyikatabacaan", "_blank");
-                  }}
-                >
-                  <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
-                    <path d="M1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924z" fill="#4285F4"/>
-                    <path d="m13.544 10.989 3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973z" fill="#34A853"/>
-                    <path d="m13.544 13.056-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z" fill="#EA4335"/>
-                    <path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594z" fill="#FBBC04"/>
-                  </svg>
-                </button>
-
-                {/* Apple App Store */}
-                <button
-                  type="button"
-                  className="app-info-social-btn btn-appstore"
-                  title="Apple App Store"
-                  aria-label="Apple App Store"
-                  onClick={() => {
-                    if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                    window.open("https://apps.apple.com/my/app/bunyi-kata/id6739794132", "_blank");
-                  }}
-                >
-                  <i className="fa-brands fa-app-store-ios" style={{ fontSize: "1.45rem", color: "#ffffff" }}></i>
-                </button>
-              </div>
-
-              {/* Hak Cipta Terpelihara hanya untuk Onboarding (Mula Bermain) */}
-              <div
-                id="app-info-copyright"
-                style={{
-                  display: "none",
-                  fontSize: "clamp(0.6rem, 2.5vw, 0.78rem)",
-                  color: "#475569",
-                  marginBottom: "20px",
-                  fontWeight: "bold",
-                  width: "100%",
-                  textAlign: "center",
-                  lineHeight: "1.5",
-                }}
-              >
-                <div>&copy; 2026 Bunyi Kata &bull; Hak Cipta Terpelihara &bull; CRDV2025M00849</div>
-              </div>
-
-              {/* Ruangan Feedback (Hanya dipaparkan untuk Popup Info) */}
-              <div
-                id="app-info-feedback-section"
-                className="feedback-section-box"
-                style={{
-                  display: "none",
-                  width: "100%",
-                  backgroundColor: "#168f81",
-                  backgroundImage:
-                    "linear-gradient(to bottom, transparent 45%, #168f81 100%), radial-gradient(rgba(255, 255, 255, 0.22) 2px, transparent 2px)",
-                  backgroundSize: "100% 100%, 15px 15px",
-                  border: "3px solid var(--color-dark, #10182f)",
-                  borderRadius: "18px",
-                  padding: "14px",
-                  boxShadow: "0 4px 0 var(--color-dark, #10182f)",
-                  textAlign: "left",
-                  boxSizing: "border-box",
-                  marginBottom: "4px",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "0.92rem",
-                    fontWeight: "900",
-                    color: "#ffffff",
-                    marginBottom: "10px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    textShadow: "0 1px 2px rgba(0,0,0,0.35)",
-                  }}
-                >
-                  <i
-                    className="fa-solid fa-comment-dots"
-                    style={{ color: "#fef08a", fontSize: "1.15rem" }}
-                  ></i>
-                  <span>Maklum Balas &amp; Cadangan Penambahbaikan</span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                    width: "100%",
-                  }}
-                >
-                  <input
-                    type="text"
-                    placeholder="Nama anda"
-                    value={feedbackNama}
-                    onChange={(e) => setFeedbackNama(e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: "8px 12px",
-                      borderRadius: "10px",
-                      border: "2px solid var(--color-dark, #10182f)",
-                      fontSize: "0.85rem",
-                      boxSizing: "border-box",
-                      backgroundColor: "#ffffff",
-                      color: "var(--color-dark, #10182f)",
-                      fontWeight: "600",
-                    }}
-                  />
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "8px",
-                      alignItems: "stretch",
-                      width: "100%",
-                    }}
-                  >
-                    <textarea
-                      placeholder="Tulis apa-apa cadangan atau penambahbaikan..."
-                      value={feedbackMesej}
-                      onChange={(e) => setFeedbackMesej(e.target.value)}
-                      rows={2}
-                      style={{
-                        flex: "1",
-                        padding: "8px 12px",
-                        borderRadius: "10px",
-                        border: "2px solid var(--color-dark, #10182f)",
-                        fontSize: "0.85rem",
-                        resize: "none",
-                        boxSizing: "border-box",
-                        backgroundColor: "#ffffff",
-                        color: "var(--color-dark, #10182f)",
-                        fontWeight: "600",
-                      }}
-                    ></textarea>
-                    <button
-                      type="button"
-                      className="neo-btn bg-blue"
-                      onClick={() => hantarFeedback()}
-                      title="Hantar Maklum Balas"
-                      style={{
-                        width: "48px",
-                        minWidth: "48px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "12px",
-                        padding: "0",
-                        backgroundColor: "#0284c7",
-                        color: "#ffffff",
-                        border: "2.5px solid var(--color-dark, #10182f)",
-                        cursor: "pointer",
-                        boxShadow: "0 2px 0 var(--color-dark, #10182f)",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <i
-                        className="fa-solid fa-paper-plane"
-                        style={{ fontSize: "1.1rem", color: "#ffffff" }}
-                      ></i>
-                    </button>
-                  </div>
-                  {feedbackStatus === "success" && (
-                    <div
-                      style={{
-                        fontSize: "0.82rem",
-                        color: "#064e3b",
-                        backgroundColor: "#ecfdf5",
-                        padding: "8px 12px",
-                        borderRadius: "10px",
-                        border: "2px solid #059669",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "6px",
-                        boxShadow: "0 2px 0 rgba(0,0,0,0.1)",
-                      }}
-                    >
-                      <i className="fa-solid fa-circle-check" style={{ color: "#059669" }}></i>
-                      <span>Maklum balas berjaya dihantar! Terima kasih.</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Butang Teruskan (Hanya dipaparkan untuk Onboarding / Mula Bermain) */}
-              <button
-                id="app-info-teruskan-btn"
-                className="neo-btn"
-                style={{
-                  display: "none",
-                  width: "100%",
-                  justifyContent: "center",
-                  fontSize: "1.1rem",
-                  padding: "12px",
-                  backgroundColor: "#168f81",
-                  color: "#ffffff",
-                }}
-                onClick={() => {
-                  try {
-                    const modal = document.getElementById("app-info-modal");
-                    if (modal) modal.style.display = "none";
-                    const mode = (window as any).pendingAppInfoMode || "murid";
-                    (window as any).pendingAppInfoMode = "";
-                    if (mode === "murid") {
-                      const currentActive = (window as any).namaMuridAktif || localStorage.getItem("muridAktif") || localStorage.getItem("bunyiKataCurrentMurid");
-                      const hasSelectedStudent = Boolean(currentActive && currentActive !== "Tetamu" && currentActive !== "Murid");
-                      const isExplicitTrial = (window as any).isGuestMode || localStorage.getItem("bunyiKataAccessLevel") === "trial";
-                      const isTrial = !hasSelectedStudent && isExplicitTrial;
-
-                      if (isTrial) {
-                        (window as any).isGuestMode = true;
-                        (window as any).isAdminMode = false;
-                        (window as any).modAdminAktif = false;
-                        (window as any).userAccessLevel = "trial";
-                        (window as any).namaMuridAktif = "Tetamu";
-                        setUserAccessLevel("trial");
-                        setIsAdminActive(false);
-                        localStorage.setItem("bunyiKataAccessLevel", "trial");
-                        localStorage.removeItem("bunyiKataUserRole");
-                      } else if (hasSelectedStudent) {
-                        (window as any).namaMuridAktif = currentActive;
-                        (window as any).isGuestMode = false;
-                      }
-                      if (typeof (window as any).masukModMurid === "function") {
-                        try {
-                          (window as any).masukModMurid(
-                            hasSelectedStudent ? currentActive : (isTrial ? "Tetamu" : "Murid"),
-                          );
-                        } catch (e) {
-                          console.warn("masukModMurid notice:", e);
-                        }
-                      }
-                      if (typeof (window as any).paparSkrin === "function") {
-                        try {
-                          (window as any).paparSkrin("main-menu-screen");
-                        } catch (e) {
-                          console.warn("paparSkrin notice:", e);
-                        }
-                      }
-                      document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
-                      document.getElementById("main-menu-screen")?.classList.add("active");
-                      document.body.classList.remove("teacher-mode", "admin-mode", "parent-mode");
-                      const topBanner = document.getElementById("teacher-top-banner");
-                      if (topBanner) topBanner.style.display = "none";
-                      const tNav = document.getElementById("teacher-sticky-nav");
-                      if (tNav) tNav.style.display = "none";
-                      const aNav = document.getElementById("admin-sticky-nav");
-                      if (aNav) aNav.style.display = "none";
-                      const pNav = document.getElementById("parent-sticky-nav");
-                      if (pNav) pNav.style.display = "none";
-                      if (typeof (window as any).updateProfilUI === "function") {
-                        try {
-                          (window as any).updateProfilUI();
-                        } catch (e) {
-                          console.warn("updateProfilUI notice:", e);
-                        }
-                      }
-                    } else if (mode === "guru") {
-                      masukModGuru();
-                    } else if (mode === "ibubapa") {
-                      (window as any).bukaModalPilihAnak &&
-                        (window as any).bukaModalPilihAnak();
-                    } else if (mode === "admin") {
-                      (window as any).masukModAdmin &&
-                        (window as any).masukModAdmin();
-                    }
-                  } catch (err) {
-                    console.error("Teruskan click error:", err);
-                    const modal = document.getElementById("app-info-modal");
-                    if (modal) modal.style.display = "none";
-                    document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
-                    document.getElementById("main-menu-screen")?.classList.add("active");
-                  }
-                }}
-              >
-                Teruskan{" "}
-                <i
-                  className="fa-solid fa-arrow-right"
-                  style={{ marginLeft: "8px" }}
-                ></i>
-              </button>
-            </div>
-          </div>
+          <AppInfoModals
+            feedbackNama={feedbackNama}
+            setFeedbackNama={setFeedbackNama}
+            feedbackMesej={feedbackMesej}
+            setFeedbackMesej={setFeedbackMesej}
+            feedbackStatus={feedbackStatus}
+            hantarFeedback={hantarFeedback}
+            setUserAccessLevel={setUserAccessLevel}
+            setIsAdminActive={setIsAdminActive}
+          />
         </>,
         document.body
       )}
@@ -11786,20 +8782,23 @@ export default function App() {
       {/* Koleksi Siri Buku Cerita Bunyi Kata Modal */}
       <AnimatePresence>
         {showBukuCeritaModal && (
-          <BukuCeritaModal
-            initialBookId={initialBukuCeritaId}
-            onClose={() => {
-              setShowBukuCeritaModal(false);
-              setInitialBukuCeritaId(null);
-            }}
-          />
+          <Suspense fallback={null}>
+            <BukuCeritaModal
+              initialBookId={initialBukuCeritaId}
+              onClose={() => {
+                setShowBukuCeritaModal(false);
+                setInitialBukuCeritaId(null);
+              }}
+            />
+          </Suspense>
         )}
       </AnimatePresence>
 
       {/* Cuba Sebut / Cuba Baca Interactive Game Modal */}
       <AnimatePresence>
         {showCubaSebut && (
-          <CubaSebutGame
+          <Suspense fallback={null}>
+            <CubaSebutGame
             mode={cubaSebutConfig.mode}
             categoryKey={cubaSebutConfig.key}
             categoryLabel={cubaSebutConfig.label}
@@ -11816,6 +8815,7 @@ export default function App() {
               }
             }}
           />
+          </Suspense>
         )}
       </AnimatePresence>
 

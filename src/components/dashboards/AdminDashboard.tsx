@@ -8,15 +8,17 @@ interface AdminDashboardProps {
 
 export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
   const [modalCiptaAkaunTerbuka, setModalCiptaAkaunTerbuka] = React.useState(false);
-  const [perananCiptaAkaun, setPerananCiptaAkaun] = React.useState<"guru" | "ibubapa">("guru");
+  const [perananCiptaAkaun, setPerananCiptaAkaun] = React.useState<"guru" | "ibubapa" | "affiliate">("guru");
 
   // Jambatan ke public/app-logic.js: butang "+ Daftar Guru/Ibu Bapa Baharu"
   // dalam tab Urus memanggil window.bukaModalDaftarAdmin(), yang kemudian
   // mengarah ke sini supaya SATU borang sahaja digunakan — CiptaAkaunModal.
   React.useEffect(() => {
-    (window as any).bukaCiptaAkaunAdmin = (peranan?: "guru" | "ibubapa") => {
+    (window as any).bukaCiptaAkaunAdmin = (peranan?: "guru" | "ibubapa" | "affiliate") => {
       if ((window as any).playBubble) (window as any).playBubble();
-      setPerananCiptaAkaun(peranan === "ibubapa" ? "ibubapa" : "guru");
+      setPerananCiptaAkaun(
+        peranan === "affiliate" ? "affiliate" : peranan === "ibubapa" ? "ibubapa" : "guru",
+      );
       setModalCiptaAkaunTerbuka(true);
     };
     return () => {
@@ -852,11 +854,9 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
             >
               <option value="guru">Senarai Guru Berdaftar</option>
               <option value="ibubapa">Senarai Ibu Bapa Berdaftar</option>
-              <option value="perlu_semakan">⚠️ Perlu Semakan (Langganan)</option>
+              <option value="perlu_semakan">Perlu Semakan (Langganan)</option>
               <option value="feedback">Senarai Maklum Balas</option>
-              <option value="audit">🧾 Log Audit Admin</option>
-              <option value="affiliate">🤝 Affiliate (Kod Rujukan)</option>
-              <option value="affiliate_bayar">💰 Laporan Pembayaran (2 Minggu)</option>
+              <option value="audit">Log Audit Admin</option>
             </select>
           </div>
           <div
@@ -1261,6 +1261,30 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
           >
             <i className="fa-solid fa-users" style={{ color: "#0284c7" }}></i>
             <span>Ibu Bapa</span>
+          </button>
+
+          <button
+            id="admin-urus-tab-btn-affiliate"
+            type="button"
+            className="neo-btn bg-white admin-tab-switcher-btn"
+            style={{
+              color: "#1e293b",
+              padding: "10px 20px",
+              fontWeight: "bold",
+              fontSize: "0.95rem",
+              borderRadius: "12px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+            onClick={() => {
+              if (typeof (window as any).tukarAdminUrusTab === "function") {
+                (window as any).tukarAdminUrusTab("affiliate");
+              }
+            }}
+          >
+            <i className="fa-solid fa-sitemap" style={{ color: "#7c3aed" }}></i>
+            <span>Affiliate</span>
           </button>
         </div>
 

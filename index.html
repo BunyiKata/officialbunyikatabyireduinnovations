@@ -18,35 +18,93 @@
     <link rel="preload" href="/fonts/AtlantaRoundedBlack.woff2" as="font" type="font/woff2" crossorigin>
     <link href="/fonts/stylesheet.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome: muat secara bukan-blocking supaya teks/UI terpapar serta-merta.
+         Ia dimuatkan sebagai stylesheet biasa selepas ia siap (preload + onload). -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     <link rel="stylesheet" href="/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!--
+      Library pihak ketiga dimuatkan dengan `defer` supaya ia TIDAK menyekat
+      render skrin login. Setiap library ini hanya digunakan di dalam skrin
+      permainan/aktiviti tertentu, jadi tidak perlu menghalang paparan awal.
+      `defer` mengekalkan susunan muat turun yang sama.
+    -->
+    <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- PWA Service Worker: daftar dengan kemas kini automatik.
-         updateViaCache: 'none' memastikan fail sw.js SENTIASA diambil
-         semula daripada rangkaian, jadi pembetulan cache tidak perlu
-         hard refresh. -->
+    <!-- PWA Service Worker: HANYA untuk produksi (domain bukan localhost).
+         Di localhost, service worker DIMATIKAN sepenuhnya supaya perubahan
+         kod (App.tsx dsb.) sentiasa segar — tiada lagi isu "page stuck /
+         loading / not responsive" selepas edit kod. Cache lama juga
+         dipadam automatik. -->
     <script>
       if ('serviceWorker' in navigator) {
+        const isLocalhost = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then((reg) => {
-            // Semak kemas kini setiap kali halaman dibuka.
-            if (reg && typeof reg.update === 'function') {
-              reg.update().catch(() => {});
-            }
-          }).catch(err => {
-            console.log('SW registration notice:', err);
-          });
+          if (isLocalhost) {
+            // Mod pembangunan: buang semua service worker + cache, kemudian
+            // muat semula SEKALI supaya modul JS (App.tsx dsb.) pasti diambil
+            // segar dari server — bukan dari cache SW lama.
+            //
+            // PENTING: kita hanya reload jika BENAR-BENAR jumpa service worker
+            // yang masih didaftarkan (atau cache dengan nama SW). Kalau tiada
+            // SW langsung, elakkan reload — App.tsx besar (~464KB, 11k baris)
+            // dan parse pertamanya boleh menyebabkan Chrome tab "Out of Memory"
+            // pada mesin yang sudah berat. Memberi pengguna akses terus tanpa
+            // reload paksa adalah lebih selamat untuk mod dev.
+            const isSwCache = (name) =>
+              typeof name === 'string' &&
+              (name.startsWith('bunyi-kata-') ||
+                name.startsWith('workbox-') ||
+                name.startsWith('vite-') ||
+                name.includes('sw-'));
+
+            Promise.resolve()
+              .then(() => navigator.serviceWorker.getRegistrations())
+              .then((regs) => {
+                const hadSw = regs.length > 0;
+                return Promise.all(regs.map((r) => r.unregister()))
+                  .then(() => hadSw);
+              })
+              .then((hadSw) => {
+                const cacheApi = window.caches;
+                if (!cacheApi || !cacheApi.keys) return hadSw;
+                return cacheApi.keys()
+                  .then((keys) => {
+                    const swCacheKeys = keys.filter(isSwCache);
+                    return Promise.all(swCacheKeys.map((k) => cacheApi.delete(k)))
+                      .then(() => hadSw || swCacheKeys.length > 0);
+                  });
+              })
+              .then((needReload) => {
+                if (needReload && !sessionStorage.getItem('bkDevCacheCleaned')) {
+                  sessionStorage.setItem('bkDevCacheCleaned', '1');
+                  console.log('[DEV] Cache SW dibersihkan — muat semula untuk kod segar.');
+                  location.reload();
+                } else {
+                  sessionStorage.removeItem('bkDevCacheCleaned');
+                }
+              })
+              .catch(() => {});
+          } else {
+            navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then((reg) => {
+              // Semak kemas kini setiap kali halaman dibuka.
+              if (reg && typeof reg.update === 'function') {
+                reg.update().catch(() => {});
+              }
+            }).catch(err => {
+              console.log('SW registration notice:', err);
+            });
+          }
         });
       }
     </script>

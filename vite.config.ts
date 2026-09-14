@@ -34,13 +34,31 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    // Pre-bundle deps berat supaya Vite tidak perlu transform mereka
+    // pada setiap request — elak "waterfall" delay semasa dev pertama kali.
+    optimizeDeps: {
+      include: [
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
+        'motion/react',
+        'firebase/app',
+        'firebase/auth',
+        'firebase/database',
+        'lucide-react',
+        'canvas-confetti',
+      ],
+      // Jangan paksa re-bundle jika deps tidak berubah
+      force: false,
+    },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify - file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {
-        ignored: ['**/node_modules/**']
+        ignored: ['**/node_modules/**', '**/.git/**'],
+        usePolling: false,
       },
     },
   };

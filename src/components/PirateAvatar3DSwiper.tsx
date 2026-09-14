@@ -11,17 +11,37 @@ export function PirateAvatar3DSwiper({
   onOpenProPackage,
   onRequestEntryChoice,
 }: PirateAvatar3DSwiperProps = {}) {
-  const isTrial = typeof (window as any).isEffectiveTrial === "function"
-    ? (window as any).isEffectiveTrial()
-    : Boolean(
-        typeof window !== "undefined" && (
-          (window as any).isGuestMode ||
+  const kiraIsTrial = React.useCallback(() => {
+    if (typeof (window as any).isEffectiveTrial === "function") {
+      return Boolean((window as any).isEffectiveTrial());
+    }
+    return Boolean(
+      typeof window !== "undefined" &&
+        ((window as any).isGuestMode ||
           (window as any).userAccessLevel === "trial" ||
           localStorage.getItem("bunyiKataAccessLevel") === "trial" ||
           !(window as any).namaMuridAktif ||
-          (window as any).namaMuridAktif === "Tetamu"
-        )
-      );
+          (window as any).namaMuridAktif === "Tetamu"),
+    );
+  }, []);
+
+  // PENTING: Sebelum ini isTrial dikira sekali sahaja semasa render dan swiper
+  // TIDAK melanggan sebarang peristiwa. Apabila React membersihkan sisa sesi
+  // admin selepas render pertama (di skrin log masuk), avatar kekal "Terbuka"
+  // (kunci terbuka) kerana komponen ini tidak pernah dikira semula. Kita jadikan
+  // ia state dan kira semula apabila akses/mod berubah.
+  const [isTrial, setIsTrial] = React.useState(kiraIsTrial);
+
+  React.useEffect(() => {
+    const segarSemula = () => setIsTrial(kiraIsTrial());
+    segarSemula();
+    window.addEventListener("akses-level-change", segarSemula);
+    window.addEventListener("admin-mode-change", segarSemula);
+    return () => {
+      window.removeEventListener("akses-level-change", segarSemula);
+      window.removeEventListener("admin-mode-change", segarSemula);
+    };
+  }, [kiraIsTrial]);
 
   const characters = [
     {

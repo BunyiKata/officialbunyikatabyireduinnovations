@@ -19,7 +19,7 @@ export interface UserProfile {
   id: string;
   email?: string;
   nama: string;
-  peranan: 'guru' | 'ibubapa' | 'admin';
+  peranan: 'guru' | 'ibubapa' | 'admin' | 'affiliate';
   nama_sekolah?: string;
   no_telefon?: string;
   avatar_url?: string;
@@ -58,6 +58,38 @@ export async function loginWithEmail(
     const cred = await signInWithEmailAndPassword(auth, cleanEmail, password);
     if (!cred.user) {
       return { success: false, message: 'Pengguna tidak dijumpai.' };
+    }
+
+    // Fasa 3: akaun AFFILIATE dijejaki melalui claim `affiliate_kod`, bukan
+    // `profiles/{uid}`. Kesan claim dahulu supaya kita tidak mencipta dokumen
+    // profil guru/ibu bapa yang salah untuk affiliate.
+    try {
+      const tokenHasil = await cred.user.getIdTokenResult();
+      const kodAff = String((tokenHasil.claims as any)?.affiliate_kod || '').trim().toUpperCase();
+      if (kodAff) {
+        let rekodAff: any = null;
+        try {
+          const aSnap = await get(ref(db, `affiliates/${kodAff}`));
+          if (aSnap.exists()) rekodAff = aSnap.val();
+        } catch (e) {
+          console.warn('[Firebase RTDB] Gagal membaca rekod affiliate:', e);
+        }
+        const profilAffiliate: UserProfile = {
+          id: cred.user.uid,
+          email: cleanEmail,
+          nama: rekodAff?.nama || cred.user.displayName || 'Affiliate',
+          peranan: 'affiliate',
+          no_telefon: rekodAff?.whatsapp,
+        };
+        return {
+          success: true,
+          message: 'Log masuk berjaya!',
+          user: profilAffiliate,
+          session: cred.user,
+        };
+      }
+    } catch (e) {
+      console.warn('[Firebase Auth] Gagal membaca claim affiliate:', e);
     }
 
     // Ambil maklumat profil dari Firebase Realtime Database

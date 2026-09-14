@@ -1234,14 +1234,15 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                     }}
                   ></div>
 
-                  {/* 2 Butang Mod: Guru & Ibubapa Bersebelahan */}
+                  {/* Butang Mod: Guru, Ibubapa & Affiliate */}
                   <div
-                    style={{ display: "flex", gap: "10px", marginBottom: "16px" }}
+                    style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}
                   >
                     <button
                       className="neo-btn bg-orange"
                       style={{
-                        flex: 1,
+                        flex: "1 1 30%",
+                        minWidth: "120px",
                         padding: "10px",
                         fontSize: "1rem",
                         display: "flex",
@@ -1267,7 +1268,8 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                     <button
                       className="neo-btn bg-blue"
                       style={{
-                        flex: 1,
+                        flex: "1 1 30%",
+                        minWidth: "120px",
                         padding: "10px",
                         fontSize: "1rem",
                         display: "flex",
@@ -1288,6 +1290,32 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                       }}
                     >
                       <i className="fa-solid fa-users"></i> Ibubapa
+                    </button>
+                    <button
+                      className="neo-btn"
+                      style={{
+                        flex: "1 1 30%",
+                        minWidth: "120px",
+                        padding: "10px",
+                        fontSize: "1rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        color: "white",
+                        background: "#7c3aed",
+                      }}
+                      onClick={() => {
+                        setIsCodeModalOpen(false);
+                        setPendingLoginMode("affiliate");
+                        setAuthModalTab("login");
+                        setAuthModalError("");
+                        setShowLoginModal(true);
+                        setLoginEmail("");
+                        setLoginPassword("");
+                      }}
+                    >
+                      <i className="fa-solid fa-sitemap"></i> Affiliate
                     </button>
                   </div>
 

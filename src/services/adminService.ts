@@ -84,11 +84,37 @@ export async function cubaAksesAdmin(kod: string): Promise<HasilAksesAdmin> {
     }
 
     // Log masuk sebenar ke Firebase Auth menggunakan custom token.
-    await signInWithCustomToken(auth, data.token);
+    // Tangkap ralat signInWithCustomToken secara BERASINGAN supaya kegagalan
+    // Firebase Auth (cth. authDomain salah, token tamat) tidak dikelirukan
+    // dengan kegagalan sambungan fetch ke pelayan.
+    try {
+      await signInWithCustomToken(auth, data.token);
+    } catch (firebaseErr: any) {
+      const kodRalat = firebaseErr?.code || '';
+      const mesejFirebase = firebaseErr?.message || String(firebaseErr);
+      console.error('[Admin] signInWithCustomToken gagal:', kodRalat, mesejFirebase);
+
+      // Token Firebase tidak sah atau konfigurasi salah
+      if (kodRalat === 'auth/invalid-custom-token' || kodRalat === 'auth/argument-error') {
+        return {
+          berjaya: false,
+          mesej: 'Token admin tidak sah. Sila hubungi pentadbir sistem.',
+          ralatKonfigurasi: true,
+        };
+      }
+
+      // Masalah rangkaian ke Firebase Auth server
+      return {
+        berjaya: false,
+        mesej: `Tidak dapat menghubungi Firebase Auth. (${kodRalat || mesejFirebase})`,
+        ralatSambungan: true,
+      };
+    }
 
     return { berjaya: true };
   } catch (err: any) {
-    console.error('[Admin] Ralat semasa mengesahkan kod admin:', err?.message || err);
+    // Tangkap ralat fetch / rangkaian ke pelayan kita sendiri.
+    console.error('[Admin] Ralat sambungan ke pelayan pengesahan:', err?.message || err);
     return {
       berjaya: false,
       mesej: 'Tidak dapat menghubungi pelayan pengesahan.',
@@ -106,7 +132,7 @@ export async function cubaAksesAdmin(kod: string): Promise<HasilAksesAdmin> {
 // Pelayan mengesahkan token itu melalui middleware requireAdmin.
 // ---------------------------------------------------------------------------
 
-export type PerananPengguna = 'guru' | 'ibubapa';
+export type PerananPengguna = 'guru' | 'ibubapa' | 'affiliate';
 export type KunciPakej = '1bulan' | '3bulan' | '1tahun';
 
 export interface InputCiptaAkaun {
@@ -303,6 +329,10 @@ export interface Affiliate {
   kod: string;
   nama: string;
   whatsapp: string;
+  /** Fasa 3: emel log masuk affiliate (Firebase Auth). */
+  email?: string;
+  /** Fasa 3: uid Firebase Auth affiliate. */
+  uid?: string;
   status: 'aktif' | 'gantung' | string;
   dicipta_pada?: string;
   // Agregat (dikira di pelayan daripada referrals):
@@ -320,6 +350,10 @@ export interface HasilAffiliate {
   affiliate?: Affiliate;
   kod?: string;
   status?: string;
+  /** Fasa 3: emel log masuk yang didaftarkan (dipulangkan sekali). */
+  email?: string;
+  /** Fasa 3: kata laluan sementara (dipulangkan SEKALI sahaja). */
+  password?: string;
 }
 
 export interface BarisKomisen {
@@ -381,9 +415,9 @@ export async function ambilSenaraiAffiliate(): Promise<Affiliate[]> {
   return Array.isArray(hasil.affiliates) ? hasil.affiliates : [];
 }
 
-/** Fasa 2: daftar affiliate baharu -> kod dijana di pelayan. */
-export async function ciptaAffiliate(nama: string, whatsapp: string): Promise<HasilAffiliate> {
-  return panggilAdmin<HasilAffiliate>('/api/admin/affiliate/create', { nama, whatsapp });
+/** Fasa 2/3: daftar affiliate baharu -> kod dijana di pelayan + akaun Auth. */
+export async function ciptaAffiliate(nama: string, email: string, whatsapp: string): Promise<HasilAffiliate> {
+  return panggilAdmin<HasilAffiliate>('/api/admin/affiliate/create', { nama, email, whatsapp });
 }
 
 /** Fasa 2: tukar status affiliate (aktif / gantung). */
@@ -406,6 +440,62 @@ export async function tandaKomisenDibayar(
   items: Array<{ kod: string; id: string }>,
 ): Promise<{ berjaya: boolean; mesej?: string; dibayar_bil?: number; jumlah_sen?: number }> {
   return panggilAdmin('/api/admin/affiliate/mark-paid', { items });
+}
+
+// ---------------------------------------------------------------------------
+// Fasa 3: Affiliate Login — API sisi affiliate (guna sendiri)
+//
+// Kod affiliate TIDAK dihantar dari klien: pelayan membacanya daripada claim
+// `affiliate_kod` dalam ID token. Klien hanya perlu membawa ID token Firebase
+// yang sah (selepas login email/kata laluan).
+// ---------------------------------------------------------------------------
+
+export interface RingkasanAffiliate {
+  jualan_bil: number;
+  jumlah_jualan_sen: number;
+  komisen_keseluruhan_sen: number;
+  dibayar_sen: number;
+  baki_sen: number;
+}
+
+export interface ProfilAffiliate {
+  nama: string;
+  kod: string;
+  email: string;
+  whatsapp: string;
+  status: string;
+  dicipta_pada?: string;
+}
+
+export interface HasilProfilAffiliate {
+  berjaya: boolean;
+  mesej?: string;
+  affiliate?: ProfilAffiliate;
+  ringkasan?: RingkasanAffiliate;
+}
+
+export interface ReferralAffiliate {
+  id: string;
+  pelanggan_nama: string;
+  nama_pakej: string;
+  harga_sen: number;
+  komisen_sen: number;
+  status: string;
+  tarikh_beli: string;
+  tarikh_bayar: string;
+}
+
+/** Fasa 3: profil + ringkasan prestasi affiliate yang sedang log masuk. */
+export async function ambilProfilAffiliate(): Promise<HasilProfilAffiliate> {
+  return panggilAdminGet<HasilProfilAffiliate>('/api/affiliate/me');
+}
+
+/** Fasa 3: senarai baris rujukan affiliate sendiri (fail-safe: []). */
+export async function ambilReferralSendiri(): Promise<ReferralAffiliate[]> {
+  const hasil = await panggilAdminGet<{ berjaya: boolean; referrals?: ReferralAffiliate[] }>(
+    '/api/affiliate/referrals',
+  );
+  return Array.isArray(hasil.referrals) ? hasil.referrals : [];
 }
 
 /**

@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 /**
  * Modal Cipta Akaun (Mod Admin)
  *
@@ -15,6 +15,7 @@ import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ciptaAkaunAdmin,
+  ciptaAffiliate,
   type PerananPengguna,
   type KunciPakej,
   type HasilCiptaAkaun,
@@ -108,6 +109,29 @@ function binaMesejWhatsApp(h: HasilCiptaAkaun): string {
   ].join("\n");
 }
 
+/** Membina mesej WhatsApp untuk affiliate baharu (butiran log masuk + kod). */
+function binaMesejWhatsAppAffiliate(nama: string, kod: string, email: string, password: string): string {
+  const origin = typeof window !== "undefined" && window.location?.origin ? window.location.origin : "";
+  const pautan = `${origin}/?ref=${kod}`;
+  const pautanMasuk = `${origin}/`;
+  return [
+    `Selamat menyertai program Affiliate Bunyi Kata! 🎉`,
+    "",
+    `👤 Nama: ${nama || "-"}`,
+    `🔑 Kod Affiliate anda: ${kod}`,
+    `🔗 Pautan Khas anda: ${pautan}`,
+    "",
+    "📥 Butiran Log Masuk (simpan & tukar kata laluan):",
+    `🎓 Emel: ${email || "-"}`,
+    `🔒 Kata laluan sementara: ${password || "-"}`,
+    `🚪 Pautan log masuk: ${pautanMasuk}`,
+    "",
+    "📣 Kongsi pautan bunyi kata dengan kod ini, dan anda akan menerima komisen bagi setiap pembelian yang menggunakan kod anda.",
+    "",
+    "Terima kasih kerana menyertai kami! 🙏",
+  ].join("\n");
+}
+
 interface CiptaAkaunModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -153,6 +177,8 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
   const [sedangProses, setSedangProses] = React.useState(false);
   const [ralat, setRalat] = React.useState("");
   const [hasil, setHasil] = React.useState<HasilCiptaAkaun | null>(null);
+  // Hasil pendaftaran affiliate (kod dijana di pelayan) — aliran berasingan.
+  const [hasilAffiliate, setHasilAffiliate] = React.useState<{ nama: string; kod: string; whatsapp: string; email: string; password: string } | null>(null);
   const [disalin, setDisalin] = React.useState(false);
   // Fasa 2: kod affiliate pelanggan ini (dari ?ref=). Boleh dibetulkan admin.
   const [kodRujukan, setKodRujukan] = React.useState("");
@@ -171,6 +197,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
     setKodRujukan(ambilKodRujukan());
     setRalat("");
     setHasil(null);
+    setHasilAffiliate(null);
     setDisalin(false);
   };
 
@@ -183,6 +210,51 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
 
   const hantar = async () => {
     setRalat("");
+    // Aliran AFFILIATE: Nama + Emel + No. WhatsApp diperlukan; kod & kata laluan dijana pelayan.
+    if (peranan === "affiliate") {
+      if (!nama.trim()) {
+        setRalat("Nama affiliate diperlukan.");
+        if (typeof (window as any).playOops === "function") (window as any).playOops();
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        setRalat("Format emel tidak sah (cth. nama@email.com).");
+        if (typeof (window as any).playOops === "function") (window as any).playOops();
+        return;
+      }
+      const wa = noTelefon.replace(/[^0-9]/g, "");
+      if (wa.length < 9) {
+        setRalat("Nombor WhatsApp tidak sah (cth. 60173955657).");
+        if (typeof (window as any).playOops === "function") (window as any).playOops();
+        return;
+      }
+      bunyiKlik();
+      setSedangProses(true);
+      const keputusan = await ciptaAffiliate(nama.trim(), email.trim().toLowerCase(), noTelefon.trim());
+      setSedangProses(false);
+      if (!keputusan.berjaya) {
+        setRalat(keputusan.mesej || "Gagal mendaftar affiliate.");
+        return;
+      }
+      setHasilAffiliate({
+        nama: keputusan.affiliate?.nama || nama.trim(),
+        kod: keputusan.affiliate?.kod || keputusan.kod || "",
+        whatsapp: keputusan.affiliate?.whatsapp || noTelefon.trim(),
+        email: keputusan.email || keputusan.affiliate?.email || email.trim().toLowerCase(),
+        password: keputusan.password || "",
+      });
+      // Muat semula jadual affiliate supaya pendaftaran baharu segera muncul.
+      if (typeof (window as any).renderAffiliateTable === "function") {
+        try {
+          (window as any).renderAffiliateTable();
+        } catch {
+          /* abaikan */
+        }
+      }
+      bunyiKlik();
+      return;
+    }
+
     if (!nama.trim() || !email.trim()) {
       setRalat("Nama dan emel diperlukan.");
       if (typeof (window as any).playOops === "function") (window as any).playOops();
@@ -214,9 +286,11 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
   };
 
   const salinMesej = async () => {
-    if (!hasil) return;
+    if (!hasil && !hasilAffiliate) return;
     bunyiKlik();
-    const mesej = binaMesejWhatsApp(hasil);
+    const mesej = hasilAffiliate
+      ? binaMesejWhatsAppAffiliate(hasilAffiliate.nama, hasilAffiliate.kod, hasilAffiliate.email, hasilAffiliate.password)
+      : binaMesejWhatsApp(hasil as HasilCiptaAkaun);
     try {
       await navigator.clipboard.writeText(mesej);
       setDisalin(true);
@@ -257,11 +331,13 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
     textAlign: "left",
   };
 
-  // Warna ikut mod (peranan terpilih): guru = oren, ibu bapa = biru.
+  // Warna ikut mod (peranan terpilih): guru = oren, ibu bapa = biru, affiliate = ungu.
   const warnaMod =
     peranan === "guru"
       ? { utama: "#ea580c", gelap: "#c2410c" }
-      : { utama: "#0284c7", gelap: "#0369a1" };
+      : peranan === "affiliate"
+        ? { utama: "#7c3aed", gelap: "#5b21b6" }
+        : { utama: "#0284c7", gelap: "#0369a1" };
 
   return (
     <AnimatePresence>
@@ -302,7 +378,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
               textAlign: "center",
             }}
           >
-            {!hasil ? (
+            {!hasil && !hasilAffiliate ? (
               <>
                 <div
                   className="neo-btn"
@@ -321,12 +397,13 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                     borderRadius: "12px",
                   }}
                 >
-                  <i className="fa-solid fa-user-plus"></i> Cipta Akaun Pengguna
+                  <i className={peranan === "affiliate" ? "fa-solid fa-sitemap" : "fa-solid fa-user-plus"}></i>{" "}
+                  {peranan === "affiliate" ? "Cipta Akaun Affiliate" : "Cipta Akaun Pengguna"}
                 </div>
                 <div style={fieldStyle}>
                   <label style={labelStyle}>Peranan</label>
                   <div style={{ display: "flex", gap: "8px" }}>
-                    {(["guru", "ibubapa"] as PerananPengguna[]).map((r) => (
+                    {(["guru", "ibubapa", "affiliate"] as PerananPengguna[]).map((r) => (
                       <button
                         key={r}
                         type="button"
@@ -354,8 +431,8 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                           gap: "7px",
                         }}
                       >
-                        <i className={r === "guru" ? "fa-solid fa-chalkboard-user" : "fa-solid fa-people-roof"}></i>
-                        {r === "guru" ? "Guru" : "Ibu Bapa"}
+                        <i className={r === "guru" ? "fa-solid fa-chalkboard-user" : r === "affiliate" ? "fa-solid fa-sitemap" : "fa-solid fa-people-roof"}></i>
+                        {r === "guru" ? "Guru" : r === "affiliate" ? "Affiliate" : "Ibu Bapa"}
                       </button>
                     ))}
                   </div>
@@ -378,32 +455,34 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="cth. siti@sekolah.edu.my"
+                    placeholder={peranan === "affiliate" ? "cth. ali@gmail.com" : "cth. siti@sekolah.edu.my"}
                   />
                 </div>
 
                 <div style={fieldStyle}>
-                  <label style={labelStyle}>No. Telefon (WhatsApp)</label>
+                  <label style={labelStyle}>No. Telefon (WhatsApp){peranan === "affiliate" ? " *" : ""}</label>
                   <input
                     style={inputStyle}
                     value={noTelefon}
                     onChange={(e) => setNoTelefon(e.target.value)}
-                    placeholder="cth. 0123456789"
+                    placeholder={peranan === "affiliate" ? "cth. 60173955657" : "cth. 0123456789"}
                   />
                 </div>
 
                 {/* Fasa 2: kod affiliate. Pra-isi dari ?ref= jika pelanggan
                     datang melalui pautan affiliate; admin boleh betulkan. */}
-                <div style={fieldStyle}>
-                  <label style={labelStyle}>Kod Rujukan Affiliate (pilihan)</label>
-                  <input
-                    style={inputStyle}
-                    value={kodRujukan}
-                    onChange={(e) => setKodRujukan(e.target.value.toUpperCase())}
-                    placeholder="cth. BK7X2K — kosongkan jika tiada"
-                    maxLength={6}
-                  />
-                </div>
+                {peranan !== "affiliate" && (
+                  <div style={fieldStyle}>
+                    <label style={labelStyle}>Kod Rujukan Affiliate (pilihan)</label>
+                    <input
+                      style={inputStyle}
+                      value={kodRujukan}
+                      onChange={(e) => setKodRujukan(e.target.value.toUpperCase())}
+                      placeholder="cth. BK7X2K — kosongkan jika tiada"
+                      maxLength={6}
+                    />
+                  </div>
+                )}
 
                 {/*
                   Ruangan "Nama Keluarga" sengaja TIADA di sini.
@@ -413,23 +492,25 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                   mereka sendiri supaya tidak berlaku percanggahan.
                 */}
 
-                <div style={{ ...fieldStyle, marginBottom: "16px" }}>
-                  <label style={labelStyle}>Pakej Langganan</label>
-                  <select
-                    style={inputStyle}
-                    value={pakej}
-                    onChange={(e) => {
-                      bunyiKlik();
-                      setPakej(e.target.value as KunciPakej);
-                    }}
-                  >
-                    {senaraiPakej.map((p) => (
-                      <option key={p.key} value={p.key}>
-                        {p.name} — {p.harga}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {peranan !== "affiliate" && (
+                  <div style={{ ...fieldStyle, marginBottom: "16px" }}>
+                    <label style={labelStyle}>Pakej Langganan</label>
+                    <select
+                      style={inputStyle}
+                      value={pakej}
+                      onChange={(e) => {
+                        bunyiKlik();
+                        setPakej(e.target.value as KunciPakej);
+                      }}
+                    >
+                      {senaraiPakej.map((p) => (
+                        <option key={p.key} value={p.key}>
+                          {p.name} — {p.harga}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 {ralat && (
                   <div
@@ -495,6 +576,196 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                     <i className={sedangProses ? "fa-solid fa-spinner fa-spin" : "fa-solid fa-circle-plus"}></i>
                     {sedangProses ? "Mencipta..." : "Cipta Akaun"}
                   </button>
+                </div>
+              </>
+            ) : hasilAffiliate ? (
+              <>
+                <div
+                  className="neo-btn"
+                  style={{
+                    backgroundColor: "#7c3aed",
+                    color: "white",
+                    fontSize: "clamp(1rem, 3.5vw, 1.18rem)",
+                    margin: "0 auto 14px auto",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "9px",
+                    pointerEvents: "none",
+                    padding: "8px 22px",
+                    lineHeight: "1.2",
+                    fontWeight: "900",
+                    borderRadius: "12px",
+                  }}
+                >
+                  <i className="fa-solid fa-circle-check"></i> Affiliate Berjaya Didaftar
+                </div>
+
+                <div
+                  style={{
+                    background: "#ffffff",
+                    border: "2px dashed #7c3aed",
+                    borderRadius: "14px",
+                    padding: "14px",
+                    marginBottom: "14px",
+                    fontSize: "0.9rem",
+                    lineHeight: "1.9",
+                    textAlign: "left",
+                    boxShadow: "0 3px 0 #0f172a",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <i className="fa-solid fa-user" style={{ color: "#7c3aed", width: "16px" }}></i>
+                    <span><b>Nama:</b> {hasilAffiliate.nama}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <i className="fa-solid fa-key" style={{ color: "#7c3aed", width: "16px" }}></i>
+                    <span>
+                      <b>Kod Affiliate:</b>{" "}
+                      <span style={{ background: "#f5f3ff", padding: "1px 7px", borderRadius: "5px", fontWeight: "bold", border: "1px solid #c4b5fd" }}>
+                        {hasilAffiliate.kod}
+                      </span>
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <i className="fa-solid fa-link" style={{ color: "#7c3aed", width: "16px" }}></i>
+                    <span style={{ wordBreak: "break-all" }}>
+                      <b>Pautan Khas:</b>{" "}
+                      <span style={{ color: "#6d28d9", fontWeight: "600", fontSize: "0.85rem" }}>
+                        {typeof window !== "undefined" ? `${window.location.origin}/?ref=${hasilAffiliate.kod}` : `/?ref=${hasilAffiliate.kod}`}
+                      </span>
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <i className="fa-brands fa-whatsapp" style={{ color: "#7c3aed", width: "16px" }}></i>
+                    <span><b>WhatsApp:</b> {hasilAffiliate.whatsapp}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <i className="fa-solid fa-envelope" style={{ color: "#7c3aed", width: "16px" }}></i>
+                    <span style={{ wordBreak: "break-all" }}><b>Emel:</b> {hasilAffiliate.email}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <i className="fa-solid fa-lock" style={{ color: "#7c3aed", width: "16px" }}></i>
+                    <span style={{ wordBreak: "break-all" }}>
+                      <b>Kata Laluan:</b>{" "}
+                      <span style={{ background: "#f5f3ff", padding: "1px 7px", borderRadius: "5px", fontWeight: "bold", border: "1px solid #c4b5fd" }}>
+                        {hasilAffiliate.password || "-"}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: "0.8rem", color: "#b45309", background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: "9px", padding: "9px 12px", margin: "0 0 14px 0", textAlign: "left", lineHeight: "1.5" }}>
+                  <i className="fa-solid fa-triangle-exclamation"></i>{" "}
+                  Kata laluan ini dipaparkan <b>sekali sahaja</b> — salin & hantar kepada affiliate sekarang.
+                </p>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "9px" }}>
+                  {hasilAffiliate.whatsapp && (
+                    <a
+                      href={`https://wa.me/${hasilAffiliate.whatsapp.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(binaMesejWhatsAppAffiliate(hasilAffiliate.nama, hasilAffiliate.kod, hasilAffiliate.email, hasilAffiliate.password))}`}
+                      target="_blank"
+                      rel="noopener"
+                      className="neo-btn"
+                      style={{
+                        width: "100%",
+                        minWidth: "100%",
+                        height: "50px",
+                        padding: "0 20px",
+                        margin: "0 auto",
+                        borderRadius: "12px",
+                        border: "2px solid #0f172a",
+                        background: "#16a34a",
+                        color: "#ffffff",
+                        fontSize: "1.05rem",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        boxShadow: "0 3px 0 #0f172a",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "9px",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <i className="fa-brands fa-whatsapp" style={{ fontSize: "1.25rem" }}></i>
+                      Hantar ke WhatsApp
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    onClick={salinMesej}
+                    className="neo-btn"
+                    title={disalin ? "Mesej Disalin!" : "Salin Mesej WhatsApp"}
+                    aria-label="Salin Mesej WhatsApp"
+                    style={{
+                      width: "100%",
+                      minWidth: "100%",
+                      height: "52px",
+                      padding: "0 20px",
+                      margin: "0 auto",
+                      borderRadius: "12px",
+                      border: "2px solid #0f172a",
+                      background: disalin ? "#22c55e" : "#ffffff",
+                      color: disalin ? "#ffffff" : "#0f172a",
+                      fontSize: "1.05rem",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      boxShadow: "0 3px 0 #0f172a",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "9px",
+                    }}
+                  >
+                    <i className={disalin ? "fa-solid fa-check" : "fa-solid fa-clipboard"}></i>
+                    {disalin ? "Disalin!" : "Copy"}
+                  </button>
+                  <div style={{ display: "flex", gap: "9px", marginTop: "4px" }}>
+                    <button
+                      type="button"
+                      onClick={resetBorang}
+                      className="neo-btn"
+                      style={{
+                        flex: 1,
+                        padding: "11px",
+                        borderRadius: "12px",
+                        border: "2px solid #7c3aed",
+                        background: "#ffffff",
+                        color: "#7c3aed",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        boxShadow: "0 3px 0 #7c3aed",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "7px",
+                      }}
+                    >
+                      <i className="fa-solid fa-user-plus"></i> Cipta Lagi
+                    </button>
+                    <button
+                      type="button"
+                      onClick={tutup}
+                      className="neo-btn"
+                      style={{
+                        flex: 1,
+                        padding: "11px",
+                        borderRadius: "12px",
+                        border: "2px solid #5b21b6",
+                        background: "#7c3aed",
+                        color: "#ffffff",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        boxShadow: "0 3px 0 #5b21b6",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "7px",
+                      }}
+                    >
+                      <i className="fa-solid fa-circle-check"></i> Selesai
+                    </button>
+                  </div>
                 </div>
               </>
             ) : (
