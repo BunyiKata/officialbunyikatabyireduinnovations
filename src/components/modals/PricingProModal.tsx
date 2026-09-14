@@ -85,7 +85,7 @@ export function PricingProModal({
       id: 3,
       question: "Bagaimana cara melanggan dan memulakan akaun?",
       answer:
-        "Tekan butang 'Langgan via WhatsApp' pada pakej pilihan anda untuk menghubungi admin. Admin akan mencipta akaun dan mengaktifkan langganan anda. Selepas itu, anda boleh log masuk dan mula mendaftar rekod murid/anak.",
+        "Tekan butang 'Daftar' pada pakej pilihan anda untuk menghubungi admin. Admin akan mencipta akaun dan mengaktifkan langganan anda. Selepas itu, anda boleh log masuk dan mula mendaftar rekod murid/anak.",
     },
   ];
 
@@ -417,7 +417,7 @@ export function PricingProModal({
                       onClose();
                     }}
                   >
-                    <i className="fa-brands fa-whatsapp" style={{ marginRight: "8px" }}></i>Langgan via WhatsApp
+                    <i className="fa-brands fa-whatsapp" style={{ marginRight: "8px" }}></i>Daftar
                   </button>
                 </div>
               </div>
@@ -563,7 +563,7 @@ export function PricingProModal({
                       onClose();
                     }}
                   >
-                    <i className="fa-brands fa-whatsapp" style={{ marginRight: "8px" }}></i>Langgan via WhatsApp
+                    <i className="fa-brands fa-whatsapp" style={{ marginRight: "8px" }}></i>Daftar
                   </button>
                 </div>
               </div>
@@ -709,7 +709,7 @@ export function PricingProModal({
                       onClose();
                     }}
                   >
-                    <i className="fa-brands fa-whatsapp" style={{ marginRight: "8px" }}></i>Langgan via WhatsApp
+                    <i className="fa-brands fa-whatsapp" style={{ marginRight: "8px" }}></i>Daftar
                   </button>
                 </div>
               </div>

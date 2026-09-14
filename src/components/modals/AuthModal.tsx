@@ -789,7 +789,7 @@ export function AuthModal({
                           lineHeight: "1.5",
                         }}
                       >
-                        Belum mempunyai akaun? Akaun baharu dibuka oleh admin.
+                        Belum mempunyai akaun?
                         <br />
                         <button
                           type="button"
@@ -816,7 +816,7 @@ export function AuthModal({
                           }}
                         >
                           <i className="fa-brands fa-whatsapp"></i>
-                          Hubungi Admin untuk Daftar
+                          Daftar
                         </button>
                       </div>
                     )}

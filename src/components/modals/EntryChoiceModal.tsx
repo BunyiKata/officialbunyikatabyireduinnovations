@@ -795,8 +795,19 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         cursor: "pointer",
                       }}
                       onClick={() => {
+                        if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                        // Tutup kedua-dua modal supaya tiada popup bertindih.
                         setIsEntryChoiceModalOpen(false);
-                        setIsModeChoiceOpen(true);
+                        setIsCodeModalOpen(false);
+                        // Terus buka modal pakej Pro (tab mengikut mod semasa).
+                        // Guna window.openPakejProModal jika ada supaya tab betul,
+                        // jika tidak guna setIsModeChoiceOpen(true) sahaja akan
+                        // memaparkan popup "Pilih Cara Mula" semula — itu bug.
+                        if (typeof (window as any).openPakejProModal === "function") {
+                          (window as any).openPakejProModal();
+                        } else {
+                          setIsModeChoiceOpen(true);
+                        }
                       }}
                     >
                       dapatkan di sini
@@ -1335,8 +1346,16 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         cursor: "pointer",
                       }}
                       onClick={() => {
+                        if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                        // Tutup kedua-dua modal supaya tiada popup bertindih.
                         setIsCodeModalOpen(false);
-                        setIsModeChoiceOpen(true);
+                        setIsEntryChoiceModalOpen(false);
+                        // Terus buka modal pakej Pro (bukan popup "Pilih Cara Mula").
+                        if (typeof (window as any).openPakejProModal === "function") {
+                          (window as any).openPakejProModal();
+                        } else {
+                          setIsModeChoiceOpen(true);
+                        }
                       }}
                     >
                       dapatkan di sini
