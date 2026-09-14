@@ -160,7 +160,15 @@ window.showAdminInfo = function (type, nama, extra) {
 
     // Cari rekod sebenar dari memori/localStorage jika data belum lengkap
     let match = {};
-    if (type === 'guru') {
+    if (type === 'affiliate') {
+        const affs = (window.__senaraiAffiliateCache && Array.isArray(window.__senaraiAffiliateCache))
+            ? window.__senaraiAffiliateCache
+            : [];
+        match = affs.find(item =>
+            (extra && extra.kod && String(item.kod) === String(extra.kod)) ||
+            (item.nama && item.nama.trim().toLowerCase() === (nama || '').trim().toLowerCase())
+        ) || {};
+    } else if (type === 'guru') {
         const teachers = typeof getAdminTeachersList === 'function' ? getAdminTeachersList() : [];
         match = teachers.find(item =>
             (extra && extra.id && String(item.id) === String(extra.id)) ||
@@ -269,7 +277,7 @@ window.showAdminInfo = function (type, nama, extra) {
                 </div>
             </div>
         `;
-    } else {
+    } else if (type === 'ibubapa') {
         title = "Maklumat Ibu Bapa";
         const emailDisplay = email
             ? `<span style="color:#0284c7; font-weight:bold; word-break:break-all;">${email}</span>`
@@ -324,6 +332,73 @@ window.showAdminInfo = function (type, nama, extra) {
                 </div>
             </div>
         `;
+    } else if (type === 'affiliate') {
+        title = "Maklumat Affiliate";
+        const kodAff = (extra && extra.kod) || match.kod || '';
+        const email = (extra && extra.email) || match.email || '';
+        const waRaw = (extra && extra.whatsapp) || match.whatsapp || '';
+        const statusRaw = (extra && extra.status) || match.status || 'aktif';
+        const aktif = statusRaw === 'aktif';
+        const jualanBil = Number((extra && extra.jualan) || match.jualan_bil || 0);
+        const komisenSen = Number((extra && extra.komisen) || match.komisen_keseluruhan_sen || 0);
+        const bakiSen = Number((extra && extra.baki) || match.baki_sen || 0);
+        const dibayarSen = Number((extra && extra.dibayar) || match.dibayar_sen || 0);
+        const dicipta = (extra && extra.dicipta) || match.dicipta_pada || '';
+        const rmAff = (sen) => "RM" + ((Number(sen) || 0) / 100).toFixed(2);
+        const waBersih = String(waRaw).replace(/[^0-9]/g, '');
+        const waDisplay = waBersih
+            ? `<a href="https://wa.me/${waBersih}" target="_blank" rel="noopener" style="color:#16a34a; font-weight:bold; text-decoration:none; word-break:break-all;"><i class="fa-brands fa-whatsapp" style="margin-right:5px;"></i>${waRaw}</a>`
+            : `<span style="color:#94a3b8; font-style:italic;">Tiada nombor WhatsApp</span>`;
+        const emailDisplayAff = email
+            ? `<span style="color:#7c3aed; font-weight:bold; word-break:break-all;">${email}</span>`
+            : `<span style="color:#94a3b8; font-style:italic;">Tiada emel berdaftar</span>`;
+        const kodDisplay = kodAff
+            ? `<span style="background:#ede9fe; color:#5b21b6; border:1.5px solid #7c3aed; padding:4px 12px; border-radius:8px; font-weight:bold; display:inline-block; margin-top:3px; letter-spacing:1px;">${kodAff}</span>`
+            : `<span style="background:#f1f5f9; color:#64748b; border:1.5px dashed #cbd5e1; padding:4px 12px; border-radius:8px; font-weight:bold; display:inline-block; margin-top:3px;">Belum Ditetapkan</span>`;
+        const statusDisplay = `<span style="display:inline-block; padding:3px 12px; border-radius:999px; font-size:0.78rem; font-weight:bold; color:white; background:${aktif ? '#16a34a' : '#dc2626'};">${aktif ? 'Aktif' : 'Digantung'}</span>`;
+        const tarikhDisplay = dicipta
+            ? new Date(dicipta).toLocaleDateString('ms-MY', { day: '2-digit', month: 'short', year: 'numeric' })
+            : '-';
+
+        contentHtml = `
+            <div style="display:flex; flex-direction:column; gap:12px; font-size:0.9rem; text-align:left;">
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">NAMA AFFILIATE:</strong><br/>
+                    <span style="font-weight:bold; color:var(--color-dark); font-size:1rem;">${nama || match.nama || '-'}</span>
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">KOD AFFILIATE:</strong><br/>
+                    ${kodDisplay}
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">EMEL:</strong><br/>
+                    ${emailDisplayAff}
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">NO. WHATSAPP:</strong><br/>
+                    ${waDisplay}
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">STATUS AKAUN:</strong><br/>
+                    ${statusDisplay}
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">PRESTASI JUALAN:</strong><br/>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:5px;">
+                        <span style="background:#f5f3ff; border:1.5px solid #ddd6fe; border-radius:8px; padding:6px 10px; font-weight:bold; color:#0f172a; text-align:center;"><i class="fa-solid fa-cart-shopping" style="color:#7c3aed; margin-right:5px;"></i>${jualanBil} Jualan</span>
+                        <span style="background:#eef2ff; border:1.5px solid #c7d2fe; border-radius:8px; padding:6px 10px; font-weight:bold; color:#4338ca; text-align:center;"><i class="fa-solid fa-coins" style="color:#4338ca; margin-right:5px;"></i>${rmAff(komisenSen)}</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+                        <span style="background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:8px; padding:6px 10px; font-weight:bold; color:#15803d; text-align:center;"><i class="fa-solid fa-money-bill-transfer" style="margin-right:5px;"></i>Dibayar: ${rmAff(dibayarSen)}</span>
+                        <span style="background:${bakiSen > 0 ? '#fffbeb' : '#ecfdf5'}; border:1.5px solid ${bakiSen > 0 ? '#fde68a' : '#a7f3d0'}; border-radius:8px; padding:6px 10px; font-weight:bold; color:${bakiSen > 0 ? '#b45309' : '#15803d'}; text-align:center;"><i class="fa-solid fa-wallet" style="margin-right:5px;"></i>Baki: ${rmAff(bakiSen)}</span>
+                    </div>
+                </div>
+                <div>
+                    <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">TARIKH DAFTAR:</strong><br/>
+                    <span style="font-weight:bold; color:#334155;"><i class="fa-solid fa-calendar-day" style="color:#7c3aed; margin-right:5px;"></i>${tarikhDisplay}</span>
+                </div>
+            </div>
+        `;
     }
     let infoModal = document.getElementById('app-admin-info-modal-overlay');
     if (!infoModal) {
@@ -338,8 +413,8 @@ window.showAdminInfo = function (type, nama, extra) {
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div style="text-align:center; margin-bottom:16px;">
-                <div class="neo-btn" style="background-color:${type === 'guru' ? '#ea580c' : '#0284c7'}; color:white; font-size:1.05rem; margin:0 auto; display:inline-flex; align-items:center; gap:8px; pointer-events:none; padding:8px 22px; font-weight:bold; border-radius:12px;">
-                    <i class="fa-solid ${type === 'guru' ? 'fa-chalkboard-user' : 'fa-people-roof'}"></i> ${title}
+                <div class="neo-btn" style="background-color:${type === 'guru' ? '#ea580c' : (type === 'affiliate' ? '#7c3aed' : '#0284c7')}; color:white; font-size:1.05rem; margin:0 auto; display:inline-flex; align-items:center; gap:8px; pointer-events:none; padding:8px 22px; font-weight:bold; border-radius:12px;">
+                    <i class="fa-solid ${type === 'guru' ? 'fa-chalkboard-user' : (type === 'affiliate' ? 'fa-sitemap' : 'fa-people-roof')}"></i> ${title}
                 </div>
             </div>
             <div style="margin-bottom:20px; background:#ffffff; border:2px solid #e2e8f0; border-radius:14px; padding:14px;">
@@ -723,13 +798,14 @@ window.renderAdminTable = function (type = 'guru') {
                         <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:110px; text-transform:uppercase;">KOMISEN</th>
                         <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:110px; text-transform:uppercase;">BAKI</th>
                         <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:90px; text-transform:uppercase;">STATUS</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:70px; text-transform:uppercase;">INFO</th>
                         <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; text-align:center; font-size:0.85rem; font-weight:bold; min-width:160px; text-transform:uppercase;">TINDAKAN</th>
                     </tr>
                 `;
 
         affTbody.innerHTML = `
             <tr>
-                <td colspan="8" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold;">
+                <td colspan="9" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold;">
                     <i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Memuatkan senarai affiliate...
                 </td>
             </tr>
@@ -740,6 +816,8 @@ window.renderAdminTable = function (type = 'guru') {
 
         const paparSenarai = (senarai) => {
             const listPenuh = Array.isArray(senarai) ? senarai : [];
+            // Simpan cache supaya butang "Info" boleh memaparkan butiran penuh.
+            window.__senaraiAffiliateCache = listPenuh;
             const tapisan = window.__affiliateStatusFilter || "semua";
             const list = tapisan === "semua"
                 ? listPenuh
@@ -749,7 +827,7 @@ window.renderAdminTable = function (type = 'guru') {
             if (list.length === 0) {
                 affTbody.innerHTML = `
                     <tr>
-                        <td colspan="8" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold; font-size: 0.95rem;">
+                        <td colspan="9" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold; font-size: 0.95rem;">
                             <i class="fa-solid fa-sitemap" style="font-size: 2rem; color: #cbd5e1; display: block; margin-bottom: 10px;"></i>
                             Tiada rekod affiliate dalam pangkalan data.
                         </td>
@@ -791,6 +869,11 @@ window.renderAdminTable = function (type = 'guru') {
                     <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; color:${(Number(a.baki_sen) || 0) > 0 ? "#b45309" : "#16a34a"}; font-weight:bold;">${rm(a.baki_sen)}</td>
                     <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center;">
                         <span style="display:inline-block; padding:3px 10px; border-radius:999px; font-size:0.72rem; font-weight:bold; color:white; background:${warnaStatus};">${labelStatus}</span>
+                    </td>
+                    <td class="admin-td" style="padding:9px 8px; border-right:1px solid #e2e8f0; text-align:center;">
+                        <button type="button" class="neo-btn bg-white" data-kod="${a.kod}" data-nama="${(a.nama || '').replace(/"/g, '&quot;')}" data-email="${(a.email || '').replace(/"/g, '&quot;')}" data-wa="${(a.whatsapp || '').replace(/"/g, '&quot;')}" data-statusraw="${a.status || 'aktif'}" data-jualan="${Number(a.jualan_bil) || 0}" data-komisen="${Number(a.komisen_keseluruhan_sen) || 0}" data-dibayar="${Number(a.dibayar_sen) || 0}" data-baki="${Number(a.baki_sen) || 0}" data-dicipta="${(a.dicipta_pada || '').replace(/"/g, '&quot;')}" data-info="1" title="Info Affiliate" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#7c3aed; border:1.5px solid #7c3aed; margin:0 auto; cursor:pointer;">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </button>
                     </td>
                     <td class="admin-td" style="padding:9px 12px; text-align:center; white-space:nowrap;">
                         ${waLink ? `
@@ -836,8 +919,25 @@ window.renderAdminTable = function (type = 'guru') {
             window.__affiliateHandlerSedia = true;
             document.addEventListener("click", function (ev) {
                 const sasaran = ev.target;
-                const btn = sasaran && sasaran.closest ? sasaran.closest("[data-salin],[data-status],[data-padam],#affiliate-tambah-btn") : null;
+                const btn = sasaran && sasaran.closest ? sasaran.closest("[data-salin],[data-status],[data-padam],[data-info],#affiliate-tambah-btn") : null;
                 if (!btn) return;
+
+                if (btn.hasAttribute("data-info")) {
+                    if (typeof window.showAdminInfo === "function") {
+                        window.showAdminInfo('affiliate', btn.getAttribute("data-nama"), {
+                            kod: btn.getAttribute("data-kod"),
+                            email: btn.getAttribute("data-email"),
+                            whatsapp: btn.getAttribute("data-wa"),
+                            status: btn.getAttribute("data-statusraw"),
+                            jualan: btn.getAttribute("data-jualan"),
+                            komisen: btn.getAttribute("data-komisen"),
+                            dibayar: btn.getAttribute("data-dibayar"),
+                            baki: btn.getAttribute("data-baki"),
+                            dicipta: btn.getAttribute("data-dicipta"),
+                        });
+                    }
+                    return;
+                }
 
                 if (btn.id === "affiliate-tambah-btn") {
                     // Buka modal pendaftaran affiliate (React: CiptaAkaunModal).
