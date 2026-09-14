@@ -19,7 +19,7 @@ export interface PlanInfo {
 export interface AuthModalProps {
   isOpen: boolean;
   initialTab?: "masuk" | "login";
-  pendingLoginMode: "guru" | "ibubapa" | "admin";
+  pendingLoginMode: "guru" | "ibubapa" | "admin" | "affiliate";
   pendingSelectedPlan?: PlanInfo | null;
   onClose: () => void;
   setUserAccessLevel: (lvl: "trial" | "pro") => void;
@@ -155,7 +155,9 @@ export function AuthModal({
                     ? "Platform interaktif literasi awal Bahasa Melayu untuk guru membimbing murid menguasai kemahiran fonik, suku kata dan membaca secara seronok dan berkesan."
                     : pendingLoginMode === "ibubapa"
                       ? "Bimbing anak anda meneroka dunia membaca, fonik dan suku kata di rumah dengan aktiviti yang ceria, interaktif serta pantau kemajuan mereka!"
-                      : "Portal pengurusan dan kawalan sistem aplikasi Bunyi Kata bagi pentadbiran modul dan akaun pengguna."}
+                      : pendingLoginMode === "affiliate"
+                        ? "Jana pendapatan dengan memperkenalkan Bunyi Kata! Pantau kod rujukan, senarai rujukan dan komisen anda di dalam satu papan pemuka."
+                        : "Portal pengurusan dan kawalan sistem aplikasi Bunyi Kata bagi pentadbiran modul dan akaun pengguna."}
                 </p>
 
                 <div className="auth-modal-badges">
@@ -201,6 +203,27 @@ export function AuthModal({
                         <span>Bintang Ceria &amp; Ganjaran Lencana</span>
                       </div>
                     </>
+                  ) : pendingLoginMode === "affiliate" ? (
+                    <>
+                      <div className="auth-modal-badge-item">
+                        <div className="auth-modal-badge-icon" style={{ backgroundColor: "rgba(124, 58, 237, 0.14)", color: "#7c3aed" }}>
+                          <i className="fa-solid fa-link"></i>
+                        </div>
+                        <span>Kod Rujukan &amp; Pautan Unik</span>
+                      </div>
+                      <div className="auth-modal-badge-item">
+                        <div className="auth-modal-badge-icon" style={{ backgroundColor: "rgba(22, 143, 129, 0.14)", color: "#168f81" }}>
+                          <i className="fa-solid fa-users"></i>
+                        </div>
+                        <span>Pantau Rujukan &amp; Jualan</span>
+                      </div>
+                      <div className="auth-modal-badge-item">
+                        <div className="auth-modal-badge-icon" style={{ backgroundColor: "rgba(234, 179, 8, 0.18)", color: "#d97706" }}>
+                          <i className="fa-solid fa-coins"></i>
+                        </div>
+                        <span>Komisen &amp; Bayaran</span>
+                      </div>
+                    </>
                   ) : (
                     <>
                       <div className="auth-modal-badge-item">
@@ -235,7 +258,9 @@ export function AuthModal({
                           ? "var(--color-orange)"
                           : pendingLoginMode === "ibubapa"
                             ? "var(--color-blue)"
-                            : "#168f81",
+                            : pendingLoginMode === "affiliate"
+                              ? "#7c3aed"
+                              : "#168f81",
                       color: "white",
                       fontSize: "clamp(1.05rem, 3.8vw, 1.25rem)",
                       margin: "0 auto 16px auto",
@@ -251,36 +276,12 @@ export function AuthModal({
                         ? "Guru"
                         : pendingLoginMode === "ibubapa"
                           ? "Ibu Bapa"
-                          : "Admin"
+                          : pendingLoginMode === "affiliate"
+                            ? "Affiliate"
+                            : "Admin"
                     }`}
                   </div>
                 </div>
-
-                {/* Log Masuk Sahaja — pendaftaran akaun dikendalikan oleh admin */}
-                {pendingLoginMode !== "admin" && (
-                  <div
-                    style={{
-                      display: "flex",
-                      backgroundColor:
-                        pendingLoginMode === "guru"
-                          ? "var(--color-orange)"
-                          : "var(--color-blue)",
-                      borderRadius: "14px",
-                      padding: "8px 6px",
-                      marginBottom: "16px",
-                      border: "2px solid var(--color-dark)",
-                      color: "#ffffff",
-                      fontWeight: "bold",
-                      fontSize: "0.9rem",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <i className="fa-solid fa-right-to-bracket"></i>
-                    Log Masuk Akaun
-                  </div>
-                )}
 
                 {/* Success Notification */}
                 {authSuccessMessage && (
@@ -552,7 +553,9 @@ export function AuthModal({
                             ? "var(--color-orange)"
                             : pendingLoginMode === "ibubapa"
                               ? "var(--color-blue)"
-                              : "#168f81",
+                              : pendingLoginMode === "affiliate"
+                                ? "#7c3aed"
+                                : "#168f81",
                         color: "#ffffff",
                         opacity: isAuthLoading ? 0.7 : 1,
                         cursor: isAuthLoading ? "not-allowed" : "pointer",
@@ -593,6 +596,12 @@ export function AuthModal({
                           if (pendingLoginMode === "admin" && role !== "admin") {
                             await logout();
                             setAuthModalError("Akaun ini tidak mempunyai akses sebagai Pentadbir (Admin).");
+                            setIsAuthLoading(false);
+                            return;
+                          }
+                          if (pendingLoginMode === "affiliate" && role !== "affiliate") {
+                            await logout();
+                            setAuthModalError("Emel ini tidak didaftarkan sebagai akaun Affiliate.");
                             setIsAuthLoading(false);
                             return;
                           }
@@ -717,6 +726,19 @@ export function AuthModal({
 
                             onClose();
                             (window as any).bukaModalPilihAnak && (window as any).bukaModalPilihAnak();
+                          } else if (role === "affiliate") {
+                            // Fasa 3: bersihkan sesi peranan lain, kemudian
+                            // paparkan panel affiliate (kod/rujukan/komisen).
+                            localStorage.removeItem("bunyiKataNamaGuru");
+                            localStorage.removeItem("bunyiKataNamaSekolah");
+                            localStorage.removeItem("bunyiKataNamaKeluarga");
+                            localStorage.setItem("bunyiKataUserRole", "affiliate");
+
+                            const affName = user?.nama || "Affiliate";
+                            localStorage.setItem("bunyiKataNamaAffiliate", affName);
+
+                            onClose();
+                            (window as any).masukModAffiliate && (window as any).masukModAffiliate();
                           } else if (role === "admin") {
                             const adminName = user?.nama || "Admin Bunyi Kata";
                             localStorage.setItem("bunyiKataNamaAdmin", adminName);
