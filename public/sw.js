@@ -1,8 +1,11 @@
-// NAHKAN v4: Bump versi cache memaksa pelayar membuang cache lama yang
-// mungkin menyimpan index.html / app-logic.js basi. PENTING: strategi fetch
-// di bawah kini menggunakan "network-first untuk dokumen & skrip", jadi
-// pengguna TIDAK perlu hard refresh selepas deploy baharu.
-const CACHE_NAME = 'bunyi-kata-v5';
+// NAHKAN v6: Bump versi cache memaksa pelayar membuang cache lama yang
+// mungkin menyimpan index.html / app-logic.js / src/App.tsx basi.
+// PEMBETULAN UTAMA v6: Tambah pengecualian untuk fail sumber Vite
+// (/src/*, *.ts, *.tsx). Sebelum ini, semua permintaan fetch() dari JS
+// (cth import Vite ke App.tsx) jatuh ke "cache-first" kerana req.destination
+// kosong, menyebabkan versi App.tsx lama terpakai selepas pembetulan.
+// Sekarang /src/* sentiasa network-first.
+const CACHE_NAME = 'bunyi-kata-v6';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -54,7 +57,36 @@ self.addEventListener('fetch', (event) => {
   const isScript = req.destination === 'script' || req.destination === 'style';
   const isAssetBerhash = url.pathname.startsWith('/assets/');
 
-  // 1) Aset berhash Vite — kekal cache-first (selamat, nama fail berubah).
+  // PEMBETULAN v6: Sumber Vite (/src/*, .ts, .tsx, .css, .html) SELALU
+  // network-first, walaupun req.destination kosong (import() bawa fetch()
+  // dengan destination=''). Tanpa ini, App.tsx versi lama terhidang dari
+  // cache selepas edit kod, menyebabkan splash nampak "stuck" walaupun
+  // kod sudah dibuang.
+  const isViteSource =
+    url.pathname.startsWith('/src/') ||
+    url.pathname.startsWith('/@') ||
+    url.pathname.startsWith('/node_modules/') ||
+    /\.(tsx?|jsx?|css|html)(\?|$)/.test(url.pathname);
+
+  // 1) Sumber Vite & dokumen & skrip: NETWORK-FIRST.
+  //    Versi terbaharu sentiasa diambil apabila ada talian; cache
+  //    hanya digunakan sebagai sandaran luar talian.
+  if (isDoc || isScript || isViteSource) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (res && res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(req, clone)).catch(() => {});
+          }
+          return res;
+        })
+        .catch(() => caches.match(req).then((cached) => cached || caches.match('/index.html')))
+    );
+    return;
+  }
+
+  // 2) Aset berhash Vite — kekal cache-first (selamat, nama fail berubah).
   if (isAssetBerhash) {
     event.respondWith(
       caches.match(req).then((cached) => {
@@ -67,25 +99,6 @@ self.addEventListener('fetch', (event) => {
           return res;
         });
       })
-    );
-    return;
-  }
-
-  // 2) Dokumen & skrip: NETWORK-FIRST.
-  //    Ini pembetulan utama untuk aduan "kena hard refresh sekali baru boleh
-  //    masuk". Versi terbaharu sentiasa diambil apabila ada talian; cache
-  //    hanya digunakan sebagai sandaran luar talian.
-  if (isDoc || isScript) {
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          if (res && res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then((c) => c.put(req, clone)).catch(() => {});
-          }
-          return res;
-        })
-        .catch(() => caches.match(req).then((cached) => cached || caches.match('/index.html')))
     );
     return;
   }

@@ -1,4 +1,4 @@
-﻿import express from "express";
+import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
@@ -160,6 +160,44 @@ async function requireAdmin(req, res, next) {
     return next();
   } catch (err) {
     console.warn("[Admin Auth] Token tidak sah:", err?.message || err);
+    return res.status(401).json({ success: false, message: "Token tidak sah atau tamat tempoh." });
+  }
+}
+
+/**
+ * Fasa 3 (Affiliate Login): kebenaran untuk endpoint sisi-affiliate.
+ *
+ * Sama seperti requireAdmin, tetapi menerima token yang mengandungi claim
+ * { affiliate_kod: "XXXXXX" } yang ditetapkan oleh pelayan semasa akaun
+ * affiliate dicipta. Kod affiliate diambil DARIPADA token (bukan body) supaya
+ * affiliate tidak boleh menipu dan membaca komisen affiliate lain.
+ */
+async function requireAffiliate(req, res, next) {
+  const header = String(req.headers.authorization || "");
+  const idToken = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+  if (!idToken) {
+    return res.status(401).json({ success: false, message: "Sesi affiliate diperlukan." });
+  }
+
+  const appInstance = getAdminApp();
+  if (!appInstance) {
+    return res.status(500).json({
+      success: false,
+      message: "Firebase Admin SDK belum dikonfigurasikan di pelayan.",
+    });
+  }
+
+  try {
+    const decoded = await getAuth(appInstance).verifyIdToken(idToken);
+    const kod = String(decoded.affiliate_kod || "").trim().toUpperCase();
+    if (!kod) {
+      return res.status(403).json({ success: false, message: "Akses ditolak." });
+    }
+    req.affiliateUid = decoded.uid;
+    req.affiliateKod = kod;
+    return next();
+  } catch (err) {
+    console.warn("[Affiliate Auth] Token tidak sah:", err?.message || err);
     return res.status(401).json({ success: false, message: "Token tidak sah atau tamat tempoh." });
   }
 }
@@ -599,7 +637,9 @@ async function startServer() {
       }
       const db = getDatabase(appInstance);
 
+      const authAdmin = getAuth(appInstance);
       const nama = String(req.body?.nama || "").trim();
+      const emailBersih = String(req.body?.email || "").trim().toLowerCase();
       const whatsapp = bersihkanWhatsapp(req.body?.whatsapp);
       if (!nama) {
         return res.status(400).json({ success: false, message: "Nama affiliate diperlukan." });
@@ -607,24 +647,65 @@ async function startServer() {
       if (!whatsapp || whatsapp.length < 9) {
         return res.status(400).json({ success: false, message: "Nombor WhatsApp tidak sah (cth. 60173955657)." });
       }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailBersih)) {
+        return res.status(400).json({ success: false, message: "Format emel tidak sah." });
+      }
+
+      // --- Pastikan emel belum digunakan oleh akaun lain ---
+      try {
+        const sediaAda = await authAdmin.getUserByEmail(emailBersih);
+        if (sediaAda) {
+          return res.status(409).json({
+            success: false,
+            message: "Emel ini sudah mempunyai akaun. Gunakan emel lain.",
+          });
+        }
+      } catch (err) {
+        // auth/user-not-found bermakna emel bebas — inilah keadaan yang kita mahu.
+        if (err?.code !== "auth/user-not-found") throw err;
+      }
 
       const kod = await janaKodAffiliate(db);
       if (!kod) {
         return res.status(500).json({ success: false, message: "Gagal menjana kod unik. Cuba lagi." });
       }
 
+      // --- Jana kata laluan sementara (dipapar SEKALI kepada admin) ---
+      const kataLaluan = String(req.body?.password || "").trim() || janaKataLaluan();
+
+      // --- Cipta akaun Firebase Auth untuk affiliate ---
+      const rekodAuth = await authAdmin.createUser({
+        email: emailBersih,
+        password: kataLaluan,
+        displayName: nama,
+        emailVerified: false,
+      });
+      const uid = rekodAuth.uid;
+
+      // Tanda pada token: claim ini yang membenarkan akses /api/affiliate/*.
+      try {
+        await authAdmin.setCustomUserClaims(uid, { affiliate_kod: kod });
+      } catch (err) {
+        // Jika claim gagal, padam akaun supaya tidak wujud affiliate tanpa akses.
+        await authAdmin.deleteUser(uid).catch(() => {});
+        throw err;
+      }
+
       const rekod = {
         nama,
         whatsapp,
         kod,
+        email: emailBersih,
+        uid,
         status: "aktif",
         dicipta_pada: new Date().toISOString(),
       };
       await db.ref(`affiliates/${kod}`).set(rekod);
-      await rekodAudit(db, "affiliate_cipta", { kod, nama, whatsapp });
+      await rekodAudit(db, "affiliate_cipta", { kod, nama, whatsapp, email: emailBersih, uid });
 
-      console.log(`[Affiliate] Didaftar: ${nama} (${kod})`);
-      return res.json({ success: true, affiliate: rekod });
+      console.log(`[Affiliate] Didaftar: ${nama} (${kod}) <${emailBersih}>`);
+      // Kata laluan dipulangkan SEKALI sahaja — tidak disimpan di mana-mana.
+      return res.json({ success: true, affiliate: rekod, email: emailBersih, password: kataLaluan });
     } catch (err) {
       console.error("[Admin Affiliate Create]", err);
       return res.status(500).json({ success: false, message: err.message });
@@ -837,6 +918,109 @@ async function startServer() {
     } catch (err) {
       console.error("[Admin Affiliate Mark Paid]", err);
       return res.status(500).json({ success: false, message: err.message });
+    }
+  });
+
+  /**
+   * Fasa 3 (Affiliate Login): profil + ringkasan prestasi affiliate sendiri.
+   *
+   * Kod affiliate diambil DARIPADA token (requireAffiliate), jadi affiliate
+   * tidak boleh melebar pandang ke kod orang lain walaupun menukar body.
+   * Formula agregat adalah SAMA seperti /api/admin/affiliate/list supaya angka
+   * yang dilihat affiliate sepadan dengan jadual admin.
+   */
+  app.get("/api/affiliate/me", requireAffiliate, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
+      }
+      const db = getDatabase(appInstance);
+      const kod = req.affiliateKod;
+
+      const [snapAff, snapRef] = await Promise.all([
+        db.ref(`affiliates/${kod}`).get(),
+        db.ref(`referrals/${kod}`).get(),
+      ]);
+      if (!snapAff.exists()) {
+        return res.status(404).json({ success: false, message: "Rekod affiliate tidak dijumpai." });
+      }
+      const profil = snapAff.val() || {};
+
+      const agg = {
+        jualan_bil: 0, jumlah_jualan_sen: 0, komisen_keseluruhan_sen: 0,
+        dibayar_sen: 0, baki_sen: 0,
+      };
+      if (snapRef.exists()) {
+        snapRef.forEach((rekod) => {
+          const r = rekod.val() || {};
+          if (r.status === "batal") return false;
+          agg.jualan_bil += 1;
+          agg.jumlah_jualan_sen += Number(r.harga_sen) || 0;
+          const kom = Number(r.komisen_sen) || 0;
+          agg.komisen_keseluruhan_sen += kom;
+          if (r.status === "dibayar") agg.dibayar_sen += kom;
+          else agg.baki_sen += kom;
+          return false;
+        });
+      }
+
+      return res.json({
+        success: true,
+        affiliate: {
+          nama: profil.nama || "",
+          kod,
+          email: profil.email || "",
+          whatsapp: profil.whatsapp || "",
+          status: profil.status || "aktif",
+          dicipta_pada: profil.dicipta_pada || "",
+        },
+        ringkasan: agg,
+      });
+    } catch (err) {
+      console.error("[Affiliate Me]", err);
+      return res.status(500).json({ success: false, message: "Gagal memuatkan profil affiliate." });
+    }
+  });
+
+  /**
+   * Fasa 3: senarai baris rujukan (bagi affiliate sendiri sahaja).
+   * Kod diambil daripada token — bukan query/body.
+   */
+  app.get("/api/affiliate/referrals", requireAffiliate, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
+      }
+      const db = getDatabase(appInstance);
+      const kod = req.affiliateKod;
+
+      const snapRef = await db.ref(`referrals/${kod}`).get();
+      const senarai = [];
+      if (snapRef.exists()) {
+        snapRef.forEach((rekod) => {
+          const r = rekod.val() || {};
+          senarai.push({
+            id: rekod.key,
+            pelanggan_nama: r.pelanggan_nama || "",
+            nama_pakej: r.nama_pakej || "",
+            harga_sen: Number(r.harga_sen) || 0,
+            komisen_sen: Number(r.komisen_sen) || 0,
+            status: r.status || "sah",
+            tarikh_beli: r.tarikh_beli || "",
+            tarikh_bayar: r.tarikh_bayar || "",
+          });
+          return false;
+        });
+      }
+
+      // Terbaharu dahulu.
+      senarai.sort((a, b) => String(b.tarikh_beli || "").localeCompare(String(a.tarikh_beli || "")));
+      return res.json({ success: true, referrals: senarai });
+    } catch (err) {
+      console.error("[Affiliate Referrals]", err);
+      return res.status(500).json({ success: false, message: "Gagal memuatkan rujukan." });
     }
   });
 
@@ -1243,8 +1427,26 @@ async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      // Muatkan vite.config.ts supaya semua plugin (react, tailwind, alias)
+      // digunakan — tanpa ini Vite scan semula dari scratch setiap request.
+      configFile: path.join(__dirname, "vite.config.ts"),
+      server: {
+        middlewareMode: true,
+        // Hormati tetapan HMR dari vite.config.ts (DISABLE_HMR)
+        hmr: process.env.DISABLE_HMR !== "true",
+        // Elak Vite memerhatikan node_modules — jimat CPU yang banyak
+        watch: process.env.DISABLE_HMR === "true" ? null : {
+          ignored: ["**/node_modules/**", "**/.git/**"],
+          usePolling: false,
+        },
+      },
       appType: "spa",
+      // Guna cache deps supaya Vite tidak re-bundle dependencies pada setiap restart
+      cacheDir: path.join(__dirname, "node_modules/.vite"),
+      optimizeDeps: {
+        // Jangan paksa bundle semula jika deps tidak berubah
+        force: false,
+      },
     });
     app.use(vite.middlewares);
   } else {

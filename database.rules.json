@@ -97,8 +97,9 @@
 
     "affiliates": {
       ".read": "auth != null && auth.token.admin == true",
-      ".indexOn": ["kod", "status", "whatsapp", "dicipta_pada"],
+      ".indexOn": ["kod", "status", "whatsapp", "email", "uid", "dicipta_pada"],
       "$kod": {
+        ".read": "auth != null && auth.token.affiliate_kod == $kod",
         ".write": "auth != null && auth.token.admin == true"
       }
     },
@@ -107,6 +108,7 @@
       ".read": "auth != null && auth.token.admin == true",
       ".indexOn": ["tarikh_beli", "status"],
       "$kod": {
+        ".read": "auth != null && auth.token.affiliate_kod == $kod",
         ".write": "auth != null && auth.token.admin == true",
         ".indexOn": ["tarikh_beli", "status"]
       }

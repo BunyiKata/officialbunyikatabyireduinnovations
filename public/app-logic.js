@@ -365,7 +365,7 @@ window.renderAdminTable = function (type = 'guru') {
     const adminThead = document.getElementById('admin-table-head') || document.getElementById('admin-thead');
     const title = document.getElementById('admin-table-title');
     const selector = document.getElementById('admin-table-selector');
-    if (selector && selector.value !== type) {
+    if (selector && selector.value !== type && type !== 'affiliate' && type !== 'affiliate_bayar') {
         selector.value = type;
     }
 
@@ -701,36 +701,35 @@ window.renderAdminTable = function (type = 'guru') {
         }
     }
     } else if (type === "affiliate") {
+        const affThead = document.getElementById('affiliate-table-head') || document.getElementById('affiliate-table-head-row');
+        const affTbody = document.getElementById('affiliate-table-body');
+        if (!affThead || !affTbody) return;
 
         // Fasa 2: jadual affiliate - tambah, senarai, gantung/padam, copy link.
 
-        if (title) {
-
-            title.className = "neo-btn";
-
-            title.style.cssText = "background:linear-gradient(135deg, #0d9488 0%, #0f766e 100%); color:white; padding:7px 16px; font-weight:bold; font-size:1rem; border-radius:12px; border:2.5px solid var(--color-dark, #10182f); box-shadow:0 3px 0 var(--color-dark, #10182f); display:inline-flex; align-items:center; gap:8px; pointer-events:none; margin:0;";
-
-            title.innerHTML = '<i class="fa-solid fa-handshake"></i> <span style="font-family:\'AtlantaRoundedBlack\', sans-serif;">Affiliate (Kod Rujukan)</span>';
-
+        const affTitle = document.getElementById('affiliate-table-title');
+        if (affTitle) {
+            affTitle.className = "neo-btn affiliate-title";
+            affTitle.style.cssText = "background:linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color:white; padding:7px 16px; font-weight:bold; font-size:1rem; border-radius:12px; border:2.5px solid var(--color-dark, #10182f); box-shadow:0 3px 0 var(--color-dark, #10182f); display:inline-flex; align-items:center; gap:8px; pointer-events:none; margin:0;";
+            affTitle.innerHTML = '<i class="fa-solid fa-sitemap"></i> <span style="font-family:\'AtlantaRoundedBlack\', sans-serif;">Affiliate</span>';
         }
 
-        adminThead.innerHTML = `
-                    <tr style="background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); color: white;">
-                        <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #115e59; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; width:44px; min-width:44px; text-transform:uppercase;">BIL.</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #115e59; border-right:1px solid rgba(255,255,255,0.25); text-align:left; font-size:0.85rem; font-weight:bold; min-width:130px; text-transform:uppercase;">NAMA</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #115e59; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:120px; text-transform:uppercase;">WHATSAPP</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #115e59; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:150px; text-transform:uppercase;">KOD</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #115e59; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:80px; text-transform:uppercase;">JUALAN</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #115e59; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:110px; text-transform:uppercase;">KOMISEN</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #115e59; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:110px; text-transform:uppercase;">BAKI</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #115e59; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:90px; text-transform:uppercase;">STATUS</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #115e59; text-align:center; font-size:0.85rem; font-weight:bold; min-width:200px; text-transform:uppercase;">TINDAKAN</th>
+        affThead.innerHTML = `
+                    <tr style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: white;">
+                        <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; width:44px; min-width:44px; text-transform:uppercase;">BIL.</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:left; font-size:0.85rem; font-weight:bold; min-width:130px; text-transform:uppercase;">NAMA</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:140px; text-transform:uppercase;">KOD</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:80px; text-transform:uppercase;">JUALAN</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:110px; text-transform:uppercase;">KOMISEN</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:110px; text-transform:uppercase;">BAKI</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:90px; text-transform:uppercase;">STATUS</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; text-align:center; font-size:0.85rem; font-weight:bold; min-width:160px; text-transform:uppercase;">TINDAKAN</th>
                     </tr>
                 `;
 
-        adminTbody.innerHTML = `
+        affTbody.innerHTML = `
             <tr>
-                <td colspan="9" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold;">
+                <td colspan="8" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold;">
                     <i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Memuatkan senarai affiliate...
                 </td>
             </tr>
@@ -740,15 +739,19 @@ window.renderAdminTable = function (type = 'guru') {
         const rm = (sen) => "RM" + ((Number(sen) || 0) / 100).toFixed(2);
 
         const paparSenarai = (senarai) => {
-            const list = Array.isArray(senarai) ? senarai : [];
-            adminTbody.innerHTML = "";
+            const listPenuh = Array.isArray(senarai) ? senarai : [];
+            const tapisan = window.__affiliateStatusFilter || "semua";
+            const list = tapisan === "semua"
+                ? listPenuh
+                : listPenuh.filter((a) => (tapisan === "aktif" ? a.status === "aktif" : a.status !== "aktif"));
+            affTbody.innerHTML = "";
 
             if (list.length === 0) {
-                adminTbody.innerHTML = `
+                affTbody.innerHTML = `
                     <tr>
-                        <td colspan="9" style="padding: 28px; text-align: center; color: #64748b; font-weight: bold;">
-                            <i class="fa-solid fa-handshake" style="font-size: 2rem; margin-bottom: 8px; display: block; color: #cbd5e1;"></i>
-                            Tiada affiliate lagi. Tambah yang pertama di atas.
+                        <td colspan="8" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold; font-size: 0.95rem;">
+                            <i class="fa-solid fa-sitemap" style="font-size: 2rem; color: #cbd5e1; display: block; margin-bottom: 10px;"></i>
+                            Tiada rekod affiliate dalam pangkalan data.
                         </td>
                     </tr>
                 `;
@@ -760,19 +763,28 @@ window.renderAdminTable = function (type = 'guru') {
                 const warnaStatus = aktif ? "#16a34a" : "#dc2626";
                 const labelStatus = aktif ? "Aktif" : "Digantung";
                 const wa = String(a.whatsapp || "").replace(/[^0-9]/g, "");
+                const pautan = window.location.origin + "/?ref=" + (a.kod || "");
+                const mesejWa = encodeURIComponent(
+                    "Selamat menyertai program Affiliate Bunyi Kata! 🎉\n\n" +
+                    "👤 Nama: " + (a.nama || "-") + "\n" +
+                    "🔑 Kod Affiliate anda: " + (a.kod || "-") + "\n" +
+                    "🔗 Pautan Khas anda: " + pautan + "\n\n" +
+                    "📣 Kongsi pautan bunyi kata dengan kod ini, dan anda akan menerima komisen bagi setiap pembelian yang menggunakan kod anda.\n\n" +
+                    "Terima kasih kerana menyertai kami! 🙏"
+                );
+                const waLink = wa ? ("https://wa.me/" + wa + "?text=" + mesejWa) : "";
                 const row = document.createElement("tr");
                 row.className = "admin-table-row";
-                row.style.cssText = "border-bottom:1px solid #e2e8f0; background: " + (index % 2 === 0 ? "#ffffff" : "#f0fdfa") + ";";
+                row.style.cssText = "border-bottom:1px solid #e2e8f0; background: " + (index % 2 === 0 ? "#ffffff" : "#f5f3ff") + ";";
 
                 row.innerHTML = `
                     <td class="admin-td" style="padding:9px 8px; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; text-align:center; font-size:0.85rem;">${index + 1}</td>
                     <td class="admin-td" style="padding:9px 12px; font-weight:bold; color:#0f172a; border-right:1px solid #e2e8f0; font-size:0.85rem;">${a.nama || "-"}</td>
                     <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center;">
-                        ${wa ? '<a href="https://wa.me/' + wa + '" target="_blank" rel="noopener" title="Hubungi ' + wa + '" style="display:inline-flex; align-items:center; gap:6px; color:#16a34a; font-weight:bold; text-decoration:none;"><i class="fa-brands fa-whatsapp" style="font-size:1.25rem;"></i></a>' : "-"}
-                    </td>
-                    <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center;">
-                        <div style="font-weight:bold; letter-spacing:1px; color:#0f766e; font-size:0.9rem;">${a.kod || "-"}</div>
-                        <button type="button" class="neo-btn" data-kod="${a.kod}" data-salin="1" style="margin-top:4px; padding:3px 8px; font-size:0.72rem; font-weight:bold; border-radius:8px; border:2px solid var(--color-dark,#10182f); background:#0d9488; color:white; cursor:pointer;"><i class="fa-solid fa-link"></i> Salin Link</button>
+                        <div style="display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+                            <span style="font-weight:bold; letter-spacing:1px; color:#5b21b6; font-size:0.92rem;">${a.kod || "-"}</span>
+                            <button type="button" class="neo-btn" data-kod="${a.kod}" data-salin="1" title="Salin Link Affiliate" style="padding:4px 8px; font-size:0.8rem; border-radius:8px; border:2px solid var(--color-dark,#10182f); background:#7c3aed; color:white; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;"><i class="fa-solid fa-link"></i></button>
+                        </div>
                     </td>
                     <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; color:#0f172a;">${Number(a.jualan_bil) || 0}</td>
                     <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; color:#4338ca; font-weight:bold;">${rm(a.komisen_keseluruhan_sen)}</td>
@@ -781,15 +793,24 @@ window.renderAdminTable = function (type = 'guru') {
                         <span style="display:inline-block; padding:3px 10px; border-radius:999px; font-size:0.72rem; font-weight:bold; color:white; background:${warnaStatus};">${labelStatus}</span>
                     </td>
                     <td class="admin-td" style="padding:9px 12px; text-align:center; white-space:nowrap;">
-                        <button type="button" class="neo-btn" data-kod="${a.kod}" data-status="${aktif ? "gantung" : "aktif"}" style="margin:2px; padding:4px 8px; font-size:0.72rem; font-weight:bold; border-radius:8px; border:2px solid var(--color-dark,#10182f); background:${aktif ? "#f59e0b" : "#16a34a"}; color:white; cursor:pointer;">
-                            <i class="fa-solid ${aktif ? "fa-pause" : "fa-play"}"></i> ${aktif ? "Gantung" : "Aktifkan"}
+                        ${waLink ? `
+                            <a href="${waLink}" target="_blank" rel="noopener" class="neo-btn" title="Hubungi WhatsApp (${wa})" style="margin:2px; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; padding:0; border-radius:8px; border:2px solid var(--color-dark,#10182f); background:#16a34a; color:white; text-decoration:none; cursor:pointer;">
+                                <i class="fa-brands fa-whatsapp" style="font-size:1.15rem;"></i>
+                            </a>
+                        ` : `
+                            <button type="button" class="neo-btn" disabled title="Tiada nombor WhatsApp" style="margin:2px; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; padding:0; border-radius:8px; border:2px solid #cbd5e1; background:#f1f5f9; color:#94a3b8; cursor:not-allowed; opacity:0.6;">
+                                <i class="fa-brands fa-whatsapp" style="font-size:1.15rem;"></i>
+                            </button>
+                        `}
+                        <button type="button" class="neo-btn" data-kod="${a.kod}" data-status="${aktif ? "gantung" : "aktif"}" title="${aktif ? "Gantung Akaun" : "Aktifkan Akaun"}" style="margin:2px; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; padding:0; border-radius:8px; border:2px solid var(--color-dark,#10182f); background:${aktif ? "#f59e0b" : "#16a34a"}; color:white; cursor:pointer;">
+                            <i class="fa-solid ${aktif ? "fa-pause" : "fa-play"}" style="font-size:0.95rem;"></i>
                         </button>
-                        <button type="button" class="neo-btn" data-kod="${a.kod}" data-padam="1" style="margin:2px; padding:4px 8px; font-size:0.72rem; font-weight:bold; border-radius:8px; border:2px solid var(--color-dark,#10182f); background:#dc2626; color:white; cursor:pointer;">
-                            <i class="fa-solid fa-trash"></i> Padam
+                        <button type="button" class="neo-btn" data-kod="${a.kod}" data-padam="1" title="Padam Affiliate" style="margin:2px; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; padding:0; border-radius:8px; border:2px solid var(--color-dark,#10182f); background:#dc2626; color:white; cursor:pointer;">
+                            <i class="fa-solid fa-trash" style="font-size:0.95rem;"></i>
                         </button>
                     </td>
                 `;
-                adminTbody.appendChild(row);
+                affTbody.appendChild(row);
             });
         };
 
@@ -803,62 +824,44 @@ window.renderAdminTable = function (type = 'guru') {
                 }
             };
             if (api && typeof api.ambilSenaraiAffiliate === "function") guna(api);
-            else _tungguAdminApi().then(guna);
+            else if (typeof _tungguAdminApi === 'function') _tungguAdminApi().then(guna);
+            else paparSenarai([]);
+        };
 
-        // Borang tambah affiliate diletak di atas baris tajuk + pemilih.
-        const barisTajuk = title && title.parentElement;
-        const wadah = barisTajuk && barisTajuk.parentElement;
-        const borangLama = document.getElementById("affiliate-borang");
-        if (borangLama) borangLama.remove();
-        if (wadah && wadah.insertBefore) {
-            const borang = document.createElement("div");
-            borang.id = "affiliate-borang";
-            borang.style.cssText = "display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px 0; padding:10px; border-radius:12px; border:2px dashed #0d9488; background:#f0fdfa; align-items:center;";
-            borang.innerHTML = `
-                <input id="aff-nama" type="text" placeholder="Nama affiliate" style="flex:1; min-width:150px; padding:8px 10px; border-radius:8px; border:2px solid #0f766e; font-size:0.9rem;">
-                <input id="aff-wa" type="text" placeholder="No. WhatsApp (cth. 60173955657)" style="flex:1; min-width:180px; padding:8px 10px; border-radius:8px; border:2px solid #0f766e; font-size:0.9rem;">
-                <button type="button" id="aff-tambah" class="neo-btn" style="padding:8px 14px; font-weight:bold; border-radius:8px; border:2px solid var(--color-dark,#10182f); background:#0d9488; color:white; cursor:pointer;"><i class="fa-solid fa-plus"></i> Tambah Affiliate</button>
-            `;
-            if (barisTajuk) wadah.insertBefore(borang, barisTajuk);
-            else wadah.insertBefore(borang, wadah.firstChild);
-        }
+        // Butang "Cipta Affiliate" dalam kad React membuka modal pendaftaran.
+        // (Tiada borang sebaris lagi — guna CiptaAkaunModal sahaja.)
 
         // Pengendali klik (delegasi) - dipasang sekali sahaja.
         if (!window.__affiliateHandlerSedia) {
             window.__affiliateHandlerSedia = true;
             document.addEventListener("click", function (ev) {
                 const sasaran = ev.target;
-                const btn = sasaran && sasaran.closest ? sasaran.closest("[data-salin],[data-status],[data-padam],#aff-tambah") : null;
+                const btn = sasaran && sasaran.closest ? sasaran.closest("[data-salin],[data-status],[data-padam],#affiliate-tambah-btn") : null;
                 if (!btn) return;
 
-                if (btn.id === "aff-tambah") {
-                    const namaEl = document.getElementById("aff-nama");
-                    const waEl = document.getElementById("aff-wa");
-                    const nama = namaEl ? namaEl.value : "";
-                    const wa = waEl ? waEl.value : "";
-                    if (!nama.trim() || !wa.trim()) { alert("Sila isi nama dan nombor WhatsApp."); return; }
-                    const api = window.__adminApi;
-                    if (!api || typeof api.ciptaAffiliate !== "function") { alert("API affiliate belum sedia."); return; }
-                    btn.disabled = true;
-                    api.ciptaAffiliate(nama.trim(), wa.trim()).then(function (h) {
-                        btn.disabled = false;
-                        if (h && h.berjaya) {
-                            const kodBaharu = h.affiliate && h.affiliate.kod ? h.affiliate.kod : "";
-                            alert("Affiliate ditambah. Kod: " + kodBaharu);
-                            window.renderAdminTable("affiliate");
-                        } else {
-                            alert((h && h.mesej) || "Gagal menambah affiliate.");
-                        }
-                    }).catch(function () { btn.disabled = false; alert("Ralat rangkaian."); });
+                if (btn.id === "affiliate-tambah-btn") {
+                    // Buka modal pendaftaran affiliate (React: CiptaAkaunModal).
+                    if (typeof window.bukaCiptaAkaunAdmin === "function") {
+                        window.bukaCiptaAkaunAdmin("affiliate");
+                    } else {
+                        alert("Modal pendaftaran belum sedia.");
+                    }
                     return;
                 }
 
                 if (btn.hasAttribute("data-salin")) {
                     const kod = btn.getAttribute("data-kod");
-                    const pautan = window.location.origin + window.location.pathname + "?ref=" + kod;
+                    const pautan = window.location.origin + "/?ref=" + kod;
                     if (navigator.clipboard && navigator.clipboard.writeText) {
-                        navigator.clipboard.writeText(pautan).then(function () { alert("Pautan disalin:\n" + pautan); })
-                            .catch(function () { window.prompt("Salin pautan ini:", pautan); });
+                        navigator.clipboard.writeText(pautan).then(function () {
+                            if (typeof window.showAppToast === "function") {
+                                window.showAppToast("Pautan Disalin", "Pautan affiliate " + kod + " telah disalin ke papan keratan.");
+                            } else if (typeof window.showAppModalAlert === "function") {
+                                window.showAppModalAlert("Pautan Disalin", pautan);
+                            } else {
+                                alert("Pautan disalin:\n" + pautan);
+                            }
+                        }).catch(function () { window.prompt("Salin pautan ini:", pautan); });
                     } else {
                         window.prompt("Salin pautan ini:", pautan);
                     }
@@ -871,40 +874,71 @@ window.renderAdminTable = function (type = 'guru') {
                     const api = window.__adminApi;
                     if (!api || typeof api.tukarStatusAffiliate !== "function") return;
                     api.tukarStatusAffiliate(kod, status).then(function (h) {
-                        if (h && h.berjaya) window.renderAdminTable("affiliate");
-                        else alert((h && h.mesej) || "Gagal menukar status.");
+                        if (h && h.berjaya) window.renderAffiliateTable();
+                        else {
+                            if (typeof window.showAppModalAlert === "function") {
+                                window.showAppModalAlert("Ralat", (h && h.mesej) || "Gagal menukar status.");
+                            } else {
+                                alert((h && h.mesej) || "Gagal menukar status.");
+                            }
+                        }
                     });
                     return;
                 }
 
                 if (btn.hasAttribute("data-padam")) {
                     const kod = btn.getAttribute("data-kod");
-                    if (!confirm("Padam affiliate " + kod + " secara KEKAL? Tindakan ini tidak boleh diundur.")) return;
-                    const api = window.__adminApi;
-                    if (!api || typeof api.padamAffiliate !== "function") return;
-                    api.padamAffiliate(kod).then(function (h) {
-                        if (h && h.berjaya) window.renderAdminTable("affiliate");
-                        else alert((h && h.mesej) || "Gagal memadam affiliate.");
-                    });
+                    const laksanaPadam = function () {
+                        const api = window.__adminApi;
+                        if (!api || typeof api.padamAffiliate !== "function") return;
+                        api.padamAffiliate(kod).then(function (h) {
+                            if (h && h.berjaya) {
+                                if (typeof window.showAppToast === "function") {
+                                    window.showAppToast("Affiliate Dipadam", "Affiliate " + kod + " telah berjaya dipadam secara kekal.");
+                                } else if (typeof window.showAppModalAlert === "function") {
+                                    window.showAppModalAlert("Berjaya", "Affiliate " + kod + " telah berjaya dipadam secara kekal.");
+                                }
+                                window.renderAffiliateTable();
+                            } else {
+                                if (typeof window.showAppModalAlert === "function") {
+                                    window.showAppModalAlert("Ralat", (h && h.mesej) || "Gagal memadam affiliate.");
+                                } else {
+                                    alert((h && h.mesej) || "Gagal memadam affiliate.");
+                                }
+                            }
+                        });
+                    };
+
+                    if (typeof window.showAppModalConfirm === "function") {
+                        window.showAppModalConfirm(
+                            "Padam Affiliate",
+                            `<p style="margin:0 0 10px 0; font-size:1.05rem;">Adakah anda pasti mahu memadam affiliate <strong>${kod}</strong> secara <strong>KEKAL</strong>?</p><p style="margin:0; font-size:0.88rem; color:#dc2626; font-weight:bold;"><i class="fa-solid fa-triangle-exclamation" style="margin-right:5px;"></i> Tindakan ini tidak boleh diundur.</p>`,
+                            laksanaPadam
+                        );
+                    } else if (confirm("Padam affiliate " + kod + " secara KEKAL? Tindakan ini tidak boleh diundur.")) {
+                        laksanaPadam();
+                    }
                     return;
                 }
             });
         }
 
         muatSenarai();
-
-    }
     } else if (type === "affiliate_bayar") {
+        const bayarThead = document.getElementById('affiliate-bayar-table-head');
+        const bayarTbody = document.getElementById('affiliate-bayar-table-body');
+        if (!bayarThead || !bayarTbody) return;
 
         // Fasa 2: laporan pembayaran komisen (kitaran 2 minggu, tahan 7 hari).
 
-        if (title) {
-            title.className = "neo-btn";
-            title.style.cssText = "background:linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color:white; padding:7px 16px; font-weight:bold; font-size:1rem; border-radius:12px; border:2.5px solid var(--color-dark, #10182f); box-shadow:0 3px 0 var(--color-dark, #10182f); display:inline-flex; align-items:center; gap:8px; pointer-events:none; margin:0;";
-            title.innerHTML = '<i class="fa-solid fa-money-bill-transfer"></i> <span style="font-family:\'AtlantaRoundedBlack\', sans-serif;">Laporan Pembayaran (2 Minggu)</span>';
+        const bayarTitle = document.getElementById('affiliate-bayar-title');
+        if (bayarTitle) {
+            bayarTitle.className = "neo-btn affiliate-title";
+            bayarTitle.style.cssText = "background:linear-gradient(135deg, #5b21b6 0%, #4c1d95 100%); color:white; padding:7px 16px; font-weight:bold; font-size:1rem; border-radius:12px; border:2.5px solid var(--color-dark, #10182f); box-shadow:0 3px 0 var(--color-dark, #10182f); display:inline-flex; align-items:center; gap:8px; pointer-events:none; margin:0;";
+            bayarTitle.innerHTML = '<i class="fa-solid fa-file-invoice-dollar"></i> <span style="font-family:\'AtlantaRoundedBlack\', sans-serif;">Laporan Pembayaran</span>';
         }
 
-        adminThead.innerHTML = `
+        bayarThead.innerHTML = `
                     <tr style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: white;">
                         <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; width:44px; min-width:44px; text-transform:uppercase;">BIL.</th>
                         <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:left; font-size:0.85rem; font-weight:bold; min-width:150px; text-transform:uppercase;">AFFILIATE</th>
@@ -915,7 +949,7 @@ window.renderAdminTable = function (type = 'guru') {
                     </tr>
                 `;
 
-        adminTbody.innerHTML = `
+        bayarTbody.innerHTML = `
             <tr>
                 <td colspan="6" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold;">
                     <i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Memuatkan laporan pembayaran...
@@ -932,15 +966,15 @@ window.renderAdminTable = function (type = 'guru') {
                 ? hasil.belum_matang.reduce((s, it) => s + (Number(it.komisen_sen) || 0), 0) : 0;
             const tahanHari = (hasil && hasil.tempoh_tahan_hari) || 7;
 
-            adminTbody.innerHTML = "";
+            bayarTbody.innerHTML = "";
 
             if (ringkasan.length === 0) {
-                adminTbody.innerHTML = `
+                bayarTbody.innerHTML = `
                     <tr>
-                        <td colspan="6" style="padding: 28px; text-align: center; color: #64748b; font-weight: bold;">
-                            <i class="fa-solid fa-money-bill-wave" style="font-size: 2rem; margin-bottom: 8px; display: block; color: #cbd5e1;"></i>
-                            Tiada komisen layak dibayar buat masa ini.
-                            ${belumMatangSen > 0 ? '<br/><span style="font-size:0.8rem; color:#94a3b8;">' + rmBayar(belumMatangSen) + " masih dalam tempoh tahan (" + tahanHari + " hari).</span>" : ""}
+                        <td colspan="6" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold; font-size: 0.95rem;">
+                            <i class="fa-solid fa-file-invoice-dollar" style="font-size: 2rem; color: #cbd5e1; display: block; margin-bottom: 10px;"></i>
+                            Tiada rekod pembayaran affiliate dalam pangkalan data.
+                            ${belumMatangSen > 0 ? '<br/><span style="font-size:0.8rem; color:#94a3b8; font-weight:normal; margin-top:6px; display:inline-block;">' + rmBayar(belumMatangSen) + " masih dalam tempoh tahan (" + tahanHari + " hari).</span>" : ""}
                         </td>
                     </tr>
                 `;
@@ -963,7 +997,7 @@ window.renderAdminTable = function (type = 'guru') {
                         </button>
                     </td>
                 `;
-                adminTbody.appendChild(row);
+                bayarTbody.appendChild(row);
             });
         };
 
@@ -977,7 +1011,9 @@ window.renderAdminTable = function (type = 'guru') {
                 }
             };
             if (api && typeof api.ambilLaporanBayaran === "function") guna(api);
-            else _tungguAdminApi().then(guna);
+            else if (typeof _tungguAdminApi === 'function') _tungguAdminApi().then(guna);
+            else paparLaporan(null);
+        };
 
         // Pengendali "Tanda Dibayar" (delegasi, sekali sahaja).
         if (!window.__bayarHandlerSedia) {
@@ -1002,7 +1038,10 @@ window.renderAdminTable = function (type = 'guru') {
                     return api.tandaKomisenDibayar(items).then(function (h) {
                         if (h && h.berjaya) {
                             alert("Ditanda dibayar: " + (h.dibayar_bil || 0) + " baris, " + rmBayar(h.jumlah_sen) + ".");
-                            window.renderAdminTable("affiliate_bayar");
+                            // SYNC: kemas kini KEDUA-DUA kad (BAKI/KOMISEN pada jadual
+                            // Affiliate mesti berubah serta-merta selepas pembayaran).
+                            if (typeof window.renderAffiliateBayar === "function") window.renderAffiliateBayar();
+                            if (typeof window.renderAffiliateTable === "function") window.renderAffiliateTable();
                         } else {
                             alert((h && h.mesej) || "Gagal menanda dibayar.");
                         }
@@ -1013,6 +1052,28 @@ window.renderAdminTable = function (type = 'guru') {
 
         muatLaporan();
 
+    }
+};
+
+// ---------------------------------------------------------------------------
+// Pembalut (wrappers) untuk KAD AFFILIATE BERASINGAN (tema ungu).
+// Kad React mempunyai bekas sendiri (affiliate-table-* / affiliate-bayar-table-*),
+// jadi kita hanya arahkan renderAdminTable ke cawangan berkaitan.
+// ---------------------------------------------------------------------------
+window.renderAffiliateTable = function () {
+    const filter = document.getElementById("affiliate-filter-status");
+    if (filter) {
+        // Tapis senarai mengikut status terpilih (semua / aktif / digantung).
+        window.__affiliateStatusFilter = filter.value || "semua";
+    }
+    if (typeof window.renderAdminTable === "function") {
+        window.renderAdminTable("affiliate");
+    }
+};
+
+window.renderAffiliateBayar = function () {
+    if (typeof window.renderAdminTable === "function") {
+        window.renderAdminTable("affiliate_bayar");
     }
 };
 
@@ -1030,7 +1091,6 @@ window.renderAdminTable = function (type = 'guru') {
             }
         }
     };
-};
 
 // --- SISTEM AUTO-SAVE LATIHAN ---
 function getAutoSave(kunci) {
@@ -2686,6 +2746,11 @@ window.bolehAksesSkrin = function (screenId) {
             return !!(window.modIbuBapaAktif || role === 'ibubapa');
         }
 
+        // 3b) Skrin affiliate (Fasa 3) — hanya dengan sesi/mode affiliate.
+        if (id === 'affiliate-dashboard' || id.startsWith('affiliate-')) {
+            return !!(window.modAffiliateAktif || role === 'affiliate');
+        }
+
         // 4) Skrin MURID (menu utama, peta, semua view-*).
         // Pelawat yang menampal pautan terus ke sini mesti melalui aliran
         // masuk dahulu (Cuba Percuma / kod kelas / kod keluarga / log masuk).
@@ -2870,6 +2935,48 @@ function masukModAdmin() {
         }).catch(err => console.warn('Fetch admin data notice:', err));
     }
 }
+
+/**
+ * Fasa 3 (Affiliate Login): buka panel affiliate.
+ *
+ * Berbeza daripada mod guru/ibu bapa, panel affiliate ialah komponen React
+ * (AffiliateDashboard) yang menarik datanya sendiri melalui /api/affiliate/*.
+ * Fungsi ini hanya: (1) bersihkan sesi peranan lain, (2) tanda role, dan
+ * (3) panggil paparSkrin('affiliate-dashboard') supaya App.tsx memaparkan panel.
+ */
+function masukModAffiliate() {
+    window.modGuruAktif = false;
+    window.modIbuBapaAktif = false;
+    window.modAdminAktif = false;
+    window.modAffiliateAktif = true;
+    window.isAdminMode = false;
+    window.isGuestMode = false;
+
+    localStorage.setItem('bunyiKataUserRole', 'affiliate');
+    localStorage.setItem('bunyiKataAccessLevel', 'pro');
+    window.userAccessLevel = 'pro';
+    if (typeof window.setUserAccessLevel === 'function') {
+        window.setUserAccessLevel('pro');
+    }
+
+    document.body.classList.remove('teacher-mode');
+    document.body.classList.remove('parent-mode');
+    document.body.classList.remove('admin-mode');
+
+    const topBanner = document.getElementById('teacher-top-banner');
+    if (topBanner) topBanner.style.display = 'none';
+    const tNav = document.getElementById('teacher-sticky-nav');
+    if (tNav) tNav.style.display = 'none';
+    const aNav = document.getElementById('admin-sticky-nav');
+    if (aNav) aNav.style.display = 'none';
+    const pNav = document.getElementById('parent-sticky-nav');
+    if (pNav) pNav.style.display = 'none';
+
+    window.dispatchEvent(new CustomEvent('affiliate-mode-change', { detail: { isAffiliate: true } }));
+
+    paparSkrin('affiliate-dashboard');
+}
+window.masukModAffiliate = masukModAffiliate;
 
 function masukModGuru() {
     // Buang sisa sesi admin dahulu — kalau tidak, senarai guru orang lain
@@ -8031,12 +8138,13 @@ window.renderAdminUrus = function (tab) {
     const container = document.getElementById('admin-urus-tab-content');
     if (!container) return;
 
-    ['guru', 'ibubapa'].forEach(t => {
+    ['guru', 'ibubapa', 'affiliate'].forEach(t => {
         const btn = document.getElementById(`admin-urus-tab-btn-${t}`);
         if (btn) {
             const icon = btn.querySelector('i');
+            const warna = t === 'guru' ? '#ea580c' : (t === 'ibubapa' ? '#0284c7' : '#7c3aed');
             if (t === activeTab) {
-                btn.style.backgroundColor = t === 'guru' ? '#ea580c' : '#0284c7';
+                btn.style.backgroundColor = warna;
                 btn.style.color = '#ffffff';
                 btn.style.boxShadow = '0 4px 0 var(--color-dark, #10182f)';
                 if (icon) icon.style.color = '#ffffff';
@@ -8044,7 +8152,7 @@ window.renderAdminUrus = function (tab) {
                 btn.style.backgroundColor = '#ffffff';
                 btn.style.color = '#1e293b';
                 btn.style.boxShadow = '0 2px 0 var(--color-dark, #10182f)';
-                if (icon) icon.style.color = t === 'guru' ? '#ea580c' : '#0284c7';
+                if (icon) icon.style.color = warna;
             }
         }
     });
@@ -8235,6 +8343,76 @@ window.renderAdminUrus = function (tab) {
                     </div>
             </div>
         `;
+    } else if (activeTab === 'affiliate') {
+        container.innerHTML = `
+            <!-- Kad Affiliate (Pengurusan Sistem) -->
+            <div class="neo-box admin-table-card affiliate-box" style="background-color:#ffffff; background-image:radial-gradient(circle, rgba(124, 58, 237, 0.16) 1.8px, transparent 1.8px); background-size:16px 16px; padding:18px; border-radius:18px; text-align:left; width:100%; max-width:100%; min-width:0; box-sizing:border-box; overflow:hidden; margin-bottom:20px;">
+                <div class="admin-urus-header-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; width:100%; box-sizing:border-box; margin-bottom:15px;">
+                    <div id="affiliate-table-title" class="neo-btn affiliate-title" style="background:linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color:white; padding:7px 16px; font-weight:bold; font-size:1rem; border-radius:12px; border:2.5px solid var(--color-dark, #10182f); box-shadow:0 3px 0 var(--color-dark, #10182f); display:inline-flex; align-items:center; gap:8px; pointer-events:none; margin:0;">
+                        <i class="fa-solid fa-sitemap"></i>
+                        <span style="font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">Affiliate</span>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                        <select id="affiliate-filter-status" class="neo-btn filter-select affiliate-filter" style="padding:6px 32px 6px 10px; font-size:0.85rem; font-weight:bold; border-radius:10px; border:2px solid var(--color-dark); background-color:#f1f5f9; cursor:pointer;" onchange="window.renderAffiliateTable && window.renderAffiliateTable()">
+                            <option value="semua">Semua Status</option>
+                            <option value="aktif">Aktif</option>
+                            <option value="digantung">Digantung</option>
+                        </select>
+                        <button type="button" id="affiliate-tambah-btn" class="neo-btn affiliate-add-btn" style="background:linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color:white; padding:7px 16px; font-weight:bold; font-size:0.9rem; border-radius:10px; border:2.5px solid var(--color-dark, #10182f); box-shadow:0 3px 0 var(--color-dark, #10182f); cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Cipta Affiliate</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Hint leret bagi peranti mudah alih -->
+                <div class="mobile-table-hint" style="display:none; font-size:0.75rem; color:#64748b; font-weight:bold; margin-bottom:8px; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-arrows-left-right" style="color:#7c3aed;"></i>
+                    <span>Leret jadual ke kiri / kanan untuk lihat maklumat & tindakan</span>
+                </div>
+                <div style="width:100%; max-width:100%; min-width:0; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; border:2px solid var(--color-dark, #10182f); box-sizing:border-box;">
+                    <table style="width:100%; min-width:780px; border-collapse:collapse; background:white; font-size:0.85rem;">
+                        <thead id="affiliate-table-head" style="background:linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color:white;">
+                            <tr id="affiliate-table-head-row"></tr>
+                        </thead>
+                        <tbody id="affiliate-table-body">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Kad Laporan Pembayaran Affiliate -->
+            <div class="neo-box admin-table-card affiliate-box" style="background-color:#ffffff; background-image:radial-gradient(circle, rgba(91, 33, 182, 0.16) 1.8px, transparent 1.8px); background-size:16px 16px; padding:18px; border-radius:18px; text-align:left; width:100%; max-width:100%; min-width:0; box-sizing:border-box; overflow:hidden;">
+                <div class="admin-urus-header-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; width:100%; box-sizing:border-box; margin-bottom:15px;">
+                    <div id="affiliate-bayar-title" class="neo-btn affiliate-title" style="background:linear-gradient(135deg, #5b21b6 0%, #4c1d95 100%); color:white; padding:7px 16px; font-weight:bold; font-size:1rem; border-radius:12px; border:2.5px solid var(--color-dark, #10182f); box-shadow:0 3px 0 var(--color-dark, #10182f); display:inline-flex; align-items:center; gap:8px; pointer-events:none; margin:0;">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <span style="font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">Laporan Pembayaran</span>
+                    </div>
+                </div>
+                <!-- Hint leret bagi peranti mudah alih -->
+                <div class="mobile-table-hint" style="display:none; font-size:0.75rem; color:#64748b; font-weight:bold; margin-bottom:8px; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-arrows-left-right" style="color:#5b21b6;"></i>
+                    <span>Leret jadual ke kiri / kanan untuk lihat maklumat & tindakan</span>
+                </div>
+                <div style="width:100%; max-width:100%; min-width:0; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; border:2px solid var(--color-dark, #10182f); box-sizing:border-box;">
+                    <table style="width:100%; min-width:780px; border-collapse:collapse; background:white; font-size:0.85rem;">
+                        <thead id="affiliate-bayar-table-head" style="background:linear-gradient(135deg, #5b21b6 0%, #4c1d95 100%); color:white;">
+                            <tr id="affiliate-bayar-table-head-row"></tr>
+                        </thead>
+                        <tbody id="affiliate-bayar-table-body">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        if (typeof window.renderAffiliateTable === 'function') {
+            window.renderAffiliateTable();
+        }
+        if (typeof window.renderAffiliateBayar === 'function') {
+            window.renderAffiliateBayar();
+        }
     }
 };
 

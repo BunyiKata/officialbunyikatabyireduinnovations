@@ -1,3 +1,13 @@
+# Laporan Penambahbaikan Jadual Affiliate & WhatsApp
+
+1. Kolum WhatsApp dipindahkan ke Tindakan
+2. Butang salin link ikon sahaja dan sebaris kod
+3. Butang gantung dan padam ikon sahaja
+4. Popup modal in-app confirm padam
+5. Templat WhatsApp dengan pautan affiliate
+
+---
+
 # Laporan Audit Supabase & Penambahbaikan Sistem Bunyi Kata
 
 ## 1. Audit Jadual SQL Supabase (Melalui MCP)
