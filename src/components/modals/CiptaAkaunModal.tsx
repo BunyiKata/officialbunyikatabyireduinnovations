@@ -94,7 +94,7 @@ function binaMesejWhatsApp(h: HasilCiptaAkaun): string {
   return [
     `Akaun Bunyi Kata anda telah sedia untuk digunakan! 🎊`,
     "",
-    "🔗 Pautan Bunyi Kata: https://bunyikata--bunyi-kata-official.asia-southeast1.hosted.app",
+    "🔗 Pautan Bunyi Kata: https://bunyikata.my",
     "",
     `📧 Emel: ${h.email || "-"}`,
     `🔑 Kata laluan sementara: ${h.password || "-"}`,

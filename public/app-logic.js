@@ -1180,20 +1180,20 @@ window.renderAffiliateBayar = function () {
     }
 };
 
-    window.padamFeedback = async function (id) {
-        if (!confirm("Adakah anda pasti mahu memadam maklum balas ini dari pangkalan data Firebase?")) return;
-        if (typeof window.deleteFeedbackInFirebase === 'function') {
-            const ok = await window.deleteFeedbackInFirebase(id);
-            if (ok) {
-                if (typeof window.showAppModalAlert === 'function') {
-                    window.showAppModalAlert('Berjaya', 'Maklum balas telah berjaya dipadam dari pangkalan data.');
-                }
-                window.renderAdminTable('feedback');
-            } else {
-                alert('Gagal memadam maklum balas daripada Firebase.');
+window.padamFeedback = async function (id) {
+    if (!confirm("Adakah anda pasti mahu memadam maklum balas ini dari pangkalan data Firebase?")) return;
+    if (typeof window.deleteFeedbackInFirebase === 'function') {
+        const ok = await window.deleteFeedbackInFirebase(id);
+        if (ok) {
+            if (typeof window.showAppModalAlert === 'function') {
+                window.showAppModalAlert('Berjaya', 'Maklum balas telah berjaya dipadam dari pangkalan data.');
             }
+            window.renderAdminTable('feedback');
+        } else {
+            alert('Gagal memadam maklum balas daripada Firebase.');
         }
-    };
+    }
+};
 
 // --- SISTEM AUTO-SAVE LATIHAN ---
 function getAutoSave(kunci) {
