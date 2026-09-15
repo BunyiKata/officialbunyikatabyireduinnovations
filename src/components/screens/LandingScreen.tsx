@@ -200,38 +200,90 @@ const IconPlayStore = () => (
   </svg>
 );
 
-/* Avatar kartun (perempuan & lelaki) untuk testimoni — LUKISAN SVG sendiri,
-   bukan aset watak projek. Supaya testimoni nampak lebih mesra & manusiawi. */
-const AvatarGirl = ({ hair = "#5b3a29", skin = "#f6c9a8", shirt = "#10b981" }: { hair?: string; skin?: string; shirt?: string }) => (
-  <svg viewBox="0 0 64 64" aria-hidden="true">
-    <path d="M32 40c-9 0-16 5.5-17 14.5h34C48 45.5 41 40 32 40z" fill={shirt} />
-    <rect x="27" y="34" width="10" height="9" rx="3" fill={skin} />
-    <circle cx="32" cy="25" r="14" fill={skin} />
-    <path d="M18 25c0-9 6-15 14-15s14 6 14 15c0 0-1-8-6-8-2 0-3 1.5-8 1.5S26 17 24 18c-3 2-6 7-6 7z" fill={hair} />
-    <path d="M18 25c-1.5 6-1.5 12 1 17 1-4 0-9 1-13zM46 25c1.5 6 1.5 12-1 17-1-4 0-9-1-13z" fill={hair} />
-    <circle cx="27" cy="25" r="1.9" fill="#22303a" />
-    <circle cx="37" cy="25" r="1.9" fill="#22303a" />
-    <circle cx="27.6" cy="24.4" r="0.6" fill="#fff" />
-    <circle cx="37.6" cy="24.4" r="0.6" fill="#fff" />
-    <circle cx="23" cy="29" r="1.7" fill="#f79ea4" opacity="0.7" />
-    <circle cx="41" cy="29" r="1.7" fill="#f79ea4" opacity="0.7" />
-    <path d="M27.5 30.5c1.5 1.9 7.5 1.9 9 0" stroke="#22303a" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+const IconSparkles = () => (
+  <svg viewBox="0 0 24 24" fill="#0f2e29" style={{ width: "24px", height: "24px", display: "block" }} aria-hidden="true">
+    <path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2zM19 15l1.2 3.3L23.5 19.5l-3.3 1.2L19 24l-1.2-3.3L14.5 19.5l3.3-1.2L19 15zM4 2l1 2.5L7.5 5.5 5 6.5 4 9 3 6.5 0.5 5.5 3 4.5 4 2z"/>
   </svg>
 );
 
-const AvatarBoy = ({ hair = "#2f2118", skin = "#f3c19b", shirt = "#2563eb" }: { hair?: string; skin?: string; shirt?: string }) => (
-  <svg viewBox="0 0 64 64" aria-hidden="true">
-    <path d="M32 40c-9 0-16 5.5-17 14.5h34C48 45.5 41 40 32 40z" fill={shirt} />
-    <rect x="27" y="34" width="10" height="9" rx="3" fill={skin} />
-    <circle cx="32" cy="25" r="14" fill={skin} />
-    <path d="M18 25c0-9 6-15 14-15s14 6 14 15c-2-6-5-7-9-7-3 0-4 1-8 1-5 0-6 2-11 6z" fill={hair} />
-    <circle cx="18" cy="26" r="2.4" fill={skin} />
-    <circle cx="46" cy="26" r="2.4" fill={skin} />
-    <circle cx="27" cy="25" r="1.9" fill="#22303a" />
-    <circle cx="37" cy="25" r="1.9" fill="#22303a" />
-    <circle cx="27.6" cy="24.4" r="0.6" fill="#fff" />
-    <circle cx="37.6" cy="24.4" r="0.6" fill="#fff" />
-    <path d="M27 30.5c1.6 2 8.4 2 10 0" stroke="#22303a" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+const IconClose = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "24px", height: "24px", display: "block", margin: "auto" }} aria-hidden="true">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const IconCompass = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "1.15em", height: "1.15em", display: "inline-block", verticalAlign: "-0.15em" }} aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" fillOpacity="0.3" />
+  </svg>
+);
+
+/* Avatar tersuai yang moden & menarik untuk testimoni — lukisan SVG sendiri,
+   tanpa menggunakan aset watak projek. */
+const AvatarAisyah = () => (
+  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="32" cy="32" r="32" fill="#d1fae5" />
+    <path d="M12 60c2-12 10-18 20-18s18 6 20 18" fill="#10b981" />
+    {/* Hijab / Tudung moden */}
+    <path d="M32 12c-9 0-16 7-16 17 0 11 4 19 16 21 12-2 16-10 16-21 0-10-7-17-16-17z" fill="#047857" />
+    {/* Muka */}
+    <ellipse cx="32" cy="31" rx="9" ry="11" fill="#fed7aa" />
+    <path d="M26 23c2-2 10-2 12 0" stroke="#047857" strokeWidth="2.5" strokeLinecap="round" />
+    {/* Mata senyum */}
+    <path d="M27 30c1 1 3 1 4 0" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" />
+    <path d="M33 30c1 1 3 1 4 0" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" />
+    {/* Pipi kemerahan */}
+    <circle cx="26" cy="34" r="2.2" fill="#fca5a5" opacity="0.65" />
+    <circle cx="38" cy="34" r="2.2" fill="#fca5a5" opacity="0.65" />
+    {/* Senyuman manis */}
+    <path d="M29.5 35.5c1.5 1.5 3.5 1.5 5 0" stroke="#b91c1c" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+);
+
+const AvatarFarah = () => (
+  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="32" cy="32" r="32" fill="#dbeafe" />
+    <path d="M12 60c2-12 10-18 20-18s18 6 20 18" fill="#3b82f6" />
+    {/* Rambut disanggul kemas */}
+    <circle cx="32" cy="15" r="7" fill="#374151" />
+    <path d="M20 28c0-8 5-14 12-14s12 6 12 14c0 3-1 6-2 8H22c-1-2-2-5-2-8z" fill="#374151" />
+    {/* Muka */}
+    <ellipse cx="32" cy="32" rx="9.5" ry="11.5" fill="#fde68a" />
+    {/* Cermin mata moden bergaya */}
+    <rect x="23" y="27" width="7.5" height="6" rx="2.5" stroke="#1e3a8a" strokeWidth="1.8" fill="#eff6ff" fillOpacity="0.4" />
+    <rect x="33.5" y="27" width="7.5" height="6" rx="2.5" stroke="#1e3a8a" strokeWidth="1.8" fill="#eff6ff" fillOpacity="0.4" />
+    <line x1="30.5" y1="30" x2="33.5" y2="30" stroke="#1e3a8a" strokeWidth="1.8" />
+    {/* Mata ceria */}
+    <circle cx="26.8" cy="30" r="1.2" fill="#1e3a8a" />
+    <circle cx="37.2" cy="30" r="1.2" fill="#1e3a8a" />
+    {/* Senyuman mesra pendidik */}
+    <path d="M29 36.5c1.8 2 4.2 2 6 0" stroke="#b91c1c" strokeWidth="1.8" strokeLinecap="round" />
+    {/* Pipi */}
+    <circle cx="25" cy="35" r="2" fill="#fca5a5" opacity="0.6" />
+    <circle cx="39" cy="35" r="2" fill="#fca5a5" opacity="0.6" />
+  </svg>
+);
+
+const AvatarDanial = () => (
+  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="32" cy="32" r="32" fill="#fef3c7" />
+    <path d="M12 60c2-12 10-18 20-18s18 6 20 18" fill="#f59e0b" />
+    {/* Kolar kemeja */}
+    <path d="M28 42l4 6 4-6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    {/* Muka */}
+    <ellipse cx="32" cy="31" rx="9.5" ry="11.5" fill="#fed7aa" />
+    {/* Rambut kemas moden */}
+    <path d="M22 25c1-7 5-11 10-11s10 3 11 8c-3-2-7-3-11-2-4 1-8 3-10 5z" fill="#1f2937" />
+    <path d="M21 27c0-2 1-4 2-5" stroke="#1f2937" strokeWidth="2.5" strokeLinecap="round" />
+    {/* Kening & Mata */}
+    <path d="M25 25c1.5-1 3.5-1 5 0" stroke="#1f2937" strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M34 25c1.5-1 3.5-1 5 0" stroke="#1f2937" strokeWidth="1.8" strokeLinecap="round" />
+    <circle cx="27.5" cy="28.5" r="1.4" fill="#1f2937" />
+    <circle cx="36.5" cy="28.5" r="1.4" fill="#1f2937" />
+    {/* Senyuman bapa prihatin */}
+    <path d="M28.5 35.5c2 2.5 5 2.5 7 0" stroke="#92400e" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
@@ -331,11 +383,11 @@ const mods = [
     img: "/images/sampingan/peta-cabaran-huruf.png",
     tag: "GURU",
     nama: "Mod Guru",
-    desc: "Untuk guru kelas, Prasekolah & Pemulihan Khas.",
+    desc: "Untuk kelas Prasekolah & Pemulihan.",
     senarai: [
-      "Kod Kelas unik untuk murid sertai",
+      "Kod Kelas unik murid sertai",
       "Sehingga 2 kelas serentak (Pro)",
-      "Statistik & laporan prestasi murid",
+      "Laporan & statistik murid",
     ],
   },
   {
@@ -344,11 +396,11 @@ const mods = [
     img: "/images/menu-kad/menu%20asas%20bunyi%20kata/teka%20gambar%20rahsia.png",
     tag: "IBU BAPA",
     nama: "Mod Ibu Bapa",
-    desc: "Untuk ibu bapa pantau anak belajar di rumah.",
+    desc: "Pantau anak belajar di rumah.",
     senarai: [
-      "Kod Keluarga khas untuk anak",
+      "Kod Keluarga khas anak",
       "Sehingga 3 profil anak (Pro)",
-      "Laporan & sijil setiap anak",
+      "Laporan & sijil pencapaian",
     ],
   },
   {
@@ -357,11 +409,11 @@ const mods = [
     img: "/images/menu/fonik%20abc.png",
     tag: "AFFILIATE",
     nama: "Mod Affiliate",
-    desc: "Jana pendapatan dengan memperkenalkan Bunyi Kata.",
+    desc: "Jana komisen promosi Bunyi Kata.",
     senarai: [
-      "Kod rujukan & pautan unik anda",
-      "Papan pemuka komisen & rujukan",
-      "Pantau prestasi jualan sekali pandang",
+      "Pautan rujukan unik anda",
+      "Papan pemuka komisen pantas",
+      "Pantau jualan sekali pandang",
     ],
   },
 ];
@@ -421,21 +473,21 @@ const testimoni = [
     peranan: "Ibu kepada Hana, 5 tahun",
     teks: "Anak saya dulu tak kenal huruf. Lepas seminggu main Bunyi Kata, dia dah boleh baca suku kata sendiri!",
     warna: "#10b981",
-    avatar: { jenis: "girl", hair: "#5b3a29", shirt: "#10b981" },
+    avatar: "aisyah",
   },
   {
     nama: "Cikgu Farah",
     peranan: "Guru Prasekolah",
     teks: "Sangat membantu dalam kelas. Murid lebih fokus dan tak sabar tunggu sesi fonik setiap hari.",
     warna: "#3b82f6",
-    avatar: { jenis: "girl", hair: "#2b2b2b", shirt: "#3b82f6" },
+    avatar: "farah",
   },
   {
     nama: "Encik Danial",
     peranan: "Bapa kepada Adam, 6 tahun",
     teks: "Seronok sebab belajar macam main game. Adam tak perasan pun dia sedang belajar membaca.",
     warna: "#f59e0b",
-    avatar: { jenis: "boy", hair: "#2f2118", shirt: "#f59e0b" },
+    avatar: "danial",
   },
 ];
 
@@ -758,6 +810,7 @@ export default function LandingScreen({
   onOpenPakej,
 }: LandingScreenProps) {
   const [faqBuka, setFaqBuka] = React.useState<number | null>(null);
+  const [isShortcutOpen, setIsShortcutOpen] = React.useState(false);
   useScrollReveal();
   useSectionPopup();
 
@@ -779,6 +832,11 @@ export default function LandingScreen({
       window.scrollTo({ top, behavior: "smooth" });
     }
     try { history.replaceState(null, "", "#" + id); } catch (_) {}
+  };
+
+  const handleShortcutClick = (id: string) => (e: React.MouseEvent) => {
+    pageScrollTo(id)(e);
+    setIsShortcutOpen(false);
   };
 
 
@@ -821,17 +879,14 @@ export default function LandingScreen({
             </div>
             <nav className="landing-nav-links">
               <a href="#ciri" onClick={pageScrollTo("ciri")}>Ciri</a>
-              <a href="#peta" onClick={pageScrollTo("peta")}>Pembelajaran</a>
+              <a href="#peta" className="landing-nav-desktop-only" onClick={pageScrollTo("peta")}>Pembelajaran</a>
               <a href="#pakej" onClick={pageScrollTo("pakej")}>Pakej</a>
               <a href="#mod" onClick={pageScrollTo("mod")}>Mod</a>
-              <a href="#faq" onClick={pageScrollTo("faq")}>FAQ</a>
+              <a href="#faq" className="landing-nav-desktop-only" onClick={pageScrollTo("faq")}>FAQ</a>
             </nav>
             <div className="landing-nav-actions">
-              <button className="landing-btn landing-btn-ghost" onClick={onLogMasuk}>
+              <button className="landing-btn landing-btn-primary" onClick={onLogMasuk}>
                 Log Masuk
-              </button>
-              <button className="landing-btn landing-btn-primary" onClick={onCubaPercuma}>
-                Cuba Percuma
               </button>
             </div>
           </div>
@@ -875,10 +930,6 @@ export default function LandingScreen({
                   Log Masuk
                 </button>
               </div>
-              <p className="landing-hero-note">
-                <IconCheck /> Tak perlu daftar &nbsp;•&nbsp;
-                <IconPhone /> Guna di telefon &amp; tablet
-              </p>
             </div>
 
             <div className="landing-hero-art">
@@ -1090,9 +1141,7 @@ export default function LandingScreen({
                   <p className="landing-testimoni-teks">{t.teks}</p>
                   <div className="landing-testimoni-orang">
                     <span className="landing-testi-avatar" aria-hidden="true">
-                      {t.avatar?.jenis === "boy"
-                        ? <AvatarBoy hair={t.avatar?.hair} shirt={t.avatar?.shirt} />
-                        : <AvatarGirl hair={t.avatar?.hair} shirt={t.avatar?.shirt} />}
+                      {t.avatar === "farah" ? <AvatarFarah /> : t.avatar === "danial" ? <AvatarDanial /> : <AvatarAisyah />}
                     </span>
                     <div className="landing-testi-ident">
                       <strong>{t.nama}</strong>
@@ -1391,6 +1440,93 @@ export default function LandingScreen({
             © {new Date().getFullYear()} Bunyi Kata · bunyikata.my · Hak cipta terpelihara.
           </div>
         </footer>
+
+        {/* ===== BUTANG TOGGLE & KOMPONEN SHORTCUT LANDING (MOBILE VIEW) ===== */}
+        <div id="landing-mobile-dial-container" className={isShortcutOpen ? "open" : ""}>
+          {isShortcutOpen && (
+            <div className="landing-shortcut-backdrop" onClick={() => setIsShortcutOpen(false)} />
+          )}
+          <div className="landing-shortcut-options" role="menu" aria-label="Navigasi Pantas">
+            <div className="landing-shortcut-header">
+              <IconCompass />
+              <span>Menu Pantas</span>
+            </div>
+            <button
+              type="button"
+              className="neo-btn landing-shortcut-btn"
+              onClick={handleShortcutClick("ciri")}
+            >
+              <span className="landing-shortcut-btn-icon" style={{ backgroundColor: "#10b981" }}><IconMap /></span>
+              <span>Ciri-ciri</span>
+            </button>
+            <button
+              type="button"
+              className="neo-btn landing-shortcut-btn"
+              onClick={handleShortcutClick("peta")}
+            >
+              <span className="landing-shortcut-btn-icon" style={{ backgroundColor: "#3b82f6" }}><IconBook /></span>
+              <span>4 Peta Belajar</span>
+            </button>
+            <button
+              type="button"
+              className="neo-btn landing-shortcut-btn"
+              onClick={handleShortcutClick("preview")}
+            >
+              <span className="landing-shortcut-btn-icon" style={{ backgroundColor: "#06b6d4" }}><IconTarget /></span>
+              <span>Pratonton App</span>
+            </button>
+            <button
+              type="button"
+              className="neo-btn landing-shortcut-btn"
+              onClick={handleShortcutClick("cabaran")}
+            >
+              <span className="landing-shortcut-btn-icon" style={{ backgroundColor: "#f59e0b" }}><IconGamepad /></span>
+              <span>Permainan</span>
+            </button>
+            <button
+              type="button"
+              className="neo-btn landing-shortcut-btn"
+              onClick={handleShortcutClick("lencana")}
+            >
+              <span className="landing-shortcut-btn-icon" style={{ backgroundColor: "#8b5cf6" }}><IconTrophy /></span>
+              <span>Lencana</span>
+            </button>
+            <button
+              type="button"
+              className="neo-btn landing-shortcut-btn"
+              onClick={handleShortcutClick("mod")}
+            >
+              <span className="landing-shortcut-btn-icon" style={{ backgroundColor: "#ea580c" }}><IconSchool /></span>
+              <span>Pilihan Mod</span>
+            </button>
+            <button
+              type="button"
+              className="neo-btn landing-shortcut-btn"
+              onClick={handleShortcutClick("pakej")}
+            >
+              <span className="landing-shortcut-btn-icon" style={{ backgroundColor: "#ec4899" }}><IconCard /></span>
+              <span>Pakej Harga</span>
+            </button>
+            <button
+              type="button"
+              className="neo-btn landing-shortcut-btn"
+              onClick={handleShortcutClick("faq")}
+            >
+              <span className="landing-shortcut-btn-icon" style={{ backgroundColor: "#64748b" }}><IconPuzzle /></span>
+              <span>Soalan Lazim</span>
+            </button>
+          </div>
+
+          <button
+            id="landing-mobile-floating-cta"
+            className="neo-btn bg-yellow"
+            onClick={() => setIsShortcutOpen(!isShortcutOpen)}
+            aria-label="Pintas Landing Page"
+            title="Menu Navigasi Pantas"
+          >
+            {isShortcutOpen ? <IconClose /> : <IconSparkles />}
+          </button>
+        </div>
 
       </div>
     </div>

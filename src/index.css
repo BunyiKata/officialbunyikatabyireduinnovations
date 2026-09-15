@@ -16085,25 +16085,34 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     }
 }
 
-@media (max-width: 640px) {
-    .landing-nav-links {
-        display: none;
+@media (max-width: 768px) {
+    .landing-nav-desktop-only {
+        display: none !important;
     }
-    /* Item 3: pada mobile, buang senarai kad putih "Rupa Dalam Aplikasi" —
+    .landing-nav-links {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+    .landing-nav-links a {
+        font-size: 0.88rem !important;
+        font-weight: 700 !important;
+        padding: 4px 6px !important;
+        color: #0f2e29 !important;
+    }
+    /* Pada mobile, buang senarai kad putih "Rupa Dalam Aplikasi" —
        carousel swipe sudah memadai dan mengurangkan ruang yang panjang. */
     .landing-preview-feature-list {
         display: none !important;
     }
     .landing-section {
-        padding: 48px 16px;
+        padding: 40px 16px;
     }
-    /* Item 4: rapatkan jarak hero (nota "tak perlu daftar") dengan jalur
-       statistik supaya tiada ruang kosong besar pada mobile. */
     .landing-hero {
-        padding: 40px 16px 24px;
+        padding: 24px 14px 16px !important;
     }
     .landing-stats-strip {
-        padding: 22px 12px;
+        padding: 18px 12px !important;
     }
     .landing-hero-cta {
         flex-direction: column;
@@ -16111,7 +16120,6 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     .landing-hero-cta .landing-btn {
         width: 100%;
     }
-    /* Item 2: 4 peta pembelajaran, 80+ aktiviti, 5 lencana dalam SATU baris. */
     .landing-stats-inner {
         grid-template-columns: repeat(3, 1fr);
         gap: 8px;
@@ -16132,8 +16140,12 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         font-size: 1.5rem;
     }
     .landing-footer-inner {
-        grid-template-columns: 1fr;
-        gap: 28px;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 20px 14px !important;
+    }
+    .landing-footer-brand {
+        grid-column: 1 / -1 !important;
+        text-align: center !important;
     }
     .landing-preview-main {
         width: 280px;
@@ -16523,7 +16535,8 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
 
 @media (max-width: 420px) {
     .landing-footer-inner {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
     }
 }
 
@@ -16893,77 +16906,446 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   MOBILE (≤640px) — HAPUS RUANG KOSONG BESAR DI BAWAH HERO
-   Punca: pada mobile, hero bertindan (column). Teks hero berpusat dan logo
-   glitch diletak di BAWAH teks (order: -1 = di atas sebenarnya), tetapi
-   .landing-hero-logo mempunyai width:100% + max-height:360px dengan nisbah
-   yang tinggi — jadi ia mengambil jalur besar & berpusat, meninggalkan
-   'ruangan kosong' di bawah nota "Tak perlu daftar". Di sini kita:
-     1) hadkan saiz logo (width auto, tinggi maks kecil),
-     2) rapatkan jarak antara elemen hero dan ke jalur statistik,
-     3) kembalikan nota "Tak perlu daftar • Guna di telefon" ke tengah.
-   Blok ini diletakkan paling AKHIR fail supaya menang ke atas semua blok
-   ≤960/≤640/≤560 yang lebih awal (tie pada spesifisiti = yang terakhir menang).
+   MOBILE VIEW (≤768px) — LANDING PAGE OPTIMISATIONS
+   - Hapus ruang kosong antara "Tak perlu daftar" & jalur statistik
+   - Top nav mobile: hanya ciri, pakej, mod
+   - Butang toggle & speed dial shortcut navigasi
+   - Kad maklum balas / testimoni lebih kecil & padat
+   - Kad maklumat mod lebih kecil & bersebelahan (2 kolum)
+   - Spacing tajuk & perenggan "Kenapa Bunyi Kata" dan "Pembelajaran Utama"
+   - Footer tersusun bersebelahan (2 lajur)
    ══════════════════════════════════════════════════════════════════════════ */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+    /* 1. TOP NAV MOBILE: HANYA CUBA PERCUMA & LOG MASUK (LAIN TAK PERLU) */
+    .landing-nav-links {
+        display: none !important;
+    }
+    .landing-nav-inner {
+        padding: 10px 14px !important;
+        justify-content: space-between !important;
+    }
+    .landing-brand-logo {
+        height: 36px !important;
+        max-width: 145px !important;
+    }
+    .landing-nav-actions {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+    .landing-nav-actions .landing-btn {
+        padding: 7px 12px !important;
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        border-radius: 10px !important;
+        display: inline-flex !important;
+    }
+    .landing-nav-actions .landing-btn-ghost {
+        display: inline-flex !important;
+        background: #ffffff !important;
+        color: #0f2e29 !important;
+        border: 2px solid #0f2e29 !important;
+        box-shadow: 0 2.5px 0 #0f2e29 !important;
+    }
+    .landing-nav-actions .landing-btn-primary {
+        display: inline-flex !important;
+        background: #ffd93d !important;
+        color: #3a2b00 !important;
+        border: 2px solid #0f2e29 !important;
+        box-shadow: 0 2.5px 0 #0f2e29 !important;
+        white-space: nowrap !important;
+    }
+
+    /* 2. HERO: HAPUS RUANG KOSONG BESAR DI BAWAH "TAK PERLU DAFTAR" */
     .landing-hero {
-        padding: 18px 16px 10px !important;
+        padding: 20px 14px 12px !important;
         min-height: 0 !important;
     }
     .landing-hero-inner {
-        gap: 10px !important;
-        margin: 0 !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 8px !important;
+        margin: 0 auto !important;
         padding: 0 !important;
         min-height: 0 !important;
     }
-    .landing-hero-text {
-        align-items: center !important;
-        text-align: center !important;
-    }
-    /* Pastikan urutan PASTI: logo DI ATAS teks. Jika tidak, logo yang berada
-       di bawah nota (nisbah imejnya tinggi) akan menghasilkan jalur kosong
-       besar di antara nota dan jalur statistik. */
     .landing-hero-art {
         order: -1 !important;
+        flex: none !important;
         width: auto !important;
         max-width: 100% !important;
-        margin: 0 auto !important;
-        flex: 0 0 auto !important;
+        margin: 0 auto 4px !important;
         line-height: 0 !important;
     }
-    .landing-hero-text {
-        order: 0 !important;
-    }
     .landing-hero-logo {
-        /* Kunci saiz: hadkan KEDUA-DUA lebar & tinggi secara mutlak supaya
-           tiada jalur besar terhasil di bawahnya. */
         display: block !important;
         width: auto !important;
         height: auto !important;
-        max-width: 54vw !important;
-        max-height: 130px !important;
+        max-width: 50vw !important;
+        max-height: 105px !important;
         margin: 0 auto !important;
     }
+    .landing-hero-text {
+        order: 0 !important;
+        flex: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
     .landing-badge {
-        margin-bottom: 12px;
+        margin-bottom: 10px !important;
+        font-size: 0.76rem !important;
+        padding: 4px 12px !important;
     }
     .landing-hero-title {
-        margin-bottom: 12px;
+        margin-bottom: 10px !important;
+        font-size: clamp(1.75rem, 6.8vw, 2.25rem) !important;
+        line-height: 1.08 !important;
     }
     .landing-hero-sub {
-        margin-bottom: 14px;
+        margin-bottom: 12px !important;
+        font-size: 0.88rem !important;
+        line-height: 1.38 !important;
+        max-width: 95% !important;
     }
     .landing-hero-cta {
-        gap: 10px;
-        margin-bottom: 10px;
+        flex-direction: column !important;
+        gap: 8px !important;
+        margin-bottom: 8px !important;
+        width: 100% !important;
+        max-width: 320px !important;
+    }
+    .landing-hero-cta .landing-btn {
+        width: 100% !important;
+        padding: 10px 18px !important;
+        font-size: 0.92rem !important;
     }
     .landing-hero-note {
         margin: 0 !important;
-        width: 100%;
-        justify-content: center;
+        width: 100% !important;
+        justify-content: center !important;
+        font-size: 0.8rem !important;
+        line-height: 1.25 !important;
     }
     .landing-stats-strip {
         padding: 16px 12px !important;
+    }
+
+    /* 3. TESTIMONI: SAIZ KAD LEBIH KECIL & PADAT */
+    .landing-testi-track {
+        gap: 12px !important;
+    }
+    .landing-testi-track .landing-card-testimoni {
+        width: 245px !important;
+        max-width: 76vw !important;
+        padding: 12px 14px !important;
+        gap: 8px !important;
+        border-left-width: 5px !important;
+    }
+    .landing-testi-top {
+        gap: 6px !important;
+    }
+    .landing-testi-quote {
+        font-size: 2.2rem !important;
+        margin-top: 2px !important;
+        line-height: 0.6 !important;
+    }
+    .landing-star-row svg {
+        width: 0.92rem !important;
+        height: 0.92rem !important;
+    }
+    .landing-testimoni-teks {
+        font-size: 0.83rem !important;
+        line-height: 1.42 !important;
+    }
+    .landing-testimoni-orang {
+        gap: 8px !important;
+        padding-top: 10px !important;
+    }
+    .landing-testi-avatar {
+        width: 36px !important;
+        height: 36px !important;
+        border-width: 2px !important;
+    }
+    .landing-testimoni-orang strong {
+        font-size: 0.86rem !important;
+    }
+    .landing-testimoni-orang span {
+        font-size: 0.72rem !important;
+    }
+
+    /* 4. MAKLUMAT MOD: KECILKAN LAGI & BERSEBELAHAN (2 KOLUM) */
+    .landing-grid-mod {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+    .landing-grid-mod .landing-card-img {
+        aspect-ratio: auto !important;
+        min-height: 180px !important;
+    }
+    .landing-grid-mod .landing-card-img:nth-child(3) {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        max-width: 320px !important;
+        margin: 0 auto !important;
+    }
+    .landing-mod-tag-img {
+        top: 8px !important;
+        right: 8px !important;
+        font-size: 0.58rem !important;
+        padding: 2px 7px !important;
+    }
+    .landing-mod-info {
+        padding: 6px 8px 2px !important;
+        gap: 5px !important;
+    }
+    .landing-grid-mod .landing-card-img-pill {
+        width: 26px !important;
+        height: 26px !important;
+    }
+    .landing-grid-mod .landing-card-img-pill svg {
+        width: 14px !important;
+        height: 14px !important;
+    }
+    .landing-grid-mod .landing-card-img-text h3 {
+        font-size: 0.85rem !important;
+        line-height: 1.15 !important;
+        margin: 0 !important;
+    }
+    .landing-grid-mod .landing-mod-desc {
+        font-size: 0.68rem !important;
+        line-height: 1.22 !important;
+        margin-top: 1px !important;
+    }
+    .landing-grid-mod .landing-mod-senarai {
+        padding: 0 8px 8px !important;
+        gap: 2px !important;
+    }
+    .landing-grid-mod .landing-mod-senarai li {
+        font-size: 0.68rem !important;
+        line-height: 1.2 !important;
+        gap: 4px !important;
+    }
+
+    /* 5. SPACING RAPAT UNTUK "KENAPA BUNYI KATA" & "PEMBELAJARAN UTAMA" */
+    #landing-screen #ciri .landing-section-head,
+    #landing-screen #peta .landing-section-head {
+        margin: 0 auto 16px !important;
+    }
+    #landing-screen #ciri .landing-kicker,
+    #landing-screen #peta .landing-kicker {
+        margin-bottom: 2px !important;
+        font-size: 0.74rem !important;
+        letter-spacing: 1.5px !important;
+    }
+    #landing-screen #ciri .landing-h2,
+    #landing-screen #peta .landing-h2 {
+        font-size: clamp(1.2rem, 4.4vw, 1.55rem) !important;
+        line-height: 1.14 !important;
+        margin: 0 0 4px !important;
+    }
+    #landing-screen #ciri .landing-h2::after,
+    #landing-screen #peta .landing-h2::after {
+        margin: 4px auto 6px !important;
+        height: 3.5px !important;
+        width: 44px !important;
+    }
+    #landing-screen #ciri .landing-section-sub,
+    #landing-screen #peta .landing-section-sub {
+        font-size: 0.82rem !important;
+        line-height: 1.3 !important;
+        margin: 0 !important;
+    }
+    #landing-screen .landing-grid-ciri,
+    #landing-screen .landing-grid-peta {
+        gap: 8px !important;
+    }
+    #landing-screen .landing-grid-ciri .landing-card-img,
+    #landing-screen .landing-grid-peta .landing-card-img {
+        aspect-ratio: 16 / 11 !important;
+    }
+    #landing-screen .landing-grid-ciri .landing-card-img-text,
+    #landing-screen .landing-grid-peta .landing-card-img-text {
+        padding: 6px 8px !important;
+        gap: 6px !important;
+    }
+    #landing-screen .landing-grid-ciri .landing-card-img-text h3,
+    #landing-screen .landing-grid-peta .landing-card-img-text h3 {
+        font-size: 0.82rem !important;
+        line-height: 1.15 !important;
+        margin: 0 !important;
+    }
+    #landing-screen .landing-grid-peta .landing-card-img-no {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 0.76rem !important;
+        top: 6px !important;
+        right: 6px !important;
+    }
+
+    /* 6. FOOTER BERSEBELAHAN */
+    .landing-footer-inner {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 18px 14px !important;
+    }
+    .landing-footer-brand {
+        grid-column: 1 / -1 !important;
+        text-align: center !important;
+    }
+}
+
+/* 7. KOMPONEN SHORTCUT LANDING PAGE & BUTANG TOGGLE (GAYA "CARA BELAJAR") */
+#landing-mobile-dial-container {
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    right: 18px;
+    z-index: 9999;
+}
+
+#landing-mobile-floating-cta {
+    position: relative !important;
+    z-index: 105 !important;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    padding: 0;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 0 #0f2e29, 0 6px 14px rgba(0,0,0,0.22);
+    animation: floating-cta-glow 1.8s infinite alternate;
+    cursor: pointer;
+    border: 3px solid #0f2e29;
+    background: #ffd93d;
+    color: #0f2e29;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, box-shadow 0.2s ease;
+}
+
+#landing-mobile-dial-container.open #landing-mobile-floating-cta {
+    transform: rotate(90deg) scale(1.06);
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border-color: #0f2e29 !important;
+    box-shadow: 0 4px 0 #0f2e29, 0 8px 18px rgba(239, 68, 68, 0.45) !important;
+    animation: none !important;
+}
+
+#landing-mobile-floating-cta svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+    pointer-events: none;
+}
+
+#landing-mobile-dial-container.open #landing-mobile-floating-cta svg {
+    stroke: #ffffff !important;
+    color: #ffffff !important;
+}
+
+.landing-shortcut-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 46, 41, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 90 !important;
+    animation: landing-fade-in 0.2s ease both;
+}
+
+.landing-shortcut-options {
+    position: absolute;
+    bottom: 64px;
+    right: 0;
+    z-index: 95 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 215px;
+    max-height: 72vh;
+    overflow-y: auto;
+    padding: 10px;
+    border-radius: 20px;
+    background: rgba(255, 253, 245, 0.98);
+    border: 3px solid #0f2e29;
+    box-shadow: 0 6px 0 #0f2e29, 0 16px 28px rgba(15, 46, 41, 0.3);
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(16px) scale(0.92);
+    transform-origin: bottom right;
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+#landing-mobile-dial-container.open .landing-shortcut-options {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.landing-shortcut-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 800;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #047857;
+    padding: 2px 4px 6px;
+    border-bottom: 2px dashed #bfe6da;
+    margin-bottom: 2px;
+}
+
+.landing-shortcut-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    padding: 6px 10px !important;
+    border-radius: 12px !important;
+    font-size: 0.82rem !important;
+    font-weight: 700 !important;
+    color: #0f2e29 !important;
+    background: #fff !important;
+    border: 2px solid #0f2e29 !important;
+    box-shadow: 0 2.5px 0 #0f2e29 !important;
+    width: 100% !important;
+    text-align: left !important;
+    transition: transform 0.1s ease, background 0.1s ease;
+}
+
+.landing-shortcut-btn:active {
+    transform: translateY(2px) !important;
+    box-shadow: 0 1px 0 #0f2e29 !important;
+}
+
+.landing-shortcut-btn-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.landing-shortcut-btn-icon svg {
+    width: 13px;
+    height: 13px;
+}
+
+@media (max-width: 768px) {
+    #landing-mobile-dial-container {
+        display: block;
     }
 }
 
