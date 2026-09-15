@@ -4,7 +4,7 @@ import React from "react";
 /**
  * Halaman pendaratan awam (public landing page) untuk bunyi-kata.my.
  *
- * v2 Ã¢â‚¬â€ Redesign penuh:
+ * v2 — Redesign penuh:
  * - SVG inline icons (tiada emoji, tiada Font Awesome)
  * - Scroll-reveal animation (IntersectionObserver)
  * - Stats strip dengan count-up
@@ -21,7 +21,7 @@ interface LandingScreenProps {
 
 const LOGO = "/images/sampingan/logo-login-screen.png";
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ SVG Icons Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── SVG Icons ───────────────────────────────────────────────────────────────
 const IconBook = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
@@ -142,19 +142,19 @@ const IconAward = () => (
   </svg>
 );
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Data Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Data ─────────────────────────────────────────────────────────────────────
 const ciri = [
   {
     Icon: IconBook,
     warna: "#10b981",
     tajuk: "Belajar Fonik Step-by-Step",
-    huraian: "Huruf vokal, konsonan, suku kata KV hingga bacaan penuh Ã¢â‚¬â€ disusun mengikut tahap usia anak.",
+    huraian: "Huruf vokal, konsonan, suku kata KV hingga bacaan penuh — disusun mengikut tahap usia anak.",
   },
   {
     Icon: IconGamepad,
     warna: "#f59e0b",
     tajuk: "12+ Mini Permainan",
-    huraian: "Tanduk Kata, Cantum Kata, Suku Kata Puzzle dan banyak lagi Ã¢â‚¬â€ belajar jadi seronok.",
+    huraian: "Tanduk Kata, Cantum Kata, Suku Kata Puzzle dan banyak lagi — belajar jadi seronok.",
   },
   {
     Icon: IconMic,
@@ -166,7 +166,7 @@ const ciri = [
     Icon: IconTrophy,
     warna: "#8b5cf6",
     tajuk: "Lencana & Ganjaran",
-    huraian: "Kumpul bintang, naik peta dan buka lencana baru Ã¢â‚¬â€ anak tak sabar nak belajar lagi.",
+    huraian: "Kumpul bintang, naik peta dan buka lencana baru — anak tak sabar nak belajar lagi.",
   },
 ];
 
@@ -203,7 +203,7 @@ const langkah = [
   },
 ];
 
-// App preview Ã¢â‚¬â€ guna aset sebenar dari projek
+// App preview — guna aset sebenar dari projek
 const appPreviews = [
   {
     img: "/images/sampingan/peta-cabaran-suku-kata-asas.png",
@@ -255,7 +255,7 @@ const testimoni = [
   },
 ];
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Count-up hook Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Count-up hook ────────────────────────────────────────────────────────────
 function useCountUp(target: number, duration = 1800, active = false) {
   const [count, setCount] = React.useState(0);
   React.useEffect(() => {
@@ -272,7 +272,7 @@ function useCountUp(target: number, duration = 1800, active = false) {
   return count;
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Scroll Reveal hook Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Scroll Reveal hook ───────────────────────────────────────────────────────
 function useScrollReveal() {
   React.useEffect(() => {
     const els = document.querySelectorAll(".landing-reveal");
@@ -293,7 +293,7 @@ function useScrollReveal() {
   }, []);
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Stat item Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Stat item ────────────────────────────────────────────────────────────────
 function StatItem({ angka, label, suffix, Icon }: { angka: number; label: string; suffix: string; Icon: any }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [active, setActive] = React.useState(false);
@@ -323,7 +323,7 @@ function StatItem({ angka, label, suffix, Icon }: { angka: number; label: string
   );
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Preview Carousel Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Preview Carousel ─────────────────────────────────────────────────────────
 function AppPreviewCarousel({ items }: { items: typeof appPreviews }) {
   const [aktif, setAktif] = React.useState(0);
 
@@ -364,7 +364,7 @@ function AppPreviewCarousel({ items }: { items: typeof appPreviews }) {
   );
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Main Component Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function LandingScreen({
   getScreenClass,
   onCubaPercuma,
@@ -381,7 +381,7 @@ export default function LandingScreen({
     },
     {
       s: "Berapa umur yang sesuai?",
-      j: "Sesuai untuk kanak-kanak 3 hingga 8 tahun Ã¢â‚¬â€ dari mula mengenal huruf sehingga boleh membaca perkataan penuh.",
+      j: "Sesuai untuk kanak-kanak 3 hingga 8 tahun — dari mula mengenal huruf sehingga boleh membaca perkataan penuh.",
     },
     {
       s: "Perlu daftar akaun ke?",
@@ -389,7 +389,7 @@ export default function LandingScreen({
     },
     {
       s: "Boleh guna di telefon?",
-      j: "Boleh. Bunyi Kata berfungsi pada telefon, tablet dan komputer Ã¢â‚¬â€ sesuai untuk belajar di mana-mana sahaja.",
+      j: "Boleh. Bunyi Kata berfungsi pada telefon, tablet dan komputer — sesuai untuk belajar di mana-mana sahaja.",
     },
   ];
 
@@ -434,7 +434,7 @@ export default function LandingScreen({
                 Anak Pandai <span className="landing-hl">Membaca</span><br/>Melalui Permainan
               </h1>
               <p className="landing-hero-sub">
-                Bunyi Kata menggabungkan fonik bersuara, mini permainan dan ganjaran lencana untuk membantu anak anda mengenal huruf dan membaca Ã¢â‚¬â€ tanpa rasa tertekan.
+                Bunyi Kata menggabungkan fonik bersuara, mini permainan dan ganjaran lencana untuk membantu anak anda mengenal huruf dan membaca — tanpa rasa tertekan.
               </p>
               <div className="landing-hero-cta">
                 <button
@@ -451,7 +451,7 @@ export default function LandingScreen({
                 </button>
               </div>
               <p className="landing-hero-note">
-                <IconCheck /> Tak perlu daftar &nbsp;Ã¢â‚¬Â¢&nbsp;
+                <IconCheck /> Tak perlu daftar &nbsp;•&nbsp;
                 <IconPhone /> Guna di telefon &amp; tablet
               </p>
             </div>
@@ -538,7 +538,7 @@ export default function LandingScreen({
             <span className="landing-kicker">Tengok Sendiri</span>
             <h2 className="landing-h2">Rupa Dalam Aplikasi</h2>
             <p className="landing-section-sub">
-              Kandungan sebenar Ã¢â‚¬â€ bukan sekadar gambar stok. Ini yang anak awak akan gunakan setiap hari.
+              Kandungan sebenar — bukan sekadar gambar stok. Ini yang anak awak akan gunakan setiap hari.
             </p>
           </div>
           <div className="landing-preview-layout">
@@ -792,7 +792,7 @@ export default function LandingScreen({
               ))}
             </div>
             <h2>Sedia Bantu Anak Anda Membaca?</h2>
-            <p>Mulakan perjalanan bacaan mereka hari ini Ã¢â‚¬â€ percuma, tanpa daftar.</p>
+            <p>Mulakan perjalanan bacaan mereka hari ini — percuma, tanpa daftar.</p>
             <button
               className="landing-btn landing-btn-cta-gold landing-btn-lg"
               onClick={onCubaPercuma}
@@ -824,7 +824,7 @@ export default function LandingScreen({
             </div>
           </div>
           <div className="landing-footer-bottom">
-            Ã‚Â© {new Date().getFullYear()} Bunyi Kata Ã‚Â· bunyi-kata.my Ã‚Â· Hak cipta terpelihara.
+            © {new Date().getFullYear()} Bunyi Kata · bunyi-kata.my · Hak cipta terpelihara.
           </div>
         </footer>
 

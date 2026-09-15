@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const path = process.argv[2];
+const t = fs.readFileSync(path, 'utf8');
+const lapor = (nama, benar) => console.log(`${benar ? 'ROSAK' : 'OK   '} ${nama}`);
+lapor('Ã (U+00C3)', t.includes('\u00c3'));
+lapor('â€ (U+00E2 U+20AC)', t.includes('\u00e2\u20ac'));
+lapor('â”€ (U+00E2 U+201D U+20AC)', t.includes('\u00e2\u201d\u20ac'));
+lapor('U+FFFD pengganti', t.includes('\ufffd'));
+lapor('kawalan C1', /[\u0080-\u009f]/.test(t));
+console.log('Panjang:', t.length);
