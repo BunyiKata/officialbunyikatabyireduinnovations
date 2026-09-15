@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
+import { getCoreAudioContext } from '../utils/coreAudio';
 
 // -------------------------------------------------------------------
 // SUKU KATA PUZZLE BAR
@@ -689,7 +690,8 @@ export const SukuKataPuzzleBar: React.FC<SukuKataPuzzleBarProps> = () => {
 // Simple pleasant chime sound using Web Audio API
 function playPuzzleChime() {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getCoreAudioContext();
+    if (!ctx) return;
     if (ctx.state === 'suspended') ctx.resume();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ATLANTA_ROUNDED_SVG_STYLE } from '../utils/atlantaFontBase64';
+import { getCoreAudioContext } from '../utils/coreAudio';
 
 // Word Card Interface for Reading Shelves
 export interface WordCard {
@@ -581,7 +582,7 @@ function generateAtlantaBadgeSvg(studentName: string) {
 
             return canvas.toDataURL('image/png');
         }
-    } catch (e) {}
+    } catch (e) { }
 
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='512' height='96'>
         <text x='256' y='55' font-family='sans-serif' font-size='40' font-weight='900' fill='#fbbf24' stroke='#78350f' stroke-width='2' text-anchor='middle'>${studentName}</text>
@@ -706,7 +707,7 @@ function makeVrHeaderSvg(title: string, textColor: string, bgColor: string, widt
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
         ${ATLANTA_ROUNDED_SVG_STYLE}
         <rect x="5" y="5" width="${width - 10}" height="${height - 10}" fill="${bgColor}" rx="20" stroke="#fbbf24" stroke-width="4"/>
-        <text x="50%" y="54%" font-family="AtlantaRounded, AtlantaRoundedBlack, sans-serif" font-weight="900" font-size="34px" fill="${textColor}" text-anchor="middle" dominant-baseline="middle" letter-spacing="2">${title.toUpperCase()}</text>
+        <text x="50%" y="54%" font-family="AtlantaRounded, AtlantaRoundedBlack, sans-serif" font-weight="900" font-size="34px" fill="${textColor}" text-anchor="middle" dominant-baseline="middle" letter-spacing="2">${title}</text>
     </svg>`;
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
 }
@@ -742,15 +743,15 @@ function vrGrandChandelier(px: number, py: number, pz: number) {
         <a-ring rotation="-90 0 0" position="0 0.08 0" radius-inner="0.75" radius-outer="1.05" color="#fbbf24"></a-ring>
         <a-octahedron position="0 -0.25 0" radius="0.38" color="#fef08a" material="emissive: #fef08a; emissiveIntensity: 0.85; opacity: 0.95; transparent: true;" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear"></a-octahedron>
         ${[0, 60, 120, 180, 240, 300].map(deg => {
-            const rad = deg * Math.PI / 180;
-            const lx = Math.cos(rad) * 0.92;
-            const lz = Math.sin(rad) * 0.92;
-            return `
+        const rad = deg * Math.PI / 180;
+        const lx = Math.cos(rad) * 0.92;
+        const lz = Math.sin(rad) * 0.92;
+        return `
                 <a-cylinder position="${lx} 0 ${lz}" radius="0.035" height="0.24" color="#d97706"></a-cylinder>
                 <a-cylinder position="${lx} 0.18 ${lz}" radius="0.1" height="0.18" color="#ffffff" material="emissive: #fffbeb; emissiveIntensity: 0.9; opacity: 0.95; transparent: true;"></a-cylinder>
                 <a-sphere position="${lx} 0.32 ${lz}" radius="0.07" color="#f59e0b" material="emissive: #fbbf24; emissiveIntensity: 1;"></a-sphere>
             `;
-        }).join('')}
+    }).join('')}
         <a-light type="point" color="#fef08a" intensity="0.5" distance="18" position="0 -0.5 0"></a-light>
     </a-entity>`;
 }
@@ -786,15 +787,15 @@ function vrGrandBookshelf(px: number, py: number, pz: number, rotY: number) {
     const colors1 = ['#dc2626', '#2563eb', '#16a34a', '#d97706', '#7c3aed', '#0284c7', '#e11d48', '#059669', '#ea580c'];
     const heights1 = [0.55, 0.62, 0.58, 0.65, 0.52, 0.64, 0.60, 0.56, 0.62];
     const books = [-0.95, -0.72, -0.48, -0.24, 0.0, 0.24, 0.48, 0.72, 0.95].map((bx, idx) => `
-        <a-box position="${bx} ${0.83 + heights1[idx]/2} 0.02" width="0.16" height="${heights1[idx]}" depth="0.32" color="${colors1[idx]}"></a-box>
-        <a-box position="${bx} ${0.83 + heights1[idx]/2} 0.17" width="0.14" height="${heights1[idx] - 0.04}" depth="0.03" color="#fef9c3"></a-box>
+        <a-box position="${bx} ${0.83 + heights1[idx] / 2} 0.02" width="0.16" height="${heights1[idx]}" depth="0.32" color="${colors1[idx]}"></a-box>
+        <a-box position="${bx} ${0.83 + heights1[idx] / 2} 0.17" width="0.14" height="${heights1[idx] - 0.04}" depth="0.03" color="#fef9c3"></a-box>
     `).join('');
 
     const colors2 = ['#0284c7', '#ea580c', '#10b981', '#6366f1', '#f59e0b', '#ec4899', '#14b8a6', '#8b5cf6', '#059669'];
     const heights2 = [0.58, 0.64, 0.54, 0.66, 0.60, 0.55, 0.62, 0.58, 0.60];
     const books2 = [-0.9, -0.68, -0.45, -0.22, 0.02, 0.25, 0.48, 0.72, 0.92].map((bx, idx) => `
-        <a-box position="${bx} ${1.68 + heights2[idx]/2} 0.02" width="0.16" height="${heights2[idx]}" depth="0.32" color="${colors2[idx]}"></a-box>
-        <a-box position="${bx} ${1.68 + heights2[idx]/2} 0.17" width="0.14" height="${heights2[idx] - 0.04}" depth="0.03" color="#fef9c3"></a-box>
+        <a-box position="${bx} ${1.68 + heights2[idx] / 2} 0.02" width="0.16" height="${heights2[idx]}" depth="0.32" color="${colors2[idx]}"></a-box>
+        <a-box position="${bx} ${1.68 + heights2[idx] / 2} 0.17" width="0.14" height="${heights2[idx] - 0.04}" depth="0.03" color="#fef9c3"></a-box>
     `).join('');
 
     return `<a-entity position="${px} ${py} ${pz}" rotation="0 ${rotY || 0} 0">
@@ -862,7 +863,7 @@ function vrWallSconce(px: number, py: number, pz: number, rotY: number) {
 }
 
 function vrLibraryCounter(px: number, py: number, pz: number, rotY: number) {
-    const signSvg = makeVrHeaderSvg('KAUNTER PERPUSTAKAAN', '#fbbf24', '#0f172a', 650, 110);
+    const signSvg = makeVrHeaderSvg('Kaunter Perpustakaan', '#fbbf24', '#0f172a', 650, 110);
     return `<a-entity position="${px} ${py} ${pz}" rotation="0 ${rotY || 0} 0">
         <!-- Main Reception Desk Structure (Rich Mahogany & Polished Gold) -->
         <!-- Front Main Counter Body -->
@@ -915,44 +916,118 @@ function vrLibraryCounter(px: number, py: number, pz: number, rotY: number) {
         <a-box position="0.75 1.19 0.85" rotation="0 -10 0" width="0.36" height="0.02" depth="0.26" color="#fef9c3"></a-box>
         <a-cylinder position="0.98 1.23 0.85" rotation="15 0 10" radius="0.008" height="0.16" color="#b8860b"></a-cylinder>
 
-        <!-- 6. Friendly Librarian NPC standing comfortably behind counter at z = -0.1 -->
-        <a-entity position="0 0 -0.1" rotation="0 0 0">
-            <!-- Legs & Trousers -->
-            <a-cylinder position="-0.14 0.5 0" radius="0.08" height="1.0" color="#1e293b"></a-cylinder>
-            <a-cylinder position="0.14 0.5 0" radius="0.08" height="1.0" color="#1e293b"></a-cylinder>
-            <a-box position="-0.14 0.05 0.04" width="0.14" height="0.1" depth="0.22" color="#0f172a"></a-box>
-            <a-box position="0.14 0.05 0.04" width="0.14" height="0.1" depth="0.22" color="#0f172a"></a-box>
-
-            <!-- Torso & Librarian Royal Blue Vest -->
-            <a-box position="0 1.35 0" width="0.52" height="0.65" depth="0.26" color="#1e3a8a"></a-box>
-            <!-- White Shirt Collar & Gold Tie -->
-            <a-box position="0 1.58 0.13" width="0.18" height="0.14" depth="0.02" color="#ffffff"></a-box>
-            <a-box position="0 1.44 0.14" width="0.08" height="0.22" depth="0.02" color="#f59e0b"></a-box>
-            <!-- Pustakawan ID Badge -->
-            <a-box position="0.16 1.48 0.14" width="0.10" height="0.06" depth="0.01" color="#fef08a"></a-box>
-            <!-- Head & Friendly Face -->
-            <a-sphere position="0 1.86 0" radius="0.22" color="#fde0b0"></a-sphere>
-            <!-- Hair -->
-            <a-sphere position="0 1.94 -0.02" radius="0.22" color="#3b1f0a" theta-start="0" theta-length="110"></a-sphere>
-            <!-- Glasses -->
-            <a-torus position="-0.07 1.88 0.20" radius="0.04" radius-tubular="0.005" color="#b8860b"></a-torus>
-            <a-torus position="0.07 1.88 0.20" radius="0.04" radius-tubular="0.005" color="#b8860b"></a-torus>
-            <a-cylinder position="0 1.88 0.20" rotation="0 0 90" radius="0.004" height="0.06" color="#b8860b"></a-cylinder>
-            <!-- Eyes & Smile -->
-            <a-sphere position="-0.07 1.88 0.20" radius="0.02" color="#1e293b"></a-sphere>
-            <a-sphere position="0.07 1.88 0.20" radius="0.02" color="#1e293b"></a-sphere>
-            <a-torus position="0 1.78 0.19" rotation="10 0 0" radius="0.035" radius-tubular="0.006" theta-start="200" theta-length="140" color="#dc2626"></a-torus>
-            <!-- Librarian Songkok / Cap -->
-            <a-cylinder position="0 2.06 0" radius="0.20" height="0.14" color="#0f172a"></a-cylinder>
-            <a-cylinder position="0 2.00 0" radius="0.21" height="0.02" color="#fbbf24"></a-cylinder>
-            <!-- Arms resting on counter -->
-            <a-cylinder position="-0.32 1.35 0.35" rotation="45 -20 0" radius="0.06" height="0.44" color="#1e3a8a"></a-cylinder>
-            <a-sphere position="-0.26 1.18 0.65" radius="0.05" color="#fde0b0"></a-sphere>
-            <a-cylinder position="0.32 1.35 0.35" rotation="45 20 0" radius="0.06" height="0.44" color="#1e3a8a"></a-cylinder>
-            <a-sphere position="0.26 1.18 0.65" radius="0.05" color="#fde0b0"></a-sphere>
+        <!-- GLOW: pendar terang berdenyut pada kaunter supaya murid tahu ada maklumat di sini -->
+        <a-entity id="vr-counter-glow">
+            <!-- Golden front glow strip along the counter edge -->
+            <a-box position="0 1.06 1.12" width="4.5" height="0.06" depth="0.05" color="#fde047"
+                material="emissive: #facc15; emissiveIntensity: 0.9; opacity: 0.95; transparent: true;"
+                animation="property: material.emissiveIntensity; from: 0.45; to: 1.0; dir: alternate; loop: true; dur: 1400; easing: easeInOutSine"></a-box>
+            <!-- Halo ring on the floor in front of the counter (beacon) -->
+            <a-ring position="0 0.03 1.9" rotation="-90 0 0" radius-inner="1.5" radius-outer="2.4" color="#fbbf24"
+                material="emissive: #fbbf24; emissiveIntensity: 0.6; opacity: 0.7; transparent: true;"
+                animation="property: material.opacity; from: 0.35; to: 0.8; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"></a-ring>
+            <a-ring position="0 0.035 1.9" rotation="-90 0 0" radius-inner="2.6" radius-outer="2.9" color="#38bdf8"
+                material="emissive: #38bdf8; emissiveIntensity: 0.5; opacity: 0.55; transparent: true;"
+                animation="property: rotation; to: -90 360 0; loop: true; dur: 9000; easing: linear"></a-ring>
+            <!-- Soft warm light above the counter -->
+            <a-light type="point" color="#fbbf24" intensity="0.9" distance="9" position="0 2.6 0.9"
+                animation="property: intensity; from: 0.6; to: 1.1; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"></a-light>
+            <!-- Floating "info" beacon above the counter -->
+            <a-entity position="0 2.45 0.9"
+                animation__spin="property: rotation; to: 0 360 0; loop: true; dur: 3600; easing: linear"
+                animation__bob="property: position; to: 0 2.7 0.9; dir: alternate; loop: true; dur: 1400; easing: easeInOutSine">
+                <a-torus radius="0.28" radius-tubular="0.05" color="#fde047"
+                    material="emissive: #facc15; emissiveIntensity: 0.8; metalness: 0.5;"></a-torus>
+                <a-octahedron radius="0.16" color="#fde047"
+                    material="emissive: #facc15; emissiveIntensity: 0.9;"></a-octahedron>
+            </a-entity>
         </a-entity>
+
+        <!-- 6. Friendly Librarian NPC (smooth, animated — berdiri di hadapan kaunter) -->
+        ${vrLibrarianNPC()}
     </a-entity>`;
 }
+// -------------------------------------------------------------
+// LIBRARIAN NPC — smooth 3D character with idle animation
+// (Messages are shown via the proximity UI in PerpustakaanGame, not a 3D bubble.)
+// -------------------------------------------------------------
+function vrLibrarianNPC() {
+    // Pustakawan berdiri DI HADAPAN kaunter (bukan di belakang) supaya seluruh badan —
+    // termasuk kaki dan kasut — jelas kelihatan oleh murid. Tiada bubble 3D; mesej
+    // disampaikan melalui UI berdekatan kaunter (lihat PerpustakaanGame).
+    return `
+        <a-entity id="vr-librarian-npc" position="-3.0 0 1.35" rotation="0 18 0"
+            animation__breathe="property: scale; to: 1 1.02 1; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine"
+            animation__sway="property: rotation; to: 0 22 0; dir: alternate; loop: true; dur: 3600; easing: easeInOutSine">
+
+            <!-- Soft contact shadow so the figure feels grounded, not floating -->
+            <a-circle position="0 0.015 0" rotation="-90 0 0" radius="0.5" color="#0f172a" material="opacity: 0.22; transparent: true;"></a-circle>
+
+            <!-- Legs & Trousers (rounded, tapered) -->
+            <a-capsule position="-0.14 0.5 0" radius="0.1" height="0.86" color="#1e293b" material="roughness: 0.7;"></a-capsule>
+            <a-capsule position="0.14 0.5 0" radius="0.1" height="0.86" color="#1e293b" material="roughness: 0.7;"></a-capsule>
+            <!-- Polished Shoes -->
+            <a-sphere position="-0.14 0.08 0.06" radius="0.11" scale="1 0.5 1.55" color="#0f172a" material="roughness: 0.35;"></a-sphere>
+            <a-sphere position="0.14 0.08 0.06" radius="0.11" scale="1 0.5 1.55" color="#0f172a" material="roughness: 0.35;"></a-sphere>
+
+            <!-- Torso: smooth tapered uni-body in Royal Blue Vest (raised so legs show) -->
+            <a-cylinder position="0 1.28 0" radius="0.26" radius-top="0.24" radius-bottom="0.29" height="0.5" color="#1e3a8a" material="roughness: 0.55;"></a-cylinder>
+            <a-capsule position="0 1.58 0" radius="0.26" height="0.2" color="#1e3a8a" material="roughness: 0.55;"></a-capsule>
+            <!-- Shoulders (rounded) -->
+            <a-sphere position="-0.24 1.62 0" radius="0.15" color="#1e3a8a" material="roughness: 0.55;"></a-sphere>
+            <a-sphere position="0.24 1.62 0" radius="0.15" color="#1e3a8a" material="roughness: 0.55;"></a-sphere>
+            <!-- White Shirt Collar, Gold Tie & Vest Button Line -->
+            <a-sphere position="0 1.68 0.14" radius="0.11" scale="1 0.8 0.5" color="#ffffff" material="roughness: 0.6;"></a-sphere>
+            <a-box position="0 1.52 0.2" width="0.06" height="0.22" depth="0.02" color="#f59e0b"></a-box>
+            <a-box position="0 1.14 0.245" width="0.02" height="0.2" depth="0.02" color="#facc15" material="emissive: #f59e0b; emissiveIntensity: 0.2;"></a-box>
+            <!-- Pustakawan ID Badge -->
+            <a-box position="0.15 1.54 0.245" width="0.09" height="0.06" depth="0.012" color="#fef08a"></a-box>
+            <a-box position="0.15 1.54 0.252" width="0.07" height="0.04" depth="0.005" color="#1e293b"></a-box>
+
+            <!-- Neck -->
+            <a-cylinder position="0 1.78 0" radius="0.075" height="0.12" color="#f3d2ab"></a-cylinder>
+
+            <!-- Head group (gentle nod animation) -->
+            <a-entity position="0 1.98 0" animation__nod="property: rotation; to: 6 0 0; dir: alternate; loop: true; dur: 2400; easing: easeInOutSine">
+                <!-- Head & Friendly Face -->
+                <a-sphere radius="0.23" scale="1 1.06 0.98" color="#f6d7b0" material="roughness: 0.5;"></a-sphere>
+                <!-- Cheeks (blush) -->
+                <a-circle position="-0.12 0.02 0.205" rotation="0 0 0" radius="0.05" color="#f9a8d4" material="opacity: 0.55; transparent: true;"></a-circle>
+                <a-circle position="0.12 0.02 0.205" rotation="0 0 0" radius="0.05" color="#f9a8d4" material="opacity: 0.55; transparent: true;"></a-circle>
+                <!-- Hair (swept, covers back & top) -->
+                <a-sphere position="0 0.06 -0.01" radius="0.235" color="#3b1f0a" theta-start="0" theta-length="120" material="roughness: 0.75;"></a-sphere>
+                <a-sphere position="0 0.12 0.16" radius="0.1" scale="1.6 0.7 1" color="#3b1f0a" material="roughness: 0.75;"></a-sphere>
+                <!-- Glasses -->
+                <a-torus position="-0.08 0.02 0.215" radius="0.045" radius-tubular="0.006" color="#b8860b" material="metalness: 0.6; roughness: 0.3;"></a-torus>
+                <a-torus position="0.08 0.02 0.215" radius="0.045" radius-tubular="0.006" color="#b8860b" material="metalness: 0.6; roughness: 0.3;"></a-torus>
+                <a-cylinder position="0 0.02 0.215" rotation="0 0 90" radius="0.005" height="0.06" color="#b8860b"></a-cylinder>
+                <!-- Eyes & Smile -->
+                <a-sphere position="-0.08 0.02 0.21" radius="0.022" color="#1e293b"></a-sphere>
+                <a-sphere position="0.08 0.02 0.21" radius="0.022" color="#1e293b"></a-sphere>
+                <a-sphere position="-0.073 0.03 0.228" radius="0.007" color="#ffffff"></a-sphere>
+                <a-sphere position="0.087 0.03 0.228" radius="0.007" color="#ffffff"></a-sphere>
+                <a-torus position="0 -0.08 0.2" rotation="10 0 0" radius="0.04" radius-tubular="0.007" theta-start="200" theta-length="140" color="#dc2626"></a-torus>
+                <!-- Librarian Songkok / Cap -->
+                <a-cylinder position="0 0.2 0" radius="0.205" height="0.15" color="#0f172a" material="roughness: 0.6;"></a-cylinder>
+                <a-cylinder position="0 0.13 0" radius="0.215" height="0.02" color="#fbbf24" material="metalness: 0.4;"></a-cylinder>
+            </a-entity>
+
+            <!-- Arms hanging naturally at the sides (with subtle gesture) -->
+            <a-entity animation__armL="property: rotation; to: 0 0 -5; dir: alternate; loop: true; dur: 2600; easing: easeInOutSine">
+                <a-capsule position="-0.33 1.35 0.02" rotation="0 0 8" radius="0.075" height="0.5" color="#1e3a8a" material="roughness: 0.55;"></a-capsule>
+                <a-sphere position="-0.36 1.06 0.05" radius="0.07" color="#f6d7b0"></a-sphere>
+            </a-entity>
+            <a-entity animation__armR="property: rotation; to: 0 0 5; dir: alternate; loop: true; dur: 2600; easing: easeInOutSine">
+                <a-capsule position="0.33 1.35 0.02" rotation="0 0 -8" radius="0.075" height="0.5" color="#1e3a8a" material="roughness: 0.55;"></a-capsule>
+                <a-sphere position="0.36 1.06 0.05" radius="0.07" color="#f6d7b0"></a-sphere>
+            </a-entity>
+
+            <!-- Warm rim light so the character reads as 3D (not a flat dummy) -->
+            <a-light type="point" color="#fde68a" intensity="0.6" distance="6" position="0.6 2.7 1.5"></a-light>
+        </a-entity>`;
+}
+
+
 
 function vrStudyTable(px: number, py: number, pz: number, rotY: number) {
     return `<a-entity position="${px} ${py} ${pz}" rotation="0 ${rotY || 0} 0">
@@ -973,7 +1048,7 @@ function vrStudyTable(px: number, py: number, pz: number, rotY: number) {
 }
 
 function vr3DTransitBus(px: number, py: number, pz: number, rotY: number) {
-    const destSvg = makeVrHeaderSvg('PERPUSTAKAAN KOTA', '#fbbf24', '#0f172a', 600, 100);
+    const destSvg = makeVrHeaderSvg('Perpustakaan Kota', '#fbbf24', '#0f172a', 600, 100);
     return `<a-entity position="${px} ${py} ${pz}" rotation="0 ${rotY || 0} 0">
         <a-box position="0 1.6 0" width="2.6" height="2.4" depth="8.8" color="#0284c7" material="roughness: 0.2; metalness: 0.4;"></a-box>
         <a-box position="0 0.35 0" width="2.66" height="0.45" depth="9.0" color="#0f172a"></a-box>
@@ -1151,6 +1226,10 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
     const isAutoPlayingRef = useRef<boolean>(false);
     const [showCelebration, setShowCelebration] = useState<boolean>(false);
     const [showVRGuideModal, setShowVRGuideModal] = useState<boolean>(true); // Shows initially like 3D Bunyi Kata!
+    // UI maklumat berdekatan kaunter: muncul apabila murid hampir dengan kaunter,
+    // hilang sendiri apabila murid bergerak jauh atau tekan pangkah (X).
+    const [nearCounter, setNearCounter] = useState<boolean>(false);
+    const [counterMsgIdx, setCounterMsgIdx] = useState<number>(0);
 
     const sceneContainerRef = useRef<HTMLDivElement>(null);
     const joystickBaseRef = useRef<HTMLDivElement>(null);
@@ -1170,12 +1249,25 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
         }
     }, [phase]);
 
+    // Mesej galakan pustakawan. Dipaparkan melalui UI berdekatan kaunter (bukan bubble 3D):
+    // bertukar antara dua ayat setiap ~4 saat SEMASA murid berada dekat kaunter sahaja.
+    const counterMessages = ['Belajar rajin rajin okay!', 'Jadi anak yang bijak!'];
+    useEffect(() => {
+        if (phase !== 'interior' || !nearCounter) return;
+        const timer = window.setInterval(() => {
+            setCounterMsgIdx((i) => (i + 1) % counterMessages.length);
+        }, 4000);
+        return () => window.clearInterval(timer);
+    }, [phase, nearCounter]);
+
+    // Which message to show. Slice out of the array so the closure stays simple.
+    const counterText = counterMessages[counterMsgIdx % counterMessages.length];
+
     // Synthesized Sound Effects
     const playSynthesizedSound = (type: 'portal' | 'chime' | 'tick' | 'victory') => {
         try {
-            const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-            if (!AudioCtx) return;
-            const ctx = new AudioCtx();
+            const ctx = getCoreAudioContext();
+            if (!ctx) return;
 
             if (type === 'tick') {
                 const osc = ctx.createOscillator();
@@ -1229,7 +1321,7 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                     osc.stop(ctx.currentTime + idx * 0.1 + 0.4);
                 });
             }
-        } catch (e) {}
+        } catch (e) { }
     };
 
     // Pronounce word or syllable with full voice engine support & completion promise
@@ -1250,7 +1342,7 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
             if (typeof (window as any).sebutAudio === 'function') {
                 try {
                     (window as any).sebutAudio(text);
-                } catch (e) {}
+                } catch (e) { }
                 setTimeout(resolve, 1200);
                 return;
             }
@@ -1344,13 +1436,13 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
             try {
                 (window as any).currentVRStationAudio.pause();
                 (window as any).currentVRStationAudio.currentTime = 0;
-            } catch (e) {}
+            } catch (e) { }
             (window as any).currentVRStationAudio = null;
         }
         if ('speechSynthesis' in window) {
             try {
                 window.speechSynthesis.cancel();
-            } catch (e) {}
+            } catch (e) { }
         }
 
         // Reset visual animations on card
@@ -1395,7 +1487,7 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                             if (typeof (window as any).logProgress === 'function') {
                                 (window as any).logProgress('perpustakaan', 'belajar', next.length * 15, 'perpustakaan');
                             }
-                        } catch (e) {}
+                        } catch (e) { }
                         return next;
                     }
                     return prev;
@@ -1423,13 +1515,27 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
             setPhase(p);
         };
 
+        // Proximity hook dari player-controller: papar/sembunyi UI maklumat kaunter.
+        (window as any).perpustakaanSetNearCounter = (v: boolean) => {
+            setNearCounter(!!v);
+        };
+
         return () => {
             delete (window as any).perpustakaanTriggerShelf;
             delete (window as any).perpustakaanTriggerEntrance;
             delete (window as any).perpustakaanTriggerExit;
             delete (window as any).perpustakaanSetPhase;
+            delete (window as any).perpustakaanSetNearCounter;
         };
     }, [countdown, shelves]);
+
+    // Apabila keluar dari kawasan dalam (interior), pastikan UI kaunter ditutup.
+    useEffect(() => {
+        if (phase !== 'interior') {
+            setNearCounter(false);
+            setCounterMsgIdx(0);
+        }
+    }, [phase]);
 
     // 3-Second Countdown Effect (Handles both entering interior & returning to exterior)
     useEffect(() => {
@@ -1483,15 +1589,12 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                         this._footstepToggle = false;
                         this.shelfCooldown = 5.0; // 5-second initial grace cooldown on spawn/respawn
                         this.lastStationId = null;
+                        this._wasNearCounter = false;
 
                         this._getAudioCtx = () => {
-                            if (!(window as any)._sharedPerpAudioCtx) {
-                                const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-                                if (AudioCtx) (window as any)._sharedPerpAudioCtx = new AudioCtx();
-                            }
-                            const ctx = (window as any)._sharedPerpAudioCtx;
+                            const ctx = getCoreAudioContext();
                             if (ctx && ctx.state === 'suspended') {
-                                ctx.resume().catch(() => {});
+                                ctx.resume().catch(() => { });
                             }
                             return ctx;
                         };
@@ -1513,7 +1616,7 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                                     osc.start();
                                     osc.stop(ctx.currentTime + 0.08);
                                 }
-                            } catch (e) {}
+                            } catch (e) { }
                         };
 
                         (window as any).perpJoystickInput = { x: 0, y: 0 };
@@ -1710,6 +1813,17 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                             } else {
                                 this.lastStationId = null;
                             }
+
+                            // Kaunter Perpustakaan proximity (di (0, -3.5)). Munculkan UI maklumat
+                            // apabila murid menghampiri; hilang automatik apabila menjauhi.
+                            const distToCounter = Math.hypot(this.charPos.x - 0, this.charPos.z - (-3.5));
+                            const isNearCounter = distToCounter < 4.2;
+                            if (isNearCounter !== this._wasNearCounter) {
+                                this._wasNearCounter = isNearCounter;
+                                if (typeof (window as any).perpustakaanSetNearCounter === 'function') {
+                                    (window as any).perpustakaanSetNearCounter(isNearCounter);
+                                }
+                            }
                         }
                     },
                 });
@@ -1723,8 +1837,8 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
 
             if (phase === 'exterior') {
                 entranceLockedRef.current = false;
-                const pedimentSvg = makeVrHeaderSvg('PERPUSTAKAAN BUNYI KATA', '#fbbf24', '#0f172a', 800, 160);
-                const busSignSvg = makeVrHeaderSvg('HENTIAN BAS PERPUSTAKAAN', '#ffffff', '#0284c7', 600, 120);
+                const pedimentSvg = makeVrHeaderSvg('Perpustakaan Bunyi Kata', '#fbbf24', '#0f172a', 800, 160);
+                const busSignSvg = makeVrHeaderSvg('Hentian Bas Perpustakaan', '#ffffff', '#0284c7', 600, 120);
 
                 const startX = 0;
                 const startZ = 4.5;
@@ -1846,7 +1960,7 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                 // =========================================================================
                 const spawnX = 0;
                 const spawnZ = 8.0;
-                const exitSignSvg = makeVrHeaderSvg('PINTU KELUAR', '#fbbf24', '#0f172a', 600, 130);
+                const exitSignSvg = makeVrHeaderSvg('Pintu Keluar', '#fbbf24', '#0f172a', 600, 130);
 
                 // Classical 3D Ornate Framed Art Paintings Generator (All Words Framed on Room Walls)
                 const roomPaintingsHtml = shelves.map((shelf, sIdx) => {
@@ -2339,7 +2453,7 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
 
         const isTouchOnInteractiveUI = (el: HTMLElement | null) => {
             if (!el) return false;
-            return !!el.closest('#vr-joystick-container, .vr-joystick-container, .perpustakaan-header-bar, .neo-btn, .vr-station-popup-overlay, .vr-guide-modal-overlay');
+            return !!el.closest('#vr-joystick-container, .vr-joystick-container, .perpustakaan-header-bar, .perpustakaan-counter-toast, .neo-btn, .vr-station-popup-overlay, .vr-guide-modal-overlay');
         };
 
         const handleTouchStart = (e: TouchEvent) => {
@@ -2600,6 +2714,31 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                             <div className="countdown-number-glow" key={countdown}>
                                 {countdown}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 5b. UI MAKLUMAT BERDEKATAN KAUNTER PERPUSTAKAAN
+                Muncul apabila murid hampir dengan kaunter. Boleh dipangkah (X) atau
+                hilang sendiri apabila murid bergerak menjauhi kaunter. */}
+            {phase === 'interior' && nearCounter && !showVRGuideModal && countdown === null && (
+                <div className="perpustakaan-counter-toast" role="status" aria-live="polite">
+                    <button
+                        className="perpustakaan-counter-toast-close"
+                        onClick={() => setNearCounter(false)}
+                        aria-label="Tutup"
+                        title="Tutup"
+                    >
+                        <i className="fa-solid fa-xmark"></i>
+                    </button>
+                    <div className="perpustakaan-counter-toast-avatar">
+                        <i className="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <div className="perpustakaan-counter-toast-body">
+                        <div className="perpustakaan-counter-toast-name">Pustakawan</div>
+                        <div className="perpustakaan-counter-toast-msg" key={counterText}>
+                            {counterText}
                         </div>
                     </div>
                 </div>

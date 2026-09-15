@@ -66,7 +66,6 @@ export default function PilihPetaModal({
                 alignItems: "center",
               }}
               onClick={(e) => {
-                if (typeof (window as any).playBubble === "function") (window as any).playBubble();
                 if (typeof (window as any).pilihPeta === "function") {
                   (window as any).pilihPeta(1);
                 } else if (typeof (window as any).bukaPeta === "function") {
@@ -87,12 +86,12 @@ export default function PilihPetaModal({
                 }}
                 alt="Misi Asas Bunyi Kata"
               />
-              <button
+              <div
                 className="neo-btn bg-white map-select-text"
                 style={{ width: "100%", pointerEvents: "none" }}
               >
                 Misi Asas Bunyi Kata
-              </button>
+              </div>
             </div>
             <div
               className="neo-box map-select-btn"
@@ -111,7 +110,6 @@ export default function PilihPetaModal({
               }}
               onClick={(e) => {
                 if (isEffectiveTrial) {
-                  if (typeof (window as any).playBubble === "function") (window as any).playBubble();
                   (window as any).openPakejProModal?.("guru");
                   return;
                 }
@@ -177,12 +175,12 @@ export default function PilihPetaModal({
                 }}
                 alt="Misi Suku Kata Asas"
               />
-              <button
+              <div
                 className="neo-btn bg-white map-select-text"
                 style={{ width: "100%", pointerEvents: "none" }}
               >
                 Misi Suku Kata Asas
-              </button>
+              </div>
             </div>
             <div
               className="neo-box map-select-btn"
@@ -201,7 +199,6 @@ export default function PilihPetaModal({
               }}
               onClick={(e) => {
                 if (isEffectiveTrial) {
-                  if (typeof (window as any).playBubble === "function") (window as any).playBubble();
                   (window as any).openPakejProModal?.("guru");
                   return;
                 }
@@ -267,12 +264,12 @@ export default function PilihPetaModal({
                 }}
                 alt="Misi Suku Kata Hero"
               />
-              <button
+              <div
                 className="neo-btn bg-white map-select-text"
                 style={{ width: "100%", pointerEvents: "none" }}
               >
                 Misi Suku Kata Hero
-              </button>
+              </div>
             </div>
             <div
               className="neo-box map-select-btn"
@@ -291,7 +288,6 @@ export default function PilihPetaModal({
               }}
               onClick={(e) => {
                 if (isEffectiveTrial) {
-                  if (typeof (window as any).playBubble === "function") (window as any).playBubble();
                   (window as any).openPakejProModal?.("guru");
                   return;
                 }
@@ -357,12 +353,12 @@ export default function PilihPetaModal({
                 }}
                 alt="Misi Bacaan Bergred"
               />
-              <button
+              <div
                 className="neo-btn bg-white map-select-text"
                 style={{ width: "100%", pointerEvents: "none" }}
               >
                 Misi Bacaan Bergred
-              </button>
+              </div>
             </div>
           </div>
         </div>

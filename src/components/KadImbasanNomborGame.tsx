@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ASAS_0_10_DATABASE, SIRI_NOMBOR_DATABASE, NomborItem } from './NomborGame';
+import { getCoreAudioContext } from '../utils/coreAudio';
 
 export type KadImbasanNomborMode = 'bilang_0_10' | 'siri_nombor';
 
@@ -142,20 +143,20 @@ export function KadImbasanNomborGame({ initialMode = 'bilang_0_10', onBack }: Ka
 
   const playPopSound = () => {
     try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return;
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(650, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.12);
-      gain.gain.setValueAtTime(0.5, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.12);
+      const g = getCoreAudioContext();
+      if (g) {
+        const osc = g.createOscillator();
+        const gain = g.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(650, g.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(140, g.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.5, g.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, g.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(g.destination);
+        osc.start();
+        osc.stop(g.currentTime + 0.12);
+      }
     } catch {}
   };
 

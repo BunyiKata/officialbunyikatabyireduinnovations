@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { getCoreAudioContext } from '../utils/coreAudio';
 
 export interface SebutItem {
   id: string;
@@ -250,10 +251,8 @@ function shuffle<T>(arr: T[]): T[] {
 // Audio Synth Helper for Celebratory Star Sound (+1 Bintang!)
 function playPopConfettiSound() {
   try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const ctx = (window as any).globalAudioCtx || new AudioContextClass();
-    (window as any).globalAudioCtx = ctx;
+    const ctx = getCoreAudioContext();
+    if (!ctx) return;
     if (ctx.state === 'suspended') ctx.resume().catch(() => {});
     const now = ctx.currentTime;
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { getCoreAudioContext } from "../utils/coreAudio";
 
 export function Lencana3DSwiper() {
   const FIVE_BADGES = [
@@ -190,13 +191,8 @@ export function Lencana3DSwiper() {
 
   const playSwipeSound = () => {
     try {
-      if (typeof (window as any).playBubble === "function") {
-        (window as any).playBubble();
-        return;
-      }
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioContextClass) {
-        const ctx = new AudioContextClass();
+      const ctx = getCoreAudioContext();
+      if (ctx) {
         if (ctx.state === "suspended") ctx.resume();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();

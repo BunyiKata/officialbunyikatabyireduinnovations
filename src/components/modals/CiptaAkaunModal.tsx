@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { getCoreAudioContext } from '../../utils/coreAudio';
 /**
  * Modal Cipta Akaun (Mod Admin)
  *
@@ -41,14 +42,9 @@ const PAKEJ_LALAI: PakejPenuh[] = [
 let _ctxModalCipta: AudioContext | null = null;
 function bunyiKlik() {
   try {
-    if (typeof window !== "undefined" && typeof (window as any).playBubble === "function") {
-      (window as any).playBubble();
-      return;
-    }
     if (typeof window === "undefined") return;
-    const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
-    if (!Ctx) return;
-    if (!_ctxModalCipta) _ctxModalCipta = new Ctx();
+    // Guna SATU AudioContext kongsi + tone nav standard
+    _ctxModalCipta = getCoreAudioContext();
     const ctx = _ctxModalCipta;
     if (!ctx) return;
     const mainkan = () => {

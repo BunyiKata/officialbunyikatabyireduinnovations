@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { getCoreAudioContext } from '../utils/coreAudio';
 
 export interface StoryPage {
   pageNumber: number; // 0 = Cover, 1..5 = Pages
@@ -547,7 +548,14 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
   const [direction, setDirection] = useState<number>(1);
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [isNarrating, setIsNarrating] = useState<boolean>(false);
+  // Makluman popup: Rak Buku ini tiada audio (sekali setiap sesi)
+  const [showBookNotice, setShowBookNotice] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('rakBukuAudioNoticeSeen') !== '1';
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
     if (initialBookId) {
@@ -569,9 +577,8 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
   // Soft subtle click tone without any AI speech / voice words
   const playNavSound = () => {
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
+      const ctx = getCoreAudioContext();
+      if (!ctx) return;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
@@ -588,10 +595,6 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
 
   const handleOpenBook = (book: StoryBook) => {
     playNavSound();
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
-    setIsNarrating(false);
     setSelectedBook(book);
     setCurrentPageIndex(0);
     setDirection(1);
@@ -599,10 +602,6 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
 
   const handleBackToShelf = () => {
     playNavSound();
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
-    setIsNarrating(false);
     setSelectedBook(null);
   };
 
@@ -610,13 +609,9 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
     if (!selectedBook) return;
     if (newIndex < 0 || newIndex >= selectedBook.pages.length) return;
     playNavSound();
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
     if (typeof (window as any).hentikanAudioSemasa === 'function') {
       (window as any).hentikanAudioSemasa();
     }
-    setIsNarrating(false);
     setDirection(newIndex > currentPageIndex ? 1 : -1);
     setCurrentPageIndex(newIndex);
   };
@@ -625,37 +620,13 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
     return book.pages[pageIdx]?.text || '';
   };
 
-  const handleNarrate = (textToRead: string) => {
-    if (!textToRead) return;
-    if (!('speechSynthesis' in window)) return;
-
-    if (isNarrating) {
-      window.speechSynthesis.cancel();
-      setIsNarrating(false);
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(textToRead);
-    utterance.lang = 'ms-MY';
-    utterance.rate = 0.88;
-    utterance.pitch = 1.05;
-
-    utterance.onstart = () => setIsNarrating(true);
-    utterance.onend = () => setIsNarrating(false);
-    utterance.onerror = () => setIsNarrating(false);
-
-    window.speechSynthesis.speak(utterance);
+  const handleDismissNotice = () => {
+    playNavSound();
+    setShowBookNotice(false);
+    try {
+      sessionStorage.setItem('rakBukuAudioNoticeSeen', '1');
+    } catch {}
   };
-
-  // Keyboard navigation & Audio Cleanup
-  useEffect(() => {
-    return () => {
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -838,7 +809,6 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
             <button
               type="button"
               onClick={() => {
-                if (window.speechSynthesis) window.speechSynthesis.cancel();
                 if (selectedBook) {
                   handleBackToShelf();
                 } else {
@@ -1206,12 +1176,12 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
                           boxSizing: 'border-box'
                         }}
                       >
-                        {/* Page Top Bar: Dynamic Themed 1/5 Badge + Audio Button */}
+                        {/* Page Top Bar: Dynamic Themed 1/5 Badge (Centered, No Audio) */}
                         <div
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'space-between',
+                            justifyContent: 'center',
                             marginBottom: '6px',
                             padding: '0 2px'
                           }}
@@ -1233,31 +1203,6 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
                           >
                             {currentPageIndex}/5
                           </span>
-
-                          {/* Read Aloud Button: Background matches Book Theme Color, Icon is ALWAYS WHITE */}
-                          <button
-                            type="button"
-                            onClick={() => handleNarrate(getPageText(selectedBook, currentPageIndex))}
-                            style={{
-                              width: isMobile ? '32px' : '36px',
-                              height: isMobile ? '32px' : '36px',
-                              borderRadius: '50%',
-                              background: isNarrating ? '#ef4444' : selectedBook.color,
-                              color: '#ffffff',
-                              border: '2px solid #1e293b',
-                              boxShadow: '0 2px 0 #1e293b',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: isMobile ? '0.9rem' : '1.05rem',
-                              transition: 'all 0.15s ease'
-                            }}
-                            title="Dengar sebutan audio teks cerita"
-                            aria-label="Dengar"
-                          >
-                            <i className={`fa-solid ${isNarrating ? 'fa-stop' : 'fa-volume-high'}`} style={{ color: '#ffffff' }}></i>
-                          </button>
                         </div>
 
                         {/* Story Image Frame with Left & Right Side Navigation Buttons */}
@@ -1460,6 +1405,89 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
           </div>
         )}
       </motion.div>
+
+      {/* Popup Makluman: Rak Buku Tiada Audio (sekali setiap sesi) */}
+      {showBookNotice && (
+        <div
+          className="modal-overlay"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDismissNotice();
+          }}
+          style={{
+            display: 'flex',
+            zIndex: 10000,
+            background: 'rgba(15, 23, 42, 0.82)',
+            backdropFilter: 'blur(10px)'
+          }}
+        >
+          <motion.div
+            className="modal-content"
+            initial={{ scale: 0.9, opacity: 0, y: 15 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 24 }}
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: '440px' }}
+          >
+            <div
+              style={{
+                fontSize: isMobile ? '3rem' : '3.6rem',
+                color: '#f59e0b',
+                marginBottom: '10px',
+                animation: 'float 2s ease-in-out infinite'
+              }}
+            >
+              <i className="fa-solid fa-book-open-reader"></i>
+            </div>
+            <h2
+              style={{
+                fontSize: isMobile ? '1.5rem' : '1.8rem',
+                marginBottom: '12px',
+                color: '#1e293b',
+                fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif'
+              }}
+            >
+              <span
+                style={{
+                  display: 'inline-block',
+                  background: 'var(--color-orange)',
+                  color: '#ffffff',
+                  padding: '6px 18px',
+                  borderRadius: '12px'
+                }}
+              >
+                Rak Buku Bunyi Kata
+              </span>
+            </h2>
+            <p
+              style={{
+                fontSize: isMobile ? '1.05rem' : '1.2rem',
+                fontWeight: 'bold',
+                lineHeight: '1.6',
+                color: '#1e293b',
+                marginBottom: '20px'
+              }}
+            >
+              Rak Buku ini tiada audio. Murid digalakkan membaca sendiri dengan kuat. Selamat mencuba!
+            </p>
+            <button
+              type="button"
+              className="neo-btn bg-orange"
+              style={{
+                width: '100%',
+                fontSize: isMobile ? '1.05rem' : '1.2rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
+              }}
+              onClick={handleDismissNotice}
+            >
+              <i className="fa-solid fa-thumbs-up"></i> Faham!
+            </button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1226,12 +1226,23 @@ var lastBubbleTime = 0;
 
 function initAudioContext() {
     try {
+        // Reuse the shared global context if another module already created one,
+        // so the whole app (and every sound) speaks through a single unlocked context.
+        if (!audioCtx && typeof window !== 'undefined' && window._globalAudioCtx) {
+            audioCtx = window._globalAudioCtx;
+        }
         if (!audioCtx) {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
             if (AudioContextClass) audioCtx = new AudioContextClass();
         }
-        if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume().catch(() => { });
+        if (audioCtx) {
+            if (typeof window !== 'undefined') window._globalAudioCtx = audioCtx;
+            // Browsers (esp. desktop Chrome/Safari) start the context 'suspended' until a
+            // real user gesture. Resume on EVERY gesture until it is running so that the
+            // first bubble click is audible on laptop as well as mobile.
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => { });
+            }
         }
     } catch (e) { }
 }
@@ -1244,8 +1255,19 @@ if (typeof document !== 'undefined') {
 
 function playBubble() {
     var nowMs = Date.now();
-    if (nowMs - lastBubbleTime < 100) return;
+    // Debounce: a single user click can reach us twice (a React onClick + the global
+    // delegated document listener both call this). Collapse them into ONE bubble.
+    if (nowMs - lastBubbleTime < 250) return;
     lastBubbleTime = nowMs;
+
+    // Synchronous lock for the whole gesture window. Resuming a suspended AudioContext is
+    // async, so two independent callers can each queue a resume and fire a note AFTER the
+    // debounce above was already consumed (a classic "double sound"). The lock is released
+    // shortly after the note is scheduled, so genuinely separate taps still both play.
+    var lockKey = '__bubbleLockUntil';
+    if (nowMs < (window[lockKey] || 0)) return;
+    window[lockKey] = nowMs + 300;
+
     try {
         if (!audioCtx) {
             audioCtx = (typeof window !== 'undefined' && window._globalAudioCtx) ? window._globalAudioCtx : null;
@@ -1260,22 +1282,25 @@ function playBubble() {
         const triggerNote = () => {
             try {
                 const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
+                const master = audioCtx.createGain();
+                master.gain.value = 1.0;
+                master.connect(audioCtx.destination);
+                osc.connect(master);
                 osc.type = 'sine';
                 const now = audioCtx.currentTime;
                 osc.frequency.setValueAtTime(450, now);
                 osc.frequency.exponentialRampToValueAtTime(950, now + 0.08);
-                gain.gain.setValueAtTime(0.4, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                // Slightly louder than before so it is clearly audible on laptop speakers.
+                master.gain.setValueAtTime(0.55, now);
+                master.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
                 osc.start(now);
                 osc.stop(now + 0.08);
             } catch (err) { }
         };
 
         if (audioCtx.state === 'suspended') {
-            audioCtx.resume().then(triggerNote).catch(() => { });
+            // Resume then play; never silently drop the note.
+            audioCtx.resume().then(triggerNote).catch(triggerNote);
         } else {
             triggerNote();
         }
@@ -21971,7 +21996,7 @@ function checkVrMuseumCollision(x, z, radius) {
     if (inBox(-5.2, -4.4, 9.6, 10.4)) return true;
     if (inBox(4.4, 5.2, 9.6, 10.4)) return true;
 
-    // West Archway (leading to Galeri Nombor Asas at X: -10)
+    // West Archway (leading to Galeri Asas Nombor at X: -10)
     if (inBox(-10.4, -9.6, -5.2, -4.4)) return true;
     if (inBox(-10.4, -9.6, 4.4, 5.2)) return true;
 
@@ -22250,7 +22275,7 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['vr-player-controller'])
             ] : [
                 { id: 'front-abc-upper', name: 'Galeri Huruf Fonik (a - z)', x: 0, z: -22 },
                 { id: 'back-abc-lower', name: 'Galeri Huruf Kecil (a - z)', x: 0, z: 22 },
-                { id: 'left-numbers', name: 'Galeri Nombor Asas (0 - 10)', x: -22, z: 0 },
+                { id: 'left-numbers', name: 'Galeri Asas Nombor (0 - 10)', x: -22, z: 0 },
                 { id: 'right-series', name: 'Galeri Siri Nombor (10 - 100)', x: 22, z: 0 }
             ];
 
@@ -22371,7 +22396,7 @@ const VR_STATION_DATA = {
         items: 'abcdefghijklmnopqrstuvwxyz'.split('').map(l => ({ text: l, sound: l }))
     },
     'left-numbers': {
-        title: 'Galeri Nombor Asas (0 - 10)',
+        title: 'Galeri Asas Nombor (0 - 10)',
         color: '#0284c7',
         isNombor: true,
         items: [
@@ -22647,7 +22672,6 @@ function formatVRSyllablesHtml(text) {
 
 window.currentVRBookId = null;
 window.currentVRBookPageIndex = 0;
-window.isVRBookNarrating = false;
 
 window.bukaVRPromptBuku = function (bookId) {
     const book = VR_STORY_BOOKS_DATA[bookId] || VR_STORY_BOOKS_DATA['buku_1_kucing_comel'];
@@ -22707,6 +22731,49 @@ window.tutupVRPromptBuku = function () {
     if (modal) modal.style.display = 'none';
 };
 
+// Popup Makluman: Rak Buku VR tiada audio (sekali setiap sesi)
+window.tutupNotisRakBukuVR = function () {
+    const modal = document.getElementById('vr-buku-notice-modal');
+    if (modal) modal.style.display = 'none';
+    try { sessionStorage.setItem('rakBukuAudioNoticeSeen', '1'); } catch (e) {}
+};
+
+window.tunjukNotisRakBukuVR = function () {
+    let alreadySeen = false;
+    try { alreadySeen = sessionStorage.getItem('rakBukuAudioNoticeSeen') === '1'; } catch (e) {}
+    if (alreadySeen) return;
+
+    let modal = document.getElementById('vr-buku-notice-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'vr-buku-notice-modal';
+        modal.className = 'modal-overlay';
+        document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 440px; text-align: center;">
+            <div style="font-size: 3.4rem; color: #f59e0b; margin-bottom: 10px;">
+                <i class="fa-solid fa-book-open-reader"></i>
+            </div>
+            <h2 style="margin-bottom: 12px; font-family: 'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">
+                <span style="display: inline-block; background: var(--color-orange); color: #ffffff; padding: 6px 18px; border-radius: 12px; font-size: 1.6rem;">Rak Buku Bunyi Kata</span>
+            </h2>
+            <p style="font-size: 1.18rem; font-weight: 700; line-height: 1.6; color: #1e293b; margin-bottom: 20px;">
+                Rak Buku ini tiada audio. Murid digalakkan membaca sendiri dengan kuat. Selamat mencuba!
+            </p>
+            <button type="button" class="neo-btn bg-orange" style="width: 100%; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="window.tutupNotisRakBukuVR()">
+                <i class="fa-solid fa-thumbs-up"></i> Faham!
+            </button>
+        </div>
+    `;
+    modal.onclick = function (e) { if (e.target === modal) window.tutupNotisRakBukuVR(); };
+    modal.style.display = 'flex';
+    modal.style.zIndex = '10060';
+    modal.style.background = 'rgba(15, 23, 42, 0.82)';
+    modal.style.backdropFilter = 'blur(10px)';
+};
+
 window.bukaVRBukuReader = function (bookId) {
     window.tutupVRPromptBuku();
     const book = VR_STORY_BOOKS_DATA[bookId] || VR_STORY_BOOKS_DATA['buku_1_kucing_comel'];
@@ -22714,8 +22781,6 @@ window.bukaVRBukuReader = function (bookId) {
 
     window.currentVRBookId = book.id;
     window.currentVRBookPageIndex = 0;
-    window.isVRBookNarrating = false;
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
 
     let modal = document.getElementById('vr-buku-reader-modal');
     if (!modal) {
@@ -22727,11 +22792,14 @@ window.bukaVRBukuReader = function (bookId) {
 
     renderVRBookReaderContent();
     modal.style.display = 'flex';
+
+    // Tunjuk notis tiada audio (sekali setiap sesi) selepas reader terbuka
+    if (typeof window.tunjukNotisRakBukuVR === 'function') {
+        window.tunjukNotisRakBukuVR();
+    }
 };
 
 window.tutupVRBukuReader = function () {
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    window.isVRBookNarrating = false;
     const modal = document.getElementById('vr-buku-reader-modal');
     if (modal) modal.style.display = 'none';
 };
@@ -22739,8 +22807,6 @@ window.tutupVRBukuReader = function () {
 window.tukarHalamanVRBuku = function (delta) {
     const book = VR_STORY_BOOKS_DATA[window.currentVRBookId];
     if (!book) return;
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    window.isVRBookNarrating = false;
 
     const newIdx = window.currentVRBookPageIndex + delta;
     if (newIdx < 0 || newIdx >= book.pages.length) return;
@@ -22780,58 +22846,6 @@ window.tukarHalamanVRBuku = function (delta) {
         window.currentVRPageAnim = delta > 0 ? 'vr-book-turn-enter-right' : 'vr-book-turn-enter-left';
         renderVRBookReaderContent();
     }
-};
-
-window.sebutAyatVRBuku = function () {
-    const book = VR_STORY_BOOKS_DATA[window.currentVRBookId];
-    if (!book) return;
-    const page = book.pages[window.currentVRBookPageIndex];
-    if (!page || !page.text) return;
-    if (!('speechSynthesis' in window)) return;
-
-    if (window.isVRBookNarrating) {
-        window.speechSynthesis.cancel();
-        window.isVRBookNarrating = false;
-        const btn = document.getElementById('vr-buku-audio-btn');
-        if (btn) {
-            btn.style.backgroundColor = book.color;
-            btn.innerHTML = '<i class="fa-solid fa-volume-high" style="color:#ffffff;"></i>';
-        }
-        return;
-    }
-
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(page.text);
-    utterance.lang = 'ms-MY';
-    utterance.rate = 0.88;
-    utterance.pitch = 1.05;
-
-    utterance.onstart = () => {
-        window.isVRBookNarrating = true;
-        const btn = document.getElementById('vr-buku-audio-btn');
-        if (btn) {
-            btn.style.backgroundColor = '#ef4444';
-            btn.innerHTML = '<i class="fa-solid fa-stop" style="color:#ffffff;"></i>';
-        }
-    };
-    utterance.onend = () => {
-        window.isVRBookNarrating = false;
-        const btn = document.getElementById('vr-buku-audio-btn');
-        if (btn) {
-            btn.style.backgroundColor = book.color;
-            btn.innerHTML = '<i class="fa-solid fa-volume-high" style="color:#ffffff;"></i>';
-        }
-    };
-    utterance.onerror = () => {
-        window.isVRBookNarrating = false;
-        const btn = document.getElementById('vr-buku-audio-btn');
-        if (btn) {
-            btn.style.backgroundColor = book.color;
-            btn.innerHTML = '<i class="fa-solid fa-volume-high" style="color:#ffffff;"></i>';
-        }
-    };
-
-    window.speechSynthesis.speak(utterance);
 };
 
 function renderVRBookReaderContent() {
@@ -22880,16 +22894,11 @@ function renderVRBookReaderContent() {
                     <!-- Inner Page Card with Storybook Page-Turn 3D Animation -->
                     <div id="vr-book-page-card" class="${animClass}" style="width: 100%; background: #ffffff; background-image: radial-gradient(rgba(30, 41, 59, 0.08) 1.5px, transparent 1.5px); background-size: 16px 16px; border-radius: 18px; border: 2.5px solid #1e293b; box-shadow: 0 3px 0 #1e293b, 0 6px 14px rgba(0,0,0,0.05); display: flex; flex-direction: column; overflow: hidden; position: relative; box-sizing: border-box; padding: 10px 10px 12px 10px;">
                         
-                        <!-- Page Top Bar: Themed 1/5 Badge + Audio Button -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; padding: 0 2px;">
+                        <!-- Page Top Bar: Themed 1/5 Badge (Centered, No Audio) -->
+                        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 6px; padding: 0 2px;">
                             <span style="background: ${book.color}; color: #ffffff; font-weight: 900; font-size: 0.84rem; font-family: 'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif; padding: 2px 12px; border-radius: 999px; border: 2px solid #1e293b; box-shadow: 0 2px 0 #1e293b; letter-spacing: 0.5px;">
                                 ${pageIdx + 1}/5
                             </span>
-
-                            <!-- Audio Speaker Button -->
-                            <button id="vr-buku-audio-btn" type="button" onclick="window.sebutAyatVRBuku()" style="width: 34px; height: 34px; border-radius: 50%; background: ${window.isVRBookNarrating ? '#ef4444' : book.color}; color: #ffffff; border: 2px solid #1e293b; box-shadow: 0 2px 0 #1e293b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem;" title="Dengar sebutan audio">
-                                <i class="fa-solid ${window.isVRBookNarrating ? 'fa-stop' : 'fa-volume-high'}" style="color: #ffffff;"></i>
-                            </button>
                         </div>
 
                         <!-- Story Image Frame with Left & Right Side Navigation Buttons -->
@@ -24240,7 +24249,7 @@ function startMuseumVRScene() {
         </a-entity>`;
     }
 
-    // West Wing Display: Nombor Asas (0 - 10) at X = -28.62
+    // West Wing Display: Asas Nombor (0 - 10) at X = -28.62
     let numberButtons = '';
     const numItems = VR_STATION_DATA['left-numbers'].items;
     numItems.forEach((item, i) => {
@@ -24285,10 +24294,10 @@ function startMuseumVRScene() {
     });
 
     // Gallery Signs for back walls
-    const fonikSignSvg = makeVrHeaderSvg('DEWAN HURUF FONIK', '#ffffff', '#065f46', 720, 130);
-    const hurufKecilSignSvg = makeVrHeaderSvg('DEWAN HURUF KECIL', '#ffffff', '#831843', 720, 130);
-    const leftHeaderSvg = makeVrHeaderSvg('GALERI NOMBOR ASAS', '#ffffff', '#0369a1', 720, 130);
-    const rightHeaderSvg = makeVrHeaderSvg('GALERI SIRI NOMBOR', '#ffffff', '#15803d', 720, 130);
+    const fonikSignSvg = makeVrHeaderSvg('Dewan Huruf Fonik', '#ffffff', '#065f46', 720, 130);
+    const hurufKecilSignSvg = makeVrHeaderSvg('Dewan Huruf Kecil', '#ffffff', '#831843', 720, 130);
+    const leftHeaderSvg = makeVrHeaderSvg('Galeri Asas Nombor', '#ffffff', '#0369a1', 720, 130);
+    const rightHeaderSvg = makeVrHeaderSvg('Galeri Siri Nombor', '#ffffff', '#15803d', 720, 130);
 
     // Initial Spawn Position: In the open rotunda at (0, 0, 4.5), facing forward with plenty of walking space!
 
@@ -24321,7 +24330,7 @@ function startMuseumVRScene() {
                     animation__bob="property: position; to: 0 2.6 0; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"></a-sphere>
             </a-entity>
 
-            <!-- West Wing: Galeri Nombor Asas (-22, 0) -->
+            <!-- West Wing: Galeri Asas Nombor (-22, 0) -->
             <a-entity position="-22 0.03 0">
                 <a-ring rotation="-90 0 0" radius-inner="0.9" radius-outer="2.0" color="#0ea5e9" material="opacity: 0.85; transparent: true;"
                     animation="property: rotation; to: -90 360 0; loop: true; dur: 5000; easing: linear"></a-ring>
@@ -24400,10 +24409,10 @@ function startMuseumVRScene() {
             <a-box position="10 1.32 20" width="0.48" height="0.06" depth="20" color="#fbbf24"></a-box>
 
             <!-- 4 Grand Archways leading into each wing -->
-            ${vrGrandArchway(0, 0, -10, 0, 'DEWAN HURUF FONIK', '#047857')}
-            ${vrGrandArchway(0, 0, 10, 180, 'DEWAN HURUF KECIL', '#9d174d')}
-            ${vrGrandArchway(-10, 0, 0, 90, 'GALERI NOMBOR ASAS', '#0284c7')}
-            ${vrGrandArchway(10, 0, 0, -90, 'GALERI SIRI NOMBOR', '#15803d')}
+            ${vrGrandArchway(0, 0, -10, 0, 'Dewan Huruf Fonik', '#047857')}
+            ${vrGrandArchway(0, 0, 10, 180, 'Dewan Huruf Kecil', '#9d174d')}
+            ${vrGrandArchway(-10, 0, 0, 90, 'Galeri Asas Nombor', '#0284c7')}
+            ${vrGrandArchway(10, 0, 0, -90, 'Galeri Siri Nombor', '#15803d')}
 
             <!-- Central Atrium Rotunda Centerpiece -->
             <a-entity position="0 0 0">
@@ -24426,7 +24435,7 @@ function startMuseumVRScene() {
             ${vrGrandChandelier(0, 7.2, -22)}
             <!-- 3. South Wing Chandelier (Dewan Huruf Kecil) -->
             ${vrGrandChandelier(0, 7.2, 22)}
-            <!-- 4. West Wing Chandelier (Galeri Nombor Asas) -->
+            <!-- 4. West Wing Chandelier (Galeri Asas Nombor) -->
             ${vrGrandChandelier(-22, 7.2, 0)}
             <!-- 5. East Wing Chandelier (Galeri Siri Nombor) -->
             ${vrGrandChandelier(22, 7.2, 0)}
@@ -24455,7 +24464,7 @@ function startMuseumVRScene() {
 
             <!-- ================= NORTH WING (DEWAN HURUF FONIK) ================= -->
             <!-- West Wall: 1 Single Elegant Modern Artwork (Vector 'abc') -->
-            ${vrWallPainting(-9.7, 3.8, -19.0, 90, 'BELAJAR FONIK', 'abc', 'Sebutan A - Z', '#059669', '#ecfdf5', '#d1fae5')}
+            ${vrWallPainting(-9.7, 3.8, -19.0, 90, 'Belajar Fonik', 'abc', 'Sebutan A - Z', '#059669', '#ecfdf5', '#d1fae5')}
             ${vrWallSconce(-9.6, 4.5, -15.0, 90)}
             ${vrWallSconce(-9.6, 4.5, -23.0, 90)}
 
@@ -24481,7 +24490,7 @@ function startMuseumVRScene() {
 
             <!-- ================= SOUTH WING (DEWAN HURUF KECIL) ================= -->
             <!-- West Wall: 1 Single Elegant Modern Artwork (Vector 'book') -->
-            ${vrWallPainting(-9.7, 3.8, 19.0, 90, 'HURUF KECIL', 'book', 'Membaca Lancar', '#9d174d', '#fdf2f8', '#fce7f3')}
+            ${vrWallPainting(-9.7, 3.8, 19.0, 90, 'Huruf Kecil', 'book', 'Membaca Lancar', '#9d174d', '#fdf2f8', '#fce7f3')}
             ${vrWallSconce(-9.6, 4.5, 15.0, 90)}
             ${vrWallSconce(-9.6, 4.5, 23.0, 90)}
 
@@ -24505,9 +24514,9 @@ function startMuseumVRScene() {
             ${vrWallSconce(-9.6, 4.5, 27.5, 90)}
             ${vrWallSconce(9.6, 4.5, 27.5, -90)}
 
-            <!-- ================= WEST WING (GALERI NOMBOR ASAS) ================= -->
+            <!-- ================= WEST WING (GALERI ASAS NOMBOR) ================= -->
             <!-- North Wall: 1 Single Elegant Modern Artwork (Vector 'numbers') -->
-            ${vrWallPainting(-19.0, 3.8, -9.7, 0, 'NOMBOR ASAS', 'numbers', 'Kira 0 Hingga 10', '#0284c7', '#f0f9ff', '#bae6fd')}
+            ${vrWallPainting(-19.0, 3.8, -9.7, 0, 'Asas Nombor', 'numbers', 'Kira 0 Hingga 10', '#0284c7', '#f0f9ff', '#bae6fd')}
             ${vrWallSconce(-15.0, 4.5, -9.6, 0)}
             ${vrWallSconce(-23.0, 4.5, -9.6, 0)}
 
@@ -24516,7 +24525,7 @@ function startMuseumVRScene() {
             ${vrWallSconce(-15.0, 4.5, 9.6, 180)}
             ${vrWallSconce(-23.0, 4.5, 9.6, 180)}
 
-            <!-- West Display Board (NOMBOR ASAS at X = -28.75) -->
+            <!-- West Display Board (ASAS NOMBOR at X = -28.75) -->
             <a-box position="-28.75 4.1 0" width="0.08" height="5.6" depth="13.2" color="#b8860b"></a-box>
             <a-box position="-28.7 4.1 0" width="0.05" height="5.2" depth="12.8" color="#0c4a6e"></a-box>
             ${numberButtons}
@@ -24533,7 +24542,7 @@ function startMuseumVRScene() {
 
             <!-- ================= EAST WING (GALERI SIRI NOMBOR) ================= -->
             <!-- North Wall: 1 Single Elegant Modern Artwork (Vector 'star') -->
-            ${vrWallPainting(19.0, 3.8, -9.7, 0, 'SIRI NOMBOR', 'star', 'Gandaan 10 - 100', '#15803d', '#f0fdf4', '#dcfce7')}
+            ${vrWallPainting(19.0, 3.8, -9.7, 0, 'Siri Nombor', 'star', 'Gandaan 10 - 100', '#15803d', '#f0fdf4', '#dcfce7')}
             ${vrWallSconce(15.0, 4.5, -9.6, 0)}
             ${vrWallSconce(23.0, 4.5, -9.6, 0)}
 
@@ -24615,12 +24624,12 @@ function startVRBacaanScene() {
     const studentName = window.namaMuridAktif || 'Kapten Suku';
     const nameBadgeSvg = generateAtlantaBadgeSvg(studentName);
 
-    const archHeader1 = makeVrHeaderSvg('dewan ayat pendek', '#ffffff', '#047857', 650, 100);
-    const archHeader2 = makeVrHeaderSvg('dewan ayat panjang', '#ffffff', '#0369a1', 650, 100);
-    const archHeader3 = makeVrHeaderSvg('galeri petikan tahap 1', '#ffffff', '#b45309', 650, 100);
-    const archHeader4 = makeVrHeaderSvg('galeri petikan tahap 2', '#ffffff', '#6d28d9', 650, 100);
-    const archHeader5 = makeVrHeaderSvg('pavilion cerita pendek', '#ffffff', '#be123c', 650, 100);
-    const welcomeSignSvg = makeVrHeaderSvg('MUZIUM BACAAN BERGRED', '#78350f', '#fbbf24', 600, 120);
+    const archHeader1 = makeVrHeaderSvg('Dewan Ayat Pendek', '#ffffff', '#047857', 650, 100);
+    const archHeader2 = makeVrHeaderSvg('Dewan Ayat Panjang', '#ffffff', '#0369a1', 650, 100);
+    const archHeader3 = makeVrHeaderSvg('Galeri Petikan Tahap 1', '#ffffff', '#b45309', 650, 100);
+    const archHeader4 = makeVrHeaderSvg('Galeri Petikan Tahap 2', '#ffffff', '#6d28d9', 650, 100);
+    const archHeader5 = makeVrHeaderSvg('Pavilion Cerita Pendek', '#ffffff', '#be123c', 650, 100);
+    const welcomeSignSvg = makeVrHeaderSvg('Muzium Bacaan Bergred', '#78350f', '#fbbf24', 600, 120);
 
     function makeBacaanFramePlaqueSvg(text, bgColor) {
         const cleanText = (text || '').replace(/^\d+\.\s*/, '').trim();
@@ -25115,7 +25124,7 @@ function startVRBacaanScene() {
             <a-box position="29.8 0.6 0" width="0.36" height="1.2" depth="60" color="#78350f"></a-box>
             <a-box position="29.8 4.6 0" width="0.36" height="6.8" depth="60" material="src: url(${creamWallTexture}); repeat: 15 2; roughness: 0.85;"></a-box>
             <a-box position="29.6 1.2 0" width="0.06" height="0.05" depth="60" color="#fbbf24"></a-box>
-            ${vrGrandArchway(0, 0, -15.8, 0, 'DEWAN AYAT PENDEK', '#047857')}
+            ${vrGrandArchway(0, 0, -15.8, 0, 'Dewan Ayat Pendek', '#047857')}
             <a-box position="-7 0.6 -22" width="0.32" height="1.2" depth="12" color="#78350f"></a-box>
             <a-box position="-7 4.6 -22" width="0.32" height="6.8" depth="12" material="src: url(${creamWallTexture}); repeat: 4 2; roughness: 0.85;"></a-box>
             <a-box position="-7 1.2 -22" width="0.34" height="0.04" depth="12" color="#fbbf24"></a-box>
@@ -25143,7 +25152,7 @@ function startVRBacaanScene() {
                     animation__bob="property: position; to: 0 2.6 0; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"></a-octahedron>
             </a-entity>
 
-            ${vrGrandArchway(13.8, 0, -11, -90, 'DEWAN AYAT PANJANG', '#0284c7')}
+            ${vrGrandArchway(13.8, 0, -11, -90, 'Dewan Ayat Panjang', '#0284c7')}
             <a-box position="21.5 0.6 -17" width="15" height="1.2" depth="0.32" color="#78350f"></a-box>
             <a-box position="21.5 4.6 -17" width="15" height="6.8" depth="0.32" material="src: url(${creamWallTexture}); repeat: 4 2; roughness: 0.85;"></a-box>
             <a-box position="21.5 1.2 -17" width="15" height="0.04" depth="0.34" color="#fbbf24"></a-box>
@@ -25171,7 +25180,7 @@ function startVRBacaanScene() {
                     animation__bob="property: position; to: 0 2.6 0; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"></a-dodecahedron>
             </a-entity>
 
-            ${vrGrandArchway(13.8, 0, 11, -90, 'GALERI PETIKAN TAHAP 1', '#d97706')}
+            ${vrGrandArchway(13.8, 0, 11, -90, 'Galeri Petikan Tahap 1', '#d97706')}
             <a-box position="21.5 0.6 5" width="15" height="1.2" depth="0.32" color="#78350f"></a-box>
             <a-box position="21.5 4.6 5" width="15" height="6.8" depth="0.32" material="src: url(${creamWallTexture}); repeat: 4 2; roughness: 0.85;"></a-box>
             <a-box position="21.5 1.2 5" width="15" height="0.04" depth="0.34" color="#fbbf24"></a-box>
@@ -25199,7 +25208,7 @@ function startVRBacaanScene() {
                     animation__bob="property: position; to: 0 2.6 0; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"></a-box>
             </a-entity>
 
-            ${vrGrandArchway(-13.8, 0, -11, 90, 'GALERI PETIKAN TAHAP 2', '#7c3aed')}
+            ${vrGrandArchway(-13.8, 0, -11, 90, 'Galeri Petikan Tahap 2', '#7c3aed')}
             <a-box position="-21.5 0.6 -17" width="15" height="1.2" depth="0.32" color="#78350f"></a-box>
             <a-box position="-21.5 4.6 -17" width="15" height="6.8" depth="0.32" material="src: url(${creamWallTexture}); repeat: 4 2; roughness: 0.85;"></a-box>
             <a-box position="-21.5 1.2 -17" width="15" height="0.04" depth="0.34" color="#fbbf24"></a-box>
@@ -25227,7 +25236,7 @@ function startVRBacaanScene() {
                     animation__bob="property: position; to: 0 2.6 0; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"></a-sphere>
             </a-entity>
 
-            ${vrGrandArchway(-13.8, 0, 11, 90, 'PAVILION CERITA PENDEK', '#be123c')}
+            ${vrGrandArchway(-13.8, 0, 11, 90, 'Pavilion Cerita Pendek', '#be123c')}
             <a-box position="-21.5 0.6 5" width="15" height="1.2" depth="0.32" color="#78350f"></a-box>
             <a-box position="-21.5 4.6 5" width="15" height="6.8" depth="0.32" material="src: url(${creamWallTexture}); repeat: 4 2; roughness: 0.85;"></a-box>
             <a-box position="-21.5 1.2 5" width="15" height="0.04" depth="0.34" color="#fbbf24"></a-box>

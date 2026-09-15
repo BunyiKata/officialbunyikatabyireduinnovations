@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 import { generateCertificateCanvas, formatTarikhSijil } from '../utils/sijilGenerator';
+import { getCoreAudioContext } from '../utils/coreAudio';
 
 interface StudentItem {
   id: string;
@@ -77,13 +78,8 @@ const loadStudentsForClass = (clsName: string): StudentItem[] => {
 const playClick = () => {
   try {
     if (typeof window !== 'undefined') {
-      if ((window as any).playBubble) {
-        (window as any).playBubble();
-        return;
-      }
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioCtx) {
-        const ctx = (window as any).globalAudioCtx || new AudioCtx();
+      const ctx = getCoreAudioContext();
+      if (ctx) {
         if (ctx.state === 'suspended') ctx.resume();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();

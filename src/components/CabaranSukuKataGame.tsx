@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'motion/react';
+import { getCoreAudioContext } from '../utils/coreAudio';
 
 interface GameProps {
   onClose: () => void;
@@ -1961,9 +1962,8 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
       if (typeof (window as any).playTada === 'function') {
         (window as any).playTada();
       } else {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
+        const ctx = getCoreAudioContext();
+        if (!ctx) return;
         if (ctx.state === 'suspended') ctx.resume();
         const now = ctx.currentTime;
         [400, 500, 600].forEach(f => {
@@ -1999,9 +1999,8 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
       } else if (typeof (window as any).playOops === 'function') {
         (window as any).playOops();
       } else {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
+        const ctx = getCoreAudioContext();
+        if (!ctx) return;
         if (ctx.state === 'suspended') ctx.resume();
         const now = ctx.currentTime;
         [293.66, 261.63, 220.00, 174.61].forEach((freq, i) => {
@@ -2278,9 +2277,8 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
           (window as any).playOops();
         } else {
           // Direct fallback
-          const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-          if (AudioCtx) {
-            const ctx = new AudioCtx();
+          const ctx = getCoreAudioContext();
+          if (ctx) {
             if (ctx.state === 'suspended') ctx.resume();
             const now = ctx.currentTime;
             const osc1 = ctx.createOscillator();

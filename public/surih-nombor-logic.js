@@ -1,6 +1,10 @@
 // Logika Surih Nombor
 
 window.bukaSurihNombor = function() {
+    // Guna SATU AudioContext kongsi seluruh app (elak had ~6 ctx pada mobile)
+    window.audioContext = (typeof window.getGlobalAudioContext === 'function')
+        ? window.getGlobalAudioContext()
+        : window.audioContext;
     if (!window.audioContext) {
         window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { getCoreAudioContext } from '../utils/coreAudio';
 
 export interface CantumWordItem {
   word: string;
@@ -160,10 +161,8 @@ const PIECE_COLORS = [
 
 function playPopConfettiSound() {
   try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const ctx = (window as any).globalAudioCtx || new AudioContextClass();
-    (window as any).globalAudioCtx = ctx;
+    const ctx = getCoreAudioContext();
+    if (!ctx) return;
     if (ctx.state === 'suspended') ctx.resume().catch(() => {});
     const now = ctx.currentTime;
 

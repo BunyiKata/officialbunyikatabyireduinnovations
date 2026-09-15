@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
+import { getCoreAudioContext } from '../utils/coreAudio';
 
 const WORD_DATABASE: Record<string, { word: string; syllables: string[]; emoji: string }[]> = {
     'KV': [
@@ -298,20 +299,13 @@ const CATEGORIES = Object.keys(WORD_DATABASE);
 const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
 
 // Web Audio Synthesizer for Tanduk Kata sound effects
-let audioCtx: AudioContext | null = null;
-
 function getAudioContext(): AudioContext | null {
     if (typeof window === 'undefined') return null;
-    if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContextClass) {
-            audioCtx = new AudioContextClass();
-        }
+    const ctx = getCoreAudioContext();
+    if (ctx && ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
     }
-    if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-    return audioCtx;
+    return ctx;
 }
 
 function playJumpSound() {
