@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import MuridSidePanel from "./components/panels/MuridSidePanel";
 import PilihPetaModal from "./components/modals/PilihPetaModal";
 import LoginScreen from "./components/screens/LoginScreen";
+import LandingScreen from "./components/screens/LandingScreen";
 import MapScreen from "./components/screens/MapScreen";
 import AppInfoModals from "./components/modals/AppInfoModals";
 // Lazy-load canvas-confetti: besar (~20KB) dan cuma dipakai selepas game tamat.
@@ -321,7 +322,7 @@ export default function App() {
         if (hash) return hash;
       }
     }
-    return "login-screen";
+    return "landing-screen";
   });
 
   const getScreenClass = (id: string, extraClasses: string = "") => {
@@ -359,14 +360,14 @@ export default function App() {
       const rawPath = window.location.pathname.replace(/^\/+/, "");
       let path = rawPath || (window.location.hash ? window.location.hash.replace("#", "") : "");
       if (!path || path === "index.html") {
-        path = "login-screen";
+        path = "landing-screen";
       }
 
       // Gunakan penjaga laluan BERKONGSI (window.bolehAksesSkrin) supaya
       // App.tsx dan app-logic.js sentiasa sependapat. Ini juga menutup
       // celah pautan yang ditampal terus (cth /main-menu-screen).
       if (typeof (window as any).bolehAksesSkrin === "function") {
-        if (path !== "login-screen" && !(window as any).bolehAksesSkrin(path)) {
+        if (path !== "login-screen" && path !== "landing-screen" && !(window as any).bolehAksesSkrin(path)) {
           path = "login-screen";
         }
       } else {
@@ -407,17 +408,17 @@ export default function App() {
       // /main-menu-screen atau /admin-dashboard) oleh pelawat awam mesti
       // kembali ke skrin log masuk. Jika tidak, mereka boleh masuk ke
       // dalam mod Pro/Admin tanpa melalui aliran masuk yang sah.
-      if (currentPath && currentPath !== "login-screen" && typeof (window as any).bolehAksesSkrin === "function") {
+      if (currentPath && currentPath !== "login-screen" && currentPath !== "landing-screen" && typeof (window as any).bolehAksesSkrin === "function") {
         if (!(window as any).bolehAksesSkrin(currentPath)) {
           console.warn("[Navigasi] Laluan awal ditolak:", currentPath, "— kembali ke skrin log masuk.");
           currentPath = "login-screen";
           try {
-            window.history.replaceState({ screenId: "login-screen" }, document.title, "/");
+            window.history.replaceState({ screenId: "login-screen" }, document.title, "/login-screen");
           } catch (e) {}
         }
       }
 
-      if (currentPath && currentPath !== "login-screen") {
+      if (currentPath && currentPath !== "login-screen" && currentPath !== "landing-screen") {
         setActiveScreen(currentPath);
         if (currentPath === "ibubapa-dashboard" || currentPath.startsWith("ibubapa-")) {
           document.body.classList.add("parent-mode");
@@ -1010,9 +1011,17 @@ export default function App() {
       if (typeof document === "undefined") return false;
       const ls = document.getElementById("login-screen");
       if (ls && ls.classList.contains("active")) return true;
+      // Skrin pendaratan awam juga dikira "belum masuk app".
+      const landing = document.getElementById("landing-screen");
+      if (landing && landing.classList.contains("active")) return true;
       // Simpanan: lastik URL semasa.
       const path = window.location.pathname.replace(/^\/+/, "");
-      return !path || path === "index.html" || path === "login-screen";
+      return (
+        !path ||
+        path === "index.html" ||
+        path === "login-screen" ||
+        path === "landing-screen"
+      );
     } catch (e) {
       return false;
     }
@@ -2088,9 +2097,9 @@ export default function App() {
       }
     };
     // Initial active screen on startup if none is active
-    const loginEl = document.getElementById("login-screen");
-    if (loginEl && !document.querySelector(".screen.active")) {
-      loginEl.classList.add("active");
+    const landingEl = document.getElementById("landing-screen") || document.getElementById("login-screen");
+    if (landingEl && !document.querySelector(".screen.active")) {
+      landingEl.classList.add("active");
     }
   }, []);
 
@@ -3661,6 +3670,27 @@ export default function App() {
       >
         <i className="fa-solid fa-bars"></i>
       </button>
+      <LandingScreen
+        getScreenClass={getScreenClass}
+        onCubaPercuma={() => {
+          if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+          if (typeof (window as any).paparSkrin === "function") {
+            (window as any).paparSkrin("login-screen");
+          }
+        }}
+        onLogMasuk={() => {
+          if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+          if (typeof (window as any).paparSkrin === "function") {
+            (window as any).paparSkrin("login-screen");
+          }
+        }}
+        onOpenPakej={(tab) => {
+          if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+          (window as any).openPakejProModal?.(tab || "guru");
+        }}
+      />
+
+
 
       <LoginScreen
         getScreenClass={getScreenClass}

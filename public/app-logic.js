@@ -2458,6 +2458,7 @@ function tutupSidePanel() {
 }
 
 const SCREEN_NAMES_MAP = {
+    'landing-screen': 'Halaman Utama',
     'login-screen': 'Log Masuk',
     'main-menu-screen': 'Menu Utama',
     'map-screen': 'Peta Pembelajaran',
@@ -2505,7 +2506,7 @@ function paparSkrin(screenId, skipHash) {
     // Laluan yang ditaip / ditampal terus (cth /main-menu-screen, /admin-dashboard)
     // mesti melalui aliran masuk yang sah dahulu. Tanpa semakan ini, pelawat
     // awam boleh menampal pautan dan terus masuk ke dalam mod Pro/Admin.
-    if (screenId !== 'login-screen' && typeof window.bolehAksesSkrin === 'function') {
+    if (screenId !== 'login-screen' && screenId !== 'landing-screen' && typeof window.bolehAksesSkrin === 'function') {
         if (!window.bolehAksesSkrin(screenId)) {
             console.warn('[Navigasi] Akses ditolak untuk skrin:', screenId, '— kembali ke skrin log masuk.');
             screenId = 'login-screen';
@@ -2542,7 +2543,18 @@ function paparSkrin(screenId, skipHash) {
     const tajukSkrin = SCREEN_NAMES_MAP[screenId] || 'Bunyi Kata';
     document.title = `${tajukSkrin} | Bunyi Kata`;
 
-    const urlPath = (screenId === 'login-screen' || !screenId) ? '/' : '/' + screenId;
+    // URL mapping:
+    //   '/'              → halaman pendaratan awam (landing-screen)
+    //   '/login-screen'  → skrin log masuk
+    //   '/<screen-id>'   → skrin berkenaan
+    let urlPath;
+    if (screenId === 'landing-screen' || !screenId) {
+        urlPath = '/';
+    } else if (screenId === 'login-screen') {
+        urlPath = '/login-screen';
+    } else {
+        urlPath = '/' + screenId;
+    }
     if (!skipHash) {
         try {
             history.pushState({ screenId: screenId }, tajukSkrin, urlPath);
@@ -2781,25 +2793,27 @@ function mengendaliNavigasiURL(e) {
         path = window.location.hash.replace('#', '');
     }
 
-    // Jika di laluan utama / (kosong) atau muat semula (refresh), buka skrin mula (login-screen) secara lalai
+    // Jika di laluan utama / (kosong) atau muat semula (refresh), buka
+    // HALAMAN PENDARATAN awam (landing-screen) secara lalai. Skrin log masuk
+    // kini berada di '/login-screen'.
     if (!path || path === 'index.html' || path === 'guru-dashboard' || path === 'ibubapa-dashboard' || path === 'admin-dashboard') {
-        path = 'login-screen';
+        path = 'landing-screen';
     }
 
     // PENTING: Semak penjaga laluan SEBELUM menulis semula URL. Jika pautan
     // yang ditampal tidak dibenarkan (cth pelawat awam membuka
     // /main-menu-screen atau /admin-dashboard), URL dalam bar alamat mesti
     // dikembalikan ke '/' — bukan dibiarkan seolah-olah akses berjaya.
-    if (path !== 'login-screen' && typeof window.bolehAksesSkrin === 'function') {
+    if (path !== 'login-screen' && path !== 'landing-screen' && typeof window.bolehAksesSkrin === 'function') {
         if (!window.bolehAksesSkrin(path)) {
             console.warn('[Navigasi] Laluan ditolak:', path, '— URL dikembalikan ke /.');
-            path = 'login-screen';
+            path = 'landing-screen';
         }
     }
 
     if (path) {
         paparSkrin(path, true);
-        const urlPath = (path === 'login-screen') ? '/' : '/' + path;
+        const urlPath = (path === 'landing-screen') ? '/' : (path === 'login-screen') ? '/login-screen' : '/' + path;
         try {
             history.replaceState({ screenId: path }, '', urlPath);
         } catch (err) { }

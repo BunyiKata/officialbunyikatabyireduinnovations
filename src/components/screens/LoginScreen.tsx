@@ -118,9 +118,6 @@ export default function LoginScreen({
         >
             <Suspense fallback={null}>
               <PirateAvatar3DSwiper
-                onRequestEntryChoice={() => {
-                  setIsEntryChoiceModalOpen(true);
-                }}
                 onStart={() => {
                   (window as any).bukaModalAppInfo &&
                     (window as any).bukaModalAppInfo("murid");
