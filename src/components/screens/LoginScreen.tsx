@@ -473,7 +473,7 @@ export default function LoginScreen({
               fontWeight: "bold",
             }}
           >
-            <div>Â© 2026 Bunyi Kata. Hak Cipta Terpelihara.</div>
+            <div>© 2026 Bunyi Kata. Hak Cipta Terpelihara.</div>
             <div
               style={{
                 fontSize: "0.72rem",

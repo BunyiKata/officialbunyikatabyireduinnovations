@@ -8,7 +8,8 @@ import React from "react";
  * - Pembelajaran utama: 4 peta (Kenal Huruf, Suku Kata Asas, Suku Kata Hero,
  *   Bacaan Bergred) — sama seperti MAP_CHALLENGES.
  * - Maklumat ikut mod: Guru / Ibu Bapa / Affiliate.
- * - Pakej sebenar: Percuma, Bulanan Biasa RM15, 3 Bulanan Pro RM40, Tahunan Pro RM69.
+ * - Pakej sebenar: Percuma, Bulanan RM15, 3 Bulanan Pro RM40, Tahunan Pro RM69
+ *   (semua pakej berbayar sama cirinya — beza hanya tempoh; warna oren sama).
  * - Butang "Log Masuk" buka popup (kod + pilih mod); "Cuba Percuma" ke skrin log masuk.
  * - Top nav hanya scroll dalam halaman ini (anchor) — tiada tukar skrin.
  */
@@ -160,38 +161,116 @@ const IconShare = () => (
   </svg>
 );
 
+/* WhatsApp — inline SVG supaya TIDAK bergantung pada CDN Font Awesome.
+   (fa-brands memerlukan fa-brands-400.woff2 yang lambat turun → muncul
+   kotak kosong/error pada paparan pertama.) */
+const IconWhatsapp = ({ size = "1.05em", style }: { size?: string; style?: React.CSSProperties }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
+       style={{ width: size, height: size, flexShrink: 0, display: "inline-block", verticalAlign: "-0.12em", ...style }}>
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
+  </svg>
+);
+
+const IconGlobe = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:"1.1em",height:"1.1em"}}>
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="2" y1="12" x2="22" y2="12"/>
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+  </svg>
+);
+
+const IconTelegram = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" style={{width:"1.15em",height:"1.15em"}}>
+    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+  </svg>
+);
+
+const IconAppStore = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" style={{width:"1.2em",height:"1.2em"}}>
+    <path d="M17.05 12.536c-.026-2.61 2.13-3.863 2.227-3.924-1.214-1.776-3.104-2.02-3.777-2.048-1.608-.163-3.138.947-3.955.947-.813 0-2.07-.923-3.402-.898-1.75.026-3.363 1.017-4.264 2.585-1.818 3.15-.464 7.812 1.306 10.368.866 1.25 1.9 2.653 3.257 2.603 1.308-.052 1.802-.845 3.383-.845 1.581 0 2.024.845 3.406.819 1.407-.026 2.297-1.272 3.158-2.528.994-1.453 1.403-2.86 1.428-2.933-.031-.014-2.74-1.052-2.767-4.146zM14.462 4.99c.72-.874 1.206-2.088 1.074-3.297-1.038.042-2.295.692-3.04 1.564-.667.771-1.252 2.006-1.095 3.19 1.157.09 2.34-.588 3.061-1.457z"/>
+  </svg>
+);
+
+const IconPlayStore = () => (
+  <svg viewBox="0 0 24 24" style={{ width: "1.25em", height: "1.25em", display: "block" }}>
+    <path d="M1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924z" fill="#4285F4"/>
+    <path d="m13.544 10.989 3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973z" fill="#34A853"/>
+    <path d="m13.544 13.056-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z" fill="#EA4335"/>
+    <path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594z" fill="#FBBC04"/>
+  </svg>
+);
+
+/* Avatar kartun (perempuan & lelaki) untuk testimoni — LUKISAN SVG sendiri,
+   bukan aset watak projek. Supaya testimoni nampak lebih mesra & manusiawi. */
+const AvatarGirl = ({ hair = "#5b3a29", skin = "#f6c9a8", shirt = "#10b981" }: { hair?: string; skin?: string; shirt?: string }) => (
+  <svg viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M32 40c-9 0-16 5.5-17 14.5h34C48 45.5 41 40 32 40z" fill={shirt} />
+    <rect x="27" y="34" width="10" height="9" rx="3" fill={skin} />
+    <circle cx="32" cy="25" r="14" fill={skin} />
+    <path d="M18 25c0-9 6-15 14-15s14 6 14 15c0 0-1-8-6-8-2 0-3 1.5-8 1.5S26 17 24 18c-3 2-6 7-6 7z" fill={hair} />
+    <path d="M18 25c-1.5 6-1.5 12 1 17 1-4 0-9 1-13zM46 25c1.5 6 1.5 12-1 17-1-4 0-9-1-13z" fill={hair} />
+    <circle cx="27" cy="25" r="1.9" fill="#22303a" />
+    <circle cx="37" cy="25" r="1.9" fill="#22303a" />
+    <circle cx="27.6" cy="24.4" r="0.6" fill="#fff" />
+    <circle cx="37.6" cy="24.4" r="0.6" fill="#fff" />
+    <circle cx="23" cy="29" r="1.7" fill="#f79ea4" opacity="0.7" />
+    <circle cx="41" cy="29" r="1.7" fill="#f79ea4" opacity="0.7" />
+    <path d="M27.5 30.5c1.5 1.9 7.5 1.9 9 0" stroke="#22303a" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+  </svg>
+);
+
+const AvatarBoy = ({ hair = "#2f2118", skin = "#f3c19b", shirt = "#2563eb" }: { hair?: string; skin?: string; shirt?: string }) => (
+  <svg viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M32 40c-9 0-16 5.5-17 14.5h34C48 45.5 41 40 32 40z" fill={shirt} />
+    <rect x="27" y="34" width="10" height="9" rx="3" fill={skin} />
+    <circle cx="32" cy="25" r="14" fill={skin} />
+    <path d="M18 25c0-9 6-15 14-15s14 6 14 15c-2-6-5-7-9-7-3 0-4 1-8 1-5 0-6 2-11 6z" fill={hair} />
+    <circle cx="18" cy="26" r="2.4" fill={skin} />
+    <circle cx="46" cy="26" r="2.4" fill={skin} />
+    <circle cx="27" cy="25" r="1.9" fill="#22303a" />
+    <circle cx="37" cy="25" r="1.9" fill="#22303a" />
+    <circle cx="27.6" cy="24.4" r="0.6" fill="#fff" />
+    <circle cx="37.6" cy="24.4" r="0.6" fill="#fff" />
+    <path d="M27 30.5c1.6 2 8.4 2 10 0" stroke="#22303a" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+  </svg>
+);
+
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const ciri = [
   {
     Icon: IconMap,
     warna: "#10b981",
+    img: "/images/sampingan/peta-cabaran-huruf.png",
     tajuk: "4 Peta Pembelajaran",
-    huraian: "Kenal Huruf, Suku Kata Asas, Suku Kata Hero & Bacaan Bergred — bertahap ikut kemampuan anak.",
+    huraian: "Kenal Huruf, Suku Kata Asas, Suku Kata Hero dan Bacaan Bergred. Bertahap ikut kemampuan anak.",
   },
   {
     Icon: IconGamepad,
     warna: "#f59e0b",
-    tajuk: "10+ Aktiviti & Permainan",
+    img: "/images/menu-kad/menu%20asas%20bunyi%20kata/teka%20gambar%20rahsia.png",
+    tajuk: "80+ Aktiviti & Permainan",
     huraian: "Kad imbasan, cantum kata, tanduk kata, puzzle suku kata, fonik ABC dan banyak lagi.",
   },
   {
     Icon: IconMic,
     warna: "#3b82f6",
+    img: "/images/menu/fonik%20abc.png",
     tajuk: "Sebutan & Audio Betul",
-    huraian: "Audio sebutan standard Bahasa Melayu bantu anak sebut suku kata & perkataan dengan jelas.",
+    huraian: "Audio sebutan standard Bahasa Melayu bantu anak sebut suku kata dengan jelas.",
   },
   {
     Icon: IconTrophy,
     warna: "#8b5cf6",
+    img: "/images/lencana/lencana-kapten-harta-karun.png",
     tajuk: "Lencana & Ganjaran",
-    huraian: "Kumpul bintang, naik peta dan buka 5 lencana rasmi — anak tak sabar nak belajar lagi.",
+    huraian: "Kumpul bintang, naik peta dan buka 5 lencana rasmi. Anak tak sabar nak belajar lagi.",
   },
 ];
 
 const stats = [
   { angka: 4, label: "Peta Pembelajaran", suffix: "", Icon: IconMap },
-  { angka: 10, label: "Aktiviti & Permainan", suffix: "+", Icon: IconGamepad },
-  { angka: 5, label: "Lencana Rasmi", suffix: "", Icon: IconStar },
+  { angka: 80, label: "Aktiviti & Permainan", suffix: "+", Icon: IconGamepad },
+  { angka: 5, label: "Lencana Pencapaian", suffix: "", Icon: IconStar },
 ];
 
 // Pembelajaran utama — 4 peta SEBENAR projek (MAP_CHALLENGES).
@@ -199,103 +278,101 @@ const petaUtama = [
   {
     Icon: IconLetters,
     warna: "#90b562",
+    img: "/images/sampingan/peta-misi-huruf.png",
     nama: "Kenal Huruf",
-    desc: "Huruf A–Z, vokal & konsonan, fonik ABC, asas nombor.",
+    desc: "Huruf A-Z, vokal dan konsonan, fonik ABC, asas nombor.",
   },
   {
     Icon: IconBook,
     warna: "#c1a472",
+    img: "/images/sampingan/peta-misi-suku-kata-asas.png",
     nama: "Suku Kata Asas",
     desc: "KV, KV+KV, V+KV, KVK dan gabungan suku kata asas.",
   },
   {
     Icon: IconTrophy,
     warna: "#ff751f",
+    img: "/images/sampingan/peta-misi-suku-kata-hero.png",
     nama: "Suku Kata Hero",
-    desc: "KV+KVK, KVK+KV, KVKK — perkataan lebih mencabar.",
+    desc: "KV+KVK, KVK+KV, KVKK. Perkataan lebih mencabar.",
   },
   {
     Icon: IconStar,
     warna: "#ec4899",
+    img: "/images/sampingan/peta-misi-bacaan-bergred.png",
     nama: "Bacaan Bergred",
-    desc: "Ayat pendek & panjang, petikan tahap 1–2, cerita pendek.",
+    desc: "Ayat pendek dan panjang, petikan tahap 1-2, cerita pendek.",
   },
 ];
 
-// Mini permainan & aktiviti SEBENAR projek.
-const cabaran = [
-  { Icon: IconCard, nama: "Kad Imbasan", warna: "#10b981" },
-  { Icon: IconPuzzle, nama: "Cantum Kata", warna: "#f59e0b" },
-  { Icon: IconTarget, nama: "Tanduk Kata", warna: "#ef4444" },
-  { Icon: IconBook, nama: "Puzzle Suku Kata", warna: "#8b5cf6" },
-  { Icon: IconMic, nama: "Cuba Sebut", warna: "#3b82f6" },
-  { Icon: IconLetters, nama: "Fonik ABC", warna: "#ec4899" },
-  { Icon: IconMap, nama: "Cari Perkataan", warna: "#8b5cf6" },
-  { Icon: IconPuzzle, nama: "Padan Ingatan", warna: "#0ea5e9" },
-  { Icon: IconTarget, nama: "Huruf Hilang", warna: "#f97316" },
-  { Icon: IconGamepad, nama: "Burung Tambah", warna: "#f59e0b" },
-  { Icon: IconGamepad, nama: "Burung Tolak", warna: "#ea580c" },
-  { Icon: IconTarget, nama: "Ketuk Huruf", warna: "#3b82f6" },
+// Mini permainan & aktiviti SEBENAR projek (gambar sebenar dari folder menu).
+const KAD = "/images/menu-kad/menu%20asas%20bunyi%20kata/";
+const aktivitiSwip: { nama: string; img: string; warna: string }[] = [
+  { nama: "Kenali Huruf", img: "/images/menu/kenali%20huruf.png", warna: "#10b981" },
+  { nama: "Fonik ABC", img: "/images/menu/fonik%20abc.png", warna: "#ec4899" },
+  { nama: "Vokal & Konsonan", img: "/images/menu/vokal%20%26%20konsonan.png", warna: "#8b5cf6" },
+  { nama: "Dengar Bunyi Huruf", img: KAD + "dengar%20bunyi%20huruf.png", warna: "#3b82f6" },
+  { nama: "Cari Bunyi", img: KAD + "cari%20bunyi.png", warna: "#0ea5e9" },
+  { nama: "Pasangan", img: KAD + "pasangan.png", warna: "#14b8a6" },
+  { nama: "Teka Gambar Rahsia", img: KAD + "teka%20gambar%20rahsia.png", warna: "#ef4444" },
+  { nama: "Kenali Tambah", img: KAD + "kenali%20tambah.png", warna: "#f59e0b" },
+  { nama: "Kenali Tolak", img: KAD + "kenali%20tolak.png", warna: "#ea580c" },
+  { nama: "Kira & Jawab", img: KAD + "kira%20dan%20jawab.png", warna: "#22c55e" },
+  { nama: "Susun Persamaan Tambah", img: KAD + "susun%20persamaan%20tambah.png", warna: "#a855f7" },
+  { nama: "Cabaran Pantas", img: KAD + "cabaran%20pantas.png", warna: "#6366f1" },
 ];
 
 // Maklumat ikut mod — supaya pembeli tahu apa yang diperoleh setiap mod.
+// Setiap mod ada gambar background (gaya sama seperti kad "Kenapa Bunyi Kata").
 const mods = [
   {
     Icon: IconSchool,
     warna: "#ea580c",
+    img: "/images/sampingan/peta-cabaran-huruf.png",
     tag: "GURU",
     nama: "Mod Guru",
-    desc: "Untuk guru kelas & Prasekolah / Pemulihan Khas.",
+    desc: "Untuk guru kelas, Prasekolah & Pemulihan Khas.",
     senarai: [
       "Kod Kelas unik untuk murid sertai",
       "Sehingga 2 kelas serentak (Pro)",
-      "Pantau statistik & prestasi latihan",
-      "Muat turun laporan & sijil murid",
+      "Statistik & laporan prestasi murid",
     ],
   },
   {
     Icon: IconUsers,
     warna: "#2563eb",
+    img: "/images/menu-kad/menu%20asas%20bunyi%20kata/teka%20gambar%20rahsia.png",
     tag: "IBU BAPA",
     nama: "Mod Ibu Bapa",
-    desc: "Untuk ibu bapa pantau anak di rumah.",
+    desc: "Untuk ibu bapa pantau anak belajar di rumah.",
     senarai: [
       "Kod Keluarga khas untuk anak",
       "Sehingga 3 profil anak (Pro)",
-      "Laporan prestasi setiap anak",
-      "Sijil pencapaian boleh dimuat turun",
+      "Laporan & sijil setiap anak",
     ],
   },
   {
     Icon: IconShare,
     warna: "#7c3aed",
+    img: "/images/menu/fonik%20abc.png",
     tag: "AFFILIATE",
     nama: "Mod Affiliate",
     desc: "Jana pendapatan dengan memperkenalkan Bunyi Kata.",
     senarai: [
       "Kod rujukan & pautan unik anda",
       "Papan pemuka komisen & rujukan",
-      "Pantau prestasi jualan dalam satu tempat",
+      "Pantau prestasi jualan sekali pandang",
     ],
   },
 ];
 
-const langkah = [
-  {
-    no: "1",
-    tajuk: "Tekan Cuba Percuma",
-    huraian: "Tak perlu daftar. Terus mula belajar dalam beberapa saat.",
-  },
-  {
-    no: "2",
-    tajuk: "Pilih Watak Kesukaan",
-    huraian: "Anak pilih watak pengembara dan mula jelajah peta belajar.",
-  },
-  {
-    no: "3",
-    tajuk: "Kumpul Bintang",
-    huraian: "Selesaikan aktiviti, kumpul bintang dan buka lencana.",
-  },
+// Lencana dalam swiper 3D — gambar SAHAJA (tanpa syarat) + teaser hadiah.
+const lencanaSwip = [
+  { nama: "Lencana Penjelajah Alfabet", img: "/images/lencana/lencana-penjelajah-alfabet.png", warna: "#90b562" },
+  { nama: "Lencana Pemburu Suku Kata", img: "/images/lencana/lencana-pemburu-suku-kata.png", warna: "#c1a472" },
+  { nama: "Lencana Wira Pulau", img: "/images/lencana/lencana-wira-pulau.png", warna: "#ff751f" },
+  { nama: "Lencana Naib Raja Bacaan", img: "/images/lencana/lencana-naib-raja-bacaan.png", warna: "#ec4899" },
+  { nama: "Lencana Kapten Harta Karun", img: "/images/lencana/lencana-kapten-harta-karun.png", warna: "#8b5cf6" },
 ];
 
 // App preview — guna aset SEBENAR dari projek.
@@ -303,31 +380,31 @@ const appPreviews = [
   {
     img: "/images/sampingan/peta-misi-huruf.png",
     label: "Misi Kenal Huruf",
-    desc: "Peta 1 — huruf, vokal & konsonan, fonik ABC",
+    desc: "Huruf, vokal dan konsonan, fonik ABC",
     warna: "#90b562",
   },
   {
     img: "/images/sampingan/peta-misi-suku-kata-asas.png",
     label: "Misi Suku Kata Asas",
-    desc: "Peta 2 — KV, KV+KV, V+KV, KVK",
+    desc: "KV, KV+KV, V+KV, KVK",
     warna: "#c1a472",
   },
   {
     img: "/images/sampingan/peta-misi-suku-kata-hero.png",
     label: "Misi Suku Kata Hero",
-    desc: "Peta 3 — KV+KVK, KVK+KV, KVKK",
+    desc: "KV+KVK, KVK+KV, KVKK",
     warna: "#ff751f",
   },
   {
     img: "/images/sampingan/peta-misi-bacaan-bergred.png",
     label: "Misi Bacaan Bergred",
-    desc: "Peta 4 — ayat, petikan & cerita pendek",
+    desc: "Ayat, petikan dan cerita pendek",
     warna: "#ec4899",
   },
   {
-    img: "/images/menu/fonik abc.png",
+    img: "/images/menu/fonik%20abc.png",
     label: "Fonik ABC",
-    desc: "Belajar bunyi & sebutan huruf dengan jelas",
+    desc: "Belajar bunyi dan sebutan huruf dengan jelas",
     warna: "#3b82f6",
   },
   {
@@ -343,16 +420,22 @@ const testimoni = [
     nama: "Puan Aisyah",
     peranan: "Ibu kepada Hana, 5 tahun",
     teks: "Anak saya dulu tak kenal huruf. Lepas seminggu main Bunyi Kata, dia dah boleh baca suku kata sendiri!",
+    warna: "#10b981",
+    avatar: { jenis: "girl", hair: "#5b3a29", shirt: "#10b981" },
   },
   {
     nama: "Cikgu Farah",
     peranan: "Guru Prasekolah",
     teks: "Sangat membantu dalam kelas. Murid lebih fokus dan tak sabar tunggu sesi fonik setiap hari.",
+    warna: "#3b82f6",
+    avatar: { jenis: "girl", hair: "#2b2b2b", shirt: "#3b82f6" },
   },
   {
     nama: "Encik Danial",
     peranan: "Bapa kepada Adam, 6 tahun",
     teks: "Seronok sebab belajar macam main game. Adam tak perasan pun dia sedang belajar membaca.",
+    warna: "#f59e0b",
+    avatar: { jenis: "boy", hair: "#2f2118", shirt: "#f59e0b" },
   },
 ];
 
@@ -394,6 +477,31 @@ function useScrollReveal() {
   }, []);
 }
 
+/* Animasi "scale up popup" pada setiap seksyen bila di-scroll (atas atau
+   bawah) — sama seperti bila popup dibuka dalam aplikasi. */
+function useSectionPopup() {
+  React.useEffect(() => {
+    const els = document.querySelectorAll(".landing-section-pop");
+    if (!els.length) return;
+    if (typeof window !== "undefined" && window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      els.forEach((el) => el.classList.add("in-view"));
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add("in-view");
+          else entry.target.classList.remove("in-view");
+        });
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -8% 0px" }
+    );
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+}
+
 // ─── Stat item ────────────────────────────────────────────────────────────────
 function StatItem({ angka, label, suffix, Icon }: { angka: number; label: string; suffix: string; Icon: any }) {
   const ref = React.useRef<HTMLDivElement>(null);
@@ -425,39 +533,216 @@ function StatItem({ angka, label, suffix, Icon }: { angka: number; label: string
 }
 
 // ─── Preview Carousel ─────────────────────────────────────────────────────────
-function AppPreviewCarousel({ items }: { items: typeof appPreviews }) {
+/* ─── Swipe3D — satu enjin 3D swipe boleh guna semula untuk SEMUA carousel
+   landing (lencana, aktiviti, peta, pratonton). Kad sisi dimiringkan dengan
+   rotateY + translateZ, kad aktif di tengah dengan glow/reflection. ─── */
+type Swipe3DProps<T> = {
+  items: T[];
+  renderCard: (item: T, isActive: boolean) => React.ReactNode;
+  keyOf: (item: T, i: number) => string;
+  labelOf: (item: T, i: number) => string;
+  accentOf?: (item: T) => string;
+  variant?: "badge" | "media";
+  autoplay?: number;
+  hideArrows?: boolean;
+};
+
+function Swipe3D<T>({ items, renderCard, keyOf, labelOf, accentOf, variant = "media", autoplay = 0, hideArrows = false }: Swipe3DProps<T>) {
+  const total = items.length;
   const [aktif, setAktif] = React.useState(0);
+  const [dragOffset, setDragOffset] = React.useState(0);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const dragStartX = React.useRef<number | null>(null);
+  const [lebar, setLebar] = React.useState(
+    typeof window !== "undefined" ? window.innerWidth : 1200
+  );
 
   React.useEffect(() => {
-    const id = setInterval(() => setAktif((p) => (p + 1) % items.length), 3200);
-    return () => clearInterval(id);
-  }, [items.length]);
+    const onResize = () => setLebar(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
+  React.useEffect(() => {
+    if (!autoplay) return;
+    if (typeof window !== "undefined" && window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Auto-swipe berjalan berterusan (macam rupa dalam aplikasi). Berhenti
+    // seketika semasa pengguna drag supaya tak bergaduh dengan jari.
+    const id = setInterval(() => {
+      if (dragStartX.current !== null) return;
+      setAktif((p) => (p + 1) % total);
+    }, autoplay);
+    return () => clearInterval(id);
+  }, [autoplay, total]);
+
+  const isMobile = lebar < 560;
+  const isLaptop = lebar >= 1100;
+  // Laptop: kad lebih rapat supaya ada 4 kad sisi (2 kiri + 2 kanan).
+  const stepX = isMobile ? 74 : isLaptop ? 148 : 118;
+  // Bilangan kad sisi yang dirender — laptop 4 bayang, lain 2.
+  const maxOff = isLaptop ? 3.4 : 2.4;
+
+  const goto = (i: number) => setAktif(((i % total) + total) % total);
+  const handleNext = () => goto(aktif + 1);
+  const handlePrev = () => goto(aktif - 1);
+
+  const handlePointerStart = (clientX: number) => {
+    dragStartX.current = clientX;
+    setIsDragging(true);
+  };
+  const handlePointerMove = (clientX: number) => {
+    if (dragStartX.current === null) return;
+    setDragOffset(clientX - dragStartX.current);
+  };
+  const handlePointerEnd = (clientX?: number) => {
+    if (dragStartX.current === null) return;
+    const finalOffset =
+      clientX !== undefined ? clientX - dragStartX.current : dragOffset;
+    if (finalOffset < -35) handleNext();
+    else if (finalOffset > 35) handlePrev();
+    dragStartX.current = null;
+    setIsDragging(false);
+    setDragOffset(0);
+  };
+
+  const offsetOf = (idx: number) => {
+    let diff = idx - aktif;
+    while (diff < -total / 2) diff += total;
+    while (diff > total / 2) diff -= total;
+    return diff;
+  };
+
+  const dragFraction = isDragging
+    ? Math.max(-1.2, Math.min(1.2, dragOffset / stepX))
+    : 0;
+
+  // Saiz kad SERAGAM untuk semua carousel (lencana, aktiviti, peta, pratonton)
+  // supaya reka bentuk swipe sama di seluruh landing page.
+  const stageH = isMobile ? "200px" : isLaptop ? "312px" : "236px";
+  const cardW = isMobile ? "150px" : isLaptop ? "280px" : "210px";
+  const cardH = isMobile ? "190px" : isLaptop ? "272px" : "224px";
+  // Kedudukan anak panah: beri jarak selesa dari tepi kad (bukan rapat).
+  // Jarak anak panah dari tepi kad: dinaikkan sedikit supaya anak panah tidak
+  // rapat dengan kad (mini permainan & lencana) — tetapi masih dalam julat
+  // selesa, bukan terlalu jauh.
+  const arrowInset = `max(0px, calc(50% - ${parseInt(cardW, 10) / 2 + (isMobile ? 46 : 68)}px))`;
   return (
-    <div className="landing-preview-carousel">
-      <div className="landing-preview-main">
-        {items.map((item, i) => (
-          <div
-            key={item.label}
-            className={`landing-preview-slide ${i === aktif ? "aktif" : ""}`}
-          >
-            <div className="landing-preview-frame" style={{ borderColor: item.warna, boxShadow: `8px 8px 0 ${item.warna}` }}>
-              <div className="landing-preview-label-top" style={{ backgroundColor: item.warna }}>
-                {item.label}
+    <div style={{ width: "100%", margin: "0 auto", position: "relative", userSelect: "none" }}>
+      <div
+        className="landing-swipe3d-stage"
+        onTouchStart={(e) => handlePointerStart(e.touches[0].clientX)}
+        onTouchMove={(e) => isDragging && handlePointerMove(e.touches[0].clientX)}
+        onTouchEnd={(e) => handlePointerEnd(e.changedTouches[0].clientX)}
+        onTouchCancel={() => handlePointerEnd()}
+        onMouseDown={(e) => handlePointerStart(e.clientX)}
+        onMouseMove={(e) => isDragging && handlePointerMove(e.clientX)}
+        onMouseUp={(e) => handlePointerEnd(e.clientX)}
+        onMouseLeave={() => isDragging && handlePointerEnd()}
+        style={{
+          position: "relative",
+          height: stageH,
+          width: "100%",
+          perspective: "1000px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: isMobile ? "6px 0 14px" : "16px 0 26px",
+          // Beri ruang sisi supaya bayang/glow kad swipe tidak terpotong.
+          padding: isMobile ? "0 8px" : "0 16px",
+          boxSizing: "border-box",
+          touchAction: "pan-y",
+          overflow: "visible",
+          cursor: isDragging ? "grabbing" : "grab",
+        }}
+      >
+        {!hideArrows && (
+        <button
+          type="button"
+          aria-label="Sebelum"
+          onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+          className="landing-lencana-arrow"
+          style={{ left: arrowInset }}
+        >
+          {"\u2039"}
+        </button>
+        )}
+        <div style={{ position: "relative", width: "100%", height: "100%", transformStyle: "preserve-3d" }}>
+          {items.map((it, idx) => {
+            const off = offsetOf(idx);
+            const absOff = Math.abs(off - dragFraction);
+            if (absOff > maxOff) return null;
+            const translateX = (off - dragFraction) * stepX;
+            const scale = Math.max(0.48, 1 - absOff * 0.18);
+            const rotateY = -off * 32 + dragFraction * 10;
+            const z = -absOff * 130;
+            const opacity = Math.max(0.1, 1 - absOff * 0.34);
+            const isActive = idx === aktif;
+            const accent = accentOf ? accentOf(it) : "#0e9f6e";
+            const halfW = parseInt(cardW, 10) / 2;
+            const halfH = parseInt(cardH, 10) / 2;
+
+            return (
+              <div
+                key={keyOf(it, idx)}
+                onClick={() => { if (Math.abs(dragOffset) < 8) goto(idx); }}
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  top: "50%",
+                  width: cardW,
+                  height: cardH,
+                  marginLeft: -halfW,
+                  marginTop: -halfH,
+                  transform: `translateX(${translateX}px) translateZ(${z}px) rotateY(${rotateY}deg) scale(${scale})`,
+                  transition: isDragging ? "none" : "transform 0.4s cubic-bezier(.22,.61,.36,1), opacity 0.4s ease",
+                  opacity,
+                  zIndex: 100 - Math.round(absOff * 10),
+                  pointerEvents: absOff < 1.6 ? "auto" : "none",
+                  cursor: isActive ? "default" : "pointer",
+                  transformStyle: "preserve-3d",
+                }}
+              >
+                {isActive && (
+                  <span className="landing-swipe3d-glow" style={{ background: accent }} aria-hidden="true" />
+                )}
+                <div
+                  className={`landing-swipe3d-card ${isActive ? "is-active" : ""}`}
+                  style={{
+                    borderColor: accent,
+                    boxShadow: isActive
+                      ? `0 8px 0 ${accent}, 0 16px 26px rgba(15,46,41,.28)`
+                      : `0 4px 0 rgba(15,46,41,.18)`,
+                  }}
+                >
+                  {renderCard(it, isActive)}
+                </div>
               </div>
-              <img src={item.img} alt={item.label} className="landing-preview-img" />
-              <div className="landing-preview-desc">{item.desc}</div>
-            </div>
-          </div>
-        ))}
+            );
+          })}
+        </div>
+        {!hideArrows && (
+        <button
+          type="button"
+          aria-label="Seterusnya"
+          onClick={(e) => { e.stopPropagation(); handleNext(); }}
+          className="landing-lencana-arrow"
+          style={{ right: arrowInset }}
+        >
+          {"\u203A"}
+        </button>
+        )}
       </div>
-      <div className="landing-preview-dots">
-        {items.map((_, i) => (
+
+      <div className="landing-lencana-dots">
+        {items.map((it, i) => (
           <button
-            key={i}
-            className={`landing-preview-dot ${i === aktif ? "aktif" : ""}`}
-            onClick={() => setAktif(i)}
-            aria-label={`Slide ${i + 1}`}
+            key={keyOf(it, i)}
+            type="button"
+            aria-label={labelOf(it, i)}
+            className={`landing-lencana-dot ${i === aktif ? "aktif" : ""}`}
+            style={i === aktif && accentOf ? { background: accentOf(it) } : undefined}
+            onClick={() => goto(i)}
           />
         ))}
       </div>
@@ -474,35 +759,53 @@ export default function LandingScreen({
 }: LandingScreenProps) {
   const [faqBuka, setFaqBuka] = React.useState<number | null>(null);
   useScrollReveal();
+  useSectionPopup();
+
+  /* Skrol SMOOTH dalam bekas landing SAHAJA (bukan tukar skrin).
+     #landing-screen ialah bekas skrol sendiri (position:fixed + overflow:auto),
+     jadi kita skrol bekas itu + tolak tinggi nav sticky supaya tajuk tak tersorok. */
+  const pageScrollTo = (id: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    const host = document.getElementById("landing-screen");
+    const el = document.getElementById(id);
+    if (!el) return;
+    const nav = document.querySelector(".landing-nav") as HTMLElement | null;
+    const offset = (nav ? nav.offsetHeight : 0) + 12;
+    if (host && host.contains(el)) {
+      const top = el.getBoundingClientRect().top - host.getBoundingClientRect().top + host.scrollTop - offset;
+      host.scrollTo({ top, behavior: "smooth" });
+    } else {
+      const top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+    try { history.replaceState(null, "", "#" + id); } catch (_) {}
+  };
+
 
   const faq = [
     {
       s: "Adakah Bunyi Kata percuma?",
-      j: "Ya. Mod percuma membolehkan anak mula belajar Kenal Huruf dan bermain aktiviti terpilih tanpa bayaran. Untuk membuka semua 4 peta, laporan & sijil, boleh naik taraf ke pakej Pro (RM15/bulan, RM40/3 bulan atau RM69/tahun).",
-    },
-    {
-      s: "Apakah perbezaan Pakej Guru dan Pakej Ibu Bapa?",
-      j: "Pakej Guru: Bulanan Biasa RM15/bulan (1 kelas); 3 Bulanan Pro RM40 & Tahunan Pro RM69 membenarkan sehingga 2 kelas serentak dengan 2 Kod Kelas unik, pantauan statistik serta muat turun laporan & sijil murid. Pakej Ibu Bapa: Bulanan Biasa RM15/bulan (1 profil anak); 3 Bulanan Pro RM40 & Tahunan Pro RM69 membenarkan sehingga 3 profil anak dengan satu Kod Keluarga khas, laporan prestasi serta sijil setiap anak.",
-    },
-    {
-      s: "Apakah peta pembelajaran yang ada?",
-      j: "Terdapat 4 peta utama: Kenal Huruf, Suku Kata Asas, Suku Kata Hero dan Bacaan Bergred — disusun bertahap daripada mengenal huruf sehingga membaca petikan dan cerita pendek.",
-    },
-    {
-      s: "Berapa umur yang sesuai?",
-      j: "Sesuai untuk kanak-kanak Prasekolah & Pemulihan Khas (sekitar 3 hingga 8 tahun) — dari mula mengenal huruf sehingga boleh membaca ayat dan cerita pendek.",
+      j: "Ya. Mod percuma membolehkan anak mula belajar Kenal Huruf dan bermain aktiviti terpilih tanpa bayaran. Untuk membuka semua 4 peta, laporan dan sijil, boleh naik taraf ke pakej Pro (RM15/bulan, RM40/3 bulan atau RM69/tahun).",
     },
     {
       s: "Perlu daftar akaun ke?",
-      j: "Tidak perlu untuk mula. Tekan 'Cuba Percuma' dan anak boleh terus bermain. Akaun (Guru / Ibu Bapa) hanya perlu untuk menyimpan kemajuan, memantau murid/anak dan akses laporan.",
+      j: "Tidak perlu untuk mula. Tekan 'Cuba Percuma' dan anak boleh terus bermain. Akaun (Guru atau Ibu Bapa) hanya perlu untuk menyimpan kemajuan, memantau murid/anak dan akses laporan.",
     },
     {
-      s: "Bagaimana cara melanggan pakej Pro?",
-      j: "Tekan butang Pakej di halaman ini atau 'Pilih Mod', pilih pakej yang sesuai dan tekan 'Daftar'. Pendaftaran akaun diuruskan oleh admin — anda akan dihubungi melalui WhatsApp untuk mengaktifkan langganan.",
+      s: "Apakah peta pembelajaran yang ada?",
+      j: "Terdapat 4 peta utama: Kenal Huruf, Suku Kata Asas, Suku Kata Hero dan Bacaan Bergred. Disusun bertahap daripada mengenal huruf sehingga membaca petikan dan cerita pendek.",
     },
     {
-      s: "Boleh guna di telefon?",
-      j: "Boleh. Bunyi Kata berfungsi pada telefon, tablet dan komputer — sesuai untuk belajar di mana-mana sahaja.",
+      s: "Apakah perbezaan Pakej Guru dan Pakej Ibu Bapa?",
+      j: "Pakej Guru sesuai untuk kelas: sehingga 2 kelas serentak dengan 2 Kod Kelas unik, pantauan statistik serta muat turun laporan dan sijil murid. Pakej Ibu Bapa sesuai untuk di rumah: sehingga 3 profil anak dengan satu Kod Keluarga khas, laporan prestasi serta sijil setiap anak.",
+    },
+    {
+      s: "Boleh guna pada telefon, tablet dan komputer?",
+      j: "Boleh. Bunyi Kata berfungsi pada telefon, tablet dan komputer melalui penyemak imbas moden. Tiada pemasangan rumit diperlukan — asalkan ada sambungan internet.",
+    },
+    {
+      s: "Adakah ada lencana dan ganjaran?",
+      j: "Ada. Anak boleh kumpul bintang, naik peta dan membuka 5 lencana rasmi. Pencapaian ini memberi motivasi supaya anak tak sabar nak belajar lagi.",
     },
   ];
 
@@ -517,12 +820,11 @@ export default function LandingScreen({
               <img src={LOGO} alt="Bunyi Kata" className="landing-brand-logo" />
             </div>
             <nav className="landing-nav-links">
-              <a href="#ciri">Ciri</a>
-              <a href="#peta">Pembelajaran</a>
-              <a href="#preview">Pratonton</a>
-              <a href="#mod">Mod</a>
-              <a href="#pakej">Pakej</a>
-              <a href="#faq">FAQ</a>
+              <a href="#ciri" onClick={pageScrollTo("ciri")}>Ciri</a>
+              <a href="#peta" onClick={pageScrollTo("peta")}>Pembelajaran</a>
+              <a href="#pakej" onClick={pageScrollTo("pakej")}>Pakej</a>
+              <a href="#mod" onClick={pageScrollTo("mod")}>Mod</a>
+              <a href="#faq" onClick={pageScrollTo("faq")}>FAQ</a>
             </nav>
             <div className="landing-nav-actions">
               <button className="landing-btn landing-btn-ghost" onClick={onLogMasuk}>
@@ -546,17 +848,25 @@ export default function LandingScreen({
                 Belajar Membaca Jadi Seronok
               </span>
               <h1 className="landing-hero-title">
-                Anak Pandai <span className="landing-hl">Membaca</span><br/>Melalui Permainan
+                <span className="landing-hero-line" style={{ animationDelay: "0.05s" }}>
+                  <span className="landing-ht-word">Anak</span>{" "}
+                  <span className="landing-ht-word">Pandai</span>{" "}
+                  <span className="landing-ht-word landing-hl">Membaca</span>
+                </span>
+                <span className="landing-hero-line" style={{ animationDelay: "0.35s" }}>
+                  <span className="landing-ht-word">Melalui</span>{" "}
+                  <span className="landing-ht-word landing-ht-last">Permainan</span>
+                </span>
               </h1>
               <p className="landing-hero-sub">
-                Bunyi Kata menggabungkan sebutan suku kata bersuara, mini permainan dan ganjaran lencana untuk membantu anak mengenal huruf dan belajar membaca — pada telefon, tablet atau komputer.
+                Bunyi Kata menggabungkan sebutan suku kata bersuara, mini permainan dan ganjaran lencana untuk membantu anak mengenal huruf dan belajar membaca, pada telefon, tablet atau komputer.
               </p>
               <div className="landing-hero-cta">
                 <button
                   className="landing-btn landing-btn-primary landing-btn-lg"
                   onClick={onCubaPercuma}
                 >
-                  <IconRocket /> Cuba Percuma Sekarang
+                  <IconRocket /> Cuba Percuma
                 </button>
                 <button
                   className="landing-btn landing-btn-outline landing-btn-lg"
@@ -591,70 +901,92 @@ export default function LandingScreen({
         </section>
 
         {/* ===== CIRI ===== */}
-        <section className="landing-section" id="ciri">
+        <section className="landing-section landing-section-pop" id="ciri">
           <div className="landing-section-head landing-reveal">
             <span className="landing-kicker">Kenapa Bunyi Kata?</span>
             <h2 className="landing-h2">Semua Yang Anak Perlukan Untuk Baca</h2>
             <p className="landing-section-sub">
-              Aktiviti yang direka oleh pendidik, dibungkus dalam permainan yang anak suka.
+              Aktiviti yang direka oleh pendidik, disusun dalam permainan yang anak suka.
             </p>
           </div>
           <div className="landing-grid landing-grid-ciri">
             {ciri.map((c, i) => (
               <div
-                className="landing-card landing-card-ciri landing-reveal"
+                className="landing-card landing-card-img landing-reveal"
                 key={c.tajuk}
-                style={{ animationDelay: `${i * 80}ms` }}
+                style={{ animationDelay: `${i * 80}ms`, borderColor: c.warna }}
               >
-                <div className="landing-card-icon" style={{ backgroundColor: c.warna }}>
-                  <c.Icon />
+                <img className="landing-card-img-bg" src={c.img} alt={c.tajuk} loading="lazy" />
+                <div className="landing-card-img-overlay" />
+                <div className="landing-card-img-text">
+                  <span className="landing-card-img-pill" style={{ backgroundColor: c.warna }}>
+                    <c.Icon />
+                  </span>
+                  <h3>{c.tajuk}</h3>
                 </div>
-                <h3>{c.tajuk}</h3>
-                <p>{c.huraian}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* ===== PEMBELAJARAN UTAMA (4 PETA) ===== */}
-        <section className="landing-section landing-section-alt" id="peta">
+        <section className="landing-section landing-section-alt landing-section-pop" id="peta">
           <div className="landing-section-head landing-reveal">
             <span className="landing-kicker">Pembelajaran Utama</span>
             <h2 className="landing-h2">4 Peta, 1 Perjalanan Membaca</h2>
             <p className="landing-section-sub">
-              Anak belajar ikut tahap — dari mengenal huruf hinggalah membaca cerita pendek.
+              Anak belajar ikut tahap, dari mengenal huruf hinggalah membaca cerita pendek.
             </p>
           </div>
           <div className="landing-grid landing-grid-peta">
             {petaUtama.map((p, i) => (
               <div
-                className="landing-card landing-card-peta landing-reveal"
+                className="landing-card landing-card-img landing-reveal"
                 key={p.nama}
-                style={{ animationDelay: `${i * 80}ms` }}
+                style={{ animationDelay: `${i * 80}ms`, borderColor: p.warna }}
               >
-                <div className="landing-peta-no" style={{ backgroundColor: p.warna }}>{i + 1}</div>
-                <div className="landing-card-icon" style={{ backgroundColor: p.warna }}>
-                  <p.Icon />
+                <img className="landing-card-img-bg" src={p.img} alt={p.nama} loading="lazy" />
+                <div className="landing-card-img-overlay" />
+                <span className="landing-card-img-no" style={{ backgroundColor: p.warna }}>{i + 1}</span>
+                <div className="landing-card-img-text">
+                  <span className="landing-card-img-pill" style={{ backgroundColor: p.warna }}>
+                    <p.Icon />
+                  </span>
+                  <h3>{p.nama}</h3>
                 </div>
-                <h3>{p.nama}</h3>
-                <p>{p.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* ===== APP PREVIEW ===== */}
-        <section className="landing-section landing-section-alt" id="preview">
+        <section className="landing-section landing-section-alt landing-section-pop" id="preview">
           <div className="landing-section-head landing-reveal">
             <span className="landing-kicker">Tengok Sendiri</span>
             <h2 className="landing-h2">Rupa Dalam Aplikasi</h2>
             <p className="landing-section-sub">
-              Kandungan sebenar — bukan sekadar gambar stok. Ini yang anak awak akan gunakan setiap hari.
+              Peta, mini permainan sampai lencana — semua ada tempatnya dalam aplikasi.
             </p>
           </div>
           <div className="landing-preview-layout">
             <div className="landing-reveal landing-reveal-left" style={{flex:"1 1 300px"}}>
-              <AppPreviewCarousel items={appPreviews} />
+              <Swipe3D
+                items={appPreviews}
+                variant="media"
+                autoplay={3600}
+                hideArrows
+                keyOf={(it) => it.label}
+                labelOf={(it) => it.label}
+                accentOf={(it) => it.warna}
+                renderCard={(it) => (
+                  <div className="landing-swipe3d-media">
+                    <img src={it.img} alt={it.label} loading="lazy" draggable={false} />
+                    <div className="landing-swipe3d-media-bar" style={{ backgroundColor: it.warna }}>
+                      {it.label}
+                    </div>
+                  </div>
+                )}
+              />
             </div>
             <div className="landing-preview-feature-list landing-reveal landing-reveal-right" style={{flex:"1 1 300px"}}>
               {appPreviews.map((item, i) => (
@@ -662,7 +994,6 @@ export default function LandingScreen({
                   <div className="landing-preview-feature-dot" style={{ backgroundColor: item.warna }} />
                   <div>
                     <strong>{item.label}</strong>
-                    <span>{item.desc}</span>
                   </div>
                 </div>
               ))}
@@ -670,84 +1001,112 @@ export default function LandingScreen({
           </div>
         </section>
 
-        {/* ===== PERMAINAN ===== */}
-        <section className="landing-section" id="cabaran">
+        {/* ===== PERMAINAN / AKTIVITI ===== */}
+        <section className="landing-section landing-section-pop" id="cabaran">
           <div className="landing-section-head landing-reveal">
             <span className="landing-kicker">Mini Permainan</span>
-            <h2 className="landing-h2">Belajar Sambil Bermain</h2>
+            <h2 className="landing-h2">80+ Aktiviti & Permainan</h2>
             <p className="landing-section-sub">
-              Setiap permainan menumpu satu kemahiran membaca yang penting.
+              Belajar sambil bermain — setiap aktiviti menumpu satu kemahiran membaca yang penting.
             </p>
           </div>
-          <div className="landing-grid landing-grid-cabaran">
-            {cabaran.map((c, i) => (
-              <div
-                className="landing-card landing-card-cabaran landing-reveal"
-                key={c.nama}
-                style={{ animationDelay: `${i * 60}ms` }}
-              >
-                <div className="landing-card-game-icon" style={{ color: c.warna, borderColor: c.warna }}>
-                  <c.Icon />
+          <Swipe3D
+            items={aktivitiSwip}
+            variant="media"
+            autoplay={3000}
+            keyOf={(it) => it.nama}
+            labelOf={(it) => `Pergi ke ${it.nama}`}
+            accentOf={(it) => it.warna}
+            renderCard={(it) => (
+              <div className="landing-swipe3d-media">
+                <img src={it.img} alt={it.nama} loading="lazy" draggable={false} />
+                <span className="landing-swipe3d-chip" style={{ backgroundColor: it.warna }}>
+                  <IconGamepad />
+                </span>
+                <div className="landing-swipe3d-media-bar" style={{ backgroundColor: it.warna }}>
+                  {it.nama}
                 </div>
-                <span className="landing-card-nama">{c.nama}</span>
               </div>
-            ))}
-          </div>
+            )}
+          />
         </section>
 
-        {/* ===== LANGKAH ===== */}
-        <section className="landing-section landing-section-alt" id="mula">
+        {/* ===== LENCANA / HADIAH ===== */}
+        <section className="landing-section landing-section-alt landing-section-pop" id="lencana">
           <div className="landing-section-head landing-reveal">
             <span className="landing-kicker">Senang Je</span>
-            <h2 className="landing-h2">Mula Dalam 3 Langkah</h2>
+            <h2 className="landing-h2">Kumpul Lencana, Raih Hadiah</h2>
+            <p className="landing-section-sub">
+              Bagi yang berjaya kumpul lencana bakal peroleh hadiah yang menarik.
+            </p>
           </div>
-          <div className="landing-grid landing-grid-langkah">
-            {langkah.map((l, i) => (
-              <div
-                className="landing-card landing-card-langkah landing-reveal"
-                key={l.no}
-                style={{ animationDelay: `${i * 100}ms` }}
-              >
-                <span className="landing-langkah-no">{l.no}</span>
-                <h3>{l.tajuk}</h3>
-                <p>{l.huraian}</p>
+          <Swipe3D
+            items={lencanaSwip}
+            variant="media"
+            autoplay={3200}
+            keyOf={(it) => it.nama}
+            labelOf={(it) => it.nama}
+            accentOf={(it) => it.warna}
+            renderCard={(it, isActive) => (
+              <div className="landing-swipe3d-media">
+                <img src={it.img} alt={it.nama} loading="lazy" draggable={false} />
+                {isActive && (
+                  <span className="landing-swipe3d-chip" style={{ backgroundColor: it.warna }}>
+                    <IconTrophy />
+                  </span>
+                )}
+                <div className="landing-swipe3d-media-bar" style={{ backgroundColor: it.warna }}>
+                  {it.nama}
+                </div>
               </div>
-            ))}
-          </div>
+            )}
+          />
         </section>
 
         {/* ===== TESTIMONI ===== */}
-        <section className="landing-section">
+        <section className="landing-section landing-section-pop">
           <div className="landing-section-head landing-reveal">
             <span className="landing-kicker">Kata Ibu Bapa &amp; Guru</span>
             <h2 className="landing-h2">Mereka Dah Nampak Bezanya</h2>
           </div>
-          <div className="landing-grid landing-grid-testimoni">
-            {testimoni.map((t, i) => (
-              <div
-                className="landing-card landing-card-testimoni landing-reveal"
-                key={t.nama}
-                style={{ animationDelay: `${i * 80}ms` }}
-              >
-                <div className="landing-star-row">
-                  {[...Array(5)].map((_, si) => (
-                    <span key={si} style={{ color: "#f59e0b", fontSize: "1.1rem" }}>
-                      <IconStar />
+          <div className="landing-testi-wrap">
+            <div className="landing-testi-track">
+              {[...testimoni, ...testimoni].map((t, i) => (
+                <div
+                  className="landing-card landing-card-testimoni"
+                  key={`${t.nama}-${i}`}
+                  style={{ "--testi": t.warna } as React.CSSProperties}
+                >
+                  <div className="landing-testi-top">
+                    <span className="landing-testi-quote" aria-hidden="true">&#8220;</span>
+                    <div className="landing-star-row">
+                      {[...Array(5)].map((_, si) => (
+                        <span key={si} style={{ color: "#f59e0b", fontSize: "1.05rem" }}>
+                          <IconStar />
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="landing-testimoni-teks">{t.teks}</p>
+                  <div className="landing-testimoni-orang">
+                    <span className="landing-testi-avatar" aria-hidden="true">
+                      {t.avatar?.jenis === "boy"
+                        ? <AvatarBoy hair={t.avatar?.hair} shirt={t.avatar?.shirt} />
+                        : <AvatarGirl hair={t.avatar?.hair} shirt={t.avatar?.shirt} />}
                     </span>
-                  ))}
+                    <div className="landing-testi-ident">
+                      <strong>{t.nama}</strong>
+                      <span>{t.peranan}</span>
+                    </div>
+                  </div>
                 </div>
-                <p className="landing-testimoni-teks">"{t.teks}"</p>
-                <div className="landing-testimoni-orang">
-                  <strong>{t.nama}</strong>
-                  <span>{t.peranan}</span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
         {/* ===== MAKLUMAT IKUT MOD ===== */}
-        <section className="landing-section" id="mod">
+        <section className="landing-section landing-section-pop" id="mod">
           <div className="landing-section-head landing-reveal">
             <span className="landing-kicker">Maklumat Ikut Mod</span>
             <h2 className="landing-h2">Guru, Ibu Bapa atau Affiliate?</h2>
@@ -758,21 +1117,27 @@ export default function LandingScreen({
           <div className="landing-grid landing-grid-mod">
             {mods.map((m, i) => (
               <div
-                className="landing-card landing-card-mod landing-reveal"
+                className="landing-card landing-card-img landing-reveal"
                 key={m.nama}
-                style={{ animationDelay: `${i * 80}ms` }}
+                style={{ animationDelay: `${i * 80}ms`, borderColor: m.warna }}
               >
-                <div className="landing-mod-head">
-                  <div className="landing-mod-icon" style={{ backgroundColor: m.warna }}>
+                <img className="landing-card-img-bg" src={m.img} alt={m.nama} loading="lazy" />
+                <div className="landing-card-img-overlay landing-mod-overlay" />
+                <span className="landing-mod-tag-img" style={{ backgroundColor: m.warna }}>
+                  {m.tag}
+                </span>
+                <div className="landing-card-img-text landing-mod-info">
+                  <span className="landing-card-img-pill" style={{ backgroundColor: m.warna }}>
                     <m.Icon />
+                  </span>
+                  <div className="landing-mod-info-txt">
+                    <h3>{m.nama}</h3>
+                    <p className="landing-mod-desc">{m.desc}</p>
                   </div>
-                  <span className="landing-mod-tag" style={{ backgroundColor: m.warna }}>{m.tag}</span>
                 </div>
-                <h3>{m.nama}</h3>
-                <p className="landing-mod-desc">{m.desc}</p>
                 <ul className="landing-mod-senarai">
-                  {m.senarai.map((s) => (
-                    <li key={s}><IconCheck /> {s}</li>
+                  {m.senarai.map((s, si) => (
+                    <li key={si}><IconCheck /> {s}</li>
                   ))}
                 </ul>
               </div>
@@ -781,18 +1146,19 @@ export default function LandingScreen({
         </section>
 
         {/* ===== PAKEJ ===== */}
-        <section className="landing-section landing-section-alt" id="pakej">
+        <section className="landing-section landing-section-alt landing-section-pop" id="pakej">
           <div className="landing-section-head landing-reveal">
             <span className="landing-kicker">Pakej</span>
             <h2 className="landing-h2">Pilih Yang Sesuai Untuk Anda</h2>
             <p className="landing-section-sub">
-              Mula percuma, naik taraf bila dah bersedia untuk ciri penuh. Harga sama untuk Guru &amp; Ibu Bapa.
+              Mula percuma, naik taraf bila dah bersedia. Bulanan, 3 bulan atau tahunan — semua pakej berbayar sama cirinya, beza hanya tempoh.
             </p>
           </div>
           <div className="landing-grid landing-grid-pakej">
             <div className="landing-card landing-pakej landing-reveal">
               <div className="landing-pakej-head">
                 <span className="landing-pakej-tag landing-tag-gratis">Percuma</span>
+                <span className="landing-pakej-untuk">Semua</span>
               </div>
               <h3 className="landing-pakej-nama">Cuba Percuma</h3>
               <div className="landing-pakej-harga">
@@ -817,25 +1183,26 @@ export default function LandingScreen({
                 <div className="landing-shine-sweep" aria-hidden="true"></div>
                 <div>
                   <div className="landing-pakej-head">
-                    <span className="landing-pakej-tag landing-tag-biasa">1 BULAN</span>
+                    <span className="landing-pakej-tag landing-tag-bulanan">1 BULAN</span>
+                    <span className="landing-pakej-untuk">Guru &amp; Ibu Bapa</span>
                   </div>
-                  <h3 className="landing-pakej-nama">Bulanan Biasa</h3>
+                  <h3 className="landing-pakej-nama">Bulanan</h3>
                   <div className="landing-pakej-harga">
                     <span className="landing-pakej-rm">RM</span>15
                     <span className="landing-pakej-bulan">/bulan</span>
                   </div>
-                  <p className="landing-pakej-note">Guru: 1 kelas &nbsp;•&nbsp; Ibu Bapa: 1 profil anak.</p>
+                  <p className="landing-pakej-note">Guru: 2 kelas serentak &nbsp;•&nbsp; Ibu Bapa: 3 profil anak.</p>
                   <ul className="landing-pakej-senarai">
                     <li><IconCheck /> Semua 4 peta &amp; aktiviti</li>
-                    <li><IconCheck /> 1 Kod Kelas / Kod Keluarga</li>
-                    <li><IconCheck /> Pantauan &amp; laporan asas</li>
+                    <li><IconCheck /> Guru: 2 Kod Kelas &nbsp;•&nbsp; Ibu Bapa: Kod Keluarga</li>
+                    <li><IconCheck /> Laporan &amp; sijil boleh dimuat turun</li>
                   </ul>
                 </div>
                 <button
-                  className="landing-btn landing-btn-pro landing-btn-block"
+                  className="neo-btn bg-orange btn-daftar-glow-orange landing-daftar-btn"
                   onClick={() => onOpenPakej && onOpenPakej("ibubapa")}
                 >
-                  Daftar Sekarang
+                  <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
                 </button>
               </div>
             </div>
@@ -844,24 +1211,25 @@ export default function LandingScreen({
               <div className="landing-pakej-card-inner">
                 <div className="landing-shine-sweep" aria-hidden="true"></div>
                 <div className="landing-pakej-head">
-                  <span className="landing-pakej-tag landing-tag-biasa">3 BULAN</span>
+                  <span className="landing-pakej-tag landing-tag-bulanan">3 BULAN</span>
+                  <span className="landing-pakej-untuk">Guru &amp; Ibu Bapa</span>
                 </div>
                 <h3 className="landing-pakej-nama">3 Bulanan Pro</h3>
                 <div className="landing-pakej-harga">
                   <span className="landing-pakej-rm">RM</span>40
                   <span className="landing-pakej-bulan">/3 bulan</span>
                 </div>
-                <p className="landing-pakej-note">Buka semua ciri &amp; laporan penuh.</p>
+                <p className="landing-pakej-note">Guru: 2 kelas serentak &nbsp;•&nbsp; Ibu Bapa: 3 profil anak.</p>
                 <ul className="landing-pakej-senarai">
                   <li><IconCheck /> Guru: sehingga 2 kelas serentak</li>
                   <li><IconCheck /> Ibu Bapa: sehingga 3 profil anak</li>
                   <li><IconCheck /> Laporan &amp; sijil boleh dimuat turun</li>
                 </ul>
                 <button
-                  className="landing-btn landing-btn-primary landing-btn-block"
+                  className="neo-btn bg-orange btn-daftar-glow-orange landing-daftar-btn"
                   onClick={() => onOpenPakej && onOpenPakej("guru")}
                 >
-                  Daftar Sekarang
+                  <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
                 </button>
               </div>
             </div>
@@ -872,13 +1240,14 @@ export default function LandingScreen({
                 <div>
                   <div className="landing-pakej-head">
                     <span className="landing-pakej-tag landing-tag-jimat">1 TAHUN</span>
+                    <span className="landing-pakej-untuk">Guru &amp; Ibu Bapa</span>
                   </div>
                   <h3 className="landing-pakej-nama">Tahunan Pro</h3>
                   <div className="landing-pakej-harga">
                     <span className="landing-pakej-rm">RM</span>69
                     <span className="landing-pakej-bulan">/tahun</span>
                   </div>
-                  <p className="landing-pakej-note">Akses penuh 365 hari — paling jimat (RM5.75/bulan).</p>
+                  <p className="landing-pakej-note">Akses penuh 365 hari, paling jimat (RM5.75/bulan).</p>
                   <ul className="landing-pakej-senarai">
                     <li><IconCheck /> Semua ciri Pro selama 1 tahun</li>
                     <li><IconCheck /> Guru: 2 kelas • Ibu Bapa: 3 anak</li>
@@ -886,10 +1255,10 @@ export default function LandingScreen({
                   </ul>
                 </div>
                 <button
-                  className="landing-btn landing-btn-outline landing-btn-block"
+                  className="neo-btn bg-orange btn-daftar-glow-orange landing-daftar-btn"
                   onClick={() => onOpenPakej && onOpenPakej("guru")}
                 >
-                  Daftar Sekarang
+                  <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
                 </button>
               </div>
             </div>
@@ -897,22 +1266,27 @@ export default function LandingScreen({
         </section>
 
         {/* ===== FAQ ===== */}
-        <section className="landing-section" id="faq">
+        <section className="landing-section landing-section-alt landing-section-pop" id="faq">
           <div className="landing-section-head landing-reveal">
             <span className="landing-kicker">Soalan Lazim</span>
             <h2 className="landing-h2">Ada Persoalan?</h2>
+            <p className="landing-section-sub">
+              Jawapan ringkas kepada soalan yang ibu bapa dan guru selalu tanya.
+            </p>
           </div>
           <div className="landing-faq">
             {faq.map((f, i) => (
               <div
-                className={`landing-faq-item landing-reveal ${faqBuka === i ? "buka" : ""}`}
+                className={`landing-faq-item ${faqBuka === i ? "buka" : ""}`}
                 key={f.s}
               >
                 <button
                   className="landing-faq-soalan"
+                  aria-expanded={faqBuka === i}
                   onClick={() => setFaqBuka(faqBuka === i ? null : i)}
                 >
-                  <span>{f.s}</span>
+                  <span className="landing-faq-no">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="landing-faq-q">{f.s}</span>
                   <span className={`landing-faq-arrow ${faqBuka === i ? "buka" : ""}`}>
                     <IconChevron />
                   </span>
@@ -931,19 +1305,24 @@ export default function LandingScreen({
         {/* ===== CTA PENUTUP ===== */}
         <section className="landing-cta-banner">
           <div className="landing-cta-inner">
-            <div className="landing-cta-avatars">
-              {[1,2,3,4].map(n => (
-                <img key={n} src={`/images/avatar/avatar${n}.png`} alt={`Watak ${n}`} className="landing-cta-avatar" />
-              ))}
+            <div className="landing-cta-card">
+              <div className="landing-cta-trust">
+                <div className="landing-cta-avatars">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <img key={n} src={`/images/avatar/avatar${n}.png`} alt={`Watak ${n}`} className="landing-cta-avatar" />
+                  ))}
+                </div>
+                <span className="landing-cta-trust-text">
+                  Disukai oleh ibu bapa &amp; guru di seluruh Malaysia
+                </span>
+              </div>
+              <button
+                className="landing-btn landing-btn-cta-gold landing-btn-lg"
+                onClick={pageScrollTo("pakej")}
+              >
+                <IconRocket /> Lihat Pakej
+              </button>
             </div>
-            <h2>Sedia Bantu Anak Anda Membaca?</h2>
-            <p>Mulakan perjalanan bacaan mereka hari ini — percuma, tanpa daftar.</p>
-            <button
-              className="landing-btn landing-btn-cta-gold landing-btn-lg"
-              onClick={onCubaPercuma}
-            >
-              <IconRocket /> Cuba Percuma Sekarang
-            </button>
           </div>
         </section>
 
@@ -956,28 +1335,60 @@ export default function LandingScreen({
             </div>
             <div className="landing-footer-col">
               <h4>Produk</h4>
-              <a href="#ciri">Ciri</a>
-              <a href="#peta">Pembelajaran</a>
-              <a href="#preview">Pratonton</a>
+              <a href="#ciri" onClick={pageScrollTo("ciri")}>Ciri</a>
+              <a href="#peta" onClick={pageScrollTo("peta")}>Pembelajaran</a>
+              <a href="#preview" onClick={pageScrollTo("preview")}>Pratonton</a>
             </div>
             <div className="landing-footer-col">
               <h4>Pakej</h4>
-              <a href="#mod">Mod</a>
-              <a href="#pakej">Harga Pakej</a>
-              <a href="#faq">Soalan Lazim</a>
+              <a href="#mod" onClick={pageScrollTo("mod")}>Mod</a>
+              <a href="#pakej" onClick={pageScrollTo("pakej")}>Harga Pakej</a>
+              <a href="#faq" onClick={pageScrollTo("faq")}>Soalan Lazim</a>
             </div>
             <div className="landing-footer-col">
-              <h4>Akaun</h4>
-              <button className="landing-footer-link" onClick={onLogMasuk}>
-                Log Masuk
-              </button>
-              <button className="landing-footer-link" onClick={onCubaPercuma}>
-                Cuba Percuma
-              </button>
+              <h4>Ikuti Kami</h4>
+              <div className="landing-footer-social">
+                <button
+                  type="button"
+                  className="landing-social-btn landing-social-web"
+                  title="Laman Web Rasmi"
+                  aria-label="Laman Web Rasmi"
+                  onClick={() => window.open("https://bunyikata.my", "_blank", "noopener")}
+                >
+                  <IconGlobe />
+                </button>
+                <button
+                  type="button"
+                  className="landing-social-btn landing-social-telegram"
+                  title="Telegram"
+                  aria-label="Telegram"
+                  onClick={() => window.open("https://t.me/+YHsrwwqA-eE5N2Vl", "_blank", "noopener")}
+                >
+                  <IconTelegram />
+                </button>
+                <button
+                  type="button"
+                  className="landing-social-btn landing-social-play"
+                  title="Google Play Store"
+                  aria-label="Google Play Store"
+                  onClick={() => window.open("https://play.google.com/store/apps/details?id=com.bunyikatabacaan", "_blank", "noopener")}
+                >
+                  <IconPlayStore />
+                </button>
+                <button
+                  type="button"
+                  className="landing-social-btn landing-social-apple"
+                  title="Apple App Store"
+                  aria-label="Apple App Store"
+                  onClick={() => window.open("https://apps.apple.com/my/app/bunyi-kata/id6739794132", "_blank", "noopener")}
+                >
+                  <IconAppStore />
+                </button>
+              </div>
             </div>
           </div>
           <div className="landing-footer-bottom">
-            © {new Date().getFullYear()} Bunyi Kata · bunyi-kata.my · Hak cipta terpelihara.
+            © {new Date().getFullYear()} Bunyi Kata · bunyikata.my · Hak cipta terpelihara.
           </div>
         </footer>
 

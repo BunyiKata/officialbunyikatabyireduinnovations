@@ -1014,6 +1014,10 @@ export default function App() {
       // Skrin pendaratan awam juga dikira "belum masuk app".
       const landing = document.getElementById("landing-screen");
       if (landing && landing.classList.contains("active")) return true;
+      // Jika TIADA skrin aktif (cth. semasa peralihan landing <-> login),
+      // anggap kita masih di luar app. Ini menghalang Mod Admin dihidupkan
+      // secara tiba-tiba semasa pengguna berpindah dari landing ke log masuk.
+      if (!document.querySelector(".screen.active")) return true;
       // Simpanan: lastik URL semasa.
       const path = window.location.pathname.replace(/^\/+/, "");
       return (

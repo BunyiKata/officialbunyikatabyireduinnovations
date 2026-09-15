@@ -19579,6 +19579,17 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
     window.modAdminAktif = false;
     if (typeof modAdminAktif !== 'undefined') modAdminAktif = false;
     window.isAdminMode = false;
+    // PENTING: 'adminClaimDisahkan' juga mesti dibersihkan. Sebelum ini hanya
+    // modAdminAktif/isAdminMode direset, jadi bendera claim admin yang tersisa
+    // (daripada sesi admin lama) kekal `true` — menyebabkan pengguna yang
+    // menekan "Cuba Percuma" / masuk sebagai murid di skrin log masuk terus
+    // dikesan sebagai ADMIN (akses Pro + nav admin terbuka).
+    window.adminClaimDisahkan = false;
+    if (localStorage.getItem('bunyiKataUserRole') === 'admin') {
+        localStorage.removeItem('bunyiKataUserRole');
+    }
+    const aNavMurid = document.getElementById('admin-sticky-nav');
+    if (aNavMurid) aNavMurid.style.display = 'none';
     window.modIbuBapaAktif = false;
     if (typeof modIbuBapaAktif !== 'undefined') modIbuBapaAktif = false;
 
