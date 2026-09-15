@@ -3680,9 +3680,9 @@ export default function App() {
         }}
         onLogMasuk={() => {
           if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-          if (typeof (window as any).paparSkrin === "function") {
-            (window as any).paparSkrin("login-screen");
-          }
+          // PENTING: Butang "Log Masuk" pada landing page membuka POPUP log masuk
+          // (masukkan kod + butang Guru / Ibu Bapa / Affiliate) — BUKAN tukar skrin.
+          setIsEntryChoiceModalOpen(true);
         }}
         onOpenPakej={(tab) => {
           if (typeof (window as any).playBubble === "function") (window as any).playBubble();

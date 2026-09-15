@@ -4,12 +4,13 @@ import React from "react";
 /**
  * Halaman pendaratan awam (public landing page) untuk bunyi-kata.my.
  *
- * v2 — Redesign penuh:
- * - SVG inline icons (tiada emoji, tiada Font Awesome)
- * - Scroll-reveal animation (IntersectionObserver)
- * - Stats strip dengan count-up
- * - App Preview gallery guna aset sebenar dari projek
- * - Identiti neo-brutalism (hijau/emas, sempadan tebal, bayang keras) dikekalkan
+ * v3 — Konten diselaraskan dengan data SEBENAR projek:
+ * - Pembelajaran utama: 4 peta (Kenal Huruf, Suku Kata Asas, Suku Kata Hero,
+ *   Bacaan Bergred) — sama seperti MAP_CHALLENGES.
+ * - Maklumat ikut mod: Guru / Ibu Bapa / Affiliate.
+ * - Pakej sebenar: Percuma, Bulanan Biasa RM15, 3 Bulanan Pro RM40, Tahunan Pro RM69.
+ * - Butang "Log Masuk" buka popup (kod + pilih mod); "Cuba Percuma" ke skrin log masuk.
+ * - Top nav hanya scroll dalam halaman ini (anchor) — tiada tukar skrin.
  */
 
 interface LandingScreenProps {
@@ -19,6 +20,8 @@ interface LandingScreenProps {
   onOpenPakej?: (tab?: "guru" | "ibubapa") => void;
 }
 
+// Logo hero mesti sama animasi seperti skrin log masuk (kelas .glitch-logo).
+const LOGO_GLITCH = "/images/sampingan/logo-login-screen.png";
 const LOGO = "/images/sampingan/logo-login-screen.png";
 
 // ─── SVG Icons ───────────────────────────────────────────────────────────────
@@ -142,47 +145,139 @@ const IconAward = () => (
   </svg>
 );
 
+const IconSchool = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 10 12 5 2 10l10 5z"/>
+    <path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/>
+  </svg>
+);
+
+const IconShare = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+    <line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/>
+    <line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/>
+  </svg>
+);
+
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const ciri = [
   {
-    Icon: IconBook,
+    Icon: IconMap,
     warna: "#10b981",
-    tajuk: "Belajar Fonik Step-by-Step",
-    huraian: "Huruf vokal, konsonan, suku kata KV hingga bacaan penuh — disusun mengikut tahap usia anak.",
+    tajuk: "4 Peta Pembelajaran",
+    huraian: "Kenal Huruf, Suku Kata Asas, Suku Kata Hero & Bacaan Bergred — bertahap ikut kemampuan anak.",
   },
   {
     Icon: IconGamepad,
     warna: "#f59e0b",
-    tajuk: "12+ Mini Permainan",
-    huraian: "Tanduk Kata, Cantum Kata, Suku Kata Puzzle dan banyak lagi — belajar jadi seronok.",
+    tajuk: "10+ Aktiviti & Permainan",
+    huraian: "Kad imbasan, cantum kata, tanduk kata, puzzle suku kata, fonik ABC dan banyak lagi.",
   },
   {
     Icon: IconMic,
     warna: "#3b82f6",
-    tajuk: "Sebutan & Suara",
-    huraian: "Kad imbasan bersuara membantu anak sebut perkataan dengan jelas dan yakin.",
+    tajuk: "Sebutan & Audio Betul",
+    huraian: "Audio sebutan standard Bahasa Melayu bantu anak sebut suku kata & perkataan dengan jelas.",
   },
   {
     Icon: IconTrophy,
     warna: "#8b5cf6",
     tajuk: "Lencana & Ganjaran",
-    huraian: "Kumpul bintang, naik peta dan buka lencana baru — anak tak sabar nak belajar lagi.",
+    huraian: "Kumpul bintang, naik peta dan buka 5 lencana rasmi — anak tak sabar nak belajar lagi.",
   },
 ];
 
 const stats = [
-  { angka: 5000, label: "Murid Aktif", suffix: "+", Icon: IconUsers },
-  { angka: 12, label: "Mini Permainan", suffix: "+", Icon: IconGamepad },
-  { angka: 50000, label: "Bintang Dikumpul", suffix: "+", Icon: IconStar },
+  { angka: 4, label: "Peta Pembelajaran", suffix: "", Icon: IconMap },
+  { angka: 10, label: "Aktiviti & Permainan", suffix: "+", Icon: IconGamepad },
+  { angka: 5, label: "Lencana Rasmi", suffix: "", Icon: IconStar },
 ];
 
+// Pembelajaran utama — 4 peta SEBENAR projek (MAP_CHALLENGES).
+const petaUtama = [
+  {
+    Icon: IconLetters,
+    warna: "#90b562",
+    nama: "Kenal Huruf",
+    desc: "Huruf A–Z, vokal & konsonan, fonik ABC, asas nombor.",
+  },
+  {
+    Icon: IconBook,
+    warna: "#c1a472",
+    nama: "Suku Kata Asas",
+    desc: "KV, KV+KV, V+KV, KVK dan gabungan suku kata asas.",
+  },
+  {
+    Icon: IconTrophy,
+    warna: "#ff751f",
+    nama: "Suku Kata Hero",
+    desc: "KV+KVK, KVK+KV, KVKK — perkataan lebih mencabar.",
+  },
+  {
+    Icon: IconStar,
+    warna: "#ec4899",
+    nama: "Bacaan Bergred",
+    desc: "Ayat pendek & panjang, petikan tahap 1–2, cerita pendek.",
+  },
+];
+
+// Mini permainan & aktiviti SEBENAR projek.
 const cabaran = [
   { Icon: IconCard, nama: "Kad Imbasan", warna: "#10b981" },
   { Icon: IconPuzzle, nama: "Cantum Kata", warna: "#f59e0b" },
   { Icon: IconTarget, nama: "Tanduk Kata", warna: "#ef4444" },
-  { Icon: IconBook, nama: "Suku Kata Puzzle", warna: "#8b5cf6" },
+  { Icon: IconBook, nama: "Puzzle Suku Kata", warna: "#8b5cf6" },
   { Icon: IconMic, nama: "Cuba Sebut", warna: "#3b82f6" },
   { Icon: IconLetters, nama: "Fonik ABC", warna: "#ec4899" },
+  { Icon: IconMap, nama: "Cari Perkataan", warna: "#8b5cf6" },
+  { Icon: IconPuzzle, nama: "Padan Ingatan", warna: "#0ea5e9" },
+  { Icon: IconTarget, nama: "Huruf Hilang", warna: "#f97316" },
+  { Icon: IconGamepad, nama: "Burung Tambah", warna: "#f59e0b" },
+  { Icon: IconGamepad, nama: "Burung Tolak", warna: "#ea580c" },
+  { Icon: IconTarget, nama: "Ketuk Huruf", warna: "#3b82f6" },
+];
+
+// Maklumat ikut mod — supaya pembeli tahu apa yang diperoleh setiap mod.
+const mods = [
+  {
+    Icon: IconSchool,
+    warna: "#ea580c",
+    tag: "GURU",
+    nama: "Mod Guru",
+    desc: "Untuk guru kelas & Prasekolah / Pemulihan Khas.",
+    senarai: [
+      "Kod Kelas unik untuk murid sertai",
+      "Sehingga 2 kelas serentak (Pro)",
+      "Pantau statistik & prestasi latihan",
+      "Muat turun laporan & sijil murid",
+    ],
+  },
+  {
+    Icon: IconUsers,
+    warna: "#2563eb",
+    tag: "IBU BAPA",
+    nama: "Mod Ibu Bapa",
+    desc: "Untuk ibu bapa pantau anak di rumah.",
+    senarai: [
+      "Kod Keluarga khas untuk anak",
+      "Sehingga 3 profil anak (Pro)",
+      "Laporan prestasi setiap anak",
+      "Sijil pencapaian boleh dimuat turun",
+    ],
+  },
+  {
+    Icon: IconShare,
+    warna: "#7c3aed",
+    tag: "AFFILIATE",
+    nama: "Mod Affiliate",
+    desc: "Jana pendapatan dengan memperkenalkan Bunyi Kata.",
+    senarai: [
+      "Kod rujukan & pautan unik anda",
+      "Papan pemuka komisen & rujukan",
+      "Pantau prestasi jualan dalam satu tempat",
+    ],
+  },
 ];
 
 const langkah = [
@@ -203,37 +298,43 @@ const langkah = [
   },
 ];
 
-// App preview — guna aset sebenar dari projek
+// App preview — guna aset SEBENAR dari projek.
 const appPreviews = [
   {
-    img: "/images/sampingan/peta-cabaran-suku-kata-asas.png",
-    label: "Peta Cabaran",
-    desc: "Jelajah pulau pembelajaran bertahap",
-    warna: "#10b981",
+    img: "/images/sampingan/peta-misi-huruf.png",
+    label: "Misi Kenal Huruf",
+    desc: "Peta 1 — huruf, vokal & konsonan, fonik ABC",
+    warna: "#90b562",
   },
   {
-    img: "/images/menu/kv+kv.png",
-    label: "Belajar Suku Kata",
-    desc: "Kad interaktif dengan panduan visual",
-    warna: "#f59e0b",
+    img: "/images/sampingan/peta-misi-suku-kata-asas.png",
+    label: "Misi Suku Kata Asas",
+    desc: "Peta 2 — KV, KV+KV, V+KV, KVK",
+    warna: "#c1a472",
+  },
+  {
+    img: "/images/sampingan/peta-misi-suku-kata-hero.png",
+    label: "Misi Suku Kata Hero",
+    desc: "Peta 3 — KV+KVK, KVK+KV, KVKK",
+    warna: "#ff751f",
+  },
+  {
+    img: "/images/sampingan/peta-misi-bacaan-bergred.png",
+    label: "Misi Bacaan Bergred",
+    desc: "Peta 4 — ayat, petikan & cerita pendek",
+    warna: "#ec4899",
   },
   {
     img: "/images/menu/fonik abc.png",
     label: "Fonik ABC",
-    desc: "Sebutan huruf dengan bunyi sebenar",
+    desc: "Belajar bunyi & sebutan huruf dengan jelas",
     warna: "#3b82f6",
   },
   {
     img: "/images/lencana/lencana-naib-raja-bacaan.png",
     label: "Lencana Pencapaian",
-    desc: "Koleksi ganjaran untuk motivasi anak",
+    desc: "5 lencana rasmi untuk motivasi anak",
     warna: "#8b5cf6",
-  },
-  {
-    img: "/images/sampingan/peta-cabaran-bacaan-bergred.png",
-    label: "Peta Bacaan Bergred",
-    desc: "Ayat pendek hingga petikan penuh",
-    warna: "#ef4444",
   },
 ];
 
@@ -377,15 +478,27 @@ export default function LandingScreen({
   const faq = [
     {
       s: "Adakah Bunyi Kata percuma?",
-      j: "Ya! Versi percuma membolehkan anak mula belajar fonik dan bermain permainan terpilih tanpa sebarang bayaran. Untuk ciri penuh seperti semua peta, watak dan laporan kemajuan, boleh naik taraf ke Versi Pro bila-bila masa.",
+      j: "Ya. Mod percuma membolehkan anak mula belajar Kenal Huruf dan bermain aktiviti terpilih tanpa bayaran. Untuk membuka semua 4 peta, laporan & sijil, boleh naik taraf ke pakej Pro (RM15/bulan, RM40/3 bulan atau RM69/tahun).",
+    },
+    {
+      s: "Apakah perbezaan Pakej Guru dan Pakej Ibu Bapa?",
+      j: "Pakej Guru: Bulanan Biasa RM15/bulan (1 kelas); 3 Bulanan Pro RM40 & Tahunan Pro RM69 membenarkan sehingga 2 kelas serentak dengan 2 Kod Kelas unik, pantauan statistik serta muat turun laporan & sijil murid. Pakej Ibu Bapa: Bulanan Biasa RM15/bulan (1 profil anak); 3 Bulanan Pro RM40 & Tahunan Pro RM69 membenarkan sehingga 3 profil anak dengan satu Kod Keluarga khas, laporan prestasi serta sijil setiap anak.",
+    },
+    {
+      s: "Apakah peta pembelajaran yang ada?",
+      j: "Terdapat 4 peta utama: Kenal Huruf, Suku Kata Asas, Suku Kata Hero dan Bacaan Bergred — disusun bertahap daripada mengenal huruf sehingga membaca petikan dan cerita pendek.",
     },
     {
       s: "Berapa umur yang sesuai?",
-      j: "Sesuai untuk kanak-kanak 3 hingga 8 tahun — dari mula mengenal huruf sehingga boleh membaca perkataan penuh.",
+      j: "Sesuai untuk kanak-kanak Prasekolah & Pemulihan Khas (sekitar 3 hingga 8 tahun) — dari mula mengenal huruf sehingga boleh membaca ayat dan cerita pendek.",
     },
     {
       s: "Perlu daftar akaun ke?",
-      j: "Tidak perlu. Tekan 'Cuba Percuma' dan anak boleh terus bermain. Akaun hanya perlu jika anda guru atau ibu bapa yang mahu menyimpan kemajuan berbilang anak.",
+      j: "Tidak perlu untuk mula. Tekan 'Cuba Percuma' dan anak boleh terus bermain. Akaun (Guru / Ibu Bapa) hanya perlu untuk menyimpan kemajuan, memantau murid/anak dan akses laporan.",
+    },
+    {
+      s: "Bagaimana cara melanggan pakej Pro?",
+      j: "Tekan butang Pakej di halaman ini atau 'Pilih Mod', pilih pakej yang sesuai dan tekan 'Daftar'. Pendaftaran akaun diuruskan oleh admin — anda akan dihubungi melalui WhatsApp untuk mengaktifkan langganan.",
     },
     {
       s: "Boleh guna di telefon?",
@@ -405,7 +518,9 @@ export default function LandingScreen({
             </div>
             <nav className="landing-nav-links">
               <a href="#ciri">Ciri</a>
+              <a href="#peta">Pembelajaran</a>
               <a href="#preview">Pratonton</a>
+              <a href="#mod">Mod</a>
               <a href="#pakej">Pakej</a>
               <a href="#faq">FAQ</a>
             </nav>
@@ -434,7 +549,7 @@ export default function LandingScreen({
                 Anak Pandai <span className="landing-hl">Membaca</span><br/>Melalui Permainan
               </h1>
               <p className="landing-hero-sub">
-                Bunyi Kata menggabungkan fonik bersuara, mini permainan dan ganjaran lencana untuk membantu anak anda mengenal huruf dan membaca — tanpa rasa tertekan.
+                Bunyi Kata menggabungkan sebutan suku kata bersuara, mini permainan dan ganjaran lencana untuk membantu anak mengenal huruf dan belajar membaca — pada telefon, tablet atau komputer.
               </p>
               <div className="landing-hero-cta">
                 <button
@@ -457,42 +572,11 @@ export default function LandingScreen({
             </div>
 
             <div className="landing-hero-art">
-              <div className="landing-hero-card">
-                <img src={LOGO} alt="Bunyi Kata" className="landing-hero-art-logo" />
-                <div className="landing-hero-floats">
-                  {/* Float 1: Huruf A */}
-                  <span className="landing-float landing-float-1">
-                    <svg viewBox="0 0 40 40" width="40" height="40">
-                      <rect width="40" height="40" rx="10" fill="#ffd93d" stroke="#0f2e29" strokeWidth="3"/>
-                      <text x="50%" y="54%" dominantBaseline="middle" textAnchor="middle" fontSize="24" fontWeight="900" fill="#0f2e29" fontFamily="Poppins,sans-serif">A</text>
-                    </svg>
-                  </span>
-                  {/* Float 2: Bintang */}
-                  <span className="landing-float landing-float-2">
-                    <svg viewBox="0 0 40 40" width="40" height="40">
-                      <rect width="40" height="40" rx="10" fill="#10b981" stroke="#0f2e29" strokeWidth="3"/>
-                      <path d="M20 8l3.09 6.26L30 15.27l-5 4.87 1.18 6.88L20 23.77l-6.18 3.25L15 20.14 10 15.27l6.91-1.01z" fill="#ffd93d"/>
-                    </svg>
-                  </span>
-                  {/* Float 3: Trofi */}
-                  <span className="landing-float landing-float-3">
-                    <svg viewBox="0 0 40 40" width="40" height="40">
-                      <rect width="40" height="40" rx="10" fill="#8b5cf6" stroke="#0f2e29" strokeWidth="3"/>
-                      <path d="M13 9h14v8a7 7 0 0 1-14 0V9z" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
-                      <path d="M9 11h4M27 11h4" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
-                      <path d="M20 24v4M15 28h10" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
-                    </svg>
-                  </span>
-                  {/* Float 4: Buku */}
-                  <span className="landing-float landing-float-4">
-                    <svg viewBox="0 0 40 40" width="40" height="40">
-                      <rect width="40" height="40" rx="10" fill="#3b82f6" stroke="#0f2e29" strokeWidth="3"/>
-                      <path d="M8 10h8a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H8z" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-                      <path d="M32 10h-8a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h9z" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                  </span>
-                </div>
-              </div>
+              <img
+                src={LOGO_GLITCH}
+                alt="Bunyi Kata"
+                className="glitch-logo landing-hero-logo"
+              />
             </div>
           </div>
         </section>
@@ -527,6 +611,33 @@ export default function LandingScreen({
                 </div>
                 <h3>{c.tajuk}</h3>
                 <p>{c.huraian}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ===== PEMBELAJARAN UTAMA (4 PETA) ===== */}
+        <section className="landing-section landing-section-alt" id="peta">
+          <div className="landing-section-head landing-reveal">
+            <span className="landing-kicker">Pembelajaran Utama</span>
+            <h2 className="landing-h2">4 Peta, 1 Perjalanan Membaca</h2>
+            <p className="landing-section-sub">
+              Anak belajar ikut tahap — dari mengenal huruf hinggalah membaca cerita pendek.
+            </p>
+          </div>
+          <div className="landing-grid landing-grid-peta">
+            {petaUtama.map((p, i) => (
+              <div
+                className="landing-card landing-card-peta landing-reveal"
+                key={p.nama}
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <div className="landing-peta-no" style={{ backgroundColor: p.warna }}>{i + 1}</div>
+                <div className="landing-card-icon" style={{ backgroundColor: p.warna }}>
+                  <p.Icon />
+                </div>
+                <h3>{p.nama}</h3>
+                <p>{p.desc}</p>
               </div>
             ))}
           </div>
@@ -635,13 +746,47 @@ export default function LandingScreen({
           </div>
         </section>
 
+        {/* ===== MAKLUMAT IKUT MOD ===== */}
+        <section className="landing-section" id="mod">
+          <div className="landing-section-head landing-reveal">
+            <span className="landing-kicker">Maklumat Ikut Mod</span>
+            <h2 className="landing-h2">Guru, Ibu Bapa atau Affiliate?</h2>
+            <p className="landing-section-sub">
+              Setiap mod ada kod akses dan ciri tersendiri. Ini yang anda akan dapat.
+            </p>
+          </div>
+          <div className="landing-grid landing-grid-mod">
+            {mods.map((m, i) => (
+              <div
+                className="landing-card landing-card-mod landing-reveal"
+                key={m.nama}
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <div className="landing-mod-head">
+                  <div className="landing-mod-icon" style={{ backgroundColor: m.warna }}>
+                    <m.Icon />
+                  </div>
+                  <span className="landing-mod-tag" style={{ backgroundColor: m.warna }}>{m.tag}</span>
+                </div>
+                <h3>{m.nama}</h3>
+                <p className="landing-mod-desc">{m.desc}</p>
+                <ul className="landing-mod-senarai">
+                  {m.senarai.map((s) => (
+                    <li key={s}><IconCheck /> {s}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* ===== PAKEJ ===== */}
         <section className="landing-section landing-section-alt" id="pakej">
           <div className="landing-section-head landing-reveal">
             <span className="landing-kicker">Pakej</span>
             <h2 className="landing-h2">Pilih Yang Sesuai Untuk Anda</h2>
             <p className="landing-section-sub">
-              Mula percuma, naik taraf bila dah bersedia untuk ciri penuh.
+              Mula percuma, naik taraf bila dah bersedia untuk ciri penuh. Harga sama untuk Guru &amp; Ibu Bapa.
             </p>
           </div>
           <div className="landing-grid landing-grid-pakej">
@@ -655,9 +800,9 @@ export default function LandingScreen({
               </div>
               <p className="landing-pakej-note">Selamanya. Untuk mula kenal huruf.</p>
               <ul className="landing-pakej-senarai">
-                <li><IconCheck /> Fonik asas (vokal &amp; konsonan)</li>
-                <li><IconCheck /> Permainan terpilih</li>
-                <li><IconCheck /> 1 profil anak</li>
+                <li><IconCheck /> Peta Kenal Huruf</li>
+                <li><IconCheck /> Aktiviti terpilih</li>
+                <li><IconCheck /> Tanpa daftar akaun</li>
               </ul>
               <button
                 className="landing-btn landing-btn-outline landing-btn-block"
@@ -679,11 +824,11 @@ export default function LandingScreen({
                     <span className="landing-pakej-rm">RM</span>15
                     <span className="landing-pakej-bulan">/bulan</span>
                   </div>
-                  <p className="landing-pakej-note">Untuk mula memantau kemajuan anak.</p>
+                  <p className="landing-pakej-note">Guru: 1 kelas &nbsp;•&nbsp; Ibu Bapa: 1 profil anak.</p>
                   <ul className="landing-pakej-senarai">
-                    <li><IconCheck /> 1 profil anak</li>
                     <li><IconCheck /> Semua 4 peta &amp; aktiviti</li>
-                    <li><IconCheck /> Laporan prestasi asas</li>
+                    <li><IconCheck /> 1 Kod Kelas / Kod Keluarga</li>
+                    <li><IconCheck /> Pantauan &amp; laporan asas</li>
                   </ul>
                 </div>
                 <button
@@ -701,16 +846,16 @@ export default function LandingScreen({
                 <div className="landing-pakej-head">
                   <span className="landing-pakej-tag landing-tag-biasa">3 BULAN</span>
                 </div>
-                <h3 className="landing-pakej-nama">Bulanan Pro</h3>
+                <h3 className="landing-pakej-nama">3 Bulanan Pro</h3>
                 <div className="landing-pakej-harga">
                   <span className="landing-pakej-rm">RM</span>40
                   <span className="landing-pakej-bulan">/3 bulan</span>
                 </div>
                 <p className="landing-pakej-note">Buka semua ciri &amp; laporan penuh.</p>
                 <ul className="landing-pakej-senarai">
-                  <li><IconCheck /> 1 kelas / sehingga 3 profil anak</li>
-                  <li><IconCheck /> Semua 4 peta &amp; aktiviti</li>
-                  <li><IconCheck /> Kod Kelas / Kod Keluarga</li>
+                  <li><IconCheck /> Guru: sehingga 2 kelas serentak</li>
+                  <li><IconCheck /> Ibu Bapa: sehingga 3 profil anak</li>
+                  <li><IconCheck /> Laporan &amp; sijil boleh dimuat turun</li>
                 </ul>
                 <button
                   className="landing-btn landing-btn-primary landing-btn-block"
@@ -733,11 +878,11 @@ export default function LandingScreen({
                     <span className="landing-pakej-rm">RM</span>69
                     <span className="landing-pakej-bulan">/tahun</span>
                   </div>
-                  <p className="landing-pakej-note">Akses penuh 365 hari — paling jimat.</p>
+                  <p className="landing-pakej-note">Akses penuh 365 hari — paling jimat (RM5.75/bulan).</p>
                   <ul className="landing-pakej-senarai">
                     <li><IconCheck /> Semua ciri Pro selama 1 tahun</li>
-                    <li><IconCheck /> 2 kelas / sehingga 3 profil anak</li>
-                    <li><IconCheck /> Laporan &amp; sijil setiap anak</li>
+                    <li><IconCheck /> Guru: 2 kelas • Ibu Bapa: 3 anak</li>
+                    <li><IconCheck /> Laporan &amp; sijil setiap murid/anak</li>
                   </ul>
                 </div>
                 <button
@@ -806,20 +951,28 @@ export default function LandingScreen({
         <footer className="landing-footer">
           <div className="landing-footer-inner">
             <div className="landing-footer-brand">
-              <img src={LOGO} alt="Bunyi Kata" className="landing-footer-logo" />
+              <img src={LOGO_GLITCH} alt="Bunyi Kata" className="landing-footer-logo" />
               <p>Belajar membaca jadi seronok. Dibina untuk anak Malaysia.</p>
             </div>
             <div className="landing-footer-col">
               <h4>Produk</h4>
               <a href="#ciri">Ciri</a>
+              <a href="#peta">Pembelajaran</a>
               <a href="#preview">Pratonton</a>
-              <a href="#pakej">Pakej</a>
+            </div>
+            <div className="landing-footer-col">
+              <h4>Pakej</h4>
+              <a href="#mod">Mod</a>
+              <a href="#pakej">Harga Pakej</a>
+              <a href="#faq">Soalan Lazim</a>
             </div>
             <div className="landing-footer-col">
               <h4>Akaun</h4>
-              <a href="#faq">FAQ</a>
               <button className="landing-footer-link" onClick={onLogMasuk}>
                 Log Masuk
+              </button>
+              <button className="landing-footer-link" onClick={onCubaPercuma}>
+                Cuba Percuma
               </button>
             </div>
           </div>
