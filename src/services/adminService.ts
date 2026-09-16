@@ -241,9 +241,22 @@ async function panggilAdmin<T extends { berjaya: boolean }>(
 
     const data = await res.json().catch(() => null);
     if (!res.ok || !data?.success) {
+      // `data` null bermakna respons BUKAN JSON (cth. halaman HTML 404 daripada
+      // pelayan lama yang belum dimulakan semula). Beri mesej diagnostik jelas
+      // supaya admin tahu langkah seterusnya, bukan sekadar "Operasi gagal".
+      if (!data) {
+        console.error('[Admin API] Respons bukan JSON daripada', path, `(HTTP ${res.status}). Pelayan mungkin versi lama.`);
+        return {
+          berjaya: false,
+          mesej:
+            res.status === 404
+              ? 'Endpoint tidak dijumpai (HTTP 404). Pelayan mungkin versi lama — sila mulakan semula pelayan (node server.js).'
+              : `Pelayan memulangkan respons tidak sah (HTTP ${res.status}). Sila cuba lagi.`,
+        } as unknown as T;
+      }
       return {
         berjaya: false,
-        mesej: data?.message || 'Operasi gagal. Sila cuba lagi.',
+        mesej: data?.message || `Operasi gagal (HTTP ${res.status}). Sila cuba lagi.`,
       } as unknown as T;
     }
 
@@ -406,6 +419,21 @@ export interface RingkasanBayaran {
   nama: string;
   bil: number;
   jumlah_sen: number;
+  baki_sen?: number;
+  baki_semua_sen?: number;
+  tarikh_bayar_terakhir?: string;
+}
+
+export interface RekodPembayaran {
+  id: string;
+  kod: string;
+  nama: string;
+  jumlah_sen: number;
+  kaedah: string;
+  rujukan: string;
+  nota: string;
+  bil: number;
+  tarikh: string;
 }
 
 export interface HasilLaporanBayaran {
@@ -415,7 +443,18 @@ export interface HasilLaporanBayaran {
   ringkasan?: RingkasanBayaran[];
   layak?: BarisKomisen[];
   belum_matang?: BarisKomisen[];
+  dibayar_sejarah?: RekodPembayaran[];
   jumlah_layak_sen?: number;
+}
+
+export interface HasilRekodPembayaran {
+  berjaya: boolean;
+  mesej?: string;
+  id?: string;
+  bil_ditanda?: number;
+  jumlah_ditanda_sen?: number;
+  jumlah_sen?: number;
+  tarikh?: string;
 }
 
 async function panggilAdminGet<T extends { berjaya: boolean }>(
@@ -430,12 +469,21 @@ async function panggilAdminGet<T extends { berjaya: boolean }>(
     const token = await pengguna.getIdToken();
     const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
     const savedAffCode = typeof localStorage !== 'undefined' ? localStorage.getItem('bunyiKataAffiliateKod') || '' : '';
-    if (savedAffCode) {
+    // Hantar header affiliate HANYA untuk laluan affiliate. Sebelum ini ia
+    // dihantar untuk SEMUA GET (termasuk endpoint admin), berisiko mencampur
+    // konteks affiliate silap ke permintaan lain.
+    if (savedAffCode && path.startsWith('/api/affiliate/')) {
       headers['x-affiliate-kod'] = savedAffCode;
     }
-    const res = await fetch(path, { method: 'GET', headers });
+    // cache: 'no-store' — pertahanan lapis kedua supaya status affiliate /
+    // senarai komisen tidak pernah dihidang daripada cache pelayar.
+    const res = await fetch(path, { method: 'GET', headers, cache: 'no-store' });
     const data = await res.json().catch(() => null);
     if (!res.ok || !data?.success) {
+      if (!data) {
+        console.error('[Admin API GET] Respons bukan JSON daripada', path, `(HTTP ${res.status}).`);
+        return { berjaya: false, mesej: `Pelayan memulangkan respons tidak sah (HTTP ${res.status}).` } as unknown as T;
+      }
       return { berjaya: false, mesej: data?.message || 'Operasi gagal.' } as unknown as T;
     }
     const { success, ...baki } = data;
@@ -472,6 +520,31 @@ export async function padamAffiliate(kod: string): Promise<HasilAffiliate> {
 /** Fasa 2: laporan pembayaran komisen (kitaran 2 minggu). */
 export async function ambilLaporanBayaran(): Promise<HasilLaporanBayaran> {
   return panggilAdminGet<HasilLaporanBayaran>('/api/admin/affiliate/payments');
+}
+
+/**
+ * Fasa 2: rekod pembayaran komisen secara MANUAL (transaksi sebenar).
+ * `tandaKomisen` (lalai true) menanda baris komisen layak sebagai `dibayar`
+ * supaya baki dikira semula di semua paparan.
+ */
+export async function rekodPembayaranAffiliate(input: {
+  kod: string;
+  jumlah_sen: number;
+  kaedah?: string;
+  rujukan?: string;
+  nota?: string;
+  tarikh?: string;
+  tanda_komisen?: boolean;
+}): Promise<HasilRekodPembayaran> {
+  return panggilAdmin<HasilRekodPembayaran>('/api/admin/affiliate/payment-record', {
+    kod: input.kod,
+    jumlah_sen: Math.round(Number(input.jumlah_sen) || 0),
+    kaedah: input.kaedah || '',
+    rujukan: input.rujukan || '',
+    nota: input.nota || '',
+    tarikh: input.tarikh || '',
+    tanda_komisen: input.tanda_komisen !== false,
+  });
 }
 
 /** Fasa 2: tanda baris komisen sudah dibayar. */
@@ -516,6 +589,8 @@ export interface HasilProfilAffiliate {
 export interface ReferralAffiliate {
   id: string;
   pelanggan_nama: string;
+  /** Peranan pelanggan: "guru" | "ibubapa" (dipaparkan sebagai "Peranan"). */
+  peranan?: string;
   nama_pakej: string;
   harga_sen: number;
   komisen_sen: number;
@@ -524,7 +599,48 @@ export interface ReferralAffiliate {
   tarikh_bayar: string;
 }
 
-/** Fasa 3: profil + ringkasan prestasi affiliate yang sedang log masuk. */
+/** Satu rekod pembayaran komisen (transaksi manual oleh admin). */
+export interface RekodPembayaranAffiliate {
+  id: string;
+  kod: string;
+  nama: string;
+  jumlah_sen: number;
+  kaedah: string;
+  rujukan: string;
+  nota: string;
+  bil: number;
+  tarikh: string;
+}
+
+export interface HasilLaporanPembayaranAffiliate {
+  berjaya: boolean;
+  mesej?: string;
+  dibayar_sejarah?: RekodPembayaranAffiliate[];
+  jumlah_dibayar_sen?: number;
+  tarikh_bayar_terakhir?: string;
+}
+
+/** Fasa 3: rekod pembayaran komisen affiliate sendiri (fail-safe: []). */
+export async function ambilLaporanPembayaranAffiliate(
+  kod?: string,
+): Promise<HasilLaporanPembayaranAffiliate> {
+  const k = kod || (typeof localStorage !== "undefined" ? localStorage.getItem("bunyiKataAffiliateKod") || "" : "");
+  const qs = k ? `?kod=${encodeURIComponent(k)}` : "";
+  const hasil = await panggilAdminGet<HasilLaporanPembayaranAffiliate>(
+    `/api/affiliate/payments${qs}`,
+    "Sesi affiliate",
+  );
+  return {
+    berjaya: hasil.berjaya,
+    mesej: hasil.mesej,
+    dibayar_sejarah: Array.isArray(hasil.dibayar_sejarah) ? hasil.dibayar_sejarah : [],
+    jumlah_dibayar_sen: Number(hasil.jumlah_dibayar_sen) || 0,
+    tarikh_bayar_terakhir: hasil.tarikh_bayar_terakhir || "",
+  };
+}
+
+/**
+ * Fasa 3: profil + ringkasan prestasi affiliate yang sedang log masuk. */
 export async function ambilProfilAffiliate(kod?: string): Promise<HasilProfilAffiliate> {
   const k = kod || (typeof localStorage !== "undefined" ? localStorage.getItem("bunyiKataAffiliateKod") || "" : "");
   const qs = k ? `?kod=${encodeURIComponent(k)}` : "";
@@ -595,6 +711,7 @@ if (typeof window !== 'undefined') {
     padamAffiliate,
     ambilLaporanBayaran,
     tandaKomisenDibayar,
+    rekodPembayaranAffiliate,
   };
 }
 

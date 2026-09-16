@@ -324,7 +324,7 @@ body.affiliate-mode #affiliate-sticky-nav {
     z-index: 1600;
 }
 
-/* Susunan 4 butang nav affiliate: Affiliate • Rujukan • Kod • Keluar */
+/* Susunan 4 butang nav affiliate: Affiliate • Rujukan • Laporan • Keluar */
 #affiliate-sticky-nav .nav-btn-dashboard {
     order: 1 !important;
 }
@@ -333,7 +333,7 @@ body.affiliate-mode #affiliate-sticky-nav {
     order: 2 !important;
 }
 
-#affiliate-sticky-nav .nav-btn-kod {
+#affiliate-sticky-nav .nav-btn-laporan {
     order: 3 !important;
 }
 
@@ -2164,6 +2164,24 @@ body.dark-mode .stars-container {
 .affiliate-table thead tr:first-child th:first-child {
     background: #6d28d9 !important;
 }
+
+/* Kotak affiliate React ("Rujukan & Komisen"/"Laporan Pembayaran"): pattern
+   titik-titik diletakkan pada background kad putih, manakala badan jadual
+   kekal legap putih supaya titik TIDAK menembusi baris jadual. */
+#affiliate-rujukan .teacher-table,
+#affiliate-rujukan .teacher-table thead,
+#affiliate-rujukan .teacher-table tbody,
+#affiliate-rujukan .teacher-table tr,
+#affiliate-rujukan .teacher-table td,
+#affiliate-laporan-screen .teacher-table,
+#affiliate-laporan-screen .teacher-table thead,
+#affiliate-laporan-screen .teacher-table tbody,
+#affiliate-laporan-screen .teacher-table tr,
+#affiliate-laporan-screen .teacher-table td {
+    background-color: #ffffff;
+}
+
+
 
 .status-icon {
     font-size: 0.9rem;
@@ -5087,7 +5105,7 @@ body.parent-mode #main-menu-mobile-header {
 
         #admin-dashboard .ibubapa-stats-grid {
             display: grid !important;
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
             width: 100% !important;
             max-width: 100% !important;
             gap: 10px !important;
@@ -5119,6 +5137,8 @@ body.parent-mode #main-menu-mobile-header {
         .ibubapa-stats-grid #admin-jumlah-ibubapa,
         .ibubapa-stats-grid #admin-jumlah-anak,
         .ibubapa-stats-grid #admin-jumlah-feedback,
+        .ibubapa-stats-grid #admin-jumlah-jualan,
+        .ibubapa-stats-grid #admin-jumlah-keuntungan,
         .ibubapa-stats-grid #guru-jumlah-murid,
         .ibubapa-stats-grid #guru-aktiviti-selesai,
         .ibubapa-stats-grid #ibubapa-jumlah-markah,
@@ -11072,7 +11092,7 @@ body.parent-mode #main-menu-mobile-header {
         }
 
         .admin-stats-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
             gap: 16px !important;
             max-width: 880px !important;
             margin: 0 auto 20px auto !important;
@@ -11153,3 +11173,63 @@ body.parent-mode #main-menu-mobile-header {
     body:has(#landing-screen.active) #affiliate-sticky-nav {
         display: none !important;
     }
+/* --- Pagination bar (10 baris/halaman) --- */
+.pagination-bar{display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;padding:12px 4px 4px;}
+.pagination-dot,.pagination-nav-btn{transition:transform .12s ease, background .15s ease;}
+.pagination-dot:hover,.pagination-nav-btn:not(:disabled):hover{transform:translateY(-1px);}
+@media (max-width:480px){.pagination-bar{gap:4px;}.pagination-dot,.pagination-nav-btn{width:27px !important;height:27px !important;font-size:0.72rem !important;}}
+
+/* --- Kad statistik Affiliate (gaya sama seperti kad mod guru) --- */
+.affiliate-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+@media (max-width: 900px) {
+    .affiliate-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+    }
+}
+@media (max-width: 400px) {
+    .affiliate-stats-grid > div {
+        padding: 12px 12px !important;
+        min-height: 100px !important;
+    }
+}
+
+/* Kad admin: 3 kad sebaris pada mudah alih (dikecilkan sedikit). */
+@media (max-width: 480px) {
+    body.admin-mode #admin-dashboard .ibubapa-stats-grid > div {
+        padding: 12px 10px !important;
+        min-height: 100px !important;
+    }
+    body.admin-mode #admin-dashboard .ibubapa-stats-grid > div > div:nth-child(2) {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 0.95rem !important;
+        margin-bottom: 6px !important;
+    }
+}
+
+/* =====================================================================
+   HURUF BESAR: nama & sekolah dalam semua jadual mod admin & mod guru.
+   Sel data dijana oleh JS (app-logic.js) jadi kita tandakan sel berkaitan
+   dengan kelas `sel-nama` / `sel-sekolah`; React pula menggunakan
+   .guru-name-cell / .guru-school-cell.
+   ===================================================================== */
+#admin-table-body td.sel-nama,
+#admin-table-body td.sel-sekolah,
+#admin-urus-guru-tbody td.sel-nama,
+#admin-urus-guru-tbody td.sel-sekolah,
+#admin-urus-ibubapa-tbody td.sel-nama,
+#guru-table-body td.sel-nama,
+#guru-table-body td.sel-sekolah,
+[id$="-sejarah-langganan-body"] td.sel-nama,
+[id$="-sejarah-langganan-body"] td.sel-sekolah,
+.sejarah-langganan-wrapper td.sel-nama,
+.sejarah-langganan-wrapper td.sel-sekolah,
+.guru-name-cell,
+.guru-school-cell {
+    text-transform: uppercase !important;
+}
+

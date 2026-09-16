@@ -189,9 +189,11 @@ async function requireAffiliate(req, res, next) {
 
   try {
     const decoded = await getAuth(appInstance).verifyIdToken(idToken);
+    const db = getDatabase(appInstance);
     let kod = String(decoded.affiliate_kod || "").trim().toUpperCase();
+
+    // Fallback 1: admin boleh menyamar sebagai affiliate melalui ?kod / header.
     if (!kod && decoded.admin === true) {
-      const db = getDatabase(appInstance);
       const reqKod = String(req.query?.kod || req.headers["x-affiliate-kod"] || "").trim().toUpperCase();
       if (reqKod) {
         kod = reqKod;
@@ -205,9 +207,53 @@ async function requireAffiliate(req, res, next) {
         }
       }
     }
-    if (!kod) {
-      return res.status(403).json({ success: false, message: "Akses ditolak." });
+
+    // Fallback 2 (PEMBETULAN "tidak aktif" salah): akaun affiliate yang
+    // dicipta SEBELUM claim `affiliate_kod` ditetapkan (atau claim yang
+    // hilang/kosong) tidak akan ditemui melalui token. Cari rekod affiliate
+    // melalui EMAIL token supaya sesi lama tidak disalahertikan sebagai
+    // "Akses ditolak" sedangkan admin melihat status "Aktif" di jadual.
+    if (!kod && decoded.email) {
+      try {
+        const qEmel = db.ref("affiliates").orderByChild("email").equalTo(String(decoded.email));
+        const emelSnap = await qEmel.get();
+        if (emelSnap.exists()) {
+          emelSnap.forEach((c) => {
+            if (!kod) {
+              kod = c.key;
+            }
+            return true;
+          });
+        }
+      } catch (e) {
+        console.warn("[Affiliate Auth] Carian email gagal:", e?.message || e);
+      }
     }
+
+    if (!kod) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Sesi affiliate tidak sah (claim affiliate_kod tiada). Sila log keluar dan log masuk semula.",
+      });
+    }
+
+    // PEMBETULAN: tegakkan status SEBENAR di pelayan. Sebelum ini token sahaja
+    // dipercayai, jadi affiliate yang digantung masih boleh mengakses API.
+    // Sebaliknya, jika admin baru aktifkan semula, status dalam DB mesti
+    // mengatasi apa-apa paparan basi di klien.
+    const snapStatus = await db.ref(`affiliates/${kod}`).get();
+    if (!snapStatus.exists()) {
+      return res.status(404).json({ success: false, message: "Rekod affiliate tidak dijumpai." });
+    }
+    // Rekod lama yang tiada medan status dianggap aktif (selaras dengan
+    // logik paparan: profil.status || "aktif"). Normalize kes + ruang supaya
+    // "Aktif" / " aktif " tidak disalahtafsir sebagai digantung.
+    const statusAff = String((snapStatus.val() || {}).status || "aktif").trim().toLowerCase();
+    if (statusAff !== "aktif") {
+      return res.status(403).json({ success: false, message: "Akaun affiliate digantung." });
+    }
+
     req.affiliateUid = decoded.uid;
     req.affiliateKod = kod;
     return next();
@@ -259,8 +305,12 @@ const GRACE_HARI = 3;
 /** Peratus komisen untuk setiap pembelian berbayar yang dirujuk. */
 const KOMISEN_PERSEN = 30;
 
-/** Bilangan hari komisen perlu "matang" sebelum layak dibayar (elak refund). */
-const KOMISEN_TAHAN_HARI = 7;
+/**
+ * Tempoh tahan komisen (hari) sebelum layak dibayar.
+ * Set ke 0 kerana model jualan ini manual/prabayar — tiada risiko refund
+ * automatik. Semua komisen belum dibayar terus layak dibayar.
+ */
+const KOMISEN_TAHAN_HARI = 0;
 
 /** Huruf yang digunakan untuk menjana kod affiliate (huruf + nombor). */
 const AKSARA_KOD = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // buang I,O,0,1 (mudah keliru)
@@ -698,8 +748,18 @@ async function startServer() {
       const uid = rekodAuth.uid;
 
       // Tanda pada token: claim ini yang membenarkan akses /api/affiliate/*.
+      // PENTING: gabung dengan claims sedia ada (setCustomUserClaims menggantikan
+      // SEMUA claim), supaya claim lain tidak hilang.
       try {
-        await authAdmin.setCustomUserClaims(uid, { affiliate_kod: kod });
+        let claimSediaAda = {};
+        try {
+          const rekodSemasa = await authAdmin.getUser(uid);
+          claimSediaAda = rekodSemasa?.customClaims || {};
+        } catch (bacaErr) {
+          // Abaikan: jika gagal baca, teruskan dengan claim baharu sahaja.
+          console.warn("[Affiliate] Gagal baca claim sedia ada:", bacaErr?.message || bacaErr);
+        }
+        await authAdmin.setCustomUserClaims(uid, { ...claimSediaAda, affiliate_kod: kod });
       } catch (err) {
         // Jika claim gagal, padam akaun supaya tidak wujud affiliate tanpa akses.
         await authAdmin.deleteUser(uid).catch(() => {});
@@ -835,11 +895,11 @@ async function startServer() {
         return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
       }
       const db = getDatabase(appInstance);
-      const hadMasa = Date.now() - KOMISEN_TAHAN_HARI * 86400000;
 
-      const [snapAff, snapRef] = await Promise.all([
+      const [snapAff, snapRef, snapBayar] = await Promise.all([
         db.ref("affiliates").get(),
         db.ref("referrals").get(),
+        db.ref("affiliate_payments").get(),
       ]);
 
       const namaKod = {};
@@ -848,17 +908,21 @@ async function startServer() {
       }
 
       const layak = []; // baris komisen yang boleh dibayar sekarang.
-      const belumMatang = []; // baris pending tetapi masih dalam tempoh tahan.
+      const belumMatang = []; // sentiasa kosong (tiada tempoh tahan) — kekal untuk keserasian API.
+      // Baki belum dibayar (semua baris pending layak kecuali yang telah dibayar).
+      const bakiLayakSen = {}; // kod -> jumlah layak belum dibayar
+      const bakiSemuaSen = {}; // kod -> jumlah komisen belum dibayar (semua peringkat)
       if (snapRef.exists()) {
         snapRef.forEach((kodSnap) => {
           const kod = kodSnap.key;
           kodSnap.forEach((rekod) => {
             const r = rekod.val() || {};
             if (r.status === "batal" || r.status === "dibayar") return false;
+            const komisen = Number(r.komisen_sen) || 0;
+            bakiSemuaSen[kod] = (bakiSemuaSen[kod] || 0) + komisen;
             const item = Object.assign({ kod, id: rekod.key, nama_affiliate: namaKod[kod] || "" }, r);
-            const masaBeli = new Date(r.tarikh_beli || 0).getTime();
-            if (Number.isFinite(masaBeli) && masaBeli <= hadMasa) layak.push(item);
-            else belumMatang.push(item);
+            layak.push(item);
+            bakiLayakSen[kod] = (bakiLayakSen[kod] || 0) + komisen;
             return false;
           });
           return false;
@@ -874,7 +938,50 @@ async function startServer() {
         ikutKod[it.kod].bil += 1;
         ikutKod[it.kod].jumlah_sen += Number(it.komisen_sen) || 0;
       });
-      const ringkasan = Object.values(ikutKod).sort((a, b) => b.jumlah_sen - a.jumlah_sen);
+
+      // Sejarah pembayaran manual (paling baharu dahulu) + tarikh bayar terakhir.
+      const dibayarSejarah = [];
+      const tarikhBayarTerakhir = {};
+      if (snapBayar.exists()) {
+        snapBayar.forEach((rekod) => {
+          const p = rekod.val() || {};
+          const kodP = String(p.kod || "").trim().toUpperCase();
+          dibayarSejarah.push({
+            id: rekod.key,
+            kod: kodP,
+            nama: p.nama || namaKod[kodP] || "",
+            jumlah_sen: Number(p.jumlah_sen) || 0,
+            kaedah: p.kaedah || "",
+            rujukan: p.rujukan || "",
+            nota: p.nota || "",
+            bil: Number(p.bil) || 0,
+            tarikh: p.tarikh || p.dicipta_pada || "",
+          });
+          const t = p.tarikh || p.dicipta_pada || "";
+          if (kodP && (!tarikhBayarTerakhir[kodP] || String(t) > String(tarikhBayarTerakhir[kodP]))) {
+            tarikhBayarTerakhir[kodP] = t;
+          }
+          return false;
+        });
+        dibayarSejarah.sort((a, b) => String(b.tarikh || "").localeCompare(String(a.tarikh || "")));
+      }
+
+      // Sertakan baris ringkasan untuk SEMUA affiliate (walaupun tiada komisen
+      // layak) supaya admin boleh merekod bayaran manual + nampak baki.
+      Object.keys(namaKod).forEach((kod) => {
+        if (!ikutKod[kod]) {
+          ikutKod[kod] = { kod, nama: namaKod[kod] || "", bil: 0, jumlah_sen: 0 };
+        }
+      });
+
+      const ringkasan = Object.values(ikutKod)
+        .map((r) => ({
+          ...r,
+          baki_sen: bakiLayakSen[r.kod] || 0,
+          baki_semua_sen: bakiSemuaSen[r.kod] || 0,
+          tarikh_bayar_terakhir: tarikhBayarTerakhir[r.kod] || "",
+        }))
+        .sort((a, b) => b.jumlah_sen - a.jumlah_sen || String(a.nama || "").localeCompare(String(b.nama || "")));
       const jumlahLayakSen = ringkasan.reduce((s, r) => s + r.jumlah_sen, 0);
 
       return res.json({
@@ -883,6 +990,7 @@ async function startServer() {
         ringkasan,
         layak,
         belum_matang: belumMatang,
+        dibayar_sejarah: dibayarSejarah,
         jumlah_layak_sen: jumlahLayakSen,
       });
     } catch (err) {
@@ -932,6 +1040,118 @@ async function startServer() {
       return res.json({ success: true, dibayar_bil: dibayarBil, jumlah_sen: jumlahSen, tarikh });
     } catch (err) {
       console.error("[Admin Affiliate Mark Paid]", err);
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  });
+
+  /**
+   * Fasa 2 (baharu): rekod pembayaran komisen SECARA MANUAL.
+   *
+   * Berbeza daripada /mark-paid (yang menanda baris komisen yang ditunjuk),
+   * endpoint ini merekod satu TRANSAKSI pembayaran sebenar ke dalam
+   * `affiliate_payments/{id}` — cth. bank transfer / DuitNow yang diterima.
+   *
+   * Pilihan `tanda_komisen` (lalai true): baris komisen LAYAK (matang) bagi
+   * affiliate itu akan ditanda `dibayar` mengikut turutan tertua dahulu,
+   * sehingga jumlah pembayaran dipenuhi. Ini menyebabkan baki dikira semula
+   * di SEMUA paparan (admin + dashboard affiliate) secara automatik.
+   */
+  app.post("/api/admin/affiliate/payment-record", requireAdmin, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
+      }
+      const db = getDatabase(appInstance);
+
+      const kod = String(req.body?.kod || "").trim().toUpperCase();
+      const jumlahSen = Math.round(Number(req.body?.jumlah_sen) || 0);
+      const kaedah = String(req.body?.kaedah || "").trim();
+      const rujukan = String(req.body?.rujukan || "").trim();
+      const nota = String(req.body?.nota || "").trim();
+      const tarikhInput = String(req.body?.tarikh || "").trim();
+      const tandaKomisen = req.body?.tanda_komisen !== false;
+
+      if (!kod) {
+        return res.status(400).json({ success: false, message: "Kod affiliate diperlukan." });
+      }
+      if (jumlahSen <= 0) {
+        return res.status(400).json({ success: false, message: "Jumlah bayaran mesti lebih daripada RM0." });
+      }
+
+      const affSnap = await db.ref(`affiliates/${kod}`).get();
+      if (!affSnap.exists()) {
+        return res.status(404).json({ success: false, message: "Rekod affiliate tidak dijumpai." });
+      }
+      const namaAff = (affSnap.val() || {}).nama || "";
+
+      const tarikh = tarikhInput || new Date().toISOString();
+
+      // 1) Kira baris komisen yang layak untuk ditanda dibayar (tiada tempoh tahan).
+      let bilDitanda = 0;
+      let jumlahDitanda = 0;
+      if (tandaKomisen) {
+        const snapRef = await db.ref(`referrals/${kod}`).get();
+        const calon = [];
+        if (snapRef.exists()) {
+          snapRef.forEach((rekod) => {
+            const r = rekod.val() || {};
+            if (r.status === "batal" || r.status === "dibayar") return false;
+            calon.push({ id: rekod.key, komisen_sen: Number(r.komisen_sen) || 0, tarikh_beli: r.tarikh_beli || "" });
+            return false;
+          });
+        }
+        // Tertua dahulu supaya baki yang paling lama dijelaskan dulu.
+        calon.sort((a, b) => String(a.tarikh_beli || "").localeCompare(String(b.tarikh_beli || "")));
+
+        const kemasKini = {};
+        for (const c of calon) {
+          if (jumlahDitanda >= jumlahSen) break;
+          kemasKini[`referrals/${kod}/${c.id}/status`] = "dibayar";
+          kemasKini[`referrals/${kod}/${c.id}/tarikh_bayar`] = tarikh;
+          jumlahDitanda += c.komisen_sen;
+          bilDitanda += 1;
+        }
+        if (Object.keys(kemasKini).length) {
+          await db.ref().update(kemasKini);
+        }
+      }
+
+      // 2) Tulis rekod pembayaran (transaksi) untuk sejarah/audit.
+      const rekod = {
+        kod,
+        nama: namaAff,
+        jumlah_sen: jumlahSen,
+        kaedah,
+        rujukan,
+        nota,
+        bil: bilDitanda,
+        tarikh,
+        dicipta_pada: new Date().toISOString(),
+        oleh: req.adminUid || "",
+      };
+      const baru = db.ref("affiliate_payments").push();
+      await baru.set(rekod);
+
+      await rekodAudit(db, "affiliate_bayar", {
+        id: baru.key,
+        kod,
+        jumlah_sen: jumlahSen,
+        bil: bilDitanda,
+        kaedah,
+        tarikh,
+      });
+
+      return res.json({
+        success: true,
+        id: baru.key,
+        bil_ditanda: bilDitanda,
+        jumlah_ditanda_sen: jumlahDitanda,
+        jumlah_sen: jumlahSen,
+        tarikh,
+      });
+    } catch (err) {
+      console.error("[Admin Affiliate Payment Record]", err);
       return res.status(500).json({ success: false, message: err.message });
     }
   });
@@ -1013,12 +1233,23 @@ async function startServer() {
 
       const snapRef = await db.ref(`referrals/${kod}`).get();
       const senarai = [];
+      const perluPeranan = [];
       if (snapRef.exists()) {
         snapRef.forEach((rekod) => {
           const r = rekod.val() || {};
+          const peranan = String(r.peranan || "").toLowerCase();
+          // Simpan calon carian untuk fallback: uid (utama) + emel (jika profil
+          // lama berkunci emel / uid tiada).
+          if (!peranan && (r.pelanggan_uid || r.pelanggan_emel)) {
+            perluPeranan.push({ uid: r.pelanggan_uid || "", emel: String(r.pelanggan_emel || "").toLowerCase() });
+          }
           senarai.push({
             id: rekod.key,
+            pelanggan_uid: r.pelanggan_uid || "",
             pelanggan_nama: r.pelanggan_nama || "",
+            // Peranan pelanggan (guru / ibubapa) — dipaparkan sebagai lajur
+            // "Peranan" supaya nama pelanggan tidak didedahkan.
+            peranan,
             nama_pakej: r.nama_pakej || "",
             harga_sen: Number(r.harga_sen) || 0,
             komisen_sen: Number(r.komisen_sen) || 0,
@@ -1030,12 +1261,112 @@ async function startServer() {
         });
       }
 
+      // --- Fallback: rekod LAMA tiada medan `peranan` ---
+      // Rujuk profil pelanggan untuk mendapatkan peranan sebenar (guru/ibubapa).
+      // Carian cuba uid dahulu, kemudian emel (profil lama boleh berkunci emel).
+      if (perluPeranan.length) {
+        const petaUid = {};
+        const petaEmel = {};
+        const uidsUnik = [...new Set(perluPeranan.map((p) => p.uid).filter(Boolean))];
+        const emelUnik = [...new Set(perluPeranan.map((p) => p.emel).filter(Boolean))];
+        await Promise.all([
+          ...uidsUnik.map(async (u) => {
+            try {
+              const snapP = await db.ref(`profiles/${u}/peranan`).get();
+              if (snapP.exists()) petaUid[u] = String(snapP.val() || "").toLowerCase();
+            } catch (err) {
+              console.warn("[Affiliate Referrals] Gagal ambil peranan (uid):", u, err?.message || err);
+            }
+          }),
+          ...emelUnik.map(async (e) => {
+            try {
+              const snapE = await db.ref("profiles").orderByChild("email").equalTo(e).limitToFirst(1).get();
+              if (snapE.exists()) {
+                snapE.forEach((c) => {
+                  const pr = c.val()?.peranan;
+                  if (pr) petaEmel[e] = String(pr).toLowerCase();
+                  return true;
+                });
+              }
+            } catch (err) {
+              console.warn("[Affiliate Referrals] Gagal ambil peranan (emel):", e, err?.message || err);
+            }
+          }),
+        ]);
+        senarai.forEach((s, i) => {
+          if (s.peranan) return;
+          const calon = perluPeranan.find((p) => p.uid && p.uid === s.pelanggan_uid) || null;
+          const emelRekod = calon ? calon.emel : (perluPeranan[i] ? perluPeranan[i].emel : "");
+          if (s.pelanggan_uid && petaUid[s.pelanggan_uid]) {
+            s.peranan = petaUid[s.pelanggan_uid];
+          } else if (emelRekod && petaEmel[emelRekod]) {
+            s.peranan = petaEmel[emelRekod];
+          }
+        });
+      }
+
       // Terbaharu dahulu.
       senarai.sort((a, b) => String(b.tarikh_beli || "").localeCompare(String(a.tarikh_beli || "")));
       return res.json({ success: true, referrals: senarai });
     } catch (err) {
       console.error("[Affiliate Referrals]", err);
       return res.status(500).json({ success: false, message: "Gagal memuatkan rujukan." });
+    }
+  });
+
+  /**
+   * Fasa 3: rekod pembayaran komisen SECARA MANUAL bagi affiliate sendiri.
+   *
+   * Kod diambil DARIPADA token (requireAffiliate) — bukan query — supaya
+   * affiliate tidak boleh mengintai pembayaran orang lain. Hanya rekod dengan
+   * kod yang sepadan dipulangkan.
+   */
+  app.get("/api/affiliate/payments", requireAffiliate, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
+      }
+      const db = getDatabase(appInstance);
+      const kod = req.affiliateKod;
+
+      const snapBayar = await db.ref("affiliate_payments").get();
+      const senarai = [];
+      let jumlahDibayarSen = 0;
+      let tarikhTerakhir = "";
+      if (snapBayar.exists()) {
+        snapBayar.forEach((rekod) => {
+          const p = rekod.val() || {};
+          const kodP = String(p.kod || "").trim().toUpperCase();
+          if (kodP !== String(kod).trim().toUpperCase()) return false;
+          const tarikh = p.tarikh || p.dicipta_pada || "";
+          senarai.push({
+            id: rekod.key,
+            kod: kodP,
+            nama: p.nama || "",
+            jumlah_sen: Number(p.jumlah_sen) || 0,
+            kaedah: p.kaedah || "",
+            rujukan: p.rujukan || "",
+            nota: p.nota || "",
+            bil: Number(p.bil) || 0,
+            tarikh,
+          });
+          jumlahDibayarSen += Number(p.jumlah_sen) || 0;
+          if (tarikh && String(tarikh) > String(tarikhTerakhir)) tarikhTerakhir = tarikh;
+          return false;
+        });
+        senarai.sort((a, b) => String(b.tarikh || "").localeCompare(String(a.tarikh || "")));
+      }
+
+      return res.json({
+        success: true,
+        dibayar_sejarah: senarai,
+        jumlah_dibayar_sen: jumlahDibayarSen,
+        tarikh_bayar_terakhir: tarikhTerakhir,
+      });
+    } catch (err) {
+      console.error("[Affiliate Payments]", err);
+      return res.status(500).json({ success: false, message: "Gagal memuatkan laporan pembayaran." });
     }
   });
 
@@ -1124,8 +1455,11 @@ async function startServer() {
           const snapAff = await db.ref(`affiliates/${kodRujukanBersih}`).get();
           if (snapAff.exists()) {
             const a = snapAff.val() || {};
-            if (a.status === "aktif") affiliateSah = a;
-            else console.warn(`[Affiliate] Kod ${kodRujukanBersih} digantung — tiada komisen.`);
+            // Rekod lama tanpa medan status dianggap aktif (fail-safe), supaya
+            // kod sah tidak dilabel "digantung" hanya kerana medan tiada.
+            const statusAff = String(a.status || "aktif").toLowerCase();
+            if (statusAff === "aktif") affiliateSah = a;
+            else console.warn(`[Affiliate] Kod ${kodRujukanBersih} status="${statusAff}" — tiada komisen.`);
           } else {
             console.warn(`[Affiliate] Kod ${kodRujukanBersih} tidak ditemui — tiada komisen.`);
           }
@@ -1215,6 +1549,9 @@ async function startServer() {
             pelanggan_uid: uid,
             pelanggan_nama: namaBersih,
             pelanggan_emel: emailBersih,
+            // Peranan pelanggan (guru / ibubapa). Tanpa medan ini, lajur
+            // "Peranan" pada jadual affiliate tidak dapat dipaparkan.
+            peranan: perananBersih,
             pakej: planBersih,
             nama_pakej: plan.name,
             harga_sen: plan.priceCents,

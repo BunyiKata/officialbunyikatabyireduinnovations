@@ -206,7 +206,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
                 }}
                 className="neo-btn"
                 style={{
-                  background: "#ffffff",
+                  background: "rgba(255,255,255,0.3)",
                   border: "2px solid var(--color-dark)",
                   borderRadius: "50%",
                   padding: "0",
@@ -214,14 +214,14 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
                   height: "34px",
                   minWidth: "auto",
                   minHeight: "auto",
-                  color: "#168f81",
+                  color: "white",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: "pointer",
                   boxShadow: "0 2px 0 var(--color-dark)",
                   fontWeight: "bold",
-                  fontSize: "0.95rem",
+                  fontSize: "0.9rem",
                 }}
                 title="Cipta Akaun Pengguna"
                 aria-label="Cipta Akaun Pengguna"
@@ -294,13 +294,13 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
 
         {/* Kad Ringkasan Bil Murid, Guru, Ibu Bapa, Anak (Mod Admin) */}
         <div
-          className="ibubapa-stats-grid"
+          className="ibubapa-stats-grid admin-stats-grid"
           style={{
             width: "100%",
             maxWidth: "900px",
             margin: "0 auto 20px",
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
             gap: "14px",
           }}
         >
@@ -786,6 +786,198 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
               </div>
             </div>
           </div>
+
+          {/* Card 6: Jumlah Jualan (Cyan/Sky) */}
+          <div
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: "18px",
+              padding: "16px 18px",
+              background: "linear-gradient(135deg, #06b6d4 0%, #0e7490 100%)",
+              color: "#ffffff",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              minHeight: "115px",
+              boxShadow: "0 10px 22px -5px rgba(14, 116, 144, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+            }}
+          >
+            {/* Half dot pattern overlay */}
+            <div
+              style={{
+                position: "absolute",
+                right: 0,
+                top: 0,
+                width: "55%",
+                height: "100%",
+                backgroundImage: "radial-gradient(rgba(255, 255, 255, 0.3) 1.5px, transparent 1.5px)",
+                backgroundSize: "9px 9px",
+                maskImage: "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.85) 100%)",
+                WebkitMaskImage: "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.85) 100%)",
+                pointerEvents: "none",
+                zIndex: 1,
+              }}
+            />
+            <div
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "10px",
+                background: "rgba(255, 255, 255, 0.22)",
+                backdropFilter: "blur(6px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "1.1rem",
+                color: "#ffffff",
+                marginBottom: "10px",
+                position: "relative",
+                zIndex: 2,
+              }}
+            >
+              <i className="fa-solid fa-cart-shopping"></i>
+            </div>
+            <i
+              className="fa-solid fa-cart-shopping"
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "8px",
+                fontSize: "2.8rem",
+                color: "#ffffff",
+                opacity: 0.12,
+                pointerEvents: "none",
+                lineHeight: 1,
+                zIndex: 1,
+              }}
+            ></i>
+            <div style={{ position: "relative", zIndex: 2 }}>
+              <div
+                style={{
+                  fontSize: "0.72rem",
+                  fontWeight: "bold",
+                  color: "rgba(255, 255, 255, 0.92)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  marginBottom: "2px",
+                  fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                }}
+              >
+                Jumlah Jualan
+              </div>
+              <div
+                id="admin-jumlah-jualan"
+                style={{
+                  fontSize: "1.35rem",
+                  fontWeight: "900",
+                  color: "#ffffff",
+                  lineHeight: 1.1,
+                  margin: 0,
+                  fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                }}
+              >
+                RM 0.00
+              </div>
+            </div>
+          </div>
+
+
+          {/* Card 7: Jumlah Keuntungan (Indigo/Teal) */}
+          <div
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: "18px",
+              padding: "16px 18px",
+              background: "linear-gradient(135deg, #4f46e5 0%, #0f766e 100%)",
+              color: "#ffffff",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              minHeight: "115px",
+              boxShadow: "0 10px 22px -5px rgba(79, 70, 229, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+            }}
+          >
+            {/* Half dot pattern overlay */}
+            <div
+              style={{
+                position: "absolute",
+                right: 0,
+                top: 0,
+                width: "55%",
+                height: "100%",
+                backgroundImage: "radial-gradient(rgba(255, 255, 255, 0.3) 1.5px, transparent 1.5px)",
+                backgroundSize: "9px 9px",
+                maskImage: "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.85) 100%)",
+                WebkitMaskImage: "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.85) 100%)",
+                pointerEvents: "none",
+                zIndex: 1,
+              }}
+            />
+            <div
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "10px",
+                background: "rgba(255, 255, 255, 0.22)",
+                backdropFilter: "blur(6px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "1.1rem",
+                color: "#ffffff",
+                marginBottom: "10px",
+                position: "relative",
+                zIndex: 2,
+              }}
+            >
+              <i className="fa-solid fa-sack-dollar"></i>
+            </div>
+            <i
+              className="fa-solid fa-sack-dollar"
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "8px",
+                fontSize: "2.8rem",
+                color: "#ffffff",
+                opacity: 0.12,
+                pointerEvents: "none",
+                lineHeight: 1,
+                zIndex: 1,
+              }}
+            ></i>
+            <div style={{ position: "relative", zIndex: 2 }}>
+              <div
+                style={{
+                  fontSize: "0.72rem",
+                  fontWeight: "bold",
+                  color: "rgba(255, 255, 255, 0.92)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  marginBottom: "2px",
+                  fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                }}
+              >
+                Jumlah Keuntungan
+              </div>
+              <div
+                id="admin-jumlah-keuntungan"
+                style={{
+                  fontSize: "1.35rem",
+                  fontWeight: "900",
+                  color: "#ffffff",
+                  lineHeight: 1.1,
+                  margin: 0,
+                  fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
+                }}
+              >
+                RM 0.00
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <div

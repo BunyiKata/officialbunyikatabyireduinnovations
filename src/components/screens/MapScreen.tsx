@@ -935,6 +935,10 @@ export default function MapScreen({
                 onClick={() => {
                   const modal = document.getElementById("modal-pilih-ar");
                   if (modal) modal.style.display = "none";
+                  if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
+                    if (typeof (window as any).kunciPro === "function") (window as any).kunciPro();
+                    return;
+                  }
                   setArKiraJariMode('nombor');
                   if ((window as any).bukaARKiraJari) (window as any).bukaARKiraJari('nombor');
                 }}
@@ -1011,6 +1015,10 @@ export default function MapScreen({
                 onClick={() => {
                   const modal = document.getElementById("modal-pilih-ar");
                   if (modal) modal.style.display = "none";
+                  if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
+                    if (typeof (window as any).kunciPro === "function") (window as any).kunciPro();
+                    return;
+                  }
                   setArKiraJariMode('tambah');
                   if ((window as any).bukaARKiraJari) (window as any).bukaARKiraJari('tambah');
                 }}
@@ -1087,6 +1095,10 @@ export default function MapScreen({
                 onClick={() => {
                   const modal = document.getElementById("modal-pilih-ar");
                   if (modal) modal.style.display = "none";
+                  if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
+                    if (typeof (window as any).kunciPro === "function") (window as any).kunciPro();
+                    return;
+                  }
                   setArKiraJariMode('tolak');
                   if ((window as any).bukaARKiraJari) (window as any).bukaARKiraJari('tolak');
                 }}

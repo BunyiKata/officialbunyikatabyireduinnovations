@@ -753,45 +753,11 @@ export function EditProfileModal(props: EditProfileModalProps) {
                         />
                       </div>
 
-                      <div style={{ marginBottom: "16px" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-start",
-                            gap: "6px",
-                            marginBottom: "8px",
-                          }}
-                        >
-                          <span style={labelHighlightStyle}>Kod Admin</span>
-                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
-                        </div>
-                        <input
-                          type="text"
-                          maxLength={8}
-                          placeholder="CTH: KOD#01"
-                          value={editKodTemp}
-                          onChange={(e) => {
-                            setEditKodTemp(e.target.value.toUpperCase());
-                            if (editModalError) setEditModalError("");
-                          }}
-                          style={{
-                            width: "100%",
-                            padding: "12px",
-                            borderRadius: "8px",
-                            border: "2px solid var(--color-dark)",
-                            fontSize: "1.1rem",
-                            fontFamily: "inherit",
-                            boxSizing: "border-box",
-                            letterSpacing: "1px",
-                            fontWeight: "bold",
-                            textTransform: "uppercase",
-                          }}
-                        />
-                        <span style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px", display: "block", textAlign: "left" }}>
-                          * Wajib 8 aksara & sekurang-kurangnya 1 simbol (Cth: KOD#01)
-                        </span>
-                      </div>
+                      {/* NOTA: Medan "Kod Admin" dibuang. Kod admin sebenar
+                          dipegang oleh PELAYAN (ADMIN_CODE, /api/admin/verify)
+                          dan tidak boleh diubah dari klien. Medan lama ini hanya
+                          memaparkan nilai localStorage basi (cth. "ADMIN#02")
+                          yang mengelirukan. */}
 
                       {/* Ruangan Emel Admin (Read-only) */}
                       <div style={{ marginBottom: "14px" }}>
@@ -2802,12 +2768,12 @@ export function EditProfileModal(props: EditProfileModalProps) {
 
                           const namaSistem = editAdminNamaSistemTemp.trim().toUpperCase();
                           const namaAdmin = editAdminNamaTemp.trim().toUpperCase();
-                          const codeTrimmed = editKodTemp.trim().toUpperCase();
 
                           localStorage.setItem("bunyiKataNamaSistem", namaSistem);
                           localStorage.setItem("bunyiKataNamaAdmin", namaAdmin);
-                          localStorage.setItem("bunyiKataKodAdmin", codeTrimmed);
-                          registerCodeInRegistry(codeTrimmed, "admin");
+                          // Buang nilai kod admin lama (basi, cth. "ADMIN#02").
+                          // Kod admin sebenar dipegang pelayan (ADMIN_CODE).
+                          localStorage.removeItem("bunyiKataKodAdmin");
 
                           const kelasTitle = document.getElementById("admin-dashboard-nama-kelas-title");
                           if (kelasTitle) kelasTitle.innerText = namaSistem;

@@ -1,6 +1,181 @@
 
 
+/* ============================================================================
+ * PAGINATION JADUAL (10 baris/halaman)
+ * ----------------------------------------------------------------------------
+ * Utiliti generik yang memotong baris `<tr>` dalam `<tbody>` supaya hanya
+ * 10 baris dipaparkan setiap halaman, dan menyuntik bar butang halaman
+ * (dot + anak panah) selepas jadual.
+ *
+ * Digunakan oleh renderAdminTable(), renderSejarahLangganan() dan
+ * renderAdminUrus() tanpa perlu mengubah logik pembinaan baris sedia ada.
+ * ==========================================================================*/
+window.__paginationState = {}; // { [kunciTbody]: halamanSemasa }
+window.__HALAMAN_PER_HALAMAN = 10;
+
+/**
+ * Kira senarai nombor halaman (tetingkap maks 7) untuk dipaparkan.
+ */
+window.__senaraiNomborHalaman = function (aktif, jumlah) {
+    if (jumlah <= 7) {
+        const semua = [];
+        for (let i = 1; i <= jumlah; i++) semua.push(i);
+        return semua;
+    }
+    const keluar = [];
+    if (aktif <= 4) {
+        for (let i = 1; i <= 5; i++) keluar.push(i);
+        keluar.push('…', jumlah);
+    } else if (aktif >= jumlah - 3) {
+        keluar.push(1, '…');
+        for (let i = jumlah - 4; i <= jumlah; i++) keluar.push(i);
+    } else {
+        keluar.push(1, '…', aktif - 1, aktif, aktif + 1, '…', jumlah);
+    }
+    return keluar;
+};
+
+/**
+ * Bina DOM bar pagination bagi satu tbody. Mengembalikan elemen
+ * `.pagination-bar` (atau null jika hanya 1 halaman).
+ */
+window.binaPaginationBar = function (kunci, jumlahRekod, halamanSemasa, fungsiTukar) {
+    const per = window.__HALAMAN_PER_HALAMAN || 10;
+    const jumlahHalaman = Math.max(1, Math.ceil(jumlahRekod / per));
+    if (jumlahHalaman <= 1) return null;
+
+    const aktif = Math.min(Math.max(1, halamanSemasa || 1), jumlahHalaman);
+    const bar = document.createElement('div');
+    bar.className = 'pagination-bar';
+    bar.setAttribute('data-pagination-for', kunci);
+
+    const btnGayaAsas = 'width:30px;height:30px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:800;cursor:pointer;border:2px solid #5b21b6;background:#ffffff;color:#5b21b6;margin:0;min-width:0;min-height:0;';
+
+    const buatBtnIkon = (ikon, sasaran, nyahaktif) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'neo-btn pagination-nav-btn';
+        b.style.cssText = btnGayaAsas + (nyahaktif ? 'opacity:0.4;cursor:not-allowed;' : '');
+        b.disabled = !!nyahaktif;
+        b.title = ikon === 'left' ? 'Sebelum' : 'Seterusnya';
+        b.setAttribute('aria-label', b.title);
+        b.innerHTML = `<i class="fa-solid fa-chevron-${ikon}"></i>`;
+        if (!nyahaktif) {
+            b.addEventListener('click', (e) => {
+                e.preventDefault();
+                fungsiTukar(sasaran);
+            });
+        }
+        return b;
+    };
+
+    bar.appendChild(buatBtnIkon('left', aktif - 1, aktif <= 1));
+
+    const items = window.__senaraiNomborHalaman(aktif, jumlahHalaman);
+    items.forEach((it) => {
+        if (it === '…') {
+            const ell = document.createElement('span');
+            ell.className = 'pagination-ellipsis';
+            ell.textContent = '…';
+            ell.style.cssText = 'font-weight:800;color:#64748b;padding:0 2px;';
+            bar.appendChild(ell);
+            return;
+        }
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'neo-btn pagination-dot';
+        const dipilih = it === aktif;
+        b.style.cssText = btnGayaAsas + (dipilih ? 'background:#7c3aed;color:#ffffff;' : '');
+        b.textContent = String(it);
+        b.title = 'Halaman ' + it;
+        b.setAttribute('aria-label', 'Halaman ' + it);
+        if (dipilih) b.setAttribute('aria-current', 'page');
+        b.addEventListener('click', (e) => {
+            e.preventDefault();
+            fungsiTukar(it);
+        });
+        bar.appendChild(b);
+    });
+
+    bar.appendChild(buatBtnIkon('right', aktif + 1, aktif >= jumlahHalaman));
+    return bar;
+};
+
+
 window.normalizeAdminPlanName = function (rawPlan) {
+
+/**
+ * Terapkan pagination pada satu tbody. `kunci` mengekalkan halaman semasa
+ * antara render semula. Bar pagination diletakkan selepas jadual (parent
+ * `.table-responsive` atau jadual itu sendiri).
+ */
+window.potongHalaman = function (tbodyId, kunci) {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+    const kunciAkhir = kunci || tbodyId;
+
+    const semuaBaris = Array.from(tbody.children).filter((el) => el.tagName === 'TR');
+    // Baris "kosong" (placeholder/nota) tidak dipaginasi.
+    const barisKosong = semuaBaris.filter(
+        (tr) => tr.querySelector('td[colspan]') || tr.classList.contains('admin-empty-row')
+    );
+    const barisData = semuaBaris.filter((tr) => !barisKosong.includes(tr));
+
+    const per = window.__HALAMAN_PER_HALAMAN || 10;
+    const jumlahHalaman = Math.max(1, Math.ceil(barisData.length / per));
+    let aktif = window.__paginationState[kunciAkhir] || 1;
+    if (aktif > jumlahHalaman) aktif = jumlahHalaman;
+    if (aktif < 1) aktif = 1;
+    window.__paginationState[kunciAkhir] = aktif;
+
+    // Sembunyi/tunjuk baris mengikut halaman semasa, dan kemas kini nombor
+    // "Bil." supaya berterusan merentas halaman (cth. halaman 2 mula dari 11).
+    barisData.forEach((tr, idx) => {
+        const halamanBaris = Math.floor(idx / per) + 1;
+        tr.style.display = halamanBaris === aktif ? '' : 'none';
+
+        const selPertama = tr.children && tr.children[0];
+        if (selPertama && selPertama.tagName === 'TD') {
+            selPertama.textContent = String(idx + 1);
+        }
+    });
+
+    // Cari bekas untuk letak bar, dan buang bar lama.
+    const indukBaris = tbody.closest('.table-responsive') || tbody.parentElement;
+    const jadual = tbody.closest('table');
+    const bekasCari = indukBaris || (jadual ? jadual.parentElement : tbody.parentElement);
+    if (bekasCari) {
+        Array.from(bekasCari.querySelectorAll(`.pagination-bar[data-pagination-for="${kunciAkhir}"]`)).forEach((el) => el.remove());
+    }
+
+    const bar = window.binaPaginationBar(kunciAkhir, barisData.length, aktif, (h) => {
+        window.__paginationState[kunciAkhir] = h;
+        window.potongHalaman(tbodyId, kunciAkhir);
+    });
+    if (!bar) return;
+
+    if (bekasCari) {
+        bekasCari.appendChild(bar);
+    } else if (jadual && jadual.parentElement) {
+        jadual.parentElement.appendChild(bar);
+    } else if (tbody.parentElement) {
+        tbody.parentElement.appendChild(bar);
+    }
+};
+
+/**
+ * Helper: panggil potongHalaman() untuk beberapa tbody dengan selamat.
+ */
+window.__paginasiJadual = function (pasangan) {
+    (pasangan || []).forEach(([tbodyId, kunci]) => {
+        try {
+            window.potongHalaman(tbodyId, kunci);
+        } catch (e) {
+            console.warn('[Pagination] Gagal untuk', tbodyId, e);
+        }
+    });
+};
+
     if (!rawPlan) return '1 Bulan (Pro)';
     const str = String(rawPlan).trim().toLowerCase();
     if (str.includes('percuma') || str.includes('trial') || str === 'free') return 'Percuma';
@@ -157,6 +332,9 @@ window.showAppModalConfirm = function (arg1, arg2, arg3, arg4) {
 window.showAdminInfo = function (type, nama, extra) {
     let title = "";
     let contentHtml = "";
+    // Rujukan affiliate untuk butang "Reset Kata Laluan" (diisi di cawangan affiliate).
+    let kodAff = "";
+    let emailAff = "";
 
     // Cari rekod sebenar dari memori/localStorage jika data belum lengkap
     let match = {};
@@ -254,6 +432,7 @@ window.showAdminInfo = function (type, nama, extra) {
                     <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">JENIS LANGGANAN:</strong><br/>
                     <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
                         <select class="neo-btn filter-select" style="padding:4px 8px; font-size:0.85rem; font-weight:bold; border-radius:8px; border:2px solid #ea580c; background:#ffffff; cursor:pointer;" onchange="window.tukarLanggananPengguna('${profileId}', 'guru', this.value)">
+                            <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
                             <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' ? 'selected' : ''}>1 Bulan (Pro)</option>
                             <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' ? 'selected' : ''}>3 Bulan (Pro)</option>
                             <option value="1 Tahun (Pro)" ${langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
@@ -309,6 +488,7 @@ window.showAdminInfo = function (type, nama, extra) {
                     <strong style="color:#64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">JENIS LANGGANAN:</strong><br/>
                     <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
                         <select class="neo-btn filter-select" style="padding:4px 8px; font-size:0.85rem; font-weight:bold; border-radius:8px; border:2px solid #0284c7; background:#ffffff; cursor:pointer;" onchange="window.tukarLanggananPengguna('${profileId}', 'ibubapa', this.value)">
+                            <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
                             <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' ? 'selected' : ''}>1 Bulan (Pro)</option>
                             <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' ? 'selected' : ''}>3 Bulan (Pro)</option>
                             <option value="1 Tahun (Pro)" ${langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
@@ -334,8 +514,9 @@ window.showAdminInfo = function (type, nama, extra) {
         `;
     } else if (type === 'affiliate') {
         title = "Maklumat Affiliate";
-        const kodAff = (extra && extra.kod) || match.kod || '';
+        kodAff = (extra && extra.kod) || match.kod || '';
         const email = (extra && extra.email) || match.email || '';
+        emailAff = email;
         const waRaw = (extra && extra.whatsapp) || match.whatsapp || '';
         const statusRaw = (extra && extra.status) || match.status || 'aktif';
         const aktif = statusRaw === 'aktif';
@@ -430,6 +611,13 @@ window.showAdminInfo = function (type, nama, extra) {
                 </button>
             </div>
             ` : ''}
+            ${type === 'affiliate' ? `
+            <div style="display:flex; gap:10px; margin-top:12px;">
+                <button type="button" class="neo-btn" style="flex:1; padding:11px; font-weight:bold; border-radius:10px; border:2px solid #5b21b6; background:#7c3aed; color:#fff; cursor:pointer; font-size:0.86rem; display:inline-flex; align-items:center; justify-content:center; gap:7px; box-shadow:0 3px 0 #5b21b6;" onclick="window.resetKataLaluanAffiliatePopup(${JSON.stringify(String(kodAff || ''))}, ${JSON.stringify(String(emailAff || ''))}, ${JSON.stringify(String((extra && extra.uid) || match.uid || ''))})">
+                    <i class="fa-solid fa-key"></i> Reset Kata Laluan
+                </button>
+            </div>
+            ` : ''}
         </div>
     `;
     infoModal.style.display = 'flex';
@@ -491,8 +679,8 @@ window.renderAdminTable = function (type = 'guru') {
             adminTbody.innerHTML += `
                         <tr class="admin-table-row" style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#ffffff' : '#fff7ed'}; transition: background 0.15s ease;">
                             <td class="admin-td" style="padding: 9px 8px; font-weight: 600; color: #64748b; border-right: 1px solid #e2e8f0; text-align: center; font-size: 0.85rem;">${index + 1}</td>
-                            <td class="admin-td" style="padding: 9px 12px; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem;">${t.nama}</td>
-                            <td class="admin-td" style="padding: 9px 12px; color: #475569; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem;">${t.sekolah}</td>
+                            <td class="admin-td sel-nama" style="padding: 9px 12px; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem;">${t.nama}</td>
+                            <td class="admin-td sel-sekolah" style="padding: 9px 12px; color: #475569; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem;">${t.sekolah}</td>
                             <td class="admin-td" style="padding: 9px 8px; text-align: center; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; font-size: 0.85rem;">${t.murid || 0}</td>
                             <td class="admin-td" style="padding: 9px 8px; text-align: center; border-right: 1px solid #e2e8f0; white-space: nowrap;">
                                 <span style="background: #fff7ed; color: #c2410c; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 10px; border: 1.5px solid #ea580c; display: inline-block; white-space: nowrap;">
@@ -548,7 +736,7 @@ window.renderAdminTable = function (type = 'guru') {
             adminTbody.innerHTML += `
                         <tr class="admin-table-row" style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#ffffff' : '#f0f9ff'}; transition: background 0.15s ease;">
                             <td class="admin-td" style="padding: 9px 8px; font-weight: 600; color: #64748b; border-right: 1px solid #e2e8f0; text-align: center; font-size: 0.85rem;">${index + 1}</td>
-                            <td class="admin-td" style="padding: 9px 12px; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem;">${t.nama}</td>
+                            <td class="admin-td sel-nama" style="padding: 9px 12px; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.85rem;">${t.nama}</td>
                             <td class="admin-td" style="padding: 9px 8px; text-align: center; font-weight: bold; color: #1e293b; border-right: 1px solid #e2e8f0; font-size: 0.85rem;">${t.anak || 0}</td>
                             <td class="admin-td" style="padding: 9px 8px; text-align: center; border-right: 1px solid #e2e8f0; white-space: nowrap;">
                                 <span style="background: #f0f9ff; color: #0284c7; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 10px; border: 1.5px solid #0284c7; display: inline-block; white-space: nowrap;">
@@ -822,9 +1010,10 @@ window.renderAdminTable = function (type = 'guru') {
             // Simpan cache supaya butang "Info" boleh memaparkan butiran penuh.
             window.__senaraiAffiliateCache = listPenuh;
             const tapisan = window.__affiliateStatusFilter || "semua";
+            const aktifKan = (a) => String((a || {}).status || "aktif").trim().toLowerCase() === "aktif";
             const list = tapisan === "semua"
                 ? listPenuh
-                : listPenuh.filter((a) => (tapisan === "aktif" ? a.status === "aktif" : a.status !== "aktif"));
+                : listPenuh.filter((a) => (tapisan === "aktif" ? aktifKan(a) : !aktifKan(a)));
             affTbody.innerHTML = "";
 
             if (list.length === 0) {
@@ -840,7 +1029,9 @@ window.renderAdminTable = function (type = 'guru') {
             }
 
             list.forEach((a, index) => {
-                const aktif = a.status === "aktif";
+                // Normalize: rekod lama mungkin "Aktif" / " aktif " — jangan
+                // salah label sebagai "Digantung" (selaras requireAffiliate).
+                const aktif = String(a.status || "aktif").trim().toLowerCase() === "aktif";
                 const warnaStatus = aktif ? "#16a34a" : "#dc2626";
                 const labelStatus = aktif ? "Aktif" : "Digantung";
                 const wa = String(a.whatsapp || "").replace(/[^0-9]/g, "");
@@ -880,7 +1071,7 @@ window.renderAdminTable = function (type = 'guru') {
                         <span style="display:inline-block; padding:3px 10px; border-radius:999px; font-size:0.72rem; font-weight:bold; color:white; background:${warnaStatus};">${labelStatus}</span>
                     </td>
                     <td class="admin-td" style="padding:9px 8px; border-right:1px solid #e2e8f0; text-align:center;">
-                        <button type="button" class="neo-btn bg-white" data-kod="${a.kod}" data-nama="${(a.nama || '').replace(/"/g, '&quot;')}" data-email="${(a.email || '').replace(/"/g, '&quot;')}" data-wa="${(a.whatsapp || '').replace(/"/g, '&quot;')}" data-statusraw="${a.status || 'aktif'}" data-jualan="${Number(a.jualan_bil) || 0}" data-komisen="${Number(a.komisen_keseluruhan_sen) || 0}" data-dibayar="${Number(a.dibayar_sen) || 0}" data-baki="${Number(a.baki_sen) || 0}" data-dicipta="${(a.dicipta_pada || '').replace(/"/g, '&quot;')}" data-info="1" title="Info Affiliate" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#7c3aed; border:1.5px solid #7c3aed; margin:0 auto; cursor:pointer;">
+                        <button type="button" class="neo-btn bg-white" data-kod="${a.kod}" data-nama="${(a.nama || '').replace(/"/g, '&quot;')}" data-email="${(a.email || '').replace(/"/g, '&quot;')}" data-uid="${(a.uid || '').replace(/"/g, '&quot;')}" data-wa="${(a.whatsapp || '').replace(/"/g, '&quot;')}" data-statusraw="${a.status || 'aktif'}" data-jualan="${Number(a.jualan_bil) || 0}" data-komisen="${Number(a.komisen_keseluruhan_sen) || 0}" data-dibayar="${Number(a.dibayar_sen) || 0}" data-baki="${Number(a.baki_sen) || 0}" data-dicipta="${(a.dicipta_pada || '').replace(/"/g, '&quot;')}" data-info="1" title="Info Affiliate" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#7c3aed; border:1.5px solid #7c3aed; margin:0 auto; cursor:pointer;">
                             <i class="fa-solid fa-circle-info"></i>
                         </button>
                     </td>
@@ -936,6 +1127,7 @@ window.renderAdminTable = function (type = 'guru') {
                         window.showAdminInfo('affiliate', btn.getAttribute("data-nama"), {
                             kod: btn.getAttribute("data-kod"),
                             email: btn.getAttribute("data-email"),
+                            uid: btn.getAttribute("data-uid"),
                             whatsapp: btn.getAttribute("data-wa"),
                             status: btn.getAttribute("data-statusraw"),
                             jualan: btn.getAttribute("data-jualan"),
@@ -1051,63 +1243,135 @@ window.renderAdminTable = function (type = 'guru') {
                     <tr style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: white;">
                         <th style="padding:10px 8px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; width:44px; min-width:44px; text-transform:uppercase;">BIL.</th>
                         <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:left; font-size:0.85rem; font-weight:bold; min-width:150px; text-transform:uppercase;">AFFILIATE</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:90px; text-transform:uppercase;">KOD</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:100px; text-transform:uppercase;">BILANGAN</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:120px; text-transform:uppercase;">JUMLAH LAYAK</th>
-                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; text-align:center; font-size:0.85rem; font-weight:bold; min-width:170px; text-transform:uppercase;">TINDAKAN</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:86px; text-transform:uppercase;">KOD</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:90px; text-transform:uppercase;">BIL. LAYAK</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:115px; text-transform:uppercase;">JUMLAH LAYAK</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:130px; text-transform:uppercase;">BAKI BELUM DIBAYAR</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:135px; text-transform:uppercase;">TARIKH BAYAR TERAKHIR</th>
+                        <th style="padding:10px 12px; background:transparent; color:white; border-bottom:2px solid #4c1d95; text-align:center; font-size:0.85rem; font-weight:bold; min-width:210px; text-transform:uppercase;">TINDAKAN</th>
                     </tr>
                 `;
 
         bayarTbody.innerHTML = `
             <tr>
-                <td colspan="6" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold;">
+                <td colspan="8" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold;">
                     <i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Memuatkan laporan pembayaran...
                 </td>
             </tr>
         `;
 
         const rmBayar = (sen) => "RM" + ((Number(sen) || 0) / 100).toFixed(2);
+        const fmtTarikh = (iso) => {
+            if (!iso) return "-";
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return String(iso);
+            const hari = String(d.getDate()).padStart(2, "0");
+            const bulan = String(d.getMonth() + 1).padStart(2, "0");
+            return hari + "/" + bulan + "/" + d.getFullYear();
+        };
 
 
         const paparLaporan = (hasil) => {
             const ringkasan = (hasil && Array.isArray(hasil.ringkasan)) ? hasil.ringkasan : [];
+            const sejarah = (hasil && Array.isArray(hasil.dibayar_sejarah)) ? hasil.dibayar_sejarah : [];
             const belumMatangSen = (hasil && Array.isArray(hasil.belum_matang))
                 ? hasil.belum_matang.reduce((s, it) => s + (Number(it.komisen_sen) || 0), 0) : 0;
-            const tahanHari = (hasil && hasil.tempoh_tahan_hari) || 7;
+            const tahanHari = (hasil && typeof hasil.tempoh_tahan_hari === 'number') ? hasil.tempoh_tahan_hari : 0;
 
+            // --- Lapisan 1: ringkasan per-affiliate ---
             bayarTbody.innerHTML = "";
 
             if (ringkasan.length === 0) {
                 bayarTbody.innerHTML = `
                     <tr>
-                        <td colspan="6" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold; font-size: 0.95rem;">
+                        <td colspan="8" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold; font-size: 0.95rem;">
                             <i class="fa-solid fa-file-invoice-dollar" style="font-size: 2rem; color: #cbd5e1; display: block; margin-bottom: 10px;"></i>
                             Tiada rekod pembayaran affiliate dalam pangkalan data.
                             ${belumMatangSen > 0 ? '<br/><span style="font-size:0.8rem; color:#94a3b8; font-weight:normal; margin-top:6px; display:inline-block;">' + rmBayar(belumMatangSen) + " masih dalam tempoh tahan (" + tahanHari + " hari).</span>" : ""}
                         </td>
                     </tr>
                 `;
-                return;
+            } else {
+                ringkasan.forEach((r, index) => {
+                    const row = document.createElement("tr");
+                    row.className = "admin-table-row";
+                    row.style.cssText = "border-bottom:1px solid #e2e8f0; background: " + (index % 2 === 0 ? "#ffffff" : "#f5f3ff") + ";";
+                    const bakiSen = Number(r.baki_sen) || 0;
+                    const bakiSemuaSen = Number(r.baki_semua_sen) || 0;
+                    const warnaBaki = bakiSen > 0 ? "#dc2626" : "#059669";
+                    // Baki boleh jadi 0 walaupun ada komisen belum matang — tunjuk nota kecil.
+                    const notaBaki = (bakiSen === 0 && bakiSemuaSen > 0)
+                        ? `<div style="font-size:0.68rem; color:#94a3b8; font-weight:normal;">+${rmBayar(bakiSemuaSen)} belum matang</div>`
+                        : "";
+                    row.innerHTML = `
+                        <td class="admin-td" style="padding:9px 8px; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; text-align:center; font-size:0.85rem;">${index + 1}</td>
+                        <td class="admin-td" style="padding:9px 12px; font-weight:bold; color:#0f172a; border-right:1px solid #e2e8f0; font-size:0.85rem;">${r.nama || "-"}</td>
+                        <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; letter-spacing:1px; color:#5b21b6;">${r.kod || "-"}</td>
+                        <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; color:#0f172a;">${Number(r.bil) || 0}</td>
+                        <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; color:#059669;">${rmBayar(r.jumlah_sen)}</td>
+                        <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; color:${warnaBaki};">${rmBayar(bakiSen)}${notaBaki}</td>
+                        <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; color:#475569; font-size:0.82rem;">${fmtTarikh(r.tarikh_bayar_terakhir)}</td>
+                        <td class="admin-td" style="padding:9px 12px; text-align:center; white-space:nowrap;">
+                            <button type="button" class="neo-btn" data-bayar-tambah="${r.kod}" data-bayar-jumlah="${Number(r.baki_sen) || 0}" style="margin:2px; padding:5px 10px; font-size:0.75rem; font-weight:bold; border-radius:8px; border:2px solid var(--color-dark,#10182f); background:#7c3aed; color:white; cursor:pointer;">
+                                <i class="fa-solid fa-plus"></i> Tambah Rekod
+                            </button>
+                            <button type="button" class="neo-btn" data-bayar-kod="${r.kod}" style="margin:2px; padding:5px 10px; font-size:0.75rem; font-weight:bold; border-radius:8px; border:2px solid var(--color-dark,#10182f); background:#059669; color:white; cursor:pointer;">
+                                <i class="fa-solid fa-check"></i> Tanda Dibayar
+                            </button>
+                        </td>
+                    `;
+                    bayarTbody.appendChild(row);
+                });
             }
 
-            ringkasan.forEach((r, index) => {
-                const row = document.createElement("tr");
-                row.className = "admin-table-row";
-                row.style.cssText = "border-bottom:1px solid #e2e8f0; background: " + (index % 2 === 0 ? "#ffffff" : "#f5f3ff") + ";";
-                row.innerHTML = `
-                    <td class="admin-td" style="padding:9px 8px; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; text-align:center; font-size:0.85rem;">${index + 1}</td>
-                    <td class="admin-td" style="padding:9px 12px; font-weight:bold; color:#0f172a; border-right:1px solid #e2e8f0; font-size:0.85rem;">${r.nama || "-"}</td>
-                    <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; letter-spacing:1px; color:#5b21b6;">${r.kod || "-"}</td>
-                    <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; color:#0f172a;">${Number(r.bil) || 0}</td>
-                    <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; color:#059669;">${rmBayar(r.jumlah_sen)}</td>
-                    <td class="admin-td" style="padding:9px 12px; text-align:center; white-space:nowrap;">
-                        <button type="button" class="neo-btn" data-bayar-kod="${r.kod}" style="margin:2px; padding:5px 10px; font-size:0.75rem; font-weight:bold; border-radius:8px; border:2px solid var(--color-dark,#10182f); background:#059669; color:white; cursor:pointer;">
-                            <i class="fa-solid fa-check"></i> Tanda Dibayar
-                        </button>
-                    </td>
+            // --- Lapisan 2: sejarah pembayaran ---
+            const sejarahHead = document.getElementById('affiliate-bayar-sejarah-head');
+            const sejarahBody = document.getElementById('affiliate-bayar-sejarah-body');
+            if (sejarahHead && sejarahBody) {
+                sejarahHead.innerHTML = `
+                    <tr style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: white;">
+                        <th style="padding:10px 8px; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; width:44px;">BIL.</th>
+                        <th style="padding:10px 12px; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:110px;">TARIKH</th>
+                        <th style="padding:10px 12px; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:left; font-size:0.85rem; font-weight:bold; min-width:150px;">AFFILIATE</th>
+                        <th style="padding:10px 12px; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:86px;">KOD</th>
+                        <th style="padding:10px 12px; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:95px;">BIL. KOMISEN</th>
+                        <th style="padding:10px 12px; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:center; font-size:0.85rem; font-weight:bold; min-width:100px;">JUMLAH</th>
+                        <th style="padding:10px 12px; color:white; border-bottom:2px solid #4c1d95; border-right:1px solid rgba(255,255,255,0.25); text-align:left; font-size:0.85rem; font-weight:bold; min-width:130px;">RUJUKAN</th>
+                        <th style="padding:10px 12px; color:white; border-bottom:2px solid #4c1d95; text-align:left; font-size:0.85rem; font-weight:bold; min-width:160px;">NOTA</th>
+                    </tr>
                 `;
-                bayarTbody.appendChild(row);
-            });
+                sejarahBody.innerHTML = "";
+                if (sejarah.length === 0) {
+                    sejarahBody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="padding: 28px 16px; text-align: center; color: #64748b; font-weight: bold; font-size: 0.9rem;">
+                                <i class="fa-solid fa-clock-rotate-left" style="font-size: 1.6rem; color: #cbd5e1; display: block; margin-bottom: 8px;"></i>
+                                Belum ada rekod pembayaran manual. Tekan "Tambah Rekod Pembayaran" untuk merekod.
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    sejarah.forEach((p, index) => {
+                        const tr = document.createElement("tr");
+                        tr.className = "admin-table-row";
+                        tr.style.cssText = "border-bottom:1px solid #e2e8f0; background: " + (index % 2 === 0 ? "#ffffff" : "#f5f3ff") + ";";
+                        tr.innerHTML = `
+                            <td class="admin-td" style="padding:9px 8px; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; text-align:center; font-size:0.85rem;">${index + 1}</td>
+                            <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; color:#334155; font-size:0.82rem;">${fmtTarikh(p.tarikh)}</td>
+                            <td class="admin-td" style="padding:9px 12px; font-weight:bold; color:#0f172a; border-right:1px solid #e2e8f0; font-size:0.85rem;">${p.nama || "-"}</td>
+                            <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; letter-spacing:1px; color:#5b21b6;">${p.kod || "-"}</td>
+                            <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; color:#0f172a;">${Number(p.bil) || 0}</td>
+                            <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:center; font-weight:bold; color:#059669;">${rmBayar(p.jumlah_sen)}</td>
+                            <td class="admin-td" style="padding:9px 12px; border-right:1px solid #e2e8f0; text-align:left; color:#334155; font-size:0.82rem;">${p.rujukan || "-"}</td>
+                            <td class="admin-td" style="padding:9px 12px; text-align:left; color:#475569; font-size:0.8rem;">${p.nota || "-"}</td>
+                        `;
+                        sejarahBody.appendChild(tr);
+                    });
+                }
+            }
+
+            // Simpan cache supaya modal "Tambah Rekod" boleh pra-isi nama/jumlah.
+            window.__bayarRingkasanCache = ringkasan;
         };
 
         const muatLaporan = () => {
@@ -1124,43 +1388,300 @@ window.renderAdminTable = function (type = 'guru') {
             else paparLaporan(null);
         };
 
+        // Modal "Tambah Rekod Pembayaran" (bina dinamik).
+        const bukaModalTambahBayar = (kodPrabisi) => {
+            // Senarai affiliate untuk dropdown. Sumber utama: cache ringkasan
+            // laporan pembayaran. Jika kosong (laporan belum dimuatkan / gagal),
+            // ambil senarai affiliate terus daripada API sebagai sandaran supaya
+            // dropdown TIDAK pernah kosong walaupun data affiliate memang ada.
+            let cache = Array.isArray(window.__bayarRingkasanCache) ? window.__bayarRingkasanCache.slice() : [];
+
+            const binaPilihan = () => cache.map((r) =>
+                `<option value="${r.kod}" data-jumlah="${Number(r.baki_sen) || 0}">${r.kod} — ${r.nama || "-"} (Baki ${rmBayar(r.baki_sen)})</option>`
+            ).join("");
+
+            const binaDanPasangModal = (senarai) => {
+                const pilih = senarai.find((r) => r.kod === kodPrabisi) || senarai[0] || null;
+                const opsiAff = binaPilihan();
+                const hariIni = new Date().toISOString().slice(0, 10);
+
+                let overlay = document.getElementById('modal-tambah-bayar-overlay');
+                if (overlay) overlay.remove();
+
+                overlay = document.createElement('div');
+                overlay.id = 'modal-tambah-bayar-overlay';
+                overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; display:flex; align-items:center; justify-content:center; padding:15px;';
+                overlay.innerHTML = window.__htmlModalTambahBayar(opsiAff, pilih, hariIni);
+                document.body.appendChild(overlay);
+
+                const tutup = () => overlay.remove();
+                document.getElementById('modal-tambah-bayar-tutup').onclick = tutup;
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) tutup(); });
+                window.__pasangSimpanTambahBayar(overlay, tutup);
+
+                // Bila tukar affiliate, pra-isi jumlah ikut baki.
+                const selAff = document.getElementById('tb-affiliate');
+                if (selAff) {
+                    selAff.addEventListener('change', () => {
+                        const opt = selAff.options[selAff.selectedIndex];
+                        const baki = Number(opt && opt.getAttribute('data-jumlah')) || 0;
+                        document.getElementById('tb-jumlah').value = (baki / 100).toFixed(2);
+                    });
+                }
+            };
+
+            if (cache.length) {
+                binaDanPasangModal(cache);
+                return;
+            }
+
+            // Cache kosong — tarik senarai affiliate terus dari API.
+            let overlay = document.getElementById('modal-tambah-bayar-overlay');
+            if (overlay) overlay.remove();
+            overlay = document.createElement('div');
+            overlay.id = 'modal-tambah-bayar-overlay';
+            overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; display:flex; align-items:center; justify-content:center; padding:15px;';
+            overlay.innerHTML = window.__htmlModalTambahBayar('<option value="">Memuatkan senarai affiliate…</option>', null, new Date().toISOString().slice(0, 10));
+            document.body.appendChild(overlay);
+            const tutupSementara = () => overlay.remove();
+            const btnTutupSementara = document.getElementById('modal-tambah-bayar-tutup');
+            if (btnTutupSementara) btnTutupSementara.onclick = tutupSementara;
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) tutupSementara(); });
+
+            const gunaApi = (apiObj) => {
+                if (!apiObj || typeof apiObj.ambilSenaraiAffiliate !== 'function') {
+                    overlay.remove();
+                    if (typeof window.showAppToast === 'function') {
+                        window.showAppToast('Gagal', 'Fungsi ini perlu versi aplikasi terkini. Sila muat semula halaman (Ctrl+F5).');
+                    } else {
+                        alert('Gagal memuatkan senarai affiliate. Sila cuba lagi.');
+                    }
+                    return;
+                }
+                apiObj.ambilSenaraiAffiliate().then((senarai) => {
+                    const senaraiBersih = (Array.isArray(senarai) ? senarai : []).map((a) => ({
+                        kod: a.kod,
+                        nama: a.nama,
+                        baki_sen: Number(a.baki_sen) || 0,
+                    }));
+                    overlay.remove();
+                    if (!senaraiBersih.length) {
+                        if (typeof window.showAppToast === 'function') {
+                            window.showAppToast('Gagal', 'Tiada affiliate berdaftar untuk direkodkan pembayaran.');
+                        } else {
+                            alert('Tiada affiliate berdaftar untuk direkodkan pembayaran.');
+                        }
+                        return;
+                    }
+                    cache = senaraiBersih;
+                    binaDanPasangModal(cache);
+                }).catch((err) => {
+                    overlay.remove();
+                    if (typeof window.showAppToast === 'function') {
+                        window.showAppToast('Gagal', 'Ralat rangkaian semasa memuatkan senarai affiliate. ' + (err && err.message ? err.message : ''));
+                    } else {
+                        alert('Ralat rangkaian semasa memuatkan senarai affiliate.');
+                    }
+                });
+            };
+            const api = window.__adminApi;
+            if (api && typeof api.ambilSenaraiAffiliate === 'function') gunaApi(api);
+            else if (typeof _tungguAdminApi === 'function') _tungguAdminApi().then(gunaApi);
+            else gunaApi(null);
+        };
+
+        // Butang global "Tambah Rekod Pembayaran".
+        const tambahBtn = document.getElementById('affiliate-bayar-tambah-btn');
+        if (tambahBtn) tambahBtn.onclick = () => bukaModalTambahBayar("");
+        window.__bukaModalTambahBayar = bukaModalTambahBayar;
+        window.__pasangSimpanTambahBayar = (overlay, tutup) => {
+            // Elak pemasangan berganda pada butang yang sama (guard: hanya sekali).
+            const btnSimpan = document.getElementById('modal-tambah-bayar-simpan');
+            if (!btnSimpan || btnSimpan.dataset.pasangBayar === '1') return;
+            btnSimpan.dataset.pasangBayar = '1';
+
+            const toastGagal = (mesej) => {
+                if (typeof window.showAppToast === 'function') {
+                    window.showAppToast('Gagal', mesej);
+                } else if (typeof window.showAppModalAlert === 'function') {
+                    window.showAppModalAlert('Gagal', mesej);
+                } else {
+                    alert(mesej);
+                }
+            };
+            const toastBerjaya = (tajuk, mesej) => {
+                if (typeof window.showAppToast === 'function') {
+                    window.showAppToast(tajuk, mesej);
+                } else if (typeof window.showAppModalAlert === 'function') {
+                    window.showAppModalAlert(tajuk, mesej);
+                } else {
+                    alert(mesej);
+                }
+            };
+
+            btnSimpan.onclick = () => {
+                const api = window.__adminApi;
+                if (!api || typeof api.rekodPembayaranAffiliate !== "function") {
+                    toastGagal("Fungsi ini perlu versi aplikasi terkini. Sila muat semula halaman (Ctrl+F5).");
+                    return;
+                }
+                const selAff = document.getElementById('tb-affiliate');
+                const kod = String(selAff.value || "").trim().toUpperCase();
+                const jumlahSen = Math.round((Number(document.getElementById('tb-jumlah').value) || 0) * 100);
+                if (!kod) { toastGagal("Sila pilih affiliate."); return; }
+                if (jumlahSen <= 0) { toastGagal("Jumlah bayaran mesti lebih daripada RM0."); return; }
+                const tarikhIsi = document.getElementById('tb-tarikh').value;
+                // Tukar tarikh (YYYY-MM-DD) ke ISO pada tengah hari waktu tempatan.
+                const tarikhIso = tarikhIsi ? new Date(tarikhIsi + "T12:00:00").toISOString() : "";
+
+                btnSimpan.disabled = true;
+                btnSimpan.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+                api.rekodPembayaranAffiliate({
+                    kod,
+                    jumlah_sen: jumlahSen,
+                    rujukan: document.getElementById('tb-rujukan').value,
+                    nota: document.getElementById('tb-nota').value,
+                    tarikh: tarikhIso,
+                    tanda_komisen: document.getElementById('tb-tanda').checked,
+                }).then((h) => {
+                    if (h && h.berjaya) {
+                        tutup();
+                        toastBerjaya("Berjaya", "Rekod pembayaran disimpan. " + (h.bil_ditanda || 0) + " baris komisen ditanda dibayar.");
+                        // SYNC: kedua-dua kad mesti dikemas kini (baki berubah).
+                        if (typeof window.renderAffiliateBayar === "function") window.renderAffiliateBayar();
+                        if (typeof window.renderAffiliateTable === "function") window.renderAffiliateTable();
+                    } else {
+                        btnSimpan.disabled = false;
+                        btnSimpan.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Rekod Pembayaran';
+                        toastGagal((h && h.mesej) || "Gagal menyimpan rekod pembayaran.");
+                    }
+                }).catch((err) => {
+                    btnSimpan.disabled = false;
+                    btnSimpan.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Rekod Pembayaran';
+                    toastGagal("Ralat rangkaian: tidak dapat menghubungi pelayan. " + (err && err.message ? err.message : ""));
+                });
+            };
+        };
+
+        // Templat HTML modal (dipisah supaya kekal mudah dibaca).
+        window.__htmlModalTambahBayar = (opsiAff, pilih, hariIni) => `
+            <div class="neo-box" style="background:#ffffff; background-image:radial-gradient(circle, rgba(91,33,182,0.14) 1.8px, transparent 1.8px); background-size:16px 16px; max-width:460px; width:100%; max-height:92vh; overflow-y:auto; box-sizing:border-box; padding:22px 20px; border-radius:20px; border:3px solid var(--color-dark,#10182f); box-shadow:0 6px 0 var(--color-dark,#10182f); position:relative;">
+                <button type="button" id="modal-tambah-bayar-tutup" class="neo-btn bg-red" style="position:absolute; top:12px; right:12px; width:34px; height:34px; min-width:34px; min-height:34px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:10px; cursor:pointer;" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+                <div class="neo-btn" style="background:#7c3aed; color:white; padding:7px 18px; font-weight:bold; font-size:1rem; border-radius:12px; border:2.5px solid var(--color-dark,#10182f); box-shadow:0 3px 0 var(--color-dark,#10182f); display:inline-flex; align-items:center; gap:8px; margin-bottom:16px; pointer-events:none;">
+                    <i class="fa-solid fa-money-bill-transfer"></i>
+                    <span style="font-family:'AtlantaRoundedBlack','AtlantaRounded',sans-serif;">Tambah Rekod Pembayaran</span>
+                </div>
+                <label style="display:block; font-weight:bold; font-size:0.82rem; color:#334155; margin-bottom:5px;">Affiliate</label>
+                <select id="tb-affiliate" style="width:100%; box-sizing:border-box; padding:9px 10px; border-radius:10px; border:2px solid #cbd5e1; margin-bottom:12px; font-size:0.9rem; background:white;">
+                    ${opsiAff || '<option value="">Tiada affiliate</option>'}
+                </select>
+                <label style="display:block; font-weight:bold; font-size:0.82rem; color:#334155; margin-bottom:5px;">Jumlah Dibayar (RM)</label>
+                <input id="tb-jumlah" type="number" min="0" step="0.01" value="${pilih ? ((Number(pilih.baki_sen) || 0) / 100).toFixed(2) : "0.00"}" style="width:100%; box-sizing:border-box; padding:9px 10px; border-radius:10px; border:2px solid #cbd5e1; margin-bottom:12px; font-size:0.9rem;" />
+                <label style="display:block; font-weight:bold; font-size:0.82rem; color:#334155; margin-bottom:5px;">Tarikh Bayar</label>
+                <input id="tb-tarikh" type="date" value="${hariIni}" style="width:100%; box-sizing:border-box; padding:9px 10px; border-radius:10px; border:2px solid #cbd5e1; margin-bottom:12px; font-size:0.9rem;" />
+                <label style="display:block; font-weight:bold; font-size:0.82rem; color:#334155; margin-bottom:5px;">Rujukan (pilihan)</label>
+                <input id="tb-rujukan" type="text" placeholder="cth. No. transaksi / resit" style="width:100%; box-sizing:border-box; padding:9px 10px; border-radius:10px; border:2px solid #cbd5e1; margin-bottom:12px; font-size:0.9rem;" />
+                <label style="display:block; font-weight:bold; font-size:0.82rem; color:#334155; margin-bottom:5px;">Nota (pilihan)</label>
+                <textarea id="tb-nota" rows="2" placeholder="cth. bayaran kitaran bulan ini" style="width:100%; box-sizing:border-box; padding:9px 10px; border-radius:10px; border:2px solid #cbd5e1; margin-bottom:12px; font-size:0.9rem; resize:vertical;"></textarea>
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:#334155; font-weight:bold; margin-bottom:16px; cursor:pointer;">
+                    <input id="tb-tanda" type="checkbox" checked style="width:16px; height:16px;" />
+                    Tanda komisen layak berkaitan sebagai “Sudah Dibayar”
+                </label>
+                <button type="button" id="modal-tambah-bayar-simpan" class="neo-btn" style="width:100%; padding:11px; font-weight:bold; font-size:0.95rem; border-radius:12px; border:2.5px solid var(--color-dark,#10182f); background:#059669; color:white; cursor:pointer;">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Rekod Pembayaran
+                </button>
+            </div>
+        `;
+
         // Pengendali "Tanda Dibayar" (delegasi, sekali sahaja).
         if (!window.__bayarHandlerSedia) {
             window.__bayarHandlerSedia = true;
             document.addEventListener("click", function (ev) {
                 const sasaran = ev.target;
+                // Butang "Tambah Rekod" pada baris ringkasan.
+                const btnTambah = sasaran && sasaran.closest ? sasaran.closest("[data-bayar-tambah]") : null;
+                if (btnTambah) {
+                    const kodT = btnTambah.getAttribute("data-bayar-tambah");
+                    if (typeof window.__bukaModalTambahBayar === "function") {
+                        window.__bukaModalTambahBayar(kodT);
+                    }
+                    return;
+                }
                 const btn = sasaran && sasaran.closest ? sasaran.closest("[data-bayar-kod]") : null;
                 if (!btn) return;
                 const kod = btn.getAttribute("data-bayar-kod");
-                if (!confirm("Tanda SEMUA komisen layak untuk " + kod + " sebagai sudah dibayar?")) return;
                 const api = window.__adminApi;
                 if (!api || typeof api.ambilLaporanBayaran !== "function" || typeof api.tandaKomisenDibayar !== "function") {
-                    alert("API affiliate belum sedia.");
+                    if (typeof window.showAppToast === "function") {
+                        window.showAppToast("Gagal", "Fungsi ini perlu versi aplikasi terkini. Sila muat semula halaman (Ctrl+F5).");
+                    } else {
+                        alert("API affiliate belum sedia.");
+                    }
                     return;
                 }
-                // Ambil senarai baris layak untuk kod ini, kemudian tanda semua.
-                api.ambilLaporanBayaran().then(function (hasil) {
-                    const layak = (hasil && Array.isArray(hasil.layak)) ? hasil.layak : [];
-                    const items = layak.filter(function (it) { return it.kod === kod; })
-                        .map(function (it) { return { kod: it.kod, id: it.id }; });
-                    if (!items.length) { alert("Tiada baris layak untuk " + kod + "."); return; }
-                    return api.tandaKomisenDibayar(items).then(function (h) {
-                        if (h && h.berjaya) {
-                            alert("Ditanda dibayar: " + (h.dibayar_bil || 0) + " baris, " + rmBayar(h.jumlah_sen) + ".");
-                            // SYNC: kemas kini KEDUA-DUA kad (BAKI/KOMISEN pada jadual
-                            // Affiliate mesti berubah serta-merta selepas pembayaran).
-                            if (typeof window.renderAffiliateBayar === "function") window.renderAffiliateBayar();
-                            if (typeof window.renderAffiliateTable === "function") window.renderAffiliateTable();
-                        } else {
-                            alert((h && h.mesej) || "Gagal menanda dibayar.");
-                        }
-                    });
-                }).catch(function () { alert("Ralat rangkaian."); });
+
+                const toastOk = (tajuk, mesej) => {
+                    if (typeof window.showAppToast === "function") window.showAppToast(tajuk, mesej);
+                    else if (typeof window.showAppModalAlert === "function") window.showAppModalAlert(tajuk, mesej);
+                    else alert(mesej);
+                };
+                const toastGagal = (mesej) => {
+                    if (typeof window.showAppToast === "function") window.showAppToast("Gagal", mesej);
+                    else if (typeof window.showAppModalAlert === "function") window.showAppModalAlert("Gagal", mesej);
+                    else alert(mesej);
+                };
+
+                const laksanaTanda = function () {
+                    // Ambil senarai baris layak untuk kod ini, kemudian tanda semua.
+                    api.ambilLaporanBayaran().then(function (hasil) {
+                        const layak = (hasil && Array.isArray(hasil.layak)) ? hasil.layak : [];
+                        const items = layak.filter(function (it) { return it.kod === kod; })
+                            .map(function (it) { return { kod: it.kod, id: it.id }; });
+                        if (!items.length) { toastGagal("Tiada baris layak untuk " + kod + "."); return; }
+                        return api.tandaKomisenDibayar(items).then(function (h) {
+                            if (h && h.berjaya) {
+                                toastOk("Berjaya", "Ditanda dibayar: " + (h.dibayar_bil || 0) + " baris, " + rmBayar(h.jumlah_sen) + ".");
+                                // SYNC: kemas kini KEDUA-DUA kad (BAKI/KOMISEN pada jadual
+                                // Affiliate mesti berubah serta-merta selepas pembayaran).
+                                if (typeof window.renderAffiliateBayar === "function") window.renderAffiliateBayar();
+                                if (typeof window.renderAffiliateTable === "function") window.renderAffiliateTable();
+                            } else {
+                                toastGagal((h && h.mesej) || "Gagal menanda dibayar.");
+                            }
+                        });
+                    }).catch(function (err) { toastGagal("Ralat rangkaian: " + (err && err.message ? err.message : "tidak dapat menghubungi pelayan.")); });
+                };
+
+                if (typeof window.showAppModalConfirm === "function") {
+                    window.showAppModalConfirm(
+                        "Tanda Dibayar",
+                        "<p style=\"margin:0; font-size:1rem;\">Tanda SEMUA komisen layak untuk <strong>" + kod + "</strong> sebagai sudah dibayar?</p>",
+                        laksanaTanda,
+                    );
+                } else if (confirm("Tanda SEMUA komisen layak untuk " + kod + " sebagai sudah dibayar?")) {
+                    laksanaTanda();
+                }
             });
         }
 
         muatLaporan();
 
+    }
+
+    // --- Pagination (10 baris/halaman) ---
+    // Dipanggil pada penghujung supaya semua baris telah dibina. `potongHalaman`
+    // tidak melakukan apa-apa jika tbody tiada (cawangan jenis lain).
+    try {
+        window.__paginasiJadual([
+            ['admin-table-body', 'admin-table'],
+            ['admin-tbody', 'admin-table'],
+            ['affiliate-table-body', 'affiliate-table'],
+            ['affiliate-bayar-table-body', 'affiliate-bayar-table'],
+            ['affiliate-bayar-sejarah-body', 'affiliate-bayar-sejarah'],
+        ]);
+    } catch (e) {
+        console.warn('[Pagination] renderAdminTable', e);
     }
 };
 
@@ -2149,6 +2670,16 @@ window.studentRecord = studentRecord;
             localStorage.removeItem('pdf_kelas');
         }
 
+        // Kod admin kini dipegang PELAYAN (ADMIN_CODE). Buang nilai localStorage
+        // basi (cth. "ADMIN#02") yang dulu digunakan untuk memaparkan/menyemak
+        // kod dalam modal Maklumat Admin — ia mengelirukan pengguna.
+        try {
+            const kodAdminLama = (localStorage.getItem('bunyiKataKodAdmin') || '').trim();
+            if (kodAdminLama && /[#]/.test(kodAdminLama)) {
+                localStorage.removeItem('bunyiKataKodAdmin');
+            }
+        } catch (e) { }
+
         // Padam modul ujian lama dummy sahaja tanpa memadam bintang atau rekod kemajuan murid sah
         const keysToRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
@@ -2980,6 +3511,15 @@ window.bolehAksesSkrin = function (screenId) {
                 namaAktif !== 'Tetamu';
             // Mod tetamu yang SAH (isGuestMode) dibenarkan walaupun tanpa nama.
             const tetamuSah = window.isGuestMode === true && namaAktif === 'Tetamu';
+            // Sekatan: affiliate yang DIGANTUNG tidak boleh masuk skrin pembelajaran
+            // (menu utama / peta / view-*) walau melalui navigasi terus.
+            const statusAff = (localStorage.getItem('bunyiKataAffiliateStatus') ||
+                (typeof window.bunyiKataAffiliateStatus !== 'undefined' ? window.bunyiKataAffiliateStatus : '') || '')
+                .toLowerCase().trim();
+            const affiliateDigantung = !!statusAff && statusAff !== 'aktif';
+            if (affiliateDigantung && (role === 'affiliate' || window.modAffiliateAktif || document.body.classList.contains('affiliate-mode'))) {
+                return false;
+            }
             return !!(
                 namaMuridSah ||
                 tetamuSah ||
@@ -3074,10 +3614,11 @@ function bersihkanSisaAdmin() {
     // 3. Kosongkan DOM jadual admin supaya tiada baris lama terpapar.
     const tbody = document.getElementById('admin-table-body') || document.getElementById('admin-tbody');
     if (tbody) tbody.innerHTML = '';
-    ['admin-jumlah-guru', 'admin-jumlah-ibubapa', 'admin-jumlah-murid', 'admin-jumlah-anak']
+    ['admin-jumlah-guru', 'admin-jumlah-ibubapa', 'admin-jumlah-murid', 'admin-jumlah-anak',
+        'admin-jumlah-feedback', 'admin-jumlah-jualan', 'admin-jumlah-keuntungan']
         .forEach(function (id) {
             const el = document.getElementById(id);
-            if (el) el.innerText = '0';
+            if (el) el.innerText = (id === 'admin-jumlah-jualan' || id === 'admin-jumlah-keuntungan') ? 'RM 0.00' : '0';
         });
 
     // 4. Keluarkan flag akses admin daripada localStorage.
@@ -3229,6 +3770,9 @@ function keluarModAffiliate() {
     localStorage.removeItem('muridAktif');
     localStorage.removeItem('bunyiKataCurrentMurid');
     localStorage.removeItem('bunyiKataStudentId');
+    // Bersihkan status affiliate supaya sesi seterusnya tidak terpakai status lama.
+    localStorage.removeItem('bunyiKataAffiliateStatus');
+    if (typeof window.bunyiKataAffiliateStatus !== 'undefined') window.bunyiKataAffiliateStatus = '';
     window.namaMuridAktif = '';
 
     document.body.classList.remove('affiliate-mode');
@@ -4118,6 +4662,18 @@ function bukaAksesGuru(mod) { /* obsolete */ }
 
 function bukaModalAksesGuru() {
     if (window.modAffiliateAktif || document.body.classList.contains('affiliate-mode') || (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim() === 'affiliate') {
+        // Sekatan: affiliate yang DIGANTUNG tidak dibenarkan masuk akses
+        // pembelajaran. Status disimpan oleh AffiliateDashboard.tsx.
+        const statusAff = (localStorage.getItem('bunyiKataAffiliateStatus') || (typeof window.bunyiKataAffiliateStatus !== 'undefined' ? window.bunyiKataAffiliateStatus : '') || '').toLowerCase().trim();
+        if (statusAff && statusAff !== 'aktif') {
+            if (typeof window.showAppModalAlert === 'function') {
+                window.showAppModalAlert(
+                    "Akaun Tidak Aktif",
+                    "Akaun affiliate anda telah DIGANTUNG oleh admin. Akses pembelajaran dinyahaktifkan buat sementara. Sila hubungi admin atau tekan \"Muat Semula\" pada papan pemuka affiliate jika akaun baru diaktifkan semula."
+                );
+            }
+            return;
+        }
         if (!window.namaMuridAktif || window.namaMuridAktif === 'Tetamu') {
             window.namaMuridAktif = localStorage.getItem('bunyiKataNamaAffiliate') || 'Affiliate';
         }
@@ -6951,10 +7507,28 @@ window.renderTeacherTable = function () {
     if (document.getElementById('admin-jumlah-ibubapa')) document.getElementById('admin-jumlah-ibubapa').innerText = currentParents.length;
     const totalAnak = currentParents.reduce((sum, p) => sum + (Number(p.anak) || 0), 0);
     if (document.getElementById('admin-jumlah-anak')) document.getElementById('admin-jumlah-anak').innerText = totalAnak;
+
+    // Kad "Maklum Balas": kiraan sebenar datang daripada Firebase (rujuk
+    // fetchAdminDataFromFirebase / getFeedbacksFromFirebase). JANGAN tulis
+    // semula daripada localStorage 'bunyi_kata_feedbacks' — kunci itu telah
+    // dibuang oleh purgeLegacyMockData, jadi ia sentiasa 0 dan menimpa
+    // kiraan sebenar (inilah punca kad terpapar 0 sehingga jadual ditukar).
+    // Di sini kita hanya SEGARKAN semula daripada Firebase jika boleh.
     try {
-        const rawFb = localStorage.getItem('bunyi_kata_feedbacks');
-        const fbList = rawFb ? JSON.parse(rawFb) : [];
-        if (document.getElementById('admin-jumlah-feedback')) document.getElementById('admin-jumlah-feedback').innerText = fbList.length;
+        if (typeof window.getFeedbacksFromFirebase === 'function') {
+            Promise.resolve(window.getFeedbacksFromFirebase())
+                .then(function (list) {
+                    const el = document.getElementById('admin-jumlah-feedback');
+                    if (el && Array.isArray(list)) el.innerText = list.length;
+                })
+                .catch(function () { /* kekalkan nilai sedia ada */ });
+        } else if (document.getElementById('admin-jumlah-feedback')) {
+            // Sandaran terakhir: bacaan profil yang telah dimuatkan.
+            if (!document.getElementById('admin-jumlah-feedback').innerText ||
+                document.getElementById('admin-jumlah-feedback').innerText === '0') {
+                // biarkan; nilai sebenar akan ditulis oleh fetchAdminDataFromFirebase
+            }
+        }
     } catch (e) { }
 
     window.renderAdminTable(document.getElementById('admin-table-selector') ? document.getElementById('admin-table-selector').value : 'guru');
@@ -7121,8 +7695,12 @@ window.tukarCarta = function (jenis) {
 window.RTDB_LEADERBOARD_CACHE = window.RTDB_LEADERBOARD_CACHE || {
     classCache: {}, // { [cacheKey]: { data: [...], timestamp: number } }
     globalCache: null, // { data: [...], timestamp: number }
-    TTL: 3 * 60 * 1000, // 3 minit TTL
-    GLOBAL_TTL: 5 * 60 * 1000 // 5 minit TTL untuk Global Top 10
+    // P5a: TTL dipendekkan (1 min kelas / 2 min global) supaya kedudukan murid
+    // lebih segar dan tidak nampak kejap ada kejap tiada. Cache masih elak
+    // spam rangkaian; cache juga dibersihkan pada event kemaskini-profil /
+    // bintang-dikemaskini.
+    TTL: 60 * 1000, // 1 minit TTL
+    GLOBAL_TTL: 2 * 60 * 1000 // 2 minit TTL untuk Global Top 10
 };
 
 window.invalidateLeaderboardCache = function () {
@@ -7462,6 +8040,17 @@ function checkIsTrial() {
     // sesi mod yang aktif. PENTING: peranan 'admin' di dalam localStorage
     // TIDAK dikira — sisa sesi admin lama mesti tidak membuka akses Pro.
     const roleSemasa = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
+
+    // Mod Affiliate = akses penuh (BUKAN trial). Selaras dengan isEffectiveTrial()
+    // dan renderLatihanLocks() yang mengendalikan affiliate sebagai Pro.
+    // Tanpa cawangan ini, bukaPeta() / pilihPeta() / bukaModalPilihPeta() akan
+    // memaparkan modal "Pakej Pro" kepada affiliate.
+    if (window.modAffiliateAktif || roleSemasa === 'affiliate' ||
+        (typeof document !== 'undefined' && document.body && document.body.classList.contains('affiliate-mode'))) {
+        window.isGuestMode = false;
+        return false;
+    }
+
     const adaSesiSah = roleSemasa === 'guru' || roleSemasa === 'ibubapa' || roleSemasa === 'murid' ||
         window.modGuruAktif || window.modIbuBapaAktif || window.modAdminAktif || window.isAdminMode ||
         window.adminClaimDisahkan === true;
@@ -7809,12 +8398,43 @@ function _rujukanProfilAdmin(uid, type) {
 
 function _emailPenggunaAdmin(uid, type) {
     try {
+        if (type === 'affiliate') {
+            const affs = (window.__senaraiAffiliateCache && Array.isArray(window.__senaraiAffiliateCache))
+                ? window.__senaraiAffiliateCache
+                : [];
+            const recAff = affs.find(function (item) {
+                return String(item.kod) === String(uid) || String(item.uid) === String(uid) || String(item.email) === String(uid);
+            });
+            if (recAff && recAff.email) return String(recAff.email).trim();
+            return '';
+        }
         const list = type === 'ibubapa' ? getAdminParentsList() : getAdminTeachersList();
         const rec = list.find(function (item) { return String(item.id) === String(uid); });
         if (rec && rec.email) return String(rec.email).trim();
     } catch (e) { }
     return '';
 }
+
+/**
+ * Set semula kata laluan AFFILIATE dan paparkan kata laluan baharu.
+ *
+ * Affiliate disimpan dalam nod `affiliates/{kod}` dengan `uid` + `email`.
+ * Pelayan /api/admin/reset-password menerima `uid` (uid Auth sebenar atau
+ * emel sebagai sandaran) + `email` untuk mencari akaun Auth yang betul.
+ */
+window.resetKataLaluanAffiliatePopup = async function (kod, email, uid) {
+    const rujukan = uid || email || kod;
+    if (!rujukan) { window.showAppToast('Ralat', 'Rujukan affiliate tidak dijumpai.'); return; }
+    const api = await _tungguAdminApi();
+    if (!api || typeof api.resetKataLaluanAdmin !== 'function') {
+        window.showAppToast('Ralat', 'Sesi admin tidak aktif. Sila muat semula halaman dan masuk semula.');
+        return;
+    }
+
+    // Hantar emel sebagai sandaran supaya pelayan boleh cari akaun Auth
+    // walaupun `uid` yang dihantar bukan UID Auth sebenar.
+    _bukaModalResetKataLaluan(rujukan, 'affiliate', email || '');
+};
 
 /** Set semula kata laluan pengguna dan paparkan kata laluan baharu. */
 window.resetKataLaluanAdminPopup = async function (uid, type) {
@@ -7836,7 +8456,7 @@ window.resetKataLaluanAdminPopup = async function (uid, type) {
  * sendiri, jadi admin perlu boleh menetapkan kata laluan baharu bagi pihak
  * pengguna.
  */
-function _bukaModalResetKataLaluan(uid, type) {
+function _bukaModalResetKataLaluan(uid, type, emailOverride) {
     let modal = document.getElementById('app-admin-reset-pass-overlay');
     if (!modal) {
         modal = document.createElement('div');
@@ -7907,7 +8527,7 @@ function _bukaModalResetKataLaluan(uid, type) {
             // Kosong -> pelayan menjana kata laluan rawak.
             // Hantar emel juga supaya pelayan boleh cari profil sekiranya `uid`
             // sebenarnya ialah kekunci profil (cth. emel disanitasi) dan bukan UID.
-            const hasil = await api.resetKataLaluanAdmin(uid, pass || '', _emailPenggunaAdmin(uid, type));
+            const hasil = await api.resetKataLaluanAdmin(uid, pass || '', emailOverride || _emailPenggunaAdmin(uid, type));
             if (!hasil || !hasil.berjaya) {
                 okBtn.disabled = false;
                 okBtn.innerHTML = asal;
@@ -8006,7 +8626,11 @@ window.panjangTempohAdminPopup = window.lanjutanTempohAdminPopup;
  * Tempoh baharu SELALU ditambah pada tarikh tamat sedia ada (lihat
  * /api/admin/extend-expiry), jadi baki yang belum habis tidak dihanguskan.
  */
+// P5b: cache pakej dengan TTL pendek (bukan sepanjang sesi) supaya harga /
+// pelan yang diubah admin kelihatan tanpa perlu refresh penuh.
 var _cachePakejKlien = null;
+var _cachePakejKlienTs = 0;
+var _CACHE_PAKEJ_TTL_MS = 2 * 60 * 1000; // 2 minit
 var _warnaPakej = [
     { warna: '#168f81', gelap: '#0b5c53' },
     { warna: '#ea580c', gelap: '#9a3412' },
@@ -8023,19 +8647,25 @@ var _PAKEJ_LALAI_KLIEN = [
  * Jika gagal, guna senarai lalai supaya modal tetap berfungsi.
  */
 function _ambilPakejKlien() {
-    if (_cachePakejKlien) return Promise.resolve(_cachePakejKlien);
+    if (_cachePakejKlien && (Date.now() - _cachePakejKlienTs) < _CACHE_PAKEJ_TTL_MS) {
+        return Promise.resolve(_cachePakejKlien);
+    }
     return fetch('/api/plans')
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (d) {
             if (d && d.success && Array.isArray(d.plans) && d.plans.length) {
                 _cachePakejKlien = d.plans;
-            } else {
+            } else if (!_cachePakejKlien) {
+                // P5b: hanya guna senarai lalai jika belum ada cache sah.
                 _cachePakejKlien = _PAKEJ_LALAI_KLIEN;
             }
+            _cachePakejKlienTs = Date.now();
             return _cachePakejKlien;
         })
         .catch(function () {
-            _cachePakejKlien = _PAKEJ_LALAI_KLIEN;
+            // P5b: jika gagal DAN sudah ada cache lama, kekalkan yg lama.
+            if (!_cachePakejKlien) _cachePakejKlien = _PAKEJ_LALAI_KLIEN;
+            _cachePakejKlienTs = Date.now();
             return _cachePakejKlien;
         });
 }
@@ -8222,13 +8852,14 @@ window.padamGuruAdmin = async function (id) {
                 }
             } catch (e) { }
 
-            let curTeachers = getAdminTeachersList().filter(item => item.id !== id);
-            localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(curTeachers));
+            // P3: JANGAN tulis senarai yang ditapis ke localStorage secara
+            // optimistik. Jika muat semula pelayan gagal, snapshot salah ini
+            // akan kekal dan guru kelihatan hilang. Muat semula dari Firebase
+            // dan biarkan renderAdminUrus/renderAdminTable guna data sebenar.
             if (typeof window.fetchAdminDataFromFirebase === 'function') {
                 await window.fetchAdminDataFromFirebase();
-            } else if (typeof window.fetchAdminDataFromFirebase === 'function') {
-                await window.fetchAdminDataFromFirebase();
             }
+            const curTeachers = getAdminTeachersList();
             if (typeof window.renderAdminUrus === 'function') window.renderAdminUrus('guru');
             if (typeof window.renderAdminTable === 'function') window.renderAdminTable('guru');
             if (document.getElementById('admin-jumlah-guru')) {
@@ -8285,13 +8916,11 @@ window.padamParentAdmin = async function (id) {
                 }
             } catch (e) { }
 
-            let curParents = getAdminParentsList().filter(item => item.id !== id);
-            localStorage.setItem('bunyiKataAdminParents', JSON.stringify(curParents));
+            // P3: sama seperti padamGuruAdmin - jangan tulis snapshot optimistik.
             if (typeof window.fetchAdminDataFromFirebase === 'function') {
                 await window.fetchAdminDataFromFirebase();
-            } else if (typeof window.fetchAdminDataFromFirebase === 'function') {
-                await window.fetchAdminDataFromFirebase();
             }
+            const curParents = getAdminParentsList();
             if (typeof window.renderAdminUrus === 'function') window.renderAdminUrus('ibubapa');
             if (typeof window.renderAdminTable === 'function') window.renderAdminTable('ibubapa');
             if (document.getElementById('admin-jumlah-ibubapa')) {
@@ -8458,7 +9087,7 @@ window.renderSejarahLangganan = function (peranan) {
         html += `
             <tr style="background:${rowBg}; border-bottom:1px solid #e2e8f0; transition:background 0.15s ease;">
                 <td class="${cellClass}" style="padding:9px 8px; text-align:center; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${idx + 1}</td>
-                <td class="${cellClass}" style="padding:9px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${r.nama || '-'}</td>
+                <td class="${cellClass} sel-nama" style="padding:9px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${r.nama || '-'}</td>
                 <td class="${cellClass}" style="padding:9px 12px; color:#475569; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap; text-align:center;">${window.formatTarikhLangganan(r.tarikhLangganan)}</td>
                 <td class="${cellClass}" style="padding:9px 12px; color:${warnaTamat}; font-weight:bold; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap; text-align:center;">${window.formatTarikhLangganan(r.tarikhTamat)}</td>
                 <td class="${cellClass}" style="padding:9px 12px; text-align:center; font-size:0.85rem; white-space:nowrap;">
@@ -8469,6 +9098,13 @@ window.renderSejarahLangganan = function (peranan) {
     });
 
     tbody.innerHTML = html;
+
+    // Pagination sejarah langganan (10 baris/halaman).
+    try {
+        window.potongHalaman(`${peranan}-sejarah-langganan-body`, `sejarah-${peranan}`);
+    } catch (e) {
+        console.warn('[Pagination] renderSejarahLangganan', e);
+    }
 };
 
 window.muatSejarahLangganan = async function (peranan) {
@@ -8533,11 +9169,12 @@ window.renderAdminUrus = function (tab) {
                 rowsHtml += `
                     <tr style="background:${rowBg}; border-bottom:1px solid #e2e8f0; transition:background 0.15s ease;">
                         <td style="padding:10px 8px; text-align:center; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${idx + 1}</td>
-                        <td style="padding:10px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${t.nama}</td>
-                        <td style="padding:10px 12px; color:#475569; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${t.sekolah}</td>
+                        <td class="sel-nama" style="padding:10px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${t.nama}</td>
+                        <td class="sel-sekolah" style="padding:10px 12px; color:#475569; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${t.sekolah}</td>
                         <td style="padding:10px 10px; text-align:center; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${t.murid || 0}</td>
                         <td style="padding:8px 8px; text-align:center; border-right:1px solid #e2e8f0; white-space:nowrap;">
                             <select class="neo-btn filter-select" style="padding: 4px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 8px; border: 1.5px solid #ea580c; background: #fff; cursor: pointer; white-space: nowrap; width: auto; min-width: 145px; display: inline-block;" onchange="window.tukarLanggananPengguna('${t.id}', 'guru', this.value)">
+                                <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
                                 <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' ? 'selected' : ''}>1 Bulan (Pro)</option>
                                 <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' ? 'selected' : ''}>3 Bulan (Pro)</option>
                                 <option value="1 Tahun (Pro)" ${langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
@@ -8600,7 +9237,7 @@ window.renderAdminUrus = function (tab) {
                                     <th style="padding:10px 10px; text-align:center; width:110px;">TINDAKAN</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="admin-urus-guru-tbody">
                                 ${rowsHtml}
                             </tbody>
                         </table>
@@ -8627,10 +9264,11 @@ window.renderAdminUrus = function (tab) {
                 rowsHtml += `
                     <tr style="background:${rowBg}; border-bottom:1px solid #e2e8f0; transition:background 0.15s ease;">
                         <td style="padding:10px 8px; text-align:center; font-weight:600; color:#64748b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${idx + 1}</td>
-                        <td style="padding:10px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${p.nama}</td>
+                        <td class="sel-nama" style="padding:10px 12px; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem; white-space:nowrap;">${p.nama}</td>
                         <td style="padding:10px 10px; text-align:center; font-weight:bold; color:#1e293b; border-right:1px solid #e2e8f0; font-size:0.85rem;">${p.anak || 0}</td>
                         <td style="padding:8px 8px; text-align:center; border-right:1px solid #e2e8f0; white-space:nowrap;">
                             <select class="neo-btn filter-select" style="padding: 4px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 8px; border: 1.5px solid #0284c7; background: #fff; cursor: pointer; white-space: nowrap; width: auto; min-width: 145px; display: inline-block;" onchange="window.tukarLanggananPengguna('${p.id}', 'ibubapa', this.value)">
+                                <option value="Percuma" ${langganan === 'Percuma' ? 'selected' : ''}>Percuma</option>
                                 <option value="1 Bulan (Pro)" ${langganan === '1 Bulan (Pro)' ? 'selected' : ''}>1 Bulan (Pro)</option>
                                 <option value="3 Bulan (Pro)" ${langganan === '3 Bulan (Pro)' ? 'selected' : ''}>3 Bulan (Pro)</option>
                                 <option value="1 Tahun (Pro)" ${langganan === '1 Tahun (Pro)' ? 'selected' : ''}>1 Tahun (Pro)</option>
@@ -8692,7 +9330,7 @@ window.renderAdminUrus = function (tab) {
                                     <th style="padding:10px 10px; text-align:center; width:110px;">TINDAKAN</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="admin-urus-ibubapa-tbody">
                                 ${rowsHtml}
                             </tbody>
                         </table>
@@ -8745,17 +9383,45 @@ window.renderAdminUrus = function (tab) {
                         <span style="font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">Laporan Pembayaran</span>
                     </div>
                 </div>
-                <!-- Hint leret bagi peranti mudah alih -->
+
+                <!-- Ringkasan per-affiliate (lapisan atas). -->
+                <div class="admin-subcard-label" style="font-weight:bold; color:#5b21b6; font-size:0.85rem; margin:2px 0 8px; display:flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-users"></i> Ringkasan Layak Bayar
+                </div>
                 <div class="mobile-table-hint" style="display:none; font-size:0.75rem; color:#64748b; font-weight:bold; margin-bottom:8px; align-items:center; gap:6px;">
                     <i class="fa-solid fa-arrows-left-right" style="color:#5b21b6;"></i>
                     <span>Leret jadual ke kiri / kanan untuk lihat maklumat & tindakan</span>
                 </div>
                 <div style="width:100%; max-width:100%; min-width:0; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; border:2px solid var(--color-dark, #10182f); box-sizing:border-box;">
-                    <table style="width:100%; min-width:780px; border-collapse:collapse; background:white; font-size:0.85rem;">
+                    <table style="width:100%; min-width:900px; border-collapse:collapse; background:white; font-size:0.85rem;">
                         <thead id="affiliate-bayar-table-head" style="background:linear-gradient(135deg, #5b21b6 0%, #4c1d95 100%); color:white;">
                             <tr id="affiliate-bayar-table-head-row"></tr>
                         </thead>
                         <tbody id="affiliate-bayar-table-body">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Sejarah pembayaran (lapisan bawah). -->
+                <div style="font-weight:bold; color:#5b21b6; font-size:0.85rem; margin:22px 0 8px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Sejarah Pembayaran
+                    </span>
+                    <button type="button" id="affiliate-bayar-tambah-btn" class="neo-btn" style="padding:6px 12px; font-size:0.78rem; font-weight:bold; border-radius:9px; border:2px solid var(--color-dark,#10182f); background:#7c3aed; color:white; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-plus"></i> Tambah Rekod Pembayaran
+                    </button>
+                </div>
+                <div class="mobile-table-hint" style="display:none; font-size:0.75rem; color:#64748b; font-weight:bold; margin-bottom:8px; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-arrows-left-right" style="color:#5b21b6;"></i>
+                    <span>Leret jadual ke kiri / kanan untuk lihat sejarah pembayaran</span>
+                </div>
+                <div style="width:100%; max-width:100%; min-width:0; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; border:2px solid var(--color-dark, #10182f); box-sizing:border-box;">
+                    <table style="width:100%; min-width:900px; border-collapse:collapse; background:white; font-size:0.85rem;">
+                        <thead id="affiliate-bayar-sejarah-head" style="background:linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color:white;">
+                            <tr id="affiliate-bayar-sejarah-head-row"></tr>
+                        </thead>
+                        <tbody id="affiliate-bayar-sejarah-body">
                             <!-- Rendered by JS -->
                         </tbody>
                     </table>
@@ -8769,6 +9435,16 @@ window.renderAdminUrus = function (tab) {
         if (typeof window.renderAffiliateBayar === 'function') {
             window.renderAffiliateBayar();
         }
+    }
+
+    // Pagination jadual tab Urus (10 baris/halaman).
+    try {
+        window.__paginasiJadual([
+            ['admin-urus-guru-tbody', 'urus-guru'],
+            ['admin-urus-ibubapa-tbody', 'urus-ibubapa'],
+        ]);
+    } catch (e) {
+        console.warn('[Pagination] renderAdminUrus', e);
     }
 };
 
@@ -8925,6 +9601,10 @@ window.handleMisiCardClick = function (idx) {
         const modul = window.currentMisiModules[idx];
         if (modul.isLocked) {
             alert('Tahap Terkunci!');
+        } else if (window.isPercumaMode && window.isPercumaMode() &&
+                   ['pengenalan_nombor', 'konsep_tambah', 'konsep_penolakan'].indexOf(modul.id) !== -1) {
+            // Kad nombor (Asas / Tambah / Tolak) dikunci untuk pengguna Percuma.
+            if (typeof window.kunciPro === 'function') window.kunciPro();
         } else {
             window.klikModul(modul.id, modul.displayTitle);
         }
@@ -25836,6 +26516,35 @@ const PETA_INFO = {
         badgeId: "badge_peta_4",
         badgeTitle: "Naib Raja Bacaan",
         image: "/images/lencana/lencana-naib-raja-bacaan.png"
+    }
+};
+
+/**
+ * Adakah pengguna semasa dalam mod Percuma / percubaan (belum Pro)?
+ * Digunakan untuk get Pro-lock pada ciri AR & kad nombor.
+ */
+window.isPercumaMode = function () {
+    if (typeof window.isEffectiveTrial === 'function') {
+        return !!window.isEffectiveTrial();
+    }
+    if (typeof checkIsTrial === 'function') {
+        return !!checkIsTrial();
+    }
+    return window.userAccessLevel === 'trial' ||
+        localStorage.getItem('bunyiKataAccessLevel') === 'trial';
+};
+
+/**
+ * Tunjuk popup pakej Pro (peranan mengikut pengguna semasa). Guna apabila
+ * pengguna Percuma cuba akses ciri terkunci seperti AR / kad nombor.
+ */
+window.kunciPro = function (roleOverride) {
+    if (typeof window.playBubble === 'function') window.playBubble();
+    const role = roleOverride || localStorage.getItem('bunyiKataUserRole') || 'guru';
+    if (typeof window.openPakejProModal === 'function') {
+        window.openPakejProModal(role === 'ibubapa' ? 'ibubapa' : 'guru');
+    } else if (typeof window.showAppModalAlert === 'function') {
+        window.showAppModalAlert('Ciri PRO', '<p style="text-align:center;font-weight:bold;">Ciri ini memerlukan Pelan PRO. Sila langgan untuk membuka.</p>');
     }
 };
 

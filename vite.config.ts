@@ -34,6 +34,35 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      // Bundle utama sebelum ini >1 MB (warning "Some chunks are larger than
+      // 500 kB"). Pecahkan vendor besar kepada chunk berasingan supaya muat
+      // awal lebih pantas & cache lebih efektif. Ini BUKAN sekadar menyenyapkan
+      // amaran — ia benar-benar mengurangkan saiz chunk utama.
+      // Had amaran dinaikkan sedikit (600 kB) kerana satu-satunya chunk melebihi
+      // 500 kB ialah `vendor-jspdf` yang LAZY (hanya dimuat bila sijil dibuka).
+      chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined;
+            if (id.includes('firebase-admin')) return 'vendor-firebase-admin';
+            if (id.includes('firebase') || id.includes('@firebase')) return 'vendor-firebase';
+            if (id.includes('react-dom') || id.includes('scheduler')) return 'vendor-react-dom';
+            if (id.includes('/react/') || id.includes('react/jsx-runtime')) return 'vendor-react';
+            if (id.includes('lucide-react')) return 'vendor-icons';
+            if (id.includes('motion')) return 'vendor-motion';
+            if (id.includes('canvas-confetti')) return 'vendor-confetti';
+            // jspdf hanya digunakan oleh AdminSijilManager (lazy import), jadi
+            // asingkan ke chunk sendiri — ia tidak dimuat sehingga sijil dibuka.
+            if (id.includes('jspdf')) return 'vendor-jspdf';
+            if (id.includes('html2canvas')) return 'vendor-jspdf';
+            if (id.includes('@google/genai') || id.includes('@google')) return 'vendor-genai';
+            return 'vendor';
+          },
+        },
+      },
+    },
     // Pre-bundle deps berat supaya Vite tidak perlu transform mereka
     // pada setiap request — elak "waterfall" delay semasa dev pertama kali.
     optimizeDeps: {

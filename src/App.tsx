@@ -744,9 +744,10 @@ export default function App() {
           localStorage.getItem("bunyiKataSekolahAvatar") ||
           "https://api.dicebear.com/7.x/shapes/svg?seed=school&backgroundColor=ffffff",
         );
-        setEditKodTemp(
-          (localStorage.getItem("bunyiKataKodAdmin") || "").toUpperCase(),
-        );
+        // Kod admin dipegang pelayan (ADMIN_CODE); jangan prefill dari nilai
+        // localStorage basi (cth. "ADMIN#02") yang mengelirukan.
+        localStorage.removeItem("bunyiKataKodAdmin");
+        setEditKodTemp("");
         setIsEditModalOpen(true);
       } else if (mode === "guru") {
         setEditModalMode("guru");
@@ -2592,17 +2593,13 @@ export default function App() {
           <i className="fa-solid fa-unlock-keyhole"></i> <span>Akses</span>
         </button>
         <button
-          className="neo-btn bg-white nav-btn-kod"
+          className="neo-btn bg-white nav-btn-laporan"
           onClick={() => {
-            paparSkrin("affiliate-dashboard");
-            setTimeout(() => {
-              const t = document.getElementById("affiliate-kod");
-              if (t) t.scrollIntoView({ behavior: "smooth", block: "start" });
-            }, 80);
+            paparSkrin("affiliate-laporan-screen");
           }}
-          title="Kod"
+          title="Laporan"
         >
-          <i className="fa-solid fa-key"></i> <span>Kod</span>
+          <i className="fa-solid fa-file-invoice-dollar"></i> <span>Laporan</span>
         </button>
         <button
           className="neo-btn bg-white nav-btn-keluar mobile-nav-only"

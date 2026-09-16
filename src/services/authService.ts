@@ -65,7 +65,28 @@ export async function loginWithEmail(
     // profil guru/ibu bapa yang salah untuk affiliate.
     try {
       const tokenHasil = await cred.user.getIdTokenResult();
-      const kodAff = String((tokenHasil.claims as any)?.affiliate_kod || '').trim().toUpperCase();
+      let kodAff = String((tokenHasil.claims as any)?.affiliate_kod || '').trim().toUpperCase();
+
+      // PEMBETULAN "tidak aktif" salah: akaun affiliate lama mungkin tiada
+      // claim `affiliate_kod` (dicipta sebelum claim ditetapkan, atau claim
+      // hilang). Cari rekod affiliate melalui EMAIL supaya auth klien selari
+      // dengan kebenaran pelayan (requireAffiliate) — jika tidak, pengguna
+      // nampak "tidak aktif" walaupun admin melihat status "Aktif".
+      if (!kodAff) {
+        try {
+          const qAff = query(ref(db, 'affiliates'), orderByChild('email'), equalTo(cleanEmail));
+          const sq = await get(qAff);
+          if (sq.exists()) {
+            sq.forEach((c) => {
+              if (!kodAff) kodAff = String(c.key || '').trim().toUpperCase();
+              return true;
+            });
+          }
+        } catch (e) {
+          console.warn('[Firebase RTDB] Carian affiliate ikut email gagal:', e);
+        }
+      }
+
       if (kodAff) {
         let rekodAff: any = null;
         try {
@@ -74,6 +95,23 @@ export async function loginWithEmail(
         } catch (e) {
           console.warn('[Firebase RTDB] Gagal membaca rekod affiliate:', e);
         }
+
+        // Tegakkan status SEBENAR di klien (selari dengan requireAffiliate).
+        // Elak pengguna masuk ke dashboard yang hanya akan memaparkan banner
+        // "tidak aktif" yang mengelirukan.
+        const statusAff = String(rekodAff?.status || 'aktif').trim().toLowerCase();
+        if (rekodAff && statusAff !== 'aktif') {
+          try {
+            await signOut(auth);
+          } catch (e) {
+            console.warn('[Firebase Auth] Gagal sign out selepas tolak affiliate:', e);
+          }
+          return {
+            success: false,
+            message: 'Akaun affiliate anda telah digantung oleh admin. Sila hubungi admin.',
+          };
+        }
+
         const profilAffiliate: UserProfile = {
           id: cred.user.uid,
           email: cleanEmail,
@@ -81,6 +119,16 @@ export async function loginWithEmail(
           peranan: 'affiliate',
           no_telefon: rekodAff?.whatsapp,
         };
+
+        // Simpan kod affiliate untuk sesi ini (header x-affiliate-kod ketika
+        // claim token belum dikemas kini).
+        try {
+          localStorage.setItem('bunyiKataAffiliateKod', kodAff);
+          localStorage.setItem('bunyiKataAffiliateEmail', cleanEmail);
+        } catch (e) {
+          console.warn('[Affiliate] Gagal simpan kod affiliate dalam localStorage:', e);
+        }
+
         return {
           success: true,
           message: 'Log masuk berjaya!',

@@ -5,7 +5,7 @@
 // (cth import Vite ke App.tsx) jatuh ke "cache-first" kerana req.destination
 // kosong, menyebabkan versi App.tsx lama terpakai selepas pembetulan.
 // Sekarang /src/* sentiasa network-first.
-const CACHE_NAME = 'bunyi-kata-v6';
+const CACHE_NAME = 'bunyi-kata-v7';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -52,6 +52,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   if (url.origin !== self.location.origin) return;
+
+  // PEMBETULAN v7: Endpoint API (/api/...) TIDAK BOLEH dicache.
+  // Respons seperti /api/affiliate/me, /api/affiliate/referrals dan
+  // /api/admin/affiliate/list mengandungi data status & komisen yang mesti
+  // sentiasa segar. Cache-first sebelum ini menyebabkan:
+  //   - Affiliate yang baru diaktifkan admin masih dipaparkan "digantung".
+  //   - Affiliate baru tidak muncul dalam jadual admin (data basi per-pelayar).
+  // Biarkan pelayar menguruskan permintaan API sepenuhnya (rangkaian).
+  if (url.pathname.startsWith('/api/')) return;
 
   const isDoc = req.mode === 'navigate' || req.destination === 'document';
   const isScript = req.destination === 'script' || req.destination === 'style';

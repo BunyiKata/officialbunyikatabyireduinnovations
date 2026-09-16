@@ -1930,7 +1930,9 @@ export default function LandingScreen({
           <div className="landing-footer-inner">
             <div className="landing-footer-brand">
               <img src={LOGO_GLITCH} alt="Bunyi Kata" className="landing-footer-logo" />
-              <p>Belajar membaca jadi seronok. Dibina untuk anak Malaysia.</p>
+              <p>
+                Belajar membaca jadi seronok. <span className="landing-footer-brand-line">Dibina untuk anak Malaysia.</span>
+              </p>
             </div>
             <div className="landing-footer-col">
               <h4>Produk</h4>

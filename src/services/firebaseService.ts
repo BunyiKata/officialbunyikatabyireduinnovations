@@ -443,14 +443,22 @@ export async function getTeacherClasses(guruIdOrEmail: string): Promise<ClassRec
     const snap = await get(q);
     const classes = snapToArray<ClassRecord>(snap);
 
+    // P4a: fallback scan hanya bila query berindeks tak pulangkan apa-apa
+    // (biasanya indexOn belum diset). Kita KECILKAN risiko kebocoran dengan
+    // menapis ikut identiti guru ini sahaja dan de-dup ikut id supaya tidak
+    // ada kelas berganda yang menjadikan senarai berkelip.
     if (classes.length === 0) {
       try {
         const snapAll = await get(ref(db, 'classes'));
         if (snapAll.exists()) {
+          const seen = new Set(classes.map(c => c.id));
           snapAll.forEach(child => {
             const val = child.val();
-            if (val && (val.guru_id === guruId || val.guru_id === guruIdOrEmail || (val.guru_email && val.guru_email.toLowerCase() === guruIdOrEmail.toLowerCase()))) {
-              classes.push({ id: child.key!, ...val });
+            if (!val) return;
+            const isOwner = val.guru_id === guruId || val.guru_id === guruIdOrEmail || (val.guru_email && val.guru_email.toLowerCase() === guruIdOrEmail.toLowerCase());
+            if (isOwner && child.key && !seen.has(child.key)) {
+              seen.add(child.key);
+              classes.push({ id: child.key, ...val });
             }
           });
         }
@@ -1854,21 +1862,43 @@ export async function getRegisteredParents(): Promise<any[]> {
  */
 export async function fetchAdminDataFromFirebase(): Promise<{ teachers: any[]; parents: any[] }> {
   try {
-    const [profilesSnap, classesSnap, familiesSnap, studentsSnap, feedbacksSnap] = await Promise.all([
+    // P1: allSettled ganti all - satu nod gagal tidak lagi membuang semua.
+    const [profilesRes, classesRes, familiesRes, studentsRes, feedbacksRes, referralsRes, ordersRes] = await Promise.allSettled([
       get(ref(db, 'profiles')),
       get(ref(db, 'classes')),
       get(ref(db, 'families')),
       get(ref(db, 'students')),
       get(ref(db, 'feedbacks')),
+      get(ref(db, 'referrals')),
+      get(ref(db, 'orders')),
     ]);
+
+    if (profilesRes.status !== 'fulfilled') {
+      console.warn('[Firebase RTDB] fetchAdminDataFromFirebase: bacaan profiles gagal, kekalkan cache semasa.');
+      return { teachers: [], parents: [] };
+    }
+
+    const settle = (res: any, label: string): any => {
+      if (res.status === 'fulfilled') return res.value;
+      console.warn('[Firebase RTDB] fetchAdminDataFromFirebase: bacaan', label, 'gagal, guna nilai sifar.');
+      return null;
+    };
+
+    const profilesSnap = profilesRes.value;
+    const classesSnap = settle(classesRes, 'classes');
+    const familiesSnap = settle(familiesRes, 'families');
+    const studentsSnap = settle(studentsRes, 'students');
+    const feedbacksSnap = settle(feedbacksRes, 'feedbacks');
+    const referralsSnap = settle(referralsRes, 'referrals');
+    const ordersSnap = settle(ordersRes, 'orders');
 
     const allProfiles = snapToArray(profilesSnap);
     const teachers = allProfiles.filter((p: any) => p.peranan === 'guru');
     const parents = allProfiles.filter((p: any) => p.peranan === 'ibubapa');
-    const classesList = snapToArray(classesSnap);
-    const familiesList = snapToArray(familiesSnap);
-    const studentsList = snapToArray(studentsSnap);
-    const feedbacksList = snapToArray(feedbacksSnap);
+    const classesList = classesSnap ? snapToArray(classesSnap) : [];
+    const familiesList = familiesSnap ? snapToArray(familiesSnap) : [];
+    const studentsList = studentsSnap ? snapToArray(studentsSnap) : [];
+    const feedbacksList = feedbacksSnap ? snapToArray(feedbacksSnap) : [];
 
     const normalizePlanName = (rawPlan?: string): string => {
       if (!rawPlan) return '1 Bulan (Pro)';
@@ -1963,6 +1993,121 @@ export async function fetchAdminDataFromFirebase(): Promise<{ teachers: any[]; p
     }
     if (document.getElementById('admin-jumlah-feedback')) {
       document.getElementById('admin-jumlah-feedback')!.innerText = String(feedbacksList.length);
+    }
+
+    // Kad "Jumlah Jualan" & "Jumlah Keuntungan" — nilai KESELURUHAN SISTEM.
+    //
+    // PUNCA LAMA: kedua-dua nilai dikira dari nod `orders`/`referrals` sahaja.
+    // Pembelian SEBENAR melalui aplikasi HANYA mengemas kini `profiles.langganan`
+    // (bukan nod `orders`), jadi kad tidak pernah bertambah walaupun ada jualan.
+    //
+    // PENDEKATAN BAHARU (boleh disahkan + berkurang automatik):
+    //   Jumlah Jualan = Σ harga pakej bagi SETIAP profil BERBAYAR yang masih
+    //                   wujud (langganan ≠ Percuma) + pesanan manual dalam
+    //                   `orders` yang bukan milik profil berbayar (elak kira dua).
+    //   Bila admin memadam profil, nilainya automatik BERKURANG.
+    //   Jumlah Keuntungan = Jumlah Jualan − Σ komisen affiliate (bukan 'batal').
+    try {
+      // Harga pakej (sen) mengikut nama pakej yang dinormalkan.
+      const hargaPakejSen = (namaPakej: string): number => {
+        const s = String(namaPakej || '').toLowerCase();
+        if (s.includes('tahun')) return 6900;
+        if (s.includes('3 bulan')) return 4000;
+        if (s.includes('bulan')) return 1500;
+        return 0; // Percuma / tidak dikenali — tiada jualan.
+      };
+
+      // Profil dianggap "AKTIF" hanya jika ia profil berbayar guru/ibubapa dan
+      // tarikh tamatnya masih di masa hadapan (langganan belum luput / tamat).
+      // Percuma, peranan lain, atau langganan tamat TIDAK dikira sebagai jualan.
+      const profilAktifBerbayar = (p: any): boolean => {
+        const peranan = String(p && p.peranan || '').toLowerCase();
+        if (peranan !== 'guru' && peranan !== 'ibubapa') return false;
+        if (hargaPakejSen(normalizePlanName(p && p.langganan)) <= 0) return false;
+        const tamat = p && p.tarikh_tamat;
+        if (!tamat) return false;
+        const masa = new Date(tamat).getTime();
+        if (!Number.isFinite(masa)) return false;
+        return masa > Date.now(); // masih aktif (belum tamat tempoh).
+      };
+
+      // Set pemilik yang masih berdaftar (emel + uid/kunci profil).
+      const emelWujud = new Set<string>();
+      const uidWujud = new Set<string>();
+      const pemilikBerbayar = new Set<string>();
+      Object.keys(allProfiles).forEach((idx) => {
+        const p: any = allProfiles[idx];
+        if (!p) return;
+        if (p.id) uidWujud.add(String(p.id).trim());
+        const emel = String(p.email || p.emel || '').trim().toLowerCase();
+        if (emel) emelWujud.add(emel);
+        if (profilAktifBerbayar(p)) {
+          if (p.id) pemilikBerbayar.add(String(p.id).trim());
+          if (emel) pemilikBerbayar.add(emel);
+        }
+      });
+
+      const pemilikWujud = (emel: any, uid: any): boolean => {
+        const e = String(emel || '').trim().toLowerCase();
+        if (e && emelWujud.has(e)) return true;
+        const u = String(uid || '').trim();
+        if (u && uidWujud.has(u)) return true;
+        return false;
+      };
+
+      // (1) Jualan daripada profil berbayar guru/ibubapa yang MASIH AKTIF
+      //     (langganan belum tamat). Profil tamat tempoh / Percuma tidak dikira.
+      let jumlahJualanSen = 0;
+      Object.keys(allProfiles).forEach((idx) => {
+        const p: any = allProfiles[idx];
+        if (!p) return;
+        if (!profilAktifBerbayar(p)) return;
+        jumlahJualanSen += hargaPakejSen(normalizePlanName(p.langganan));
+      });
+
+      // (2) Pesanan manual dalam `orders` (cth. rekod admin) — hanya jika
+      //     pemiliknya masih wujud DAN bukan profil berbayar (elak kira dua).
+      if (ordersSnap) {
+        const ordersRoot = ordersSnap.val() || {};
+        Object.keys(ordersRoot).forEach((orderKey) => {
+          const o = ordersRoot[orderKey] || {};
+          if (String(o.status || '').toLowerCase() === 'batal') return;
+          if (!pemilikWujud(o.emel || o.email, o.uid)) return;
+          const emelPemilik = String(o.emel || o.email || '').trim().toLowerCase();
+          const uidPemilik = String(o.uid || '').trim();
+          if (pemilikBerbayar.has(emelPemilik) || pemilikBerbayar.has(uidPemilik)) return;
+          jumlahJualanSen += Number(o.harga_sen) || 0;
+        });
+      }
+
+      let jumlahKomisenSen = 0;
+      if (referralsSnap) {
+        const referralsRoot = referralsSnap.val() || {};
+        Object.keys(referralsRoot).forEach((kod) => {
+          const kodNode = referralsRoot[kod];
+          if (!kodNode || typeof kodNode !== 'object') return;
+          Object.keys(kodNode).forEach((rekodKey) => {
+            const r = kodNode[rekodKey] || {};
+            if (String(r.status || '').toLowerCase() === 'batal') return;
+            jumlahKomisenSen += Number(r.komisen_sen) || 0;
+          });
+        });
+      }
+
+      const jumlahKeuntunganSen = Math.max(0, jumlahJualanSen - jumlahKomisenSen);
+
+      // Dedah nilai mentah supaya paparan lain boleh disegerakkan.
+      (window as any).__adminJumlahJualanSen = jumlahJualanSen;
+      (window as any).__adminJumlahKeuntunganSen = jumlahKeuntunganSen;
+      const formatRM = (sen: number) => `RM ${((Number(sen) || 0) / 100).toFixed(2)}`;
+      if (document.getElementById('admin-jumlah-jualan')) {
+        document.getElementById('admin-jumlah-jualan')!.innerText = formatRM(jumlahJualanSen);
+      }
+      if (document.getElementById('admin-jumlah-keuntungan')) {
+        document.getElementById('admin-jumlah-keuntungan')!.innerText = formatRM(jumlahKeuntunganSen);
+      }
+    } catch (e) {
+      console.warn('[Firebase RTDB] fetchAdminDataFromFirebase: gagal mengira jumlah jualan/keuntungan.', e);
     }
 
     if (typeof (window as any).renderTeacherTable === 'function') {
@@ -2479,15 +2624,31 @@ export async function adminCreateProfile(userData: {
 /**
  * Inisialisasi Firebase Realtime Listener
  */
+// P2: penjaga idempotensi supaya listener tidak didaftar berulang kali
+// (React StrictMode / useEffect dipanggil semula menyebabkan berbilang
+// onValue -> berbilang fetchAdminDataFromFirebase serentak -> respons
+// lama menulis ganti respons baru = jadual 'kejap ada kejap tiada').
+let _rtdbSubsInit = false;
+let _adminRefreshTimer: any = null;
+
 export function initFirebaseRealtimeSubscriptions() {
+  if (_rtdbSubsInit) return;
+  _rtdbSubsInit = true;
   try {
     onValue(ref(db, 'profiles'), () => {
       console.log('[Firebase RTDB] Profiles dikemas kini.');
-      if (typeof (window as any).fetchAdminDataFromFirebase === 'function') {
-        (window as any).fetchAdminDataFromFirebase();
-      }
+      // P2: debounce 300ms supaya ledakan perubahan profil tidak
+      // mencetuskan berbilang fetch bertindih.
+      if (_adminRefreshTimer) clearTimeout(_adminRefreshTimer);
+      _adminRefreshTimer = setTimeout(() => {
+        _adminRefreshTimer = null;
+        if (typeof (window as any).fetchAdminDataFromFirebase === 'function') {
+          Promise.resolve((window as any).fetchAdminDataFromFirebase()).catch(() => {});
+        }
+      }, 300);
     });
   } catch (e) {
+    _rtdbSubsInit = false;
     console.warn('[Firebase RTDB notice]:', e);
   }
 }
