@@ -972,7 +972,12 @@ export default function App() {
   const [isAffiliateActive, setIsAffiliateActive] = React.useState<boolean>(() => {
     try {
       if (typeof window === "undefined") return false;
-      return localStorage.getItem("bunyiKataUserRole") === "affiliate";
+      // Sesi affiliate: role tersimpan ATAU kod affiliate masih ada
+      // (menangani muat semula halaman sebelum role ditulis semula).
+      return (
+        localStorage.getItem("bunyiKataUserRole") === "affiliate" ||
+        !!localStorage.getItem("bunyiKataAffiliateKod")
+      );
     } catch (e) {
       return false;
     }
@@ -1136,6 +1141,62 @@ export default function App() {
           setUserAccessLevel("pro");
         } else {
           bersihkanSisaSesiAdmin();
+
+          // PEMBETULAN "tidak aktif" palsu pada muat halaman segar:
+          // Firebase Auth memulihkan sesi affiliate pada setiap muat semula,
+          // tetapi `modAffiliateAktif` / kelas `affiliate-mode` adalah keadaan
+          // RUNTIME yang direset. Tanpa pemulihan ini, app menganggap pengguna
+          // sebagai TRIAL sehingga mereka log keluar & masuk semula - lalu UI
+          // memaparkan keadaan "tidak aktif"/terkunci walaupun admin melihat
+          // status "Aktif".
+          //
+          // Kita hanya memulihkan KONTEKS sesi (role + kelas). Status
+          // aktif/gantung SEBENAR disahkan oleh AffiliateDashboard melalui
+          // /api/affiliate/me (sumber kebenaran) - bukan daripada cache di sini.
+          try {
+            const claimKod = String(
+              (tokenResult?.claims as any)?.affiliate_kod || "",
+            )
+              .trim()
+              .toUpperCase();
+            const roleTersimpan = (
+              localStorage.getItem("bunyiKataUserRole") || ""
+            ).toLowerCase();
+            const adaKodTempatan = !!localStorage.getItem(
+              "bunyiKataAffiliateKod",
+            );
+            const isAffiliateSesi =
+              !!claimKod || roleTersimpan === "affiliate" || adaKodTempatan;
+
+            if (isAffiliateSesi && !sedangDiSkrinLogin()) {
+              // Tegakkan KONTEKS sesi mod affiliate sahaja (role + kelas +
+              // bendera runtime) supaya isEffectiveTrial() tidak tersalah
+              // anggap Trial. Kita TIDAK memaksa paparSkrin di sini -
+              // navigasi/panel dikendalikan oleh skrin semasa atau oleh
+              // AffiliateDashboard itu sendiri. Status aktif/gantung sebenar
+              // tetap disahkan melalui /api/affiliate/me.
+              localStorage.setItem("bunyiKataUserRole", "affiliate");
+              localStorage.setItem("bunyiKataAccessLevel", "pro");
+              (window as any).modAffiliateAktif = true;
+              (window as any).modGuruAktif = false;
+              (window as any).modIbuBapaAktif = false;
+              (window as any).modAdminAktif = false;
+              (window as any).isAdminMode = false;
+              (window as any).isGuestMode = false;
+              (window as any).userAccessLevel = "pro";
+              if (typeof document !== "undefined" && document.body) {
+                document.body.classList.add("affiliate-mode");
+                document.body.classList.remove(
+                  "teacher-mode",
+                  "admin-mode",
+                  "parent-mode",
+                );
+              }
+              setIsAffiliateActive(true);
+            }
+          } catch (affErr) {
+            console.warn("[Affiliate] Pemulihan sesi gagal:", affErr);
+          }
         }
       } catch (err) {
         console.warn("[Admin] Semakan claim admin gagal:", err);
@@ -1256,8 +1317,11 @@ export default function App() {
       try {
         const role = localStorage.getItem("bunyiKataUserRole");
         const skrinAff = document.getElementById("affiliate-dashboard");
+        const adaKod = !!localStorage.getItem("bunyiKataAffiliateKod");
         aktif =
           role === "affiliate" ||
+          adaKod ||
+          (window as any).modAffiliateAktif === true ||
           (!!skrinAff && skrinAff.classList.contains("active"));
       } catch (e) {
         aktif = false;
@@ -1291,7 +1355,7 @@ export default function App() {
   const [teacherPlanName, setTeacherPlanName] = React.useState(() => localStorage.getItem("bunyiKataTeacherPlan") || "Percuma");
 
   const currentRole = localStorage.getItem("bunyiKataUserRole") || "";
-  const isAffiliateRole = currentRole === "affiliate" || (window as any).modAffiliateAktif || (typeof document !== 'undefined' && document.body?.classList.contains('affiliate-mode'));
+  const isAffiliateRole = currentRole === "affiliate" || !!localStorage.getItem("bunyiKataAffiliateKod") || (window as any).modAffiliateAktif || (typeof document !== 'undefined' && document.body?.classList.contains('affiliate-mode'));
   const isStudentRole = currentRole === "murid" || Boolean((window as any).namaMuridAktif && (window as any).namaMuridAktif !== "Tetamu");
   const isParent = currentRole === "ibubapa" || (!currentRole && !!localStorage.getItem("bunyiKataIbubapaEmail"));
   
@@ -5810,6 +5874,10 @@ export default function App() {
               }}
               onClick={(e) => {
                 document.getElementById("modal-pilih-jenis-nombor").style.display = "none";
+                if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
+                  if (typeof (window as any).kunciPro === "function") (window as any).kunciPro();
+                  return;
+                }
                 (window as any).nomborMode = "asas_nombor";
                 (window as any).nomborFilter = "0_10";
                 window.dispatchEvent(new CustomEvent("set-nombor-mode", { detail: { mode: "asas_nombor", filter: "0_10" } }));
@@ -5950,6 +6018,10 @@ export default function App() {
               }}
               onClick={(e) => {
                 document.getElementById("modal-pilih-jenis-nombor").style.display = "none";
+                if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
+                  if (typeof (window as any).kunciPro === "function") (window as any).kunciPro();
+                  return;
+                }
                 (window as any).nomborMode = "asas_nombor";
                 (window as any).nomborFilter = "siri_nombor";
                 window.dispatchEvent(new CustomEvent("set-nombor-mode", { detail: { mode: "asas_nombor", filter: "siri_nombor" } }));

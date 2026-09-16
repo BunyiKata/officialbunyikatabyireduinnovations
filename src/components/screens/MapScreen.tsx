@@ -635,6 +635,10 @@ export default function MapScreen({
                 onClick={() => {
                   const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
                   if (modal) modal.style.display = "none";
+                  if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
+                    if (typeof (window as any).kunciPro === "function") (window as any).kunciPro();
+                    return;
+                  }
                   setKadImbasanNomborMode("bilang_0_10");
                   if ((window as any).paparSkrin) (window as any).paparSkrin("view-kad-imbasan-nombor");
                 }}
@@ -774,6 +778,10 @@ export default function MapScreen({
                 onClick={() => {
                   const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
                   if (modal) modal.style.display = "none";
+                  if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
+                    if (typeof (window as any).kunciPro === "function") (window as any).kunciPro();
+                    return;
+                  }
                   setKadImbasanNomborMode("siri_nombor");
                   if ((window as any).paparSkrin) (window as any).paparSkrin("view-kad-imbasan-nombor");
                 }}

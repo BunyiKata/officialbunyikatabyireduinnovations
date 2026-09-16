@@ -3516,7 +3516,14 @@ window.bolehAksesSkrin = function (screenId) {
             const statusAff = (localStorage.getItem('bunyiKataAffiliateStatus') ||
                 (typeof window.bunyiKataAffiliateStatus !== 'undefined' ? window.bunyiKataAffiliateStatus : '') || '')
                 .toLowerCase().trim();
-            const affiliateDigantung = !!statusAff && statusAff !== 'aktif';
+            // PENTING (pembetulan "tidak aktif" palsu): status di sini hanya
+            // nilai CACHE pelayar. Ia mungkin basi (cth. dibaca sebelum
+            // /api/affiliate/me selesai) atau tidak lengkap. Sumber kebenaran
+            // sebenar ialah pelayan (requireAffiliate menolak jika status != aktif).
+            // Jadi kita BLOCK hanya apabila status cache secara EKSPLISIT
+            // "gantung" - nilai lain (kosong / tidak dikenali) dibenarkan supaya
+            // skrin pembelajaran tidak tersalah kunci pada muat halaman segar.
+            const affiliateDigantung = statusAff === 'gantung';
             if (affiliateDigantung && (role === 'affiliate' || window.modAffiliateAktif || document.body.classList.contains('affiliate-mode'))) {
                 return false;
             }
@@ -4664,8 +4671,11 @@ function bukaModalAksesGuru() {
     if (window.modAffiliateAktif || document.body.classList.contains('affiliate-mode') || (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim() === 'affiliate') {
         // Sekatan: affiliate yang DIGANTUNG tidak dibenarkan masuk akses
         // pembelajaran. Status disimpan oleh AffiliateDashboard.tsx.
+        // Fail-open: hanya block bila status cache EKSPLISIT "gantung"
+        // (selaras guard dalam bolehAksesSkrin) supaya status basi/kosong
+        // tidak tersalah kunci akses pada muat halaman segar.
         const statusAff = (localStorage.getItem('bunyiKataAffiliateStatus') || (typeof window.bunyiKataAffiliateStatus !== 'undefined' ? window.bunyiKataAffiliateStatus : '') || '').toLowerCase().trim();
-        if (statusAff && statusAff !== 'aktif') {
+        if (statusAff === 'gantung') {
             if (typeof window.showAppModalAlert === 'function') {
                 window.showAppModalAlert(
                     "Akaun Tidak Aktif",
