@@ -9,6 +9,18 @@ import MapScreen from "./components/screens/MapScreen";
 import AppInfoModals from "./components/modals/AppInfoModals";
 // Lazy-load canvas-confetti: besar (~20KB) dan cuma dipakai selepas game tamat.
 // Defer supaya initial bundle kekal kecil dan tidak block render shell login.
+// Pelindung dwi-klik (double-fire): React onClick boleh tercetus dua kali
+// (klik pantas / sentuh), dan app-logic.js lama juga mempunyai pendengar klik
+// global. Pelindung ini memastikan satu tindakan (audio/nav/buka modal) hanya
+// berlaku SEKALI dalam tempoh singkat, jadi tiada audio/nav berganda.
+const _kunciKlik: Record<string, number> = {};
+function sekaliKlik(kunci: string, tempohMs: number = 450): boolean {
+  const now = Date.now();
+  if (_kunciKlik[kunci] && now - _kunciKlik[kunci] < tempohMs) return false;
+  _kunciKlik[kunci] = now;
+  return true;
+}
+
 const confettiPromise = import("canvas-confetti").then((m) => m.default);
 let _confetti: any = null;
 const confetti = (...args: any[]) => {
@@ -49,7 +61,7 @@ const PricingProModal = lazy(() => import("./components/modals/PricingProModal")
 const EditProfileModal = lazy(() => import("./components/modals/EditProfileModal").then(m => ({ default: m.EditProfileModal })));
 const EntryChoiceModal = lazy(() => import("./components/modals/EntryChoiceModal").then(m => ({ default: m.EntryChoiceModal })));
 const ModeChoiceModal = lazy(() => import("./components/modals/ModeChoiceModal").then(m => ({ default: m.ModeChoiceModal })));
-import { hubungiAdminWhatsapp, mesejDaftarPakej } from "./config/contactAdmin";
+import { hubungiAdminWhatsapp, mesejDaftarPakej, mesejDaftarAffiliate } from "./config/contactAdmin";
 import "./utils/sijilGenerator";
 import "./index.css";
 import { motion, AnimatePresence } from "motion/react";
@@ -1051,7 +1063,7 @@ export default function App() {
       if (localStorage.getItem("bunyiKataUserRole") === "admin") {
         localStorage.removeItem("bunyiKataUserRole");
       }
-      const roleMasihSah = ["guru", "ibubapa", "murid"].includes(
+      const roleMasihSah = ["guru", "ibubapa", "murid", "affiliate"].includes(
         (localStorage.getItem("bunyiKataUserRole") || "").toLowerCase(),
       );
       if (!roleMasihSah && localStorage.getItem("bunyiKataAccessLevel") === "pro") {
@@ -1278,6 +1290,7 @@ export default function App() {
   const [teacherPlanName, setTeacherPlanName] = React.useState(() => localStorage.getItem("bunyiKataTeacherPlan") || "Percuma");
 
   const currentRole = localStorage.getItem("bunyiKataUserRole") || "";
+  const isAffiliateRole = currentRole === "affiliate" || (window as any).modAffiliateAktif || (typeof document !== 'undefined' && document.body?.classList.contains('affiliate-mode'));
   const isStudentRole = currentRole === "murid" || Boolean((window as any).namaMuridAktif && (window as any).namaMuridAktif !== "Tetamu");
   const isParent = currentRole === "ibubapa" || (!currentRole && !!localStorage.getItem("bunyiKataIbubapaEmail"));
   
@@ -1285,7 +1298,7 @@ export default function App() {
     ? (localStorage.getItem("bunyiKataParentPlan") || "Percuma")
     : (localStorage.getItem("bunyiKataTeacherPlan") || teacherPlanName || "Percuma");
 
-  const isPaidPlan = Boolean(
+  const isPaidPlan = isAffiliateRole || Boolean(
     rawActivePlan &&
     rawActivePlan.toLowerCase() !== "percuma" &&
     rawActivePlan.toLowerCase() !== "trial" &&
@@ -1303,7 +1316,7 @@ export default function App() {
     )
   );
 
-  const isPlanFree = !isStudentRole && !isPaidPlan;
+  const isPlanFree = !isStudentRole && !isPaidPlan && !isAffiliateRole;
   // SUMBER KEBENARAN TUNGGAL: `checkIsTrial()` (fail-closed) dalam app-logic.js
   // menyemak peranan + pelan + sesi admin RUNTIME. React jangan kira semula
   // dari localStorage sendiri — ia akan bercanggah (cth. sisa pelan berbayar
@@ -1312,6 +1325,7 @@ export default function App() {
   // Gunakan versi kanonik bila tersedia; fallback kepada pengiraan tempatan
   // (fail-closed = trial) hanya sebelum app-logic.js dimuatkan.
   const [efektifTrialState, setEfektifTrialState] = React.useState<boolean>(() => {
+    if (isAffiliateRole) return false;
     if (typeof (window as any).checkIsTrial === "function") {
       try { return (window as any).checkIsTrial(); } catch (e) {}
     }
@@ -1338,6 +1352,13 @@ export default function App() {
   React.useEffect(() => {
     const sync = () => {
       let trialNow = false;
+      const affNow = (localStorage.getItem("bunyiKataUserRole") || "").toLowerCase().trim() === "affiliate" ||
+        (window as any).modAffiliateAktif ||
+        (typeof document !== "undefined" && document.body?.classList.contains("affiliate-mode"));
+      if (affNow) {
+        setEfektifTrialState(false);
+        return;
+      }
       if (typeof (window as any).checkIsTrial === "function") {
         try { trialNow = Boolean((window as any).checkIsTrial()); } catch (e) { trialNow = false; }
       } else {
@@ -1347,6 +1368,7 @@ export default function App() {
     };
     sync();
     window.addEventListener("admin-mode-change", sync);
+    window.addEventListener("affiliate-mode-change", sync);
     window.addEventListener("focus", sync);
     window.addEventListener("akses-level-change", sync);
     // 'storage' — perubahan localStorage dari tab lain
@@ -1354,11 +1376,12 @@ export default function App() {
     // Apabila userAccessLevel berubah (setUserAccessLevel), refresh juga
     return () => {
       window.removeEventListener("admin-mode-change", sync);
+      window.removeEventListener("affiliate-mode-change", sync);
       window.removeEventListener("focus", sync);
       window.removeEventListener("akses-level-change", sync);
       window.removeEventListener("storage", sync);
     };
-  }, [isGuestModeActive, isPlanFree, isAdminActive, userAccessLevel, isUserAdmin]);
+  }, [isGuestModeActive, isPlanFree, isAdminActive, userAccessLevel, isUserAdmin, isAffiliateRole]);
 
   React.useEffect(() => {
     // PENTING: app-logic.js mentakrifkan versi kanonikal `isEffectiveTrial`
@@ -2055,7 +2078,7 @@ export default function App() {
       localStorage.setItem("bunyiKataAccessLevel", lvl);
       (window as any).userAccessLevel = isUserAdmin() ? "pro" : lvl;
     };
-    (window as any).openPakejProModal = (tab?: "guru" | "ibubapa") => {
+    (window as any).openPakejProModal = (tab?: "guru" | "ibubapa" | "affiliate") => {
       const activeTab = tab || ((window as any).modIbuBapaAktif ? "ibubapa" : "guru");
       setProPricingTab(activeTab);
       setIsProPricingModalOpen(true);
@@ -2213,6 +2236,10 @@ export default function App() {
               <>
                 <i className="fa-solid fa-user-shield"></i> MOD ADMIN
               </>
+            ) : isAffiliateActive || (typeof document !== "undefined" && document.body.classList.contains("affiliate-mode")) || (typeof localStorage !== "undefined" && localStorage.getItem("bunyiKataUserRole") === "affiliate") ? (
+              <>
+                <i className="fa-solid fa-sitemap"></i> MOD AFFILIATE
+              </>
             ) : (typeof window !== "undefined" && (window as any).modIbuBapaAktif) ||
               (typeof document !== "undefined" && document.body.classList.contains("parent-mode")) ||
               (typeof localStorage !== "undefined" && localStorage.getItem("bunyiKataUserRole") === "ibubapa") ? (
@@ -2238,6 +2265,17 @@ export default function App() {
               ) {
                 if (typeof (window as any).keluarModGuru === "function") {
                   (window as any).keluarModGuru();
+                } else {
+                  paparSkrin("login-screen");
+                }
+              } else if (
+                isAffiliateActive ||
+                (window as any).modAffiliateAktif ||
+                (typeof document !== "undefined" && document.body.classList.contains("affiliate-mode")) ||
+                (typeof localStorage !== "undefined" && localStorage.getItem("bunyiKataUserRole") === "affiliate")
+              ) {
+                if (typeof (window as any).keluarModAffiliate === "function") {
+                  (window as any).keluarModAffiliate();
                 } else {
                   paparSkrin("login-screen");
                 }
@@ -2500,7 +2538,87 @@ export default function App() {
         </button>
       </nav>
 
-      {/* Modal Popup Laporan Kemajuan (Mod Ibu Bapa - Mobile Only) */}
+      {/* Navigasi Sticky Mod Affiliate (4 butang: Affiliate • Rujukan • Kod • Keluar) */}
+      <nav
+        id="affiliate-sticky-nav"
+        className="teacher-sticky-nav affiliate-sticky-nav student-nav-curved"
+        aria-label="Navigasi mod affiliate"
+        style={{ display: "none" }}
+      >
+        <div className="student-nav-curved-backdrop mobile-nav-only" aria-hidden="true">
+          <svg viewBox="0 0 400 70" preserveAspectRatio="none" className="student-nav-curved-svg">
+            <path
+              d="M -5 0 L 160 0 C 176 0, 183 30, 200 30 C 217 30, 224 0, 240 0 L 405 0 L 405 80 L -5 80 Z"
+              fill="#ffffff"
+              stroke="none"
+            />
+            <path
+              d="M -5 0 L 160 0 C 176 0, 183 30, 200 30 C 217 30, 224 0, 240 0 L 405 0"
+              fill="none"
+              stroke="var(--color-dark, #10182f)"
+              strokeWidth="3"
+            />
+          </svg>
+        </div>
+        <button
+          className="neo-btn bg-white nav-btn-dashboard"
+          onClick={() => {
+            paparSkrin("affiliate-dashboard");
+          }}
+          title="Dashboard Affiliate"
+        >
+          <i className="fa-solid fa-sitemap"></i> <span>Affiliate</span>
+        </button>
+        <button
+          className="neo-btn bg-white nav-btn-rujukan"
+          onClick={() => {
+            paparSkrin("affiliate-dashboard");
+            setTimeout(() => {
+              const t = document.getElementById("affiliate-rujukan");
+              if (t) t.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 80);
+          }}
+          title="Rujukan"
+        >
+          <i className="fa-solid fa-table-list"></i> <span>Rujukan</span>
+        </button>
+        <button
+          className="neo-btn bg-white nav-item-center-circle nav-btn-akses"
+          onClick={() => {
+            bukaModalAksesGuru();
+          }}
+          title="Akses"
+        >
+          <i className="fa-solid fa-unlock-keyhole"></i> <span>Akses</span>
+        </button>
+        <button
+          className="neo-btn bg-white nav-btn-kod"
+          onClick={() => {
+            paparSkrin("affiliate-dashboard");
+            setTimeout(() => {
+              const t = document.getElementById("affiliate-kod");
+              if (t) t.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 80);
+          }}
+          title="Kod"
+        >
+          <i className="fa-solid fa-key"></i> <span>Kod</span>
+        </button>
+        <button
+          className="neo-btn bg-white nav-btn-keluar mobile-nav-only"
+          onClick={() => {
+            if (typeof (window as any).keluarModAffiliate === "function") {
+              (window as any).keluarModAffiliate();
+            } else {
+              paparSkrin("login-screen");
+            }
+          }}
+          title="Keluar"
+        >
+          <i className="fa-solid fa-right-from-bracket"></i> <span>Keluar</span>
+        </button>
+      </nav>
+
       <div
         id="modal-laporan-kemajuan"
         className="modal-overlay"
@@ -3677,20 +3795,66 @@ export default function App() {
       <LandingScreen
         getScreenClass={getScreenClass}
         onCubaPercuma={() => {
+          if (!sekaliKlik("landing-cuba-percuma")) return;
           if (typeof (window as any).playBubble === "function") (window as any).playBubble();
           if (typeof (window as any).paparSkrin === "function") {
             (window as any).paparSkrin("login-screen");
           }
         }}
         onLogMasuk={() => {
+          if (!sekaliKlik("landing-log-masuk")) return;
           if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-          // PENTING: Butang "Log Masuk" pada landing page membuka POPUP log masuk
-          // (masukkan kod + butang Guru / Ibu Bapa / Affiliate) — BUKAN tukar skrin.
-          setIsEntryChoiceModalOpen(true);
+          // Butang "Log Masuk" membuka popup "Masukkan Kod" (yang turut mengandungi pilihan Guru, Ibubapa & Affiliate)
+          setIsCodeModalOpen(true);
         }}
         onOpenPakej={(tab) => {
+          if (!sekaliKlik("landing-pakej")) return;
           if (typeof (window as any).playBubble === "function") (window as any).playBubble();
           (window as any).openPakejProModal?.(tab || "guru");
+        }}
+        onDaftarPakej={(category, namaPakej) => {
+          // Butang "Daftar" pada kad pakej landing: hantar TERUS ke WhatsApp admin
+          // (TIADA popup) — sama seperti onSelectPlanRegister, tetapi tanpa buka modal.
+          if (!sekaliKlik("landing-daftar-pakej")) return;
+          if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+
+          // Nama pakej rasmi (sebutan sama seperti popup Pakej Pro).
+          // `namaPakej` dari landing: "Bulanan Biasa" | "3 Bulan" | "1 Tahun".
+          const namaRasmi = /bulanan/i.test(namaPakej)
+            ? "Bulanan (Biasa)"
+            : /1 tahun|tahun/i.test(namaPakej)
+              ? "1 Tahun (Pro)"
+              : "3 Bulan (Pro)";
+
+          // `mesejDaftarPakej` auto-cantum kod affiliate (jika ada) dari storan,
+          // jadi kod rujukan affiliate tetap dikesan walaupun tiada popup.
+          const mesej = mesejDaftarPakej(namaRasmi);
+          const berjaya = hubungiAdminWhatsapp(mesej);
+
+          if (typeof (window as any).paparNotifikasiUmum === "function") {
+            (window as any).paparNotifikasiUmum(
+              berjaya
+                ? `Pendaftaran akaun diuruskan oleh admin. Sila teruskan perbualan di WhatsApp untuk melanggan pakej ${namaRasmi}.`
+                : "Pendaftaran akaun diuruskan oleh admin. Sila hubungi admin untuk melanggan pakej.",
+            );
+          }
+        }}
+        onDaftarAffiliate={() => {
+          // Butang "Daftar" pada kad Pakej Affiliate landing: hantar TERUS ke
+          // WhatsApp admin dengan template khas affiliate (auto-cantum kod rujukan).
+          if (!sekaliKlik("landing-daftar-affiliate")) return;
+          if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+
+          const mesej = mesejDaftarAffiliate();
+          const berjaya = hubungiAdminWhatsapp(mesej);
+
+          if (typeof (window as any).paparNotifikasiUmum === "function") {
+            (window as any).paparNotifikasiUmum(
+              berjaya
+                ? "Pendaftaran akaun diuruskan oleh admin. Sila teruskan perbualan di WhatsApp untuk menyertai Pakej Affiliate."
+                : "Pendaftaran akaun diuruskan oleh admin. Sila hubungi admin untuk menyertai Pakej Affiliate.",
+            );
+          }
         }}
       />
 
@@ -4899,13 +5063,23 @@ export default function App() {
             localStorage.removeItem("bunyiKataNamaAffiliate");
             (window as any).modAffiliateAktif = false;
             setIsAffiliateActive(false);
-            if (typeof (window as any).keluarKeSkrinLogin === "function") {
+            if (typeof (window as any).keluarModAffiliate === "function") {
+              (window as any).keluarModAffiliate();
+            } else if (typeof (window as any).keluarKeSkrinLogin === "function") {
               (window as any).keluarKeSkrinLogin();
             } else if (typeof (window as any).paparSkrin === "function") {
               (window as any).paparSkrin("login-screen");
             } else {
               window.location.reload();
             }
+          }}
+          onEditProfile={() => {
+            setEditModalError("");
+            setIsMandatorySetup(false);
+            setEditModalMode("affiliate");
+            setIsChangingPassword(false);
+            setNewPasswordInput("");
+            setIsEditModalOpen(true);
           }}
         />
       </Suspense>
@@ -8792,6 +8966,23 @@ export default function App() {
                   berjaya
                     ? "Pendaftaran akaun diuruskan oleh admin. Sila teruskan perbualan di WhatsApp untuk melanggan pakej."
                     : "Pendaftaran akaun diuruskan oleh admin. Sila hubungi admin untuk melanggan pakej.",
+                );
+              }
+            }}
+            onSelectAffiliateRegister={() => {
+              // Butang "Daftar" pada kad Pakej Affiliate dalam popup Pakej Pro:
+              // hantar TERUS ke WhatsApp admin dengan template khas affiliate.
+              setIsModeMenuOpen(false);
+              setIsProPricingModalOpen(false);
+
+              const mesej = mesejDaftarAffiliate();
+              const berjaya = hubungiAdminWhatsapp(mesej);
+
+              if (typeof (window as any).paparNotifikasiUmum === "function") {
+                (window as any).paparNotifikasiUmum(
+                  berjaya
+                    ? "Pendaftaran akaun diuruskan oleh admin. Sila teruskan perbualan di WhatsApp untuk menyertai Pakej Affiliate."
+                    : "Pendaftaran akaun diuruskan oleh admin. Sila hubungi admin untuk menyertai Pakej Affiliate.",
                 );
               }
             }}

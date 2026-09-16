@@ -845,11 +845,17 @@ window.renderAdminTable = function (type = 'guru') {
                 const labelStatus = aktif ? "Aktif" : "Digantung";
                 const wa = String(a.whatsapp || "").replace(/[^0-9]/g, "");
                 const pautan = window.location.origin + "/?ref=" + (a.kod || "");
+                // Emoji: guna 📧 untuk Emel (BUKAN 🎓) supaya maksud betul &
+                // disokong meluas. Selari dengan binaMesejWhatsAppAffiliate()
+                // dalam CiptaAkaunModal.tsx (satu sumber gaya mesej affiliate).
                 const mesejWa = encodeURIComponent(
                     "Selamat menyertai program Affiliate Bunyi Kata! 🎉\n\n" +
                     "👤 Nama: " + (a.nama || "-") + "\n" +
                     "🔑 Kod Affiliate anda: " + (a.kod || "-") + "\n" +
                     "🔗 Pautan Khas anda: " + pautan + "\n\n" +
+                    "📥 Butiran Log Masuk (simpan & tukar kata laluan):\n" +
+                    "📧 Emel: " + (a.email || "-") + "\n" +
+                    "🔗 Pautan log masuk: " + window.location.origin + "/\n\n" +
                     "📣 Kongsi pautan bunyi kata dengan kod ini, dan anda akan menerima komisen bagi setiap pembelian yang menggunakan kod anda.\n\n" +
                     "Terima kasih kerana menyertai kami! 🙏"
                 );
@@ -1223,6 +1229,10 @@ function updateProgressBar(id, percentage) {
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioCtx;
 var lastBubbleTime = 0;
+// Nota "bubble" yang menunggu context selesai resume (maksimum SATU pada satu masa).
+// Ini menghalang kesan "double": gesture pertama tidak lagi meninggalkan nota
+// tertunggak yang berbunyi lewat pada gesture berikutnya.
+var pendingBubbleResume = null;
 
 function initAudioContext() {
     try {
@@ -1240,8 +1250,10 @@ function initAudioContext() {
             // Browsers (esp. desktop Chrome/Safari) start the context 'suspended' until a
             // real user gesture. Resume on EVERY gesture until it is running so that the
             // first bubble click is audible on laptop as well as mobile.
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume().catch(() => { });
+            if (audioCtx.state === 'suspended' && !audioCtx._resumeInFlight) {
+                audioCtx._resumeInFlight = audioCtx.resume()
+                    .then(() => { audioCtx._resumeInFlight = null; })
+                    .catch(() => { audioCtx._resumeInFlight = null; });
             }
         }
     } catch (e) { }
@@ -1299,8 +1311,19 @@ function playBubble() {
         };
 
         if (audioCtx.state === 'suspended') {
-            // Resume then play; never silently drop the note.
-            audioCtx.resume().then(triggerNote).catch(triggerNote);
+            // Resume then play EXACTLY ONCE. Guard with a single shared promise so a
+            // React onClick + the global listener never queue two resumes / two notes.
+            // Once the context is running, subsequent gestures play synchronously and
+            // no stale "pending" note is ever left to fire on the NEXT click.
+            if (!pendingBubbleResume) {
+                pendingBubbleResume = audioCtx.resume().then(() => {
+                    pendingBubbleResume = null;
+                    triggerNote();
+                }).catch(() => {
+                    pendingBubbleResume = null;
+                    triggerNote();
+                });
+            }
         } else {
             triggerNote();
         }
@@ -2238,6 +2261,13 @@ window.addEventListener('teacher-classes-synced', function () {
 
 function saveStudentData() {
     try {
+        const userRole = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
+        const isAffiliate = userRole === 'affiliate' || window.modAffiliateAktif || (typeof document !== 'undefined' && document.body && document.body.classList.contains('affiliate-mode'));
+        if (isAffiliate) {
+            // Mod Affiliate: Tidak menyimpan sebarang rekod ke database / storan murid
+            return;
+        }
+
         const curStu = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif') || localStorage.getItem('bunyiKataCurrentMurid') || '';
         const isRealStudent = curStu && !GHOST_NAMES.includes(curStu.trim().toLowerCase());
 
@@ -2607,62 +2637,94 @@ function paparSkrin(screenId, skipHash) {
 
     const isLoginScreen = screenId === 'login-screen';
     const isCurrentAdmin = !isLoginScreen && (screenId === 'admin-dashboard' || screenId.startsWith('admin-') ||
-        ((document.body.classList.contains('admin-mode') || window.modAdminAktif || window.isAdminMode) && !window.modIbuBapaAktif));
+        ((document.body.classList.contains('admin-mode') || window.modAdminAktif || window.isAdminMode) && !window.modIbuBapaAktif && !window.modAffiliateAktif));
     const isCurrentParent = !isLoginScreen && !isCurrentAdmin && (screenId === 'ibubapa-dashboard' || screenId.startsWith('ibubapa-') ||
         Boolean(window.modIbuBapaAktif) || document.body.classList.contains('parent-mode'));
-    const isCurrentTeacher = !isLoginScreen && !isCurrentAdmin && !isCurrentParent && (screenId === 'guru-dashboard' || screenId.startsWith('guru-') ||
+    const isCurrentAffiliate = !isLoginScreen && !isCurrentAdmin && !isCurrentParent && (screenId === 'affiliate-dashboard' || screenId.startsWith('affiliate-') ||
+        Boolean(window.modAffiliateAktif) || document.body.classList.contains('affiliate-mode'));
+    const isCurrentTeacher = !isLoginScreen && !isCurrentAdmin && !isCurrentParent && !isCurrentAffiliate && (screenId === 'guru-dashboard' || screenId.startsWith('guru-') ||
         Boolean(window.modGuruAktif) || document.body.classList.contains('teacher-mode'));
+
+    const affNav = document.getElementById('affiliate-sticky-nav');
+    const sNav = document.getElementById('student-global-nav');
 
     if (isCurrentAdmin) {
         window.modGuruAktif = true;
         window.modIbuBapaAktif = false;
+        window.modAffiliateAktif = false;
         document.body.classList.add('teacher-mode', 'admin-mode');
-        document.body.classList.remove('parent-mode');
+        document.body.classList.remove('parent-mode', 'affiliate-mode');
         if (topBanner) topBanner.style.display = sembunyiBanner ? 'none' : 'flex';
         if (badge) badge.innerHTML = '<i class="fa-solid fa-user-shield"></i> MOD ADMIN';
         // Tiada top nav dalam cara belajar
         if (aNav) aNav.style.display = isLearningOrGame ? 'none' : 'flex';
         if (tNav) tNav.style.display = 'none';
         if (pNav) pNav.style.display = 'none';
+        if (affNav) affNav.style.display = 'none';
+        if (sNav) sNav.style.display = 'none';
     } else if (isCurrentTeacher) {
         window.modGuruAktif = true;
         window.modIbuBapaAktif = false;
+        window.modAffiliateAktif = false;
         document.body.classList.add('teacher-mode');
-        document.body.classList.remove('admin-mode', 'parent-mode');
+        document.body.classList.remove('admin-mode', 'parent-mode', 'affiliate-mode');
         if (topBanner) topBanner.style.display = sembunyiBanner ? 'none' : 'flex';
         if (badge) badge.innerHTML = '<i class="fa-solid fa-chalkboard-user"></i> MOD GURU';
         // Tiada top nav dalam cara belajar
         if (tNav) tNav.style.display = isLearningOrGame ? 'none' : 'flex';
         if (aNav) aNav.style.display = 'none';
         if (pNav) pNav.style.display = 'none';
+        if (affNav) affNav.style.display = 'none';
+        if (sNav) sNav.style.display = 'none';
     } else if (isCurrentParent) {
         window.modIbuBapaAktif = true;
         window.modGuruAktif = false;
+        window.modAffiliateAktif = false;
         document.body.classList.add('parent-mode');
-        document.body.classList.remove('teacher-mode', 'admin-mode');
+        document.body.classList.remove('teacher-mode', 'admin-mode', 'affiliate-mode');
         if (topBanner) topBanner.style.display = sembunyiBanner ? 'none' : 'flex';
         if (badge) badge.innerHTML = '<i class="fa-solid fa-user-group"></i> MOD IBU BAPA';
         // Tiada top nav dalam cara belajar
         if (pNav) pNav.style.display = isLearningOrGame ? 'none' : 'flex';
         if (tNav) tNav.style.display = 'none';
         if (aNav) aNav.style.display = 'none';
+        if (affNav) affNav.style.display = 'none';
+        if (sNav) sNav.style.display = 'none';
+    } else if (isCurrentAffiliate) {
+        window.modAffiliateAktif = true;
+        window.modGuruAktif = false;
+        window.modIbuBapaAktif = false;
+        window.modAdminAktif = false;
+        document.body.classList.add('affiliate-mode');
+        document.body.classList.remove('teacher-mode', 'admin-mode', 'parent-mode');
+        if (topBanner) topBanner.style.display = sembunyiBanner ? 'none' : 'flex';
+        if (badge) badge.innerHTML = '<i class="fa-solid fa-sitemap"></i> MOD AFFILIATE';
+        // Tiada top nav dalam cara belajar
+        if (affNav) affNav.style.display = isLearningOrGame ? 'none' : 'flex';
+        if (tNav) tNav.style.display = 'none';
+        if (aNav) aNav.style.display = 'none';
+        if (pNav) pNav.style.display = 'none';
+        if (sNav) sNav.style.display = 'none';
     } else {
         if (screenId === 'login-screen') {
             window.modGuruAktif = false;
             window.modIbuBapaAktif = false;
             window.modAdminAktif = false;
+            window.modAffiliateAktif = false;
             window.isAdminMode = false;
-            document.body.classList.remove('teacher-mode', 'parent-mode', 'admin-mode');
+            document.body.classList.remove('teacher-mode', 'parent-mode', 'admin-mode', 'affiliate-mode');
             if (tNav) tNav.style.display = 'none';
             if (aNav) aNav.style.display = 'none';
             if (pNav) pNav.style.display = 'none';
+            if (affNav) affNav.style.display = 'none';
             if (topBanner) topBanner.style.display = 'none';
         }
-        if (!window.modGuruAktif && !window.modIbuBapaAktif) {
-            document.body.classList.remove('teacher-mode', 'parent-mode', 'admin-mode');
+        if (!window.modGuruAktif && !window.modIbuBapaAktif && !window.modAdminAktif && !window.modAffiliateAktif) {
+            document.body.classList.remove('teacher-mode', 'parent-mode', 'admin-mode', 'affiliate-mode');
             if (tNav) tNav.style.display = 'none';
             if (aNav) aNav.style.display = 'none';
             if (pNav) pNav.style.display = 'none';
+            if (affNav) affNav.style.display = 'none';
             if (topBanner) topBanner.style.display = 'none';
 
             if (['profile-screen', 'lencana-screen', 'prestasi-screen', 'leaderboard-screen', 'login-screen', 'view-tanduk-kata'].includes(screenId)) {
@@ -2675,8 +2737,8 @@ function paparSkrin(screenId, skipHash) {
 
     // Jaring keselamatan: jika skrin ini sepatutnya memaparkan banner mod
     if (!sembunyiBanner && screenId !== 'login-screen' &&
-        (window.modGuruAktif || window.modIbuBapaAktif || window.modAdminAktif || window.isAdminMode ||
-            document.body.classList.contains('admin-mode') || document.body.classList.contains('teacher-mode') || document.body.classList.contains('parent-mode'))) {
+        (window.modGuruAktif || window.modIbuBapaAktif || window.modAdminAktif || window.modAffiliateAktif || window.isAdminMode ||
+            document.body.classList.contains('admin-mode') || document.body.classList.contains('teacher-mode') || document.body.classList.contains('parent-mode') || document.body.classList.contains('affiliate-mode'))) {
         if (topBanner) topBanner.style.display = 'flex';
         if (badge) {
             if (document.body.classList.contains('admin-mode')) {
@@ -2685,6 +2747,8 @@ function paparSkrin(screenId, skipHash) {
                 badge.innerHTML = '<i class="fa-solid fa-user-group"></i> MOD IBU BAPA';
             } else if (document.body.classList.contains('teacher-mode')) {
                 badge.innerHTML = '<i class="fa-solid fa-chalkboard-user"></i> MOD GURU';
+            } else if (document.body.classList.contains('affiliate-mode') || window.modAffiliateAktif) {
+                badge.innerHTML = '<i class="fa-solid fa-sitemap"></i> MOD AFFILIATE';
             }
         }
     }
@@ -2693,6 +2757,7 @@ function paparSkrin(screenId, skipHash) {
         if (tNav) tNav.style.display = 'none';
         if (aNav) aNav.style.display = 'none';
         if (pNav) pNav.style.display = 'none';
+        if (affNav) affNav.style.display = 'none';
     }
 
     // Jika buka dashboard guru, render jadual dan segerakkan data terkini dari Firebase
@@ -2922,6 +2987,9 @@ window.bolehAksesSkrin = function (screenId) {
                 window.modGuruAktif ||
                 window.modAdminAktif ||
                 window.modIbuBapaAktif ||
+                window.modAffiliateAktif ||
+                role === 'affiliate' ||
+                document.body.classList.contains('affiliate-mode') ||
                 window.isAdminMode
             );
         }
@@ -2937,9 +3005,15 @@ window.isEffectiveTrial = function () {
     if (window.isAdminMode || window.modAdminAktif) return false;
     if (window.adminClaimDisahkan === true) return false;
 
+    // Sesi Mod Affiliate: mendapat semua akses penuh seperti Mod Ibu Bapa / Pro
+    const userRole = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
+    if (window.modAffiliateAktif || userRole === 'affiliate' || (typeof document !== 'undefined' && document.body && document.body.classList.contains('affiliate-mode'))) {
+        window.isGuestMode = false;
+        return false;
+    }
+
     const teacherPlan = (localStorage.getItem('bunyiKataTeacherPlan') || '').toLowerCase().trim();
     const parentPlan = (localStorage.getItem('bunyiKataParentPlan') || '').toLowerCase().trim();
-    const userRole = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
     const accessLvl = (localStorage.getItem('bunyiKataAccessLevel') || window.userAccessLevel || '').toLowerCase().trim();
 
     const isTeacherPaid = teacherPlan && teacherPlan !== 'percuma' && teacherPlan !== 'trial' && teacherPlan !== 'free';
@@ -3059,6 +3133,9 @@ function masukModAdmin() {
     if (aNav) aNav.style.display = 'flex';
     const pNav = document.getElementById('parent-sticky-nav');
     if (pNav) pNav.style.display = 'none';
+    document.body.classList.remove('affiliate-mode');
+    const affNav = document.getElementById('affiliate-sticky-nav');
+    if (affNav) affNav.style.display = 'none';
 
     window.dispatchEvent(new CustomEvent('admin-mode-change', { detail: { isAdmin: true } }));
 
@@ -3101,24 +3178,78 @@ function masukModAffiliate() {
         window.setUserAccessLevel('pro');
     }
 
+    const affNama = localStorage.getItem('bunyiKataNamaAffiliate') || 'Affiliate';
+    window.namaMuridAktif = affNama;
+    localStorage.setItem('muridAktif', affNama);
+    localStorage.setItem('bunyiKataCurrentMurid', affNama);
+    localStorage.removeItem('bunyiKataStudentId');
+
     document.body.classList.remove('teacher-mode');
     document.body.classList.remove('parent-mode');
     document.body.classList.remove('admin-mode');
+    document.body.classList.add('affiliate-mode');
 
     const topBanner = document.getElementById('teacher-top-banner');
-    if (topBanner) topBanner.style.display = 'none';
+    if (topBanner) topBanner.style.display = 'flex';
+    const badge = document.getElementById('teacher-banner-badge');
+    if (badge) badge.innerHTML = '<i class="fa-solid fa-sitemap"></i> MOD AFFILIATE';
     const tNav = document.getElementById('teacher-sticky-nav');
     if (tNav) tNav.style.display = 'none';
     const aNav = document.getElementById('admin-sticky-nav');
     if (aNav) aNav.style.display = 'none';
     const pNav = document.getElementById('parent-sticky-nav');
     if (pNav) pNav.style.display = 'none';
+    const sNav = document.getElementById('student-global-nav');
+    if (sNav) sNav.style.display = 'none';
+
+    // Nav affiliate (Affiliate • Rujukan • Kod • Akses • Keluar)
+    const affNav = document.getElementById('affiliate-sticky-nav');
+    if (affNav) affNav.style.display = 'flex';
 
     window.dispatchEvent(new CustomEvent('affiliate-mode-change', { detail: { isAffiliate: true } }));
 
     paparSkrin('affiliate-dashboard');
 }
 window.masukModAffiliate = masukModAffiliate;
+
+/**
+ * Keluar daripada mod affiliate: bersihkan sesi + sembunyikan nav affiliate.
+ */
+function keluarModAffiliate() {
+    window.modAffiliateAktif = false;
+    if (localStorage.getItem('bunyiKataUserRole') === 'affiliate') {
+        localStorage.removeItem('bunyiKataUserRole');
+    }
+    if (localStorage.getItem('bunyiKataAccessLevel') === 'pro') {
+        const roleSelepas = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
+        const masihAda = roleSelepas === 'guru' || roleSelepas === 'ibubapa' || roleSelepas === 'murid';
+        if (!masihAda) localStorage.removeItem('bunyiKataAccessLevel');
+    }
+    window.userAccessLevel = 'trial';
+    localStorage.removeItem('muridAktif');
+    localStorage.removeItem('bunyiKataCurrentMurid');
+    localStorage.removeItem('bunyiKataStudentId');
+    window.namaMuridAktif = '';
+
+    document.body.classList.remove('affiliate-mode');
+    const topBanner = document.getElementById('teacher-top-banner');
+    if (topBanner) topBanner.style.display = 'none';
+    const affNav = document.getElementById('affiliate-sticky-nav');
+    if (affNav) affNav.style.display = 'none';
+    if (typeof window.firebaseLogout === 'function') {
+        try {
+            Promise.resolve(window.firebaseLogout()).catch(function () { });
+        } catch (e) { }
+    }
+    window.dispatchEvent(new CustomEvent('affiliate-mode-change', { detail: { isAffiliate: false } }));
+    const pSkrin = (typeof paparSkrin === 'function') ? paparSkrin : null;
+    if (pSkrin) {
+        pSkrin('login-screen');
+    } else {
+        window.location.reload();
+    }
+}
+window.keluarModAffiliate = keluarModAffiliate;
 
 function masukModGuru() {
     // Buang sisa sesi admin dahulu — kalau tidak, senarai guru orang lain
@@ -3196,6 +3327,9 @@ function masukModGuru() {
     if (aNav) aNav.style.display = 'none';
     const pNav = document.getElementById('parent-sticky-nav');
     if (pNav) pNav.style.display = 'none';
+    document.body.classList.remove('affiliate-mode');
+    const affNav = document.getElementById('affiliate-sticky-nav');
+    if (affNav) affNav.style.display = 'none';
 
     paparSkrin('guru-dashboard');
 
@@ -3292,6 +3426,9 @@ function keluarModGuru() {
     if (aNav) aNav.style.display = 'none';
     const pNav = document.getElementById('parent-sticky-nav');
     if (pNav) pNav.style.display = 'none';
+    document.body.classList.remove('affiliate-mode');
+    const affNavKeluar = document.getElementById('affiliate-sticky-nav');
+    if (affNavKeluar) affNavKeluar.style.display = 'none';
     const topBanner = document.getElementById('teacher-top-banner');
     if (topBanner) topBanner.style.display = 'none';
 
@@ -3743,6 +3880,9 @@ window.masukModIbuBapa = function (namaAnak) {
     if (aNav) aNav.style.display = 'none';
     const pNav = document.getElementById('parent-sticky-nav');
     if (pNav) pNav.style.display = 'flex';
+    document.body.classList.remove('affiliate-mode');
+    const affNav = document.getElementById('affiliate-sticky-nav');
+    if (affNav) affNav.style.display = 'none';
 
     window.tutupModalPilihAnak();
     paparSkrin('ibubapa-dashboard');
@@ -3977,6 +4117,17 @@ window.renderParentDashboard = function () {
 function bukaAksesGuru(mod) { /* obsolete */ }
 
 function bukaModalAksesGuru() {
+    if (window.modAffiliateAktif || document.body.classList.contains('affiliate-mode') || (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim() === 'affiliate') {
+        if (!window.namaMuridAktif || window.namaMuridAktif === 'Tetamu') {
+            window.namaMuridAktif = localStorage.getItem('bunyiKataNamaAffiliate') || 'Affiliate';
+        }
+        window.userAccessLevel = 'pro';
+        localStorage.setItem('bunyiKataAccessLevel', 'pro');
+        window.isGuestMode = false;
+        if (typeof window.syncPlanFlagsFromStorage === 'function') {
+            window.syncPlanFlagsFromStorage();
+        }
+    }
     paparSkrin('main-menu-screen');
 }
 
@@ -5028,8 +5179,9 @@ window.renderLatihanLocks = renderLatihanLocks;
 function renderLatihanLocks() {
     const cards = document.querySelectorAll('#murid-menu-latihan [data-exercise-index]');
     if (!cards.length) return;
-    const data = studentData[namaMuridAktif] || {};
-    const unlocked = modGuruAktif ? latihanSequence.length : getLatihanUnlockIndex();
+    const data = (typeof studentData !== 'undefined' && studentData[namaMuridAktif]) ? studentData[namaMuridAktif] : {};
+    const isUnlockedAll = modGuruAktif || modIbuBapaAktif || modAffiliateAktif || (typeof document !== 'undefined' && document.body && (document.body.classList.contains('affiliate-mode') || document.body.classList.contains('parent-mode') || document.body.classList.contains('teacher-mode')));
+    const unlocked = isUnlockedAll ? latihanSequence.length : getLatihanUnlockIndex();
     cards.forEach(card => {
         const index = Number(card.dataset.exerciseIndex);
         const complete = Boolean(data.latihan && data.latihan[card.dataset.exerciseKey]);
@@ -5037,7 +5189,7 @@ function renderLatihanLocks() {
         card.classList.toggle('is-complete', complete);
         card.setAttribute('aria-disabled', String(index > unlocked && !complete));
         card.onclick = () => {
-            if (index > unlocked && !complete && !modGuruAktif) {
+            if (index > unlocked && !complete && !isUnlockedAll) {
                 paparBantuan('Selesaikan latihan sebelumnya untuk membuka latihan ini.');
                 return;
             }
@@ -5058,13 +5210,14 @@ function getMaxScore(modId) {
 window.getMaxScore = getMaxScore;
 
 function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '', customStars = null) {
-    const userRole = localStorage.getItem('bunyiKataUserRole') || '';
+    const userRole = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
     const teacherName = (localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || '').trim().toUpperCase();
     const isTeacherOrAdmin = userRole === 'guru' || userRole === 'admin' || window.modGuruAktif || window.modAdminAktif || (typeof document !== 'undefined' && document.body && (document.body.classList.contains('teacher-mode') || document.body.classList.contains('admin-mode')));
+    const isAffiliate = userRole === 'affiliate' || window.modAffiliateAktif || (typeof document !== 'undefined' && document.body && document.body.classList.contains('affiliate-mode'));
 
-    // Guru / Admin yang mengakses aplikasi tidak perlu direkodkan bintang atau aktiviti
-    if (isTeacherOrAdmin) {
-        console.log('[REKOD] Mod Guru/Admin aktif: Bintang dan aktiviti tidak direkodkan untuk guru.');
+    // Guru / Admin / Affiliate yang mengakses aplikasi tidak perlu direkodkan bintang atau aktiviti
+    if (isTeacherOrAdmin || isAffiliate) {
+        console.log('[REKOD] Mod Guru/Admin/Affiliate aktif: Bintang dan aktiviti tidak direkodkan.');
         return;
     }
 
@@ -5212,13 +5365,14 @@ window.logProgress = logProgress;
 window.tambahBintangGlobal = function (activityKey, amount) {
     if (!activityKey) return;
 
-    const userRole = localStorage.getItem('bunyiKataUserRole') || '';
+    const userRole = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
     const teacherName = (localStorage.getItem('bunyiKataNamaGuru') || localStorage.getItem('pdf_guru') || '').trim().toUpperCase();
     const isTeacherOrAdmin = userRole === 'guru' || userRole === 'admin' || window.modGuruAktif || window.modAdminAktif || (typeof document !== 'undefined' && document.body && (document.body.classList.contains('teacher-mode') || document.body.classList.contains('admin-mode')));
+    const isAffiliate = userRole === 'affiliate' || window.modAffiliateAktif || (typeof document !== 'undefined' && document.body && document.body.classList.contains('affiliate-mode'));
 
-    // Guru / Admin yang mengakses aplikasi tidak perlu ditambah bintang
-    if (isTeacherOrAdmin) {
-        console.log('[BINTANG] Mod Guru/Admin aktif: Bintang tidak ditambah untuk guru.');
+    // Guru / Admin / Affiliate yang mengakses aplikasi tidak perlu ditambah bintang
+    if (isTeacherOrAdmin || isAffiliate) {
+        console.log('[BINTANG] Mod Guru/Admin/Affiliate aktif: Bintang tidak ditambah.');
         return;
     }
 
@@ -6931,6 +7085,11 @@ window.renderTeacherTable = function () {
 };
 
 window.tukarCarta = function (jenis) {
+    // Sentiasa benarkan mod 'global' lulus; jika tidak, sekat mod
+    // harian/mingguan/bulanan untuk akaun percuma (kedudukan TIDAK direkod)
+    // dan buka popup Pakej Pro sebagai ganti.
+    jenis = jenis === 'global' ? 'global' : 'harian';
+
     document.querySelectorAll('#btn-leaderboard-harian, #btn-leaderboard-mingguan, #btn-leaderboard-bulanan, #btn-leaderboard-global').forEach(btn => {
         btn.classList.remove('bg-yellow');
         btn.classList.add('bg-white');
@@ -6939,6 +7098,20 @@ window.tukarCarta = function (jenis) {
     if (activeBtn) {
         activeBtn.classList.remove('bg-white');
         activeBtn.classList.add('bg-yellow');
+    }
+
+    // Mod percuma: kedudukan harian / mingguan / bulanan tidak direkod —
+    // paparkan kad promosi pakej Pro dan jangan muat turun data kosong.
+    if (jenis !== 'global' && typeof window.isEffectiveTrial === 'function' && window.isEffectiveTrial()) {
+        const grandstandEl = document.getElementById('leaderboard-grandstand');
+        const listEl = document.getElementById('leaderboard-list');
+        if (grandstandEl) grandstandEl.innerHTML = '';
+        if (listEl) listEl.innerHTML = '';
+        if (grandstandEl && typeof leaderboardEmptyNoticeEl === 'function') {
+            const elKosong = leaderboardEmptyNoticeEl();
+            if (elKosong) grandstandEl.appendChild(elKosong);
+        }
+        return;
     }
 
     renderLeaderboard(jenis);
@@ -6965,6 +7138,46 @@ window.addEventListener('kemaskini-profil', () => {
 window.addEventListener('bintang-dikemaskini', () => {
     if (typeof window.invalidateLeaderboardCache === 'function') window.invalidateLeaderboardCache();
 });
+
+// Kad maklumat "senarai kosong" pada Carta Kedudukan.
+// PENTING: Mod percuma TIDAK merekod kedudukan harian / mingguan / bulanan,
+// jadi kad ini menerangkan sebabnya + butang kuning untuk daftar Pakej Pro.
+// Dibina guna DOM API (bukan innerHTML) supaya apostrof/teks selamat.
+function leaderboardEmptyNoticeEl() {
+    const card = document.createElement('div');
+    card.className = 'leaderboard-empty-notice';
+    card.style.cssText = 'grid-column:1/-1;width:100%;box-sizing:border-box;background:#ffffff;color:#000000;border:3px solid var(--color-dark, #1e293b);border-radius:16px;padding:22px 18px;text-align:center;box-shadow:0 4px 0 var(--color-dark, #1e293b);';
+
+    // Tukar peranan mengikut mod semasa (kata kunci "murid" sahaja jika
+    // tiada mod guru/ibu bapa supaya mesej kekal ringkas).
+    const namaPeranan = (window.modGuruAktif || (typeof document !== 'undefined' && document.body && document.body.classList.contains('teacher-mode')))
+        ? 'guru'
+        : ((window.modIbuBapaAktif || (typeof document !== 'undefined' && document.body && document.body.classList.contains('parent-mode')))
+            ? 'ibu bapa'
+            : 'murid');
+
+    const mesej = document.createElement('div');
+    mesej.style.cssText = 'font-weight:800;font-size:0.98rem;line-height:1.5;color:#000000;';
+    mesej.textContent = `Tiada ${namaPeranan} dalam senarai ini. Daftar pakej Pro Bunyi Kata untuk akses kedudukan`;
+    card.appendChild(mesej);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'neo-btn bg-yellow';
+    btn.style.cssText = 'margin:16px auto 0 auto;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;max-width:280px;padding:14px 16px;font-size:0.95rem;font-weight:900;border-radius:14px;color:var(--color-dark, #1e293b);';
+    btn.innerHTML = '<i class="fa-solid fa-crown"></i> Daftar Pakej Pro Bunyi Kata';
+    btn.addEventListener('click', function () {
+        try { if (typeof window.playBubble === 'function') window.playBubble(); } catch (e) { }
+        if (typeof window.openPakejProModal === 'function') {
+            // Peranan guru / ibu bapa buka tab yang betul; jika tidak, kekal
+            // pada tab lalai (guru) seperti tingkah laku biasa.
+            window.openPakejProModal(namaPeranan === 'ibu bapa' ? 'ibubapa' : (namaPeranan === 'guru' ? 'guru' : undefined));
+        }
+    });
+    card.appendChild(btn);
+
+    return card;
+}
 
 window.renderLeaderboard = renderLeaderboard;
 async function renderLeaderboard(jenis = 'harian') {
@@ -7183,7 +7396,8 @@ async function renderLeaderboard(jenis = 'harian') {
     listEl.innerHTML = '';
 
     if (studentsArr.length === 0) {
-        grandstandEl.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:30px; color:#64748b; font-weight:bold;">Tiada murid dalam senarai ini.</div>';
+        const elKosong = leaderboardEmptyNoticeEl();
+        if (elKosong) grandstandEl.appendChild(elKosong);
         return;
     }
 
@@ -19654,8 +19868,21 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
     if (studentName === 'Tetamu' || isExplicitGuest) {
         window.isGuestMode = true;
         window.userAccessLevel = 'trial';
+        window.adminClaimDisahkan = false;
         localStorage.setItem('bunyiKataAccessLevel', 'trial');
         localStorage.removeItem('bunyiKataUserRole');
+        // Isolasi Mod Percuma: buang baki pelan berbayar & kod supaya pengguna
+        // Pro yang masuk mod Tetamu tidak "naik" semula ke Pro melalui logik
+        // dia atas (yang membaca kunci-kunci ini), dan supaya tiada data kelas
+        // murid berdaftar terbawa masuk.
+        localStorage.removeItem('bunyiKataTeacherPlan');
+        localStorage.removeItem('bunyiKataParentPlan');
+        localStorage.removeItem('bunyiKataKodKelas');
+        localStorage.removeItem('bunyiKataKodKelas2');
+        localStorage.removeItem('bunyiKataKodKeluarga');
+        localStorage.removeItem('bunyiKataStudentId');
+        localStorage.removeItem('bunyiKataIsParentChild');
+        window.selectedAvatarIcon = '/images/avatar/avatar1.png';
         if (typeof window.setUserAccessLevel === 'function') {
             window.setUserAccessLevel('trial');
         }
@@ -19682,6 +19909,20 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
         if (typeof window.setUserAccessLevel === 'function') {
             window.setUserAccessLevel(isProStudent ? 'pro' : 'trial');
         }
+    }
+
+    // Isolasi Mod Tetamu: pastikan rekod 'Tetamu' sentiasa bermula bersih supaya
+    // pelawat baharu tidak mewarisi bintang/avatar/kemajuan pemain sebelumnya.
+    if (studentName === 'Tetamu' || isExplicitGuest) {
+        const rekodTetamuBaharu = (typeof studentRecord === 'function')
+            ? studentRecord()
+            : { coins: 0, badges: [], mapsUnlocked: 1, avatar: '/images/avatar/avatar1.png', claimedAvatars: ['/images/avatar/avatar1.png'], scores: {}, stars: {}, latihan: {} };
+        rekodTetamuBaharu.coins = 0;
+        rekodTetamuBaharu.badges = [];
+        rekodTetamuBaharu.mapsUnlocked = 1;
+        rekodTetamuBaharu.avatar = '/images/avatar/avatar1.png';
+        if (typeof window.studentData !== 'undefined') window.studentData[studentName] = rekodTetamuBaharu;
+        if (typeof studentData !== 'undefined') studentData[studentName] = rekodTetamuBaharu;
     }
 
     // Pastikan rekod data murid wujud

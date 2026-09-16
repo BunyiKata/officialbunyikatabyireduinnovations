@@ -8,8 +8,11 @@ import React from "react";
  * - Pembelajaran utama: 4 peta (Kenal Huruf, Suku Kata Asas, Suku Kata Hero,
  *   Bacaan Bergred) — sama seperti MAP_CHALLENGES.
  * - Maklumat ikut mod: Guru / Ibu Bapa / Affiliate.
- * - Pakej sebenar: Percuma, Bulanan RM15, 3 Bulanan Pro RM40, Tahunan Pro RM69
- *   (semua pakej berbayar sama cirinya — beza hanya tempoh; warna oren sama).
+ * - Pakej sebenar: Bulanan Pro RM15, 3 Bulanan Pro RM40, Tahunan Pro RM69
+ *   (semua pakej berbayar sama cirinya — beza hanya tempoh).
+ * - Seksyen Pakej guna reka bentuk 100% SAMA seperti popup PricingProModal:
+ *   tab Guru / Ibu Bapa, kad `.pro-pakej-card`, animasi glow/shine, timer promosi.
+ * - Butang "Daftar" hantar TERUS ke WhatsApp admin (mesejDaftarPakej) — tiada popup.
  * - Butang "Log Masuk" buka popup (kod + pilih mod); "Cuba Percuma" ke skrin log masuk.
  * - Top nav hanya scroll dalam halaman ini (anchor) — tiada tukar skrin.
  */
@@ -19,6 +22,10 @@ interface LandingScreenProps {
   onCubaPercuma?: () => void;
   onLogMasuk?: () => void;
   onOpenPakej?: (tab?: "guru" | "ibubapa") => void;
+  /** Kad pakej landing: hantar terus ke WhatsApp admin (tiada popup). */
+  onDaftarPakej?: (category: "guru" | "ibubapa", namaPakej: string) => void;
+  /** Kad pakej Affiliate landing: hantar terus ke WhatsApp admin (tiada popup). */
+  onDaftarAffiliate?: () => void;
 }
 
 // Logo hero mesti sama animasi seperti skrin log masuk (kelas .glitch-logo).
@@ -158,6 +165,57 @@ const IconShare = () => (
     <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
     <line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/>
     <line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/>
+  </svg>
+);
+
+/* ── Ikon tab pakej (guru / ibu bapa / affiliate) — inline SVG ──
+   Seksyen Pakej landing mesti guna ikon SVG yang SAMA gaya seperti baki
+   halaman ini (IconWhatsapp, IconCheck, …) dan BUKAN kelas Font Awesome
+   `<i class="fa-solid …">`. Sebab: FA dimuatkan secara non-blocking melalui
+   CDN (preload + onload), jadi pada muat pertama ikon fa-* muncul sebagai
+   kotak kosong / tidak kelihatan. Inline SVG sentiasa terpapar serta-merta. */
+const IconChalkboard = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "1.05em", height: "1.05em", flexShrink: 0, display: "inline-block", verticalAlign: "-0.15em" }}>
+    <path d="M2 3h20v14H2z" />
+    <path d="M12 17v4" />
+    <path d="M8 21h8" />
+    <path d="M7 7h10" />
+    <path d="M7 11h6" />
+  </svg>
+);
+
+const IconUsersSolid = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "1.05em", height: "1.05em", flexShrink: 0, display: "inline-block", verticalAlign: "-0.15em" }}>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+
+const IconHandshake = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "1.05em", height: "1.05em", flexShrink: 0, display: "inline-block", verticalAlign: "-0.15em" }}>
+    <path d="m11 17 2 2a1 1 0 1 0 3-3" />
+    <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4" />
+    <path d="m21 3 1 11h-2" />
+    <path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3" />
+    <path d="M3 4h8" />
+  </svg>
+);
+
+const IconHourglass = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "0.72rem", height: "0.72rem", flexShrink: 0, display: "inline-block" }}>
+    <path d="M5 22h14" />
+    <path d="M5 2h14" />
+    <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" />
+    <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
+  </svg>
+);
+
+const IconCircleCheck = ({ style }: { style?: React.CSSProperties }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "1em", height: "1em", flexShrink: 0, display: "inline-block", ...style }}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="m9 12 2 2 4-4" />
   </svg>
 );
 
@@ -375,12 +433,12 @@ const aktivitiSwip: { nama: string; img: string; warna: string }[] = [
 ];
 
 // Maklumat ikut mod — supaya pembeli tahu apa yang diperoleh setiap mod.
-// Setiap mod ada gambar background (gaya sama seperti kad "Kenapa Bunyi Kata").
+// Setiap mod ada gambar background dashboard sebenar dari folder preview.
 const mods = [
   {
     Icon: IconSchool,
     warna: "#ea580c",
-    img: "/images/sampingan/peta-cabaran-huruf.png",
+    img: "/images/preview/preview-dashboard-guru.png",
     tag: "GURU",
     nama: "Mod Guru",
     desc: "Untuk kelas Prasekolah & Pemulihan.",
@@ -393,7 +451,7 @@ const mods = [
   {
     Icon: IconUsers,
     warna: "#2563eb",
-    img: "/images/menu-kad/menu%20asas%20bunyi%20kata/teka%20gambar%20rahsia.png",
+    img: "/images/preview/preview-dashboard-ibubapa.png",
     tag: "IBU BAPA",
     nama: "Mod Ibu Bapa",
     desc: "Pantau anak belajar di rumah.",
@@ -406,7 +464,7 @@ const mods = [
   {
     Icon: IconShare,
     warna: "#7c3aed",
-    img: "/images/menu/fonik%20abc.png",
+    img: "/images/preview/preview-dashboard-affiliate.png",
     tag: "AFFILIATE",
     nama: "Mod Affiliate",
     desc: "Jana komisen promosi Bunyi Kata.",
@@ -427,44 +485,77 @@ const lencanaSwip = [
   { nama: "Lencana Kapten Harta Karun", img: "/images/lencana/lencana-kapten-harta-karun.png", warna: "#8b5cf6" },
 ];
 
-// App preview — guna aset SEBENAR dari projek.
+// App preview — guna aset SEBENAR dari folder preview/rupa-dalam-aplikasi.
 const appPreviews = [
   {
-    img: "/images/sampingan/peta-misi-huruf.png",
-    label: "Misi Kenal Huruf",
-    desc: "Huruf, vokal dan konsonan, fonik ABC",
+    img: "/images/preview/rupa-dalam-aplikasi/misi-asas-bunyi-kata.png",
+    label: "Misi Asas Bunyi Kata",
+    desc: "Kenali nombor, huruf, vokal, dan asas bunyi kata",
     warna: "#90b562",
   },
   {
-    img: "/images/sampingan/peta-misi-suku-kata-asas.png",
+    img: "/images/preview/rupa-dalam-aplikasi/misi-suku-kata-asas.png",
     label: "Misi Suku Kata Asas",
     desc: "KV, KV+KV, V+KV, KVK",
     warna: "#c1a472",
   },
   {
-    img: "/images/sampingan/peta-misi-suku-kata-hero.png",
+    img: "/images/preview/rupa-dalam-aplikasi/misi-suku-kata-hero.png",
     label: "Misi Suku Kata Hero",
-    desc: "KV+KVK, KVK+KV, KVKK",
+    desc: "Galeri 3D Bunyi Kata & persekitaran interaktif",
     warna: "#ff751f",
   },
   {
-    img: "/images/sampingan/peta-misi-bacaan-bergred.png",
+    img: "/images/preview/rupa-dalam-aplikasi/misi-bacaan-bergred.png",
     label: "Misi Bacaan Bergred",
-    desc: "Ayat, petikan dan cerita pendek",
+    desc: "Petikan tahap 1-2, ayat, dan cerita pendek",
     warna: "#ec4899",
   },
   {
-    img: "/images/menu/fonik%20abc.png",
-    label: "Fonik ABC",
-    desc: "Belajar bunyi dan sebutan huruf dengan jelas",
+    img: "/images/preview/rupa-dalam-aplikasi/cuba-sebut.png",
+    label: "Cuba Sebut",
+    desc: "Pengecaman suara dan sebutan perkataan interaktif",
+    warna: "#0ea5e9",
+  },
+  {
+    img: "/images/preview/rupa-dalam-aplikasi/kad-imbasan.png",
+    label: "Kad Imbasan",
+    desc: "Kad imbasan cantum perkataan visual & audio",
+    warna: "#8b5cf6",
+  },
+  {
+    img: "/images/preview/rupa-dalam-aplikasi/tanduk-kata.png",
+    label: "Tanduk Kata",
+    desc: "Permainan aksi arked kembara perkataan",
+    warna: "#ea580c",
+  },
+  {
+    img: "/images/preview/rupa-dalam-aplikasi/puzzle.png",
+    label: "Puzzle",
+    desc: "Cantuman gambar & susun suku kata",
+    warna: "#14b8a6",
+  },
+  {
+    img: "/images/preview/rupa-dalam-aplikasi/rak-buku.png",
+    label: "Rak Buku",
+    desc: "Perpustakaan digital cerita kanak-kanak",
     warna: "#3b82f6",
   },
   {
-    img: "/images/lencana/lencana-naib-raja-bacaan.png",
-    label: "Lencana Pencapaian",
-    desc: "5 lencana rasmi untuk motivasi anak",
-    warna: "#8b5cf6",
+    img: "/images/preview/rupa-dalam-aplikasi/pencapian.png",
+    label: "Pencapaian",
+    desc: "Ganjaran bintang dan animasi kejayaan",
+    warna: "#f59e0b",
   },
+];
+
+// Senarai kad sebelah kanan untuk paparan laptop — kekalkan senarai asal seperti permintaan pengguna
+const appPreviewFeatures = [
+  { label: "Misi Kenal Huruf", warna: "#90b562" },
+  { label: "Misi Suku Kata Asas", warna: "#c1a472" },
+  { label: "Misi Suku Kata Hero", warna: "#ff751f" },
+  { label: "Misi Bacaan Bergred", warna: "#ec4899" },
+  { label: "Fonik ABC", warna: "#3b82f6" },
 ];
 
 const testimoni = [
@@ -808,9 +899,47 @@ export default function LandingScreen({
   onCubaPercuma,
   onLogMasuk,
   onOpenPakej,
+  onDaftarPakej,
+  onDaftarAffiliate,
 }: LandingScreenProps) {
   const [faqBuka, setFaqBuka] = React.useState<number | null>(null);
   const [isShortcutOpen, setIsShortcutOpen] = React.useState(false);
+  // Tab jenis pakej pada kad landing (sama seperti popup Pakej Pro).
+  const [activePakejCategory, setActivePakejCategory] = React.useState<
+    "guru" | "ibubapa" | "affiliate"
+  >("guru");
+  // Timer promosi (sama seperti popup Pakej Pro).
+  const [promoSecondsLeft, setPromoSecondsLeft] = React.useState<number>(() => {
+    if (typeof window === "undefined") return 86400;
+    const saved = localStorage.getItem("bunyiKataPromoTimerExpiry");
+    const now = Date.now();
+    if (saved) {
+      const remaining = Math.floor((parseInt(saved, 10) - now) / 1000);
+      if (remaining > 0 && remaining <= 86400) return remaining;
+    }
+    const newExpiry = now + 24 * 60 * 60 * 1000;
+    localStorage.setItem("bunyiKataPromoTimerExpiry", newExpiry.toString());
+    return 86400;
+  });
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setPromoSecondsLeft((prev) => {
+        if (prev <= 1) {
+          const newExpiry = Date.now() + 24 * 60 * 60 * 1000;
+          localStorage.setItem("bunyiKataPromoTimerExpiry", newExpiry.toString());
+          return 86400;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const formatPromoTimer = (secs: number) => {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    return `${String(h).padStart(2, "0")}j ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
+  };
   useScrollReveal();
   useSectionPopup();
 
@@ -914,7 +1043,7 @@ export default function LandingScreen({
                 </span>
               </h1>
               <p className="landing-hero-sub">
-                Bunyi Kata menggabungkan sebutan suku kata bersuara, mini permainan dan ganjaran lencana untuk membantu anak mengenal huruf dan belajar membaca, pada telefon, tablet atau komputer.
+                Aplikasi mengenal huruf dan suku kata yang sesuai untuk murid Prasekolah dan murid Pemulihan Khas. Bunyi Kata terbahagi kepada dua bahagian utama iaitu Pembelajaran dan Latihan. Elemen gamifikasi yang ditekankan membawa kepada keseronokan dalam pembelajaran.
               </p>
               <div className="landing-hero-cta">
                 <button
@@ -1040,7 +1169,7 @@ export default function LandingScreen({
               />
             </div>
             <div className="landing-preview-feature-list landing-reveal landing-reveal-right" style={{flex:"1 1 300px"}}>
-              {appPreviews.map((item, i) => (
+              {appPreviewFeatures.map((item, i) => (
                 <div className="landing-preview-feature-item" key={item.label} style={{"--delay": `${i * 60}ms`} as React.CSSProperties}>
                   <div className="landing-preview-feature-dot" style={{ backgroundColor: item.warna }} />
                   <div>
@@ -1194,122 +1323,543 @@ export default function LandingScreen({
           </div>
         </section>
 
-        {/* ===== PAKEJ ===== */}
+        {/* ===== PAKEJ (gaya 100% sama seperti popup Pakej Pro) ===== */}
         <section className="landing-section landing-section-alt landing-section-pop" id="pakej">
           <div className="landing-section-head landing-reveal">
             <span className="landing-kicker">Pakej</span>
             <h2 className="landing-h2">Pilih Yang Sesuai Untuk Anda</h2>
             <p className="landing-section-sub">
-              Mula percuma, naik taraf bila dah bersedia. Bulanan, 3 bulan atau tahunan — semua pakej berbayar sama cirinya, beza hanya tempoh.
+              Pilih pakej mengikut keperluan anda. Semua pakej berbayar sama cirinya — beza hanya tempoh. Tekan “Daftar” untuk terus berhubung dengan admin melalui WhatsApp.
             </p>
           </div>
-          <div className="landing-grid landing-grid-pakej">
-            <div className="landing-card landing-pakej landing-reveal">
-              <div className="landing-pakej-head">
-                <span className="landing-pakej-tag landing-tag-gratis">Percuma</span>
-                <span className="landing-pakej-untuk">Semua</span>
-              </div>
-              <h3 className="landing-pakej-nama">Cuba Percuma</h3>
-              <div className="landing-pakej-harga">
-                <span className="landing-pakej-rm">RM</span>0
-              </div>
-              <p className="landing-pakej-note">Selamanya. Untuk mula kenal huruf.</p>
-              <ul className="landing-pakej-senarai">
-                <li><IconCheck /> Peta Kenal Huruf</li>
-                <li><IconCheck /> Aktiviti terpilih</li>
-                <li><IconCheck /> Tanpa daftar akaun</li>
-              </ul>
+
+          <div className="landing-pakej-wrap landing-reveal">
+            {/* Tab jenis pakej: Guru / Ibu Bapa / Affiliate — ciri kad bertukar ikut tab */}
+            <div className="landing-pakej-tabs">
               <button
-                className="landing-btn landing-btn-outline landing-btn-block"
-                onClick={onCubaPercuma}
+                className={`neo-btn pakej-tab-btn ${activePakejCategory === "guru" ? "bg-orange" : "bg-white"}`}
+                style={{
+                  flex: 1,
+                  maxWidth: "200px",
+                  padding: "9px 14px",
+                  fontSize: "0.95rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  whiteSpace: "nowrap",
+                  color: activePakejCategory === "guru" ? "white" : "var(--color-dark)",
+                  border: "2.5px solid var(--color-dark)",
+                }}
+                onClick={() => setActivePakejCategory("guru")}
               >
-                Cuba Sekarang
+                <IconChalkboard /> Pakej Guru
+              </button>
+              <button
+                className={`neo-btn pakej-tab-btn ${activePakejCategory === "ibubapa" ? "bg-blue" : "bg-white"}`}
+                style={{
+                  flex: 1,
+                  maxWidth: "200px",
+                  padding: "9px 14px",
+                  fontSize: "0.95rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  whiteSpace: "nowrap",
+                  color: activePakejCategory === "ibubapa" ? "white" : "var(--color-dark)",
+                  border: "2.5px solid var(--color-dark)",
+                }}
+                onClick={() => setActivePakejCategory("ibubapa")}
+              >
+                <IconUsersSolid /> Pakej Ibu Bapa
+              </button>
+              <button
+                className={`neo-btn pakej-tab-btn ${activePakejCategory === "affiliate" ? "bg-purple" : "bg-white"}`}
+                style={{
+                  flex: 1,
+                  maxWidth: "200px",
+                  padding: "9px 14px",
+                  fontSize: "0.95rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  whiteSpace: "nowrap",
+                  color: activePakejCategory === "affiliate" ? "white" : "var(--color-dark)",
+                  border: "2.5px solid var(--color-dark)",
+                }}
+                onClick={() => setActivePakejCategory("affiliate")}
+              >
+                <IconHandshake /> Pakej Affiliate
               </button>
             </div>
 
-            <div className="landing-pakej-card landing-reveal">
-              <div className="landing-pakej-card-inner">
-                <div className="landing-shine-sweep" aria-hidden="true"></div>
-                <div>
-                  <div className="landing-pakej-head">
-                    <span className="landing-pakej-tag landing-tag-bulanan">1 BULAN</span>
-                    <span className="landing-pakej-untuk">Guru &amp; Ibu Bapa</span>
-                  </div>
-                  <h3 className="landing-pakej-nama">Bulanan</h3>
-                  <div className="landing-pakej-harga">
-                    <span className="landing-pakej-rm">RM</span>15
-                    <span className="landing-pakej-bulan">/bulan</span>
-                  </div>
-                  <p className="landing-pakej-note">Guru: 2 kelas serentak &nbsp;•&nbsp; Ibu Bapa: 3 profil anak.</p>
-                  <ul className="landing-pakej-senarai">
-                    <li><IconCheck /> Semua 4 peta &amp; aktiviti</li>
-                    <li><IconCheck /> Guru: 2 Kod Kelas &nbsp;•&nbsp; Ibu Bapa: Kod Keluarga</li>
-                    <li><IconCheck /> Laporan &amp; sijil boleh dimuat turun</li>
-                  </ul>
-                </div>
-                <button
-                  className="neo-btn bg-orange btn-daftar-glow-orange landing-daftar-btn"
-                  onClick={() => onOpenPakej && onOpenPakej("ibubapa")}
-                >
-                  <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
-                </button>
-              </div>
-            </div>
+            {/* Grid kad pakej — guna kelas pro-pakej-card (sama seperti popup) */}
+            <div
+              className="pakej-grid-container"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(215px, 1fr))",
+                gap: "14px",
+                marginBottom: "20px",
+                textAlign: "left",
+              }}
+            >
+              {activePakejCategory !== "affiliate" && (
+                <>
+              {/* Kad 1: Bulanan Pro */}
+              <div className="pro-pakej-card">
+                <div className="pro-pakej-card-inner" style={{ padding: "16px 14px" }}>
+                  <div className="shine-sweep-overlay"></div>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                      <div
+                        style={{
+                          display: "inline-block",
+                          backgroundColor: "#ea580c",
+                          color: "#ffffff",
+                          fontSize: "0.72rem",
+                          fontWeight: "900",
+                          letterSpacing: "0.5px",
+                          textTransform: "uppercase",
+                          padding: "2px 8px",
+                          borderRadius: "6px",
+                          border: "1.5px solid var(--color-dark)",
+                          boxShadow: "1px 1px 0 var(--color-dark)",
+                        }}
+                      >
+                        {activePakejCategory === "guru" ? "2 KELAS" : "3 PROFIL ANAK"}
+                      </div>
+                    </div>
+                    <h3 style={{ fontSize: "1.15rem", margin: "0 0 4px 0", color: "var(--color-dark)", fontWeight: "bold" }}>
+                      Bulanan Pro
+                    </h3>
 
-            <div className="landing-pakej-card landing-pakej-card-unggul landing-reveal">
-              <div className="landing-pakej-card-inner">
-                <div className="landing-shine-sweep" aria-hidden="true"></div>
-                <div className="landing-pakej-head">
-                  <span className="landing-pakej-tag landing-tag-bulanan">3 BULAN</span>
-                  <span className="landing-pakej-untuk">Guru &amp; Ibu Bapa</span>
-                </div>
-                <h3 className="landing-pakej-nama">3 Bulanan Pro</h3>
-                <div className="landing-pakej-harga">
-                  <span className="landing-pakej-rm">RM</span>40
-                  <span className="landing-pakej-bulan">/3 bulan</span>
-                </div>
-                <p className="landing-pakej-note">Guru: 2 kelas serentak &nbsp;•&nbsp; Ibu Bapa: 3 profil anak.</p>
-                <ul className="landing-pakej-senarai">
-                  <li><IconCheck /> Guru: sehingga 2 kelas serentak</li>
-                  <li><IconCheck /> Ibu Bapa: sehingga 3 profil anak</li>
-                  <li><IconCheck /> Laporan &amp; sijil boleh dimuat turun</li>
-                </ul>
-                <button
-                  className="neo-btn bg-orange btn-daftar-glow-orange landing-daftar-btn"
-                  onClick={() => onOpenPakej && onOpenPakej("guru")}
-                >
-                  <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
-                </button>
-              </div>
-            </div>
+                    {/* Harga asal (strike) & lencana diskaun */}
+                    <div className="original-price-box" style={{ marginBottom: "4px" }}>
+                      <span className="original-price-strike">RM99</span>
+                      <span className="discount-tag-badge">-85% OFF</span>
+                    </div>
 
-            <div className="landing-pakej-card landing-reveal">
-              <div className="landing-pakej-card-inner">
-                <div className="landing-shine-sweep" aria-hidden="true"></div>
-                <div>
-                  <div className="landing-pakej-head">
-                    <span className="landing-pakej-tag landing-tag-jimat">1 TAHUN</span>
-                    <span className="landing-pakej-untuk">Guru &amp; Ibu Bapa</span>
+                    {/* Animasi masa sahaja */}
+                    <div
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
+                        border: "1.5px solid #f43f5e",
+                        borderRadius: "8px",
+                        padding: "4px 8px",
+                        margin: "4px 0 8px 0",
+                        boxShadow: "0 1.5px 0 var(--color-dark)",
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: "18px",
+                          height: "18px",
+                          borderRadius: "50%",
+                          backgroundColor: "#e11d48",
+                          color: "white",
+                          fontSize: "0.68rem",
+                          animation: "timerIconSpin 3s linear infinite",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <IconHourglass />
+                      </span>
+                      <span style={{ fontSize: "0.95rem", fontWeight: "900", color: "#e11d48", letterSpacing: "0.6px", fontFamily: "monospace" }}>
+                        {formatPromoTimer(promoSecondsLeft)}
+                      </span>
+                    </div>
+
+                    <div className="price-tag" style={{ fontSize: "1.6rem", fontWeight: "900", color: "#0f766e", marginBottom: "10px", letterSpacing: "-0.5px" }}>
+                      RM15{" "}
+                      <span style={{ fontSize: "0.8rem", color: "#475569", fontWeight: "bold" }}>/ bulan</span>
+                    </div>
+                    <ul
+                      style={{
+                        listStyle: "none",
+                        padding: 0,
+                        margin: 0,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "7px",
+                        fontSize: "0.83rem",
+                        color: "#334155",
+                        lineHeight: "1.35",
+                      }}
+                    >
+                      {activePakejCategory === "guru" ? (
+                        <>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>2 Kelas Serentak</b> (Sehingga 80 murid)</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>Semua 4 Peta &amp; Aktiviti</b> Terbuka</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>2 Kod Kelas</b> Unik</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span>Muat Turun Laporan &amp; Sijil (2 Kelas)</span>
+                          </li>
+                        </>
+                      ) : (
+                        <>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>Sehingga 3 Profil Anak</b> Serentak</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>Semua 4 Peta &amp; Latihan</b> Terbuka</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>Kod Keluarga Khas</b> untuk 3 Anak</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span>Laporan Prestasi &amp; Sijil Setiap Anak</span>
+                          </li>
+                        </>
+                      )}
+                    </ul>
                   </div>
-                  <h3 className="landing-pakej-nama">Tahunan Pro</h3>
-                  <div className="landing-pakej-harga">
-                    <span className="landing-pakej-rm">RM</span>69
-                    <span className="landing-pakej-bulan">/tahun</span>
-                  </div>
-                  <p className="landing-pakej-note">Akses penuh 365 hari, paling jimat (RM5.75/bulan).</p>
-                  <ul className="landing-pakej-senarai">
-                    <li><IconCheck /> Semua ciri Pro selama 1 tahun</li>
-                    <li><IconCheck /> Guru: 2 kelas • Ibu Bapa: 3 anak</li>
-                    <li><IconCheck /> Laporan &amp; sijil setiap murid/anak</li>
-                  </ul>
+
+                  <button
+                    className={`neo-btn ${activePakejCategory === "guru" ? "bg-orange btn-daftar-glow-orange" : "bg-blue btn-daftar-glow-blue"}`}
+                    style={{
+                      width: "100%",
+                      marginTop: "14px",
+                      padding: "9px",
+                      fontSize: "0.98rem",
+                      color: "white",
+                      fontWeight: "bold",
+                      justifyContent: "center",
+                    }}
+                    onClick={() => onDaftarPakej && onDaftarPakej(activePakejCategory, "Bulanan Biasa")}
+                  >
+                    <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
+                  </button>
                 </div>
-                <button
-                  className="neo-btn bg-orange btn-daftar-glow-orange landing-daftar-btn"
-                  onClick={() => onOpenPakej && onOpenPakej("guru")}
-                >
-                  <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
-                </button>
               </div>
+
+              {/* Kad 2: 3 Bulanan Pro */}
+              <div className="pro-pakej-card">
+                <div className="pro-pakej-card-inner" style={{ padding: "16px 14px" }}>
+                  <div className="shine-sweep-overlay"></div>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                      <div
+                        style={{
+                          display: "inline-block",
+                          backgroundColor: "#0284c7",
+                          color: "#ffffff",
+                          fontSize: "0.72rem",
+                          fontWeight: "900",
+                          letterSpacing: "0.5px",
+                          textTransform: "uppercase",
+                          padding: "2px 8px",
+                          borderRadius: "6px",
+                          border: "1.5px solid var(--color-dark)",
+                          boxShadow: "1px 1px 0 var(--color-dark)",
+                        }}
+                      >
+                        {activePakejCategory === "guru" ? "2 KELAS" : "3 PROFIL ANAK"}
+                      </div>
+                    </div>
+                    <h3 style={{ fontSize: "1.15rem", margin: "0 0 4px 0", color: "var(--color-dark)", fontWeight: "bold" }}>
+                      3 Bulanan Pro
+                    </h3>
+
+                    <div className="original-price-box" style={{ marginBottom: "4px" }}>
+                      <span className="original-price-strike">RM150</span>
+                      <span className="discount-tag-badge">-73% OFF</span>
+                    </div>
+
+                    <div className="price-tag" style={{ fontSize: "1.6rem", fontWeight: "900", color: "#0f766e", marginBottom: "10px", letterSpacing: "-0.5px" }}>
+                      RM40{" "}
+                      <span style={{ fontSize: "0.8rem", color: "#475569", fontWeight: "bold" }}>/ 3 bulan</span>
+                    </div>
+                    <ul
+                      style={{
+                        listStyle: "none",
+                        padding: 0,
+                        margin: 0,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "7px",
+                        fontSize: "0.83rem",
+                        color: "#334155",
+                        lineHeight: "1.35",
+                      }}
+                    >
+                      {activePakejCategory === "guru" ? (
+                        <>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>2 Kelas Serentak</b> (Akses 90 Hari)</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>Semua 4 Peta &amp; Aktiviti</b> Terbuka</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>2 Kod Kelas</b> Unik</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span>Muat Turun Laporan &amp; Sijil (2 Kelas)</span>
+                          </li>
+                        </>
+                      ) : (
+                        <>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>Sehingga 3 Profil Anak</b> (Akses 90 Hari)</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>Semua 4 Peta &amp; Latihan</b> Terbuka</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>Kod Keluarga Khas</b> untuk 3 Anak</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span>Laporan Prestasi &amp; Sijil Setiap Anak</span>
+                          </li>
+                        </>
+                      )}
+                    </ul>
+                  </div>
+
+                  <button
+                    className={`neo-btn ${activePakejCategory === "guru" ? "bg-orange btn-daftar-glow-orange" : "bg-blue btn-daftar-glow-blue"}`}
+                    style={{
+                      width: "100%",
+                      marginTop: "14px",
+                      padding: "9px",
+                      fontSize: "0.98rem",
+                      color: "white",
+                      fontWeight: "bold",
+                      justifyContent: "center",
+                    }}
+                    onClick={() => onDaftarPakej && onDaftarPakej(activePakejCategory, "3 Bulan")}
+                  >
+                    <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
+                  </button>
+                </div>
+              </div>
+              {/* Kad 3: Tahunan Pro */}
+              <div className="pro-pakej-card">
+                <div className="pro-pakej-card-inner" style={{ padding: "16px 14px" }}>
+                  <div className="shine-sweep-overlay"></div>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                      <div
+                        style={{
+                          display: "inline-block",
+                          backgroundColor: "#dc2626",
+                          color: "#ffffff",
+                          fontSize: "0.72rem",
+                          fontWeight: "900",
+                          letterSpacing: "0.5px",
+                          textTransform: "uppercase",
+                          padding: "2px 8px",
+                          borderRadius: "6px",
+                          border: "1.5px solid var(--color-dark)",
+                          boxShadow: "1px 1px 0 var(--color-dark)",
+                        }}
+                      >
+                        PAKEJ TAHUNAN
+                      </div>
+                    </div>
+                    <h3 style={{ fontSize: "1.15rem", margin: "0 0 4px 0", color: "var(--color-dark)", fontWeight: "bold" }}>
+                      Tahunan Pro
+                    </h3>
+
+                    <div className="original-price-box" style={{ marginBottom: "4px" }}>
+                      <span className="original-price-strike">RM199</span>
+                      <span className="discount-tag-badge">-65% OFF</span>
+                    </div>
+
+                    <div className="price-tag" style={{ fontSize: "1.6rem", fontWeight: "900", color: "#0f766e", marginBottom: "10px", letterSpacing: "-0.5px" }}>
+                      RM69{" "}
+                      <span style={{ fontSize: "0.8rem", color: "#475569", fontWeight: "bold" }}>/ tahun</span>
+                    </div>
+                    <ul
+                      style={{
+                        listStyle: "none",
+                        padding: 0,
+                        margin: 0,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "7px",
+                        fontSize: "0.83rem",
+                        color: "#334155",
+                        lineHeight: "1.35",
+                      }}
+                    >
+                      {activePakejCategory === "guru" ? (
+                        <>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>2 Kelas</b> Akses 365 Hari</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>Semua 4 Peta &amp; Aktiviti</b> Terbuka</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span>Laporan &amp; Sijil Tanpa Had</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span>Sokongan Keutamaan Pentadbir</span>
+                          </li>
+                        </>
+                      ) : (
+                        <>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>Sehingga 3 Profil Anak</b> (365 Hari)</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>Semua 4 Peta &amp; Latihan</b> Terbuka</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span>Laporan &amp; Sijil Lengkap Tanpa Had</span>
+                          </li>
+                          <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                            <IconCircleCheck style={{ color: "#10b981", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                            <span><b>Penjimatan Maksimum</b> (RM5.75/bln)</span>
+                          </li>
+                        </>
+                      )}
+                    </ul>
+                  </div>
+
+                  <button
+                    className={`neo-btn ${activePakejCategory === "guru" ? "bg-orange btn-daftar-glow-orange" : "bg-blue btn-daftar-glow-blue"}`}
+                    style={{
+                      width: "100%",
+                      marginTop: "14px",
+                      padding: "9px",
+                      fontSize: "0.98rem",
+                      color: "white",
+                      fontWeight: "bold",
+                      justifyContent: "center",
+                    }}
+                    onClick={() => onDaftarPakej && onDaftarPakej(activePakejCategory, "1 Tahun")}
+                  >
+                    <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
+                  </button>
+                </div>
+              </div>
+                </>
+              )}
+
+              {/* Kad Affiliate: RM5 (tema ungu) — tiada bulanan/tahunan, terus ke admin */}
+              {activePakejCategory === "affiliate" && (
+                <div className="pro-pakej-card kad-affiliate">
+                  <div className="pro-pakej-card-inner" style={{ padding: "16px 14px" }}>
+                    <div className="shine-sweep-overlay"></div>
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                        <div
+                          style={{
+                            display: "inline-block",
+                            backgroundColor: "#7c3aed",
+                            color: "#ffffff",
+                            fontSize: "0.72rem",
+                            fontWeight: "900",
+                            letterSpacing: "0.5px",
+                            textTransform: "uppercase",
+                            padding: "2px 8px",
+                            borderRadius: "6px",
+                            border: "1.5px solid var(--color-dark)",
+                            boxShadow: "1px 1px 0 var(--color-dark)",
+                          }}
+                        >
+                          RM5 SAHAJA
+                        </div>
+                      </div>
+                      <h3 style={{ fontSize: "1.15rem", margin: "0 0 4px 0", color: "var(--color-dark)", fontWeight: "bold" }}>
+                        Pakej Affiliate
+                      </h3>
+
+                      <div className="price-tag" style={{ fontSize: "1.6rem", fontWeight: "900", color: "#7c3aed", marginBottom: "10px", letterSpacing: "-0.5px" }}>
+                        RM5{" "}
+                        <span style={{ fontSize: "0.8rem", color: "#475569", fontWeight: "bold" }}>/ sekali sahaja</span>
+                      </div>
+
+                      <ul
+                        style={{
+                          listStyle: "none",
+                          padding: 0,
+                          margin: 0,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "7px",
+                          fontSize: "0.83rem",
+                          color: "#334155",
+                          lineHeight: "1.35",
+                        }}
+                      >
+                        <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                          <IconCircleCheck style={{ color: "#7c3aed", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                          <span><b>Kod Rujukan Unik</b> Sendiri</span>
+                        </li>
+                        <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                          <IconCircleCheck style={{ color: "#7c3aed", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                          <span><b>Komisen</b> Setiap Rujukan Berjaya</span>
+                        </li>
+                        <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                          <IconCircleCheck style={{ color: "#7c3aed", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                          <span><b>Papan Pemuka</b> Pantau Rujukan &amp; Komisen</span>
+                        </li>
+                        <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                          <IconCircleCheck style={{ color: "#7c3aed", marginTop: "2px", width: "1.05em", height: "1.05em" }} />
+                          <span>Bayaran Komisen <b>Telus &amp; Terus</b></span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      className="neo-btn bg-purple btn-daftar-glow-purple"
+                      style={{
+                        width: "100%",
+                        marginTop: "14px",
+                        padding: "9px",
+                        fontSize: "0.98rem",
+                        color: "white",
+                        fontWeight: "bold",
+                        justifyContent: "center",
+                      }}
+                      onClick={() => onDaftarAffiliate && onDaftarAffiliate()}
+                    >
+                      <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>

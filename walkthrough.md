@@ -193,4 +193,78 @@ Semua 5 isu dan maklum balas daripada rakaman audio dan tangkap layar pengguna t
    - Semakan silang dilakukan pada peringkat pangkalan data (`profiles`), Firebase Authentication (`auth/email-already-in-use`), dan pra-semakan antaramuka klien sebelum borang dihantar dengan mesej amaran jelas.
    - Sesi log masuk kini secara automatik mengekalkan peranan pendaftaran asal pengguna (`user.peranan`).
 
+---
 
+## 9. Penambahbaikan Mod Affiliate: Akses Penuh (Versi Pro) Tanpa Rekod Database & Pembaikan Navigasi
+
+### Keperluan Pengguna:
+1. **Akses Penuh Mod Affiliate**:
+   - Mod Affiliate mesti mendapat akses penuh kepada semua kandungan pembelajaran (Peta 1, 2, 3, 4), semua permainan, suku kata, dan aktiviti interaktif sama seperti akaun berbayar / Mod Guru / Mod Ibu Bapa.
+   - Tetapi sebarang aktiviti dalam mod ini **TIDAK** direkodkan ke dalam pangkalan data (Firebase Realtime Database) untuk bintang, skor, lencana, sijil, atau rekod murid.
+2. **Pembaikan Pertindihan Navigasi (Top Nav & Student Nav)**:
+   - Navigasi murid (`[ i ] [ Profil ] [ Lencana ] [ Kedudukan ] [ Keluar ]`) tidak boleh muncul di belakang atau bertindih dengan bar navigasi affiliate (`[ Affiliate ] [ Rujukan ] [ Kod ] [ Akses ] [ Keluar ]`).
+   - Paparan Mod Affiliate mesti bersih dan konsisten dengan Mod Guru dan Mod Ibu Bapa: banner atas ungu bertulis `[ 🏢 MOD AFFILIATE ]` dan bar navigasi lekat affiliate sahaja.
+
+### Tindakan Pembaikan:
+1. **Akses Penuh untuk Mod Affiliate**:
+   - Dalam [public/app-logic.js](file:///c:/Users/User/Desktop/bunyi-kata-offcial/public/app-logic.js):
+     - `window.isEffectiveTrial` dan `window.checkIsTrial()` mengembalikan `false` (bukan trial / akses Pro penuh) apabila mod affiliate aktif (`modAffiliateAktif` / `role === 'affiliate'`).
+     - `bukaModalAksesGuru()` menetapkan tahap akses ke `pro` dan `bunyiKataAccessLevel = 'pro'` apabila affiliate membuka skrin menu utama atau latihan.
+     - `renderLatihanLocks()` membuka kunci kesemua modul latihan (`latihanSequence.length`) untuk mod affiliate.
+   - Dalam [src/App.tsx](file:///c:/Users/User/Desktop/bunyi-kata-offcial/src/App.tsx):
+     - Memperkenalkan pembolehubah `isAffiliateRole` yang menganggap pelan affiliate sebagai pelan berbayar penuh (`isPaidPlan = true`, `efektifTrialState = false`).
+     - Menambah pendengar acara `affiliate-mode-change` dalam `useEffect` supaya status akses segera disegerakkan ke seluruh aplikasi.
+2. **Penyekatan Simpanan ke Pangkalan Data & Storan Murid**:
+   - Dalam [public/app-logic.js](file:///c:/Users/User/Desktop/bunyi-kata-offcial/public/app-logic.js):
+     - `saveStudentData()` mengembalikan nilai serta-merta tanpa menyimpan atau menyegerakkan sebarang data ke Firebase apabila mod affiliate aktif.
+     - `logProgress()` dan `window.tambahBintangGlobal()` menyekat sebarang penambahan bintang atau aktiviti apabila mod affiliate aktif.
+   - Dalam [src/services/firebaseService.ts](file:///c:/Users/User/Desktop/bunyi-kata-offcial/src/services/firebaseService.ts):
+     - Menambah pembantu `isAffiliateActiveSession()`.
+     - Melindungi fungsi `syncStudentToFirebase`, `saveScoreToFirebase`, `recordStudentBadge`, dan `saveCertificate` dengan sekatan awal jika mod affiliate dikesan.
+3. **Penyelesaian Pertindihan Navigasi Murid (CSS & JS)**:
+   - Dalam [public/styles.css](file:///c:/Users/User/Desktop/bunyi-kata-offcial/public/styles.css) dan [src/index.css](file:///c:/Users/User/Desktop/bunyi-kata-offcial/src/index.css):
+     - Menambah sekatan spesifik `body:not(.affiliate-mode):has(#main-menu-screen.active) #student-global-nav` supaya nav murid tidak diaktifkan.
+     - Menambah peraturan tegas `body.affiliate-mode #student-global-nav, body.affiliate-mode #student-global-nav * { display: none !important; visibility: hidden !important; pointer-events: none !important; }`.
+     - Memastikan padding atas pada skrin menu dan papan pemuka affiliate teratur dengan kemas tanpa bertindih.
+   - Dalam [public/app-logic.js](file:///c:/Users/User/Desktop/bunyi-kata-offcial/public/app-logic.js):
+     - Fungsi `paparSkrin()` memastikan `sNav.style.display = 'none'` setiap kali paparan beralih dalam mod affiliate.
+
+### Pengesahan & Ujian:
+- `npx tsc --noEmit` — **Lulus (0 ralat TypeScript)**.
+
+---
+
+## 10. Kemas Kini Landing Page: Gambar "Rupa Dalam Aplikasi" & Gambar Dashboard "Maklumat Ikut Mod"
+
+### Keperluan Pengguna:
+1. **Rupa Dalam Aplikasi (Landing Page)**:
+   - Gantikan gambar pratonton dengan kesemua 10 tangkap layar sebenar dalam aplikasi dari folder `public/images/preview/rupa-dalam-aplikasi/`.
+   - Nama kapsyen mengikut nama fail tangkap layar dalam subfolder berkenaan.
+   - Kekalkan senarai kad sebelah kanan untuk paparan laptop (`Misi Kenal Huruf`, `Misi Suku Kata Asas`, `Misi Suku Kata Hero`, `Misi Bacaan Bergred`, `Fonik ABC`) tanpa dipanjangkan berlebihan.
+2. **Maklumat Ikut Mod (Mod Guru, Mod Ibu Bapa, Mod Affiliate)**:
+   - Gantikan latar belakang kad mod dengan tangkap layar papan pemuka sebenar dari folder `public/images/preview/`:
+     - **Mod Guru**: `preview-dashboard-guru.png`
+     - **Mod Ibu Bapa**: `preview-dashboard-ibubapa.png`
+     - **Mod Affiliate**: `preview-dashboard-affiliate.png`
+3. **Skop Terhad**:
+   - Perubahan hanya diaplikasikan pada Landing Page (`src/components/screens/LandingScreen.tsx`).
+
+### Tindakan Pembaikan:
+- Di [src/components/screens/LandingScreen.tsx](file:///c:/Users/User/Desktop/bunyi-kata-offcial/src/components/screens/LandingScreen.tsx):
+  - Mengemas kini array `mods` dengan imej papan pemuka sebenar bagi setiap mod.
+  - Memasukkan 10 gambar `appPreviews` dari `public/images/preview/rupa-dalam-aplikasi/` dengan kapsyen padanan:
+    1. `Misi Asas Bunyi Kata` (`misi-asas-bunyi-kata.png`)
+    2. `Misi Suku Kata Asas` (`misi-suku-kata-asas.png`)
+    3. `Misi Suku Kata Hero` (`misi-suku-kata-hero.png`)
+    4. `Misi Bacaan Bergred` (`misi-bacaan-bergred.png`)
+    5. `Cuba Sebut` (`cuba-sebut.png`)
+    6. `Kad Imbasan` (`kad-imbasan.png`)
+    7. `Tanduk Kata` (`tanduk-kata.png`)
+    8. `Puzzle` (`puzzle.png`)
+    9. `Rak Buku` (`rak-buku.png`)
+    10. `Pencapaian` (`pencapian.png`)
+  - Mengasingkan senarai kad paparan komputer riba (`appPreviewFeatures`) untuk mengekalkan 5 senarai kad asal yang padat di sebelah kanan.
+
+### Status Ujian:
+- `npx tsc --noEmit` — **0 ralat (Lulus Bersih)**.
+- Dev server Vite menyegerakkan HMR secara langsung di `http://localhost:3000`.

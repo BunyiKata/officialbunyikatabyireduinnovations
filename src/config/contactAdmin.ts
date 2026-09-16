@@ -63,14 +63,25 @@ export function kosongkanKodRujukan(): void {
 
 /**
  * Bina mesej pendaftaran mengikut EJAAN RASMI yang dipersetujui:
- *   Saya berminat dapatkan Bunyi Kata Pakej "3 Bulan (Pro)" 🙌🏻 (Bunyi Kata - BK7X2K)
+ *   Saya berminat dapatkan Bunyi Kata Pakej "3 Bulan (Pro)" 🙌 (Bunyi Kata - BK7X2K)
  * Jika tiada kod rujukan, kurungan di hujung DIGUGURKAN sepenuhnya:
- *   Saya berminat dapatkan Bunyi Kata Pakej "3 Bulan (Pro)" 🙌🏻
+ *   Saya berminat dapatkan Bunyi Kata Pakej "3 Bulan (Pro)" 🙌
+ *
+ * NOTA emoji: guna "🙌" TANPA pengubah warna kulit (skin-tone). Versi "🙌🏻"
+ * (U+1F64C U+1F3FB) muncul sebagai dua aksara / kotak rosak pada sesetengah
+ * peranti, jadi kita kekalkan emoji asas yang disokong meluas.
  */
 export function mesejDaftarPakej(namaPakej: string, kodRujukan?: string): string {
   const nama = (namaPakej || "").trim();
   const kod = (kodRujukan ?? ambilKodRujukan()).trim().toUpperCase();
-  const asas = `Saya berminat dapatkan Bunyi Kata Pakej "${nama}" 🙌🏻`;
+  const asas = `Saya berminat dapatkan Bunyi Kata Pakej "${nama}" 🙌`;
+  return kod ? `${asas} (Bunyi Kata - ${kod})` : asas;
+}
+
+/** Mesej rasmi pendaftaran Pakej Affiliate (sama gaya seperti pakej pro, khas affiliate). */
+export function mesejDaftarAffiliate(kodRujukan?: string): string {
+  const kod = (kodRujukan ?? ambilKodRujukan()).trim().toUpperCase();
+  const asas = "Saya berminat daftar Pakej Affiliate Bunyi Kata (RM5) 🙌";
   return kod ? `${asas} (Bunyi Kata - ${kod})` : asas;
 }
 

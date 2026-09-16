@@ -1,8 +1,8 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { loginWithEmail, sendPasswordResetEmail, logout } from "../../services/authService";
-import { hubungiAdminWhatsapp } from "../../config/contactAdmin";
+import { hubungiAdminWhatsapp, mesejDaftarAffiliate } from "../../config/contactAdmin";
 import {
   syncTeacherSessionFromFirebase,
   syncParentSessionFromFirebase,
@@ -736,6 +736,10 @@ export function AuthModal({
 
                             const affName = user?.nama || "Affiliate";
                             localStorage.setItem("bunyiKataNamaAffiliate", affName);
+                            const affKod = user?.kod || user?.affiliate_kod || localStorage.getItem("bunyiKataAffiliateKod") || "";
+                            if (affKod) localStorage.setItem("bunyiKataAffiliateKod", affKod);
+                            const affEmail = user?.email || localStorage.getItem("bunyiKataAffiliateEmail") || "";
+                            if (affEmail) localStorage.setItem("bunyiKataAffiliateEmail", affEmail);
 
                             onClose();
                             (window as any).masukModAffiliate && (window as any).masukModAffiliate();
@@ -789,7 +793,10 @@ export function AuthModal({
                           lineHeight: "1.5",
                         }}
                       >
-                        Belum mempunyai akaun? Daftar Pakej Pro
+                        Belum mempunyai akaun?{" "}
+                        {pendingLoginMode === "affiliate"
+                          ? "Daftar Pakej Affiliate"
+                          : "Daftar Pakej Pro"}
                         <br />
                         <button
                           type="button"
@@ -797,9 +804,11 @@ export function AuthModal({
                             background: "none",
                             border: "none",
                             color:
-                              pendingLoginMode === "guru"
-                                ? "var(--color-orange)"
-                                : "var(--color-blue)",
+                              pendingLoginMode === "affiliate"
+                                ? "#7c3aed"
+                                : pendingLoginMode === "guru"
+                                  ? "var(--color-orange)"
+                                  : "var(--color-blue)",
                             fontWeight: "bold",
                             fontSize: "0.88rem",
                             cursor: "pointer",
@@ -812,8 +821,16 @@ export function AuthModal({
                           }}
                           onClick={() => {
                             if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                            // Tutup modal log masuk, kemudian buka modal Pilih Pakej Pro
-                            // (senarai harga) supaya pengguna boleh memilih pakej dahulu.
+                            // PENTING: Bagi mod Affiliate, butang ini TERUS ke WhatsApp
+                            // admin dengan template khas affiliate (tiada popup pakej,
+                            // kerana affiliate tiada pilihan bulanan/tahunan).
+                            if (pendingLoginMode === "affiliate") {
+                              onClose();
+                              hubungiAdminWhatsapp(mesejDaftarAffiliate());
+                              return;
+                            }
+                            // Guru / Ibu Bapa: tutup modal log masuk, kemudian buka
+                            // modal Pilih Pakej Pro (senarai harga) untuk memilih pakej.
                             onClose();
                             const tab = pendingLoginMode === "guru" ? "guru" : "ibubapa";
                             if (typeof (window as any).openPakejProModal === "function") {

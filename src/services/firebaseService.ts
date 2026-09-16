@@ -772,6 +772,16 @@ export async function getStudentsByCode(code: string): Promise<StudentRecord[]> 
   }
 }
 
+export function isAffiliateActiveSession(): boolean {
+  try {
+    const activeUserRole = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
+    if (activeUserRole === 'affiliate') return true;
+    if (typeof window !== 'undefined' && Boolean((window as any).modAffiliateAktif)) return true;
+    if (typeof document !== 'undefined' && Boolean(document.body?.classList.contains('affiliate-mode'))) return true;
+  } catch (e) {}
+  return false;
+}
+
 /**
  * Menyegerakkan rekod murid ke Firebase Realtime Database
  */
@@ -799,6 +809,11 @@ export async function syncStudentToFirebase(student: {
   stars?: Record<string, number>;
   latihan?: Record<string, boolean>;
 }): Promise<StudentRecord | null> {
+  if (isAffiliateActiveSession()) {
+    console.warn('[Firebase RTDB] Simpanan disekat: Mod Affiliate aktif — tiada rekod murid disimpan.');
+    return null;
+  }
+
   const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
   if (!student.nama || GHOST_NAMES.includes(student.nama.trim().toLowerCase())) {
     console.warn('[Firebase RTDB] Simpanan disekat: nama murid tidak sah atau nama sistem —', student.nama);
@@ -1493,6 +1508,10 @@ export async function saveScoreToFirebase(scoreData: {
   bintang: number;
   dataTambahan?: any;
 }): Promise<boolean> {
+  if (isAffiliateActiveSession()) {
+    console.warn('[Firebase RTDB] Skor disekat: Mod Affiliate aktif — tiada rekod markah/bintang disimpan.');
+    return false;
+  }
   try {
     const now = new Date().toISOString();
     const newScoreRef = push(ref(db, 'scores'));
@@ -1606,6 +1625,10 @@ export async function recordStudentActivity(
  * Menyimpan lencana (badge) yang diperoleh murid ke Realtime Database
  */
 export async function recordStudentBadge(studentId: string, badgeKey: string): Promise<boolean> {
+  if (isAffiliateActiveSession()) {
+    console.warn('[Firebase RTDB] Lencana disekat: Mod Affiliate aktif — tiada rekod lencana disimpan.');
+    return false;
+  }
   try {
     if (!studentId || !badgeKey) return false;
     const now = new Date().toISOString();
@@ -1645,6 +1668,10 @@ export async function saveCertificate(certData: {
   namaKelas?: string;
   namaGuru?: string;
 }): Promise<boolean> {
+  if (isAffiliateActiveSession()) {
+    console.warn('[Firebase RTDB] Sijil disekat: Mod Affiliate aktif — tiada rekod sijil disimpan.');
+    return false;
+  }
   try {
     const now = new Date().toISOString();
     const newCertRef = push(ref(db, 'certificates'));

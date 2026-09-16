@@ -13,8 +13,39 @@
  *   5. Klien signInWithCustomToken() -> auth != null, peraturan RTDB percaya.
  */
 
-import { signInWithCustomToken } from 'firebase/auth';
+import { signInWithCustomToken, onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+
+/**
+ * Dapatkan pengguna auth semasa dengan menunggu permulaan Firebase Auth (authStateReady)
+ * jika sesi sedang dimuatkan dari storan tempatan (cth. selepas muat semula halaman).
+ */
+export async function dapatkanPenggunaAuth(): Promise<User | null> {
+  if (auth.currentUser) return auth.currentUser;
+  try {
+    if (typeof (auth as any).authStateReady === 'function') {
+      await (auth as any).authStateReady();
+    }
+  } catch (e) {}
+  if (auth.currentUser) return auth.currentUser;
+  return new Promise((resolve) => {
+    let selesai = false;
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (!selesai) {
+        selesai = true;
+        try { unsub(); } catch (e) {}
+        resolve(user);
+      }
+    });
+    setTimeout(() => {
+      if (!selesai) {
+        selesai = true;
+        try { unsub(); } catch (e) {}
+        resolve(auth.currentUser);
+      }
+    }, 4000);
+  });
+}
 
 export interface HasilAksesAdmin {
   berjaya: boolean;
@@ -193,9 +224,9 @@ async function panggilAdmin<T extends { berjaya: boolean }>(
   body: Record<string, unknown>,
 ): Promise<T> {
   try {
-    const pengguna = auth.currentUser;
+    const pengguna = await dapatkanPenggunaAuth();
     if (!pengguna) {
-      return { berjaya: false, mesej: 'Sesi admin tidak aktif. Sila masuk semula.' } as unknown as T;
+      return { berjaya: false, mesej: 'Sesi admin tidak aktif. Sila berhubung dengan admin.' } as unknown as T;
     }
 
     const token = await pengguna.getIdToken();
@@ -387,14 +418,22 @@ export interface HasilLaporanBayaran {
   jumlah_layak_sen?: number;
 }
 
-async function panggilAdminGet<T extends { berjaya: boolean }>(path: string): Promise<T> {
+async function panggilAdminGet<T extends { berjaya: boolean }>(
+  path: string,
+  labelSesi = 'Sesi admin',
+): Promise<T> {
   try {
-    const pengguna = auth.currentUser;
+    const pengguna = await dapatkanPenggunaAuth();
     if (!pengguna) {
-      return { berjaya: false, mesej: 'Sesi admin tidak aktif. Sila masuk semula.' } as unknown as T;
+      return { berjaya: false, mesej: `${labelSesi} tidak aktif. Sila berhubung dengan admin.` } as unknown as T;
     }
     const token = await pengguna.getIdToken();
-    const res = await fetch(path, { method: 'GET', headers: { Authorization: `Bearer ${token}` } });
+    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+    const savedAffCode = typeof localStorage !== 'undefined' ? localStorage.getItem('bunyiKataAffiliateKod') || '' : '';
+    if (savedAffCode) {
+      headers['x-affiliate-kod'] = savedAffCode;
+    }
+    const res = await fetch(path, { method: 'GET', headers });
     const data = await res.json().catch(() => null);
     if (!res.ok || !data?.success) {
       return { berjaya: false, mesej: data?.message || 'Operasi gagal.' } as unknown as T;
@@ -486,16 +525,29 @@ export interface ReferralAffiliate {
 }
 
 /** Fasa 3: profil + ringkasan prestasi affiliate yang sedang log masuk. */
-export async function ambilProfilAffiliate(): Promise<HasilProfilAffiliate> {
-  return panggilAdminGet<HasilProfilAffiliate>('/api/affiliate/me');
+export async function ambilProfilAffiliate(kod?: string): Promise<HasilProfilAffiliate> {
+  const k = kod || (typeof localStorage !== "undefined" ? localStorage.getItem("bunyiKataAffiliateKod") || "" : "");
+  const qs = k ? `?kod=${encodeURIComponent(k)}` : "";
+  return panggilAdminGet<HasilProfilAffiliate>(`/api/affiliate/me${qs}`, 'Sesi affiliate');
 }
 
 /** Fasa 3: senarai baris rujukan affiliate sendiri (fail-safe: []). */
-export async function ambilReferralSendiri(): Promise<ReferralAffiliate[]> {
+export async function ambilReferralSendiri(kod?: string): Promise<ReferralAffiliate[]> {
+  const k = kod || (typeof localStorage !== "undefined" ? localStorage.getItem("bunyiKataAffiliateKod") || "" : "");
+  const qs = k ? `?kod=${encodeURIComponent(k)}` : "";
   const hasil = await panggilAdminGet<{ berjaya: boolean; referrals?: ReferralAffiliate[] }>(
-    '/api/affiliate/referrals',
+    `/api/affiliate/referrals${qs}`,
+    'Sesi affiliate',
   );
   return Array.isArray(hasil.referrals) ? hasil.referrals : [];
+}
+
+/** Fasa 3: kemas kini profil affiliate (nama / whatsapp). */
+export async function kemaskiniProfilAffiliate(data: { nama?: string; whatsapp?: string }): Promise<{ berjaya: boolean; mesej?: string }> {
+  return panggilAdmin<{ berjaya: boolean; mesej?: string }>(
+    '/api/affiliate/update-profile',
+    data as Record<string, unknown>
+  );
 }
 
 /**
@@ -504,7 +556,7 @@ export async function ambilReferralSendiri(): Promise<ReferralAffiliate[]> {
  */
 export async function ambilLogAudit(): Promise<RekodAudit[]> {
   try {
-    const pengguna = auth.currentUser;
+    const pengguna = await dapatkanPenggunaAuth();
     if (!pengguna) return [];
     const token = await pengguna.getIdToken();
     const res = await fetch("/api/admin/audit", {

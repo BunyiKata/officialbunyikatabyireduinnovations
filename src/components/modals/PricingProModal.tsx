@@ -12,9 +12,11 @@ export interface PlanInfo {
 
 export interface PricingProModalProps {
   isOpen: boolean;
-  initialTab?: "guru" | "ibubapa";
+  initialTab?: "guru" | "ibubapa" | "affiliate";
   onClose: () => void;
   onSelectPlanRegister: (category: "guru" | "ibubapa", planInfo?: PlanInfo) => void;
+  /** Tab Affiliate: hantar terus ke WhatsApp admin (tiada PlanInfo). */
+  onSelectAffiliateRegister?: () => void;
 }
 
 export function PricingProModal({
@@ -22,8 +24,9 @@ export function PricingProModal({
   initialTab = "guru",
   onClose,
   onSelectPlanRegister,
+  onSelectAffiliateRegister,
 }: PricingProModalProps) {
-  const [activePakejCategory, setActivePakejCategory] = React.useState<"guru" | "ibubapa">(initialTab);
+  const [activePakejCategory, setActivePakejCategory] = React.useState<"guru" | "ibubapa" | "affiliate">(initialTab);
   const [activeFaqId, setActiveFaqId] = React.useState<number | null>(null);
 
   React.useEffect(() => {
@@ -225,6 +228,28 @@ export function PricingProModal({
               >
                 <i className="fa-solid fa-users"></i> Pakej Ibu Bapa
               </button>
+              <button
+                className={`neo-btn pakej-tab-btn ${activePakejCategory === "affiliate" ? "bg-purple" : "bg-white"}`}
+                style={{
+                  flex: 1,
+                  maxWidth: "200px",
+                  padding: "9px 14px",
+                  fontSize: "0.95rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  whiteSpace: "nowrap",
+                  color:
+                    activePakejCategory === "affiliate"
+                      ? "white"
+                      : "var(--color-dark)",
+                  border: "2.5px solid var(--color-dark)",
+                }}
+                onClick={() => setActivePakejCategory("affiliate")}
+              >
+                <i className="fa-solid fa-handshake"></i> Pakej Affiliate
+              </button>
             </div>
 
             {/* Offer Cards Grid */}
@@ -238,6 +263,8 @@ export function PricingProModal({
                 textAlign: "left",
               }}
             >
+              {activePakejCategory !== "affiliate" && (
+                <>
               {/* Kad 1: Bulanan Pro */}
               <div className="pro-pakej-card">
                 <div className="pro-pakej-card-inner" style={{ padding: "16px 14px" }}>
@@ -719,6 +746,96 @@ export function PricingProModal({
                   </button>
                 </div>
               </div>
+                </>
+              )}
+
+              {/* Kad Affiliate: RM5 (tema ungu) — terus ke WhatsApp admin */}
+              {activePakejCategory === "affiliate" && (
+                <div className="pro-pakej-card kad-affiliate">
+                  <div className="pro-pakej-card-inner" style={{ padding: "16px 14px" }}>
+                    <div className="shine-sweep-overlay"></div>
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                        <div
+                          style={{
+                            display: "inline-block",
+                            backgroundColor: "#7c3aed",
+                            color: "#ffffff",
+                            fontSize: "0.72rem",
+                            fontWeight: "900",
+                            letterSpacing: "0.5px",
+                            textTransform: "uppercase",
+                            padding: "2px 8px",
+                            borderRadius: "6px",
+                            border: "1.5px solid var(--color-dark)",
+                            boxShadow: "1px 1px 0 var(--color-dark)",
+                          }}
+                        >
+                          RM5 SAHAJA
+                        </div>
+                      </div>
+                      <h3 style={{ fontSize: "1.15rem", margin: "0 0 4px 0", color: "var(--color-dark)", fontWeight: "bold" }}>
+                        Pakej Affiliate
+                      </h3>
+
+                      <div className="price-tag" style={{ fontSize: "1.6rem", fontWeight: "900", color: "#7c3aed", marginBottom: "10px", letterSpacing: "-0.5px" }}>
+                        RM5{" "}
+                        <span style={{ fontSize: "0.8rem", color: "#475569", fontWeight: "bold" }}>/ sekali sahaja</span>
+                      </div>
+
+                      <ul
+                        style={{
+                          listStyle: "none",
+                          padding: 0,
+                          margin: 0,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "7px",
+                          fontSize: "0.83rem",
+                          color: "#334155",
+                          lineHeight: "1.35",
+                        }}
+                      >
+                        <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                          <i className="fa-solid fa-circle-check" style={{ color: "#7c3aed", marginTop: "2px" }}></i>
+                          <span><b>Kod Rujukan Unik</b> Sendiri</span>
+                        </li>
+                        <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                          <i className="fa-solid fa-circle-check" style={{ color: "#7c3aed", marginTop: "2px" }}></i>
+                          <span><b>Komisen</b> Setiap Rujukan Berjaya</span>
+                        </li>
+                        <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                          <i className="fa-solid fa-circle-check" style={{ color: "#7c3aed", marginTop: "2px" }}></i>
+                          <span><b>Papan Pemuka</b> Pantau Rujukan &amp; Komisen</span>
+                        </li>
+                        <li style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                          <i className="fa-solid fa-circle-check" style={{ color: "#7c3aed", marginTop: "2px" }}></i>
+                          <span>Bayaran Komisen <b>Telus &amp; Terus</b></span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      className="neo-btn bg-purple btn-daftar-glow-purple"
+                      style={{
+                        width: "100%",
+                        marginTop: "14px",
+                        padding: "9px",
+                        fontSize: "0.98rem",
+                        color: "white",
+                        fontWeight: "bold",
+                        justifyContent: "center",
+                      }}
+                      onClick={() => {
+                        if (onSelectAffiliateRegister) onSelectAffiliateRegister();
+                        onClose();
+                      }}
+                    >
+                      <i className="fa-brands fa-whatsapp" style={{ marginRight: "8px" }}></i>Daftar
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* FAQ Accordion Section */}

@@ -158,26 +158,91 @@ export function EditProfileModal(props: EditProfileModalProps) {
     ? props.isEffectivePro
     : !isEffectiveTrial;
 
+  const [affiliateNamaTemp, setAffiliateNamaTemp] = React.useState(() => {
+    return typeof localStorage !== "undefined" ? localStorage.getItem("bunyiKataNamaAffiliate") || "" : "";
+  });
+  const [affiliateKodTemp, setAffiliateKodTemp] = React.useState(() => {
+    return typeof localStorage !== "undefined"
+      ? localStorage.getItem("bunyiKataAffiliateKod") ||
+        localStorage.getItem("affiliateKod") ||
+        (window as any).bunyiKataAffiliateKod ||
+        (window as any).affiliateKod ||
+        ""
+      : "";
+  });
+  const [affiliateEmailTemp, setAffiliateEmailTemp] = React.useState(() => {
+    return typeof localStorage !== "undefined"
+      ? localStorage.getItem("bunyiKataAffiliateEmail") ||
+        localStorage.getItem("bunyiKataUserEmail") ||
+        (window as any).bunyiKataAffiliateEmail ||
+        ""
+      : "";
+  });
+
+  React.useEffect(() => {
+    if (isOpen && editModalMode === "affiliate") {
+      const storedNama = localStorage.getItem("bunyiKataNamaAffiliate") || (window as any).bunyiKataNamaAffiliate || "";
+      const storedKod = localStorage.getItem("bunyiKataAffiliateKod") || localStorage.getItem("affiliateKod") || (window as any).bunyiKataAffiliateKod || "";
+      const storedEmail = localStorage.getItem("bunyiKataAffiliateEmail") || localStorage.getItem("bunyiKataUserEmail") || (window as any).bunyiKataAffiliateEmail || "";
+
+      if (storedNama) setAffiliateNamaTemp(storedNama);
+      if (storedKod) setAffiliateKodTemp(storedKod);
+      if (storedEmail) setAffiliateEmailTemp(storedEmail);
+
+      // Pastikan kod dan emel sentiasa dimuatkan daripada profil jika kosong
+      if (!storedKod || !storedEmail || !storedNama) {
+        import("../../services/adminService").then(({ ambilProfilAffiliate }) => {
+          ambilProfilAffiliate().then((res) => {
+            if (res?.affiliate) {
+              if (res.affiliate.kod) {
+                setAffiliateKodTemp(res.affiliate.kod);
+                localStorage.setItem("bunyiKataAffiliateKod", res.affiliate.kod);
+                (window as any).bunyiKataAffiliateKod = res.affiliate.kod;
+              }
+              if (res.affiliate.email) {
+                setAffiliateEmailTemp(res.affiliate.email);
+                localStorage.setItem("bunyiKataAffiliateEmail", res.affiliate.email);
+                (window as any).bunyiKataAffiliateEmail = res.affiliate.email;
+              }
+              if (res.affiliate.nama && !storedNama) {
+                setAffiliateNamaTemp(res.affiliate.nama);
+                localStorage.setItem("bunyiKataNamaAffiliate", res.affiliate.nama);
+                (window as any).bunyiKataNamaAffiliate = res.affiliate.nama;
+              }
+            }
+          }).catch((err) => {
+            console.warn("[EditProfileModal] Gagal ambil profil affiliate:", err);
+          });
+        }).catch(() => {});
+      }
+    }
+  }, [isOpen, editModalMode]);
+
   const isEditModalOpen = isOpen;
 
   return (
     <>
       {isEditModalOpen && (() => {
+            const isAffiliate = editModalMode === "affiliate";
             const isAdmin = editModalMode === "admin";
             const isParent = editModalMode === "ibubapa";
             const isGuru = editModalMode === "guru";
 
-            const modalHeaderTitle = isAdmin
-              ? "Maklumat Admin"
-              : isParent
-                ? "Maklumat Keluarga"
-                : "Maklumat Guru";
+            const modalHeaderTitle = isAffiliate
+              ? "Maklumat Affiliate"
+              : isAdmin
+                ? "Maklumat Admin"
+                : isParent
+                  ? "Maklumat Keluarga"
+                  : "Maklumat Guru";
 
-            const headerBgColor = isAdmin
-              ? "#168f81"
-              : isParent
-                ? "var(--color-blue)"
-                : "var(--color-orange)";
+            const headerBgColor = isAffiliate
+              ? "#7c3aed"
+              : isAdmin
+                ? "#168f81"
+                : isParent
+                  ? "var(--color-blue)"
+                  : "var(--color-orange)";
 
             const labelHighlightStyle: React.CSSProperties = {
               backgroundColor: headerBgColor,
@@ -316,7 +381,307 @@ export function EditProfileModal(props: EditProfileModalProps) {
                     </div>
                   )}
 
-                  {isAdmin ? (
+                  {isAffiliate ? (
+                    <>
+                      {/* Nama Affiliate */}
+                      <div style={{ marginBottom: "14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Nama Affiliate</span>
+                          <span style={{ color: "#ef4444", fontWeight: "900", fontSize: "1.2rem" }}>*</span>
+                        </div>
+                        <div style={{ position: "relative" }}>
+                          <input
+                            type="text"
+                            placeholder="CTH: AMIR"
+                            value={affiliateNamaTemp}
+                            onChange={(e) => {
+                              setAffiliateNamaTemp(e.target.value.toUpperCase());
+                              if (editModalError) setEditModalError("");
+                            }}
+                            style={{
+                              width: "100%",
+                              padding: "10px 12px 10px 38px",
+                              borderRadius: "8px",
+                              border: "2px solid var(--color-dark)",
+                              fontSize: "clamp(0.95rem, 2.5vw, 1.05rem)",
+                              fontFamily: "inherit",
+                              boxSizing: "border-box",
+                              textTransform: "uppercase",
+                              fontWeight: "bold",
+                            }}
+                          />
+                          <i
+                            className="fa-solid fa-user-pen"
+                            style={{
+                              position: "absolute",
+                              left: "12px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              color: "#7c3aed",
+                              fontSize: "1rem",
+                            }}
+                          ></i>
+                        </div>
+                      </div>
+
+                      {/* Kod Affiliate (Read-Only) */}
+                      <div style={{ marginBottom: "14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Kod Affiliate</span>
+                          <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "bold", marginLeft: "4px" }}>
+                            (Kekal / Tidak Boleh Diubah)
+                          </span>
+                        </div>
+                        <div style={{ position: "relative" }}>
+                          <input
+                            type="text"
+                            value={affiliateKodTemp || localStorage.getItem("bunyiKataAffiliateKod") || "-"}
+                            disabled
+                            readOnly
+                            style={{
+                              width: "100%",
+                              padding: "10px 12px 10px 38px",
+                              borderRadius: "8px",
+                              border: "2px solid #cbd5e1",
+                              backgroundColor: "#f1f5f9",
+                              color: "#1e293b",
+                              fontSize: "1rem",
+                              fontWeight: "900",
+                              letterSpacing: "1px",
+                              fontFamily: "inherit",
+                              boxSizing: "border-box",
+                              cursor: "not-allowed",
+                            }}
+                          />
+                          <i
+                            className="fa-solid fa-key"
+                            style={{
+                              position: "absolute",
+                              left: "12px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              color: "#7c3aed",
+                              fontSize: "1rem",
+                            }}
+                          ></i>
+                        </div>
+                      </div>
+
+                      {/* Emel Affiliate (Read-Only) */}
+                      <div style={{ marginBottom: "14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            gap: "6px",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <span style={labelHighlightStyle}>Emel Affiliate</span>
+                          <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "bold", marginLeft: "4px" }}>
+                            (Kekal / Tidak Boleh Diubah)
+                          </span>
+                        </div>
+                        <div style={{ position: "relative" }}>
+                          <input
+                            type="email"
+                            value={affiliateEmailTemp || localStorage.getItem("bunyiKataAffiliateEmail") || "-"}
+                            disabled
+                            readOnly
+                            style={{
+                              width: "100%",
+                              padding: "10px 12px 10px 38px",
+                              borderRadius: "8px",
+                              border: "2px solid #cbd5e1",
+                              backgroundColor: "#f1f5f9",
+                              color: "#1e293b",
+                              fontSize: "0.95rem",
+                              fontWeight: "bold",
+                              fontFamily: "inherit",
+                              boxSizing: "border-box",
+                              cursor: "not-allowed",
+                            }}
+                          />
+                          <i
+                            className="fa-solid fa-envelope"
+                            style={{
+                              position: "absolute",
+                              left: "12px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              color: "#7c3aed",
+                              fontSize: "1rem",
+                            }}
+                          ></i>
+                        </div>
+                      </div>
+
+                      {/* Ruangan Tukar Kata Laluan */}
+                      <div style={{ marginBottom: "16px", marginTop: "16px" }}>
+                        {!isChangingPassword ? (
+                          <button
+                            type="button"
+                            className="neo-btn"
+                            style={{
+                              width: "100%",
+                              padding: "10px",
+                              backgroundColor: "#f8fafc",
+                              color: "#334155",
+                              border: "2px dashed #7c3aed",
+                              borderRadius: "8px",
+                              fontWeight: "bold",
+                              fontSize: "0.9rem",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "8px",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => {
+                              setIsChangingPassword(true);
+                              setNewPasswordInput("");
+                            }}
+                          >
+                            <i className="fa-solid fa-key" style={{ color: "#7c3aed" }}></i>
+                            <span>Tukar Kata Laluan Affiliate</span>
+                          </button>
+                        ) : (
+                          <div
+                            style={{
+                              backgroundColor: "#f5f3ff",
+                              border: "2px solid #7c3aed",
+                              borderRadius: "8px",
+                              padding: "12px",
+                              boxShadow: "0 3px 0 var(--color-dark)",
+                            }}
+                          >
+                            <div style={{ marginBottom: "10px" }}>
+                              <label style={{ fontSize: "0.82rem", fontWeight: "bold", color: "#334155", display: "block", marginBottom: "4px" }}>
+                                Masukkan Kata Laluan Baharu:
+                              </label>
+                              <div style={{ position: "relative", width: "100%" }}>
+                                <input
+                                  type={showNewPassword ? "text" : "password"}
+                                  placeholder="Cipta kata laluan baharu anda"
+                                  value={newPasswordInput}
+                                  onChange={(e) => setNewPasswordInput(e.target.value)}
+                                  style={{
+                                    width: "100%",
+                                    padding: "10px 42px 10px 12px",
+                                    borderRadius: "8px",
+                                    border: "2px solid var(--color-dark)",
+                                    fontSize: "0.95rem",
+                                    fontFamily: "inherit",
+                                    boxSizing: "border-box",
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowNewPassword((prev) => !prev)}
+                                  style={{
+                                    position: "absolute",
+                                    right: "8px",
+                                    top: "50%",
+                                    transform: "translateY(-50%)",
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    color: showNewPassword ? "#7c3aed" : "#64748b",
+                                    padding: "6px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "1rem",
+                                    zIndex: 2,
+                                  }}
+                                  title={showNewPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
+                                  aria-label={showNewPassword ? "Sembunyikan kata laluan" : "Lihat kata laluan"}
+                                >
+                                  <i className={`fa-solid ${showNewPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                                </button>
+                              </div>
+                            </div>
+                            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
+                              <button
+                                type="button"
+                                className="neo-btn"
+                                title="Batal"
+                                aria-label="Batal"
+                                style={{
+                                  width: "38px",
+                                  height: "38px",
+                                  minWidth: "38px",
+                                  padding: "0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: "#ef4444",
+                                  color: "#ffffff",
+                                  fontSize: "1rem",
+                                  borderRadius: "8px",
+                                  border: "2px solid var(--color-dark)",
+                                  boxShadow: "0 2px 0 var(--color-dark)",
+                                }}
+                                onClick={() => {
+                                  setIsChangingPassword(false);
+                                  setNewPasswordInput("");
+                                }}
+                              >
+                                <i className="fa-solid fa-xmark"></i>
+                              </button>
+                              <button
+                                type="button"
+                                className="neo-btn"
+                                title="Simpan Kata Laluan"
+                                aria-label="Simpan Kata Laluan"
+                                style={{
+                                  width: "38px",
+                                  height: "38px",
+                                  minWidth: "38px",
+                                  padding: "0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: "#7c3aed",
+                                  color: "#ffffff",
+                                  fontSize: "1rem",
+                                  borderRadius: "8px",
+                                  border: "2px solid var(--color-dark)",
+                                  boxShadow: "0 2px 0 var(--color-dark)",
+                                }}
+                                onClick={() => {
+                                  if (!newPasswordInput.trim()) {
+                                    alert("Sila masukkan kata laluan baharu!");
+                                    return;
+                                  }
+                                  setShowPasswordConfirmModal(true);
+                                }}
+                              >
+                                <i className="fa-solid fa-check"></i>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : isAdmin ? (
                     <>
                       <div style={{ marginBottom: "16px" }}>
                         <div
@@ -2317,7 +2682,9 @@ export function EditProfileModal(props: EditProfileModalProps) {
                             }}
                             onClick={async () => {
                               const passToSave = newPasswordInput.trim();
-                              if (isAdmin) {
+                              if (isAffiliate) {
+                                localStorage.setItem("bunyiKataAffiliatePassword", passToSave);
+                              } else if (isAdmin) {
                                 localStorage.setItem("bunyiKataAdminPassword", passToSave);
                               } else if (isParent) {
                                 localStorage.setItem("bunyiKataIbubapaPassword", passToSave);
@@ -2348,7 +2715,71 @@ export function EditProfileModal(props: EditProfileModalProps) {
                     </div>
                   )}
 
-                  {isAdmin ? (
+                  {isAffiliate ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "12px",
+                        justifyContent: "flex-end",
+                        marginTop: "16px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!affiliateNamaTemp.trim()) {
+                            setEditModalError("Sila masukkan Nama Affiliate!");
+                            return;
+                          }
+
+                          const namaBersih = affiliateNamaTemp.trim().toUpperCase();
+                          localStorage.setItem("bunyiKataNamaAffiliate", namaBersih);
+                          const titleEl = document.getElementById("affiliate-nama-title");
+                          if (titleEl) titleEl.innerText = namaBersih;
+
+                          try {
+                            const { kemaskiniProfilAffiliate } = await import("../../services/adminService");
+                            await kemaskiniProfilAffiliate({ nama: namaBersih });
+                          } catch (err) {
+                            console.warn("Kemaskini profil affiliate server:", err);
+                          }
+
+                          setEditModalError("");
+                          setIsEditModalOpen(false);
+
+                          if (typeof (window as any).showAppModalAlert === "function") {
+                            (window as any).showAppModalAlert(
+                              "Berjaya Disimpan",
+                              `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;">
+                                <i class="fa-solid fa-circle-check" style="font-size:2.2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>
+                                Maklumat Affiliate telah berjaya disimpan!
+                              </p>`
+                            );
+                          }
+                        }}
+                        title="Simpan Maklumat Affiliate"
+                        aria-label="Simpan Maklumat Affiliate"
+                        className="neo-btn"
+                        style={{
+                          padding: "10px 18px",
+                          borderRadius: "12px",
+                          backgroundColor: "#7c3aed",
+                          border: "2.5px solid var(--color-dark)",
+                          boxShadow: "0 4px 0 var(--color-dark)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          cursor: "pointer",
+                          color: "white",
+                          fontSize: "0.95rem",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        <i className="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Maklumat Affiliate</span>
+                      </button>
+                    </div>
+                  ) : isAdmin ? (
                     <div
                       style={{
                         display: "flex",

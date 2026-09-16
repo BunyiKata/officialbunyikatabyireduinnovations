@@ -1,4 +1,4 @@
-﻿@font-face {
+@font-face {
     font-family: 'AtlantaRoundedBlack';
     src: url('/fonts/AtlantaRoundedBlack.woff2') format('woff2'),
         url('/fonts/AtlantaRoundedBlack.woff') format('woff');
@@ -317,15 +317,71 @@ body {
 
 body.teacher-mode:not(.admin-mode) #teacher-sticky-nav,
 body.admin-mode #admin-sticky-nav,
-body.parent-mode #parent-sticky-nav {
+body.parent-mode #parent-sticky-nav,
+body.affiliate-mode #affiliate-sticky-nav {
     display: flex;
     top: 60px;
     z-index: 1600;
 }
 
+/* Susunan 4 butang nav affiliate: Affiliate • Rujukan • Kod • Keluar */
+#affiliate-sticky-nav .nav-btn-dashboard {
+    order: 1 !important;
+}
+
+#affiliate-sticky-nav .nav-btn-rujukan {
+    order: 2 !important;
+}
+
+#affiliate-sticky-nav .nav-btn-kod {
+    order: 3 !important;
+}
+
+#affiliate-sticky-nav .nav-btn-keluar {
+    order: 4 !important;
+}
+
+/* Avatar banner affiliate: guna tema ungu (kelas asas .ibubapa-card-avatar-box
+   mempunyai border emas; override supaya padan dengan warna affiliate). */
+#affiliate-dashboard .ibubapa-card-avatar-box {
+    border-color: #7c3aed !important;
+    box-shadow: 0 3px 0 #5b21b6 !important;
+}
+
+/* Butang keluar merah pada banner affiliate (mobile sahaja) */
+.affiliate-banner-exit {
+    background: #dc2626 !important;
+    color: #ffffff !important;
+    border-color: #7f1d1d !important;
+}
+
+.affiliate-banner-exit i {
+    color: #ffffff !important;
+}
+
+/* Banner affiliate: teks "Log Keluar" desktop (>=721px), ikon merah mobile (<=720px) */
+.affiliate-banner-logout {
+    display: inline-flex !important;
+}
+
+.affiliate-banner-exit {
+    display: none !important;
+}
+
+@media (max-width: 720px) {
+    .affiliate-banner-logout {
+        display: none !important;
+    }
+
+    .affiliate-banner-exit {
+        display: inline-flex !important;
+    }
+}
+
 body.teacher-mode .screen.active,
 body.admin-mode .screen.active,
-body.parent-mode .screen.active {
+body.parent-mode .screen.active,
+body.affiliate-mode .screen.active {
     padding-top: 145px !important;
 }
 
@@ -2099,6 +2155,16 @@ body.dark-mode .stars-container {
     background-color: #f8fafc;
 }
 
+.affiliate-table th {
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%) !important;
+    color: #ffffff !important;
+    border-bottom: 2px solid #4c1d95 !important;
+}
+
+.affiliate-table thead tr:first-child th:first-child {
+    background: #6d28d9 !important;
+}
+
 .status-icon {
     font-size: 0.9rem;
 }
@@ -2561,7 +2627,7 @@ body.dark-mode .stars-container {
         font-size: 1.1rem !important;
     }
 
-    body:not(.teacher-mode):has(#main-menu-screen.active) #student-global-nav {
+    body:not(.teacher-mode):not(.admin-mode):not(.parent-mode):not(.affiliate-mode):has(#main-menu-screen.active) #student-global-nav {
         display: flex !important;
     }
 
@@ -4040,12 +4106,16 @@ body {
     display: none;
 }
 
-body:not(.teacher-mode):has(#main-menu-screen.active) #student-global-nav {
+body:not(.teacher-mode):not(.admin-mode):not(.parent-mode):not(.affiliate-mode):has(#main-menu-screen.active) #student-global-nav {
     display: flex;
 }
 
-body:has(#login-screen.active) #student-global-nav {
+body:has(#login-screen.active) #student-global-nav,
+body.affiliate-mode #student-global-nav,
+body.affiliate-mode #student-global-nav * {
     display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }
 
 @media (min-width: 721px) {
@@ -4075,7 +4145,7 @@ body:has(#login-screen.active) #student-global-nav {
 
     body:has(#profile-screen.active) #student-global-nav,
     body:has(#lencana-screen.active) #student-global-nav,
-    body:not(.teacher-mode):not(.admin-mode):not(.parent-mode):has(#lencana-screen.active) #student-global-nav {
+    body:not(.teacher-mode):not(.admin-mode):not(.parent-mode):not(.affiliate-mode):has(#lencana-screen.active) #student-global-nav {
         display: none !important;
     }
 
@@ -4091,30 +4161,39 @@ body:has(#login-screen.active) #student-global-nav {
 body:has(#view-cabaran-suku-kata.active) #teacher-sticky-nav,
 body:has(#view-cabaran-suku-kata.active) #admin-sticky-nav,
 body:has(#view-cabaran-suku-kata.active) #parent-sticky-nav,
+body:has(#view-cabaran-suku-kata.active) #affiliate-sticky-nav,
 body:has(#view-tanduk-kata.active) #teacher-sticky-nav,
 body:has(#view-tanduk-kata.active) #admin-sticky-nav,
 body:has(#view-tanduk-kata.active) #parent-sticky-nav,
+body:has(#view-tanduk-kata.active) #affiliate-sticky-nav,
 body:has(#view-perpustakaan.active) #teacher-sticky-nav,
 body:has(#view-perpustakaan.active) #admin-sticky-nav,
 body:has(#view-perpustakaan.active) #parent-sticky-nav,
+body:has(#view-perpustakaan.active) #affiliate-sticky-nav,
 body:has(#map-screen.active) #teacher-sticky-nav,
 body:has(#map-screen.active) #admin-sticky-nav,
 body:has(#map-screen.active) #parent-sticky-nav,
+body:has(#map-screen.active) #affiliate-sticky-nav,
 body:has(.screen[id^="view-latihan-"].active) #teacher-sticky-nav,
 body:has(.screen[id^="view-latihan-"].active) #admin-sticky-nav,
 body:has(.screen[id^="view-latihan-"].active) #parent-sticky-nav,
+body:has(.screen[id^="view-latihan-"].active) #affiliate-sticky-nav,
 body:has(.screen[id^="view-learn-"].active) #teacher-sticky-nav,
 body:has(.screen[id^="view-learn-"].active) #admin-sticky-nav,
 body:has(.screen[id^="view-learn-"].active) #parent-sticky-nav,
+body:has(.screen[id^="view-learn-"].active) #affiliate-sticky-nav,
 body:has(#view-belajar-huruf.active) #teacher-sticky-nav,
 body:has(#view-belajar-huruf.active) #admin-sticky-nav,
 body:has(#view-belajar-huruf.active) #parent-sticky-nav,
+body:has(#view-belajar-huruf.active) #affiliate-sticky-nav,
 body:has(#view-belajar-sukukata.active) #teacher-sticky-nav,
 body:has(#view-belajar-sukukata.active) #admin-sticky-nav,
 body:has(#view-belajar-sukukata.active) #parent-sticky-nav,
+body:has(#view-belajar-sukukata.active) #affiliate-sticky-nav,
 body:has(#view-belajar-bacaan.active) #teacher-sticky-nav,
 body:has(#view-belajar-bacaan.active) #admin-sticky-nav,
-body:has(#view-belajar-bacaan.active) #parent-sticky-nav {
+body:has(#view-belajar-bacaan.active) #parent-sticky-nav,
+body:has(#view-belajar-bacaan.active) #affiliate-sticky-nav {
     display: none !important;
 }
 
@@ -4294,28 +4373,35 @@ body.parent-mode #main-menu-mobile-header {
 
     body.teacher-mode #main-menu-screen,
     body.admin-mode #main-menu-screen,
-    body.parent-mode #main-menu-screen {
+    body.parent-mode #main-menu-screen,
+    body.affiliate-mode #main-menu-screen {
         padding-top: 130px !important;
     }
 
     body.teacher-mode #map-screen.active,
     body.admin-mode #map-screen.active,
     body.parent-mode #map-screen.active,
+    body.affiliate-mode #map-screen.active,
     body.teacher-mode #lencana-screen.active,
     body.admin-mode #lencana-screen.active,
     body.parent-mode #lencana-screen.active,
+    body.affiliate-mode #lencana-screen.active,
     body.teacher-mode #leaderboard-screen.active,
     body.admin-mode #leaderboard-screen.active,
     body.parent-mode #leaderboard-screen.active,
+    body.affiliate-mode #leaderboard-screen.active,
     body.teacher-mode #murid-menu-belajar.active,
     body.admin-mode #murid-menu-belajar.active,
     body.parent-mode #murid-menu-belajar.active,
+    body.affiliate-mode #murid-menu-belajar.active,
     body.teacher-mode #murid-menu-latihan.active,
     body.admin-mode #murid-menu-latihan.active,
     body.parent-mode #murid-menu-latihan.active,
+    body.affiliate-mode #murid-menu-latihan.active,
     body.teacher-mode .screen[id^="view-"].active,
     body.admin-mode .screen[id^="view-"].active,
-    body.parent-mode .screen[id^="view-"].active {
+    body.parent-mode .screen[id^="view-"].active,
+    body.affiliate-mode .screen[id^="view-"].active {
         padding-top: 56px !important;
     }
 }
@@ -4342,16 +4428,19 @@ body.parent-mode #main-menu-mobile-header {
 
     body.teacher-mode #main-menu-screen,
     body.admin-mode #main-menu-screen,
-    body.parent-mode #main-menu-screen {
+    body.parent-mode #main-menu-screen,
+    body.affiliate-mode #main-menu-screen {
         padding-top: 145px !important;
     }
 
     body.teacher-mode .screen.active,
     body.admin-mode .screen.active,
     body.parent-mode .screen.active,
+    body.affiliate-mode .screen.active,
     #admin-dashboard.active,
     #guru-dashboard.active,
     #ibubapa-dashboard.active,
+    #affiliate-dashboard.active,
     #admin-senarai-perkataan.active,
     #guru-senarai-perkataan.active,
     #ibubapa-senarai-perkataan.active {
@@ -9297,7 +9386,7 @@ body.parent-mode #main-menu-mobile-header {
         }
     }
 
-     /* ========================================================
+    /* ========================================================
        CABARAN TAMBAHAN — FULL-SCREEN LAYOUT MATCHING CABARAN UTAMA
        ======================================================== */
     #modal-cabaran-lain-game.cabaran-tambahan-fullscreen-screen {
@@ -9573,15 +9662,18 @@ body.parent-mode #main-menu-mobile-header {
             margin: 0 auto !important;
             perspective: 1000px !important;
         }
+
         #modal-cabaran-lain-game .mm-card-container,
         #modal-cabaran-lain-game .mm-card-inner,
         #modal-cabaran-lain-game .mm-card-front,
         #modal-cabaran-lain-game .mm-card-back {
             border-radius: 20px !important;
         }
+
         #modal-cabaran-lain-game .mm-card-front {
             font-size: 2.8rem !important;
         }
+
         #modal-cabaran-lain-game .mm-card-back span,
         #modal-cabaran-lain-game .mm-card-letter {
             font-size: 3.5rem !important;
@@ -9692,6 +9784,7 @@ body.parent-mode #main-menu-mobile-header {
 
     /* Responsive Sizing for Mobile View (Preserves Corner-by-Corner Alignment on Mobile) */
     @media (max-width: 768px) {
+
         #modal-cabaran-lain-game,
         #modal-cabaran-lain-game.cabaran-tambahan-fullscreen-screen {
             background-position: left center !important;
@@ -9729,6 +9822,7 @@ body.parent-mode #main-menu-mobile-header {
             margin-bottom: 12px !important;
             padding: 0 2px !important;
         }
+
         #modal-cabaran-lain-game .cl-canvas-wrap,
         #modal-cabaran-lain-game canvas,
         #modal-cabaran-lain-game #bc-canvas,
@@ -9743,21 +9837,26 @@ body.parent-mode #main-menu-mobile-header {
         #modal-cabaran-lain-game #vw-grid {
             max-width: min(390px, 92vw) !important;
         }
+
         #modal-cabaran-lain-game #ws-word-list {
             max-width: min(370px, 92vw) !important;
         }
+
         #modal-cabaran-lain-game #ws-word-list span {
             font-size: 0.95rem !important;
             padding: 6px 14px !important;
         }
+
         #modal-cabaran-lain-game #ws-grid {
             max-width: min(360px, 92vw) !important;
             gap: 6px !important;
         }
+
         #modal-cabaran-lain-game #ws-grid .ws-cell {
             font-size: 1.3rem !important;
             border-radius: 12px !important;
         }
+
         #modal-cabaran-lain-game #mm-grid {
             display: grid !important;
             grid-template-columns: repeat(3, 1fr) !important;
@@ -9765,15 +9864,18 @@ body.parent-mode #main-menu-mobile-header {
             gap: 10px !important;
             margin: 0 auto !important;
         }
+
         #modal-cabaran-lain-game .mm-card-container,
         #modal-cabaran-lain-game .mm-card-inner,
         #modal-cabaran-lain-game .mm-card-front,
         #modal-cabaran-lain-game .mm-card-back {
             border-radius: 14px !important;
         }
+
         #modal-cabaran-lain-game .mm-card-front {
             font-size: 2.1rem !important;
         }
+
         #modal-cabaran-lain-game .mm-card-back span,
         #modal-cabaran-lain-game .mm-card-letter {
             font-size: 2.6rem !important;
@@ -9792,6 +9894,7 @@ body.parent-mode #main-menu-mobile-header {
             margin: 0 auto !important;
             gap: 10px !important;
         }
+
         #modal-cabaran-lain-game .cl-bacaan-question-card {
             flex: 0 0 auto !important;
             max-width: 100% !important;
@@ -9802,16 +9905,19 @@ body.parent-mode #main-menu-mobile-header {
             border-radius: 16px !important;
             cursor: pointer !important;
         }
+
         #modal-cabaran-lain-game .cl-bacaan-question-card img {
             width: 52px !important;
             height: 52px !important;
             border-radius: 10px !important;
             flex-shrink: 0 !important;
         }
+
         #modal-cabaran-lain-game .cl-bacaan-question-card p,
         #modal-cabaran-lain-game .cl-bacaan-question-card span {
             font-size: 1.05rem !important;
         }
+
         #modal-cabaran-lain-game .cl-bacaan-canvas-wrap {
             flex: 0 0 auto !important;
             width: 100% !important;
@@ -9820,6 +9926,7 @@ body.parent-mode #main-menu-mobile-header {
             min-height: unset !important;
             margin: 0 auto !important;
         }
+
         #modal-cabaran-lain-game .cl-bacaan-canvas-wrap canvas,
         #modal-cabaran-lain-game #bpa-canvas,
         #modal-cabaran-lain-game #lb-canvas,
@@ -9864,10 +9971,12 @@ body.parent-mode #main-menu-mobile-header {
             transform: translateY(-45px) scale(0.2);
             opacity: 0;
         }
+
         70% {
             transform: translateY(6px) scale(1.15);
             opacity: 1;
         }
+
         100% {
             transform: translateY(0) scale(1);
             opacity: 1;
@@ -9875,13 +9984,25 @@ body.parent-mode #main-menu-mobile-header {
     }
 
     @keyframes shineSweepLoop {
-        0% { left: -150%; }
-        100% { left: 150%; }
+        0% {
+            left: -150%;
+        }
+
+        100% {
+            left: 150%;
+        }
     }
 
     @keyframes badgeGlowPulse {
-        0%, 100% { filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.45)); }
-        50% { filter: drop-shadow(0 6px 14px rgba(245, 158, 11, 0.8)); }
+
+        0%,
+        100% {
+            filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.45));
+        }
+
+        50% {
+            filter: drop-shadow(0 6px 14px rgba(245, 158, 11, 0.8));
+        }
     }
 
     /* ========================================================
@@ -10591,410 +10712,444 @@ body.parent-mode #main-menu-mobile-header {
         }
     }
 
-/* ========================================================================== */
-/* TABLET & IPAD VIEWPORT OPTIMIZATION (768px to 1024px / 1200px Landscape)   */
-/* ========================================================================== */
+    /* ========================================================================== */
+    /* TABLET & IPAD VIEWPORT OPTIMIZATION (768px to 1024px / 1200px Landscape)   */
+    /* ========================================================================== */
 
-@media (min-width: 768px) and (max-width: 1200px) {
-    /* --- General Tablet Screen & Layout Tweaks --- */
-    .screen {
-        padding-left: 18px !important;
-        padding-right: 18px !important;
-        box-sizing: border-box !important;
+    @media (min-width: 768px) and (max-width: 1200px) {
+
+        /* --- General Tablet Screen & Layout Tweaks --- */
+        .screen {
+            padding-left: 18px !important;
+            padding-right: 18px !important;
+            box-sizing: border-box !important;
+        }
+
+        /* --- 1. Login Screen (Tablet / iPad) --- */
+        #login-screen.active {
+            padding: 24px 20px 40px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+        }
+
+        #login-screen #login-logo-container img,
+        #login-screen .glitch-logo {
+            max-height: 170px !important;
+            max-width: 85% !important;
+            margin: 0 auto 12px auto !important;
+        }
+
+        #login-screen .login-hero-wrapper {
+            width: 100% !important;
+            max-width: 600px !important;
+            margin: 0 auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+
+        #login-screen #mode-buttons-container {
+            max-width: 520px !important;
+            width: 100% !important;
+            margin: 0 auto 16px auto !important;
+        }
+
+        #login-screen #mode-selection-card {
+            max-width: 500px !important;
+            width: 90% !important;
+            margin: 0 auto 20px auto !important;
+            padding: 18px 24px !important;
+            border-radius: 20px !important;
+        }
+
+        #login-screen #mode-selection-card div {
+            font-size: 1.05rem !important;
+        }
+
+        #login-screen .teacher-login-icon {
+            width: 48px !important;
+            height: 48px !important;
+            font-size: 1.25rem !important;
+        }
+
+        /* --- 2. Main Menu Screen (Tablet / iPad) --- */
+        #main-screen,
+        #main-menu-screen {
+            max-width: 800px !important;
+            margin: 0 auto !important;
+            padding: 20px 16px !important;
+        }
+
+        #main-screen .main-action-buttons,
+        #main-menu-screen .main-action-buttons {
+            max-width: 680px !important;
+            margin: 0 auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 14px !important;
+        }
+
+        #main-screen .main-action-buttons .neo-btn,
+        #main-menu-screen .main-action-buttons .neo-btn {
+            min-height: 60px !important;
+            font-size: 1.2rem !important;
+            padding: 16px 28px !important;
+            border-radius: 18px !important;
+        }
+
+        #murid-menu-belajar .sub-menu-grid,
+        #murid-menu-latihan .sub-menu-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 16px !important;
+            max-width: 720px !important;
+            margin: 0 auto !important;
+        }
+
+        #murid-menu-belajar .sub-menu-grid .neo-btn,
+        #murid-menu-latihan .sub-menu-grid .neo-btn {
+            min-height: 72px !important;
+            padding: 16px 18px !important;
+            font-size: 1.1rem !important;
+            border-radius: 18px !important;
+        }
+
+        /* --- 3. Map Screen & Cara Belajar (Tablet / iPad) --- */
+        #map-screen .map-top-bar {
+            padding: 12px 24px !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        }
+
+        #map-screen .map-top-bar .page-title {
+            font-size: 1.2rem !important;
+            padding: 8px 24px !important;
+        }
+
+        #map-screen .map-board {
+            max-width: 900px !important;
+            margin: 0 auto !important;
+            padding: 24px 16px !important;
+        }
+
+        #cara-belajar-lain-section {
+            max-width: 820px !important;
+            margin: 20px auto !important;
+            padding: 20px 24px !important;
+            border-radius: 24px !important;
+        }
+
+        #cara-belajar-lain-section .cara-belajar-btn-container {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            gap: 12px !important;
+        }
+
+        #cara-belajar-lain-section .cara-belajar-btn {
+            flex: 0 1 calc(33.333% - 10px) !important;
+            min-width: 145px !important;
+            padding: 12px 16px !important;
+            font-size: 0.95rem !important;
+            border-radius: 14px !important;
+        }
+
+        /* --- 4. Mod Guru Dashboard (Tablet / iPad) --- */
+        body.teacher-mode #guru-dashboard {
+            max-width: 920px !important;
+            margin: 0 auto !important;
+            padding: 20px 16px 100px !important;
+        }
+
+        /* Statistik Kelas Saya Header Card */
+        #guru-dashboard .header-card,
+        #guru-dashboard>div:first-child {
+            max-width: 880px !important;
+            width: 100% !important;
+            margin: 0 auto 16px auto !important;
+            border-radius: 22px !important;
+        }
+
+        /* Summary Stats Grid (Bilangan Murid & Aktiviti Selesai) */
+        #guru-dashboard .stats-grid,
+        #guru-dashboard>div[style*="display: grid"] {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 16px !important;
+            max-width: 880px !important;
+            margin: 0 auto 18px auto !important;
+        }
+
+        /* Prestasi Murid & Laporan Card */
+        #guru-dashboard .guru-table-card,
+        #guru-dashboard #guru-prestasi-card,
+        #guru-dashboard>div:last-child {
+            max-width: 880px !important;
+            margin: 0 auto 24px auto !important;
+            padding: 20px !important;
+            border-radius: 22px !important;
+        }
+
+        /* Filters Row in Table */
+        .guru-controls-bar {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 10px !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            margin-bottom: 14px !important;
+        }
+
+        .guru-controls-bar select,
+        #guru-dashboard select {
+            height: 40px !important;
+            font-size: 0.88rem !important;
+            padding: 6px 14px !important;
+            min-width: 140px !important;
+            border-radius: 12px !important;
+        }
+
+        /* Teacher Sticky Nav on Tablet */
+        #teacher-sticky-nav,
+        #admin-sticky-nav,
+        #parent-sticky-nav,
+        #affiliate-sticky-nav {
+            max-width: 640px !important;
+            width: calc(100% - 36px) !important;
+            padding: 6px 14px !important;
+            gap: 8px !important;
+            height: 68px !important;
+        }
+
+        #teacher-sticky-nav .neo-btn:not(.nav-item-center-circle) span,
+        #admin-sticky-nav .neo-btn:not(.nav-item-center-circle) span,
+        #parent-sticky-nav .neo-btn:not(.nav-item-center-circle) span,
+        #affiliate-sticky-nav .neo-btn:not(.nav-item-center-circle) span {
+            font-size: 0.74rem !important;
+            font-weight: 700 !important;
+        }
+
+        #teacher-sticky-nav .neo-btn:not(.nav-item-center-circle) i,
+        #admin-sticky-nav .neo-btn:not(.nav-item-center-circle) i,
+        #parent-sticky-nav .neo-btn:not(.nav-item-center-circle) i,
+        #affiliate-sticky-nav .neo-btn:not(.nav-item-center-circle) i {
+            font-size: 1.25rem !important;
+        }
+
+        /* Floating Dial Button on Tablet */
+        #guru-floating-dial-container {
+            bottom: 24px !important;
+            right: 24px !important;
+        }
+
+        #guru-floating-dial-container #guru-floating-cta {
+            width: 58px !important;
+            height: 58px !important;
+            font-size: 1.4rem !important;
+        }
+
+        /* --- 5. Mod Ibu Bapa Dashboard (Tablet / iPad) --- */
+        body.parent-mode #ibubapa-dashboard,
+        #ibubapa-dashboard {
+            max-width: 920px !important;
+            margin: 0 auto !important;
+            padding: 20px 16px 110px !important;
+        }
+
+        /* Kad Header: Statistik Anak Saya */
+        #ibubapa-dashboard>div.neo-box:first-child {
+            max-width: 880px !important;
+            width: 100% !important;
+            margin: 0 auto 18px auto !important;
+            padding: 20px 24px !important;
+            border-radius: 22px !important;
+        }
+
+        #ibubapa-dashboard .ibubapa-card-avatar-box {
+            width: 64px !important;
+            height: 64px !important;
+        }
+
+        #ibubapa-dashboard #ibubapa-nama-anak-title {
+            font-size: 1.45rem !important;
+        }
+
+        /* --- Mod Affiliate Dashboard (Tablet / iPad) --- */
+        #affiliate-dashboard {
+            max-width: 920px !important;
+            margin: 0 auto !important;
+            padding: 20px 16px 110px !important;
+        }
+
+        #affiliate-dashboard .ibubapa-card-avatar-box {
+            width: 64px !important;
+            height: 64px !important;
+        }
+
+        #affiliate-dashboard #affiliate-nama-title {
+            font-size: 1.45rem !important;
+        }
+
+        /* 3 Kad Ringkasan (Markah, Lencana, Aktiviti Selesai) */
+        .ibubapa-stats-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 14px !important;
+            max-width: 880px !important;
+            margin: 0 auto 20px auto !important;
+        }
+
+        .ibubapa-stats-grid>div {
+            padding: 16px 18px !important;
+            border-radius: 20px !important;
+            min-height: 120px !important;
+        }
+
+        .ibubapa-stats-grid #ibubapa-jumlah-markah,
+        .ibubapa-stats-grid #ibubapa-jumlah-lencana,
+        .ibubapa-stats-grid #ibubapa-aktiviti-selesai {
+            font-size: 2.2rem !important;
+        }
+
+        /* Kad Diagnostik AI & Cadangan Bimbingan */
+        #ibubapa-laporan-card {
+            display: block !important;
+            max-width: 880px !important;
+            margin: 0 auto 20px auto !important;
+            padding: 20px 24px !important;
+            border-radius: 22px !important;
+        }
+
+        #ibubapa-ai-content {
+            font-size: 0.95rem !important;
+            line-height: 1.6 !important;
+        }
+
+        /* Kad Rekod Kemajuan Cabaran & Jadual */
+        #ibubapa-dashboard>div:last-child {
+            max-width: 880px !important;
+            margin: 0 auto 30px auto !important;
+            padding: 20px 22px !important;
+            border-radius: 22px !important;
+        }
+
+        #ibubapa-peta-select {
+            height: 40px !important;
+            font-size: 0.88rem !important;
+            padding: 6px 14px !important;
+            min-width: 160px !important;
+            border-radius: 12px !important;
+        }
+
+        #ibubapa-dashboard .table-responsive {
+            -webkit-overflow-scrolling: touch !important;
+            overflow-x: auto !important;
+        }
+
+        #ibubapa-dashboard .teacher-table th,
+        #ibubapa-dashboard .teacher-table td {
+            padding: 12px 16px !important;
+            font-size: 0.88rem !important;
+        }
+
+        /* Modal Pilih Anak & Edit Keluarga di Tablet */
+        #modal-pilih-anak .modal-content,
+        #modal-edit-profil-keluarga .modal-content {
+            max-width: min(620px, 92vw) !important;
+            padding: 24px !important;
+            border-radius: 24px !important;
+        }
+
+        /* --- 6. Mod Admin Dashboard (Tablet / iPad) --- */
+        body.admin-mode #admin-dashboard,
+        body.admin-mode #admin-sijil,
+        body.admin-mode #admin-urus {
+            max-width: 920px !important;
+            margin: 0 auto !important;
+            padding: 20px 16px 100px !important;
+        }
+
+        .admin-stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 16px !important;
+            max-width: 880px !important;
+            margin: 0 auto 20px auto !important;
+        }
+
+        .admin-table-card {
+            max-width: 880px !important;
+            margin: 0 auto !important;
+            padding: 18px 20px !important;
+        }
+
+        /* --- 6. Sijil Pencapaian (Tablet / iPad) --- */
+        .sijil-manager-wrapper {
+            max-width: 920px !important;
+            padding: 12px 14px 40px !important;
+        }
+
+        .sijil-header-card {
+            max-width: 540px !important;
+            margin: 0 auto 18px auto !important;
+            padding: 14px 22px !important;
+        }
+
+        /* --- 7. Modals on Tablet / iPad --- */
+        .modal-overlay .modal-content {
+            max-width: min(740px, 92vw) !important;
+            max-height: 90vh !important;
+            padding: 22px 20px !important;
+            border-radius: 24px !important;
+        }
+
+        .modal-overlay .close-btn {
+            width: 40px !important;
+            height: 40px !important;
+            font-size: 1.1rem !important;
+        }
+
+        /* --- 8. Activities / Games (Tablet / iPad) --- */
+        #grid-huruf-container {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 14px !important;
+            max-width: 700px !important;
+            margin: 0 auto !important;
+        }
+
+        #grid-huruf-container .kad-huruf-btn {
+            min-height: 75px !important;
+            font-size: 2rem !important;
+            border-radius: 18px !important;
+        }
+
+        #view-surih-nombor .surih-canvas-wrapper,
+        #view-surih-huruf .surih-canvas-wrapper {
+            max-width: 580px !important;
+            margin: 0 auto !important;
+        }
+
+        .cabaran-opt-btn {
+            padding: 16px 20px !important;
+            font-size: 1.15rem !important;
+            min-height: 56px !important;
+            border-radius: 16px !important;
+        }
     }
 
-    /* --- 1. Login Screen (Tablet / iPad) --- */
-    #login-screen.active {
-        padding: 24px 20px 40px !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-    }
-
-    #login-screen #login-logo-container img,
-    #login-screen .glitch-logo {
-        max-height: 170px !important;
-        max-width: 85% !important;
-        margin: 0 auto 12px auto !important;
-    }
-
-    #login-screen .login-hero-wrapper {
-        width: 100% !important;
-        max-width: 600px !important;
-        margin: 0 auto !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-    }
-
-    #login-screen #mode-buttons-container {
-        max-width: 520px !important;
-        width: 100% !important;
-        margin: 0 auto 16px auto !important;
-    }
-
-    #login-screen #mode-selection-card {
-        max-width: 500px !important;
-        width: 90% !important;
-        margin: 0 auto 20px auto !important;
-        padding: 18px 24px !important;
-        border-radius: 20px !important;
-    }
-
-    #login-screen #mode-selection-card div {
-        font-size: 1.05rem !important;
-    }
-
-    #login-screen .teacher-login-icon {
-        width: 48px !important;
-        height: 48px !important;
-        font-size: 1.25rem !important;
-    }
-
-    /* --- 2. Main Menu Screen (Tablet / iPad) --- */
-    #main-screen,
-    #main-menu-screen {
-        max-width: 800px !important;
-        margin: 0 auto !important;
-        padding: 20px 16px !important;
-    }
-
-    #main-screen .main-action-buttons,
-    #main-menu-screen .main-action-buttons {
-        max-width: 680px !important;
-        margin: 0 auto !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 14px !important;
-    }
-
-    #main-screen .main-action-buttons .neo-btn,
-    #main-menu-screen .main-action-buttons .neo-btn {
-        min-height: 60px !important;
-        font-size: 1.2rem !important;
-        padding: 16px 28px !important;
-        border-radius: 18px !important;
-    }
-
-    #murid-menu-belajar .sub-menu-grid,
-    #murid-menu-latihan .sub-menu-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 16px !important;
-        max-width: 720px !important;
-        margin: 0 auto !important;
-    }
-
-    #murid-menu-belajar .sub-menu-grid .neo-btn,
-    #murid-menu-latihan .sub-menu-grid .neo-btn {
-        min-height: 72px !important;
-        padding: 16px 18px !important;
-        font-size: 1.1rem !important;
-        border-radius: 18px !important;
-    }
-
-    /* --- 3. Map Screen & Cara Belajar (Tablet / iPad) --- */
-    #map-screen .map-top-bar {
-        padding: 12px 24px !important;
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-    }
-
-    #map-screen .map-top-bar .page-title {
-        font-size: 1.2rem !important;
-        padding: 8px 24px !important;
-    }
-
-    #map-screen .map-board {
-        max-width: 900px !important;
-        margin: 0 auto !important;
-        padding: 24px 16px !important;
-    }
-
-    #cara-belajar-lain-section {
-        max-width: 820px !important;
-        margin: 20px auto !important;
-        padding: 20px 24px !important;
-        border-radius: 24px !important;
-    }
-
-    #cara-belajar-lain-section .cara-belajar-btn-container {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        gap: 12px !important;
-    }
-
-    #cara-belajar-lain-section .cara-belajar-btn {
-        flex: 0 1 calc(33.333% - 10px) !important;
-        min-width: 145px !important;
-        padding: 12px 16px !important;
-        font-size: 0.95rem !important;
-        border-radius: 14px !important;
-    }
-
-    /* --- 4. Mod Guru Dashboard (Tablet / iPad) --- */
-    body.teacher-mode #guru-dashboard {
-        max-width: 920px !important;
-        margin: 0 auto !important;
-        padding: 20px 16px 100px !important;
-    }
-
-    /* Statistik Kelas Saya Header Card */
-    #guru-dashboard .header-card,
-    #guru-dashboard > div:first-child {
-        max-width: 880px !important;
-        width: 100% !important;
-        margin: 0 auto 16px auto !important;
-        border-radius: 22px !important;
-    }
-
-    /* Summary Stats Grid (Bilangan Murid & Aktiviti Selesai) */
-    #guru-dashboard .stats-grid,
-    #guru-dashboard > div[style*="display: grid"] {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 16px !important;
-        max-width: 880px !important;
-        margin: 0 auto 18px auto !important;
-    }
-
-    /* Prestasi Murid & Laporan Card */
-    #guru-dashboard .guru-table-card,
-    #guru-dashboard #guru-prestasi-card,
-    #guru-dashboard > div:last-child {
-        max-width: 880px !important;
-        margin: 0 auto 24px auto !important;
-        padding: 20px !important;
-        border-radius: 22px !important;
-    }
-
-    /* Filters Row in Table */
-    .guru-controls-bar {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        gap: 10px !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        margin-bottom: 14px !important;
-    }
-
-    .guru-controls-bar select,
-    #guru-dashboard select {
-        height: 40px !important;
-        font-size: 0.88rem !important;
-        padding: 6px 14px !important;
-        min-width: 140px !important;
-        border-radius: 12px !important;
-    }
-
-    /* Teacher Sticky Nav on Tablet */
-    #teacher-sticky-nav,
-    #admin-sticky-nav,
-    #parent-sticky-nav {
-        max-width: 640px !important;
-        width: calc(100% - 36px) !important;
-        padding: 6px 14px !important;
-        gap: 8px !important;
-        height: 68px !important;
-    }
-
-    #teacher-sticky-nav .neo-btn:not(.nav-item-center-circle) span,
-    #admin-sticky-nav .neo-btn:not(.nav-item-center-circle) span,
-    #parent-sticky-nav .neo-btn:not(.nav-item-center-circle) span {
-        font-size: 0.74rem !important;
-        font-weight: 700 !important;
-    }
-
-    #teacher-sticky-nav .neo-btn:not(.nav-item-center-circle) i,
-    #admin-sticky-nav .neo-btn:not(.nav-item-center-circle) i,
-    #parent-sticky-nav .neo-btn:not(.nav-item-center-circle) i {
-        font-size: 1.25rem !important;
-    }
-
-    /* Floating Dial Button on Tablet */
-    #guru-floating-dial-container {
-        bottom: 24px !important;
-        right: 24px !important;
-    }
-
-    #guru-floating-dial-container #guru-floating-cta {
-        width: 58px !important;
-        height: 58px !important;
-        font-size: 1.4rem !important;
-    }
-
-    /* --- 5. Mod Ibu Bapa Dashboard (Tablet / iPad) --- */
-    body.parent-mode #ibubapa-dashboard,
-    #ibubapa-dashboard {
-        max-width: 920px !important;
-        margin: 0 auto !important;
-        padding: 20px 16px 110px !important;
-    }
-
-    /* Kad Header: Statistik Anak Saya */
-    #ibubapa-dashboard > div.neo-box:first-child {
-        max-width: 880px !important;
-        width: 100% !important;
-        margin: 0 auto 18px auto !important;
-        padding: 20px 24px !important;
-        border-radius: 22px !important;
-    }
-
-    #ibubapa-dashboard .ibubapa-card-avatar-box {
-        width: 64px !important;
-        height: 64px !important;
-    }
-
-    #ibubapa-dashboard #ibubapa-nama-anak-title {
-        font-size: 1.45rem !important;
-    }
-
-    /* 3 Kad Ringkasan (Markah, Lencana, Aktiviti Selesai) */
-    .ibubapa-stats-grid {
-        display: grid !important;
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-        gap: 14px !important;
-        max-width: 880px !important;
-        margin: 0 auto 20px auto !important;
-    }
-
-    .ibubapa-stats-grid > div {
-        padding: 16px 18px !important;
-        border-radius: 20px !important;
-        min-height: 120px !important;
-    }
-
-    .ibubapa-stats-grid #ibubapa-jumlah-markah,
-    .ibubapa-stats-grid #ibubapa-jumlah-lencana,
-    .ibubapa-stats-grid #ibubapa-aktiviti-selesai {
-        font-size: 2.2rem !important;
-    }
-
-    /* Kad Diagnostik AI & Cadangan Bimbingan */
-    #ibubapa-laporan-card {
-        display: block !important;
-        max-width: 880px !important;
-        margin: 0 auto 20px auto !important;
-        padding: 20px 24px !important;
-        border-radius: 22px !important;
-    }
-
-    #ibubapa-ai-content {
-        font-size: 0.95rem !important;
-        line-height: 1.6 !important;
-    }
-
-    /* Kad Rekod Kemajuan Cabaran & Jadual */
-    #ibubapa-dashboard > div:last-child {
-        max-width: 880px !important;
-        margin: 0 auto 30px auto !important;
-        padding: 20px 22px !important;
-        border-radius: 22px !important;
-    }
-
-    #ibubapa-peta-select {
-        height: 40px !important;
-        font-size: 0.88rem !important;
-        padding: 6px 14px !important;
-        min-width: 160px !important;
-        border-radius: 12px !important;
-    }
-
-    #ibubapa-dashboard .table-responsive {
-        -webkit-overflow-scrolling: touch !important;
-        overflow-x: auto !important;
-    }
-
-    #ibubapa-dashboard .teacher-table th,
-    #ibubapa-dashboard .teacher-table td {
-        padding: 12px 16px !important;
-        font-size: 0.88rem !important;
-    }
-
-    /* Modal Pilih Anak & Edit Keluarga di Tablet */
-    #modal-pilih-anak .modal-content,
-    #modal-edit-profil-keluarga .modal-content {
-        max-width: min(620px, 92vw) !important;
-        padding: 24px !important;
-        border-radius: 24px !important;
-    }
-
-    /* --- 6. Mod Admin Dashboard (Tablet / iPad) --- */
-    body.admin-mode #admin-dashboard,
-    body.admin-mode #admin-sijil,
-    body.admin-mode #admin-urus {
-        max-width: 920px !important;
-        margin: 0 auto !important;
-        padding: 20px 16px 100px !important;
-    }
-
-    .admin-stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 16px !important;
-        max-width: 880px !important;
-        margin: 0 auto 20px auto !important;
-    }
-
-    .admin-table-card {
-        max-width: 880px !important;
-        margin: 0 auto !important;
-        padding: 18px 20px !important;
-    }
-
-    /* --- 6. Sijil Pencapaian (Tablet / iPad) --- */
-    .sijil-manager-wrapper {
-        max-width: 920px !important;
-        padding: 12px 14px 40px !important;
-    }
-
-    .sijil-header-card {
-        max-width: 540px !important;
-        margin: 0 auto 18px auto !important;
-        padding: 14px 22px !important;
-    }
-
-    /* --- 7. Modals on Tablet / iPad --- */
-    .modal-overlay .modal-content {
-        max-width: min(740px, 92vw) !important;
-        max-height: 90vh !important;
-        padding: 22px 20px !important;
-        border-radius: 24px !important;
-    }
-
-    .modal-overlay .close-btn {
-        width: 40px !important;
-        height: 40px !important;
-        font-size: 1.1rem !important;
-    }
-
-    /* --- 8. Activities / Games (Tablet / iPad) --- */
-    #grid-huruf-container {
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 14px !important;
-        max-width: 700px !important;
-        margin: 0 auto !important;
-    }
-
-    #grid-huruf-container .kad-huruf-btn {
-        min-height: 75px !important;
-        font-size: 2rem !important;
-        border-radius: 18px !important;
-    }
-
-    #view-surih-nombor .surih-canvas-wrapper,
-    #view-surih-huruf .surih-canvas-wrapper {
-        max-width: 580px !important;
-        margin: 0 auto !important;
-    }
-
-    .cabaran-opt-btn {
-        padding: 16px 20px !important;
-        font-size: 1.15rem !important;
-        min-height: 56px !important;
-        border-radius: 16px !important;
-    }
-}
+    /* =====================================================================
 
 /* =====================================================================
+   MOD AFFILIATE (Fasa 3): nav sticky 4 butang + banner keluar mobile
+   ===================================================================== */
+    /* Nav affiliate disembunyikan kecuali dalam mod affiliate. */
+    body:not(.affiliate-mode) #affiliate-sticky-nav {
+        display: none !important;
+    }
+
+    /* Sembunyikan nav pada skrin log masuk / pendaratan. */
+    body:has(#login-screen.active) #affiliate-sticky-nav,
+    body:has(#landing-screen.active) #affiliate-sticky-nav {
+        display: none !important;
+    }

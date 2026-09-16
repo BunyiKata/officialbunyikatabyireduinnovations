@@ -9,6 +9,8 @@ import {
   getStudentsByFamilyId,
 } from "../../services/firebaseService";
 import { cubaAksesAdmin, tetapkanSesiAdminTempatan } from "../../services/adminService";
+import { ref, get } from "firebase/database";
+import { db } from "../../lib/firebase";
 
 /**
  * Papar amaran spesifik apabila pelayan mengaku ia HIDUP tetapi mod admin
@@ -264,6 +266,13 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         "outlineGlowGold 2.5s infinite, pulse-scale 2.5s infinite ease-in-out",
                     }}
                     onClick={() => {
+                      // Pelindung dwi-klik (double-fire).
+                      if ((window as any).__bkKlikKunciEntryCuba) return;
+                      (window as any).__bkKlikKunciEntryCuba = true;
+                      setTimeout(() => {
+                        (window as any).__bkKlikKunciEntryCuba = false;
+                      }, 450);
+
                       if (typeof (window as any).playBubble === "function") (window as any).playBubble();
                       setIsEntryChoiceModalOpen(false);
                       (window as any).isGuestMode = true;
@@ -271,14 +280,47 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                       (window as any).modAdminAktif = false;
                       (window as any).modGuruAktif = false;
                       (window as any).modIbuBapaAktif = false;
+                      (window as any).adminClaimDisahkan = false;
                       (window as any).userAccessLevel = "trial";
                       (window as any).namaMuridAktif = "Tetamu";
                       setUserAccessLevel("trial");
                       setIsAdminActive(false);
                       localStorage.setItem("bunyiKataAccessLevel", "trial");
                       localStorage.removeItem("bunyiKataUserRole");
+
+                      // PENTING (Isolasi Mod Percuma): Buang baki pelan berbayar &
+                      // kod kelas/keluarga supaya pengguna Pro yang menekan "Mula"
+                      // (Cuba Percuma) benar-benar kekal dalam mod percuma. Tanpa ini,
+                      // masukModMurid() akan mengesan semula pelan Pro lama daripada
+                      // kunci-kunci ini dan menaikkan semula akses ke 'pro'.
+                      localStorage.removeItem("bunyiKataTeacherPlan");
+                      localStorage.removeItem("bunyiKataParentPlan");
+                      localStorage.removeItem("bunyiKataKodKelas");
+                      localStorage.removeItem("bunyiKataKodKelas2");
+                      localStorage.removeItem("bunyiKataKodKeluarga");
+                      localStorage.removeItem("bunyiKataStudentId");
+                      localStorage.removeItem("bunyiKataIsParentChild");
+
                       localStorage.setItem("muridAktif", "Tetamu");
                       localStorage.setItem("bunyiKataCurrentMurid", "Tetamu");
+
+                      // Isolasi akaun: pastikan rekod 'Tetamu' bermula bersih
+                      // (jangan mewarisi data murid berdaftar yang lalu).
+                      try {
+                        const sData = (window as any).studentData || {};
+                        sData["Tetamu"] = {
+                          coins: 0,
+                          badges: [],
+                          mapsUnlocked: 1,
+                          avatar: "/images/avatar/avatar1.png",
+                          claimedAvatars: ["/images/avatar/avatar1.png"],
+                          scores: {},
+                          stars: {},
+                          latihan: {},
+                        };
+                        (window as any).studentData = sData;
+                        (window as any).selectedAvatarIcon = "/images/avatar/avatar1.png";
+                      } catch (e) {}
 
                       if (typeof (window as any).resetTrialGuestProgress === "function") {
                         (window as any).resetTrialGuestProgress();
@@ -932,6 +974,13 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         "outlineGlowGold 2.5s infinite, pulse-scale 2.5s infinite ease-in-out",
                     }}
                     onClick={async () => {
+                      // Pelindung dwi-klik (double-fire) — elak kod disahkan dua kali.
+                      if ((window as any).__bkKlikKunciSahkanKod) return;
+                      (window as any).__bkKlikKunciSahkanKod = true;
+                      setTimeout(() => {
+                        (window as any).__bkKlikKunciSahkanKod = false;
+                      }, 700);
+
                       if (!joinCode.trim()) {
                         if (typeof (window as any).showAppModalAlert === "function") {
                           (window as any).showAppModalAlert(
@@ -1203,6 +1252,36 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                               );
                             }
                             return;
+                          }
+                          // Semakan kod affiliate (Fasa 3)
+                          try {
+                            const affSnap = await get(ref(db, `affiliates/${entered}`));
+                            if (affSnap.exists()) {
+                              const affData = affSnap.val() || {};
+                              localStorage.setItem("bunyiKataAffiliateKod", entered);
+                              if (affData.email) localStorage.setItem("bunyiKataAffiliateEmail", affData.email);
+                              if (affData.nama) localStorage.setItem("bunyiKataNamaAffiliate", affData.nama);
+                              setIsCodeModalOpen(false);
+                              setPendingLoginMode("affiliate");
+                              setAuthModalTab("login");
+                              setAuthModalError("");
+                              setLoginEmail(affData.email || "");
+                              setLoginPassword("");
+                              setShowLoginModal(true);
+                              if (typeof (window as any).showAppModalAlert === "function") {
+                                (window as any).showAppModalAlert(
+                                  "Akaun Affiliate Dijumpai",
+                                  `<p style="text-align:center; font-weight:bold; color:#7c3aed; margin:10px 0;">
+                                    <i class="fa-solid fa-sitemap" style="font-size:2.2rem; color:#7c3aed; display:block; margin-bottom:8px;"></i>
+                                    Selamat kembali, <strong>${affData.nama || "Affiliate"}</strong>!<br/>
+                                    <span style="font-size:0.9rem; color:#475569; font-weight:normal;">Sila masukkan kata laluan akaun anda untuk log masuk.</span>
+                                  </p>`
+                                );
+                              }
+                              return;
+                            }
+                          } catch (affErr) {
+                            console.warn("Affiliate code check warning:", affErr);
                           }
                         } catch (checkErr) {
                           console.warn("Database code validation warning:", checkErr);

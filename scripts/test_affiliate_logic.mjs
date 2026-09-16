@@ -49,16 +49,17 @@ assert.strictEqual(kiraKomisenSen(6900), 2070, "1 Tahun RM69 -> RM20.70");
 function mesejDaftarPakej(namaPakej, kodRujukan) {
   const nama = (namaPakej || "").trim();
   const kod = (kodRujukan || "").trim().toUpperCase();
-  const asas = `Saya berminat dapatkan Bunyi Kata Pakej "${nama}" 🙌🏻`;
+  // Emoji "🙌" tanpa skin-tone (versi "🙌🏻" rosak pada sesetengah peranti).
+  const asas = `Saya berminat dapatkan Bunyi Kata Pakej "${nama}" 🙌`;
   return kod ? `${asas} (Bunyi Kata - ${kod})` : asas;
 }
 assert.strictEqual(
   mesejDaftarPakej("3 Bulan (Pro)", "BK7X2K"),
-  'Saya berminat dapatkan Bunyi Kata Pakej "3 Bulan (Pro)" 🙌🏻 (Bunyi Kata - BK7X2K)',
+  'Saya berminat dapatkan Bunyi Kata Pakej "3 Bulan (Pro)" 🙌 (Bunyi Kata - BK7X2K)',
 );
 assert.strictEqual(
   mesejDaftarPakej("3 Bulan (Pro)", ""),
-  'Saya berminat dapatkan Bunyi Kata Pakej "3 Bulan (Pro)" 🙌🏻',
+  'Saya berminat dapatkan Bunyi Kata Pakej "3 Bulan (Pro)" 🙌',
   "tanpa kod: kurungan digugurkan sepenuhnya",
 );
 assert.strictEqual(

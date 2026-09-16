@@ -189,7 +189,22 @@ async function requireAffiliate(req, res, next) {
 
   try {
     const decoded = await getAuth(appInstance).verifyIdToken(idToken);
-    const kod = String(decoded.affiliate_kod || "").trim().toUpperCase();
+    let kod = String(decoded.affiliate_kod || "").trim().toUpperCase();
+    if (!kod && decoded.admin === true) {
+      const db = getDatabase(appInstance);
+      const reqKod = String(req.query?.kod || req.headers["x-affiliate-kod"] || "").trim().toUpperCase();
+      if (reqKod) {
+        kod = reqKod;
+      } else {
+        const affSnap = await db.ref("affiliates").limitToFirst(1).get();
+        if (affSnap.exists()) {
+          affSnap.forEach((c) => {
+            kod = c.key;
+            return true;
+          });
+        }
+      }
+    }
     if (!kod) {
       return res.status(403).json({ success: false, message: "Akses ditolak." });
     }
@@ -1021,6 +1036,41 @@ async function startServer() {
     } catch (err) {
       console.error("[Affiliate Referrals]", err);
       return res.status(500).json({ success: false, message: "Gagal memuatkan rujukan." });
+    }
+  });
+
+  /**
+   * Fasa 3: Kemas kini profil affiliate (nama / whatsapp).
+   */
+  app.post("/api/affiliate/update-profile", requireAffiliate, async (req, res) => {
+    try {
+      const appInstance = getAdminApp();
+      if (!appInstance) {
+        return res.status(503).json({ success: false, message: "Firebase Admin SDK belum sedia." });
+      }
+      const db = getDatabase(appInstance);
+      const authAdmin = getAuth(appInstance);
+      const kod = req.affiliateKod;
+      const { nama, whatsapp } = req.body || {};
+
+      const updates = {};
+      if (typeof nama === "string" && nama.trim()) updates.nama = nama.trim();
+      if (typeof whatsapp === "string") updates.whatsapp = whatsapp.trim();
+      updates.dikemaskini_pada = new Date().toISOString();
+
+      await db.ref(`affiliates/${kod}`).update(updates);
+      if (req.user && req.user.uid && updates.nama) {
+        try {
+          await authAdmin.updateUser(req.user.uid, { displayName: updates.nama });
+        } catch (e) {
+          console.warn("[Affiliate update displayName]", e);
+        }
+      }
+
+      return res.json({ success: true, message: "Profil affiliate berjaya dikemaskini." });
+    } catch (err) {
+      console.error("[Affiliate Update Profile]", err);
+      return res.status(500).json({ success: false, message: "Gagal mengemaskini profil affiliate." });
     }
   });
 

@@ -119,12 +119,19 @@ export default function LoginScreen({
             <Suspense fallback={null}>
               <PirateAvatar3DSwiper
                 onStart={() => {
-                  (window as any).bukaModalAppInfo &&
+                  if (typeof (window as any).playBubble === "function") (window as any).playBubble();
+                  // Laluan cuba percuma dari skrin log masuk: pastikan mod percuma/trial
+                  if (typeof (window as any).bukaModalAppInfo === "function") {
                     (window as any).bukaModalAppInfo("murid");
+                  } else if (typeof (window as any).masukModMurid === "function") {
+                    (window as any).masukModMurid("Tetamu");
+                  }
                 }}
                 onOpenProPackage={() => {
                   if (typeof (window as any).playBubble === "function") (window as any).playBubble();
-                  (window as any).openPakejProModal?.("guru");
+                  if (typeof (window as any).openPakejProModal === "function") {
+                    (window as any).openPakejProModal("guru");
+                  }
                 }}
               />
             </Suspense>

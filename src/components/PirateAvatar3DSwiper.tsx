@@ -43,6 +43,8 @@ export function PirateAvatar3DSwiper({
     };
   }, [kiraIsTrial]);
 
+  // 2 Avatar Utama (Kapten Suku & Pahlawan Kata) kekal UNLOCKED untuk laluan cuba percuma.
+  // 3 Avatar lain kekal TERKUNCI (Versi Pro) pada skrin log masuk untuk promosi langganan.
   const characters = [
     {
       id: 1,
@@ -62,22 +64,22 @@ export function PirateAvatar3DSwiper({
       id: 3,
       name: "Pendekar ABC",
       icon: "/images/avatar/avatar3.png",
-      unlocked: !isTrial,
-      tag: isTrial ? "Versi Pro" : "Terbuka",
+      unlocked: false,
+      tag: "Versi Pro",
     },
     {
       id: 4,
       name: "Laksamana Suku",
       icon: "/images/avatar/avatar4.png",
-      unlocked: !isTrial,
-      tag: isTrial ? "Versi Pro" : "Terbuka",
+      unlocked: false,
+      tag: "Versi Pro",
     },
     {
       id: 5,
       name: "Pengembara Vokal",
       icon: "/images/avatar/avatar5.png",
-      unlocked: !isTrial,
-      tag: isTrial ? "Versi Pro" : "Terbuka",
+      unlocked: false,
+      tag: "Versi Pro",
     },
   ];
 
@@ -100,14 +102,13 @@ export function PirateAvatar3DSwiper({
   const handleSelectIndex = (idx: number) => {
     if (typeof (window as any).playBubble === "function") (window as any).playBubble();
     setActiveIndex(idx);
-    if (characters[idx].unlocked) {
-      setSelectedAvatar(characters[idx].icon);
-      setLockedNotice(null);
-    } else {
+    setSelectedAvatar(characters[idx].icon);
+    if (!characters[idx].unlocked) {
       setLockedNotice(
         `Watak ${characters[idx].name} terkunci (${characters[idx].tag})`,
       );
-      triggerProNotice(characters[idx].name);
+    } else {
+      setLockedNotice(null);
     }
   };
 
@@ -149,10 +150,27 @@ export function PirateAvatar3DSwiper({
       return;
     }
 
-    const finalAvatar = selectedAvatar;
+    const finalAvatar = selectedAvatar || activeChar.icon;
     (window as any).selectedAvatarIcon = finalAvatar;
 
-    const studentName = (window as any).namaMuridAktif || "Murid";
+    // PENTING: Laluan mula cuba percuma di login screen HANYA untuk mod percuma (trial/tetamu)
+    if (typeof window !== "undefined") {
+      (window as any).isGuestMode = true;
+      (window as any).userAccessLevel = "trial";
+      (window as any).adminClaimDisahkan = false;
+      (window as any).isAdminMode = false;
+      (window as any).modAdminAktif = false;
+      (window as any).modGuruAktif = false;
+      (window as any).modIbuBapaAktif = false;
+      (window as any).modAffiliateAktif = false;
+      localStorage.setItem("bunyiKataAccessLevel", "trial");
+      localStorage.removeItem("bunyiKataUserRole");
+      if (typeof (window as any).setUserAccessLevel === "function") {
+        (window as any).setUserAccessLevel("trial");
+      }
+    }
+
+    const studentName = (window as any).namaMuridAktif || "Tetamu";
     if (
       typeof (window as any).studentData !== "undefined" &&
       (window as any).studentData[studentName]
@@ -167,8 +185,10 @@ export function PirateAvatar3DSwiper({
       onRequestEntryChoice();
     } else if (onStart) {
       onStart();
+    } else if (typeof (window as any).bukaModalAppInfo === "function") {
+      (window as any).bukaModalAppInfo("murid");
     } else if (typeof (window as any).masukModMurid === "function") {
-      (window as any).masukModMurid(studentName);
+      (window as any).masukModMurid("Tetamu");
     }
   };
 
@@ -341,16 +361,21 @@ export function PirateAvatar3DSwiper({
               opacity = 0;
             }
 
-            const isSelected =
-              char.icon === selectedAvatar &&
-              char.unlocked &&
-              activeIndex === idx;
+            const isSelected = activeIndex === idx;
 
             return (
               <div
                 key={char.id}
                 className={isSelected ? "gaming-card-glow" : ""}
-                onClick={() => handleSelectIndex(idx)}
+                onClick={() => {
+                  if (activeIndex === idx) {
+                    if (!char.unlocked) {
+                      triggerProNotice(char.name);
+                    }
+                  } else {
+                    handleSelectIndex(idx);
+                  }
+                }}
                 style={{
                   position: "absolute",
                   width: "135px",
@@ -458,7 +483,11 @@ export function PirateAvatar3DSwiper({
                   <div
                     onClick={(e) => {
                       e.stopPropagation();
-                      triggerProNotice(char.name);
+                      if (activeIndex === idx) {
+                        triggerProNotice(char.name);
+                      } else {
+                        handleSelectIndex(idx);
+                      }
                     }}
                     style={{
                       position: "absolute",

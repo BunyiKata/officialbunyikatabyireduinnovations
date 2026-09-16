@@ -15,10 +15,12 @@ import {
   type RingkasanAffiliate,
   type ReferralAffiliate,
 } from "../../services/adminService";
+import { hubungiAdminWhatsapp } from "../../config/contactAdmin";
 
 interface AffiliateDashboardProps {
   getScreenClass: (id: string, extraClasses?: string) => string;
   onLogout: () => void;
+  onEditProfile?: () => void;
 }
 
 const UNGU = "#7c3aed";
@@ -66,13 +68,42 @@ const tdStyle: React.CSSProperties = {
 };
 
 
-export function AffiliateDashboard({ getScreenClass, onLogout }: AffiliateDashboardProps) {
+export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: AffiliateDashboardProps) {
   const [profil, setProfil] = React.useState<ProfilAffiliate | null>(null);
   const [ringkasan, setRingkasan] = React.useState<RingkasanAffiliate | null>(null);
   const [referral, setReferral] = React.useState<ReferralAffiliate[]>([]);
   const [memuat, setMemuat] = React.useState(true);
   const [ralat, setRalat] = React.useState("");
   const [salin, setSalin] = React.useState("");
+
+  const muatData = React.useCallback(async () => {
+    setMemuat(true);
+    setRalat("");
+    const [hasilProfil, senarai] = await Promise.all([
+      ambilProfilAffiliate(),
+      ambilReferralSendiri(),
+    ]);
+    if (!hasilProfil.berjaya || !hasilProfil.affiliate) {
+      setRalat(hasilProfil.mesej || "Gagal memuatkan profil affiliate.");
+    } else {
+      setProfil(hasilProfil.affiliate);
+      setRingkasan(hasilProfil.ringkasan || null);
+      if (hasilProfil.affiliate.kod) {
+        localStorage.setItem("bunyiKataAffiliateKod", hasilProfil.affiliate.kod);
+        (window as any).bunyiKataAffiliateKod = hasilProfil.affiliate.kod;
+      }
+      if (hasilProfil.affiliate.email) {
+        localStorage.setItem("bunyiKataAffiliateEmail", hasilProfil.affiliate.email);
+        (window as any).bunyiKataAffiliateEmail = hasilProfil.affiliate.email;
+      }
+      if (hasilProfil.affiliate.nama) {
+        localStorage.setItem("bunyiKataNamaAffiliate", hasilProfil.affiliate.nama);
+        (window as any).bunyiKataNamaAffiliate = hasilProfil.affiliate.nama;
+      }
+    }
+    setReferral(senarai);
+    setMemuat(false);
+  }, []);
 
   React.useEffect(() => {
     let batal = false;
@@ -89,6 +120,18 @@ export function AffiliateDashboard({ getScreenClass, onLogout }: AffiliateDashbo
       } else {
         setProfil(hasilProfil.affiliate);
         setRingkasan(hasilProfil.ringkasan || null);
+        if (hasilProfil.affiliate.kod) {
+          localStorage.setItem("bunyiKataAffiliateKod", hasilProfil.affiliate.kod);
+          (window as any).bunyiKataAffiliateKod = hasilProfil.affiliate.kod;
+        }
+        if (hasilProfil.affiliate.email) {
+          localStorage.setItem("bunyiKataAffiliateEmail", hasilProfil.affiliate.email);
+          (window as any).bunyiKataAffiliateEmail = hasilProfil.affiliate.email;
+        }
+        if (hasilProfil.affiliate.nama) {
+          localStorage.setItem("bunyiKataNamaAffiliate", hasilProfil.affiliate.nama);
+          (window as any).bunyiKataNamaAffiliate = hasilProfil.affiliate.nama;
+        }
       }
       setReferral(senarai);
       setMemuat(false);
@@ -133,7 +176,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout }: AffiliateDashbo
 
   return (
     <div id="affiliate-dashboard" className={getScreenClass("affiliate-dashboard")}>
-      {/* Kepala ungu */}
+      {/* Kepala banner bergaya Guru/Ibu Bapa */}
       <div
         className="neo-box"
         style={{
@@ -154,45 +197,125 @@ export function AffiliateDashboard({ getScreenClass, onLogout }: AffiliateDashbo
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
             gap: "15px",
+            flexWrap: "wrap",
           }}
         >
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <i className="fa-solid fa-sitemap" style={{ fontSize: "1.5rem" }}></i>
-              <h2 style={{ margin: 0, fontWeight: 900, fontSize: "clamp(1.3rem, 4vw, 1.9rem)" }}>
-                Panel Affiliate
-              </h2>
-            </div>
-            <p style={{ margin: "8px 0 0", opacity: 0.95 }}>
+          {/* Avatar kotak (selaras kelas avatar Guru/Ibu Bapa) */}
+          <div
+            className="ibubapa-card-avatar-box"
+            style={{
+              background: "#ffffff",
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <i
+              id="affiliate-avatar-icon"
+              className="fa-solid fa-sitemap"
+              style={{ color: UNGU, fontSize: "1.7rem" }}
+            ></i>
+          </div>
+
+          <div style={{ flex: 1, minWidth: "180px", textAlign: "left" }}>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                background: "rgba(255,255,255,0.22)",
+                border: "1.5px solid rgba(255,255,255,0.55)",
+                color: "#ffffff",
+                fontWeight: 800,
+                fontSize: "0.7rem",
+                letterSpacing: "0.6px",
+                padding: "2px 10px",
+                borderRadius: "20px",
+                marginBottom: "6px",
+              }}
+            >
+              <i className="fa-solid fa-chart-simple"></i> STATISTIK AFFILIATE SAYA
+            </span>
+            <h2
+              id="affiliate-nama-title"
+              style={{ margin: 0, fontWeight: 900, fontSize: "clamp(1.3rem, 4vw, 1.9rem)" }}
+            >
+              {profil?.nama || "Panel Affiliate"}
+            </h2>
+            <p style={{ margin: "6px 0 0", opacity: 0.95, fontSize: "0.85rem" }}>
               {profil ? (
                 <>
-                  Selamat datang, <b>{profil.nama}</b>
-                  {profil.status && profil.status !== "aktif" ? ` (${profil.status})` : ""}
+                  Kod: <b>{profil.kod || "-"}</b>
+                  {" \u2022 "}
+                  Status:{" "}
+                  <b style={{ textTransform: "capitalize", color: String(profil.status).toLowerCase() === "aktif" ? "#86efac" : "#fca5a5" }}>
+                    {profil.status || "aktif"}
+                  </b>
                 </>
               ) : (
                 "Selamat datang!"
               )}
             </p>
           </div>
-          <button
-            onClick={onLogout}
-            className="neo-btn"
-            style={{
-              background: "#ffffff",
-              color: UNGU_GELAP,
-              border: "2px solid #0f172a",
-              borderRadius: "12px",
-              padding: "10px 18px",
-              fontWeight: 900,
-              cursor: "pointer",
-              boxShadow: "0 3px 0 #0f172a",
-            }}
-          >
-            <i className="fa-solid fa-right-from-bracket"></i> Log Keluar
-          </button>
+
+          {/* Butang Edit Maklumat Affiliate */}
+          {onEditProfile && (
+            <div
+              style={{
+                position: "absolute",
+                top: "15px",
+                right: "15px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                zIndex: 10,
+              }}
+            >
+              <button
+                onClick={() => {
+                  if ((window as any).playBubble) (window as any).playBubble();
+                  if (profil?.kod) {
+                    localStorage.setItem("bunyiKataAffiliateKod", profil.kod);
+                    (window as any).bunyiKataAffiliateKod = profil.kod;
+                  }
+                  if (profil?.email) {
+                    localStorage.setItem("bunyiKataAffiliateEmail", profil.email);
+                    (window as any).bunyiKataAffiliateEmail = profil.email;
+                  }
+                  if (profil?.nama) {
+                    localStorage.setItem("bunyiKataNamaAffiliate", profil.nama);
+                    (window as any).bunyiKataNamaAffiliate = profil.nama;
+                  }
+                  onEditProfile();
+                }}
+                className="neo-btn"
+                style={{
+                  background: "rgba(255,255,255,0.3)",
+                  border: "2px solid var(--color-dark)",
+                  borderRadius: "50%",
+                  padding: "0",
+                  width: "36px",
+                  height: "36px",
+                  minWidth: "auto",
+                  minHeight: "auto",
+                  color: "white",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 0 var(--color-dark)",
+                  fontWeight: "bold",
+                  fontSize: "0.95rem",
+                }}
+                title="Edit Maklumat Affiliate"
+                aria-label="Edit Maklumat Affiliate"
+              >
+                <i className="fa-solid fa-pencil"></i>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -215,9 +338,95 @@ export function AffiliateDashboard({ getScreenClass, onLogout }: AffiliateDashbo
               border: "2px solid #b91c1c",
               borderRadius: "14px",
               textAlign: "left",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "12px",
             }}
           >
-            <i className="fa-solid fa-triangle-exclamation"></i> {ralat}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: "1.3rem" }}></i>
+              <span>{ralat.replace(/sila masuk semula\.?/gi, "Sila berhubung dengan admin.")}</span>
+            </div>
+            <button
+              className="neo-btn"
+              onClick={() => {
+                if ((window as any).playBubble) (window as any).playBubble();
+                const affKod = profil?.kod || localStorage.getItem("bunyiKataAffiliateKod") || "";
+                const affEmail = profil?.email || localStorage.getItem("bunyiKataAffiliateEmail") || "";
+                const mesej = `Hai admin Bunyi Kata, saya ingin berhubung berkenaan akaun/sesi affiliate saya (Kod: ${affKod || "-"}, Emel: ${affEmail || "-"}).`;
+                hubungiAdminWhatsapp(mesej);
+              }}
+              style={{
+                background: "#25D366",
+                color: "#ffffff",
+                padding: "8px 16px",
+                fontSize: "0.85rem",
+                borderRadius: "8px",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                fontWeight: "bold",
+                border: "2px solid #16a34a",
+              }}
+            >
+              <i className="fa-brands fa-whatsapp" style={{ fontSize: "1.1rem" }}></i>
+              Hubungi Admin
+            </button>
+          </div>
+        )}
+
+        {!memuat && profil && String(profil.status).toLowerCase() === "gantung" && (
+          <div
+            className="neo-box"
+            style={{
+              padding: "16px 18px",
+              marginBottom: "18px",
+              background: "#fef3c7",
+              color: "#b45309",
+              border: "2px solid #b45309",
+              borderRadius: "14px",
+              textAlign: "left",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "12px",
+              fontWeight: "bold",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <i className="fa-solid fa-circle-pause" style={{ fontSize: "1.4rem" }}></i>
+              <span>Akaun affiliate anda tidak aktif / digantung. Sila berhubung dengan admin.</span>
+            </div>
+            <button
+              className="neo-btn"
+              onClick={() => {
+                if ((window as any).playBubble) (window as any).playBubble();
+                const affKod = profil?.kod || localStorage.getItem("bunyiKataAffiliateKod") || "";
+                const affEmail = profil?.email || localStorage.getItem("bunyiKataAffiliateEmail") || "";
+                const mesej = `Hai admin Bunyi Kata, akaun affiliate saya tidak aktif / digantung (Kod: ${affKod || "-"}, Emel: ${affEmail || "-"}).`;
+                hubungiAdminWhatsapp(mesej);
+              }}
+              style={{
+                background: "#25D366",
+                color: "#ffffff",
+                padding: "8px 16px",
+                fontSize: "0.85rem",
+                borderRadius: "8px",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                fontWeight: "bold",
+                border: "2px solid #16a34a",
+              }}
+            >
+              <i className="fa-brands fa-whatsapp" style={{ fontSize: "1.1rem" }}></i>
+              Hubungi Admin
+            </button>
           </div>
         )}
 
@@ -225,6 +434,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout }: AffiliateDashbo
           <>
             {/* Kad kod + pautan rujukan */}
             <div
+              id="affiliate-kod"
               className="neo-box"
               style={{
                 padding: "18px",
@@ -254,9 +464,24 @@ export function AffiliateDashboard({ getScreenClass, onLogout }: AffiliateDashbo
                 <button
                   onClick={() => salinTeks(profil.kod, "kod")}
                   className="neo-btn"
-                  style={{ padding: "3px 10px", borderRadius: "8px", fontSize: "0.8rem", cursor: "pointer" }}
+                  title={salin === "kod" ? "Disalin!" : "Salin Kod"}
+                  aria-label="Salin Kod"
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: "8px",
+                    fontSize: "0.85rem",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minWidth: "34px",
+                    height: "30px",
+                  }}
                 >
-                  {salin === "kod" ? "✓ Disalin" : "Salin"}
+                  <i
+                    className={salin === "kod" ? "fa-solid fa-check" : "fa-regular fa-copy"}
+                    style={{ color: salin === "kod" ? "#16a34a" : "inherit" }}
+                  ></i>
                 </button>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "9px", flexWrap: "wrap" }}>
@@ -268,9 +493,24 @@ export function AffiliateDashboard({ getScreenClass, onLogout }: AffiliateDashbo
                 <button
                   onClick={() => salinTeks(pautanRujukan, "pautan")}
                   className="neo-btn"
-                  style={{ padding: "3px 10px", borderRadius: "8px", fontSize: "0.8rem", cursor: "pointer" }}
+                  title={salin === "pautan" ? "Disalin!" : "Salin Pautan"}
+                  aria-label="Salin Pautan"
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: "8px",
+                    fontSize: "0.85rem",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minWidth: "34px",
+                    height: "30px",
+                  }}
                 >
-                  {salin === "pautan" ? "✓ Disalin" : "Salin"}
+                  <i
+                    className={salin === "pautan" ? "fa-solid fa-check" : "fa-regular fa-copy"}
+                    style={{ color: salin === "pautan" ? "#16a34a" : "inherit" }}
+                  ></i>
                 </button>
               </div>
             </div>
@@ -309,6 +549,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout }: AffiliateDashbo
 
             {/* Jadual rujukan */}
             <div
+              id="affiliate-rujukan"
               className="neo-box"
               style={{
                 padding: "18px",
@@ -322,56 +563,78 @@ export function AffiliateDashboard({ getScreenClass, onLogout }: AffiliateDashbo
               <h3 style={{ margin: "0 0 14px", fontWeight: 900 }}>
                 <i className="fa-solid fa-list-check" style={{ color: UNGU }}></i> Rujukan &amp; Komisen
               </h3>
-              {referral.length === 0 ? (
-                <p style={{ color: "#64748b", margin: 0 }}>
-                  Belum ada rujukan. Kongsi pautan khas anda untuk mula mengumpul komisen.
-                </p>
-              ) : (
-                <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
-                    <thead>
-                      <tr style={{ background: "#f5f3ff", color: UNGU_GELAP }}>
-                        <th style={thStyle}>Pelanggan</th>
-                        <th style={thStyle}>Pakej</th>
-                        <th style={thStyle}>Harga</th>
-                        <th style={thStyle}>Komisen</th>
-                        <th style={thStyle}>Status</th>
-                        <th style={thStyle}>Tarikh</th>
+              <div
+                className="table-responsive"
+                style={{
+                  overflowX: "auto",
+                  borderRadius: "12px",
+                  border: "2px solid var(--color-dark)",
+                }}
+              >
+                <table className="teacher-table affiliate-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: "45px" }}>Bil.</th>
+                      <th style={{ textAlign: "left" }}>Pelanggan</th>
+                      <th>Pakej</th>
+                      <th>Harga</th>
+                      <th>Komisen</th>
+                      <th>Status</th>
+                      <th>Tarikh</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {referral.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={7}
+                          style={{
+                            padding: "26px 16px",
+                            textAlign: "center",
+                            color: "#64748b",
+                            background: "#ffffff",
+                            fontWeight: 600,
+                          }}
+                        >
+                          <i className="fa-solid fa-inbox" style={{ marginRight: "8px", color: UNGU, fontSize: "1.2rem" }}></i>
+                          Belum ada rujukan. Kongsi pautan khas anda untuk mula mengumpul komisen.
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {referral.map((r) => {
+                    ) : (
+                      referral.map((r, idx) => {
                         const l = lencanaStatus(r.status);
                         return (
-                          <tr key={r.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                            <td style={tdStyle}>{r.pelanggan_nama || "-"}</td>
-                            <td style={tdStyle}>{r.nama_pakej || "-"}</td>
-                            <td style={tdStyle}>{formatRM(r.harga_sen)}</td>
-                            <td style={{ ...tdStyle, fontWeight: 700, color: UNGU_GELAP }}>
+                          <tr key={r.id || idx}>
+                            <td style={{ fontWeight: "bold" }}>{idx + 1}</td>
+                            <td style={{ textAlign: "left", fontWeight: 700 }}>{r.pelanggan_nama || "-"}</td>
+                            <td>{r.nama_pakej || "-"}</td>
+                            <td>{formatRM(r.harga_sen)}</td>
+                            <td style={{ fontWeight: 800, color: UNGU_GELAP }}>
                               {formatRM(r.komisen_sen)}
                             </td>
-                            <td style={tdStyle}>
+                            <td>
                               <span
                                 style={{
                                   background: l.bg,
                                   color: l.warna,
-                                  padding: "2px 9px",
+                                  padding: "3px 10px",
                                   borderRadius: "20px",
                                   fontSize: "0.75rem",
                                   fontWeight: 700,
+                                  display: "inline-block",
                                 }}
                               >
                                 {l.teks}
                               </span>
                             </td>
-                            <td style={tdStyle}>{formatTarikh(r.tarikh_beli)}</td>
+                            <td>{formatTarikh(r.tarikh_beli)}</td>
                           </tr>
                         );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </>
         )}
