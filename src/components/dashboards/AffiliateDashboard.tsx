@@ -223,6 +223,13 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
   const muatData = React.useCallback(async () => {
     setMemuat(true);
     setRalat("");
+    // Bersihkan status tersimpan SEBELUM muat naik baharu supaya nilai basi
+    // (contoh: sesi gantung yang lalu) tidak dibaca oleh app-logic.js semasa
+    // tetingkap memuat dan menyebabkan flash "tidak aktif" yang mengelirukan.
+    try {
+      localStorage.removeItem("bunyiKataAffiliateStatus");
+      (window as any).bunyiKataAffiliateStatus = "";
+    } catch {}
     // BEST-EFFORT: paksa token segar supaya claim `affiliate_kod` (yang mungkin
     // ditetapkan admin selepas pendaftaran) diterima. Kegagalan diabaikan —
     // pelayan masih boleh menyelesaikan kod melalui emel sebagai sandaran.
@@ -271,6 +278,11 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
     (async () => {
       setMemuat(true);
       setRalat("");
+      // Elak pembacaan status basi semasa tetingkap memuat (lihat muatData).
+      try {
+        localStorage.removeItem("bunyiKataAffiliateStatus");
+        (window as any).bunyiKataAffiliateStatus = "";
+      } catch {}
       const [hasilProfil, senarai, hasilBayaran] = await Promise.all([
         ambilProfilAffiliate(),
         ambilReferralSendiri(),
@@ -322,6 +334,13 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
     profil?.kod && typeof window !== "undefined"
       ? `${window.location.origin}/?ref=${profil.kod}`
       : "";
+
+  // Status sebenar affiliate (selepas data selesai dimuatkan). Semasa memuat
+  // atau sebelum profil tiba, kita TIDAK menganggap akaun tidak aktif — ini
+  // mengelak flash "digantung/tidak aktif" pada muat pertama (race async
+  // Firebase auth + HMR Vite) yang mengelirukan pengguna.
+  const statusAffiliate = String(profil?.status || "aktif").toLowerCase().trim() || "aktif";
+  const akaunAktif = !memuat && !!profil && statusAffiliate === "aktif";
 
   // --- Halaman semasa untuk setiap jadual ---
   const jumlahHalamanRujukan = Math.max(1, Math.ceil(referral.length / HAL_PER_HALAMAN));
@@ -570,7 +589,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
           </div>
         )}
 
-        {!memuat && profil && String(profil.status).toLowerCase() === "gantung" && (
+        {!memuat && profil && statusAffiliate === "gantung" && (
           <div
             className="neo-box"
             style={{
@@ -647,7 +666,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
           </div>
         )}
 
-        {!memuat && profil && (
+        {akaunAktif && (
           <>
             {/* Kad kod + pautan rujukan */}
             <div
@@ -663,7 +682,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
                 textAlign: "left",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "9px", marginBottom: "10px", flexWrap: "wrap" }}>
+              <div className="affiliate-kod-row" style={{ display: "flex", alignItems: "center", gap: "9px", marginBottom: "10px", flexWrap: "wrap" }}>
                 <i className="fa-solid fa-key" style={{ color: UNGU }}></i>
                 <b>Kod Affiliate:</b>
                 <span
@@ -680,7 +699,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
                 </span>
                 <button
                   onClick={() => salinTeks(profil.kod, "kod")}
-                  className="neo-btn"
+                  className="neo-btn affiliate-copy-btn"
                   title={salin === "kod" ? "Disalin!" : "Salin Kod"}
                   aria-label="Salin Kod"
                   style={{
@@ -701,15 +720,15 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
                   ></i>
                 </button>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "9px", flexWrap: "wrap" }}>
+              <div className="affiliate-pautan-row" style={{ display: "flex", alignItems: "center", gap: "9px", flexWrap: "wrap" }}>
                 <i className="fa-solid fa-link" style={{ color: UNGU }}></i>
-                <b>Pautan Khas:</b>
-                <span style={{ color: UNGU_GELAP, fontWeight: 600, fontSize: "0.85rem", wordBreak: "break-all" }}>
+                <b className="affiliate-pautan-label">Pautan Khas:</b>
+                <span className="affiliate-pautan-url" style={{ color: UNGU_GELAP, fontWeight: 600, fontSize: "0.85rem", wordBreak: "break-all" }}>
                   {pautanRujukan}
                 </span>
                 <button
                   onClick={() => salinTeks(pautanRujukan, "pautan")}
-                  className="neo-btn"
+                  className="neo-btn affiliate-copy-btn"
                   title={salin === "pautan" ? "Disalin!" : "Salin Pautan"}
                   aria-label="Salin Pautan"
                   style={{
@@ -968,7 +987,11 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
     </div>
 
     {/* Screen: Laporan Pembayaran Affiliate (page berasingan) */}
-    <div id="affiliate-laporan-screen" className={getScreenClass("affiliate-laporan-screen")}>
+    <div
+      id="affiliate-laporan-screen"
+      className={getScreenClass("affiliate-laporan-screen")}
+      style={akaunAktif ? undefined : { display: "none" }}
+    >
       <div style={{ width: "100%", maxWidth: "900px", margin: "0 auto" }}>
         <div
           className="neo-box"

@@ -347,6 +347,102 @@ function kiraKomisenSen(hargaSen) {
 }
 
 /**
+ * Selaraskan status baris rujukan dengan rekod pembayaran sebenar.
+ *
+ * MASALAH YANG DIBETULKAN:
+ *   Sistem menyimpan DUA sumber berasingan:
+ *     1) `referrals/{kod}/{id}.status`  -> "pending" / "dibayar" / "batal"
+ *     2) `affiliate_payments/{id}`      -> rekod transaksi bayaran oleh admin
+ *   Rekod pembayaran boleh wujud (admin sudah bayar) manakala baris rujukan
+ *   masih "pending" (cth. rekod lama dicipta sebelum `tanda_komisen`, atau
+ *   admin tidak tandakan baris). Ini menyebabkan Jadual Rujukan & Komisen
+ *   menunjukkan "Belum Dibayar" walaupun Jadual Laporan Pembayaran sudah
+ *   menunjukkan bayaran, dan kad "Telah Dibayar" kekal RM0.00.
+ *
+ * PENYELESAIAN (Pilihan 1 — betulkan & simpan):
+ *   Baca semua rekod `affiliate_payments` bagi kod ini, jumlahkan `jumlah_sen`
+ *   sebagai "wang sebenar yang telah dibayar". Kemudian tanda baris komisen
+ *   (batal dikecualikan, tertua dahulu) sebagai "dibayar" sehingga jumlah
+ *   pembayaran dipenuhi. Tanda ditulis KE DALAM Firebase supaya semua
+ *   paparan (admin + affiliate) kekal konsisten selepas ini.
+ *
+ * @param {object} db        Instance Realtime Database.
+ * @param {string} kod       Kod affiliate (huruf besar).
+ * @param {object} [pilihan] { rekodBayar } untuk elak baca semula.
+ * @returns {Promise<{ ditanda: number, jumlahPembayaranSen: number }>}
+ */
+async function selarasStatusKomisen(db, kod, pilihan = {}) {
+  const kodBersih = String(kod || "").trim().toUpperCase();
+  if (!kodBersih) return { ditanda: 0, jumlahPembayaranSen: 0 };
+
+  // 1) Jumlah wang sebenar yang telah dibayar (semua rekod untuk kod ini).
+  let rekodBayar = pilihan.rekodBayar;
+  if (!rekodBayar) {
+    try {
+      const snapBayar = await db.ref("affiliate_payments").get();
+      rekodBayar = [];
+      if (snapBayar.exists()) {
+        snapBayar.forEach((r) => {
+          const p = r.val() || {};
+          if (String(p.kod || "").trim().toUpperCase() === kodBersih) rekodBayar.push(p);
+          return false;
+        });
+      }
+    } catch (err) {
+      console.warn("[Selaras Komisen] Gagal baca affiliate_payments:", err?.message || err);
+      rekodBayar = [];
+    }
+  }
+  const jumlahPembayaranSen = rekodBayar.reduce(
+    (s, p) => s + (Number(p.jumlah_sen) || 0),
+    0,
+  );
+  if (jumlahPembayaranSen <= 0) return { ditanda: 0, jumlahPembayaranSen: 0 };
+
+  // 2) Kira baris komisen belum dibayar (tertua dahulu).
+  const snapRef = await db.ref(`referrals/${kodBersih}`).get();
+  if (!snapRef.exists()) return { ditanda: 0, jumlahPembayaranSen };
+
+  const calon = [];
+  let jumlahSudahDibayar = 0;
+  snapRef.forEach((rekod) => {
+    const r = rekod.val() || {};
+    if (r.status === "batal") return false; // batal tidak dikira langsung.
+    const komisen = Number(r.komisen_sen) || 0;
+    if (r.status === "dibayar") {
+      jumlahSudahDibayar += komisen;
+    } else {
+      calon.push({ id: rekod.key, komisen_sen: komisen, tarikh_beli: r.tarikh_beli || "" });
+    }
+    return false;
+  });
+  calon.sort((a, b) => String(a.tarikh_beli || "").localeCompare(String(b.tarikh_beli || "")));
+
+  // 3) Tanda baris sehingga jumlah pembayaran dipenuhi. Baki yang belum
+  //    diliputi pembayaran kekal "pending" (belum dibayar).
+  const tarikh = new Date().toISOString();
+  const kemasKini = {};
+  let jumlahDitanda = jumlahSudahDibayar;
+  let ditanda = 0;
+  for (const c of calon) {
+    if (jumlahDitanda + c.komisen_sen > jumlahPembayaranSen) break;
+    kemasKini[`referrals/${kodBersih}/${c.id}/status`] = "dibayar";
+    kemasKini[`referrals/${kodBersih}/${c.id}/tarikh_bayar`] = tarikh;
+    jumlahDitanda += c.komisen_sen;
+    ditanda += 1;
+  }
+  if (ditanda > 0) {
+    try {
+      await db.ref().update(kemasKini);
+    } catch (err) {
+      console.warn("[Selaras Komisen] Gagal tulis status:", err?.message || err);
+      return { ditanda: 0, jumlahPembayaranSen };
+    }
+  }
+  return { ditanda, jumlahPembayaranSen };
+}
+
+/**
  * Tentukan sama ada langganan profil sudah luput secara kekal.
  *
  * Peraturan (pelayan ialah sumber kebenaran):
@@ -630,6 +726,22 @@ async function startServer() {
       }
       const db = getDatabase(appInstance);
 
+      // Selaraskan status semua kod affiliate dengan rekod pembayaran
+      // sebenar sebelum agregat dikira, supaya jadual admin tidak
+      // bercanggah dengan laporan pembayaran.
+      try {
+        const snapKod = await db.ref("affiliates").get();
+        if (snapKod.exists()) {
+          await Promise.all(
+            Object.keys(snapKod.val() || {}).map((k) =>
+              selarasStatusKomisen(db, k).catch(() => null),
+            ),
+          );
+        }
+      } catch (err) {
+        console.warn("[Admin Affiliate List] Selaras gagal:", err?.message || err);
+      }
+
       const [snapAff, snapRef] = await Promise.all([
         db.ref("affiliates").get(),
         db.ref("referrals").get(),
@@ -896,6 +1008,26 @@ async function startServer() {
       }
       const db = getDatabase(appInstance);
 
+      // Ambil rekod pembayaran dahulu, kemudian selaraskan status baris
+      // rujukan (auto-tanda 'dibayar') SEBELUM snapshot rujukan dibaca,
+      // supaya jadual "Rujukan & Komisen" dan "Laporan Pembayaran" sepadan.
+      let snapBayarAwal;
+      let snapAffAwal;
+      try {
+        [snapAffAwal, snapBayarAwal] = await Promise.all([
+          db.ref("affiliates").get(),
+          db.ref("affiliate_payments").get(),
+        ]);
+        if (snapAffAwal.exists()) {
+          const kodSenarai = Object.keys(snapAffAwal.val() || {});
+          await Promise.all(
+            kodSenarai.map((k) => selarasStatusKomisen(db, k).catch(() => null)),
+          );
+        }
+      } catch (err) {
+        console.warn("[Admin Affiliate Payments] Selaras gagal:", err?.message || err);
+      }
+
       const [snapAff, snapRef, snapBayar] = await Promise.all([
         db.ref("affiliates").get(),
         db.ref("referrals").get(),
@@ -1133,6 +1265,11 @@ async function startServer() {
       const baru = db.ref("affiliate_payments").push();
       await baru.set(rekod);
 
+      // 3) Selaraskan semula status baris dengan SEMUA rekod pembayaran
+      //    (termasuk rekod lama) supaya tiada baris tertinggal "Belum
+      //    Dibayar" walaupun bayaran sudah direkod.
+      await selarasStatusKomisen(db, kod);
+
       await rekodAudit(db, "affiliate_bayar", {
         id: baru.key,
         kod,
@@ -1172,6 +1309,11 @@ async function startServer() {
       }
       const db = getDatabase(appInstance);
       const kod = req.affiliateKod;
+
+      // Selaraskan status baris (rekod pembayaran sebenar -> status rujukan)
+      // supaya kad "Telah Dibayar" & baki tidak kekal RM0.00 apabila admin
+      // sudah merekod pembayaran.
+      await selarasStatusKomisen(db, kod);
 
       const [snapAff, snapRef] = await Promise.all([
         db.ref(`affiliates/${kod}`).get(),
@@ -1230,6 +1372,11 @@ async function startServer() {
       }
       const db = getDatabase(appInstance);
       const kod = req.affiliateKod;
+
+      // Selaraskan status sebelum membaca supaya baris yang sudah dibayar
+      // (mengikut rekod `affiliate_payments`) tidak lagi dipaparkan
+      // "Belum Dibayar".
+      await selarasStatusKomisen(db, kod);
 
       const snapRef = await db.ref(`referrals/${kod}`).get();
       const senarai = [];
@@ -1329,6 +1476,10 @@ async function startServer() {
       }
       const db = getDatabase(appInstance);
       const kod = req.affiliateKod;
+
+      // Selaraskan status rujukan dengan rekod pembayaran sebelum membaca
+      // supaya laporan ini sepadan dengan Jadual Rujukan & Komisen.
+      await selarasStatusKomisen(db, kod);
 
       const snapBayar = await db.ref("affiliate_payments").get();
       const senarai = [];
