@@ -6,5 +6,61 @@
     "providers": {
       "emailPassword": true
     }
+  },
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "cleanUrls": true,
+    "rewrites": [
+      {
+        "source": "/AUDIO FONIK/**",
+        "destination": "/audio/fonik/:splat"
+      },
+      {
+        "source": "/AUDIO BACAAN BERGRED/**",
+        "destination": "/audio/bacaan-bergred/:splat"
+      },
+      {
+        "source": "/AUDIO TAMBAH TOLAK/**",
+        "destination": "/audio/tambah/:splat"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "/sw.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(woff|woff2|ttf|otf)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(png|jpg|jpeg|gif|svg|webp|mp3|wav|ogg|glb|gltf)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=604800"
+          }
+        ]
+      }
+    ]
   }
 }
