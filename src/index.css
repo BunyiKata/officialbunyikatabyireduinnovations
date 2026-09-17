@@ -17834,43 +17834,56 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     text-transform: uppercase !important;
 }
 
-/* ===== PRO LOCK OVERLAY & CHIP (kad nombor versi percuma) ===== */
+/* ===== PRO LOCK OVERLAY & CHIP (kad nombor versi percuma) =====
+ * Reka bentuk disalin tepat daripada overlay kunci pada kad "Pilih Peta"
+ * (src/components/modals/PilihPetaModal.tsx) supaya kelihatan seragam:
+ * selubung gelap lutsinar + ikon kunci putih + pil merah "Versi Pro".
+ * Overlay TIDAK mengubah susun atur kad dan tidak menambah sebarang
+ * sempadan pada kad, jadi tiada garisan/nama terputus atau warna yang
+ * menyimpang daripada versi rujukan.
+ */
 .versi-pro-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(15, 23, 42, 0.48);
+    border-radius: inherit;
+    background-color: rgba(15, 23, 42, 0.40);
+    -webkit-backdrop-filter: blur(0.8px);
+    backdrop-filter: blur(0.8px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    color: #ffffff;
-    z-index: 12;
-    border-radius: inherit;
+    z-index: 10;
+    padding: 8px;
+    box-sizing: border-box;
     pointer-events: none;
 }
 
 .versi-pro-overlay > i {
-    font-size: 1.7rem;
+    font-size: 2rem;
     color: #ffffff;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.75));
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85));
+    margin-bottom: 4px;
+    line-height: 1;
 }
 
 .versi-pro-chip {
     display: inline-block;
-    font-size: 0.72rem;
-    font-weight: 900;
+    font-size: 0.78rem;
+    font-weight: 800;
     color: #ffffff;
-    background: linear-gradient(180deg, #f472b6 0%, #ec4899 100%);
-    border: 2px solid var(--color-dark, #10182f);
-    border-radius: 999px;
-    padding: 3px 12px;
-    box-shadow: 0 3px 0 var(--color-dark, #10182f);
+    background-color: #dc2626;
+    border: 1.5px solid #ef4444;
+    border-radius: 10px;
+    padding: 4px 12px;
+    text-align: center;
+    line-height: 1.2;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+    letter-spacing: 0.2px;
     text-transform: none;
-    letter-spacing: 0.3px;
     white-space: nowrap;
 }
 
 .versi-pro-card {
-    border: 3px dashed #ec4899 !important;
+    cursor: pointer;
 }
