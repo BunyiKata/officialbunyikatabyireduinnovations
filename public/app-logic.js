@@ -18247,9 +18247,9 @@ function bukaPeta(nomborPeta, skipScreenChange = false) {
                             <div class="island-inner-box ${lockedClass}" style="border-color: ${modul.color};">
                                 ${isLocked ? '<i class="fa-solid fa-lock module-lock-icon" style="position: absolute; z-index: 10; color: white; font-size: 2.5rem; text-shadow: 0px 2px 4px rgba(0,0,0,0.8);" aria-label="Terkunci"></i>' : ''}
                                 ${modul.image ? `<div class="island-inner-image" style="background-image: linear-gradient(to bottom, transparent, rgba(0,0,0,0.6)), url('${modul.image}');"></div>` : (isLocked ? '' : `<div class="island-inner-text">${modul.content}</div>`)}
-                                ${proOverlayHTML}
                             </div>
                             <div class="island-title-text">${displayTitle}</div>
+                            ${proOverlayHTML}
                         </div>
                     </div>
                 `;

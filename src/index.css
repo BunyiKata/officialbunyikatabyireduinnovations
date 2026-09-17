@@ -17886,6 +17886,28 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     white-space: nowrap;
 }
 
+/*
+ * Kad nombor PRO: jangan biarkan penapis grayscale ".island-inner-box.locked"
+ * (atau penapis kelegapan kad sisi) memudarkan/menjadikan pil "Versi Pro"
+ * berwarna kelabu. Selubung gelap (.versi-pro-overlay) sudah cukup untuk
+ * menunjukkan kad itu terkunci, jadi penapis grayscale dibatalkan pada kad
+ * PRO ini sahaja.
+ */
+.island-node.versi-pro-card .island-inner-box.locked {
+    filter: none !important;
+}
+
+.misi-3d-card-slot.is-side .island-node.versi-pro-card,
+.misi-3d-card-slot.is-center .island-node.versi-pro-card {
+    filter: none !important;
+}
+
+/* Pastikan pil MERAH tidak diwarnakan/dipudarkan oleh sebarang penapis warisan. */
+.island-node.versi-pro-card .versi-pro-overlay,
+.island-node.versi-pro-card .versi-pro-chip {
+    filter: none !important;
+}
+
 .versi-pro-card {
     cursor: pointer;
 }
