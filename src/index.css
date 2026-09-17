@@ -17833,3 +17833,44 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
 .guru-school-cell {
     text-transform: uppercase !important;
 }
+
+/* ===== PRO LOCK OVERLAY & CHIP (kad nombor versi percuma) ===== */
+.versi-pro-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.48);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #ffffff;
+    z-index: 12;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.versi-pro-overlay > i {
+    font-size: 1.7rem;
+    color: #ffffff;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.75));
+}
+
+.versi-pro-chip {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: #ffffff;
+    background: linear-gradient(180deg, #f472b6 0%, #ec4899 100%);
+    border: 2px solid var(--color-dark, #10182f);
+    border-radius: 999px;
+    padding: 3px 12px;
+    box-shadow: 0 3px 0 var(--color-dark, #10182f);
+    text-transform: none;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.versi-pro-card {
+    border: 3px dashed #ec4899 !important;
+}

@@ -22,6 +22,41 @@ const paparSkrin = (...args: any[]) => (window as any).paparSkrin?.(...args);
 const bukaARKiraJari = (...args: any[]) => (window as any).bukaARKiraJari?.(...args);
 const showARSukuKataModal = (...args: any[]) => (window as any).showARSukuKataModal?.(...args);
 
+/**
+ * Kesan sama ada pengguna semasa dalam mod Percuma (trial). Disegerakkan
+ * daripada window.isPercumaMode() dan dikemas kini bila mod berubah supaya
+ * lencana "Versi Pro" pada kad AR / kad imbasan nombor boleh dipaparkan.
+ */
+function useIsPercumaMode(): boolean {
+  const read = () =>
+    typeof (window as any).isPercumaMode === "function"
+      ? !!(window as any).isPercumaMode()
+      : false;
+
+  const [isPercuma, setIsPercuma] = React.useState<boolean>(read);
+
+  React.useEffect(() => {
+    const sync = () => setIsPercuma(read());
+    sync();
+    const events = [
+      "bunyiKataAccessChanged",
+      "admin-mode-change",
+      "affiliate-mode-change",
+      "guru-mode-change",
+      "screen-change",
+      "storage",
+    ];
+    events.forEach((ev) => window.addEventListener(ev, sync));
+    const iv = window.setInterval(sync, 1500);
+    return () => {
+      events.forEach((ev) => window.removeEventListener(ev, sync));
+      window.clearInterval(iv);
+    };
+  }, []);
+
+  return isPercuma;
+}
+
 interface MapScreenProps {
   getScreenClass: (screenId: string) => string;
   setShowBukuCeritaModal?: (show: boolean) => void;
@@ -39,6 +74,16 @@ export default function MapScreen({
   isDialOpen = false,
   setIsDialOpen = () => {},
 }: MapScreenProps) {
+  const isPercuma = useIsPercumaMode();
+
+  // Lencana "Versi Pro" untuk kad terkunci mod percuma (gaya sama seperti avatar Pro).
+  const proBadge = (
+    <div className="versi-pro-overlay">
+      <i className="fa-solid fa-lock"></i>
+      <span className="versi-pro-chip">Versi Pro</span>
+    </div>
+  );
+
   return (
       <div id="map-screen" className={getScreenClass("map-screen")}>
         <div className="map-top-bar">
@@ -630,7 +675,8 @@ export default function MapScreen({
                   transition: "all 0.15s ease",
                   background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
                   gap: "14px",
-                  boxSizing: "border-box"
+                  boxSizing: "border-box",
+                  position: "relative"
                 }}
                 onClick={() => {
                   const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
@@ -755,6 +801,7 @@ export default function MapScreen({
                 <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
                   Nombor 0-10
                 </span>
+                {isPercuma && proBadge}
               </div>
 
               {/* Square Card Siri Nombor 10-100 */}
@@ -773,7 +820,8 @@ export default function MapScreen({
                   transition: "all 0.15s ease",
                   background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
                   gap: "14px",
-                  boxSizing: "border-box"
+                  boxSizing: "border-box",
+                  position: "relative"
                 }}
                 onClick={() => {
                   const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
@@ -898,6 +946,7 @@ export default function MapScreen({
                 <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
                   Siri Nombor 10-100
                 </span>
+                {isPercuma && proBadge}
               </div>
             </div>
           </div>
@@ -999,6 +1048,7 @@ export default function MapScreen({
                 <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
                   AR Nombor
                 </span>
+                {isPercuma && proBadge}
               </div>
 
               {/* Card 3: AR Tambah */}
@@ -1079,6 +1129,7 @@ export default function MapScreen({
                 <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
                   AR Tambah
                 </span>
+                {isPercuma && proBadge}
               </div>
 
               {/* Card 4: AR Tolak */}
@@ -1159,6 +1210,7 @@ export default function MapScreen({
                 <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
                   AR Tolak
                 </span>
+                {isPercuma && proBadge}
               </div>
 
             </div>

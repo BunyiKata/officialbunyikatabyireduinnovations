@@ -9607,13 +9607,17 @@ window.handleMisiCardClick = function (idx) {
     const activeIdx = window.currentMisiActiveIndex || 0;
     const offset = getMisiCircularOffset(idx, activeIdx, total);
 
-    if (Math.abs(offset) < 0.5) {
+    const modulKlik = window.currentMisiModules[idx];
+    const modulPro = modulKlik && (window.isPercumaMode && window.isPercumaMode()) &&
+        ['pengenalan_nombor', 'konsep_tambah', 'konsep_penolakan'].indexOf(modulKlik.id) !== -1;
+
+    if (Math.abs(offset) < 0.5 || modulPro) {
         const modul = window.currentMisiModules[idx];
         if (modul.isLocked) {
             alert('Tahap Terkunci!');
-        } else if (window.isPercumaMode && window.isPercumaMode() &&
-                   ['pengenalan_nombor', 'konsep_tambah', 'konsep_penolakan'].indexOf(modul.id) !== -1) {
+        } else if (modulPro) {
             // Kad nombor (Asas / Tambah / Tolak) dikunci untuk pengguna Percuma.
+            // Buka modal Pakej Pro serta-merta walau kad bukan kad aktif.
             if (typeof window.kunciPro === 'function') window.kunciPro();
         } else {
             window.klikModul(modul.id, modul.displayTitle);
@@ -18225,14 +18229,25 @@ function bukaPeta(nomborPeta, skipScreenChange = false) {
         const activeClass = (!isLocked && moduleIndex === activeLevelIdx) ? 'active-level' : '';
         const completedClass = isCompleted ? 'completed-level' : '';
 
+        // Kad nombor (Asas / Tambah / Tolak) bertanda PRO untuk pengguna mod percuma.
+        // Kad kekal boleh dikenal tetapi dipaparkan gelap + ikon kunci + label "Versi Pro",
+        // selaras dengan gaya avatar Versi Pro.
+        const modulPro = (typeof window.isPercumaMode === 'function' && window.isPercumaMode()) &&
+            ['pengenalan_nombor', 'konsep_tambah', 'konsep_penolakan'].indexOf(modul.id) !== -1;
+        const proClass = modulPro ? 'versi-pro-card' : '';
+        const proOverlayHTML = modulPro
+            ? `<div class="versi-pro-overlay"><i class="fa-solid fa-lock"></i><span class="versi-pro-chip">Versi Pro</span></div>`
+            : '';
+
         slotsHtml += `
                     <div id="misi-slot-${moduleIndex}" class="misi-3d-card-slot" onclick="window.handleMisiCardClick(${moduleIndex})">
-                        <div class="island-node ${lockedClass} ${activeClass} ${completedClass}">
+                        <div class="island-node ${lockedClass} ${activeClass} ${completedClass} ${proClass}">
                             <div class="island-tape" style="background: ${modul.color};"></div>
                             ${starsHTML}
                             <div class="island-inner-box ${lockedClass}" style="border-color: ${modul.color};">
                                 ${isLocked ? '<i class="fa-solid fa-lock module-lock-icon" style="position: absolute; z-index: 10; color: white; font-size: 2.5rem; text-shadow: 0px 2px 4px rgba(0,0,0,0.8);" aria-label="Terkunci"></i>' : ''}
                                 ${modul.image ? `<div class="island-inner-image" style="background-image: linear-gradient(to bottom, transparent, rgba(0,0,0,0.6)), url('${modul.image}');"></div>` : (isLocked ? '' : `<div class="island-inner-text">${modul.content}</div>`)}
+                                ${proOverlayHTML}
                             </div>
                             <div class="island-title-text">${displayTitle}</div>
                         </div>

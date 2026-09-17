@@ -1018,6 +1018,46 @@ export default function App() {
     return "trial";
   });
 
+  // Keadaan mod Percuma untuk paparan lencana "Versi Pro" pada pilihan kad
+  // nombor (segerak dengan window.isPercumaMode, termasuk mod affiliate/admin).
+  const [isPercumaUI, setIsPercumaUI] = React.useState<boolean>(() =>
+    typeof (window as any).isPercumaMode === "function"
+      ? !!(window as any).isPercumaMode()
+      : false,
+  );
+  React.useEffect(() => {
+    const sync = () => {
+      const v =
+        typeof (window as any).isPercumaMode === "function"
+          ? !!(window as any).isPercumaMode()
+          : false;
+      setIsPercumaUI(v);
+    };
+    sync();
+    const events = [
+      "bunyiKataAccessChanged",
+      "admin-mode-change",
+      "affiliate-mode-change",
+      "guru-mode-change",
+      "screen-change",
+      "storage",
+    ];
+    events.forEach((ev) => window.addEventListener(ev, sync));
+    const iv = window.setInterval(sync, 1500);
+    return () => {
+      events.forEach((ev) => window.removeEventListener(ev, sync));
+      window.clearInterval(iv);
+    };
+  }, []);
+
+  // Lencana "Versi Pro" (gaya sama seperti avatar Pro) untuk kad nombor mod percuma.
+  const proBadge = (
+    <div className="versi-pro-overlay">
+      <i className="fa-solid fa-lock"></i>
+      <span className="versi-pro-chip">Versi Pro</span>
+    </div>
+  );
+
   // Semak sama ada kita sedang berada di SKRIN LOG MASUK.
   // Ini penting: sesi Firebase Auth admin yang tersimpan (custom token) di
   // IndexedDB akan dipulihkan oleh onAuthStateChanged pada SETIAP muat semula.
@@ -5870,7 +5910,8 @@ export default function App() {
                 transition: "all 0.15s ease",
                 background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
                 gap: "14px",
-                boxSizing: "border-box"
+                boxSizing: "border-box",
+                position: "relative"
               }}
               onClick={(e) => {
                 document.getElementById("modal-pilih-jenis-nombor").style.display = "none";
@@ -5996,6 +6037,7 @@ export default function App() {
               <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
                 Nombor 0-10
               </span>
+              {isPercumaUI && proBadge}
             </div>
 
             {/* Square Card Siri Nombor 10-100 */}
@@ -6014,7 +6056,8 @@ export default function App() {
                 transition: "all 0.15s ease",
                 background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
                 gap: "14px",
-                boxSizing: "border-box"
+                boxSizing: "border-box",
+                position: "relative"
               }}
               onClick={(e) => {
                 document.getElementById("modal-pilih-jenis-nombor").style.display = "none";
@@ -6140,6 +6183,7 @@ export default function App() {
               <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
                 Siri Nombor 10-100
               </span>
+              {isPercumaUI && proBadge}
             </div>
           </div>
         </div>
