@@ -17872,8 +17872,10 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     font-size: 0.78rem;
     font-weight: 800;
     color: #ffffff;
+    /* Warna MERAH lencana (sama seperti kunci pada kad Pilih Peta). */
     background-color: #dc2626;
-    border: 1.5px solid #ef4444;
+    background-image: none;
+    border: 2px solid #991b1b;
     border-radius: 10px;
     padding: 4px 12px;
     text-align: center;
