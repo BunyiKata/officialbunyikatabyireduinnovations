@@ -378,7 +378,11 @@ function startTrace(e) {
         // Maybe clicked wrong number
         const otherStroke = currentStrokesToDraw.find(s => !surihData.strokBerjaya.has(s.id) && Math.sqrt(dist2(pos, s.points[0])) < 40);
         if (otherStroke && otherStroke.id !== surihData.traceStrokSemasa) {
-            alert(`Mulakan dari nombor ${surihData.traceStrokSemasa} dahulu!`);
+            if (typeof window.showAppToast === 'function') {
+                window.showAppToast('Ikut Urutan', `Mulakan dari nombor ${surihData.traceStrokSemasa} dahulu!`, 'warning');
+            } else {
+                alert(`Mulakan dari nombor ${surihData.traceStrokSemasa} dahulu!`);
+            }
         }
     }
 }

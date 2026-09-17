@@ -436,7 +436,11 @@ function startTraceNombor(e) {
     } else {
         const otherStroke = currentStrokesToDrawNombor.find(s => !surihNomborData.strokBerjaya.has(s.id) && Math.sqrt(dist2(pos, s.points[0])) < 45);
         if (otherStroke && otherStroke.id !== surihNomborData.traceStrokSemasa) {
-            alert(`Mulakan dari nombor ${surihNomborData.traceStrokSemasa} dahulu!`);
+            if (typeof window.showAppToast === 'function') {
+                window.showAppToast('Ikut Urutan', `Mulakan dari nombor ${surihNomborData.traceStrokSemasa} dahulu!`, 'warning');
+            } else {
+                alert(`Mulakan dari nombor ${surihNomborData.traceStrokSemasa} dahulu!`);
+            }
         }
     }
 }

@@ -275,6 +275,43 @@ window.showAppModalAlert = function (title, contentHtml) {
     window.showAppToast(title, contentHtml);
 };
 
+// Alias lama yang dipanggil oleh kod React (App.tsx) untuk notifikasi umum
+// (cth. pendaftaran akaun melalui WhatsApp). Sebelum ini fungsi ini tidak
+// pernah wujud, jadi notifikasi tersebut senyap tidak muncul. Kini ia
+// dipetakan ke toast atas-kanan yang sama.
+window.paparNotifikasiUmum = function (messageHtml, type) {
+    window.showAppToast('Pemberitahuan', messageHtml, type || 'success');
+};
+
+// Helper generik: gantikan alert() lama dengan toast atas-kanan (showAppToast).
+// Jenis ikon auto-dikesan daripada kata kunci dalam mesej (lihat showAppToast).
+// Fallback ke alert() asal jika toast tidak tersedia.
+window.notify = function (messageOrTitle, maybeMessage, type) {
+    if (typeof window.showAppToast !== 'function') {
+        alert(maybeMessage ? messageOrTitle + ': ' + maybeMessage : messageOrTitle);
+        return;
+    }
+    const mesej = (messageOrTitle == null) ? '' : String(messageOrTitle);
+    let tajuk = 'Pemberitahuan';
+    let isi = mesej;
+    if (maybeMessage !== undefined) {
+        tajuk = messageOrTitle;
+        isi = maybeMessage;
+    }
+    // Auto-kesan jenis (ralat / peringatan) daripada teks mesej supaya ikon sesuai.
+    if (!type) {
+        const teks = (tajuk + ' ' + isi).toLowerCase();
+        if (/(gagal|ralat|tidak sah|tidak dapat|ditolak|belum sedia|belum dimuatkan|masih dalam pembinaan|belum tersedia)/.test(teks)) {
+            type = 'error';
+        } else if (/(terhad|terkunci|diperlukan|perlu|maksimum|sudah wujud|tidak boleh|masukkan|pilih|pastikan|terlebih dahulu|dahulu)/.test(teks)) {
+            type = 'warning';
+        } else {
+            type = 'success';
+        }
+    }
+    window.showAppToast(tajuk, isi, type);
+};
+
 window.showAppModalConfirm = function (arg1, arg2, arg3, arg4) {
     let title = "Pengesahan Diperlukan";
     let messageHtml = "";
@@ -1145,7 +1182,7 @@ window.renderAdminTable = function (type = 'guru') {
                     if (typeof window.bukaCiptaAkaunAdmin === "function") {
                         window.bukaCiptaAkaunAdmin("affiliate");
                     } else {
-                        alert("Modal pendaftaran belum sedia.");
+                        window.notify("Modal pendaftaran belum sedia.");
                     }
                     return;
                 }
@@ -1160,7 +1197,7 @@ window.renderAdminTable = function (type = 'guru') {
                             } else if (typeof window.showAppModalAlert === "function") {
                                 window.showAppModalAlert("Pautan Disalin", pautan);
                             } else {
-                                alert("Pautan disalin:\n" + pautan);
+                                window.notify("Pautan disalin:\n" + pautan);
                             }
                         }).catch(function () { window.prompt("Salin pautan ini:", pautan); });
                     } else {
@@ -1180,7 +1217,7 @@ window.renderAdminTable = function (type = 'guru') {
                             if (typeof window.showAppModalAlert === "function") {
                                 window.showAppModalAlert("Ralat", (h && h.mesej) || "Gagal menukar status.");
                             } else {
-                                alert((h && h.mesej) || "Gagal menukar status.");
+                                window.notify((h && h.mesej) || "Gagal menukar status.");
                             }
                         }
                     });
@@ -1204,7 +1241,7 @@ window.renderAdminTable = function (type = 'guru') {
                                 if (typeof window.showAppModalAlert === "function") {
                                     window.showAppModalAlert("Ralat", (h && h.mesej) || "Gagal memadam affiliate.");
                                 } else {
-                                    alert((h && h.mesej) || "Gagal memadam affiliate.");
+                                    window.notify((h && h.mesej) || "Gagal memadam affiliate.");
                                 }
                             }
                         });
@@ -1454,7 +1491,7 @@ window.renderAdminTable = function (type = 'guru') {
                     if (typeof window.showAppToast === 'function') {
                         window.showAppToast('Gagal', 'Fungsi ini perlu versi aplikasi terkini. Sila muat semula halaman (Ctrl+F5).');
                     } else {
-                        alert('Gagal memuatkan senarai affiliate. Sila cuba lagi.');
+                        window.notify('Gagal memuatkan senarai affiliate. Sila cuba lagi.');
                     }
                     return;
                 }
@@ -1469,7 +1506,7 @@ window.renderAdminTable = function (type = 'guru') {
                         if (typeof window.showAppToast === 'function') {
                             window.showAppToast('Gagal', 'Tiada affiliate berdaftar untuk direkodkan pembayaran.');
                         } else {
-                            alert('Tiada affiliate berdaftar untuk direkodkan pembayaran.');
+                            window.notify('Tiada affiliate berdaftar untuk direkodkan pembayaran.');
                         }
                         return;
                     }
@@ -1480,7 +1517,7 @@ window.renderAdminTable = function (type = 'guru') {
                     if (typeof window.showAppToast === 'function') {
                         window.showAppToast('Gagal', 'Ralat rangkaian semasa memuatkan senarai affiliate. ' + (err && err.message ? err.message : ''));
                     } else {
-                        alert('Ralat rangkaian semasa memuatkan senarai affiliate.');
+                        window.notify('Ralat rangkaian semasa memuatkan senarai affiliate.');
                     }
                 });
             };
@@ -1506,7 +1543,7 @@ window.renderAdminTable = function (type = 'guru') {
                 } else if (typeof window.showAppModalAlert === 'function') {
                     window.showAppModalAlert('Gagal', mesej);
                 } else {
-                    alert(mesej);
+                    window.notify(mesej);
                 }
             };
             const toastBerjaya = (tajuk, mesej) => {
@@ -1515,7 +1552,7 @@ window.renderAdminTable = function (type = 'guru') {
                 } else if (typeof window.showAppModalAlert === 'function') {
                     window.showAppModalAlert(tajuk, mesej);
                 } else {
-                    alert(mesej);
+                    window.notify(mesej);
                 }
             };
 
@@ -1616,7 +1653,7 @@ window.renderAdminTable = function (type = 'guru') {
                     if (typeof window.showAppToast === "function") {
                         window.showAppToast("Gagal", "Fungsi ini perlu versi aplikasi terkini. Sila muat semula halaman (Ctrl+F5).");
                     } else {
-                        alert("API affiliate belum sedia.");
+                        window.notify("API affiliate belum sedia.");
                     }
                     return;
                 }
@@ -1624,12 +1661,12 @@ window.renderAdminTable = function (type = 'guru') {
                 const toastOk = (tajuk, mesej) => {
                     if (typeof window.showAppToast === "function") window.showAppToast(tajuk, mesej);
                     else if (typeof window.showAppModalAlert === "function") window.showAppModalAlert(tajuk, mesej);
-                    else alert(mesej);
+                    else window.notify(mesej);
                 };
                 const toastGagal = (mesej) => {
                     if (typeof window.showAppToast === "function") window.showAppToast("Gagal", mesej);
                     else if (typeof window.showAppModalAlert === "function") window.showAppModalAlert("Gagal", mesej);
-                    else alert(mesej);
+                    else window.notify(mesej);
                 };
 
                 const laksanaTanda = function () {
@@ -1717,7 +1754,7 @@ window.padamFeedback = async function (id) {
             }
             window.renderAdminTable('feedback');
         } else {
-            alert('Gagal memadam maklum balas daripada Firebase.');
+            window.notify('Gagal memadam maklum balas daripada Firebase.');
         }
     }
 };
@@ -4170,7 +4207,7 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
                                     </p>`
                                 );
                             } else {
-                                alert("Penukaran profil anak pelbagai terhad untuk Pakej Pro. Sila langgan Pakej Pro!");
+                                window.notify("Penukaran profil anak pelbagai terhad untuk Pakej Pro. Sila langgan Pakej Pro!");
                             }
                             return;
                         }
@@ -4236,7 +4273,7 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
                             </p>`
                         );
                     } else {
-                        alert("Penambahan profil anak terhad untuk Pakej Pro. Sila langgan Pakej Pro untuk mendaftar sehingga 3 profil anak!");
+                        window.notify("Penambahan profil anak terhad untuk Pakej Pro. Sila langgan Pakej Pro untuk mendaftar sehingga 3 profil anak!");
                     }
                 };
             } else {
@@ -4246,7 +4283,7 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
                     const userPlan = window.currentParentPlan || localStorage.getItem('bunyiKataParentPlan') || 'pro';
                     const maxAllowed = (userPlan === 'basic') ? 1 : 3;
                     if (childNames.length >= maxAllowed) {
-                        alert("Pakej Semasa Anda membenarkan 1 Profil Anak sahaja.\n\nSila langgan Pakej PRO untuk mendaftar sehingga 3 orang anak!");
+                        window.notify("Pakej Semasa Anda membenarkan 1 Profil Anak sahaja.\n\nSila langgan Pakej PRO untuk mendaftar sehingga 3 orang anak!");
                         if (typeof window.openPakejProModal === 'function') window.openPakejProModal('ibubapa');
                         return;
                     }
@@ -4343,7 +4380,7 @@ window.bukaModalPilihAnak = function (isTukarDashboard = false, isStudentLogin =
                             document.body.removeChild(overlay);
                             window.bukaModalPilihAnak();
                         } else {
-                            alert("Sila masukkan nama profil yang sah.");
+                            window.notify("Sila masukkan nama profil yang sah.");
                         }
                     };
                 };
@@ -4374,7 +4411,7 @@ window.tutupModalPilihAnak = function () {
 window.logMasukIbuBapa = function () {
     const select = document.getElementById('ibubapa-child-select');
     if (!select || !select.value) {
-        alert("Sila pilih profil anak!");
+        window.notify("Sila pilih profil anak!");
         return;
     }
     if (select.value === "+ Tambah Profil Anak") {
@@ -4389,7 +4426,7 @@ window.logMasukIbuBapa = function () {
             localStorage.setItem('bunyiKataParentChildNames', JSON.stringify(window.parentChildNames));
             window.masukModIbuBapa(finalName);
         } else {
-            alert("Nama profil tidak sah.");
+            window.notify("Nama profil tidak sah.");
         }
     } else {
         window.masukModIbuBapa(select.value);
@@ -5638,7 +5675,7 @@ window.selectAvatar = function (icon, element) {
 
 function logMasukMurid() {
     const select = document.getElementById('student-dropdown');
-    if (!select.value) { alert("Sila pilih nama dalam senarai!"); return; }
+    if (!select.value) { window.notify("Sila pilih nama dalam senarai!"); return; }
 
     modGuruAktif = false;
     document.body.classList.remove('teacher-mode');
@@ -6261,7 +6298,7 @@ window.bukaModalAvatar = function () {
     tutupSidePanel();
     console.log("bukaModalAvatar invoked. namaMuridAktif:", namaMuridAktif);
     if (!namaMuridAktif) {
-        alert("Sila log masuk dahulu!");
+        window.notify("Sila log masuk dahulu!");
         return;
     }
     if (!studentData[namaMuridAktif]) {
@@ -6683,7 +6720,7 @@ window.pilihAvatarTemp = function (icon) {
 
 window.simpanProfilEdit = function () {
     let newName = document.getElementById('edit-nama-input').value.trim();
-    if (!newName) return alert('Sila masukkan nama.');
+    if (!newName) return window.notify('Sila masukkan nama.');
 
     var isTrial = isTrialAvatarCheck();
     var chosenCfg = AVATAR_CONFIG.find(function (a) { return a.icon === window.tempSelectedAvatar; });
@@ -6696,7 +6733,7 @@ window.simpanProfilEdit = function () {
 
     if (newName !== namaMuridAktif) {
         if (studentData[newName]) {
-            return alert('Nama ini sudah wujud, sila pilih nama lain.');
+            return window.notify('Nama ini sudah wujud, sila pilih nama lain.');
         }
         studentData[newName] = studentData[namaMuridAktif];
         delete studentData[namaMuridAktif];
@@ -7340,7 +7377,7 @@ function renderProfile() {
             if (typeof window.showAppToast === 'function') {
                 window.showAppToast('Lencana Masih Terkunci', msg, 'warning');
             } else {
-                alert(msg);
+                window.notify(msg);
             }
         }
     };
@@ -9568,7 +9605,7 @@ window.simpanDaftarGuruModal = async function () {
         window.bukaCiptaAkaunAdmin('guru');
         return;
     }
-    alert('Sila muat semula halaman. Borang cipta akaun tidak dimuatkan.');
+    window.notify('Sila muat semula halaman. Borang cipta akaun tidak dimuatkan.');
 };
 
 window.simpanDaftarParentModal = async function () {
@@ -9576,7 +9613,7 @@ window.simpanDaftarParentModal = async function () {
         window.bukaCiptaAkaunAdmin('ibubapa');
         return;
     }
-    alert('Sila muat semula halaman. Borang cipta akaun tidak dimuatkan.');
+    window.notify('Sila muat semula halaman. Borang cipta akaun tidak dimuatkan.');
 };
 
 window.misi3DNext = function () {
@@ -9613,12 +9650,20 @@ window.handleMisiCardClick = function (idx) {
 
     if (Math.abs(offset) < 0.5 || modulPro) {
         const modul = window.currentMisiModules[idx];
-        if (modul.isLocked) {
-            alert('Tahap Terkunci!');
-        } else if (modulPro) {
+        // PENTING: Kad nombor bertanda "Versi Pro" untuk pengguna Percuma mesti
+        // membuka popup Pakej Pro WALAUPUN kad itu masih terkunci (isLocked).
+        // Semak modulPro DAHULU supaya badge "Versi Pro" tidak memunculkan
+        // notifikasi "Tahap Terkunci" sebaliknya.
+        if (modulPro) {
             // Kad nombor (Asas / Tambah / Tolak) dikunci untuk pengguna Percuma.
             // Buka modal Pakej Pro serta-merta walau kad bukan kad aktif.
             if (typeof window.kunciPro === 'function') window.kunciPro();
+        } else if (modul.isLocked) {
+            if (typeof window.showAppToast === 'function') {
+                window.showAppToast('Tahap Terkunci', 'Selesaikan tahap sebelum ini dahulu untuk membuka tahap ini.', 'warning');
+            } else {
+                alert('Tahap Terkunci!');
+            }
         } else {
             window.klikModul(modul.id, modul.displayTitle);
         }
@@ -10445,6 +10490,29 @@ window.generateFruitSlashGame = function (area) {
     }, 50);
 };
 
+/**
+ * Sediakan canvas "Cabaran Tambahan" dengan backing store beresolusi tinggi
+ * (mengikut devicePixelRatio) supaya lukisan kekal TAJAM/HDR walaupun CSS
+ * membesarkan canvas (cth. max-width 520-560px) pada skrin retina.
+ *
+ * Semua kod lukisan kekal menggunakan koordinat logik asal (cth. 360x340),
+ * kerana transform di-skala sekali di sini. Panggil `ctx.setTransform(__dpr,...)`
+ * di awal setiap gelung render (gameLoop/loop) untuk memastikan transform betul
+ * walau apa jua keadaan save/restore.
+ *
+ * @returns {number} faktor skala (dpr) yang digunakan.
+ */
+window.setupHiResCanvas = function (canvas, logicalWidth, logicalHeight) {
+    const dpr = Math.min(3, Math.max(1, window.devicePixelRatio || 1));
+    canvas.width = Math.round(logicalWidth * dpr);
+    canvas.height = Math.round(logicalHeight * dpr);
+    // Pastikan nisbah aspek CSS kekal sama supaya tiada herotan.
+    canvas.style.aspectRatio = logicalWidth + ' / ' + logicalHeight;
+    const ctx = canvas.getContext('2d');
+    if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return dpr;
+};
+
 window.initFruitSlashCanvas = function () {
     const canvas = document.getElementById('fs-canvas');
     if (!canvas) return;
@@ -10453,6 +10521,7 @@ window.initFruitSlashCanvas = function () {
 
     const C_WIDTH = 360;
     const C_HEIGHT = 340;
+    const __dpr = window.setupHiResCanvas(canvas, C_WIDTH, C_HEIGHT);
 
     let gameState = 'ready'; // 'ready' | 'playing' | 'done'
     let fruits = [];
@@ -10531,8 +10600,8 @@ window.initFruitSlashCanvas = function () {
 
     function getCanvasCoords(e) {
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
+        const scaleX = C_WIDTH / rect.width;
+        const scaleY = C_HEIGHT / rect.height;
         return {
             x: (e.clientX - rect.left) * scaleX,
             y: (e.clientY - rect.top) * scaleY
@@ -10819,6 +10888,7 @@ window.initFruitSlashCanvas = function () {
     }
 
     function gameLoop() {
+        ctx.setTransform(__dpr, 0, 0, __dpr, 0, 0);
         // Clear screen with warm sunrise sky
         const skyGrad = ctx.createLinearGradient(0, 0, 0, C_HEIGHT);
         skyGrad.addColorStop(0, '#fed7aa');
@@ -11640,6 +11710,7 @@ window.initBasketCatchCanvas = function () {
 
     const C_WIDTH = 360;
     const C_HEIGHT = 340;
+    const __dpr = window.setupHiResCanvas(canvas, C_WIDTH, C_HEIGHT);
 
     let gameState = 'ready'; // 'ready' | 'playing' | 'done'
     let fallingItems = [];
@@ -11723,7 +11794,7 @@ window.initBasketCatchCanvas = function () {
 
     function getCanvasCoords(e) {
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
+        const scaleX = C_WIDTH / rect.width;
         return (e.clientX - rect.left) * scaleX;
     }
 
@@ -11859,6 +11930,7 @@ window.initBasketCatchCanvas = function () {
     }
 
     function gameLoop() {
+        ctx.setTransform(__dpr, 0, 0, __dpr, 0, 0);
         // Clear screen with soft sunny sky
         const skyGrad = ctx.createLinearGradient(0, 0, 0, C_HEIGHT);
         skyGrad.addColorStop(0, '#bae6fd');
@@ -12332,6 +12404,7 @@ window.initFrogJumpCanvas = function () {
 
     const C_WIDTH = 360;
     const C_HEIGHT = 300;
+    const __dpr = window.setupHiResCanvas(canvas, C_WIDTH, C_HEIGHT);
 
     let currentQ = window.fjQuestions[window.fjCurrentIdx];
     if (!currentQ) return;
@@ -12567,8 +12640,8 @@ window.initFrogJumpCanvas = function () {
 
     function getCanvasCoords(e) {
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
+        const scaleX = C_WIDTH / rect.width;
+        const scaleY = C_HEIGHT / rect.height;
         return {
             x: (e.clientX - rect.left) * scaleX,
             y: (e.clientY - rect.top) * scaleY
@@ -12605,6 +12678,7 @@ window.initFrogJumpCanvas = function () {
     };
 
     function gameLoop() {
+        ctx.setTransform(__dpr, 0, 0, __dpr, 0, 0);
         time += 0.03;
 
         // Clear canvas
@@ -12943,6 +13017,7 @@ window.initBirdMathCanvas = function () {
 
     const C_WIDTH = 360;
     const C_HEIGHT = 320;
+    const __dpr = window.setupHiResCanvas(canvas, C_WIDTH, C_HEIGHT);
     const GROUND_Y = 292;
 
     let bird = {
@@ -13076,6 +13151,7 @@ window.initBirdMathCanvas = function () {
     }
 
     function gameLoop() {
+        ctx.setTransform(__dpr, 0, 0, __dpr, 0, 0);
         // Clear screen with sky gradient
         const skyGrad = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
         skyGrad.addColorStop(0, '#38bdf8');
@@ -13624,6 +13700,7 @@ window.initBirdTolakCanvas = function () {
 
     const C_WIDTH = 360;
     const C_HEIGHT = 320;
+    const __dpr = window.setupHiResCanvas(canvas, C_WIDTH, C_HEIGHT);
     const GROUND_Y = 292;
 
     let bird = {
@@ -13753,6 +13830,7 @@ window.initBirdTolakCanvas = function () {
     }
 
     function gameLoop() {
+        ctx.setTransform(__dpr, 0, 0, __dpr, 0, 0);
         // Clear screen with warm sky gradient
         const skyGrad = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
         skyGrad.addColorStop(0, '#38bdf8');
@@ -14435,6 +14513,7 @@ window.initSpaceShooterCanvas = function () {
 
     const C_WIDTH = 360;
     const C_HEIGHT = 320;
+    const __dpr = window.setupHiResCanvas(canvas, C_WIDTH, C_HEIGHT);
 
     const currentQ = window.ssQuestions[window.ssCurrentIdx] || { word: 'baju', syllables: ['ba', 'ju'] };
     const syllablesList = currentQ.syllables;
@@ -14541,7 +14620,7 @@ window.initSpaceShooterCanvas = function () {
 
     function getCanvasCoords(e) {
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
+        const scaleX = C_WIDTH / rect.width;
         return (e.clientX - rect.left) * scaleX;
     }
 
@@ -14776,6 +14855,7 @@ window.initSpaceShooterCanvas = function () {
     }
 
     function gameLoop() {
+        ctx.setTransform(__dpr, 0, 0, __dpr, 0, 0);
         time += 0.04;
 
         // Clear canvas
@@ -16104,6 +16184,7 @@ window.initBurungPatukAyatCanvas = function () {
 
     const C_WIDTH = 340;
     const C_HEIGHT = 260;
+    const __dpr = window.setupHiResCanvas(canvas, C_WIDTH, C_HEIGHT);
     const GROUND_Y = 236;
 
     let bird = {
@@ -16225,6 +16306,7 @@ window.initBurungPatukAyatCanvas = function () {
     let frameCount = 0;
 
     function gameLoop() {
+        ctx.setTransform(__dpr, 0, 0, __dpr, 0, 0);
         frameCount++;
 
         // Clear sky
@@ -16627,6 +16709,7 @@ window.initLastikBurungCanvas = function () {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    const __dpr = window.setupHiResCanvas(canvas, 340, 260);
 
     if (window.lbAnimId) cancelAnimationFrame(window.lbAnimId);
 
@@ -16733,6 +16816,7 @@ window.initLastikBurungCanvas = function () {
     let advanceTimeout = null;
 
     function loop() {
+        ctx.setTransform(__dpr, 0, 0, __dpr, 0, 0);
         // Physics update
         if (bird.isFlying) {
             bird.x += bird.vx;
@@ -17040,6 +17124,7 @@ window.initMeriamKataCanvas = function () {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    const __dpr = window.setupHiResCanvas(canvas, 340, 260);
 
     if (window.mkAnimId) cancelAnimationFrame(window.mkAnimId);
 
@@ -17101,6 +17186,7 @@ window.initMeriamKataCanvas = function () {
     });
 
     function loop() {
+        ctx.setTransform(__dpr, 0, 0, __dpr, 0, 0);
         time += 0.03;
 
         // Update balloons swaying
@@ -17412,6 +17498,7 @@ window.initKatakLompatCanvas = function () {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    const __dpr = window.setupHiResCanvas(canvas, 340, 260);
 
     if (window.klAnimId) cancelAnimationFrame(window.klAnimId);
 
@@ -17506,6 +17593,7 @@ window.initKatakLompatCanvas = function () {
     };
 
     function loop() {
+        ctx.setTransform(__dpr, 0, 0, __dpr, 0, 0);
         // Jump arc physics
         if (frog.isJumping && frog.jumpT < 1) {
             frog.jumpT += 0.055;
@@ -17798,6 +17886,7 @@ window.initTangkapCeritaCanvas = function () {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    const __dpr = window.setupHiResCanvas(canvas, 340, 260);
 
     if (window.tcAnimId) cancelAnimationFrame(window.tcAnimId);
     if (window.tcKeyHandler) window.removeEventListener('keydown', window.tcKeyHandler);
@@ -17935,6 +18024,7 @@ window.initTangkapCeritaCanvas = function () {
     let isAdvancing = false;
 
     function loop() {
+        ctx.setTransform(__dpr, 0, 0, __dpr, 0, 0);
         // Update falling items
         items.forEach(it => {
             if (it.caught) return;
@@ -18426,7 +18516,7 @@ function navigate(viewId, btnNode) {
         targetView.classList.add('active');
     } else {
         console.warn("Paparan tidak wujud: view-" + viewId);
-        alert("Modul ini masih dalam pembinaan.");
+        window.notify("Modul ini masih dalam pembinaan.");
     }
 }
 
@@ -19026,7 +19116,7 @@ function klikModul(id, title) {
             return;
         }
 
-        alert('Kandungan belum tersedia untuk modul ini.');
+        window.notify('Kandungan belum tersedia untuk modul ini.');
     } else {
         if (window.currentPeta === 1 || window.currentPeta === 2 || window.currentPeta === 3 || window.currentPeta === 4) {
             const displayTitle = (modSemasa === 'belajar') ? title.replace(/^Cabaran\s+/i, '') : title;
@@ -19034,7 +19124,7 @@ function klikModul(id, title) {
             window.dispatchEvent(event);
             paparSkrin('view-cabaran-suku-kata');
         } else {
-            alert('Kandungan latihan belum tersedia untuk modul ini.');
+            window.notify('Kandungan latihan belum tersedia untuk modul ini.');
         }
     }
 }
@@ -20202,7 +20292,7 @@ function janaMuatTurunSijilPDF(namaOptional) {
     let jsPDFObj = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : (typeof jsPDF !== 'undefined' ? jsPDF : null);
 
     if (!jsPDFObj) {
-        alert("Modul jsPDF sedang dimuatkan. Sila guna fungsi cetak sementara.");
+        window.notify("Modul jsPDF sedang dimuatkan. Sila guna fungsi cetak sementara.");
         window.print();
         return;
     }
@@ -20341,7 +20431,7 @@ function janaMuatTurunSijilPDF(namaOptional) {
         doc.save(`Sijil_Pencapaian_BunyiKata_${cleanName}.pdf`);
     } catch (err) {
         console.error("Gagal menjana PDF:", err);
-        alert("Gagal menjana PDF Sijil. Membuka mod cetakan...");
+        window.notify("Gagal menjana PDF Sijil. Membuka mod cetakan...");
         window.print();
     }
 }
@@ -20354,7 +20444,7 @@ function muatTurunSijil(namaOptional) {
         if (typeof window.showAppToast === 'function') {
             window.showAppToast('Sijil Masih Terkunci', msg, 'warning');
         } else {
-            alert(msg);
+            window.notify(msg);
         }
         return;
     }
@@ -21607,7 +21697,7 @@ window.simpanKodKelasUrus = async function () {
         if (typeof window.showAppToast === 'function') {
             window.showAppToast('Format Kod Tidak Sah', 'Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#01 atau ABCD@123)!', 'warning');
         } else {
-            alert('Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol!');
+            window.notify('Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol!');
         }
         return;
     }
@@ -21626,7 +21716,7 @@ window.simpanKodKelasUrus = async function () {
                 if (typeof window.showAppToast === 'function') {
                     window.showAppToast('Kod Telah Digunakan', `Kod “${newKod}” tidak boleh digunakan kerana telah didaftarkan oleh ${collision.usedBy}! Sila pilih kod lain.`, 'warning');
                 } else {
-                    alert(`Kod “${newKod}” telah digunakan oleh ${collision.usedBy}! Sila pilih kod lain.`);
+                    window.notify(`Kod “${newKod}” telah digunakan oleh ${collision.usedBy}! Sila pilih kod lain.`);
                 }
                 return;
             }
@@ -21663,7 +21753,7 @@ window.simpanKodKelasUrus = async function () {
     if (typeof window.showAppToast === 'function') {
         window.showAppToast('Berjaya Disimpan', `Kod kelas bagi "${active}" berjaya dikemaskini kepada "${newKod}".`, 'success');
     } else {
-        alert(`Kod kelas bagi "${active}" berjaya dikemaskini kepada "${newKod}".`);
+        window.notify(`Kod kelas bagi "${active}" berjaya dikemaskini kepada "${newKod}".`);
     }
 };
 
@@ -21682,13 +21772,13 @@ window.padamKelasSemasa = function () {
         if (typeof window.openPakejProModal === 'function') {
             window.openPakejProModal('guru');
         } else {
-            alert("Pengurusan kelas memerlukan Pelan PRO!");
+            window.notify("Pengurusan kelas memerlukan Pelan PRO!");
         }
         return;
     }
     const list = window.getDaftarKelas();
     if (list.length === 0) {
-        alert("Tiada kelas untuk dipadam.");
+        window.notify("Tiada kelas untuk dipadam.");
         return;
     }
     const currentActive = window.getKelasAktif();
@@ -21701,7 +21791,7 @@ window.padamKelasSemasa = function () {
         window.kemaskiniSemuaDropdownKelas();
         if (typeof window.renderSenaraiMuridUrus === 'function') window.renderSenaraiMuridUrus();
         if (typeof window.renderTeacherTable === 'function') window.renderTeacherTable();
-        alert(`Kelas "${currentActive}" telah dipadam.`);
+        window.notify(`Kelas "${currentActive}" telah dipadam.`);
         return;
     }
 
@@ -21728,7 +21818,7 @@ window.padamKelasSemasa = function () {
     if (typeof window.renderSenaraiMuridUrus === 'function') window.renderSenaraiMuridUrus();
     if (typeof window.renderTeacherTable === 'function') window.renderTeacherTable();
 
-    alert(`Kelas "${currentActive}" telah berjaya dipadam! Kelas aktif kini ialah "${newActive}".`);
+    window.notify(`Kelas "${currentActive}" telah berjaya dipadam! Kelas aktif kini ialah "${newActive}".`);
 };
 
 window.bukaModalTambahKelas = function () {
@@ -21736,14 +21826,14 @@ window.bukaModalTambahKelas = function () {
         if (typeof window.openPakejProModal === 'function') {
             window.openPakejProModal('guru');
         } else {
-            alert("Penambahan kelas memerlukan Pelan PRO!");
+            window.notify("Penambahan kelas memerlukan Pelan PRO!");
         }
         return;
     }
     const list = window.getDaftarKelas();
     const maxAllowed = 2;
     if (list.length >= maxAllowed) {
-        alert("Maksimum 2 kelas sahaja dibenarkan bagi akaun guru (Pakej Pro)! Anda boleh padam salah satu kelas jika ingin menambah kelas baharu.");
+        window.notify("Maksimum 2 kelas sahaja dibenarkan bagi akaun guru (Pakej Pro)! Anda boleh padam salah satu kelas jika ingin menambah kelas baharu.");
         return;
     }
 
@@ -21798,20 +21888,20 @@ window.simpanKelasBaharuModal = function () {
     if (!input) return;
     const nama = input.value.trim();
     if (!nama) {
-        alert("Sila masukkan nama kelas baharu!");
+        window.notify("Sila masukkan nama kelas baharu!");
         input.focus();
         return;
     }
 
     let list = window.getDaftarKelas();
     if (list.length >= 2) {
-        alert("Maksimum 2 kelas sahaja dibenarkan untuk satu akaun guru!");
+        window.notify("Maksimum 2 kelas sahaja dibenarkan untuk satu akaun guru!");
         document.getElementById('modal-tambah-kelas-overlay').style.display = 'none';
         return;
     }
 
     if (list.some(k => k.toLowerCase() === nama.toLowerCase())) {
-        alert(`Kelas "${nama}" sudah wujud dalam senarai kelas anda!`);
+        window.notify(`Kelas "${nama}" sudah wujud dalam senarai kelas anda!`);
         window.tukarKelasAktif(list.find(k => k.toLowerCase() === nama.toLowerCase()));
         document.getElementById('modal-tambah-kelas-overlay').style.display = 'none';
         return;
@@ -21846,7 +21936,7 @@ window.simpanKelasBaharuModal = function () {
     if (typeof window.showAppModalAlert === 'function') {
         window.showAppModalAlert('Kelas Berjaya Ditambah', `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;"><i class="fa-solid fa-circle-check" style="font-size:2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>Kelas <strong>"${nama}"</strong> telah berjaya didaftarkan!<br><span style="color:#64748b; font-size:0.85rem;">(${final2.length}/2 Kelas digunakan)</span></p>`);
     } else {
-        alert(`Kelas "${nama}" telah berjaya didaftarkan! (${final2.length}/2 Kelas digunakan)`);
+        window.notify(`Kelas "${nama}" telah berjaya didaftarkan! (${final2.length}/2 Kelas digunakan)`);
     }
 };
 
@@ -21856,7 +21946,7 @@ window.simpanNamaKelas = function () {
         if (typeof window.openPakejProModal === 'function') {
             window.openPakejProModal('guru');
         } else {
-            alert("Tetapan nama kelas memerlukan Pelan PRO!");
+            window.notify("Tetapan nama kelas memerlukan Pelan PRO!");
         }
         return;
     }
@@ -21867,7 +21957,7 @@ window.simpanNamaKelas = function () {
         if (typeof window.showAppModalAlert === 'function') {
             window.showAppModalAlert('Nama Kelas Diperlukan', '<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">Sila masukkan nama kelas terlebih dahulu!</p>');
         } else {
-            alert('Sila masukkan nama kelas!');
+            window.notify('Sila masukkan nama kelas!');
         }
         return;
     }
@@ -21914,7 +22004,7 @@ window.simpanNamaKelas = function () {
     if (typeof window.showAppModalAlert === 'function') {
         window.showAppModalAlert('Berjaya Disimpan', `<p style="text-align:center; font-weight:bold; color:#15803d; margin:10px 0;"><i class="fa-solid fa-circle-check" style="font-size:2rem; color:#22c55e; display:block; margin-bottom:8px;"></i>Nama kelas telah berjaya dikemaskini kepada <strong>"${newName}"</strong>.</p>`);
     } else {
-        alert(`Nama kelas telah dikemaskini kepada "${newName}".`);
+        window.notify(`Nama kelas telah dikemaskini kepada "${newName}".`);
     }
 };
 
@@ -22348,7 +22438,7 @@ window.tambahMuridBaru = function () {
         if (typeof window.showAppModalAlert === 'function') {
             window.showAppModalAlert('Nama Murid Diperlukan', '<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">Sila masukkan nama murid terlebih dahulu!</p>');
         } else {
-            alert('Sila masukkan nama murid!');
+            window.notify('Sila masukkan nama murid!');
         }
         return;
     }
@@ -22358,7 +22448,7 @@ window.tambahMuridBaru = function () {
         if (typeof window.showAppModalAlert === 'function') {
             window.showAppModalAlert('Tetapan Kelas Diperlukan', '<p style="text-align:center; font-weight:bold; color:#ef4444; margin:10px 0;">Sila tetapkan nama kelas terlebih dahulu di bahagian "Tetapan Nama Kelas" di bawah sebelum menambah murid!</p>');
         } else {
-            alert('Sila tetapkan nama kelas terlebih dahulu di bahagian "Tetapan Nama Kelas" di bawah sebelum menambah murid!');
+            window.notify('Sila tetapkan nama kelas terlebih dahulu di bahagian "Tetapan Nama Kelas" di bawah sebelum menambah murid!');
         }
         return;
     }
@@ -22420,11 +22510,11 @@ window.tambahMuridBaru = function () {
         }
     } else {
         if (duplicates.length > 0 && addedCount === 0) {
-            alert('Semua nama murid tersebut sudah wujud dalam senarai!');
+            window.notify('Semua nama murid tersebut sudah wujud dalam senarai!');
         } else if (duplicates.length > 0) {
-            alert(addedCount + ' murid berjaya ditambah ke kelas "' + activeKelas + '".\nTerdapat nama yang diabaikan kerana sudah wujud:\n' + duplicates.join(', '));
+            window.notify(addedCount + ' murid berjaya ditambah ke kelas "' + activeKelas + '".\nTerdapat nama yang diabaikan kerana sudah wujud:\n' + duplicates.join(', '));
         } else {
-            alert(addedCount + ' murid berjaya ditambah.');
+            window.notify(addedCount + ' murid berjaya ditambah.');
         }
     }
 };
@@ -22682,7 +22772,7 @@ function requestSensorPermissionAndStart(type, arg) {
                     if (permissionState === 'granted') {
                         startScene();
                     } else {
-                        alert('Akses penderia ditolak. Pengalaman 3D/AR mungkin terhad.');
+                        window.notify('Akses penderia ditolak. Pengalaman 3D/AR mungkin terhad.');
                         startScene(); // Fallback
                     }
                 })

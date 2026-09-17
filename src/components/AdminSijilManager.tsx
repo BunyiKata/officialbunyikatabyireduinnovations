@@ -316,7 +316,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
       link.click();
     } catch (e) {
       console.error(e);
-      alert('Ralat semasa menjana PNG sijil');
+      (window as any).notify('Ralat semasa menjana PNG sijil');
     } finally {
       setIsExporting(false);
       setExportProgress('');
@@ -352,7 +352,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
       pdf.save(`Sijil_BunyiKata_${clean || 'Murid'}.pdf`);
     } catch (e) {
       console.error(e);
-      alert('Ralat semasa menjana PDF sijil');
+      (window as any).notify('Ralat semasa menjana PDF sijil');
     } finally {
       setIsExporting(false);
       setExportProgress('');
@@ -363,7 +363,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
   const handleBulkDownloadPNG = async () => {
     playClick();
     if (students.length === 0) {
-      alert('Tiada murid dalam senarai.');
+      (window as any).notify('Tiada murid dalam senarai.');
       return;
     }
     setIsExporting(true);
@@ -388,7 +388,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
       }
     } catch (e) {
       console.error(e);
-      alert('Ralat semasa menjana PNG pukal');
+      (window as any).notify('Ralat semasa menjana PNG pukal');
     } finally {
       setIsExporting(false);
       setExportProgress('');
@@ -399,7 +399,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
   const handleBulkDownloadPDF = async () => {
     playClick();
     if (students.length === 0) {
-      alert('Tiada murid dalam senarai.');
+      (window as any).notify('Tiada murid dalam senarai.');
       return;
     }
     setIsExporting(true);
@@ -435,7 +435,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
       pdf.save(`Sijil_Pukal_BunyiKata_${students.length}_Murid.pdf`);
     } catch (e) {
       console.error(e);
-      alert('Ralat semasa menjana PDF pukal');
+      (window as any).notify('Ralat semasa menjana PDF pukal');
     } finally {
       setIsExporting(false);
       setExportProgress('');
@@ -524,7 +524,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
       }
     } catch (e) {
       console.error(e);
-      alert('Ralat semasa mencetak sijil');
+      (window as any).notify('Ralat semasa mencetak sijil');
     } finally {
       setIsExporting(false);
       setExportProgress('');

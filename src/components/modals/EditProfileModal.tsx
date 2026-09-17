@@ -668,7 +668,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 }}
                                 onClick={() => {
                                   if (!newPasswordInput.trim()) {
-                                    alert("Sila masukkan kata laluan baharu!");
+                                    (window as any).notify("Sila masukkan kata laluan baharu!");
                                     return;
                                   }
                                   setShowPasswordConfirmModal(true);
@@ -977,7 +977,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 }}
                                 onClick={() => {
                                   if (!newPasswordInput.trim()) {
-                                    alert("Sila masukkan kata laluan baharu!");
+                                    (window as any).notify("Sila masukkan kata laluan baharu!");
                                     return;
                                   }
                                   setShowPasswordConfirmModal(true);
@@ -1572,7 +1572,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 }}
                                 onClick={() => {
                                   if (!newPasswordInput.trim()) {
-                                    alert("Sila masukkan kata laluan baharu!");
+                                    (window as any).notify("Sila masukkan kata laluan baharu!");
                                     return;
                                   }
                                   setShowPasswordConfirmModal(true);
@@ -1703,7 +1703,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                               const s = editSekolahTemp.trim().toUpperCase();
                               const g = editGuruTemp.trim().toUpperCase();
                               if (!s || !g) {
-                                alert("Sila lengkapkan Nama Sekolah dan Nama Guru!");
+                                (window as any).notify("Sila lengkapkan Nama Sekolah dan Nama Guru!");
                                 return;
                               }
                               localStorage.setItem("bunyiKataNamaSekolah", s);
@@ -2259,7 +2259,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
                                       onClick={() => {
                                         if (newCode2Input.trim().toUpperCase() === editKodTemp) {
-                                          alert("Kod Kelas 2 tidak boleh sama dengan Kod Kelas 1!");
+                                          (window as any).notify("Kod Kelas 2 tidak boleh sama dengan Kod Kelas 1!");
                                           return;
                                         }
                                         handleSaveClassCode2(newCode2Input);
@@ -2549,7 +2549,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                     if ((window as any).showAppToast) {
                                       (window as any).showAppToast("Amaran", "Sila masukkan kata laluan baharu!", "warning");
                                     } else {
-                                      alert("Sila masukkan kata laluan baharu!");
+                                      (window as any).notify("Sila masukkan kata laluan baharu!");
                                     }
                                     return;
                                   }

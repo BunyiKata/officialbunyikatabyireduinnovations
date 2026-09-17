@@ -260,7 +260,7 @@ export function Lencana3DSwiper() {
       if (typeof (window as any).showAppToast === "function") {
         (window as any).showAppToast("Lencana Masih Terkunci", msg, "warning");
       } else {
-        alert(msg);
+        (window as any).notify(msg);
       }
     }
   };

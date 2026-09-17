@@ -441,7 +441,7 @@ export default function LoginScreen({
                 "student-dropdown",
               ) as HTMLSelectElement;
               if (!select || !select.value) {
-                alert("Sila pilih nama dalam senarai!");
+                (window as any).notify("Sila pilih nama dalam senarai!");
                 return;
               }
               (window as any).namaMuridAktif = select.value;

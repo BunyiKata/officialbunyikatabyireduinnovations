@@ -1705,7 +1705,7 @@ export default function App() {
   const handleSaveClassName1 = async (name: string) => {
     const clean = name.trim().toUpperCase();
     if (!clean) {
-      alert("Sila masukkan nama kelas 1!");
+      window.notify("Sila masukkan nama kelas 1!");
       return;
     }
     setEditKelasTemp(clean);
@@ -1765,7 +1765,7 @@ export default function App() {
           "warning"
         );
       } else {
-        alert("Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#01)!");
+        window.notify("Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#01)!");
       }
       return;
     }
@@ -1777,7 +1777,7 @@ export default function App() {
         if (typeof (window as any).showAppToast === "function") {
           (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
         } else {
-          alert(msg);
+          window.notify(msg);
         }
         return;
       }
@@ -1829,7 +1829,7 @@ export default function App() {
       if (typeof (window as any).showAppToast === "function") {
         (window as any).showAppToast("Nama Kelas Diperlukan", "Sila masukkan nama kelas 2!", "warning");
       } else {
-        alert("Sila masukkan nama kelas 2!");
+        window.notify("Sila masukkan nama kelas 2!");
       }
       return;
     }
@@ -1888,7 +1888,7 @@ export default function App() {
           "warning"
         );
       } else {
-        alert("Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#02)!");
+        window.notify("Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: KELAS#02)!");
       }
       return;
     }
@@ -1900,7 +1900,7 @@ export default function App() {
         if (typeof (window as any).showAppToast === "function") {
           (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
         } else {
-          alert(msg);
+          window.notify(msg);
         }
         return;
       }
@@ -1950,7 +1950,7 @@ export default function App() {
       if (typeof (window as any).showAppToast === "function") {
         (window as any).showAppToast("Nama Keluarga Diperlukan", "Sila masukkan nama keluarga!", "warning");
       } else {
-        alert("Sila masukkan nama keluarga!");
+        window.notify("Sila masukkan nama keluarga!");
       }
       return;
     }
@@ -1999,7 +1999,7 @@ export default function App() {
           "warning"
         );
       } else {
-        alert("Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: FAM@2026)!");
+        window.notify("Kod mestilah tepat 8 aksara dan mengandungi sekurang-kurangnya 1 simbol (contoh: FAM@2026)!");
       }
       return;
     }
@@ -2011,7 +2011,7 @@ export default function App() {
         if (typeof (window as any).showAppToast === "function") {
           (window as any).showAppToast("Kod Telah Digunakan", msg, "warning");
         } else {
-          alert(msg);
+          window.notify(msg);
         }
         return;
       }
@@ -4685,7 +4685,7 @@ export default function App() {
                 if (typeof (window as any).showAppToast === "function") {
                   (window as any).showAppToast("Sijil Masih Terkunci", msg, "warning");
                 } else {
-                  alert(msg);
+                  (window as any).notify(msg);
                 }
                 return;
               }

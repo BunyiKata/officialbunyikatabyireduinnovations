@@ -520,16 +520,17 @@ export function AuthModal({
                           try {
                             const res = await sendPasswordResetEmail(emailToSend.trim());
                             if (res.success) {
-                              alert(
-                                `Pautan penetapan semula kata laluan telah dihantar ke: ${emailToSend.trim()}\n\nSila semak peti masuk (Inbox / Spam) emel anda.`
+                              (window as any).notify(
+                                `Pautan penetapan semula kata laluan telah dihantar ke: ${emailToSend.trim()}. Sila semak peti masuk (Inbox / Spam) emel anda.`
                               );
                             } else {
-                              alert(`Ralat: ${res.message}`);
+                              (window as any).notify(`Ralat: ${res.message}`, undefined, "error");
                             }
                           } catch (err: any) {
-                            alert(
-                              "Gagal menghantar pautan reset kata laluan: " +
-                                (err?.message || "")
+                            (window as any).notify(
+                              "Gagal menghantar pautan reset kata laluan: " + (err?.message || ""),
+                              undefined,
+                              "error"
                             );
                           } finally {
                             setIsAuthLoading(false);

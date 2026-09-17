@@ -39,9 +39,11 @@ function tunjukAmaranKonfigurasiAdmin(mesejPelayan?: string) {
   if (typeof (window as any).showAppModalAlert === "function") {
     (window as any).showAppModalAlert("Mod Admin Tidak Tersedia", html);
   } else {
-    alert(
+    (window as any).notify(
       "Mod admin tidak dapat dimulakan — pelayan belum dikonfigurasikan." +
-        (mesejPelayan ? `\n\n${mesejPelayan}` : ""),
+        (mesejPelayan ? `. ${mesejPelayan}` : ""),
+      undefined,
+      "error"
     );
   }
 }
@@ -449,7 +451,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                             </p>`
                           );
                         } else {
-                          alert("Sila masukkan kod kelas atau keluarga!");
+                          (window as any).notify("Sila masukkan kod kelas atau keluarga!");
                         }
                         return;
                       }
@@ -518,8 +520,10 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                             </p>`
                           );
                         } else {
-                          alert(
+                          (window as any).notify(
                             "Tidak dapat menghubungi pelayan. Pastikan pelayan sedang berjalan.",
+                            undefined,
+                            "error"
                           );
                         }
                         return;
@@ -734,7 +738,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                             </p>`
                           );
                         } else {
-                          alert("Kod tidak sah. Sila pastikan kod yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.");
+                          (window as any).notify("Kod tidak sah. Sila pastikan kod yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.", undefined, "error");
                         }
                       }
                     }}
@@ -991,7 +995,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                             </p>`
                           );
                         } else {
-                          alert("Sila masukkan kod kelas atau keluarga!");
+                          (window as any).notify("Sila masukkan kod kelas atau keluarga!");
                         }
                         return;
                       }
@@ -1055,8 +1059,10 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                             </p>`
                           );
                         } else {
-                          alert(
+                          (window as any).notify(
                             "Tidak dapat menghubungi pelayan. Pastikan pelayan sedang berjalan.",
+                            undefined,
+                            "error"
                           );
                         }
                         return;
@@ -1296,7 +1302,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                             </p>`
                           );
                         } else {
-                          alert("Kod tidak sah. Sila pastikan kod yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.");
+                          (window as any).notify("Kod tidak sah. Sila pastikan kod yang dimasukkan adalah tepat seperti yang didaftarkan oleh Guru atau Ibu Bapa.", undefined, "error");
                         }
                       }
                     }}

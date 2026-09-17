@@ -1554,7 +1554,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                               if ((window as any).showAppToast) {
                                 (window as any).showAppToast("Kod Disalin", "Kod Kelas 1 telah disalin!");
                               } else {
-                                alert("Kod Kelas 1 telah disalin!");
+                                (window as any).notify("Kod Kelas 1 telah disalin!");
                               }
                             }}
                             title="Salin Kod"
@@ -1805,7 +1805,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                                 if ((window as any).showAppToast) {
                                   (window as any).showAppToast("Kod Disalin", "Kod Kelas 2 telah disalin!");
                                 } else {
-                                  alert("Kod Kelas 2 telah disalin!");
+                                  (window as any).notify("Kod Kelas 2 telah disalin!");
                                 }
                               }}
                               title="Salin Kod"
@@ -1880,7 +1880,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                               style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
                               onClick={() => {
                                 if (newCode2Input.trim().toUpperCase() === editKodTemp) {
-                                  alert("Kod Kelas 2 tidak boleh sama dengan Kod Kelas 1!");
+                                  (window as any).notify("Kod Kelas 2 tidak boleh sama dengan Kod Kelas 1!");
                                   return;
                                 }
                                 handleSaveClassCode2(newCode2Input);
