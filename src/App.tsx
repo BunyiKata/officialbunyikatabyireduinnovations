@@ -6525,15 +6525,6 @@ export default function App() {
             >
               <i className="fa-solid fa-rotate-right"></i> Cuba Lagi
             </button>
-            <button
-              className="neo-btn bg-blue"
-              style={{ flex: "1", minWidth: "140px" }}
-              onClick={(e) => {
-                window.surihNomborHantarStatus && window.surihNomborHantarStatus();
-              }}
-            >
-              <i className="fa-solid fa-paper-plane"></i> Hantar
-            </button>
             <div id="surih-nombor-score" style={{ display: "none" }}>
               <span id="surih-nombor-stars"></span>
             </div>
@@ -6725,15 +6716,6 @@ export default function App() {
               }}
             >
               <i className="fa-solid fa-rotate-right"></i> Cuba Lagi
-            </button>
-            <button
-              className="neo-btn bg-blue"
-              style={{ flex: "1", minWidth: "140px" }}
-              onClick={(e) => {
-                window.surihHantarStatus && window.surihHantarStatus();
-              }}
-            >
-              <i className="fa-solid fa-paper-plane"></i> Hantar
             </button>
             <div id="surih-score" style={{ display: "none" }}>
               <span id="surih-stars"></span>

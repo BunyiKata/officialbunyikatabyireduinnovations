@@ -49,6 +49,10 @@ function kunciSurihHuruf(idx) {
 }
 
 function sudahSelesaiSurihHuruf(idx) {
+    // Cara Belajar surih huruf: baca rekod HANYA untuk murid PRO sahaja.
+    // Mod percuma / tetamu / guru / admin / ibu bapa / affiliate tidak pernah
+    // membaca (atau menulis) rekod ke storan / Firebase.
+    if (typeof window.bolehRekodSurihCaraBelajar === 'function' && !window.bolehRekodSurihCaraBelajar()) return false;
     const kunci = kunciSurihHuruf(idx);
     if (!kunci) return false;
     try {
@@ -61,6 +65,9 @@ function sudahSelesaiSurihHuruf(idx) {
 }
 
 function simpanStatusSurihHuruf(idx) {
+    // Halang simpanan ke storan / Firebase untuk mod percuma / tetamu / guru /
+    // admin / ibu bapa / affiliate. Cara Belajar hanya merekod untuk murid PRO.
+    if (typeof window.bolehRekodSurihCaraBelajar === 'function' && !window.bolehRekodSurihCaraBelajar()) return false;
     if (sudahSelesaiSurihHuruf(idx)) return false;
     const kunci = kunciSurihHuruf(idx);
     if (!kunci) return false;

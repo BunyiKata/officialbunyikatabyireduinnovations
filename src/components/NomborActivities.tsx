@@ -9,6 +9,7 @@ import {
   ModernSoccerBall
 } from './NomborGame';
 import { playNavTone, playPopTone, playErrorTone, playTone } from '../utils/coreAudio';
+import { playCorrectPeneguhan, playWrongPeneguhan, playPopupBerjaya, playPopupGagal, resetPeneguhanTurn } from '../utils/peneguhanAudio';
 
 export const MAIN_APP_BG = 'transparent';
 
@@ -2611,6 +2612,7 @@ export function Activity7MatchAudioNombor({ item, mode, isMobile, onNext, onBack
       triggerTerbaik(onNext);
     } else {
       playErrorSound();
+      playWrongPeneguhan();
       setShakeError(true);
       setTimeout(() => {
         setShakeError(false);

@@ -7,6 +7,7 @@ import {
   playErrorTone,
   playTone
 } from '../utils/coreAudio';
+import { playCorrectPeneguhan, playWrongPeneguhan, playPopupBerjaya, playPopupGagal, resetPeneguhanTurn } from '../utils/peneguhanAudio';
 
 // ─── Types ───────────────────────────────────────────────────
 export interface MathItem {
@@ -416,8 +417,9 @@ function MathTopBar({
 // ─── Visual Object Dots (Sama Warna Seragam) ─────────────────
 function ObjectDots({ count, color = '#3b82f6', isMobile, animate: doAnimate }: { count: number; color?: string; isMobile: boolean; animate?: boolean }) {
   const size = isMobile ? 30 : 40;
+  const gap = isMobile ? 6 : 8;
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '6px' : '8px', justifyContent: 'center', alignItems: 'center', maxWidth: isMobile ? '180px' : '240px' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: `${gap}px`, justifyContent: 'center', alignItems: 'center' }}>
       {Array.from({ length: count }).map((_, i) => (
         <motion.div
           key={i}
@@ -427,14 +429,16 @@ function ObjectDots({ count, color = '#3b82f6', isMobile, animate: doAnimate }: 
           style={{
             width: size,
             height: size,
+            flex: '0 0 auto',
+            boxSizing: 'border-box',
             borderRadius: '50%',
             background: color,
-            border: '2.5px solid #1e293b',
+            border: `${Math.max(1.5, size * 0.07)}px solid #1e293b`,
             boxShadow: '0 2px 0 #1e293b',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: isMobile ? '0.9rem' : '1.1rem',
+            fontSize: `${Math.max(0.5, size * 0.028)}rem`,
             fontWeight: 900,
             color: 'white',
             fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif'
@@ -446,6 +450,227 @@ function ObjectDots({ count, color = '#3b82f6', isMobile, animate: doAnimate }: 
     </div>
   );
 }
+// ─── Ayat Matematik 1 Baris (Kira & Jawab) ───────────────────
+// Mengira saiz bulatan supaya "a op b = ?" muat dalam SATU baris
+// pada kedua-dua paparan laptop dan telefon.
+function MathSentenceDotsGroup({
+  countA,
+  countB,
+  op,
+  isMobile,
+  showResult,
+  result
+}: {
+  countA: number;
+  countB: number;
+  op: string;
+  isMobile: boolean;
+  showResult: boolean;
+  result: number;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [available, setAvailable] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const measure = () => setAvailable(el.clientWidth);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
+
+  // Fallback lebar jika ukuran belum tersedia (anggaran konservatif)
+  const width = available > 0 ? available : isMobile ? 280 : 600;
+
+  // ── Kira saiz bulatan ──────────────────────────────────────────
+  // Setiap kumpulan (A & B) BOLEH wrap ke beberapa baris supaya bulatan
+  // tak jadi terlalu kecil, TETAPI keseluruhan ayat matematik
+  // (A + B = ?) mesti kekal dalam SATU baris menegak yang sama.
+  const gap = isMobile ? 5 : 8;            // jurang antara bulatan
+  const groupGap = isMobile ? 6 : 12;      // jurang antara kumpulan & operator
+  const answerBox = isMobile ? 46 : 60;    // saiz kotak jawapan
+  const opFont = isMobile ? 1.4 : 2.1;     // saiz fon operator (rem)
+  const opWidth = isMobile ? 22 : 34;      // anggaran lebar operator '+' / '='
+
+  // Ruang bukan-bulatan: 4 jurang kumpulan + 2 operator + kotak jawapan
+  const nonDotWidth = groupGap * 4 + opWidth * 2 + answerBox;
+
+  // Setiap kumpulan (A & B) dihadkan MAKSIMUM 2 baris bulatan.
+  // Bilangan bulatan per baris dikira SEBELUM render dan dijadikan baris
+  // eksplisit (bukan bergantung pada wrapping flexbox) supaya susunannya
+  // sama tepat di laptop dan telefon.
+  const MAX_ROWS = 2;
+
+  // Bahagikan 'n' bulatan kepada baris-baris: baris awal lebih banyak,
+  // baris akhir menampung baki (baris terakhir ≤ baris pertama).
+  const splitRows = (n: number): number[] => {
+    if (n <= 0) return [];
+    const perRow = Math.ceil(n / MAX_ROWS); // maksimum 2 baris
+    const rows: number[] = [];
+    let remaining = n;
+    while (remaining > 0) {
+      const take = Math.min(perRow, remaining);
+      rows.push(take);
+      remaining -= take;
+    }
+    return rows;
+  };
+
+  // Lebar terbesar baris bagi kumpulan 'n' bulatan saiz 's'
+  const groupWidth = (n: number, s: number) => {
+    const rows = splitRows(n);
+    if (rows.length === 0) return 0;
+    const longest = Math.max(...rows);
+    return longest * s + (longest - 1) * gap;
+  };
+
+  // Cari saiz terbesar supaya (lebarA + lebarB + nonDot) ≤ width.
+  // Saiz juga mesti kekal munasabah supaya bulatan tak terlalu kecil.
+  const minSize = isMobile ? 14 : 18;
+  const maxSize = isMobile ? 30 : 40;
+  const fits = (s: number) => {
+    const wA = groupWidth(countA, s);
+    const wB = groupWidth(countB, s);
+    return wA + wB + nonDotWidth <= width - 4; // margin keselamatan kecil
+  };
+
+  // Pilih saiz dari besar ke kecil sehingga muat dalam SATU baris.
+  // Jika saiz minimum pun tak muat (nilai sangat besar pada skrin sempit),
+  // kekal pada saiz minimum supaya ayat matematik tak jadi terlalu kecil.
+  let size = maxSize;
+  for (let s = maxSize; s >= minSize; s -= 1) {
+    if (fits(s)) { size = s; break; }
+    if (s === minSize) size = minSize;
+  }
+
+  const rowsA = splitRows(countA);
+  const rowsB = splitRows(countB);
+
+  // Satu kumpulan bulatan sebagai baris-baris eksplisit (maks 2 baris).
+  // Setiap baris dipusatkan supaya susunannya kemas dan sama di semua skrin.
+  const renderDotGroup = (rows: number[], color: string) => (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: `${gap}px`,
+        flex: '0 0 auto'
+      }}
+    >
+      {rows.map((rowCount, rowIdx) => (
+        <div
+          key={rowIdx}
+          style={{
+            display: 'flex',
+            flexWrap: 'nowrap',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: `${gap}px`
+          }}
+        >
+          {Array.from({ length: rowCount }).map((_, i) => (
+            <motion.div
+              key={i}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: (rowIdx * rowCount + i) * 0.05, type: 'spring', stiffness: 400, damping: 15 }}
+              style={{
+                width: size,
+                height: size,
+                flex: '0 0 auto',
+                boxSizing: 'border-box',
+                borderRadius: '50%',
+                background: color,
+                border: `${Math.max(1.5, size * 0.07)}px solid #1e293b`,
+                boxShadow: '0 2px 0 #1e293b',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: `${Math.max(0.5, size * 0.028)}rem`,
+                fontWeight: 900,
+                color: 'white',
+                fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif'
+              }}
+            >
+              ●
+            </motion.div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+
+  const opStyle: React.CSSProperties = {
+    fontSize: `${opFont}rem`,
+    fontWeight: 900,
+    color: '#1e293b',
+    fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif',
+    flex: '0 0 auto',
+    lineHeight: 1
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: `${groupGap}px`,
+        flexWrap: 'nowrap',
+        width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box'
+      }}
+    >
+      {renderDotGroup(rowsA, '#3b82f6')}
+      <span style={opStyle}>{op}</span>
+      {renderDotGroup(rowsB, '#3b82f6')}
+      <span style={opStyle}>=</span>
+      {/* Kotak Jawapan: Tanda Soal Putih #ffffff dengan Glow Animation, Bila Betul Tukar Oren #f59e0b */}
+      <motion.div
+        animate={
+          showResult
+            ? { scale: [1, 1.2, 1], boxShadow: '0 3.5px 0 #1e293b' }
+            : { boxShadow: ['0 3.5px 0 #1e293b, 0 0 0px #fbbf24', '0 3.5px 0 #1e293b, 0 0 16px #fbbf24', '0 3.5px 0 #1e293b, 0 0 0px #fbbf24'] }
+        }
+        transition={
+          showResult
+            ? { duration: 0.5 }
+            : { duration: 1.5, repeat: Infinity }
+        }
+        style={{
+          width: answerBox,
+          height: answerBox,
+          flex: '0 0 auto',
+          borderRadius: size < 24 ? '12px' : '16px',
+          background: showResult ? '#f59e0b' : '#ffffff',
+          border: '3px solid #1e293b',
+          boxShadow: '0 3.5px 0 #1e293b',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: showResult ? (isMobile ? '1.35rem' : '1.75rem') : (isMobile ? '1.5rem' : '1.9rem'),
+          fontWeight: 900,
+          color: showResult ? '#ffffff' : '#1e293b',
+          fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif',
+          lineHeight: 1
+        }}
+      >
+        {showResult ? result : '?'}
+      </motion.div>
+    </div>
+  );
+}
+
+
 
 // ─── Number Keypad (Pilihan Oren #f59e0b dengan Teks Putih - Saiz Lebih Besar) ─────────
 function NumberKeypad({ onPress, isMobile, disabled }: { onPress: (n: number) => void; isMobile: boolean; disabled?: boolean }) {
@@ -1712,6 +1937,7 @@ export function MathActivity2KiraJawab({ dataset, mode, isMobile, onBack, onComp
       answeringRef.current = true;
       setFeedback('correct');
       playPopSound();
+      playCorrectPeneguhan();
       triggerPopConfetti();
       speakMathAudio(item, () => {
         setTimeout(() => {
@@ -1729,6 +1955,7 @@ export function MathActivity2KiraJawab({ dataset, mode, isMobile, onBack, onComp
       setFeedback('wrong');
       setShaking(true);
       playErrorSound();
+      playWrongPeneguhan();
       setTimeout(() => {
         setFeedback(null);
         setShaking(false);
@@ -1794,56 +2021,9 @@ export function MathActivity2KiraJawab({ dataset, mode, isMobile, onBack, onComp
               boxSizing: 'border-box'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-              {/* Objek visual kedua-duanya guna warna biru #3b82f6 */}
-              <ObjectDots count={a} color="#3b82f6" isMobile={isMobile} animate />
-              <span style={{
-                fontSize: isMobile ? '1.8rem' : '2.4rem',
-                fontWeight: 900,
-                color: '#1e293b',
-                fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif'
-              }}>
-                {op}
-              </span>
-              <ObjectDots count={b} color="#3b82f6" isMobile={isMobile} animate />
-              <span style={{
-                fontSize: isMobile ? '1.8rem' : '2.4rem',
-                fontWeight: 900,
-                color: '#1e293b',
-                fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif'
-              }}>
-                =
-              </span>
-              {/* Kotak Jawapan: Tanda Soal Putih #ffffff dengan Glow Animation, Bila Betul Tukar Oren #f59e0b */}
-              <motion.div
-                animate={
-                  feedback === 'correct'
-                    ? { scale: [1, 1.2, 1], boxShadow: '0 3.5px 0 #1e293b' }
-                    : { boxShadow: ['0 3.5px 0 #1e293b, 0 0 0px #fbbf24', '0 3.5px 0 #1e293b, 0 0 16px #fbbf24', '0 3.5px 0 #1e293b, 0 0 0px #fbbf24'] }
-                }
-                transition={
-                  feedback === 'correct'
-                    ? { duration: 0.5 }
-                    : { duration: 1.5, repeat: Infinity }
-                }
-                style={{
-                  width: isMobile ? 50 : 64,
-                  height: isMobile ? 50 : 64,
-                  borderRadius: '16px',
-                  background: feedback === 'correct' ? '#f59e0b' : '#ffffff',
-                  border: '3px solid #1e293b',
-                  boxShadow: '0 3.5px 0 #1e293b',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: isMobile ? '1.6rem' : '2rem',
-                  fontWeight: 900,
-                  color: feedback === 'correct' ? '#ffffff' : '#1e293b',
-                  fontFamily: 'AtlantaRoundedBlack, AtlantaRounded, sans-serif'
-                }}
-              >
-                {feedback === 'correct' ? result : '?'}
-              </motion.div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '10px', flexWrap: 'nowrap', justifyContent: 'center', width: '100%' }}>
+              {/* Objek visual kedua-duanya guna warna biru #3b82f6 — saiz dikira supaya ayat matematik kekal 1 baris */}
+              <MathSentenceDotsGroup countA={a} countB={b} op={op} isMobile={isMobile} showResult={feedback === 'correct'} result={result} />
             </div>
           </motion.div>
 
@@ -1907,6 +2087,7 @@ export function MathActivity3PilihJawapan({ dataset, mode, isMobile, onBack, onC
       answeringRef.current = true;
       setIsCorrect(true);
       playPopSound();
+      playCorrectPeneguhan();
       triggerPopConfetti();
       speakMathAudio(item, () => {
         setTimeout(() => {
@@ -1923,6 +2104,7 @@ export function MathActivity3PilihJawapan({ dataset, mode, isMobile, onBack, onC
       setIsCorrect(false);
       setAttempts(prev => prev + 1);
       playErrorSound();
+      playWrongPeneguhan();
       setTimeout(() => {
         setSelected(null);
         setIsCorrect(null);
@@ -2098,6 +2280,7 @@ export function MathActivity4LengkapPersamaan({ dataset, mode, isMobile, onBack,
       answeringRef.current = true;
       setIsCorrect(true);
       playPopSound();
+      playCorrectPeneguhan();
       triggerPopConfetti();
       speakMathAudio(q.item, () => {
         setTimeout(() => {
@@ -2113,6 +2296,7 @@ export function MathActivity4LengkapPersamaan({ dataset, mode, isMobile, onBack,
     } else {
       setIsCorrect(false);
       playErrorSound();
+      playWrongPeneguhan();
       setTimeout(() => {
         setSelected(null);
         setIsCorrect(null);
@@ -2280,6 +2464,7 @@ export function MathActivity5SusunPersamaan({ dataset, mode, isMobile, onBack, o
     if (emptySlotIdx === -1) return;
     if (piece === correctOrder[emptySlotIdx]) {
       playPopSound();
+      playCorrectPeneguhan();
       triggerPopConfetti();
       const newSlots = [...slots];
       newSlots[emptySlotIdx] = piece;
@@ -2303,6 +2488,7 @@ export function MathActivity5SusunPersamaan({ dataset, mode, isMobile, onBack, o
       }
     } else {
       playErrorSound();
+      playWrongPeneguhan();
     }
   };
 
@@ -2572,10 +2758,12 @@ export function MathActivity6CabaranPantas({ dataset, mode, isMobile, onBack, on
       setFeedback('correct');
       setScore(prev => prev + 1);
       playPopSound();
+      playCorrectPeneguhan();
       triggerPopConfetti();
     } else {
       setFeedback('wrong');
       playErrorSound();
+      playWrongPeneguhan();
     }
     setTimeout(() => {
       setFeedback(null);

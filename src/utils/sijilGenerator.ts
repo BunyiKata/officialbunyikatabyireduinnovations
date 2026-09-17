@@ -454,7 +454,13 @@ export const bukaModalSijilMurid = async (namaOptional?: string): Promise<void> 
   `;
   certModal.style.display = 'flex';
 
+  // Gelung "processing" untuk proses menjana sijil yang kelihatan (spinner).
+  // Dihentikan dalam SEMUA laluan (berjaya/gagal) melalui `finally`.
+  let processing: any = null;
   try {
+    if (typeof window !== 'undefined' && (window as any).bkSfx && (window as any).bkSfx.startLoop) {
+      processing = (window as any).bkSfx.startLoop('processing');
+    }
     const canvas = await generateCertificateCanvas(studentName, '', false);
     const container = document.getElementById('modal-sijil-canvas-container');
     if (container) {
@@ -477,8 +483,26 @@ export const bukaModalSijilMurid = async (namaOptional?: string): Promise<void> 
     if (printBtn) {
       printBtn.onclick = () => printCertificateA4(studentName, '', false);
     }
+    // Sijil berjaya dijana = keputusan lengkap.
+    try {
+      if ((window as any).bkSfx && (window as any).bkSfx.outcome) (window as any).bkSfx.outcome('success');
+    } catch { /* abaikan */ }
   } catch (err) {
     console.error('Error rendering student certificate modal:', err);
+    try {
+      if (typeof window !== 'undefined' && (window as any).bkSfx && (window as any).bkSfx.outcome) {
+        (window as any).bkSfx.outcome('error');
+      }
+    } catch { /* abaikan */ }
+  } finally {
+    // Pastikan gelung berhenti & pemegang dibuang pada SETIAP laluan.
+    try {
+      if (typeof window !== 'undefined' && (window as any).bkSfx && (window as any).bkSfx.stopLoop) {
+        (window as any).bkSfx.stopLoop('processing');
+      }
+      processing?.stop?.();
+    } catch { /* abaikan */ }
+    processing = null;
   }
 };
 

@@ -49,6 +49,22 @@ export function AuthModal({
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authSuccessMessage, setAuthSuccessMessage] = useState("");
 
+  // Gelung "loading" (uisfx) terikat pada keadaan pemuatan pengesahan yang
+  // KELIHATAN. Dihentikan apabila selesai, gagal, ditutup, atau unmount.
+  React.useEffect(() => {
+    const sfx = (window as any).bkSfx;
+    if (!sfx) return;
+    if (isAuthLoading) {
+      sfx.startLoop?.("loading");
+    } else {
+      sfx.stopLoop?.("loading");
+    }
+    return () => {
+      sfx.stopLoop?.("loading");
+    };
+  }, [isAuthLoading]);
+
+
   React.useEffect(() => {
     if (initialTab) {
       setAuthModalTab(initialTab === "masuk" ? "masuk" : "login");

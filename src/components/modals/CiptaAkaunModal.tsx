@@ -226,12 +226,21 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
       }
       bunyiKlik();
       setSedangProses(true);
-      const keputusan = await ciptaAffiliate(nama.trim(), email.trim().toLowerCase(), noTelefon.trim());
-      setSedangProses(false);
+      // Gelung "processing" semasa pendaftaran affiliate (proses tak segerak).
+      try { (window as any).bkSfx?.startLoop?.("processing"); } catch { /* abaikan */ }
+      let keputusan: any;
+      try {
+        keputusan = await ciptaAffiliate(nama.trim(), email.trim().toLowerCase(), noTelefon.trim());
+      } finally {
+        try { (window as any).bkSfx?.stopLoop?.("processing"); } catch { /* abaikan */ }
+        setSedangProses(false);
+      }
       if (!keputusan.berjaya) {
         setRalat(keputusan.mesej || "Gagal mendaftar affiliate.");
+        try { (window as any).bkSfx?.outcome?.("error"); } catch { /* abaikan */ }
         return;
       }
+      try { (window as any).bkSfx?.outcome?.("success"); } catch { /* abaikan */ }
       setHasilAffiliate({
         nama: keputusan.affiliate?.nama || nama.trim(),
         kod: keputusan.affiliate?.kod || keputusan.kod || "",
@@ -258,26 +267,35 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
     }
     bunyiKlik();
     setSedangProses(true);
-    const keputusan = await ciptaAkaunAdmin({
-      nama: nama.trim(),
-      email: email.trim(),
-      peranan,
-      no_telefon: noTelefon.trim(),
-      nama_sekolah: "",
-      // Nama keluarga tidak lagi diminta semasa cipta akaun — ibu bapa
-      // menetapkannya sendiri selepas log masuk pertama. Hantar kosong supaya
-      // pelayan tidak menyimpan nilai palsu.
-      nama_keluarga: "",
-      planKey: pakej,
-      kod_rujukan: kodRujukan.trim().toUpperCase(),
-    });
-    setSedangProses(false);
+    // Gelung "processing" semasa cipta akaun (proses tak segerak).
+    try { (window as any).bkSfx?.startLoop?.("processing"); } catch { /* abaikan */ }
+    let keputusan: any;
+    try {
+      keputusan = await ciptaAkaunAdmin({
+        nama: nama.trim(),
+        email: email.trim(),
+        peranan,
+        no_telefon: noTelefon.trim(),
+        nama_sekolah: "",
+        // Nama keluarga tidak lagi diminta semasa cipta akaun — ibu bapa
+        // menetapkannya sendiri selepas log masuk pertama. Hantar kosong supaya
+        // pelayan tidak menyimpan nilai palsu.
+        nama_keluarga: "",
+        planKey: pakej,
+        kod_rujukan: kodRujukan.trim().toUpperCase(),
+      });
+    } finally {
+      try { (window as any).bkSfx?.stopLoop?.("processing"); } catch { /* abaikan */ }
+      setSedangProses(false);
+    }
 
     if (!keputusan.berjaya) {
       setRalat(keputusan.mesej || "Gagal mencipta akaun.");
+      try { (window as any).bkSfx?.outcome?.("error"); } catch { /* abaikan */ }
       return;
     }
     setHasil(keputusan);
+    try { (window as any).bkSfx?.outcome?.("success"); } catch { /* abaikan */ }
     bunyiKlik();
   };
 

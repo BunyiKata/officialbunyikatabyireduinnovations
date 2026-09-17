@@ -4,6 +4,11 @@ import App from './App.tsx';
 import './index.css';
 import { tangkapKodRujukan } from './config/contactAdmin';
 import * as coreAudio from './utils/coreAudio';
+import { installUiSfxUnlocker } from './utils/uiSfx';
+import { installUiSfxBridge } from './utils/uiSfxBridge';
+// Audio peneguhan (MP3 sebenar) — mengimportnya di sini supaya jambatan global
+// window.playPeneguhanCorrect/Wrong/Popup* terpasang untuk app-logic.js (AR).
+import './utils/peneguhanAudio';
 
 // Fasa 2: tangkap ?ref= SEBELUM React dimuatkan, supaya kod affiliate tidak
 // hilang apabila URL dibersihkan oleh navigasi/pelayar.
@@ -19,6 +24,11 @@ tangkapKodRujukan();
 
 // Buka kunci audio pada gesture PERTAMA (iOS/Android) + resume ctx.
 coreAudio.installCoreAudioUnlocker();
+
+// Buka kunci bunyi UI (uisfx, pack boleh tukar; kini "minimal") pada gesture pertama TANPA
+// autoplay, dan dedahkan API semantik pada window untuk kod JS lama.
+installUiSfxUnlocker();
+installUiSfxBridge();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -16,6 +16,7 @@ import {
   playErrorTone,
   playTone
 } from '../utils/coreAudio';
+import { playCorrectPeneguhan, playWrongPeneguhan, playPopupBerjaya, playPopupGagal, resetPeneguhanTurn } from '../utils/peneguhanAudio';
 
 export const MAIN_APP_BG = 'transparent';
 
@@ -1067,6 +1068,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
         }
       } else {
         playErrorSound();
+        playWrongPeneguhan();
         playSound(mode === 'fonik_abc' ? getPhonicsAudio(letter) : `/audio/abc/${letter.toLowerCase()}.mp3`);
         setCards(prev => prev.map(c => c.id === id ? { ...c, status: 'wrong' } : c));
         setTimeout(() => {
@@ -1434,6 +1436,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
         triggerTerbaik(onNext);
       } else {
         playErrorSound();
+        playWrongPeneguhan();
         setShakeError(true);
         setTimeout(() => {
           setShakeError(false);

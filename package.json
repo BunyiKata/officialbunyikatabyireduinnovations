@@ -13,6 +13,8 @@
     "preview": "node server.js",
     "clean": "node -e \"const fs = require('fs'); if (fs.existsSync('dist')) fs.rmSync('dist', { recursive: true, force: true });\"",
     "lint": "echo 'No lint step required'",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
     "encode-sa": "node scripts/encode-service-account.mjs",
     "check-admin": "node scripts/check-admin-setup.mjs"
   },
@@ -31,6 +33,7 @@
     "node-fetch": "^2.7.0",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
+    "uisfx": "^0.4.0",
     "vite": "^6.2.3"
   },
   "devDependencies": {

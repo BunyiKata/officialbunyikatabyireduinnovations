@@ -2,6 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'motion/react';
 import { getCoreAudioContext } from '../utils/coreAudio';
+import {
+  playCorrectPeneguhan,
+  playWrongPeneguhan,
+  playPopupBerjaya,
+  playPopupGagal,
+  resetPeneguhanTurn,
+} from '../utils/peneguhanAudio';
 
 interface GameProps {
   onClose: () => void;
@@ -2043,7 +2050,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
       const isFull = (activeStarCount === 3 || score === total) && !isLose;
 
       if (isFull) {
-        playCelebrationResult();
+        playPopupBerjaya();
         // Multi-burst confetti celebration
         confetti({
           particleCount: 110,
@@ -2070,7 +2077,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
 
       } else {
         // Play Cuba Lagi audio
-        playCubaLagiResult();
+        playPopupGagal();
       }
 
       if (cabaranId) {
@@ -2164,6 +2171,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
       setSusunSlots([]);
       setActiveBakulWordIndex(0);
       setSelectedOption(null);
+      resetPeneguhanTurn();
     };
 
     window.addEventListener('start-cabaran-suku-kata', handleStart);
@@ -2185,6 +2193,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
     setSusunSlots([]);
     setActiveBakulWordIndex(0);
     setSelectedOption(null);
+    resetPeneguhanTurn();
   };
 
   const cabaranActiveAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -2311,6 +2320,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
   const handleCorrect = () => {
     setFeedback('correct');
     playSoundEffect('correct');
+    playCorrectPeneguhan();
     setScore(prev => prev + 1);
 
     confetti({
@@ -2330,6 +2340,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
   const handleWrong = () => {
     setFeedback('wrong');
     playSoundEffect('wrong');
+    playWrongPeneguhan();
     setShake(true);
     setLives(prev => prev - 1);
 
@@ -2410,6 +2421,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
     if (category === currentWord.category) {
       setFeedback('correct');
       if ((window as any).playBubble) (window as any).playBubble();
+      playCorrectPeneguhan();
 
       setTimeout(() => {
         setFeedback(null);
@@ -2527,6 +2539,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                 playSoundEffect={playSoundEffect}
                 onWordFound={() => {
                   setScore(s => s + 1);
+                  playCorrectPeneguhan();
                   confetti({
                     particleCount: 50,
                     spread: 60,

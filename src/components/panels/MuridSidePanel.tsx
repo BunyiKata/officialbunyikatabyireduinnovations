@@ -1,4 +1,6 @@
 // @ts-nocheck
+import SoundToggle from "../SoundToggle";
+
 import React from "react";
 
 const tutupSidePanel = (...args: any[]) => (window as any).tutupSidePanel?.(...args);
@@ -153,6 +155,7 @@ export default function MuridSidePanel({
               flex: "1",
             }}
           >
+            <SoundToggle />
             <button
               className="neo-btn bg-purple"
               style={{

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { getCoreAudioContext } from '../utils/coreAudio';
+import { playCorrectPeneguhan, playWrongPeneguhan, playPopupBerjaya, playPopupGagal, resetPeneguhanTurn } from '../utils/peneguhanAudio';
 
 export interface CantumWordItem {
   word: string;
@@ -158,43 +158,6 @@ const PIECE_COLORS = [
   { bg: '#4ade80', border: '#10182f', text: '#052e16' }, // Hijau Segar
   { bg: '#c084fc', border: '#10182f', text: '#3b0764' }  // Ungu
 ];
-
-function playPopConfettiSound() {
-  try {
-    const ctx = getCoreAudioContext();
-    if (!ctx) return;
-    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
-    const now = ctx.currentTime;
-
-    const popOsc = ctx.createOscillator();
-    const popGain = ctx.createGain();
-    popOsc.type = 'sine';
-    popOsc.frequency.setValueAtTime(680, now);
-    popOsc.frequency.exponentialRampToValueAtTime(120, now + 0.09);
-
-    popGain.gain.setValueAtTime(0.45, now);
-    popGain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
-
-    popOsc.connect(popGain);
-    popGain.connect(ctx.destination);
-
-    popOsc.start(now);
-    popOsc.stop(now + 0.09);
-
-    [523.25, 659.25, 783.99, 1046.5].forEach((freq: number, idx: number) => {
-      const chimeOsc = ctx.createOscillator();
-      const chimeGain = ctx.createGain();
-      chimeOsc.type = 'triangle';
-      chimeOsc.frequency.setValueAtTime(freq, now + 0.04 + idx * 0.06);
-      chimeGain.gain.setValueAtTime(0.3, now + 0.04 + idx * 0.06);
-      chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4 + idx * 0.06);
-      chimeOsc.connect(chimeGain);
-      chimeGain.connect(ctx.destination);
-      chimeOsc.start(now + 0.04 + idx * 0.06);
-      chimeOsc.stop(now + 0.45 + idx * 0.06);
-    });
-  } catch (e) {}
-}
 
 /**
  * Path SVG untuk Jigsaw Interlocking Puzzle Piece
@@ -434,7 +397,8 @@ export const CantumKataGame: React.FC<{ onClose: () => void }> = ({ onClose }) =
         return updated;
       });
 
-      playPopConfettiSound();
+      // Audio kesan confetti dibuang — kekalkan effect confetti visual & peneguhan sahaja.
+      playCorrectPeneguhan();
       if (typeof (window as any).playTada === 'function') {
         (window as any).playTada();
       }
@@ -492,6 +456,7 @@ export const CantumKataGame: React.FC<{ onClose: () => void }> = ({ onClose }) =
     } else {
       setWrongSlotIdx(targetSlotIdx);
       setTimeout(() => setWrongSlotIdx(null), 600);
+      playWrongPeneguhan();
       if (typeof (window as any).playOops === 'function') {
         (window as any).playOops();
       }

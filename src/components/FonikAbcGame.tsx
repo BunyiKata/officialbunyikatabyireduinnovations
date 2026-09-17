@@ -15,6 +15,7 @@ import {
   playErrorTone,
   playTone
 } from '../utils/coreAudio';
+import { playCorrectPeneguhan, playWrongPeneguhan, playPopupBerjaya, playPopupGagal, resetPeneguhanTurn } from '../utils/peneguhanAudio';
 
 export type PhonicsMode = 'kenali_huruf' | 'vokal_konsonan' | 'fonik_abc';
 
@@ -954,6 +955,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
   // bintang patut dipaparkan TIDAK bergantung pada ref yang mungkin belum di-flush.
   const triggerTerbaik = (onComplete: () => void, durationMs = 1500, showStar?: boolean) => {
     playSuccessCelebration();
+    playCorrectPeneguhan();
     const shouldShowStar = typeof showStar === 'boolean' ? showStar : showStarOnPopupRef.current;
     setShowStarPopup(shouldShowStar);
     setGlobalTerbaik(true);

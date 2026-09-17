@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { getCoreAudioContext } from '../utils/coreAudio';
+import { playCorrectPeneguhan, playWrongPeneguhan, playPopupBerjaya, playPopupGagal, resetPeneguhanTurn } from '../utils/peneguhanAudio';
 
 export interface SebutItem {
   id: string;
@@ -352,6 +353,21 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
   const [matchStatus, setMatchStatus] = useState<'idle' | 'listening' | 'success' | 'retry'>('idle');
   const [isCompleted, setIsCompleted] = useState(false);
 
+  // Gelung "recording" (uisfx) terikat pada keadaan rakaman yang KELIHATAN.
+  // Dihentikan apabila rakaman tamat, gagal, dibatalkan, ATAU komponen unmount.
+  useEffect(() => {
+    const sfx = (window as any).bkSfx;
+    if (!sfx) return;
+    if (isRecording) {
+      sfx.startLoop?.('recording');
+    } else {
+      sfx.stopLoop?.('recording');
+    }
+    return () => {
+      sfx.stopLoop?.('recording');
+    };
+  }, [isRecording]);
+
   const recognitionRef = useRef<any>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const isHoldingRef = useRef(false);
@@ -471,6 +487,7 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
     setFloatingStarActive(true);
     playPopConfettiSound();
     playSoundEffect('star');
+    playCorrectPeneguhan();
 
     confetti({
       particleCount: 55,
@@ -648,6 +665,7 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
     setFloatingStarActive(false);
     setTranscript('');
     setMatchStatus('idle');
+    resetPeneguhanTurn();
   };
 
   const isMountedRef = useRef(false);
@@ -665,6 +683,7 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
     setFloatingStarActive(false);
     setTranscript('');
     setMatchStatus('idle');
+    resetPeneguhanTurn();
   }, [categoryKey, mode]);
 
   // Sync stars to Student Profile & Trigger celebratory confetti upon completion
@@ -685,6 +704,7 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
 
       // 2. Play celebratory sound
       playPopConfettiSound();
+      playPopupBerjaya();
       if (typeof (window as any).playTada === 'function') {
         (window as any).playTada();
       } else {

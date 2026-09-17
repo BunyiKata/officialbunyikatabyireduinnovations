@@ -41,8 +41,8 @@ export function getCoreAudioContext(): AudioContext | null {
 export function resumeCoreAudio(): AudioContext | null {
   const ctx = getCoreAudioContext();
   try {
-    if (ctx && ctx.state === "suspended") ctx.resume().catch(() => {});
-  } catch (e) {}
+    if (ctx && ctx.state === "suspended") ctx.resume().catch(() => { });
+  } catch (e) { }
   return ctx;
 }
 
@@ -62,12 +62,12 @@ export function unlockCoreAudio(): void {
       src.connect(ctx.destination);
       try {
         src.start(0);
-      } catch (e) {}
+      } catch (e) { }
     }
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       if (window.speechSynthesis.paused) window.speechSynthesis.resume();
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
 /** Pasang listener unlock pada gesture pertama (dipanggil sekali di main/App). */
@@ -121,46 +121,78 @@ export function playTone(opts: ToneOptions): void {
       );
     osc.start(startAt);
     osc.stop(endAt + 0.02);
-  } catch (e) {}
+  } catch (e) { }
 }
 
 // ─── Bunyi standard (dikongsi seluruh app supaya konsisten & tak double) ───
 
+// ============================================================================
+// MOD "SATU CUE" untuk nada UI generik.
+// Bila aktif, playNavTone/playPopTone/playErrorTone semuanya main cue `select`
+// daripada uisfx (satu bunyi), sama seperti bkSfx. Ini mengekalkan janji
+// "semua bunyi UI = select". Set false untuk pulihkan nada asal.
+// ============================================================================
+let _cumaSelect = true;
+export function setCoreAudioSingleCue(v: boolean): void {
+  _cumaSelect = v;
+}
+
+function _selectOr(fallback: () => void): void {
+  if (_cumaSelect) {
+    try {
+      const bk = (window as any).bkSfx;
+      if (bk && typeof bk.select === "function") {
+        bk.select();
+        return;
+      }
+    } catch (e) {
+      /* jatuh ke fallback */
+    }
+  }
+  fallback();
+}
+
 export function playNavTone(): void {
-  playTone({
-    type: "sine",
-    freqRamp: [
-      [0, 440],
-      [0.08, 880],
-    ],
-    gainRamp: [
-      [0, 0.2],
-      [0.1, 0.001],
-    ],
-  });
+  _selectOr(() =>
+    playTone({
+      type: "sine",
+      freqRamp: [
+        [0, 440],
+        [0.08, 880],
+      ],
+      gainRamp: [
+        [0, 0.2],
+        [0.1, 0.001],
+      ],
+    })
+  );
 }
 
 export function playPopTone(): void {
-  playTone({
-    type: "sine",
-    freqRamp: [
-      [0, 700],
-      [0.05, 1400],
-    ],
-    gainRamp: [
-      [0, 0.3],
-      [0.08, 0.001],
-    ],
-  });
+  _selectOr(() =>
+    playTone({
+      type: "sine",
+      freqRamp: [
+        [0, 700],
+        [0.05, 1400],
+      ],
+      gainRamp: [
+        [0, 0.3],
+        [0.08, 0.001],
+      ],
+    })
+  );
 }
 
 export function playErrorTone(): void {
-  playTone({
-    type: "sawtooth",
-    freqRamp: [[0, 220]],
-    gainRamp: [
-      [0, 0.2],
-      [0.25, 0.001],
-    ],
-  });
+  _selectOr(() =>
+    playTone({
+      type: "sawtooth",
+      freqRamp: [[0, 220]],
+      gainRamp: [
+        [0, 0.2],
+        [0.25, 0.001],
+      ],
+    })
+  );
 }

@@ -247,6 +247,14 @@ window.showAppToast = function (title, contentHtml, type = 'success') {
         iconHtml = '<i class="fa-solid fa-key"></i>';
     }
 
+    // Bunyi hasil SEMANTIK (uisfx) — sekali sahaja, pada saat toast benar-benar
+    // dipaparkan. Ini cermin-isyarat (bukan satu-satunya) bagi visual + ARIA.
+    try {
+        if (window.bkSfx && typeof window.bkSfx.outcome === 'function') {
+            window.bkSfx.outcome(isError ? 'error' : (isWarning ? 'warning' : 'success'));
+        }
+    } catch (e) { }
+
     toast.innerHTML = `
         <div style="width: 38px; height: 38px; min-width: 38px; border-radius: 50%; background: ${iconBg}; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; border: 2px solid var(--color-dark); box-shadow: 0 2px 0 var(--color-dark); flex-shrink: 0;">
             ${iconHtml}
@@ -1834,6 +1842,16 @@ function playBubble() {
     if (nowMs < (window[lockKey] || 0)) return;
     window[lockKey] = nowMs + 600;
 
+    // Utamakan bunyi tap SEMANTIK dari uisfx (pack boleh tukar; kini "minimal") — SATU enjin,
+    // satu bunyi tap yang konsisten dengan seluruh app. Fallback ke oscillator
+    // lama jika pemain uisfx belum sedia (cth. skrip dimuatkan bersendirian).
+    try {
+        if (window.bkSfx && typeof window.bkSfx.press === 'function') {
+            window.bkSfx.press();
+            return;
+        }
+    } catch (e) { }
+
     try {
         // Reuse or create the shared AudioContext.
         if (!audioCtx) {
@@ -2554,6 +2572,13 @@ function triggerSuccessAnimation(mesej, callback, retryCallback, starsCount) {
 
     const numStars = starsCount !== undefined ? Math.max(starsCount, 0) : 3;
 
+    // Peneguhan popup akhir sesi (MP3 sebenar) — berjaya semua bintang vs cuba lagi.
+    if (numStars >= 3) {
+        if (typeof window.playPeneguhanPopupBerjaya === 'function') window.playPeneguhanPopupBerjaya();
+    } else {
+        if (typeof window.playPeneguhanPopupGagal === 'function') window.playPeneguhanPopupGagal();
+    }
+
     if (titleEl) {
         titleEl.innerText = numStars >= 3 ? "Tahniah Anda Hebat!" : "Cuba Lagi!";
     }
@@ -3209,6 +3234,35 @@ function paparSkrin(screenId, skipHash) {
     sasaran.classList.add('active');
     window.currentActiveScreen = screenId;
     window.dispatchEvent(new CustomEvent('screen-changed', { detail: { screenId: screenId } }));
+
+    // Navigasi = perubahan pandangan yang bermakna. Permintaan pengguna: klik
+    // nav = main cue "select" (bukan "open") supaya terasa seperti MEMILIH
+    // destinasi, bukan sekadar membuka panel. Hentikan sebarang gelung yang
+    // tertinggal daripada skrin sebelumnya supaya tiada gelung "tak kelihatan"
+    // terus berbunyi (route change cleanup).
+    // Jika bertukar dari skrin berdashboard ke log masuk/landing = LOG KELUAR:
+    // main cue "lock" + stopAll (transisi global).
+    // Transisi masuk (login) kekal guna cue sesi "unlock".
+    try {
+        if (window.bkSfx) {
+            window.bkSfx.stopAllLoops();
+            const logMasukSkrin = (screenId === 'login-screen' || screenId === 'landing-screen');
+            const sebelumIni = window.__bkSfxSkrinSebelum;
+            const sebelumAuth = !!sebelumIni && sebelumIni !== 'login-screen' && sebelumIni !== 'landing-screen';
+            const skrinAuth = (screenId === 'main-menu-screen' || /-dashboard$/.test(screenId));
+            const sebelumBukanAuth = !sebelumIni || sebelumIni === 'login-screen' || sebelumIni === 'landing-screen';
+            if (logMasukSkrin && sebelumAuth) {
+                window.bkSfx.stopAll();
+                if (window.bkSfx.session) window.bkSfx.session('logout');
+            } else if (skrinAuth && sebelumBukanAuth) {
+                if (window.bkSfx.session) window.bkSfx.session('login');
+            } else if (window.bkSfx.select) {
+                // Klik navigasi biasa = pilihan destinasi → cue "select".
+                window.bkSfx.select();
+            }
+        }
+    } catch (e) { }
+    window.__bkSfxSkrinSebelum = screenId;
 
     // Kemaskini Tajuk Halaman & Navigasi Sejarah tanpa '#'
     const tajukSkrin = SCREEN_NAMES_MAP[screenId] || 'Bunyi Kata';
@@ -6168,6 +6222,14 @@ window.tambahBintangGlobal = function (activityKey, amount) {
     }
     window.dispatchEvent(new CustomEvent('kemaskini-profil'));
     window.dispatchEvent(new CustomEvent('bintang-dikemaskini', { detail: { activityKey, delta: starDelta } }));
+
+    // Bunyi ganjaran SEMANTIK (uisfx) — hanya selepas bintang benar-benar
+    // tersimpan (state change disahkan).
+    try {
+        if (window.bkSfx && typeof window.bkSfx.reward === 'function') {
+            window.bkSfx.reward();
+        }
+    } catch (e) { }
 };
 
 function jumlahMarkah(data) {
@@ -8244,6 +8306,41 @@ function checkIsTrial() {
 }
 window.checkIsTrial = checkIsTrial;
 
+// === GABUNG REKOD SURIH CARA BELAJAR: MURID PRO SAHAJA ===
+// Cara Belajar (surih huruf & nombor) TIDAK menyimpan apa-apa rekod ke storan
+// atau Firebase untuk mod percuma / tetamu / guru / admin / ibu bapa / affiliate.
+// Hanya murid berdaftar yang benar-benar Pro (bukan trial) dibenarkan menyimpan.
+// Butang "Hantar" pula hanya wujud pada aktiviti Surih Nombor & Perkataan di
+// Map Screen (NomborGame / Activity6SurihNombor), bukan di Cara Belajar.
+window.bolehRekodSurihCaraBelajar = function () {
+    try {
+        // Tetamu / guest tidak pernah menyimpan.
+        if (window.isGuestMode) return false;
+        const namaAktif = (window.namaMuridAktif || localStorage.getItem('muridAktif') || '').trim();
+        if (!namaAktif || namaAktif.toLowerCase() === 'tetamu') return false;
+
+        // Sesi guru / admin / ibu bapa / affiliate: JANGAN simpan walaupun Pro.
+        const userRole = (localStorage.getItem('bunyiKataUserRole') || '').toLowerCase().trim();
+        if (userRole === 'guru' || userRole === 'admin' || userRole === 'ibubapa' || userRole === 'affiliate') return false;
+        if (window.modGuruAktif || window.modAdminAktif || window.modIbuBapaAktif || window.modAffiliateAktif) return false;
+        if (window.isAdminMode || window.adminClaimDisahkan === true) return false;
+        if (typeof document !== 'undefined' && document.body) {
+            const cl = document.body.classList;
+            if (cl.contains('teacher-mode') || cl.contains('admin-mode') || cl.contains('parent-mode') || cl.contains('affiliate-mode')) return false;
+        }
+
+        // Hanya peranan murid dianggap layak.
+        if (userRole !== 'murid') return false;
+
+        // Murid mesti bukan trial (iaitu Pro berbayar / akses Pro eksplisit).
+        if (typeof window.checkIsTrial === 'function' && window.checkIsTrial()) return false;
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+};
+
 function bukaModalPilihPeta(mod) {
     modSemasa = mod;
     window.modSemasa = mod;
@@ -8320,12 +8417,20 @@ function bukaModalPilihPeta(mod) {
     } else {
         console.warn('[BunyiKata] modal-pilih-peta tidak dijumpai dalam DOM.');
     }
+
+    // Dialog dibuka (perubahan lapisan bermakna) — cue "open" sekali sahaja.
+    try {
+        if (window.bkSfx && window.bkSfx.dialog) window.bkSfx.dialog(true);
+    } catch (e) { }
 }
 window.bukaModalPilihPeta = bukaModalPilihPeta;
 
 function tutupModal() {
     const m = document.getElementById('modal-pilih-peta');
     if (m) m.style.display = 'none';
+    try {
+        if (window.bkSfx && window.bkSfx.dialog) window.bkSfx.dialog(false);
+    } catch (e) { }
 }
 window.tutupModal = tutupModal;
 
@@ -26795,6 +26900,11 @@ window.pilihPeta = function (nomborPeta) {
     const pModal = document.getElementById('modal-pilih-peta');
     if (pModal) pModal.style.display = 'none';
 
+    // Pilih peta = perubahan pilihan: main cue "select" (dari keadaan HASIL).
+    try {
+        if (window.bkSfx && window.bkSfx.select) window.bkSfx.select();
+    } catch (e) { }
+
     // Terus buka peta kembara untuk mod Belajar
     if (currentMod === 'belajar') {
         window.bukaPeta(nomborPeta);
@@ -27330,6 +27440,10 @@ window.tutupARSukuKata = function () {
 };
 
 function hideARCameraOverlay() {
+    // Kamera AR sudah sedia = sambungan selesai: hentikan gelung "connecting".
+    try {
+        if (window.bkSfx && window.bkSfx.stopLoop) window.bkSfx.stopLoop('connecting');
+    } catch (e) { }
     const overlay = document.getElementById('camera_status_ar_sukukata');
     if (overlay) {
         overlay.classList.add('opacity-0', 'hidden');
@@ -27352,6 +27466,12 @@ function initARCamera() {
         hideARCameraOverlay();
         return;
     }
+
+    // Overlay "Memuatkan Kamera AR..." kelihatan = proses menyambung aktif.
+    // Gelung dihentikan oleh hideARCameraOverlay() (berjaya) atau .catch (gagal).
+    try {
+        if (window.bkSfx && window.bkSfx.startLoop) window.bkSfx.startLoop('connecting');
+    } catch (e) { }
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } }).catch(() => {
@@ -27634,6 +27754,11 @@ function initARCamera() {
 
         }).catch(err => {
             console.error("Camera access denied: ", err);
+            // Gagal menyambung kamera: hentikan gelung "connecting" + main hasil error.
+            try {
+                if (window.bkSfx && window.bkSfx.stopLoop) window.bkSfx.stopLoop('connecting');
+                if (window.bkSfx && window.bkSfx.outcome) window.bkSfx.outcome('error');
+            } catch (e) { }
             if (overlay) {
                 overlay.innerHTML = '<i class="fa-solid fa-triangle-exclamation fa-3x mb-3 text-red-500"></i><p class="text-xl font-bold text-red-500 text-center">Kamera diperlukan.</p><p class="text-sm text-center">Sila benarkan akses kamera untuk AR.</p>';
             }
@@ -27646,51 +27771,8 @@ function getARPromptText() {
     return window.currentARKemahiran === 'abc' ? "Sila sebut huruf..." : "Sila sebut perkataan...";
 }
 
-// Pop Confetti Sound effect matching Tanduk Kata
-window.playPopConfettiSound = function () {
-    try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
-        if (!window.globalAudioCtx) {
-            window.globalAudioCtx = new AudioContextClass();
-        }
-        const ctx = window.globalAudioCtx;
-        if (ctx.state === 'suspended') {
-            ctx.resume().catch(() => { });
-        }
-        const now = ctx.currentTime;
-
-        // Cork / balloon pop sound
-        const popOsc = ctx.createOscillator();
-        const popGain = ctx.createGain();
-        popOsc.type = 'sine';
-        popOsc.frequency.setValueAtTime(650, now);
-        popOsc.frequency.exponentialRampToValueAtTime(110, now + 0.09);
-
-        popGain.gain.setValueAtTime(0.45, now);
-        popGain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
-
-        popOsc.connect(popGain);
-        popGain.connect(ctx.destination);
-
-        popOsc.start(now);
-        popOsc.stop(now + 0.09);
-
-        // Chimes
-        [523.25, 659.25, 783.99].forEach((freq, idx) => {
-            const chimeOsc = ctx.createOscillator();
-            const chimeGain = ctx.createGain();
-            chimeOsc.type = 'triangle';
-            chimeOsc.frequency.setValueAtTime(freq, now + 0.04 + idx * 0.06);
-            chimeGain.gain.setValueAtTime(0.3, now + 0.04 + idx * 0.06);
-            chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4 + idx * 0.06);
-            chimeOsc.connect(chimeGain);
-            chimeGain.connect(ctx.destination);
-            chimeOsc.start(now + 0.04 + idx * 0.06);
-            chimeOsc.stop(now + 0.45 + idx * 0.06);
-        });
-    } catch (e) { }
-};
+// NOTA: window.playPopConfettiSound (bunyi pop confetti) telah DIBUANG —
+// semua aliran AR kini hanya guna peneguhan MP3 + kesan confetti visual.
 
 function initSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -27781,6 +27863,7 @@ function initSpeechRecognition() {
                         .trim() || latestTranscript;
 
                     if (isFinalResult) {
+                        if (window.playPeneguhanWrong) window.playPeneguhanWrong();
                         if (window.playOops) window.playOops();
                         statusEl.innerHTML = `Awak sebut: <b style="color: #dc2626; display: inline-block;">"${cleanDisplay}"</b>. Cuba lagi!`;
                         statusEl.className = "ar-speech-text text-red-700";
@@ -28008,9 +28091,8 @@ function nextARWord() {
 function arCorrectAnswer() {
     if (!window.isARPlaying || !window.currentARWord || (typeof window.currentARWord === 'string' && window.currentARWord.trim() === '')) return;
 
-    if (typeof window.playPopConfettiSound === 'function') {
-        window.playPopConfettiSound();
-    }
+    if (typeof window.playPeneguhanCorrect === 'function') window.playPeneguhanCorrect();
+    // Audio kesan confetti dibuang — kekalkan peneguhan + confetti visual sahaja.
 
     confetti({
         particleCount: 150,
@@ -28089,9 +28171,7 @@ function arCorrectAnswer() {
 }
 
 window.showStarPopupAR = function (targetViewId) {
-    if (typeof window.playPopConfettiSound === 'function') {
-        window.playPopConfettiSound();
-    }
+    // Audio kesan confetti dibuang — kekalkan popup bintang + animasi sahaja.
 
     const oldPopups = document.querySelectorAll('.ar-star-popup-dynamic');
     oldPopups.forEach(p => p.remove());
@@ -28951,6 +29031,8 @@ window.arKiraJariCorrectAnswer = function () {
     if (!window.isARKiraJariPlaying) return;
     window.arKiraJariScore++;
 
+    if (typeof window.playPeneguhanCorrect === 'function') window.playPeneguhanCorrect();
+
     const mode = window.arKiraJariMode || 'nombor';
     const q = window.currentARKiraJariQuestion;
 
@@ -28970,22 +29052,9 @@ window.arKiraJariCorrectAnswer = function () {
         answerBox.innerText = q.count.toString();
     }
 
-    if (typeof window.playPopConfettiSound === 'function') {
-        window.playPopConfettiSound();
-    }
-
-    // Play Voice Audio
-    if (q && q.audio) {
-        try {
-            const audioObj = new Audio(q.audio);
-            audioObj.play().catch(e => console.log("Audio play prevented:", e));
-        } catch (e) { }
-    } else if (q && q.name) {
-        try {
-            const audioObj = new Audio(`/audio/nombor/${q.name}.mp3`);
-            audioObj.play().catch(e => console.log("Audio play prevented:", e));
-        } catch (e) { }
-    }
+    // NOTA: Audio ayat matematik/jawapan ("satu tambah satu sama dengan dua")
+    // serta kesan bunyi confetti DIHAPUSKAN di sini — kekalkan peneguhan
+    // (playPeneguhanCorrect di atas) + kesan confetti visual sahaja.
 
     // Confetti
     if (typeof confetti === 'function') {
@@ -29090,6 +29159,12 @@ window.showARKiraJariResultModal = function (starsOverride) {
 
     const isFullStars = stars >= 6;
     const titleText = isFullStars ? 'Tahniah Anda Hebat!' : 'Cuba Lagi!';
+
+    if (isFullStars) {
+        if (typeof window.playPeneguhanPopupBerjaya === 'function') window.playPeneguhanPopupBerjaya();
+    } else {
+        if (typeof window.playPeneguhanPopupGagal === 'function') window.playPeneguhanPopupGagal();
+    }
 
     const renderStarSvg = (isFilled, isMiddle, rotateAngle) => {
         const size = isMiddle ? 74 : 58;

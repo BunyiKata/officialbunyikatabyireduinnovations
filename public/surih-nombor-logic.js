@@ -59,6 +59,10 @@ function kunciSurihNombor(idx) {
 }
 
 function sudahSelesaiSurihNombor(idx) {
+    // Cara Belajar surih nombor: baca rekod HANYA untuk murid PRO sahaja.
+    // Mod percuma / tetamu / guru / admin / ibu bapa / affiliate tidak pernah
+    // membaca (atau menulis) rekod ke storan / Firebase.
+    if (typeof window.bolehRekodSurihCaraBelajar === 'function' && !window.bolehRekodSurihCaraBelajar()) return false;
     const kunci = kunciSurihNombor(idx);
     if (!kunci) return false;
     try {
@@ -71,6 +75,9 @@ function sudahSelesaiSurihNombor(idx) {
 }
 
 function simpanStatusSurihNombor(idx) {
+    // Halang simpanan ke storan / Firebase untuk mod percuma / tetamu / guru /
+    // admin / ibu bapa / affiliate. Cara Belajar hanya merekod untuk murid PRO.
+    if (typeof window.bolehRekodSurihCaraBelajar === 'function' && !window.bolehRekodSurihCaraBelajar()) return false;
     if (sudahSelesaiSurihNombor(idx)) return false;
     const kunci = kunciSurihNombor(idx);
     if (!kunci) return false;

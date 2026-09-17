@@ -681,10 +681,7 @@ export default function MapScreen({
                 onClick={() => {
                   const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
                   if (modal) modal.style.display = "none";
-                  if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
-                    if (typeof (window as any).kunciPro === "function") (window as any).kunciPro();
-                    return;
-                  }
+                  // Kad Imbasan Nombor kekal terbuka dalam mod Percuma (tiada kunci Pro).
                   setKadImbasanNomborMode("bilang_0_10");
                   if ((window as any).paparSkrin) (window as any).paparSkrin("view-kad-imbasan-nombor");
                 }}
@@ -801,7 +798,6 @@ export default function MapScreen({
                 <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
                   Nombor 0-10
                 </span>
-                {isPercuma && proBadge}
               </div>
 
               {/* Square Card Siri Nombor 10-100 */}
@@ -826,10 +822,7 @@ export default function MapScreen({
                 onClick={() => {
                   const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
                   if (modal) modal.style.display = "none";
-                  if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
-                    if (typeof (window as any).kunciPro === "function") (window as any).kunciPro();
-                    return;
-                  }
+                  // Kad Imbasan Nombor kekal terbuka dalam mod Percuma (tiada kunci Pro).
                   setKadImbasanNomborMode("siri_nombor");
                   if ((window as any).paparSkrin) (window as any).paparSkrin("view-kad-imbasan-nombor");
                 }}
@@ -946,7 +939,6 @@ export default function MapScreen({
                 <span style={{ fontSize: "1.1rem", fontWeight: "900", color: "white", textShadow: "0 2px 0 rgba(0,0,0,0.35)", fontFamily: "AtlantaRoundedBlack, AtlantaRounded, sans-serif", textAlign: "center", whiteSpace: "nowrap" }}>
                   Siri Nombor 10-100
                 </span>
-                {isPercuma && proBadge}
               </div>
             </div>
           </div>
