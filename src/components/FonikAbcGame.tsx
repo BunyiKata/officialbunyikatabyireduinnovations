@@ -26,6 +26,62 @@ export interface FonikAbcGameProps {
 export const VOWELS_SET = new Set(['a', 'e', 'i', 'o', 'u']);
 export const isVowelLetter = (letter: string) => VOWELS_SET.has(letter.toLowerCase());
 
+// Huruf konsonan M hingga Z dikunci untuk pengguna Mod Percuma (vokal & A-L kekal bebas).
+// Tambahan: vokal O dan U juga dikunci dalam mod Kenali Huruf & Fonik ABC (dalaman), tetapi
+// kekal bebas dalam modul Vokal / Vokal-Konsonan. Huruf terkunci masih kelihatan tetapi
+// bertanda ikon kunci + pil "Versi Pro", sejajar dengan gaya kad nombor/avatar PRO.
+// Menekannya membuka popup Pakej Pro.
+export const PRO_LOCKED_VOWELS = new Set(['o', 'u']);
+
+export const isLockedProLetter = (
+  letter: string,
+  isPercuma: boolean,
+  mode?: PhonicsMode | string
+): boolean => {
+  if (!isPercuma) return false;
+  const l = (letter || '').trim().toLowerCase();
+  // Modul Vokal / Vokal-Konsonan kekal bebas sepenuhnya (semua vokal unlocked).
+  if (mode === 'vokal_konsonan') return false;
+  // 'e taling' (é) dipaparkan sebagai huruf e biasa — JANGAN sekali-kali dikunci.
+  if (l === 'é' || l === 'e taling' || l === 'e tailing' || l === 'e-taling') return false;
+  if (PRO_LOCKED_VOWELS.has(l)) return true;
+  return !isVowelLetter(l) && l >= 'm';
+};
+
+/**
+ * Kesan sama ada pengguna semasa dalam mod Percuma (trial). Disegerakkan daripada
+ * window.isPercumaMode() dan dikemas kini bila mod berubah.
+ */
+function useIsPercumaModeFonik(): boolean {
+  const read = () =>
+    typeof window !== 'undefined' && typeof (window as any).isPercumaMode === 'function'
+      ? !!(window as any).isPercumaMode()
+      : false;
+
+  const [isPercuma, setIsPercuma] = React.useState<boolean>(read);
+
+  React.useEffect(() => {
+    const sync = () => setIsPercuma(read());
+    sync();
+    const events = [
+      'bunyiKataAccessChanged',
+      'admin-mode-change',
+      'affiliate-mode-change',
+      'guru-mode-change',
+      'screen-change',
+      'storage',
+    ];
+    events.forEach((ev) => window.addEventListener(ev, sync));
+    const iv = window.setInterval(sync, 1500);
+    return () => {
+      events.forEach((ev) => window.removeEventListener(ev, sync));
+      window.clearInterval(iv);
+    };
+  }, []);
+
+  return isPercuma;
+}
+
 export const getCleanDisplayLetter = (letter: string, isUpper: boolean = false): string => {
   const l = (letter || '').trim();
   if (l === 'é' || l === 'e taling' || l === 'e tailing' || l === 'e-taling') {
@@ -53,7 +109,7 @@ export const MODE_CONFIGS: Record<PhonicsMode, ModeConfig> = {
   kenali_huruf: {
     mode: 'kenali_huruf',
     title: 'Kenali Huruf ABC',
-    topBadge: 'KENALI HURUF ABC',
+    topBadge: 'Kenali Huruf ABC',
     topBadgeColor: '#ea580c',
     subtitle: 'Kenali bentuk huruf kecil & huruf besar, sambungkan pasangan, pecahkan buih, dan buka gambar rahsia!',
     bannerGradient: 'linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #f97316 100%)',
@@ -64,7 +120,7 @@ export const MODE_CONFIGS: Record<PhonicsMode, ModeConfig> = {
   vokal_konsonan: {
     mode: 'vokal_konsonan',
     title: 'Kenali Huruf Vokal & Konsonan',
-    topBadge: 'VOKAL & KONSONAN',
+    topBadge: 'Vokal & Konsonan',
     topBadgeColor: '#0f766e',
     subtitle: 'Kenali perbezaan huruf Vokal (a, e, i, o, u) dan huruf Konsonan dengan aktiviti interaktif!',
     bannerGradient: 'linear-gradient(135deg, #134e4a 0%, #0f766e 50%, #0e7490 100%)',
@@ -75,7 +131,7 @@ export const MODE_CONFIGS: Record<PhonicsMode, ModeConfig> = {
   fonik_abc: {
     mode: 'fonik_abc',
     title: 'Kenali Huruf Fonik ABC',
-    topBadge: 'FONIK ABC',
+    topBadge: 'Fonik ABC',
     topBadgeColor: '#7c3aed',
     subtitle: 'Dengar bunyi fonik setiap huruf, sambungkan pasangan, pecahkan buih, dan buka gambar rahsia!',
     bannerGradient: 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #6366f1 100%)',
@@ -99,7 +155,7 @@ export interface PhonicsItem {
 }
 
 export const getPhonicsAudio = (letter: string): string => {
-  const l = (letter || '').toLowerCase().trim();
+  const l = (letter || '').trim();
   if (l === 'é' || l === 'e taling' || l === 'e tailing') {
     return '/audio/fonik/fonik e tailing.mp3';
   }
@@ -461,7 +517,7 @@ function ActivityTopBar({
   actNum,
   onBack,
   isMobile,
-  badgeText = 'FONIK ABC',
+  badgeText = 'Fonik ABC',
   badgeColor = '#ff7a00'
 }: {
   actNum: number;
@@ -581,8 +637,8 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
   minHeight: isMobile ? '460px' : '520px'
 });
 
-// Floating Star Popup "Terbaik! 🌟" Animation (Matching +1 Bintang)
-function GlobalTerbaikPopup({ show }: { show: boolean }) {
+// Floating Star Popup (Hebat! 🎉 / +1 Bintang! 🌟) Animation
+function GlobalTerbaikPopup({ show, showStar = true }: { show: boolean; showStar?: boolean }) {
   return (
     <AnimatePresence>
       {show && (
@@ -615,7 +671,7 @@ function GlobalTerbaikPopup({ show }: { show: boolean }) {
               userSelect: 'none'
             }}
           >
-            +1 Bintang! 🌟
+            {showStar ? '+1 Bintang! 🌟' : 'Hebat! 🎉'}
           </motion.div>
         </div>
       )}
@@ -634,9 +690,13 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
   const [showGuideModal, setShowGuideModal] = useState<boolean>(false);
   const [screenMountKey, setScreenMountKey] = useState<number>(1);
   const [globalTerbaik, setGlobalTerbaik] = useState<boolean>(false);
+  const [showStarPopup, setShowStarPopup] = useState<boolean>(false);
+  // Keputusan sama ada popup selepas aktiviti patut tunjuk "+1 Bintang" (aktiviti terakhir)
+  const showStarOnPopupRef = useRef<boolean>(false);
 
   const currentConfig = MODE_CONFIGS[mode] || MODE_CONFIGS.kenali_huruf;
-
+  // Mod Percuma: huruf konsonan M-Z dikunci (badge "Versi Pro").
+  const isPercuma = useIsPercumaModeFonik();
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     handleResize();
@@ -802,9 +862,22 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
     });
 
     const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
-    // Auto-update student profile stars immediately (+1 Bintang) - HANYA jika bukan trial
-    if (!isTrial && typeof (window as any).tambahBintangGlobal === 'function') {
-      (window as any).tambahBintangGlobal(`fonik_${mode}_${letter}_act${actIndex + 1}`, 1);
+    // Bintang diberi SEKALI sahaja apabila KESEMUA 6 aktiviti huruf ini selesai.
+    // Kira status terkini dari localStorage + aktiviti semasa (state React mungkin belum flush).
+    let allDone = false;
+    try {
+      const saved = localStorage.getItem(getPhonicsStorageKey());
+      const data = saved ? JSON.parse(saved) : {};
+      const curr: boolean[] = (data[letter] || []).slice(0, 6);
+      while (curr.length < 6) curr.push(false);
+      curr[actIndex] = true;
+      allDone = curr.every(Boolean);
+    } catch (e) {
+      allDone = false;
+    }
+    showStarOnPopupRef.current = allDone;
+    if (!isTrial && allDone && typeof (window as any).tambahBintangGlobal === 'function') {
+      (window as any).tambahBintangGlobal(`belajar_fonik_${mode}_${letter}`, 1);
     }
   };
 
@@ -876,12 +949,17 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
     });
   };
 
-  // Helper to trigger floating "Terbaik! 🌟" animation before advancing to next screen
-  const triggerTerbaik = (onComplete: () => void, durationMs = 1500) => {
+  // Helper to trigger floating popup ("Hebat!" / "+1 Bintang!") before advancing to next screen.
+  // `showStar` diberi secara eksplisit oleh pemanggil supaya keputusan sama ada
+  // bintang patut dipaparkan TIDAK bergantung pada ref yang mungkin belum di-flush.
+  const triggerTerbaik = (onComplete: () => void, durationMs = 1500, showStar?: boolean) => {
     playSuccessCelebration();
+    const shouldShowStar = typeof showStar === 'boolean' ? showStar : showStarOnPopupRef.current;
+    setShowStarPopup(shouldShowStar);
     setGlobalTerbaik(true);
     setTimeout(() => {
       setGlobalTerbaik(false);
+      setShowStarPopup(false);
       onComplete();
     }, durationMs);
   };
@@ -892,7 +970,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
   if (currentView === 'act1') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity1HearSound
           phonics={currentPhonics}
           mode={mode}
@@ -908,7 +986,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
   if (currentView === 'act2') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity2MatchPartners
           phonics={currentPhonics}
           mode={mode}
@@ -924,7 +1002,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
   if (currentView === 'act3') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity3BubblePop
           phonics={currentPhonics}
           mode={mode}
@@ -940,7 +1018,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
   if (currentView === 'act4') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity4FindSound
           phonics={currentPhonics}
           mode={mode}
@@ -956,7 +1034,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
   if (currentView === 'act5') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity5MatchSound
           phonics={currentPhonics}
           mode={mode}
@@ -972,7 +1050,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
   if (currentView === 'act6') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity6PicturePuzzle
           phonics={currentPhonics}
           mode={mode}
@@ -1137,7 +1215,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
           position: 'relative'
         }}
       >
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         {/* Top Navbar */}
         <div style={{
           width: '100%',
@@ -1658,7 +1736,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
         position: 'relative'
       }}
     >
-      <GlobalTerbaikPopup show={globalTerbaik} />
+      <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
       {/* Top Navbar with Scale-Up Popup Animation */}
       <motion.div
         key={`topbar-${mode}-${screenMountKey}`}
@@ -2175,6 +2253,8 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
           const isCompleted = actStatus.every(Boolean);
           const isNextTarget = mode !== 'vokal_konsonan' && index === activeFocusIndex && !isCompleted;
           const isVowel = isVowelLetter(item.letter);
+          // Mod Percuma: konsonan M-Z + vokal O/U dikunci dengan badge "Versi Pro".
+          const isLocked = isLockedProLetter(item.letter, isPercuma, mode);
 
           return (
             <motion.div
@@ -2201,6 +2281,11 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
               whileHover={isMobile ? undefined : (isNextTarget ? { y: -4 } : { scale: 1.05, y: -4 })}
               whileTap={{ scale: 0.94 }}
               onClick={() => {
+                // Mod Percuma: huruf konsonan M-Z membuka popup Pakej Pro sahaja.
+                if (isLocked) {
+                  if (typeof (window as any).kunciPro === 'function') (window as any).kunciPro();
+                  return;
+                }
                 playNavSound();
                 const realIndex = PHONICS_DATABASE.findIndex(p => p.letter === item.letter);
                 setSelectedLetterIndex(realIndex !== -1 ? realIndex : 0);
@@ -2223,6 +2308,13 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
                 transformOrigin: 'center center'
               }}
             >
+              {/* Badge "Versi Pro" untuk huruf yang dikunci dalam mod Percuma */}
+              {isLocked && (
+                <div className="versi-pro-overlay" style={{ borderRadius: isMobile ? '18px' : '24px' }}>
+                  <i className="fa-solid fa-lock"></i>
+                  <span className="versi-pro-chip">Versi Pro</span>
+                </div>
+              )}
               {/* Looping Reveal Shine Sweep Overlay on Each Card */}
               <div
                 style={{

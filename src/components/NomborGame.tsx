@@ -47,30 +47,30 @@ export interface NomborModeConfig {
 export const NOMBOR_MODE_CONFIGS: Record<NomborMode, NomborModeConfig> = {
   bilang_0_10: {
     mode: 'bilang_0_10',
-    title: 'Asas Nombor 0-10',
-    topBadge: 'ASAS NOMBOR 0 - 10',
+    title: 'Asas Nombor 0 - 10',
+    topBadge: 'Asas Nombor 0 - 10',
     topBadgeColor: '#ec4899',
     subtitle: 'Kira bilangan objek, sebut nama nombor, sambungkan pasangan, pecahkan buih, dan buka gambar rahsia!',
     bannerGradient: 'linear-gradient(135deg, #be185d 0%, #ec4899 50%, #f472b6 100%)',
     bannerProgressColor: '#fbcfe8',
     progressKey: 'bunyikata_nombor_0_10_v5',
-    guideTitle: 'Panduan Asas Nombor 0-10'
+    guideTitle: 'Panduan Asas Nombor 0 - 10'
   },
   siri_nombor: {
     mode: 'siri_nombor',
-    title: 'Siri Nombor 10-100',
-    topBadge: 'SIRI NOMBOR 10 - 100',
+    title: 'Siri Nombor 10 - 100',
+    topBadge: 'Siri Nombor 10 - 100',
     topBadgeColor: '#db2777',
     subtitle: 'Kira siri nombor puluh sehingga seratus, kenali perkataan bersuku kata, dan terokai aktiviti interaktif!',
     bannerGradient: 'linear-gradient(135deg, #9d174d 0%, #db2777 50%, #f472b6 100%)',
     bannerProgressColor: '#fbcfe8',
     progressKey: 'bunyikata_siri_nombor_v5',
-    guideTitle: 'Panduan Siri Nombor 10-100'
+    guideTitle: 'Panduan Siri Nombor 10 - 100'
   },
   tambah_nombor: {
     mode: 'tambah_nombor',
     title: 'Tambah Nombor',
-    topBadge: 'TAMBAH NOMBOR',
+    topBadge: 'Tambah Nombor',
     topBadgeColor: '#881337',
     subtitle: 'Latih operasi tambah nombor 0 hingga 10, bina persamaan matematik, dan selesaikan aktiviti interaktif!',
     bannerGradient: 'linear-gradient(135deg, #4c0519 0%, #881337 50%, #9f1239 100%)',
@@ -81,7 +81,7 @@ export const NOMBOR_MODE_CONFIGS: Record<NomborMode, NomborModeConfig> = {
   tolak_nombor: {
     mode: 'tolak_nombor',
     title: 'Tolak Nombor',
-    topBadge: 'TOLAK NOMBOR',
+    topBadge: 'Tolak Nombor',
     topBadgeColor: '#881337',
     subtitle: 'Latih operasi tolak nombor 10 hingga 0, bina persamaan penolakan, dan selesaikan aktiviti interaktif!',
     bannerGradient: 'linear-gradient(135deg, #4c0519 0%, #881337 50%, #9f1239 100%)',
@@ -628,7 +628,7 @@ function ActivityTopBar({
   actNum,
   onBack,
   isMobile,
-  badgeText = 'ASAS NOMBOR',
+  badgeText = 'Asas Nombor',
   badgeColor = '#ea580c'
 }: {
   actNum: number;
@@ -748,8 +748,8 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
   minHeight: isMobile ? '460px' : '520px'
 });
 
-// Floating Star Popup "+1 Bintang! 🌟" Animation
-function GlobalTerbaikPopup({ show }: { show: boolean }) {
+// Floating Star Popup (Hebat! 🎉 / +1 Bintang! 🌟) Animation
+function GlobalTerbaikPopup({ show, showStar = true }: { show: boolean; showStar?: boolean }) {
   return (
     <AnimatePresence>
       {show && (
@@ -782,7 +782,7 @@ function GlobalTerbaikPopup({ show }: { show: boolean }) {
               userSelect: 'none'
             }}
           >
-            +1 Bintang! 🌟
+            {showStar ? '+1 Bintang! 🌟' : 'Hebat! 🎉'}
           </motion.div>
         </div>
       )}
@@ -800,6 +800,9 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   const [showGuideModal, setShowGuideModal] = useState<boolean>(false);
   const [screenMountKey, setScreenMountKey] = useState<number>(1);
   const [globalTerbaik, setGlobalTerbaik] = useState<boolean>(false);
+  const [showStarPopup, setShowStarPopup] = useState<boolean>(false);
+  // Keputusan sama ada popup selepas aktiviti patut tunjuk "+1 Bintang" (aktiviti terakhir)
+  const showStarOnPopupRef = useRef<boolean>(false);
   const [mathProgressTrigger, setMathProgressTrigger] = useState<number>(0);
 
   const isMathMode = mode === 'tambah_nombor' || mode === 'tolak_nombor';
@@ -1005,9 +1008,23 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
     });
 
     const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
-    // Auto-update student profile stars immediately (+1 Bintang) - HANYA jika bukan trial
-    if (!isTrial && typeof (window as any).tambahBintangGlobal === 'function') {
-      (window as any).tambahBintangGlobal(`nombor_${mode}_${itemId}_act${actIndex + 1}`, 1);
+    // Bintang diberi SEKALI sahaja apabila KESEMUA aktiviti item ini selesai.
+    // Bilangan aktiviti sebenar: 4 untuk digit '0' / siri_nombor, 7 untuk yang lain.
+    const totalActs = (currentItem.digit === '0' || mode === 'siri_nombor') ? 4 : 7;
+    let allDone = false;
+    try {
+      const saved = localStorage.getItem(getNomborStorageKey(currentConfig.progressKey));
+      const data = saved ? JSON.parse(saved) : {};
+      const curr: boolean[] = (data[itemId] || []).slice(0, totalActs);
+      while (curr.length < totalActs) curr.push(false);
+      curr[actIndex] = true;
+      allDone = curr.every(Boolean);
+    } catch (e) {
+      allDone = false;
+    }
+    showStarOnPopupRef.current = allDone;
+    if (!isTrial && allDone && typeof (window as any).tambahBintangGlobal === 'function') {
+      (window as any).tambahBintangGlobal(`belajar_nombor_${mode}_${itemId}`, 1);
     }
   };
 
@@ -1083,11 +1100,16 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
     });
   };
 
-  const triggerTerbaik = (onComplete: () => void, durationMs = 1500) => {
+  // `showStar` diberi secara eksplisit oleh pemanggil supaya keputusan sama ada
+  // bintang patut dipaparkan TIDAK bergantung pada ref yang mungkin belum di-flush.
+  const triggerTerbaik = (onComplete: () => void, durationMs = 1500, showStar?: boolean) => {
     playSuccessCelebration();
+    const shouldShowStar = typeof showStar === 'boolean' ? showStar : showStarOnPopupRef.current;
+    setShowStarPopup(shouldShowStar);
     setGlobalTerbaik(true);
     setTimeout(() => {
       setGlobalTerbaik(false);
+      setShowStarPopup(false);
       onComplete();
     }, durationMs);
   };
@@ -1108,18 +1130,30 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
     setMathProgressTrigger(prev => prev + 1);
 
     const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);
-    // Auto-update student profile stars immediately (+1 Bintang) - HANYA jika bukan trial
-    if (!isTrial && typeof (window as any).tambahBintangGlobal === 'function') {
-      (window as any).tambahBintangGlobal(`math_${mathMode}_act${actIndex + 1}`, 1);
+    // Bintang diberi SEKALI sahaja apabila KESEMUA 6 aktiviti (Tambah/Tolak) selesai.
+    let allDone = false;
+    try {
+      const saved = localStorage.getItem(getNomborStorageKey(baseMathProgressKey));
+      const arr: boolean[] = saved ? JSON.parse(saved) : [false, false, false, false, false, false];
+      const curr = arr.slice(0, 6);
+      while (curr.length < 6) curr.push(false);
+      curr[actIndex] = true;
+      allDone = curr.every(Boolean);
+    } catch (e) {
+      allDone = false;
+    }
+    showStarOnPopupRef.current = allDone;
+    if (!isTrial && allDone && typeof (window as any).tambahBintangGlobal === 'function') {
+      (window as any).tambahBintangGlobal(`belajar_math_${mathMode}`, 1);
     }
 
-    triggerTerbaik(() => { setCurrentView('lessons'); });
+    triggerTerbaik(() => { setCurrentView('lessons'); }, 1500, allDone);
   };
 
   if (currentView === 'math_act1') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <MathActivity1KenaliOperasi dataset={mathDataset} mode={mathMode} isMobile={isMobile} onBack={() => setCurrentView('lessons')} onComplete={saveMathActivityDone} />
       </>
     );
@@ -1127,7 +1161,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   if (currentView === 'math_act2') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <MathActivity2KiraJawab dataset={mathDataset} mode={mathMode} isMobile={isMobile} onBack={() => setCurrentView('lessons')} onComplete={saveMathActivityDone} />
       </>
     );
@@ -1135,7 +1169,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   if (currentView === 'math_act3') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <MathActivity3PilihJawapan dataset={mathDataset} mode={mathMode} isMobile={isMobile} onBack={() => setCurrentView('lessons')} onComplete={saveMathActivityDone} />
       </>
     );
@@ -1143,7 +1177,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   if (currentView === 'math_act4') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <MathActivity4LengkapPersamaan dataset={mathDataset} mode={mathMode} isMobile={isMobile} onBack={() => setCurrentView('lessons')} onComplete={saveMathActivityDone} />
       </>
     );
@@ -1151,7 +1185,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   if (currentView === 'math_act5') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <MathActivity5SusunPersamaan dataset={mathDataset} mode={mathMode} isMobile={isMobile} onBack={() => setCurrentView('lessons')} onComplete={saveMathActivityDone} />
       </>
     );
@@ -1159,7 +1193,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   if (currentView === 'math_act6') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <MathActivity6CabaranPantas dataset={mathDataset} mode={mathMode} isMobile={isMobile} onBack={() => setCurrentView('lessons')} onComplete={saveMathActivityDone} />
       </>
     );
@@ -1171,7 +1205,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   if (currentView === 'act1') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity1PicturePuzzleNombor
           item={currentItem}
           mode={mode}
@@ -1193,7 +1227,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   if (currentView === 'act2') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity2FlappyBirdNombor
           item={currentItem}
           mode={mode}
@@ -1209,7 +1243,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   if (currentView === 'act3') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity3HearNombor
           item={currentItem}
           mode={mode}
@@ -1225,7 +1259,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   if (currentView === 'act4') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity4BubblePopNombor
           item={currentItem}
           mode={mode}
@@ -1241,7 +1275,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   if (currentView === 'act5') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity6SurihNombor
           item={currentItem}
           mode={mode}
@@ -1257,7 +1291,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   if (currentView === 'act6') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity5MatchPartnersNombor
           item={currentItem}
           mode={mode}
@@ -1273,7 +1307,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
   if (currentView === 'act7') {
     return (
       <>
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         <Activity7MatchAudioNombor
           item={currentItem}
           mode={mode}
@@ -1378,7 +1412,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
           position: 'relative'
         }}
       >
-        <GlobalTerbaikPopup show={globalTerbaik} />
+        <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
         {/* Top Navbar */}
         <div style={{
           width: '100%',
@@ -1862,7 +1896,7 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
         position: 'relative'
       }}
     >
-      <GlobalTerbaikPopup show={globalTerbaik} />
+      <GlobalTerbaikPopup show={globalTerbaik} showStar={showStarPopup} />
       {/* Top Navbar */}
       <motion.div
         key={`topbar-${mode}-${screenMountKey}`}

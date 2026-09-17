@@ -36,14 +36,14 @@ export interface PhonicsActivityProps {
   onNext: () => void;
   onBack: () => void;
   onComplete: () => void;
-  triggerTerbaik: (onComplete: () => void, durationMs?: number) => void;
+  triggerTerbaik: (onComplete: () => void, durationMs?: number, showStar?: boolean) => void;
 }
 
 function ActivityTopBar({
   actNum,
   onBack,
   isMobile,
-  badgeText = 'FONIK ABC',
+  badgeText = 'Fonik ABC',
   badgeColor = '#ff7a00'
 }: {
   actNum: number;
@@ -239,15 +239,15 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
 
     const handleTapUpper = (idx: number) => {
       playSound(phonics.soundAudio);
-      setTappedUpper(prev => {
-        const next = [...prev];
-        next[idx] = true;
-        if (next.every(Boolean)) {
-          onComplete();
-          triggerTerbaik(onNext);
-        }
-        return next;
-      });
+      // Kira penyiapan DI LUAR updater setState supaya kesan sampingan (rekod bintang/popup)
+      // tidak tercetus dua kali dalam React StrictMode (updater boleh dipanggil 2x).
+      const next = [...tappedUpper];
+      next[idx] = true;
+      setTappedUpper(next);
+      if (next.every(Boolean)) {
+        onComplete();
+        triggerTerbaik(onNext);
+      }
     };
 
     return (
@@ -842,15 +842,15 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
         setPopEffects(prev => prev.filter(p => p.id !== `${id}-${Date.now()}`));
       }, 450);
 
-      setBubbles(prev => {
-        const next = prev.map(b => b.id === id ? { ...b, popped: true } : b);
-        const newPopped = next.filter(b => b.popped).length;
-        if (newPopped >= totalCount) {
-          onComplete();
-          triggerTerbaik(onNext);
-        }
-        return next;
-      });
+      // Kira penyiapan DI LUAR updater setState supaya rekod bintang/popup tidak
+      // tercetus dua kali dalam React StrictMode.
+      const nextBubbles = bubbles.map(b => b.id === id ? { ...b, popped: true } : b);
+      const newPopped = nextBubbles.filter(b => b.popped).length;
+      setBubbles(nextBubbles);
+      if (newPopped >= totalCount) {
+        onComplete();
+        triggerTerbaik(onNext);
+      }
     };
 
     return (
@@ -1047,25 +1047,24 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
       if (isTarget) {
         playPopSound();
         playSound(phonics.soundAudio);
-        setCards(prev => {
-          const next = prev.map(c => c.id === id ? { ...c, status: 'correct' } : c);
-          const newCount = next.filter(c => c.isTarget && c.status === 'correct').length;
-          if (newCount >= targetTotal) {
-            if (phase === 1) {
-              // Pusingan 1 complete -> Switch to Pusingan 2 (Huruf Besar)
-              setTimeout(() => {
-                setPhase(2);
-                setCards(generateCards(displayUpper, true));
-                playSound(phonics.soundAudio);
-              }, 400);
-            } else {
-              // Pusingan 2 complete -> Finish Activity 4 and auto advance!
-              onComplete();
-              triggerTerbaik(onNext);
-            }
+        // Kira penyiapan DI LUAR updater setState (elak kesan sampingan 2x dalam StrictMode).
+        const nextCards = cards.map(c => c.id === id ? { ...c, status: 'correct' } : c);
+        const newCount = nextCards.filter(c => c.isTarget && c.status === 'correct').length;
+        setCards(nextCards);
+        if (newCount >= targetTotal) {
+          if (phase === 1) {
+            // Pusingan 1 complete -> Switch to Pusingan 2 (Huruf Besar)
+            setTimeout(() => {
+              setPhase(2);
+              setCards(generateCards(displayUpper, true));
+              playSound(phonics.soundAudio);
+            }, 400);
+          } else {
+            // Pusingan 2 complete -> Finish Activity 4 and auto advance!
+            onComplete();
+            triggerTerbaik(onNext);
           }
-          return next;
-        });
+        }
       } else {
         playErrorSound();
         playSound(mode === 'fonik_abc' ? getPhonicsAudio(letter) : `/audio/abc/${letter.toLowerCase()}.mp3`);
@@ -1706,27 +1705,26 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
 
     const handleOpenTile = (idx: number) => {
       playSound(phonics.soundAudio);
-      setOpenTiles(prev => {
-        const next = [...prev];
-        next[idx] = true;
-        if (next.every(Boolean)) {
-          // 1. Show Picture Reveal Modal with word and play pronunciation audio
-          setTimeout(() => {
-            setShowPopupReveal(true);
-            playSound(phonics.wordAudio);
-          }, 300);
+      // Kira penyiapan DI LUAR updater setState (elak timer/popup 2x dalam StrictMode).
+      const next = [...openTiles];
+      next[idx] = true;
+      setOpenTiles(next);
+      if (next.every(Boolean)) {
+        // 1. Show Picture Reveal Modal with word and play pronunciation audio
+        setTimeout(() => {
+          setShowPopupReveal(true);
+          playSound(phonics.wordAudio);
+        }, 300);
 
-          // 2. After 2.4s, close picture popup, show Terbaik! reward animation, and auto redirect to letters menu
-          setTimeout(() => {
-            setShowPopupReveal(false);
-            onComplete();
-            triggerTerbaik(() => {
-              onNext();
-            }, 1500);
-          }, 2600);
-        }
-        return next;
-      });
+        // 2. After 2.4s, close picture popup, show Terbaik! reward animation, and auto redirect to letters menu
+        setTimeout(() => {
+          setShowPopupReveal(false);
+          onComplete();
+          triggerTerbaik(() => {
+            onNext();
+          }, 1500);
+        }, 2600);
+      }
     };
 
     return (

@@ -2021,7 +2021,7 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
                                     boxSizing: 'border-box'
                                 }}>
                                     <div style={{ fontSize: '0.88rem', fontWeight: '900', color: '#0f172a', letterSpacing: '0.5px', fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif", marginBottom: '6px' }}>
-                                        ANDA MENDAPAT
+                                        Anda Mendapat
                                     </div>
                                     <div 
                                         className="score-box-glow-pulse"
@@ -2045,7 +2045,7 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
                                     </div>
                                     <div style={{ fontSize: '0.82rem', fontWeight: '900', color: '#0f172a', letterSpacing: '1px', fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif" }}>
                                         <span style={{ color: '#f59e0b', margin: '0 4px' }}>•••••</span>
-                                        BINTANG
+                                        Bintang
                                         <span style={{ color: '#f59e0b', margin: '0 4px' }}>•••••</span>
                                     </div>
                                 </div>

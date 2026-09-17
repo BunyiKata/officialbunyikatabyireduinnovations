@@ -1825,65 +1825,52 @@ if (typeof document !== 'undefined') {
 
 function playBubble() {
     var nowMs = Date.now();
-    // Debounce: a single user click can reach us twice (a React onClick + the global
-    // delegated document listener both call this). Collapse them into ONE bubble.
+    // Debounce: collapse multiple rapid calls (React onClick + global listener) into ONE.
     if (nowMs - lastBubbleTime < 250) return;
     lastBubbleTime = nowMs;
 
-    // Synchronous lock for the whole gesture window. Resuming a suspended AudioContext is
-    // async, so two independent callers can each queue a resume and fire a note AFTER the
-    // debounce above was already consumed (a classic "double sound"). The lock is released
-    // shortly after the note is scheduled, so genuinely separate taps still both play.
+    // Lock to prevent double-audio: genuine taps > 600ms apart still both play.
     var lockKey = '__bubbleLockUntil';
     if (nowMs < (window[lockKey] || 0)) return;
-    window[lockKey] = nowMs + 300;
+    window[lockKey] = nowMs + 600;
 
     try {
+        // Reuse or create the shared AudioContext.
         if (!audioCtx) {
-            audioCtx = (typeof window !== 'undefined' && window._globalAudioCtx) ? window._globalAudioCtx : null;
+            audioCtx = (window._globalAudioCtx) ? window._globalAudioCtx : null;
             if (!audioCtx) {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                var AudioContextClass = window.AudioContext || window.webkitAudioContext;
                 if (AudioContextClass) audioCtx = new AudioContextClass();
             }
         }
         if (!audioCtx) return;
-        if (typeof window !== 'undefined') window._globalAudioCtx = audioCtx;
+        window._globalAudioCtx = audioCtx;
 
-        const triggerNote = () => {
-            try {
-                const osc = audioCtx.createOscillator();
-                const master = audioCtx.createGain();
-                master.gain.value = 1.0;
-                master.connect(audioCtx.destination);
-                osc.connect(master);
-                osc.type = 'sine';
-                const now = audioCtx.currentTime;
-                osc.frequency.setValueAtTime(450, now);
-                osc.frequency.exponentialRampToValueAtTime(950, now + 0.08);
-                // Slightly louder than before so it is clearly audible on laptop speakers.
-                master.gain.setValueAtTime(0.55, now);
-                master.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-                osc.start(now);
-                osc.stop(now + 0.08);
-            } catch (err) { }
-        };
+        // --- KEY FIX ---
+        // Schedule the note NOW, before calling resume().
+        // If context is suspended, Web Audio queues the oscillator and plays it
+        // the INSTANT the context resumes — no .then() async delay, no stale notes.
+        // If context is already running, osc.start(currentTime) plays immediately.
+        var osc = audioCtx.createOscillator();
+        var master = audioCtx.createGain();
+        master.connect(audioCtx.destination);
+        osc.connect(master);
+        osc.type = 'sine';
+        var t = audioCtx.currentTime;
+        osc.frequency.setValueAtTime(450, t);
+        osc.frequency.exponentialRampToValueAtTime(950, t + 0.08);
+        master.gain.setValueAtTime(0.6, t);
+        master.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        osc.start(t);
+        osc.stop(t + 0.12);
 
-        if (audioCtx.state === 'suspended') {
-            // Resume then play EXACTLY ONCE. Guard with a single shared promise so a
-            // React onClick + the global listener never queue two resumes / two notes.
-            // Once the context is running, subsequent gestures play synchronously and
-            // no stale "pending" note is ever left to fire on the NEXT click.
+        // Resume context AFTER scheduling — this is the correct order.
+        if (audioCtx.state !== 'running') {
             if (!pendingBubbleResume) {
-                pendingBubbleResume = audioCtx.resume().then(() => {
-                    pendingBubbleResume = null;
-                    triggerNote();
-                }).catch(() => {
-                    pendingBubbleResume = null;
-                    triggerNote();
-                });
+                pendingBubbleResume = audioCtx.resume()
+                    .then(function() { pendingBubbleResume = null; })
+                    .catch(function() { pendingBubbleResume = null; });
             }
-        } else {
-            triggerNote();
         }
     } catch (e) { }
 }
@@ -1955,7 +1942,11 @@ function triggerErrorAnimation(el) {
 }
 
 document.addEventListener('click', (e) => {
-    if (e.target.closest('button, .neo-btn, .island-node, .learning-card, .side-btn, select, .blank-slot, .map-select-btn, #mode-selection-card, .modal-overlay .close-btn, .clickable, .badge-card-item, [role="button"]')) {
+    // Skip elements that handle audio themselves via React onClick (data-no-bubble="true").
+    // This prevents the global listener from firing a second bubble on top of the React handler.
+    const target = e.target;
+    if (target && target.closest && target.closest('[data-no-bubble="true"]')) return;
+    if (target && target.closest && target.closest('button, .neo-btn, .island-node, .learning-card, .side-btn, select, .blank-slot, .map-select-btn, #mode-selection-card, .modal-overlay .close-btn, .clickable, .badge-card-item, [role="button"]')) {
         playBubble();
     }
 });
@@ -2745,6 +2736,88 @@ window.studentRecord = studentRecord;
         console.warn('purgeLegacyMockData notice:', e);
     }
 })();
+// MIGRASI: Buang bintang per-aktiviti lama (fonik_*_actN, nombor_*_actN, math_*_actN).
+// Sebelum ini setiap aktiviti memberi +1 bintang (membengkak). Kini 1 bintang
+// diberi SEKALI per item melalui kunci 'belajar_*'. Kunci lama dibuang supaya
+// jumlah markah murid dikira semula dengan bersih.
+// PENTING: Jika semua aktiviti sesuatu item sudah selesai (semua *_actN ada),
+// kita beri SATU bintang 'belajar_legacy_*' sebagai ganti SEBELUM buang kunci lama
+// supaya murid TIDAK kehilangan markah. Migrasi ini idempoten (ada penanda versi).
+(function migrateLegacyPerActivityStars() {
+    try {
+        const MIGRATION_FLAG = 'bunyiKataLegacyStarsMigrated_v1';
+        if (localStorage.getItem(MIGRATION_FLAG) === 'true') return;
+
+        const isLegacyPerActivityKey = (k) =>
+            typeof k === 'string' && /_act\d+$/.test(k) && (
+                k.startsWith('fonik_') ||
+                k.startsWith('nombor_') ||
+                k.startsWith('math_')
+            );
+
+        // Kumpul kunci legasi ikut 'item' (buang akhiran _actN).
+        const itemKeyOf = (k) => k.replace(/_act\d+$/, '');
+
+        const raw = localStorage.getItem('bunyiKataStudentData');
+        if (!raw) { localStorage.setItem(MIGRATION_FLAG, 'true'); return; }
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== 'object') { localStorage.setItem(MIGRATION_FLAG, 'true'); return; }
+
+        let changed = false;
+        Object.keys(data).forEach(name => {
+            const rec = data[name];
+            if (!rec || typeof rec !== 'object') return;
+
+            // 1. Kumpul aktiviti legasi unik per item daripada bucket 'stars'.
+            const perItemActs = {};
+            if (rec.stars && typeof rec.stars === 'object') {
+                Object.keys(rec.stars).forEach(key => {
+                    if (!isLegacyPerActivityKey(key)) return;
+                    const item = itemKeyOf(key);
+                    if (!perItemActs[item]) perItemActs[item] = new Set();
+                    perItemActs[item].add(key);
+                });
+            }
+
+            // 2. Bagi SATU bintang 'belajar_legacy_<item>' jika item itu menunjukkan
+            //    sekurang-kurangnya 1 aktiviti legasi (bukti murid pernah buat item ini),
+            //    dan belum ada kunci 'belajar_legacy_<item>'.
+            if (!rec.stars) rec.stars = {};
+            if (!rec.scores) rec.scores = {};
+            Object.keys(perItemActs).forEach(item => {
+                const legacyKey = 'belajar_legacy_' + item;
+                if ((rec.stars[legacyKey] || 0) <= 0) {
+                    rec.stars[legacyKey] = 1;
+                    rec.scores[legacyKey] = Math.max(Number(rec.scores[legacyKey] || 0), 1);
+                    changed = true;
+                }
+            });
+
+            // 3. Buang kunci legasi per-aktiviti daripada 'stars' dan 'scores'.
+            ['stars', 'scores'].forEach(bucket => {
+                const obj = rec[bucket];
+                if (obj && typeof obj === 'object') {
+                    Object.keys(obj).forEach(key => {
+                        if (isLegacyPerActivityKey(key)) {
+                            delete obj[key];
+                            changed = true;
+                        }
+                    });
+                }
+            });
+        });
+
+        if (changed) {
+            localStorage.setItem('bunyiKataStudentData', JSON.stringify(data));
+            console.log('[MIGRASI] Bintang per-aktiviti lama dibuang; bintang belajar_legacy_ diberi sebagai ganti.');
+        }
+        localStorage.setItem(MIGRATION_FLAG, 'true');
+    } catch (e) {
+        console.warn('migrateLegacyPerActivityStars notice:', e);
+    }
+})();
+
+
 
 const GHOST_NAMES = ['tetamu', 'murid', 'guest', 'student'];
 var defaultStudentNames = [];
@@ -5873,9 +5946,6 @@ function logProgress(aktiviti, kategori = 'belajar', markah = 0, lencana = '', c
             aktiviti.startsWith('cantumKata_') ||
             aktiviti.startsWith('cubaSebut_') ||
             aktiviti.startsWith('cubaBaca_') ||
-            aktiviti.startsWith('nombor_') ||
-            aktiviti.startsWith('math_') ||
-            aktiviti.startsWith('fonik_') ||
             (aktiviti.startsWith('cabaran_') && !aktiviti.includes('tambahan'))
         );
         if (customStars !== null && typeof customStars === 'number') {
@@ -6007,6 +6077,12 @@ window.tambahBintangGlobal = function (activityKey, amount) {
 
     if (curRecord) {
         const prevStars = Number(curRecord.stars[activityKey] || 0);
+        // Bintang pembelajaran utama (belajar_*) hanya diberi SEKALI sahaja per item.
+        // Jika kunci sudah wujud dengan nilai > 0, jangan tambah lagi.
+        if (activityKey.startsWith('belajar_') && prevStars > 0) {
+            console.log('[BINTANG] Kunci ' + activityKey + ' sudah diberi. Bintang tidak ditambah lagi.');
+            return;
+        }
         const newStars = prevStars + starDelta;
         curRecord.stars[activityKey] = newStars;
         curRecord.scores[activityKey] = newStars;
@@ -6032,11 +6108,13 @@ window.tambahBintangGlobal = function (activityKey, amount) {
         });
     }
 
-    // 2. Simpan ke storan tempatan
+    // 2. Simpan ke storan tempatan (idempotent: selari dengan nilai rekod, bukan tambah buta)
     try {
         const lsKey = 'stars_' + activityKey;
+        const recordValue = curRecord && curRecord.stars ? Number(curRecord.stars[activityKey] || 0) : null;
         const prevLs = Number(localStorage.getItem(lsKey) || 0);
-        localStorage.setItem(lsKey, (prevLs + starDelta).toString());
+        const nextLs = recordValue !== null ? Math.max(prevLs, recordValue) : (prevLs + starDelta);
+        localStorage.setItem(lsKey, nextLs.toString());
     } catch (e) {
         console.warn('localStorage stars notice:', e);
     }
@@ -6125,6 +6203,20 @@ function jumlahMarkah(data) {
         totalStars = Object.values(data.scores).reduce((total, markah) => total + Math.min(Number(markah || 0), 3), 0);
     }
 
+    // Bintang pembelajaran utama (belajar_fonik_*, belajar_nombor_*, belajar_math_*).
+    // Diberi SEKALI sahaja per item oleh tambahBintangGlobal(), jadi kira terus di sini
+    // supaya jumlah TIDAK bergantung pada kunci warisan (fonik_*_actN) yang telah dimigrasi.
+    // Setiap kunci bernilai maks 3 bintang (1 bintang per item yang disiapkan sepenuhnya).
+    if (data && data.stars) {
+        Object.keys(data.stars).forEach(key => {
+            if (!key.startsWith('belajar_')) return;
+            if (countedKeys.has(key)) return;
+            countedKeys.add(key);
+            const st = Number(data.stars[key] || 0);
+            totalStars += Math.min(Math.max(st, 0), 3);
+        });
+    }
+
     // Cabaran Tambahan: Setiap cabaran tambahan maksima 3 bintang sahaja (berdasarkan popup bintang)
     if (typeof EXTRA_CHALLENGES_DATA !== 'undefined') {
         Object.values(EXTRA_CHALLENGES_DATA).forEach(list => {
@@ -6162,9 +6254,6 @@ function jumlahMarkah(data) {
                     key.startsWith('cantumKata_') ||
                     key.startsWith('cubaSebut_') ||
                     key.startsWith('cubaBaca_') ||
-                    key.startsWith('nombor_') ||
-                    key.startsWith('math_') ||
-                    key.startsWith('fonik_') ||
                     (key.startsWith('cabaran_') && !key.includes('tambahan')) ||
                     key.startsWith('surih_')
                 );
@@ -6198,9 +6287,6 @@ function jumlahMarkah(data) {
                     key.startsWith('cantumKata_') ||
                     key.startsWith('cubaSebut_') ||
                     key.startsWith('cubaBaca_') ||
-                    key.startsWith('nombor_') ||
-                    key.startsWith('math_') ||
-                    key.startsWith('fonik_') ||
                     (key.startsWith('cabaran_') && !key.includes('tambahan')) ||
                     key.startsWith('surih_')
                 );
@@ -6211,6 +6297,10 @@ function jumlahMarkah(data) {
     }
 
     if (totalStars === 0 && data) {
+        // Jangan pulihkan angka lama jika rekod ini sudah diselaraskan (kira semula).
+        // Ini penting supaya migrasi idempoten & angka lama yang membengkak tidak
+        // muncul semula sebagai "jumlah bintang".
+        if (data.__starRecount === 'v1') return 0;
         if (data.totalBintang !== undefined && Number(data.totalBintang) > 0) return Number(data.totalBintang);
         if (data.coins !== undefined && Number(data.coins) > 0) return Number(data.coins);
     }
@@ -7687,7 +7777,7 @@ window.renderTeacherTable = function () {
                     <tr style="background:${rowBg}; transition: background 0.15s ease;">
                         <td style="font-weight:600; text-align:center; vertical-align:middle; padding:6px 8px; font-size:0.8rem; color:#64748b; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;">${index++}</td>
                         <td style="font-weight:bold; color:var(--color-dark, #1e293b); vertical-align:middle; padding:6px 12px; font-size:0.82rem; text-align:left; text-transform:uppercase; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0; white-space:nowrap;">${nama.toUpperCase()}</td>
-                        <td style="font-weight:bold; vertical-align:middle; text-align:center; padding:6px 8px; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;"><span style="color:#d97706; font-size:0.8rem; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-star"></i> ${(data && data.totalBintang !== undefined && (!data.stars || Object.keys(data.stars).length === 0)) ? Number(data.totalBintang || 0) : jumlahMarkah(data)}</span></td>
+                        <td style="font-weight:bold; vertical-align:middle; text-align:center; padding:6px 8px; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;"><span style="color:#d97706; font-size:0.8rem; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-star"></i> ${typeof jumlahMarkah === 'function' ? jumlahMarkah(data) : Number((data && data.totalBintang) || 0)}</span></td>
                         <td style="font-weight:bold; vertical-align:middle; text-align:center; padding:6px 8px; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;">
                             <span style="background:#fef3c7; color:#b45309; padding:3px 8px; border-radius:8px; border:1px solid #fcd34d; font-size:0.75rem; display:inline-flex; align-items:center; gap:4px;">
                                 <i class="fa-solid fa-award"></i> ${lencanaCount}
@@ -7839,7 +7929,7 @@ async function renderLeaderboard(jenis = 'harian') {
                         rawArr.push({
                             id: id,
                             name: s.nama.trim().toUpperCase(),
-                            score: Number(s.total_bintang || 0),
+                            score: (typeof jumlahMarkah === 'function' ? jumlahMarkah(s) : Number(s.total_bintang || 0)),
                             avatar: s.avatar_url || '/images/avatar/avatar1.png',
                             kelas: s.nama_kelas || s.kod_kelas || s.nama_keluarga || ''
                         });
@@ -8002,9 +8092,11 @@ async function renderLeaderboard(jenis = 'harian') {
         studentsArr = targetNames.map(nama => {
             const d = sTarget[nama] || {};
             const isSelf = (nama.trim().toLowerCase() === curActiveName.trim().toLowerCase());
-            const totalStarsGlobal = isSelf && typeof jumlahMarkah === 'function'
-                ? jumlahMarkah(d)
-                : (Number(d.total_bintang || 0) || (typeof jumlahMarkah === 'function' ? jumlahMarkah(d) : 0));
+            // Guna jumlahMarkah sebagai kebenaran tunggal untuk SEMUA murid supaya
+            // kedudukan konsisten & tidak memaparkan total_bintang lama yang membengkak.
+            const totalStarsGlobal = (typeof jumlahMarkah === 'function')
+                ? Number(jumlahMarkah(d)) || 0
+                : Number(d.total_bintang || 0);
 
             return {
                 name: nama,
@@ -10370,7 +10462,7 @@ window.showCabaranLainStarPopup = function (score, stars) {
         <!-- Middle Dotted Score Box with Outline Glow Loop (HANYA JUMLAH BINTANG: MAKSIMA 3) -->
         <div style="border:2.5px dashed #94a3b8;border-radius:20px;padding:12px 14px;margin:8px 0;width:100%;box-sizing:border-box;background:rgba(255,255,255,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;">
             <div style="font-size:0.88rem;font-weight:900;color:#0f172a;letter-spacing:0.5px;font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;margin-bottom:4px;">
-                ANDA MENDAPAT
+                Anda Mendapat
             </div>
             
             <div class="score-box-glow-pulse" style="background:#ffffff;border:3px solid #0f172a;border-radius:16px;padding:4px 32px;margin:6px auto;width:100%;max-width:170px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;">
@@ -10381,7 +10473,7 @@ window.showCabaranLainStarPopup = function (score, stars) {
 
             <div style="font-size:0.82rem;font-weight:900;color:#0f172a;letter-spacing:1px;font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">
                 <span style="color:#f59e0b;margin:0 4px;">•••••</span>
-                BINTANG
+                Bintang
                 <span style="color:#f59e0b;margin:0 4px;">•••••</span>
             </div>
         </div>
@@ -19022,10 +19114,34 @@ function bukaSenaraiHuruf(jenis) {
     container.innerHTML = '';
 
     hurufList.forEach(huruf => {
-        var btn = document.createElement('button');
-        btn.className = 'neo-btn bg-purple btn-huruf-grid';
-        btn.innerText = huruf;
-        btn.onclick = () => sebutHuruf(huruf, currentModuleId === 'fonik_abc');
+        // Huruf konsonan M hingga Z dikunci untuk pengguna Mod Percuma.
+        // Huruf vokal A, E, I dan huruf A hingga L kekal bebas. Tambahan: vokal O dan U juga
+        // dikunci dalam mod Kenali Huruf & Fonik ABC, tetapi kekal bebas dalam modul
+        // Vokal / Vokal-Konsonan. Serupa dengan kad nombor PRO, huruf terkunci masih kelihatan
+        // tetapi bertanda ikon kunci + pil "Versi Pro" dan membuka popup Pakej Pro apabila ditekan.
+        var hurufKecil = huruf.toLowerCase();
+        // 'e taling' (é) sentiasa dipaparkan sebagai huruf e biasa dan tidak pernah dikunci.
+        if (hurufKecil === 'é' || hurufKecil === 'e taling' || hurufKecil === 'e tailing' || hurufKecil === 'e-taling') {
+            hurufKecil = 'e';
+        }
+        var hurufVokal = ['a', 'e', 'i', 'o', 'u'].indexOf(hurufKecil) !== -1;
+        var hurufVokalTerkunci = currentModuleId !== 'huruf_vokal' && (hurufKecil === 'o' || hurufKecil === 'u');
+        var hurufTerkunci = (typeof window.isPercumaMode === 'function' && window.isPercumaMode()) &&
+            (hurufVokalTerkunci || (!hurufVokal && hurufKecil >= 'm'));
+        if (hurufTerkunci) {
+            btn.className = 'neo-btn bg-purple btn-huruf-grid versi-pro-card';
+            btn.innerText = huruf;
+            btn.setAttribute('aria-label', 'Huruf ' + huruf + ' versi Pro');
+            var overlay = document.createElement('div');
+            overlay.className = 'versi-pro-overlay';
+            overlay.innerHTML = '<i class="fa-solid fa-lock"></i><span class="versi-pro-chip">Versi Pro</span>';
+            btn.appendChild(overlay);
+            btn.onclick = () => { if (typeof window.kunciPro === 'function') window.kunciPro(); };
+        } else {
+            btn.className = 'neo-btn bg-purple btn-huruf-grid';
+            btn.innerText = huruf;
+            btn.onclick = () => sebutHuruf(huruf, currentModuleId === 'fonik_abc');
+        }
         container.appendChild(btn);
     });
 
@@ -20799,10 +20915,12 @@ window.masukModMurid = function (namaAnak, stuIdParam) {
                     if (remote.latihan && typeof remote.latihan === 'object') {
                         sTarget[studentName].latihan = { ...(sTarget[studentName].latihan || {}), ...remote.latihan };
                     }
-                    if (remote.totalBintang !== undefined && remote.totalBintang > 0) {
-                        sTarget[studentName].totalBintang = remote.totalBintang;
-                        sTarget[studentName].coins = remote.totalBintang;
-                    }
+                    // Kira semula ikut format baharu (kebenaran = jumlahMarkah), bukan
+                    // angka lama remote.totalBintang.
+                    const totalKanonikal = typeof jumlahMarkah === 'function' ? Number(jumlahMarkah(sTarget[studentName])) || 0 : 0;
+                    sTarget[studentName].totalBintang = totalKanonikal;
+                    sTarget[studentName].coins = totalKanonikal;
+                    sTarget[studentName].__starRecount = 'v1';
 
                     if ((!sTarget[studentName].badges || sTarget[studentName].badges.length === 0) && typeof kiraLencanaMurid === 'function') {
                         const earned = kiraLencanaMurid(sTarget[studentName]);
@@ -25242,7 +25360,7 @@ function startMuseumVRScene() {
 
     const headerTitle = document.getElementById('vr-header-title');
     if (headerTitle) {
-        headerTitle.innerHTML = '<i class="fa-solid fa-cube" style="margin-right: 6px;"></i> <span>3D BUNYI KATA</span>';
+        headerTitle.innerHTML = '<i class="fa-solid fa-cube" style="margin-right: 6px;"></i> <span>3D Bunyi Kata</span>';
     }
 
     initVRInputListeners();
@@ -25649,7 +25767,7 @@ function startVRBacaanScene() {
 
     const headerTitle = document.getElementById('vr-header-title');
     if (headerTitle) {
-        headerTitle.innerHTML = '<i class="fa-solid fa-book-open-reader" style="margin-right: 6px;"></i> <span>3D BACAAN BERGRED</span>';
+        headerTitle.innerHTML = '<i class="fa-solid fa-book-open-reader" style="margin-right: 6px;"></i> <span>3D Bacaan Bergred</span>';
     }
 
     initVRInputListeners();
@@ -25894,7 +26012,7 @@ function startVRBacaanScene() {
             <circle cx="200" cy="360" r="95" fill="rgba(255,255,255,0.08)" stroke="#fde047" stroke-width="3"/>
             <text x="50%" y="390" font-family="'Segoe UI Emoji', sans-serif" font-size="90px" text-anchor="middle">${icon || '📖'}</text>
             <rect x="50" y="495" width="300" height="50" fill="#fbbf24" rx="14"/>
-            <text x="50%" y="528" font-family="AtlantaRounded, AtlantaRoundedBlack, sans-serif" font-weight="900" font-size="18px" fill="#0f172a" text-anchor="middle">BUNYI KATA 3D</text>
+            <text x="50%" y="528" font-family="AtlantaRounded, AtlantaRoundedBlack, sans-serif" font-weight="900" font-size="18px" fill="#0f172a" text-anchor="middle">Bunyi Kata 3D</text>
         </svg>`;
         const tapSrc = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
         return `<a-entity position="${px} ${py} ${pz}" rotation="0 ${rotY || 0} 0">
@@ -26720,7 +26838,7 @@ window.pilihPeta = function (nomborPeta) {
             ${info.desc}
         </div>
         
-        <div style="font-size: 0.95rem; font-weight: 800; color: var(--color-dark); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">LENCANA GANJARAN:</div>
+        <div style="font-size: 0.95rem; font-weight: 800; color: var(--color-dark); margin-bottom: 10px;  letter-spacing: 0.5px;">Lencana Ganjaran:</div>
         
         <!-- 3D CAROUSEL ORBIT STAGE -->
         <div id="badge-3d-carousel-stage" style="perspective: 800px; width: 100%; height: 165px; display: flex; align-items: center; justify-content: center; position: relative; margin: 10px 0 20px 0; overflow: visible; user-select: none;">
@@ -26863,7 +26981,106 @@ window.pilihPeta = function (nomborPeta) {
     requestAnimationFrame(renderFrame);
 };
 
+/**
+ * Bahagian 2: Kira semula jumlah bintang murid sedia ada (migrasi sekali sahaja).
+ * - Backup penuh bunyiKataStudentData sebelum sebarang perubahan.
+ * - Tetapkan coins = totalBintang = jumlahMarkah(rec) (kebenaran tunggal).
+ * - Tanda rec.__starRecount = 'v1' supaya jumlahMarkah tidak pulih angka lama.
+ * - Flag idempoten bunyiKataStarRecount_v1.
+ * - Bahagian 4: hantar jumlah baharu ke Firebase guna syncStudentToFirebase.
+ */
+function jalankanKiraSemulaBintangSediaAda() {
+    try {
+        const FLAG = 'bunyiKataStarRecount_v1';
+        if (typeof jumlahMarkah !== 'function') return;
+        if (localStorage.getItem(FLAG) === 'done') return;
+
+        let data = null;
+        try {
+            data = (typeof window.studentData !== 'undefined' && window.studentData)
+                ? window.studentData
+                : JSON.parse(localStorage.getItem('bunyiKataStudentData') || 'null');
+        } catch (e) { data = null; }
+        if (!data || typeof data !== 'object') {
+            localStorage.setItem(FLAG, 'done');
+            return;
+        }
+
+        const BACKUP_KEY = 'bunyiKataStudentData_backup_recount_v1';
+        if (!localStorage.getItem(BACKUP_KEY)) {
+            try {
+                localStorage.setItem(BACKUP_KEY, JSON.stringify(data));
+                console.log('[KiraSemulaBintang] Backup disimpan di', BACKUP_KEY);
+            } catch (e) {
+                console.warn('[KiraSemulaBintang] Gagal simpan backup:', e);
+            }
+        }
+
+        const ringkasan = [];
+        Object.keys(data).forEach(nama => {
+            const rec = data[nama];
+            if (!rec || typeof rec !== 'object') return;
+            // Elak fallback angka lama semasa mengira nilai kanonikal.
+            const recUntukKira = { ...rec };
+            delete recUntukKira.totalBintang;
+            delete recUntukKira.coins;
+            const lama = Number(rec.coins || rec.totalBintang || 0);
+            const baharu = Math.max(0, Number(jumlahMarkah(recUntukKira)) || 0);
+            rec.coins = baharu;
+            rec.totalBintang = baharu;
+            rec.__starRecount = 'v1';
+            ringkasan.push({ nama, lama, baharu });
+        });
+
+        try {
+            localStorage.setItem('bunyiKataStudentData', JSON.stringify(data));
+            localStorage.setItem(FLAG, 'done');
+        } catch (e) {
+            console.warn('[KiraSemulaBintang] Gagal simpan data baharu:', e);
+            return;
+        }
+
+        try {
+            console.groupCollapsed('[KiraSemulaBintang] Ringkasan ' + ringkasan.length + ' murid');
+            ringkasan.forEach(r => {
+                const arah = r.baharu === r.lama ? '=' : (r.baharu > r.lama ? '↑' : '↓');
+                console.log(`${r.nama}: ${r.lama} ${arah} ${r.baharu}`);
+            });
+            console.groupEnd();
+        } catch (e) { }
+
+        // Bahagian 4: sync balik ke Firebase sekali.
+        if (typeof window.syncStudentToFirebase === 'function') {
+            ringkasan.forEach(r => {
+                const rec = data[r.nama];
+                if (!rec) return;
+                try {
+                    Promise.resolve(window.syncStudentToFirebase({
+                        id: rec.id,
+                        nama: r.nama,
+                        coins: r.baharu,
+                        totalBintang: r.baharu,
+                        scores: rec.scores || {},
+                        stars: rec.stars || {},
+                        latihan: rec.latihan || {},
+                        badges: rec.badges || [],
+                        avatar: rec.avatar,
+                    })).catch(e => console.warn('[KiraSemulaBintang] sync gagal:', r.nama, e));
+                } catch (e) {
+                    console.warn('[KiraSemulaBintang] sync exception:', r.nama, e);
+                }
+            });
+        }
+    } catch (e) {
+        console.warn('[KiraSemulaBintang] Ralat migrasi:', e);
+    }
+}
+window.jalankanKiraSemulaBintangSediaAda = jalankanKiraSemulaBintangSediaAda;
+
 function initAppLogicOnReady() {
+    // Bahagian 2: kira semula bintang sedia ada ikut format baharu (idempoten).
+    jalankanKiraSemulaBintangSediaAda();
+
     mengendaliNavigasiURL();
 
     // Pulihkan dan sync data murid aktif jika pengguna sedang dalam sesi murid/anak
@@ -26915,10 +27132,12 @@ function initAppLogicOnReady() {
                         if (remote.latihan && typeof remote.latihan === 'object') {
                             target[curStudent].latihan = { ...(target[curStudent].latihan || {}), ...remote.latihan };
                         }
-                        if (remote.totalBintang !== undefined && remote.totalBintang > 0) {
-                            target[curStudent].totalBintang = remote.totalBintang;
-                            target[curStudent].coins = remote.totalBintang;
-                        }
+                        // Kira semula ikut format baharu (kebenaran = jumlahMarkah), bukan
+                        // angka lama remote.totalBintang.
+                        const totalKanonikal = typeof jumlahMarkah === 'function' ? Number(jumlahMarkah(target[curStudent])) || 0 : 0;
+                        target[curStudent].totalBintang = totalKanonikal;
+                        target[curStudent].coins = totalKanonikal;
+                        target[curStudent].__starRecount = 'v1';
                         if (typeof kiraLencanaMurid === 'function') {
                             const earned = kiraLencanaMurid(target[curStudent]);
                             if (Array.isArray(earned) && earned.length > 0) {
@@ -28927,7 +29146,7 @@ window.showARKiraJariResultModal = function (starsOverride) {
         <!-- Middle Dotted Score Box with Outline Glow Loop -->
         <div style="border:2.5px dashed #94a3b8;border-radius:20px;padding:12px 14px;margin:8px 0;width:100%;box-sizing:border-box;background:rgba(255,255,255,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;">
             <div style="font-size:0.88rem;font-weight:900;color:#0f172a;letter-spacing:0.5px;font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;margin-bottom:4px;">
-                ANDA MENDAPAT
+                Anda Mendapat
             </div>
             
             <div class="score-box-glow-pulse" style="background:#ffffff;border:3px solid #0f172a;border-radius:16px;padding:4px 32px;margin:6px auto;width:100%;max-width:170px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;">
@@ -28938,7 +29157,7 @@ window.showARKiraJariResultModal = function (starsOverride) {
 
             <div style="font-size:0.82rem;font-weight:900;color:#0f172a;letter-spacing:1px;font-family:'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif;">
                 <span style="color:#f59e0b;margin:0 4px;">•••••</span>
-                BINTANG
+                Bintang
                 <span style="color:#f59e0b;margin:0 4px;">•••••</span>
             </div>
         </div>

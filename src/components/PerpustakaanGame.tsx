@@ -1237,7 +1237,7 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
     const entranceLockedRef = useRef<boolean>(false);
 
     const shelves = isHeroMode ? HERO_SHELVES : ASAS_SHELVES;
-    const modeTitle = isHeroMode ? '3D PERPUSTAKAAN HERO' : '3D PERPUSTAKAAN ASAS';
+    const modeTitle = isHeroMode ? '3D Perpustakaan Hero' : '3D Perpustakaan Asas';
 
     // Synchronize global phase for A-Frame and close modals on phase switch
     useEffect(() => {

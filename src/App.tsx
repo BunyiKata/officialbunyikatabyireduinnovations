@@ -6525,6 +6525,15 @@ export default function App() {
             >
               <i className="fa-solid fa-rotate-right"></i> Cuba Lagi
             </button>
+            <button
+              className="neo-btn bg-blue"
+              style={{ flex: "1", minWidth: "140px" }}
+              onClick={(e) => {
+                window.surihNomborHantarStatus && window.surihNomborHantarStatus();
+              }}
+            >
+              <i className="fa-solid fa-paper-plane"></i> Hantar
+            </button>
             <div id="surih-nombor-score" style={{ display: "none" }}>
               <span id="surih-nombor-stars"></span>
             </div>
@@ -6716,6 +6725,15 @@ export default function App() {
               }}
             >
               <i className="fa-solid fa-rotate-right"></i> Cuba Lagi
+            </button>
+            <button
+              className="neo-btn bg-blue"
+              style={{ flex: "1", minWidth: "140px" }}
+              onClick={(e) => {
+                window.surihHantarStatus && window.surihHantarStatus();
+              }}
+            >
+              <i className="fa-solid fa-paper-plane"></i> Hantar
             </button>
             <div id="surih-score" style={{ display: "none" }}>
               <span id="surih-stars"></span>
@@ -6985,7 +7003,7 @@ export default function App() {
             }}
           >
             <i className="fa-solid fa-cube" style={{ marginRight: "4px" }}></i>
-            <span>3D BUNYI KATA</span>
+            <span>3D Bunyi Kata</span>
           </div>
 
           <button
@@ -8843,7 +8861,7 @@ export default function App() {
           <AnimatePresence>
             {showVRGuideModal && (() => {
               const isBacaan = (window as any).vrCurrentMode === 'bacaan';
-              const modalTitle = isBacaan ? '3D BACAAN BERGRED' : '3D BUNYI KATA';
+              const modalTitle = isBacaan ? '3D Bacaan Bergred' : '3D Bunyi Kata';
               const modalDesc = isBacaan
                 ? 'Terokai Muzium Bacaan Bergred dalam mod 3D! Lawati 5 dewan pameran: Dewan Ayat Pendek, Dewan Ayat Panjang, Galeri Petikan Tahap 1 & 2, dan Pavilion Cerita Pendek. Gunakan joystick atau seret skrin untuk bergerak.'
                 : 'Terokai Muzium Bunyi Kata dalam mod 3D! Pusingkan peranti atau seret skrin untuk melihat 4 dinding pameran (Huruf Fonik, Huruf Kecil, Galeri Asas Nombor 0-10, dan Siri Nombor 10-100). Terokai pameran dengan gambar dan sebutan audio interaktif!';

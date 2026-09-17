@@ -1048,12 +1048,14 @@ export default function LandingScreen({
               <div className="landing-hero-cta">
                 <button
                   className="landing-btn landing-btn-primary landing-btn-lg"
+                  data-no-bubble="true"
                   onClick={onCubaPercuma}
                 >
                   <IconRocket /> Cuba Percuma
                 </button>
                 <button
                   className="landing-btn landing-btn-outline landing-btn-lg"
+                  data-no-bubble="true"
                   onClick={onLogMasuk}
                 >
                   Log Masuk

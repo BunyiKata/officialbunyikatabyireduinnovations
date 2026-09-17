@@ -45,6 +45,53 @@ function getSenaraiNombor() {
     return surihNomborData.kategori === 'siri' ? senaraiNomborSiri : senaraiNombor0_10;
 }
 
+// === SIMPAN STATUS SELESAI SURIH NOMBOR (MURID PRO SAHAJA) ===
+// Setiap nombor yang selesai disurih menyimpan SATU bintang (sekali sahaja)
+// melalui window.tambahBintangGlobal(). Fungsi itu sendiri sudah menolak mod
+// percuma / guru / admin / ibu bapa (affiliate), jadi hanya murid sah disimpan
+// dan disegerakkan ke Firebase. Lukisan kanvas TIDAK disimpan (jimat ruang).
+function kunciSurihNombor(idx) {
+    const senarai = getSenaraiNombor();
+    const nilai = senarai[idx];
+    if (nilai === undefined) return null;
+    const prefix = surihNomborData.kategori === 'siri' ? 'surih_nombor_siri_' : 'surih_nombor_0_10_';
+    return prefix + nilai;
+}
+
+function sudahSelesaiSurihNombor(idx) {
+    const kunci = kunciSurihNombor(idx);
+    if (!kunci) return false;
+    try {
+        const namaMurid = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif') || '';
+        const data = (typeof studentData !== 'undefined' && studentData && studentData[namaMurid]) ? studentData[namaMurid] : null;
+        if (data && data.stars && Number(data.stars[kunci] || 0) > 0) return true;
+        if (Number(localStorage.getItem('stars_' + kunci) || 0) > 0) return true;
+    } catch (e) { }
+    return false;
+}
+
+function simpanStatusSurihNombor(idx) {
+    if (sudahSelesaiSurihNombor(idx)) return false;
+    const kunci = kunciSurihNombor(idx);
+    if (!kunci) return false;
+    if (typeof window.tambahBintangGlobal === 'function') {
+        window.tambahBintangGlobal(kunci, 1);
+        return true;
+    }
+    return false;
+}
+
+// Pulihkan tanda selesai (hijau) pada navigasi daripada rekod murid PRO sahaja.
+function pulihkanStatusSurihNombor() {
+    const senarai = getSenaraiNombor();
+    surihNomborData.nomborSelesai.clear();
+    senarai.forEach((_, idx) => {
+        if (sudahSelesaiSurihNombor(idx)) {
+            surihNomborData.nomborSelesai.add(idx);
+        }
+    });
+}
+
 // Data strok dipermudahkan (berdasarkan koordinat grid 100x100)
 const svgBesarNombor = {
     '0': ["M 50 18 C 24 18, 24 85, 50 85 C 76 85, 76 18, 50 18"],
@@ -207,6 +254,7 @@ window.surihNomborSetKategori = function(kat) {
     }
     
     binaNavigasiNombor();
+    pulihkanStatusSurihNombor();
     window.updateSurihNomborNavColors();
     window.surihNomborReset();
 };
@@ -224,6 +272,9 @@ function initSurihNombor() {
 
     // Bina navigasi
     binaNavigasiNombor();
+
+    // Pulihkan tanda selesai (hijau) daripada rekod murid PRO
+    pulihkanStatusSurihNombor();
 
     // Events
     window.updateSurihNomborNavColors();
@@ -504,6 +555,7 @@ function tracingNombor(e) {
             
             if (surihNomborData.traceStrokSemasa > currentStrokesToDrawNombor.length) {
                 // Semua selesai!
+                simpanStatusSurihNombor(surihNomborData.nomborSemasa);
                 setTimeout(() => {
                     tunjukKonfetiSurihNombor();
                     tunjukMesejKejayaanNombor();
@@ -694,4 +746,22 @@ window.updateSurihNomborNavColors = function() {
             btn.classList.add('bg-white');
         }
     });
+};
+
+// Butang "Hantar": simpan status selesai nombor semasa (murid PRO sahaja).
+window.surihNomborHantarStatus = function() {
+    const idx = surihNomborData.nomborSemasa;
+    const senarai = getSenaraiNombor();
+    const nilai = senarai[idx];
+    if (nilai === undefined) return;
+    const berjayaSimpan = simpanStatusSurihNombor(idx);
+    surihNomborData.nomborSelesai.add(idx);
+    window.updateSurihNomborNavColors();
+    if (typeof window.showAppToast === 'function') {
+        if (berjayaSimpan) {
+            window.showAppToast('Berjaya Dihantar', `Status surih nombor ${nilai} telah disimpan.`, 'success');
+        } else {
+            window.showAppToast('Sudah Disimpan', `Nombor ${nilai} sudahpun direkodkan.`, 'success');
+        }
+    }
 };

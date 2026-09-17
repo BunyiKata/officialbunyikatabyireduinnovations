@@ -3457,7 +3457,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                           letterSpacing: '0.5px',
                           fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif"
                         }}>
-                          ANDA MENDAPAT
+                          Anda Mendapat
                         </div>
 
                         <div
@@ -3487,7 +3487,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                           fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif"
                         }}>
                           <span style={{ color: '#f59e0b', margin: '0 4px' }}>•••••</span>
-                          BINTANG
+                          Bintang
                           <span style={{ color: '#f59e0b', margin: '0 4px' }}>•••••</span>
                         </div>
                       </div>

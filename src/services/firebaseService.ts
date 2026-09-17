@@ -791,6 +791,33 @@ export function isAffiliateActiveSession(): boolean {
 }
 
 /**
+ * Kira semula jumlah bintang kanonikal mengikut "cara peroleh bintang" baharu.
+ * window.jumlahMarkah() (app-logic.js) ialah SUMBER KEBENARAN TUNGGAL.
+ * Rekod LAMA yang mempunyai coins/total_bintang membengkak tidak lagi dijadikan
+ * asas supaya jumlah kekal konsisten merentas semua skrin & peranti.
+ * Fallback (jika jumlahMarkah belum dimuatkan): kira bucket `stars` (maks 3/kunci).
+ */
+export function kiraSemulaBintang(rekod: any, jumlahMarkahFn?: (d: any) => number): number {
+  if (!rekod || typeof rekod !== 'object') return 0;
+  try {
+    const fn = jumlahMarkahFn
+      || (typeof window !== 'undefined' ? (window as any).jumlahMarkah : undefined);
+    if (typeof fn === 'function') {
+      const t = Number(fn(rekod));
+      if (Number.isFinite(t) && t > 0) return t;
+    }
+  } catch (e) {}
+  let total = 0;
+  const stars = rekod.stars;
+  if (stars && typeof stars === 'object') {
+    Object.keys(stars).forEach(k => {
+      total += Math.min(Math.max(Number(stars[k]) || 0, 0), 3);
+    });
+  }
+  return total;
+}
+
+/**
  * Menyegerakkan rekod murid ke Firebase Realtime Database
  */
 export async function syncStudentToFirebase(student: {
@@ -1359,6 +1386,11 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
           stars: remoteTotal === 0 ? (st.stars || {}) : { ...(prev.stars || {}), ...(st.stars || {}) },
           latihan: remoteTotal === 0 ? (st.latihan || {}) : { ...(prev.latihan || {}), ...(st.latihan || {}) },
         };
+        // Kira semula jumlah bintang kanonikal (cara peroleh baharu) supaya coins/
+        // totalBintang TIDAK lagi membaca angka lama (total_bintang) yang membengkak.
+        const kanonikal = kiraSemulaBintang(cleanedStudentData[st.nama]);
+        cleanedStudentData[st.nama].coins = kanonikal;
+        cleanedStudentData[st.nama].totalBintang = kanonikal;
       });
 
       // Gabungkan juga skor daripada nod scores/ bagi memastikan data 100% tally
@@ -1383,10 +1415,6 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
                 cleanedStudentData[sName].scores[sc.aktiviti_nama] = Math.max(oldSc, Number(sc.skor) || 0);
                 cleanedStudentData[sName].stars[sc.aktiviti_nama] = Math.max(oldSt, Number(sc.bintang) || 0);
                 cleanedStudentData[sName].latihan[sc.aktiviti_nama] = true;
-                if (sc.bintang && cleanedStudentData[sName].coins === 0) {
-                  cleanedStudentData[sName].coins = Math.max(cleanedStudentData[sName].coins, Number(sc.bintang));
-                  cleanedStudentData[sName].totalBintang = Math.max(cleanedStudentData[sName].totalBintang, Number(sc.bintang));
-                }
               }
             }
           });
@@ -1394,6 +1422,13 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
       } catch (scoreErr) {
         console.warn('[Firebase RTDB] Skor merge notice:', scoreErr);
       }
+
+      // Kira semula SEKALI lagi selepas gabungan skor supaya jumlah akhir konsisten.
+      Object.keys(cleanedStudentData).forEach(nama => {
+        const kanonikal = kiraSemulaBintang(cleanedStudentData[nama]);
+        cleanedStudentData[nama].coins = kanonikal;
+        cleanedStudentData[nama].totalBintang = kanonikal;
+      });
 
       localStorage.setItem('bunyiKataStudentData', JSON.stringify(cleanedStudentData));
       localStorage.setItem('bunyiKataStudentFirebaseIds', JSON.stringify(idMap));
@@ -1572,7 +1607,14 @@ export async function saveScoreToFirebase(scoreData: {
           }
         }
 
-        updatePayload.total_bintang = recalculatedStars > 0 ? recalculatedStars : (currTotalStars + (starDiff > 0 ? starDiff : bestStar));
+        // Jumlah bintang kanonikal: jumlahMarkah() (cara peroleh baharu) diutamakan.
+        // Jika tiada (cth. app-logic belum dimuat), guna kiraan bucket stars sahaja
+        // — TIDAK lagi menambah pada total_bintang lama (punca jumlah membengkak).
+        let kanonikal = recalculatedStars;
+        if (typeof window !== 'undefined' && sVal.nama && (window as any).studentData && (window as any).studentData[sVal.nama]) {
+          kanonikal = kiraSemulaBintang((window as any).studentData[sVal.nama]);
+        }
+        updatePayload.total_bintang = kanonikal;
 
         await update(sRef, updatePayload);
 
@@ -3118,6 +3160,10 @@ export async function syncParentSessionFromFirebase(userIdOrEmail?: string): Pro
               stars: remoteTotal === 0 ? (sVal.stars || {}) : { ...(prev.stars || {}), ...(sVal.stars || {}) },
               latihan: remoteTotal === 0 ? (sVal.latihan || {}) : { ...(prev.latihan || {}), ...(sVal.latihan || {}) },
             };
+            // Kira semula jumlah bintang kanonikal (cara peroleh baharu).
+            const kanonikal = kiraSemulaBintang(rawLocalData[n]);
+            rawLocalData[n].coins = kanonikal;
+            rawLocalData[n].totalBintang = kanonikal;
           }
         });
       });

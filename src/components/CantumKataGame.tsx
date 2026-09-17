@@ -918,7 +918,7 @@ export const CantumKataGame: React.FC<{ onClose: () => void }> = ({ onClose }) =
           }}
         >
           <i className="fa-solid fa-puzzle-piece" style={{ color: '#fff' }}></i>
-          <span style={{ fontWeight: 800 }}>CANTUM KATA</span>
+          <span style={{ fontWeight: 800 }}>Cantum Kata</span>
         </div>
 
         <button

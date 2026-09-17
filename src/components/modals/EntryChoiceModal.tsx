@@ -251,6 +251,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                   <button
                     type="button"
                     className="neo-box"
+                    data-no-bubble="true"
                     style={{
                       cursor: "pointer",
                       padding: "12px 16px",
@@ -429,6 +430,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                   {/* Butang Sahkan Kod */}
                   <button
                     className="neo-btn"
+                    data-no-bubble="true"
                     style={{
                       width: "100%",
                       padding: "11px",

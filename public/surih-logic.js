@@ -37,6 +37,49 @@ const surihData = {
 
 const hurufAbjad = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
+// === SIMPAN STATUS SELESAI SURIH HURUF (MURID PRO SAHAJA) ===
+// Setiap huruf yang selesai disurih menyimpan SATU bintang (sekali sahaja)
+// melalui window.tambahBintangGlobal(). Fungsi itu sendiri sudah menolak mod
+// percuma / guru / admin / ibu bapa (affiliate), jadi hanya murid sah disimpan
+// dan disegerakkan ke Firebase. Lukisan kanvas TIDAK disimpan (jimat ruang).
+function kunciSurihHuruf(idx) {
+    const huruf = hurufAbjad[idx];
+    if (huruf === undefined) return null;
+    return 'surih_huruf_' + huruf;
+}
+
+function sudahSelesaiSurihHuruf(idx) {
+    const kunci = kunciSurihHuruf(idx);
+    if (!kunci) return false;
+    try {
+        const namaMurid = window.namaMuridAktif || (typeof namaMuridAktif !== 'undefined' ? namaMuridAktif : '') || localStorage.getItem('muridAktif') || '';
+        const data = (typeof studentData !== 'undefined' && studentData && studentData[namaMurid]) ? studentData[namaMurid] : null;
+        if (data && data.stars && Number(data.stars[kunci] || 0) > 0) return true;
+        if (Number(localStorage.getItem('stars_' + kunci) || 0) > 0) return true;
+    } catch (e) { }
+    return false;
+}
+
+function simpanStatusSurihHuruf(idx) {
+    if (sudahSelesaiSurihHuruf(idx)) return false;
+    const kunci = kunciSurihHuruf(idx);
+    if (!kunci) return false;
+    if (typeof window.tambahBintangGlobal === 'function') {
+        window.tambahBintangGlobal(kunci, 1);
+        return true;
+    }
+    return false;
+}
+
+function pulihkanStatusSurihHuruf() {
+    surihData.hurufSelesai.clear();
+    hurufAbjad.forEach((_, idx) => {
+        if (sudahSelesaiSurihHuruf(idx)) {
+            surihData.hurufSelesai.add(idx);
+        }
+    });
+}
+
 // Data strok dipermudahkan (berdasarkan koordinat grid 100x100)
 // Format strok: [{x, y}, {x, y}, ...]
 const svgBesar = {
@@ -172,6 +215,7 @@ function initSurih() {
     });
 
     // Events
+    pulihkanStatusSurihHuruf();
     window.updateSurihNavColors();
     canvas.addEventListener('mousedown', startTrace);
     canvas.addEventListener('mousemove', tracing);
@@ -210,12 +254,14 @@ window.surihTukarHuruf = function(offset) {
 
     
         surihData.hurufSemasa = newIdx;
+    pulihkanStatusSurihHuruf();
     window.updateSurihNavColors();
     window.surihReset();
 };
 
 window.surihSetJenis = function(jenis) {
     surihData.jenisPaparan = jenis;
+    pulihkanStatusSurihHuruf();
     window.surihReset();
 };
 
@@ -428,6 +474,7 @@ function tracing(e) {
             
             if (surihData.traceStrokSemasa > currentStrokesToDraw.length) {
                 // Semua selesai!
+                simpanStatusSurihHuruf(surihData.hurufSemasa);
                 setTimeout(() => {
                     tunjukKonfetiSurih(); tunjukMesejKejayaan();
                     mainkanBunyiSorak();
@@ -606,4 +653,21 @@ window.updateSurihNavColors = function() {
             btn.classList.add('bg-white');
         }
     });
+};
+
+// Butang "Hantar": simpan status selesai huruf semasa (murid PRO sahaja).
+window.surihHantarStatus = function() {
+    const idx = surihData.hurufSemasa;
+    const huruf = hurufAbjad[idx];
+    if (huruf === undefined) return;
+    const berjayaSimpan = simpanStatusSurihHuruf(idx);
+    surihData.hurufSelesai.add(idx);
+    window.updateSurihNavColors();
+    if (typeof window.showAppToast === 'function') {
+        if (berjayaSimpan) {
+            window.showAppToast('Berjaya Dihantar', `Status surih huruf ${huruf} telah disimpan.`, 'success');
+        } else {
+            window.showAppToast('Sudah Disimpan', `Huruf ${huruf} sudahpun direkodkan.`, 'success');
+        }
+    }
 };

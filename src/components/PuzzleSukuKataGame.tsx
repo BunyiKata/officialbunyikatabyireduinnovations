@@ -852,7 +852,7 @@ export const PuzzleSukuKataGame: React.FC<{ onClose: () => void }> = ({ onClose 
           }}
         >
           <i className="fa-solid fa-puzzle-piece" style={{ color: '#fff' }}></i>
-          <span style={{ fontWeight: 800 }}>PUZZLE SUKU KATA</span>
+          <span style={{ fontWeight: 800 }}>Puzzle Suku Kata</span>
         </div>
 
         <button

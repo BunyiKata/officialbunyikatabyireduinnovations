@@ -289,7 +289,7 @@ function MathTopBar({
   total?: number;
 }) {
   const badgeColor = '#881337';
-  const badgeText = mode === 'tambah' ? 'TAMBAH NOMBOR' : 'TOLAK NOMBOR';
+  const badgeText = mode === 'tambah' ? 'Tambah Nombor' : 'Tolak Nombor';
 
   return (
     <div style={{

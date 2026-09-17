@@ -870,7 +870,7 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
           }}
         >
           <i className={`fa-solid ${mode === 'baca' ? 'fa-book-open-reader' : 'fa-microphone-lines'}`} style={{ color: '#ffffff', fontSize: isMobile ? '1.05rem' : '1.2rem' }}></i>
-          <span>{mode === 'baca' ? 'CUBA BACA' : 'CUBA SEBUT'}</span>
+          <span>{mode === 'baca' ? 'Cuba Baca' : 'Cuba Sebut'}</span>
         </div>
 
         {/* Right Panduan Button (Orange circular button with lightbulb icon) */}
@@ -1790,7 +1790,7 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
                       marginBottom: '6px'
                     }}
                   >
-                    ANDA MENDAPAT
+                    Anda Mendapat
                   </div>
                   <div
                     className="score-box-glow-pulse"
@@ -1830,7 +1830,7 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
                     }}
                   >
                     <span style={{ color: '#f59e0b', margin: '0 4px' }}>•••••</span>
-                    BINTANG
+                    Bintang
                     <span style={{ color: '#f59e0b', margin: '0 4px' }}>•••••</span>
                   </div>
                 </div>
