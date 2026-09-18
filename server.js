@@ -1,4 +1,6 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
@@ -530,13 +532,73 @@ async function rekodAudit(db, tindakan, butiran) {
 }
 
 
+/**
+ * [KESELAMATAN S2] Had cubaan untuk pintu masuk admin.
+ *
+ * Tanpa had ini, sesiapa boleh mencuba kod admin beribu kali sesaat
+ * (brute-force) sehingga berjaya. Dengan 20 cubaan / 15 minit:
+ *  - Penyerang hanya boleh cuba ~80 kod sejam (dahulu boleh jutaan).
+ *  - Admin sebenar (biasanya 1-2 cubaan) tiada masalah.
+ *
+ * Tetapan boleh ubah melalui .env:
+ *  - ADMIN_RATE_MAX   (lalai 20)  — bilangan cubaan dibenarkan
+ *  - ADMIN_RATE_WINDOW_MS (lalai 900000 = 15 minit)
+ */
+const adminVerifyLimiter = rateLimit({
+  windowMs: Number(process.env.ADMIN_RATE_WINDOW_MS) || 15 * 60 * 1000,
+  max: Number(process.env.ADMIN_RATE_MAX) || 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Jangan kira cubaan yang BERJAYA (200) — hanya cubaan gagal yang dihad.
+  skipSuccessfulRequests: true,
+  // Mesej mesra dalam Bahasa Melayu supaya boleh dipaparkan terus di UI.
+  message: {
+    success: false,
+    message: "Terlalu banyak cubaan. Sila cuba lagi dalam 15 minit.",
+  },
+});
+
 async function startServer() {
   const app = express();
   // App Hosting / Cloud Run menyuntik PORT melalui persekitaran. Mesti dipatuhi,
   // jika tidak health check akan gagal dan rollout ditolak.
   const PORT = Number(process.env.PORT) || 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: "1mb" }));
+
+  /**
+   * [KESELAMATAN S3 + S6] Perisai asas (helmet) + had saiz badan permintaan.
+   *
+   * S3: helmet memasang beberapa header keselamatan penting sekaligus:
+   *   - X-Frame-Options: SAMEORIGIN   → halang clickjacking (panel admin tak
+   *     boleh "dibingkaikan" dalam laman lain).
+   *   - X-Content-Type-Options: nosniff → halang penyamaran jenis fail.
+   *   - Strict-Transport-Security      → paksa HTTPS.
+   *   - Referrer-Policy                → jangan bocorkan URL dalam.
+   *
+   *   CSP (Content-Security-Policy) SENGAJA dinyahaktifkan (false) buat masa ini
+   *   kerana index.html menggunakan banyak skrip CDN luar (aframe, mediapipe,
+   *   jspdf, chart.js) + skrip inline. CSP yang ketat akan memecahkan ciri-ciri
+   *   tersebut. Ia boleh diketatkan kemudian selepas setiap CDN dibenarkan
+   *   secara eksplisit dan inline-script dinyahaktifkan.
+   *
+   * S6: express.json({ limit: "1mb" }) menghalang permintaan bersaiz besar
+   *   (cth. 500MB) yang boleh menghabiskan memori dan meruntuhkan pelayan.
+   */
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
+
+  // Sediakan header CSP ringkas LEWAT (selepas helmet) untuk asal sendiri sahaja
+  // jika perlu pada masa hadapan. Kekalkan longgar supaya CDN terus berfungsi.
+  app.use((req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    next();
+  });
 
   /**
    * Senarai pakej awam (harga + tempoh).
@@ -626,7 +688,7 @@ async function startServer() {
     }
   });
 
-  app.post("/api/admin/verify", async (req, res) => {
+  app.post("/api/admin/verify", adminVerifyLimiter, async (req, res) => {
     try {
       const expectedCode = process.env.ADMIN_CODE;
       if (!expectedCode) {

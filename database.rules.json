@@ -82,8 +82,16 @@
       ".read": "auth != null",
       ".indexOn": ["email", "purchase_id", "status"],
       "$orderId": {
-        ".write": "!data.exists() || auth.token.admin == true",
+        ".write": "auth.token.admin == true",
         ".validate": "newData.hasChildren(['purchase_id', 'email', 'status'])"
+      }
+    },
+
+    "affiliate_payments": {
+      ".read": "auth != null && auth.token.admin == true",
+      ".indexOn": ["kod", "nama", "tarikh", "oleh", "jumlah_sen"],
+      "$paymentId": {
+        ".write": "auth.token.admin == true"
       }
     },
 
