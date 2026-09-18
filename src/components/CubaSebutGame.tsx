@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { getCoreAudioContext } from '../utils/coreAudio';
 import { playCorrectPeneguhan, playWrongPeneguhan, playPopupBerjaya, playPopupGagal, resetPeneguhanTurn } from '../utils/peneguhanAudio';
+import { formatSukuKataTeksReact } from '../utils/renderIconHtml';
 
 export interface SebutItem {
   id: string;
@@ -1220,19 +1221,9 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
                 }
 
                 // For Reading Sentences: Format using alternating black & red syllables
-                if (typeof (window as any).formatSukuKataTeks === 'function') {
-                  return (
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: (window as any).formatSukuKataTeks(currentItem.text, 'center')
-                      }}
-                    />
-                  );
-                }
-
                 return (
-                  <span style={{ color: '#10182f' }}>
-                    {currentItem.text}
+                  <span>
+                    {formatSukuKataTeksReact(currentItem.text, 'center')}
                   </span>
                 );
               })()}

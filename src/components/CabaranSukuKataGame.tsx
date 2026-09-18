@@ -9,6 +9,7 @@ import {
   playPopupGagal,
   resetPeneguhanTurn,
 } from '../utils/peneguhanAudio';
+import { renderIconHtml, formatSukuKataTeksReact } from '../utils/renderIconHtml';
 
 interface GameProps {
   onClose: () => void;
@@ -1398,7 +1399,11 @@ const PadanGarisanKVK: React.FC<PadanGarisanProps> = ({
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '110px', width: '100%', marginBottom: '8px' }}>
                 {activePopup.icon && activePopup.icon.includes('<img') ? (
-                  <div dangerouslySetInnerHTML={{ __html: activePopup.icon }} style={{ width: '100%', height: '110px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                  renderIconHtml(activePopup.icon, { maxHeight: 110 }) ?? (
+                    <div style={{ width: '100%', height: '110px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {activePopup.icon}
+                    </div>
+                  )
                 ) : activePopup.icon && (activePopup.icon.startsWith('/') || activePopup.icon.includes('.png')) ? (
                   <img src={activePopup.icon} alt={activePopup.word} style={{ maxHeight: '110px', maxWidth: '100%', objectFit: 'contain' }} />
                 ) : (
@@ -1856,7 +1861,11 @@ const Crossword8x8: React.FC<CrosswordProps> = ({
             >
               <div className="text-[3rem] md:text-[3.5rem] leading-none mb-1" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '85px' }}>
                 {activePopup.icon && activePopup.icon.includes('<img') ? (
-                  <div dangerouslySetInnerHTML={{ __html: activePopup.icon }} style={{ width: '100%', height: '85px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                  renderIconHtml(activePopup.icon, { maxHeight: 85 }) ?? (
+                    <div style={{ width: '100%', height: '85px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {activePopup.icon}
+                    </div>
+                  )
                 ) : activePopup.icon && (activePopup.icon.startsWith('/') || activePopup.icon.includes('.png')) ? (
                   <img src={activePopup.icon} alt={activePopup.word} style={{ maxHeight: '85px', maxWidth: '100%', objectFit: 'contain' }} />
                 ) : (
@@ -2710,7 +2719,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                           ))}
                         </div>
                       ) : currentQ.image && currentQ.image.includes('<img') ? (
-                        <div dangerouslySetInnerHTML={{ __html: currentQ.image }} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                        renderIconHtml(currentQ.image, { maxHeight: 130, cursor: targetAudio ? 'pointer' : 'default' }) ?? currentQ.image
                       ) : currentQ.image && (currentQ.image.startsWith('/') || currentQ.image.includes('.png')) ? (
                         <img
                           src={currentQ.image}
@@ -2845,7 +2854,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
               <div className={`neo-box cabaran-bacaan-box ${currentQ.type === 'padan' ? 'cabaran-padan-box' : ''}`} style={{ backgroundColor: '#ffffff', backgroundImage: 'radial-gradient(rgba(16, 24, 47, 0.05) 1.5px, transparent 1.5px)', backgroundSize: '15px 15px', textAlign: 'center', padding: '16px 20px', width: '100%', maxWidth: '550px', position: 'relative' }}>
                 <div className="cabaran-bacaan-image" style={{ fontSize: currentQ.image && currentQ.image.length > 20 ? 'clamp(1.5rem, 5vw, 2rem)' : 'clamp(2.5rem, 10vw, 3rem)', filter: 'drop-shadow(2px 4px 0 rgba(0,0,0,0.2))', wordBreak: 'break-word', lineHeight: 1.3 }}>
                   {currentQ.image && currentQ.image.includes('<img') ? (
-                    <div dangerouslySetInnerHTML={{ __html: currentQ.image }} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                    renderIconHtml(currentQ.image, { maxHeight: 135 }) ?? currentQ.image
                   ) : currentQ.image && (currentQ.image.startsWith('/') || currentQ.image.includes('.png') || currentQ.image.includes('.jpg')) ? (
                     <img src={currentQ.image} alt="Soalan" style={{ maxHeight: '135px', maxWidth: '100%', objectFit: 'contain', borderRadius: '12px' }} />
                   ) : (
@@ -2882,12 +2891,9 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                     cursor: 'pointer',
                     userSelect: 'none'
                   }}
-                  dangerouslySetInnerHTML={{
-                    __html: typeof (window as any).formatSukuKataTeks === 'function'
-                      ? (window as any).formatSukuKataTeks(currentQ.passage, 'left')
-                      : currentQ.passage
-                  }}
-                />
+                >
+                  {formatSukuKataTeksReact(currentQ.passage, 'left')}
+                </div>
                 <div className="cabaran-bacaan-question" style={{ fontSize: '1.05rem', fontWeight: '800', color: '#168f81', marginTop: '8px' }}>
                   {currentQ.question}
                 </div>
@@ -2899,7 +2905,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                 <div className="neo-box cabaran-bacaan-box cabaran-susun-box" style={{ backgroundColor: '#ffffff', backgroundImage: 'radial-gradient(rgba(16, 24, 47, 0.05) 1.5px, transparent 1.5px)', backgroundSize: '15px 15px', padding: '16px 40px', width: '100%', maxWidth: '420px', position: 'relative', borderRadius: '20px' }}>
                   <div className="cabaran-bacaan-image cabaran-susun-image" style={{ fontSize: currentQ.image && currentQ.image.length > 20 ? 'clamp(1.5rem, 5vw, 2.5rem)' : 'clamp(2.5rem, 10vw, 3.8rem)', filter: 'drop-shadow(2px 4px 0 rgba(0,0,0,0.2))', cursor: currentQ.imageText ? 'pointer' : 'default', wordBreak: 'break-word', lineHeight: 1.3 }} onClick={() => currentQ.imageText && playAudio(currentQ.imageText)}>
                     {currentQ.image && currentQ.image.includes('<img') ? (
-                      <div dangerouslySetInnerHTML={{ __html: currentQ.image }} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                      renderIconHtml(currentQ.image, { maxHeight: 135 }) ?? currentQ.image
                     ) : currentQ.image && (currentQ.image.startsWith('/') || currentQ.image.includes('.png') || currentQ.image.includes('.jpg')) ? (
                       <img src={currentQ.image} alt="Soalan" style={{ maxHeight: '135px', maxWidth: '100%', objectFit: 'contain', borderRadius: '12px' }} />
                     ) : (
@@ -3085,7 +3091,7 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
                           onClick={() => handleOptionClick(optIcon, i)}
                         >
                           {optIcon && optIcon.includes('<img') ? (
-                            <div dangerouslySetInnerHTML={{ __html: optIcon }} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                            renderIconHtml(optIcon, { maxHeight: 80 }) ?? optIcon
                           ) : optIcon && (optIcon.startsWith('/') || optIcon.includes('.png')) ? (
                             <img src={optIcon} alt="Pilihan" style={{ maxHeight: '80px', maxWidth: '100%', objectFit: 'contain' }} />
                           ) : (

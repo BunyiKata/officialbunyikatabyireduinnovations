@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { getCoreAudioContext } from '../utils/coreAudio';
+import { renderIconHtml } from '../utils/renderIconHtml';
 
 const WORD_DATABASE: Record<string, { word: string; syllables: string[]; emoji: string }[]> = {
     'KV': [
@@ -1697,7 +1698,7 @@ export const TandukKataGame = ({ onClose }: { onClose: () => void }) => {
                             {activeWord.emoji && selectedCategory !== 'KV' && (
                                 <div style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '140px' }}>
                                     {activeWord.emoji.includes('<img') ? (
-                                        <div dangerouslySetInnerHTML={{ __html: activeWord.emoji }} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                                        renderIconHtml(activeWord.emoji, { maxHeight: 130, maxWidth: 180 }) ?? activeWord.emoji
                                     ) : activeWord.emoji.includes('/') || activeWord.emoji.includes('.png') ? (
                                         <img src={activeWord.emoji} alt={activeWord.word} style={{ maxHeight: '130px', maxWidth: '180px', objectFit: 'contain' }} />
                                     ) : (
