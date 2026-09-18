@@ -219,8 +219,32 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
   const [jumlahDibayarSen, setJumlahDibayarSen] = React.useState(0);
   const [halamanRujukan, setHalamanRujukan] = React.useState(1);
   const [halamanBayaran, setHalamanBayaran] = React.useState(1);
+  // Halang muat naik serentak (cth. peristiwa affiliate-mode-change DAN
+  // screen-changed tercetus berturut-turut selepas log masuk).
+  const sedangMuatRef = React.useRef(false);
+
+  // Elak ralat "tidak aktif" yang mengelirukan: komponen ini SENTIASA
+  // dipasang (disembunyikan melalui CSS kelas skrin), jadi jangan panggil API
+  // affiliate melainkan sesi affiliate BETUL-BETUL wujud. Jika tidak, pada
+  // muat halaman segar (belum log masuk) panggilan akan gagal & meninggalkan
+  // ralat basi yang dipaparkan selepas pengguna log masuk (effect [] tidak
+  // dijalankan semula).
+  const adaSesiAffiliate = React.useCallback((): boolean => {
+    try {
+      if (typeof window === "undefined") return false;
+      if ((window as any).modAffiliateAktif === true) return true;
+      if (typeof document !== "undefined" && document.body?.classList.contains("affiliate-mode")) return true;
+      if ((localStorage.getItem("bunyiKataUserRole") || "").toLowerCase().trim() === "affiliate") return true;
+      if (localStorage.getItem("bunyiKataAffiliateKod")) return true;
+      return false;
+    } catch {
+      return false;
+    }
+  }, []);
 
   const muatData = React.useCallback(async () => {
+    if (sedangMuatRef.current) return;
+    sedangMuatRef.current = true;
     setMemuat(true);
     setRalat("");
     // Bersihkan status tersimpan SEBELUM muat naik baharu supaya nilai basi
@@ -241,54 +265,12 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
     } catch (e) {
       console.warn("[Affiliate] Gagal segarkan token:", e);
     }
-    const [hasilProfil, senarai, hasilBayaran] = await Promise.all([
-      ambilProfilAffiliate(),
-      ambilReferralSendiri(),
-      ambilLaporanPembayaranAffiliate(),
-    ]);
-    setBayaran(hasilBayaran.dibayar_sejarah || []);
-    setJumlahDibayarSen(Number(hasilBayaran.jumlah_dibayar_sen) || 0);
-    if (!hasilProfil.berjaya || !hasilProfil.affiliate) {
-      setRalat(hasilProfil.mesej || "Gagal memuatkan profil affiliate.");
-    } else {
-      setProfil(hasilProfil.affiliate);
-      setRingkasan(hasilProfil.ringkasan || null);
-      simpanStatusAffiliate(hasilProfil.affiliate);
-      if (hasilProfil.affiliate.kod) {
-        localStorage.setItem("bunyiKataAffiliateKod", hasilProfil.affiliate.kod);
-        (window as any).bunyiKataAffiliateKod = hasilProfil.affiliate.kod;
-      }
-      if (hasilProfil.affiliate.email) {
-        localStorage.setItem("bunyiKataAffiliateEmail", hasilProfil.affiliate.email);
-        (window as any).bunyiKataAffiliateEmail = hasilProfil.affiliate.email;
-      }
-      if (hasilProfil.affiliate.nama) {
-        localStorage.setItem("bunyiKataNamaAffiliate", hasilProfil.affiliate.nama);
-        (window as any).bunyiKataNamaAffiliate = hasilProfil.affiliate.nama;
-      }
-    }
-    setReferral(senarai);
-    setHalamanRujukan(1);
-    setHalamanBayaran(1);
-    setMemuat(false);
-  }, []);
-
-  React.useEffect(() => {
-    let batal = false;
-    (async () => {
-      setMemuat(true);
-      setRalat("");
-      // Elak pembacaan status basi semasa tetingkap memuat (lihat muatData).
-      try {
-        localStorage.removeItem("bunyiKataAffiliateStatus");
-        (window as any).bunyiKataAffiliateStatus = "";
-      } catch {}
+    try {
       const [hasilProfil, senarai, hasilBayaran] = await Promise.all([
         ambilProfilAffiliate(),
         ambilReferralSendiri(),
         ambilLaporanPembayaranAffiliate(),
       ]);
-      if (batal) return;
       setBayaran(hasilBayaran.dibayar_sejarah || []);
       setJumlahDibayarSen(Number(hasilBayaran.jumlah_dibayar_sen) || 0);
       if (!hasilProfil.berjaya || !hasilProfil.affiliate) {
@@ -313,12 +295,59 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
       setReferral(senarai);
       setHalamanRujukan(1);
       setHalamanBayaran(1);
+    } catch (e: any) {
+      console.warn("[Affiliate] Gagal memuatkan data panel:", e?.message || e);
+      setRalat("Tidak dapat memuatkan data affiliate. Sila cuba lagi.");
+    } finally {
       setMemuat(false);
-    })();
-    return () => {
-      batal = true;
-    };
+      sedangMuatRef.current = false;
+    }
   }, []);
+
+  React.useEffect(() => {
+    // Muat data HANYA apabila sesi affiliate wujud. Komponen ini dipasang pada
+    // setiap muat halaman (walaupun tersembunyi), jadi tanpa semakan ini,
+    // panggilan API pada muat segar (belum log masuk) akan gagal & menetapkan
+    // ralat "Sesi affiliate tidak aktif" yang kekal dipaparkan selepas log masuk.
+    const muatJikaAdaSesi = () => {
+      if (!adaSesiAffiliate()) {
+        // Belum log masuk: jangan paparkan ralat, tunggu peristiwa mod affiliate.
+        setMemuat(false);
+        setRalat("");
+        return;
+      }
+      void muatData();
+    };
+
+    muatJikaAdaSesi();
+
+    // PEMBETULAN: dengar peristiwa mod affiliate. Tanpa ini, selepas affiliate
+    // log masuk (masukModAffiliate menyiarkan 'affiliate-mode-change'), effect
+    // [] tidak dijalankan semula, jadi panel kekal memaparkan keadaan ralat
+    // basi ("tidak aktif") walaupun /api/affiliate/me menunjukkan status aktif.
+    const onAffiliateChange = (ev?: any) => {
+      if (ev?.detail?.isAffiliate === true || adaSesiAffiliate()) {
+        muatJikaAdaSesi();
+      }
+    };
+    const onScreenChange = (ev?: any) => {
+      const id = ev?.detail?.screenId || (typeof window !== "undefined" ? (window as any).currentActiveScreen : "");
+      if (id === "affiliate-dashboard" || String(id || "").startsWith("affiliate-")) {
+        muatJikaAdaSesi();
+      }
+    };
+
+    window.addEventListener("affiliate-mode-change", onAffiliateChange);
+    window.addEventListener("screen-changed", onScreenChange);
+    window.addEventListener("screen-change", onScreenChange);
+    window.addEventListener("focus", onAffiliateChange);
+    return () => {
+      window.removeEventListener("affiliate-mode-change", onAffiliateChange);
+      window.removeEventListener("screen-changed", onScreenChange);
+      window.removeEventListener("screen-change", onScreenChange);
+      window.removeEventListener("focus", onAffiliateChange);
+    };
+  }, [adaSesiAffiliate, muatData]);
 
   // Simpan status affiliate (aktif/gantung) supaya app-logic.js boleh menapis
   // akses pembelajaran tanpa perlu memanggil API tambahan.

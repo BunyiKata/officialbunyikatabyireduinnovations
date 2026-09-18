@@ -224,9 +224,14 @@ async function panggilAdmin<T extends { berjaya: boolean }>(
   body: Record<string, unknown>,
 ): Promise<T> {
   try {
-    const pengguna = await dapatkanPenggunaAuth();
+    let pengguna = await dapatkanPenggunaAuth();
+    // Perlumbaan pemulihan sesi Firebase Auth (lihat panggilAdminGet).
     if (!pengguna) {
-      return { berjaya: false, mesej: 'Sesi admin tidak aktif. Sila berhubung dengan admin.' } as unknown as T;
+      await new Promise((r) => setTimeout(r, 600));
+      pengguna = await dapatkanPenggunaAuth();
+    }
+    if (!pengguna) {
+      return { berjaya: false, mesej: 'Sesi admin tidak aktif. Sila muat semula halaman, atau hubungi admin jika masalah berterusan.' } as unknown as T;
     }
 
     const token = await pengguna.getIdToken();
@@ -460,9 +465,16 @@ async function panggilAdminGet<T extends { berjaya: boolean }>(
   labelSesi = 'Sesi admin',
 ): Promise<T> {
   try {
-    const pengguna = await dapatkanPenggunaAuth();
+    let pengguna = await dapatkanPenggunaAuth();
+    // Perlumbaan pemulihan sesi Firebase Auth: sejurus selepas log masuk atau
+    // muat semula, `auth.currentUser` mungkin belum sedia. Cuba semula sekali
+    // selepas jeda pendek sebelum melaporkan "sesi tidak aktif" (palsu).
     if (!pengguna) {
-      return { berjaya: false, mesej: `${labelSesi} tidak aktif. Sila berhubung dengan admin.` } as unknown as T;
+      await new Promise((r) => setTimeout(r, 600));
+      pengguna = await dapatkanPenggunaAuth();
+    }
+    if (!pengguna) {
+      return { berjaya: false, mesej: `${labelSesi} tidak aktif. Sila muat semula halaman, atau hubungi admin jika masalah berterusan.` } as unknown as T;
     }
     const token = await pengguna.getIdToken();
     const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
