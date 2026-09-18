@@ -1,4 +1,3 @@
-
 @font-face {
     font-family: 'AtlantaRoundedBlack';
     src: url('/fonts/AtlantaRoundedBlack.woff2') format('woff2'),
@@ -6864,6 +6863,7 @@ body:not(.teacher-mode):not(.admin-mode):not(.parent-mode):not(.affiliate-mode):
         display: flex !important;
     }
 }
+
 @media (min-width: 721px) {
     body:not(.teacher-mode):not(.admin-mode):not(.parent-mode):not(.affiliate-mode):has(#leaderboard-screen.active) #student-global-nav {
         display: none !important;
@@ -7821,9 +7821,9 @@ body:is(.teacher-mode, .admin-mode, .parent-mode, .affiliate-mode) #view-ar-kira
     padding-top: 0 !important;
 }
 
-body:is(.teacher-mode, .admin-mode, .parent-mode, .affiliate-mode):has(#view-belajar-fonik.active) #view-belajar-fonik > div,
-body:is(.teacher-mode, .admin-mode, .parent-mode, .affiliate-mode):has(#view-belajar-nombor.active) #view-belajar-nombor > div,
-body:is(.teacher-mode, .admin-mode, .parent-mode, .affiliate-mode):has(#view-kad-imbasan-nombor.active) #view-kad-imbasan-nombor > div {
+body:is(.teacher-mode, .admin-mode, .parent-mode, .affiliate-mode):has(#view-belajar-fonik.active) #view-belajar-fonik>div,
+body:is(.teacher-mode, .admin-mode, .parent-mode, .affiliate-mode):has(#view-belajar-nombor.active) #view-belajar-nombor>div,
+body:is(.teacher-mode, .admin-mode, .parent-mode, .affiliate-mode):has(#view-kad-imbasan-nombor.active) #view-kad-imbasan-nombor>div {
     min-height: calc(100vh - 40px) !important;
 }
 
@@ -8070,7 +8070,7 @@ body.parent-mode #student-global-nav {
         display: grid !important;
         grid-template-columns: 32px 32px !important;
         grid-template-rows: 32px 32px !important;
-        grid-template-areas: 
+        grid-template-areas:
             "info edit"
             ". tukar" !important;
         gap: 8px !important;
@@ -8980,11 +8980,14 @@ i.fa-brands {
 
 /* Sijil Modal Preview Outline Glow Animations */
 @keyframes sijilPreviewGlow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 0 3px #f59e0b, 0 0 16px rgba(245, 158, 11, 0.65), 0 0 32px rgba(251, 191, 36, 0.4), 0 8px 20px rgba(0, 0, 0, 0.25);
         border-color: #0f172a;
         transform: scale(1);
     }
+
     50% {
         box-shadow: 0 0 0 5px #fde047, 0 0 28px rgba(245, 158, 11, 0.95), 0 0 52px rgba(251, 191, 36, 0.7), 0 10px 24px rgba(0, 0, 0, 0.3);
         border-color: #d97706;
@@ -8993,10 +8996,13 @@ i.fa-brands {
 }
 
 @keyframes certDashedOutlineGlow {
-    0%, 100% {
+
+    0%,
+    100% {
         border-color: rgba(245, 158, 11, 0.45);
         box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
     }
+
     50% {
         border-color: #f59e0b;
         box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
@@ -9004,9 +9010,12 @@ i.fa-brands {
 }
 
 @keyframes sijilModalCardGlow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 10px 0 #0f172a, 0 0 0 2px rgba(245, 158, 11, 0.3), 0 0 14px rgba(245, 158, 11, 0.2);
     }
+
     50% {
         box-shadow: 0 10px 0 #0f172a, 0 0 0 4px #fbbf24, 0 0 28px rgba(245, 158, 11, 0.45);
     }
@@ -9086,7 +9095,7 @@ i.fa-brands {
     box-sizing: border-box !important;
 }
 
-.sijil-btn-row > button {
+.sijil-btn-row>button {
     flex: 1 1 0 !important;
     width: 0 !important;
     min-width: 0 !important;
@@ -9104,10 +9113,11 @@ i.fa-brands {
     transition: transform 0.15s ease, box-shadow 0.15s ease !important;
 }
 
-.sijil-btn-row > button:hover {
+.sijil-btn-row>button:hover {
     transform: translateY(-2px) !important;
 }
-.sijil-btn-row > button:active {
+
+.sijil-btn-row>button:active {
     transform: translateY(1px) !important;
 }
 
@@ -9116,6 +9126,7 @@ i.fa-brands {
     #modal-sijil-pencapaian {
         padding: 8px !important;
     }
+
     .sijil-modal-card {
         max-width: 340px !important;
         width: 90% !important;
@@ -9123,12 +9134,14 @@ i.fa-brands {
         border-radius: 18px !important;
         border-width: 3px !important;
     }
+
     #modal-sijil-canvas-container {
         padding: 6px !important;
         margin-top: 18px !important;
         margin-bottom: 12px !important;
         min-height: 260px !important;
     }
+
     .sijil-img-glow {
         width: 100% !important;
         max-width: 270px !important;
@@ -9136,11 +9149,13 @@ i.fa-brands {
         border-radius: 10px !important;
         border-width: 2.5px !important;
     }
+
     .sijil-btn-row {
         gap: 6px !important;
         max-width: 100% !important;
     }
-    .sijil-btn-row > button {
+
+    .sijil-btn-row>button {
         height: 42px !important;
         font-size: 0.82rem !important;
         padding: 0 2px !important;
@@ -9387,11 +9402,14 @@ i.fa-brands {
 
 /* Animation Outline Glow Gold Besar-Kecil Perlahan untuk Butang Audio Oren Cabaran Utama */
 @keyframes cabaranOrangeAudioGoldGlow {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
         box-shadow: 0 5px 0 #10182f, 0 0 0 3.5px #ffffff, 0 0 0 7.5px #f59e0b, 0 0 20px rgba(245, 158, 11, 0.8), 0 0 32px rgba(250, 204, 21, 0.45);
         border-color: #10182f;
     }
+
     50% {
         transform: scale(1.07);
         box-shadow: 0 5px 0 #10182f, 0 0 0 4.5px #ffffff, 0 0 0 14px #fbbf24, 0 0 36px rgba(245, 158, 11, 1), 0 0 52px rgba(250, 204, 21, 0.8);
@@ -9642,10 +9660,13 @@ i.fa-brands {
 }
 
 @keyframes flashTimerGlow {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
         box-shadow: 0 4px 0 #000, 0 0 6px rgba(239, 68, 68, 0.4);
     }
+
     50% {
         transform: scale(1.05);
         box-shadow: 0 4px 0 #000, 0 0 14px rgba(239, 68, 68, 0.85);
@@ -9653,13 +9674,19 @@ i.fa-brands {
 }
 
 @keyframes timerIconSpin {
-    0%, 20% {
+
+    0%,
+    20% {
         transform: rotate(0deg);
     }
-    40%, 60% {
+
+    40%,
+    60% {
         transform: rotate(180deg);
     }
-    80%, 100% {
+
+    80%,
+    100% {
         transform: rotate(360deg);
     }
 }
@@ -9919,6 +9946,7 @@ i.fa-brands {
 }
 
 @media (min-width: 768px) {
+
     /* Ensure inactive screens are strictly hidden */
     .screen:not(.active) {
         display: none !important;
@@ -9977,7 +10005,7 @@ i.fa-brands {
         width: 100% !important;
     }
 
-    .login-hero-wrapper #mode-buttons-container > div {
+    .login-hero-wrapper #mode-buttons-container>div {
         max-width: 540px !important;
         width: 100% !important;
     }
@@ -10019,11 +10047,11 @@ i.fa-brands {
         box-shadow: 0 6px 0 var(--color-dark, #10182f) !important;
     }
 
-    #mode-selection-card > div {
+    #mode-selection-card>div {
         font-size: 1.15rem !important;
     }
 
-    #mode-selection-card > div > span {
+    #mode-selection-card>div>span {
         font-size: 1.18rem !important;
         margin-top: 6px !important;
     }
@@ -12970,6 +12998,7 @@ i.fa-brands {
 /* ========================================================================== */
 
 @media (min-width: 768px) and (max-width: 1200px) {
+
     /* --- General Tablet Screen & Layout Tweaks --- */
     .screen {
         padding-left: 18px !important;
@@ -13117,7 +13146,7 @@ i.fa-brands {
 
     /* Statistik Kelas Saya Header Card */
     #guru-dashboard .header-card,
-    #guru-dashboard > div:first-child {
+    #guru-dashboard>div:first-child {
         max-width: 880px !important;
         width: 100% !important;
         margin: 0 auto 16px auto !important;
@@ -13126,7 +13155,7 @@ i.fa-brands {
 
     /* Summary Stats Grid (Bilangan Murid & Aktiviti Selesai) */
     #guru-dashboard .stats-grid,
-    #guru-dashboard > div[style*="display: grid"] {
+    #guru-dashboard>div[style*="display: grid"] {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: 16px !important;
@@ -13137,7 +13166,7 @@ i.fa-brands {
     /* Prestasi Murid & Laporan Card */
     #guru-dashboard .guru-table-card,
     #guru-dashboard #guru-prestasi-card,
-    #guru-dashboard > div:last-child {
+    #guru-dashboard>div:last-child {
         max-width: 880px !important;
         margin: 0 auto 24px auto !important;
         padding: 20px !important;
@@ -13211,7 +13240,7 @@ i.fa-brands {
     }
 
     /* Kad Header: Statistik Anak Saya */
-    #ibubapa-dashboard > div.neo-box:first-child {
+    #ibubapa-dashboard>div.neo-box:first-child {
         max-width: 880px !important;
         width: 100% !important;
         margin: 0 auto 18px auto !important;
@@ -13253,7 +13282,7 @@ i.fa-brands {
         margin: 0 auto 20px auto !important;
     }
 
-    .ibubapa-stats-grid > div {
+    .ibubapa-stats-grid>div {
         padding: 16px 18px !important;
         border-radius: 20px !important;
         min-height: 120px !important;
@@ -13280,7 +13309,7 @@ i.fa-brands {
     }
 
     /* Kad Rekod Kemajuan Cabaran & Jadual */
-    #ibubapa-dashboard > div:last-child {
+    #ibubapa-dashboard>div:last-child {
         max-width: 880px !important;
         margin: 0 auto 30px auto !important;
         padding: 20px 22px !important;
@@ -13482,8 +13511,15 @@ i.fa-brands {
 }
 
 @keyframes typewriterBlink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
 }
 
 .auth-modal-left-desc {
@@ -13610,14 +13646,17 @@ i.fa-brands {
         width: 100%;
         gap: 8px;
     }
+
     .guru-filter-kelas {
         width: 100% !important;
     }
+
     .guru-filter-secondary-group {
         display: flex;
         gap: 8px;
         width: 100%;
     }
+
     .guru-filter-secondary-group select {
         flex: 1;
         min-width: 0;
@@ -13681,6 +13720,7 @@ i.fa-brands {
         flex-direction: column;
         gap: 16px;
     }
+
     .auth-modal-divider {
         width: 100%;
         height: 2px;
@@ -13688,22 +13728,27 @@ i.fa-brands {
         border-top: 2px dashed rgba(16, 24, 47, 0.2);
         margin: 4px 0;
     }
+
     .auth-modal-left {
         padding: 14px 12px;
     }
+
     .auth-modal-left-logo {
         width: 125px;
         margin-bottom: 8px;
     }
+
     .auth-modal-left-title {
         font-size: 1.1rem;
         margin-bottom: 4px;
         min-height: auto;
     }
+
     .auth-modal-left-desc {
         font-size: 0.82rem;
         margin-bottom: 8px;
     }
+
     .auth-modal-badges {
         display: none;
     }
@@ -13827,6 +13872,7 @@ i.fa-brands {
 }
 
 @media (max-width: 480px) {
+
     #app-info-social-buttons-container,
     .modal-content>div.app-info-social-row,
     .app-info-social-row {
@@ -13837,6 +13883,7 @@ i.fa-brands {
         gap: 10px !important;
         margin: 6px auto 18px auto !important;
     }
+
     #app-info-social-buttons-container .app-info-social-btn,
     .app-info-social-btn {
         width: 42px !important;
@@ -13856,7 +13903,8 @@ i.fa-brands {
 }
 
 #modal-cabaran-lain-game.cabaran-tambahan-fullscreen-screen {
-    display: none; /* hidden by default; JS controls visibility via style.display */
+    display: none;
+    /* hidden by default; JS controls visibility via style.display */
     position: fixed !important;
     inset: 0 !important;
     width: 100vw !important;
@@ -13878,6 +13926,7 @@ i.fa-brands {
 }
 
 @media (max-width: 768px) {
+
     #modal-cabaran-lain-game,
     #modal-cabaran-lain-game.cabaran-tambahan-fullscreen-screen {
         background-position: left center !important;
@@ -13944,7 +13993,7 @@ i.fa-brands {
 }
 
 #modal-cabaran-lain-game .cabaran-tambahan-top-bar .top-bar-spacer,
-#modal-cabaran-lain-game .cabaran-tambahan-top-bar > div:last-child {
+#modal-cabaran-lain-game .cabaran-tambahan-top-bar>div:last-child {
     width: 48px !important;
     height: 48px !important;
     flex-shrink: 0 !important;
@@ -14100,8 +14149,8 @@ i.fa-brands {
 }
 
 /* FIX: Cari Kata (Word Search) - Fits comfortably without scrolling on laptop */
-#modal-cabaran-lain-game #cabaran-lain-game-area > div[style*="Tarik huruf"],
-#modal-cabaran-lain-game #cabaran-lain-game-area > div:first-child:not(.cl-top-header-row) {
+#modal-cabaran-lain-game #cabaran-lain-game-area>div[style*="Tarik huruf"],
+#modal-cabaran-lain-game #cabaran-lain-game-area>div:first-child:not(.cl-top-header-row) {
     color: #0f172a !important;
     text-shadow: none !important;
     font-size: 1.05rem !important;
@@ -14357,6 +14406,7 @@ i.fa-brands {
         margin-bottom: 12px !important;
         padding: 0 2px !important;
     }
+
     #modal-cabaran-lain-game .cl-canvas-wrap,
     #modal-cabaran-lain-game canvas,
     #modal-cabaran-lain-game #bc-canvas,
@@ -14371,21 +14421,26 @@ i.fa-brands {
     #modal-cabaran-lain-game #vw-grid {
         max-width: min(390px, 92vw) !important;
     }
+
     #modal-cabaran-lain-game #ws-word-list {
         max-width: min(370px, 92vw) !important;
     }
+
     #modal-cabaran-lain-game #ws-word-list span {
         font-size: 0.95rem !important;
         padding: 6px 14px !important;
     }
+
     #modal-cabaran-lain-game #ws-grid {
         max-width: min(360px, 92vw) !important;
         gap: 6px !important;
     }
+
     #modal-cabaran-lain-game #ws-grid .ws-cell {
         font-size: 1.3rem !important;
         border-radius: 12px !important;
     }
+
     #modal-cabaran-lain-game #mm-grid {
         display: grid !important;
         grid-template-columns: repeat(3, 1fr) !important;
@@ -14393,15 +14448,18 @@ i.fa-brands {
         gap: 10px !important;
         margin: 0 auto !important;
     }
+
     #modal-cabaran-lain-game .mm-card-container,
     #modal-cabaran-lain-game .mm-card-inner,
     #modal-cabaran-lain-game .mm-card-front,
     #modal-cabaran-lain-game .mm-card-back {
         border-radius: 14px !important;
     }
+
     #modal-cabaran-lain-game .mm-card-front {
         font-size: 2.1rem !important;
     }
+
     #modal-cabaran-lain-game .mm-card-back span,
     #modal-cabaran-lain-game .mm-card-letter {
         font-size: 2.6rem !important;
@@ -14420,6 +14478,7 @@ i.fa-brands {
         margin: 0 auto !important;
         gap: 10px !important;
     }
+
     #modal-cabaran-lain-game .cl-bacaan-question-card {
         flex: 0 0 auto !important;
         max-width: 100% !important;
@@ -14430,16 +14489,19 @@ i.fa-brands {
         border-radius: 16px !important;
         cursor: pointer !important;
     }
+
     #modal-cabaran-lain-game .cl-bacaan-question-card img {
         width: 52px !important;
         height: 52px !important;
         border-radius: 10px !important;
         flex-shrink: 0 !important;
     }
+
     #modal-cabaran-lain-game .cl-bacaan-question-card p,
     #modal-cabaran-lain-game .cl-bacaan-question-card span {
         font-size: 1.05rem !important;
     }
+
     #modal-cabaran-lain-game .cl-bacaan-canvas-wrap {
         flex: 0 0 auto !important;
         width: 100% !important;
@@ -14448,6 +14510,7 @@ i.fa-brands {
         min-height: unset !important;
         margin: 0 auto !important;
     }
+
     #modal-cabaran-lain-game .cl-bacaan-canvas-wrap canvas,
     #modal-cabaran-lain-game #bpa-canvas,
     #modal-cabaran-lain-game #lb-canvas,
@@ -14499,10 +14562,12 @@ i.fa-brands {
         transform: translateY(-45px) scale(0.2);
         opacity: 0;
     }
+
     70% {
         transform: translateY(6px) scale(1.15);
         opacity: 1;
     }
+
     100% {
         transform: translateY(0) scale(1);
         opacity: 1;
@@ -14510,13 +14575,25 @@ i.fa-brands {
 }
 
 @keyframes shineSweepLoop {
-    0% { left: -150%; }
-    100% { left: 150%; }
+    0% {
+        left: -150%;
+    }
+
+    100% {
+        left: 150%;
+    }
 }
 
 @keyframes badgeGlowPulse {
-    0%, 100% { filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.45)); }
-    50% { filter: drop-shadow(0 6px 14px rgba(245, 158, 11, 0.8)); }
+
+    0%,
+    100% {
+        filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.45));
+    }
+
+    50% {
+        filter: drop-shadow(0 6px 14px rgba(245, 158, 11, 0.8));
+    }
 }
 
 /* ========================================================
@@ -14631,6 +14708,7 @@ i.fa-brands {
     .cabaran-susun-slots-container {
         gap: 6px !important;
     }
+
     .cabaran-susun-slots-container.is-ayat {
         gap: 4px !important;
     }
@@ -14655,6 +14733,7 @@ i.fa-brands {
     .cabaran-susun-options-container {
         gap: 6px !important;
     }
+
     .cabaran-susun-options-container.is-ayat {
         gap: 4px !important;
     }
@@ -14717,6 +14796,7 @@ i.fa-brands {
         opacity: 0;
         transform: translateX(120%);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -14728,6 +14808,7 @@ i.fa-brands {
         opacity: 1;
         transform: translateX(0);
     }
+
     to {
         opacity: 0;
         transform: translateX(120%);
@@ -14789,9 +14870,11 @@ i.fa-brands {
         gap: 8px !important;
         max-height: 55vh !important;
     }
+
     .student-row-card .student-row-name {
         font-size: 0.82rem !important;
     }
+
     #modal-pilih-anak .modal-content {
         max-width: 96vw !important;
         width: 96vw !important;
@@ -14902,40 +14985,109 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
 
 /* â”€â”€â”€ KEYFRAMES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes landing-fade-up {
-    from { opacity: 0; transform: translateY(28px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(28px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
+
 @keyframes landing-fade-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
+
 @keyframes landing-slide-left {
-    from { opacity: 0; transform: translateX(-32px); }
-    to   { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(-32px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
+
 @keyframes landing-slide-right {
-    from { opacity: 0; transform: translateX(32px); }
-    to   { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(32px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
+
 @keyframes landing-scale-in {
-    from { opacity: 0; transform: scale(0.88); }
-    to   { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.88);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
+
 @keyframes landing-bob {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50%       { transform: translateY(-10px) rotate(4deg); }
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-10px) rotate(4deg);
+    }
 }
+
 @keyframes landing-bob2 {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50%       { transform: translateY(-8px) rotate(-5deg); }
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-8px) rotate(-5deg);
+    }
 }
+
 @keyframes landing-hero-text-in {
-    0%   { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
+
 @keyframes landing-pulse-ring {
-    0%   { transform: scale(1); opacity: 0.6; }
-    100% { transform: scale(1.5); opacity: 0; }
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
 }
 
 /* â”€â”€â”€ SCROLL REVEAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -14945,19 +15097,24 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     transition: opacity 0.55s ease, transform 0.55s ease;
     transition-delay: var(--delay, 0ms);
 }
+
 .landing-reveal.visible {
     opacity: 1;
     transform: translateY(0);
 }
+
 .landing-reveal-left {
     transform: translateX(-24px);
 }
+
 .landing-reveal-left.visible {
     transform: translateX(0);
 }
+
 .landing-reveal-right {
     transform: translateX(24px);
 }
+
 .landing-reveal-right.visible {
     transform: translateX(0);
 }
@@ -14970,10 +15127,12 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
     will-change: transform, opacity;
 }
+
 .landing-section-pop.in-view {
     opacity: 1;
     transform: scale(1) translateY(0);
 }
+
 @media (prefers-reduced-motion: reduce) {
     .landing-section-pop {
         opacity: 1;
@@ -14986,10 +15145,12 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
 .landing-kicker {
     animation: landing-kicker-in 0.5s ease both;
 }
+
 .landing-h2 {
     position: relative;
     animation: landing-title-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
 .landing-h2::after {
     content: "";
     display: block;
@@ -15002,24 +15163,60 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     transform-origin: center;
     animation: landing-title-underline 0.6s ease 0.35s forwards;
 }
+
 @keyframes landing-kicker-in {
-    0%   { opacity: 0; transform: translateY(10px); letter-spacing: 6px; }
-    100% { opacity: 1; transform: translateY(0); letter-spacing: 2.5px; }
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+        letter-spacing: 6px;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        letter-spacing: 2.5px;
+    }
 }
+
 @keyframes landing-title-in {
-    0%   { opacity: 0; transform: translateY(18px) scale(0.96); filter: blur(4px); }
-    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.96);
+        filter: blur(4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
 }
+
 @keyframes landing-title-underline {
-    0%   { transform: scaleX(0); }
-    60%  { transform: scaleX(1.08); }
-    100% { transform: scaleX(1); }
+    0% {
+        transform: scaleX(0);
+    }
+
+    60% {
+        transform: scaleX(1.08);
+    }
+
+    100% {
+        transform: scaleX(1);
+    }
 }
+
 @media (prefers-reduced-motion: reduce) {
+
     .landing-kicker,
     .landing-h2,
-    .landing-h2::after { animation: none; }
-    .landing-h2::after { transform: scaleX(1); }
+    .landing-h2::after {
+        animation: none;
+    }
+
+    .landing-h2::after {
+        transform: scaleX(1);
+    }
 }
 
 /* â”€â”€â”€ ROOT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -15054,6 +15251,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     margin: 0 !important;
     width: 100% !important;
 }
+
 .landing-nav-inner {
     max-width: 1160px;
     margin: 0 auto !important;
@@ -15063,6 +15261,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     justify-content: space-between !important;
     gap: 16px !important;
 }
+
 .landing-brand-logo {
     height: 40px !important;
     width: auto !important;
@@ -15072,6 +15271,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     margin: 0 !important;
     padding: 0 !important;
 }
+
 .landing-nav-links {
     display: flex !important;
     align-items: center !important;
@@ -15081,6 +15281,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     margin: 0 !important;
     padding: 0 !important;
 }
+
 .landing-nav-links a {
     color: #0f2e29 !important;
     text-decoration: none !important;
@@ -15093,9 +15294,11 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     border: none !important;
     box-shadow: none !important;
 }
+
 .landing-nav-links a:hover {
     color: #0e9f6e !important;
 }
+
 .landing-nav-actions {
     display: flex !important;
     align-items: center !important;
@@ -15123,27 +15326,33 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     gap: 8px;
     line-height: 1.2;
 }
+
 .landing-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 7px 0 #0f2e29;
 }
+
 .landing-btn:active {
     transform: translateY(0);
     box-shadow: 0 2px 0 #0f2e29;
 }
+
 .landing-btn svg {
     width: 1.1em;
     height: 1.1em;
     flex-shrink: 0;
 }
+
 .landing-btn-primary {
     background: #ffd93d !important;
     color: #3a2b00 !important;
 }
+
 .landing-btn-outline {
     background: #ffd93d !important;
     color: #3a2b00 !important;
 }
+
 /* Butang HERO — lebih besar, warna lebih tegas daripada nav. */
 .landing-hero-cta .landing-btn-primary {
     background: #ffd93d !important;
@@ -15151,35 +15360,42 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     border-color: #0f2e29 !important;
     box-shadow: 0 5px 0 #0f2e29 !important;
 }
+
 .landing-hero-cta .landing-btn-primary:hover {
     box-shadow: 0 8px 0 #0f2e29 !important;
 }
+
 .landing-hero-cta .landing-btn-outline {
     background: #ffffff !important;
     color: #8a6100 !important;
     border-color: #f5b301 !important;
     box-shadow: 0 5px 0 #f5b301 !important;
 }
+
 .landing-hero-cta .landing-btn-outline:hover {
     background: #fffbea !important;
     box-shadow: 0 8px 0 #f5b301 !important;
 }
+
 .landing-btn-ghost {
     background: transparent !important;
     box-shadow: none !important;
     border-color: transparent !important;
     padding: 10px 12px !important;
 }
+
 .landing-btn-ghost:hover {
     transform: none !important;
     box-shadow: none !important;
     color: #0e9f6e !important;
 }
+
 .landing-btn-lg {
     padding: 14px 30px !important;
     font-size: 1.05rem !important;
     border-radius: 14px !important;
 }
+
 .landing-btn-block {
     width: 100% !important;
 }
@@ -15192,6 +15408,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     font-size: 1.1rem;
     padding: 16px 36px;
 }
+
 .landing-btn-cta-gold:hover {
     background: #ffe566;
     box-shadow: 0 7px 0 #0f2e29;
@@ -15210,6 +15427,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     border-bottom: 3px solid #0f2e29;
     overflow: hidden;
 }
+
 .landing-hero-inner {
     max-width: 1160px;
     margin: 0 auto;
@@ -15220,6 +15438,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     justify-content: center;
     gap: 40px !important;
 }
+
 .landing-hero-text {
     max-width: 640px;
     flex: 1 1 560px;
@@ -15229,6 +15448,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     text-align: left;
     animation: landing-hero-text-in 0.7s ease both;
 }
+
 .landing-badge {
     display: inline-flex;
     align-items: center;
@@ -15241,9 +15461,11 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     box-shadow: 0 4px 0 #0f2e29;
     margin-bottom: 20px;
 }
+
 .landing-badge-anim {
     animation: landing-fade-in 0.5s ease 0.1s both;
 }
+
 .landing-hero-title {
     font-size: clamp(2.2rem, 5.5vw, 3.6rem);
     font-weight: 900;
@@ -15253,31 +15475,71 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     display: flex;
     flex-direction: column;
 }
+
 /* Animasi teks hero — setiap baris masuk dengan efek 3D rotateX + blur. */
 .landing-hero-line {
     display: block;
     transform-origin: 50% 100%;
     animation: landing-hero-line-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
 @keyframes landing-hero-line-in {
-    0%   { opacity: 0; transform: translateY(28px) rotateX(-70deg) scale(0.94); filter: blur(6px); }
-    60%  { opacity: 1; filter: blur(0); }
-    100% { opacity: 1; transform: translateY(0) rotateX(0) scale(1); filter: blur(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(28px) rotateX(-70deg) scale(0.94);
+        filter: blur(6px);
+    }
+
+    60% {
+        opacity: 1;
+        filter: blur(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0) scale(1);
+        filter: blur(0);
+    }
 }
+
 /* Setiap perkataan naik berperingkat (staggered). */
 .landing-ht-word {
     display: inline-block;
     animation: landing-ht-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
-.landing-hero-line:nth-child(1) .landing-ht-word:nth-child(1) { animation-delay: 0.18s; }
-.landing-hero-line:nth-child(1) .landing-ht-word:nth-child(2) { animation-delay: 0.30s; }
-.landing-hero-line:nth-child(1) .landing-ht-word:nth-child(3) { animation-delay: 0.42s; }
-.landing-hero-line:nth-child(2) .landing-ht-word:nth-child(1) { animation-delay: 0.54s; }
-.landing-hero-line:nth-child(2) .landing-ht-word:nth-child(2) { animation-delay: 0.66s; }
-@keyframes landing-ht-pop {
-    0%   { opacity: 0; transform: translateY(16px) scale(0.86); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+
+.landing-hero-line:nth-child(1) .landing-ht-word:nth-child(1) {
+    animation-delay: 0.18s;
 }
+
+.landing-hero-line:nth-child(1) .landing-ht-word:nth-child(2) {
+    animation-delay: 0.30s;
+}
+
+.landing-hero-line:nth-child(1) .landing-ht-word:nth-child(3) {
+    animation-delay: 0.42s;
+}
+
+.landing-hero-line:nth-child(2) .landing-ht-word:nth-child(1) {
+    animation-delay: 0.54s;
+}
+
+.landing-hero-line:nth-child(2) .landing-ht-word:nth-child(2) {
+    animation-delay: 0.66s;
+}
+
+@keyframes landing-ht-pop {
+    0% {
+        opacity: 0;
+        transform: translateY(16px) scale(0.86);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* Kilau bergerak pada perkataan "Membaca". */
 .landing-hero-title .landing-hl {
     background: linear-gradient(100deg, #0e9f6e 0%, #12b981 34%, #ffd93d 50%, #12b981 66%, #0e9f6e 100%);
@@ -15287,10 +15549,17 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     -webkit-text-fill-color: transparent;
     animation: landing-hl-sheen 4.5s linear 1.2s infinite;
 }
+
 @keyframes landing-hl-sheen {
-    0%   { background-position: 130% 0; }
-    100% { background-position: -130% 0; }
+    0% {
+        background-position: 130% 0;
+    }
+
+    100% {
+        background-position: -130% 0;
+    }
 }
+
 /* Garisan bawah "Membaca" melukis dari kiri ke kanan. */
 .landing-hero-title .landing-hl::after {
     z-index: 0;
@@ -15298,16 +15567,24 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     transform-origin: left center;
     animation: landing-hl-underline 0.7s ease 0.95s both;
 }
+
 @keyframes landing-hl-underline {
-    0%   { transform: scaleX(0); }
-    100% { transform: scaleX(1); }
+    0% {
+        transform: scaleX(0);
+    }
+
+    100% {
+        transform: scaleX(1);
+    }
 }
+
 .landing-hl {
     color: #0e9f6e;
     position: relative;
     white-space: nowrap;
     display: inline-block;
 }
+
 .landing-hl::after {
     content: "";
     position: absolute;
@@ -15320,6 +15597,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     z-index: -1;
     opacity: 0.7;
 }
+
 .landing-hero-sub {
     font-size: clamp(1rem, 2.2vw, 1.15rem);
     color: #285b52;
@@ -15327,6 +15605,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     margin: 0 auto 28px;
     animation: landing-hero-text-in 0.7s ease 0.25s both;
 }
+
 .landing-hero-cta {
     display: flex;
     flex-wrap: wrap;
@@ -15335,6 +15614,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     margin-bottom: 18px;
     animation: landing-hero-text-in 0.7s ease 0.35s both;
 }
+
 .landing-hero-note {
     font-size: 0.9rem;
     color: #2f7d6c;
@@ -15346,14 +15626,17 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     flex-wrap: wrap;
     animation: landing-hero-text-in 0.7s ease 0.45s both;
 }
+
 .landing-hero-note svg {
     color: #0e9f6e;
 }
+
 .landing-hero-art {
     display: flex;
     justify-content: center;
     animation: landing-scale-in 0.8s ease 0.2s both;
 }
+
 /* .landing-hero-card / .landing-float-* dibuang pada v3 — hero kini guna
    logo glitch sahaja (tiada kotak hijau / border pada logo). */
 
@@ -15363,6 +15646,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     border-bottom: 3px solid #0f2e29;
     padding: 40px 20px;
 }
+
 .landing-stats-inner {
     max-width: 900px;
     margin: 0 auto;
@@ -15371,6 +15655,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     gap: 16px;
     text-align: center;
 }
+
 .landing-stat-item {
     position: relative;
     display: flex;
@@ -15378,19 +15663,20 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     align-items: center;
     gap: 8px;
     padding: 24px 16px 22px;
-    border: 2.5px solid rgba(255,255,255,0.16);
+    border: 2.5px solid rgba(255, 255, 255, 0.16);
     border-radius: 20px;
-    background: linear-gradient(160deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 55%, rgba(0,0,0,0.18) 100%);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.03) 55%, rgba(0, 0, 0, 0.18) 100%);
     box-shadow:
-        0 10px 0 rgba(0,0,0,0.30),
-        0 16px 26px rgba(0,0,0,0.30),
-        inset 0 1px 0 rgba(255,255,255,0.22);
+        0 10px 0 rgba(0, 0, 0, 0.30),
+        0 16px 26px rgba(0, 0, 0, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
     transform: perspective(700px) rotateX(3deg);
     transform-style: preserve-3d;
-    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease;
+    transition: transform 0.25s cubic-bezier(.34, 1.56, .64, 1), box-shadow 0.25s ease;
     overflow: hidden;
     animation: landing-stat-glow 3.2s ease-in-out infinite;
 }
+
 /* Kilauan berjalan pada permukaan kad (efek kad 3D). */
 .landing-stat-item::before {
     content: "";
@@ -15399,66 +15685,89 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     left: -120%;
     width: 60%;
     height: 220%;
-    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0) 100%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.22) 50%, rgba(255, 255, 255, 0) 100%);
     transform: rotate(18deg);
     pointer-events: none;
     animation: landing-stat-sheen 4.2s ease-in-out infinite;
 }
+
 @keyframes landing-stat-sheen {
-    0%   { left: -120%; }
-    55%  { left: 160%; }
-    100% { left: 160%; }
+    0% {
+        left: -120%;
+    }
+
+    55% {
+        left: 160%;
+    }
+
+    100% {
+        left: 160%;
+    }
 }
+
 /* Outline glow berdenyut mengelilingi kad. */
 @keyframes landing-stat-glow {
-    0%, 100% {
-        border-color: rgba(255,217,61,0.55);
+
+    0%,
+    100% {
+        border-color: rgba(255, 217, 61, 0.55);
         box-shadow:
-            0 0 0 0 rgba(255,217,61,0),
-            0 10px 0 rgba(0,0,0,0.30),
-            0 16px 26px rgba(0,0,0,0.30),
-            inset 0 1px 0 rgba(255,255,255,0.22);
+            0 0 0 0 rgba(255, 217, 61, 0),
+            0 10px 0 rgba(0, 0, 0, 0.30),
+            0 16px 26px rgba(0, 0, 0, 0.30),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
     }
+
     50% {
-        border-color: rgba(255,217,61,0.95);
+        border-color: rgba(255, 217, 61, 0.95);
         box-shadow:
-            0 0 0 5px rgba(255,217,61,0.14),
-            0 0 26px rgba(255,217,61,0.36),
-            0 10px 0 rgba(0,0,0,0.30),
-            0 16px 26px rgba(0,0,0,0.30),
-            inset 0 1px 0 rgba(255,255,255,0.22);
+            0 0 0 5px rgba(255, 217, 61, 0.14),
+            0 0 26px rgba(255, 217, 61, 0.36),
+            0 10px 0 rgba(0, 0, 0, 0.30),
+            0 16px 26px rgba(0, 0, 0, 0.30),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
     }
 }
-.landing-stat-item:nth-child(2) { animation-delay: 0.5s; }
-.landing-stat-item:nth-child(3) { animation-delay: 1s; }
+
+.landing-stat-item:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.landing-stat-item:nth-child(3) {
+    animation-delay: 1s;
+}
+
 .landing-stat-item:hover {
     transform: perspective(700px) rotateX(0deg) translateY(-6px) scale(1.03);
     box-shadow:
-        0 0 0 6px rgba(255,217,61,0.18),
-        0 0 32px rgba(255,217,61,0.42),
-        0 16px 0 rgba(0,0,0,0.32),
-        0 24px 34px rgba(0,0,0,0.34),
-        inset 0 1px 0 rgba(255,255,255,0.28);
+        0 0 0 6px rgba(255, 217, 61, 0.18),
+        0 0 32px rgba(255, 217, 61, 0.42),
+        0 16px 0 rgba(0, 0, 0, 0.32),
+        0 24px 34px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
+
 .landing-stat-icon {
     position: relative;
     z-index: 1;
     width: 52px;
     height: 52px;
     background: linear-gradient(160deg, #ffe27a 0%, #ffd93d 45%, #f2b705 100%);
-    border: 2.5px solid rgba(255,255,255,0.45);
+    border: 2.5px solid rgba(255, 255, 255, 0.45);
     border-radius: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #0f2e29;
-    box-shadow: 0 4px 0 rgba(0,0,0,0.35), 0 8px 14px rgba(0,0,0,0.28), inset 0 2px 3px rgba(255,255,255,0.6);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35), 0 8px 14px rgba(0, 0, 0, 0.28), inset 0 2px 3px rgba(255, 255, 255, 0.6);
     transform: translateZ(18px);
 }
+
 .landing-stat-icon svg {
     width: 25px;
     height: 25px;
 }
+
 .landing-stat-angka {
     position: relative;
     z-index: 1;
@@ -15467,9 +15776,10 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     color: #fff;
     letter-spacing: -1px;
     line-height: 1;
-    text-shadow: 0 2px 0 rgba(0,0,0,0.35), 0 6px 14px rgba(0,0,0,0.35);
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35), 0 6px 14px rgba(0, 0, 0, 0.35);
     transform: translateZ(12px);
 }
+
 .landing-stat-label {
     position: relative;
     z-index: 1;
@@ -15485,6 +15795,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
 .landing-section {
     padding: 72px 20px;
 }
+
 .landing-section-alt {
     /* Separuh lutsinar + pattern dot halus supaya background-utama.png kekal kelihatan */
     background-color: rgba(241, 253, 248, 0.9) !important;
@@ -15493,11 +15804,13 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     border-top: 3px solid #0f2e29;
     border-bottom: 3px solid #0f2e29;
 }
+
 .landing-section-head {
     max-width: 720px;
     margin: 0 auto 48px;
     text-align: center;
 }
+
 .landing-kicker {
     display: inline-block;
     text-transform: uppercase;
@@ -15507,6 +15820,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     color: #0e9f6e;
     margin-bottom: 10px;
 }
+
 .landing-h2 {
     font-size: clamp(1.7rem, 4vw, 2.5rem);
     font-weight: 900;
@@ -15514,38 +15828,47 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     margin: 0 0 14px;
     letter-spacing: -0.5px;
 }
+
 .landing-section-sub {
     color: #3a6b62;
     font-size: 1.05rem;
     margin: 0;
 }
+
 .landing-grid {
     max-width: 1160px;
     margin: 0 auto;
     display: grid !important;
     gap: 24px !important;
 }
+
 .landing-grid-ciri {
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
+
 .landing-grid-cabaran {
     grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
 }
+
 .landing-grid-langkah {
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
+
 .landing-grid-testimoni {
     grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
 }
+
 .landing-grid-pakej {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     max-width: 1160px;
     align-items: stretch;
 }
+
 .landing-btn-pro {
     background: #ea580c !important;
     color: #ffffff !important;
 }
+
 /* Butang "Daftar" pada kad pakej — sama reka bentuk seperti butang dalam
    popup Pakej Pro (neo-btn bg-orange + glow pulse + ikon WhatsApp). */
 .landing-daftar-btn {
@@ -15581,9 +15904,11 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     transition: box-shadow 0.15s ease;
     cursor: default;
 }
+
 .landing-card-img:hover {
     box-shadow: 0 10px 0 #0f2e29;
 }
+
 .landing-card-img-bg {
     position: absolute;
     inset: 0;
@@ -15594,12 +15919,14 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     user-select: none;
     -webkit-user-drag: none;
 }
+
 .landing-card-img-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(15,46,41,0) 38%, rgba(15,46,41,0.82) 100%);
+    background: linear-gradient(180deg, rgba(15, 46, 41, 0) 38%, rgba(15, 46, 41, 0.82) 100%);
     pointer-events: none;
 }
+
 .landing-card-img-text {
     position: relative;
     z-index: 2;
@@ -15609,14 +15936,16 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     align-items: center;
     gap: 10px;
 }
+
 .landing-card-img-text h3 {
     margin: 0;
     color: #fff;
     font-size: 1.05rem;
     font-weight: 800;
     line-height: 1.15;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.45);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
+
 .landing-card-img-pill {
     flex: 0 0 auto;
     width: 38px;
@@ -15627,12 +15956,14 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     align-items: center;
     justify-content: center;
     color: #fff;
-    box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
 }
+
 .landing-card-img-pill svg {
     width: 20px;
     height: 20px;
 }
+
 .landing-card-img-no {
     position: absolute;
     top: 12px;
@@ -15648,7 +15979,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     font-weight: 900;
     font-size: 1.05rem;
     color: #fff;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
 }
 
 /* â”€â”€â”€ KAD CIRI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -15656,9 +15987,11 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     transition: box-shadow 0.15s ease;
     overflow: hidden;
 }
+
 .landing-card-ciri:hover {
     box-shadow: 0 10px 0 #0f2e29;
 }
+
 .landing-card-icon {
     width: 56px;
     height: 56px;
@@ -15671,15 +16004,18 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     margin-bottom: 18px;
     box-shadow: 0 3px 0 #0f2e29;
 }
+
 .landing-card-icon svg {
     width: 26px;
     height: 26px;
 }
+
 .landing-card h3 {
     margin: 0 0 10px;
     font-size: 1.15rem;
     font-weight: 800;
 }
+
 .landing-card p {
     margin: 0;
     color: #476b64;
@@ -15696,6 +16032,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     align-items: center;
     flex-wrap: wrap;
 }
+
 .landing-preview-carousel {
     display: flex;
     flex-direction: column;
@@ -15703,11 +16040,13 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     gap: 20px;
     min-width: 280px;
 }
+
 .landing-preview-main {
     position: relative;
     width: 320px;
     height: 340px;
 }
+
 .landing-preview-slide {
     position: absolute;
     inset: 0;
@@ -15716,11 +16055,13 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     transition: opacity 0.45s ease, transform 0.45s ease;
     pointer-events: none;
 }
+
 .landing-preview-slide.aktif {
     opacity: 1;
     transform: scale(1) translateY(0);
     pointer-events: auto;
 }
+
 .landing-preview-frame {
     background: #fff;
     border: 4px solid #10b981;
@@ -15731,6 +16072,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     flex-direction: column;
     height: 100%;
 }
+
 .landing-preview-label-top {
     color: #fff;
     font-weight: 700;
@@ -15738,8 +16080,9 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     text-transform: uppercase;
     letter-spacing: 1.5px;
     padding: 8px 16px;
-    border-bottom: 2px solid rgba(0,0,0,0.12);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.12);
 }
+
 .landing-preview-img {
     flex: 1;
     width: 100%;
@@ -15747,6 +16090,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     padding: 16px;
     background: #f8fffe;
 }
+
 .landing-preview-desc {
     padding: 10px 16px;
     font-size: 0.82rem;
@@ -15756,10 +16100,12 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     background: #fff;
     text-align: center;
 }
+
 .landing-preview-dots {
     display: flex;
     gap: 8px;
 }
+
 .landing-preview-dot {
     width: 10px;
     height: 10px;
@@ -15770,15 +16116,18 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     transition: background 0.2s, transform 0.2s;
     padding: 0;
 }
+
 .landing-preview-dot.aktif {
     background: #12b981;
     transform: scale(1.25);
 }
+
 .landing-preview-feature-list {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
+
 .landing-preview-feature-item {
     display: flex;
     align-items: flex-start;
@@ -15791,10 +16140,12 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     transition: transform 0.12s ease, box-shadow 0.12s ease;
     animation-delay: var(--delay, 0ms);
 }
+
 .landing-preview-feature-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 0 #0f2e29;
 }
+
 .landing-preview-feature-dot {
     width: 14px;
     height: 14px;
@@ -15803,12 +16154,14 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     flex-shrink: 0;
     margin-top: 4px;
 }
+
 .landing-preview-feature-item strong {
     display: block;
     font-size: 0.98rem;
     font-weight: 800;
     margin-bottom: 2px;
 }
+
 .landing-preview-feature-item span {
     font-size: 0.85rem;
     color: #476b64;
@@ -15824,9 +16177,11 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     padding: 22px 14px;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
 .landing-card-cabaran:hover {
     box-shadow: 0 8px 0 #0f2e29;
 }
+
 .landing-card-game-icon {
     width: 52px;
     height: 52px;
@@ -15835,16 +16190,19 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255, 255, 255, 0.8);
     transition: background 0.15s;
 }
+
 .landing-card-game-icon svg {
     width: 26px;
     height: 26px;
 }
+
 .landing-card-cabaran:hover .landing-card-game-icon {
-    background: rgba(255,255,255,1);
+    background: rgba(255, 255, 255, 1);
 }
+
 .landing-card-nama {
     font-weight: 700;
     font-size: 0.92rem;
@@ -15856,6 +16214,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     position: relative;
     padding-top: 34px;
 }
+
 .landing-langkah-no {
     position: absolute;
     top: -20px;
@@ -15882,15 +16241,18 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     border-left: 6px solid var(--testi, #10b981);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
 .landing-card-testimoni:hover {
     box-shadow: 0 8px 0 #0f2e29;
 }
+
 .landing-testi-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
 }
+
 .landing-testi-quote {
     font-family: Georgia, 'Times New Roman', serif;
     font-size: 3.2rem;
@@ -15900,14 +16262,17 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     opacity: 0.35;
     margin-top: 6px;
 }
+
 .landing-star-row {
     display: flex;
     gap: 3px;
 }
+
 .landing-star-row svg {
     width: 1.1rem;
     height: 1.1rem;
 }
+
 .landing-testimoni-teks {
     font-size: 1rem;
     color: #1e4b43;
@@ -15916,6 +16281,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     flex: 1;
     line-height: 1.65;
 }
+
 .landing-testimoni-orang {
     display: flex;
     align-items: center;
@@ -15923,6 +16289,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     border-top: 2px dashed #bfe6da;
     padding-top: 14px;
 }
+
 .landing-testi-avatar {
     flex-shrink: 0;
     width: 42px;
@@ -15937,8 +16304,9 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     color: #fff;
     background: var(--testi, #10b981);
     border: 2.5px solid #0f2e29;
-    box-shadow: 0 3px 0 rgba(15,46,41,0.25);
+    box-shadow: 0 3px 0 rgba(15, 46, 41, 0.25);
 }
+
 .landing-testi-avatar svg {
     width: 100%;
     height: 100%;
@@ -15946,16 +16314,19 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     transform: scale(1.08);
     transform-origin: center 78%;
 }
+
 .landing-testi-ident {
     display: flex;
     flex-direction: column;
     line-height: 1.3;
 }
+
 .landing-testimoni-orang strong {
     font-weight: 800;
     font-size: 0.97rem;
     color: #0f2e29;
 }
+
 .landing-testimoni-orang span {
     font-size: 0.83rem;
     color: #5a837a;
@@ -15969,6 +16340,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
     mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
 }
+
 .landing-testi-track {
     display: flex;
     width: max-content;
@@ -15976,13 +16348,21 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     animation: landing-testi-scroll 38s linear infinite;
     will-change: transform;
 }
+
 .landing-testi-track:hover {
     animation-play-state: paused;
 }
+
 @keyframes landing-testi-scroll {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
 }
+
 .landing-testi-track .landing-card-testimoni {
     flex: 0 0 auto;
     width: 320px;
@@ -15990,12 +16370,16 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     box-sizing: border-box;
     transform: none;
 }
+
 .landing-testi-track .landing-card-testimoni:hover {
     transform: none;
-    box-shadow: 0 4px 0 #0f2e29, 0 6px 0 rgba(15,46,41,0.12), 0 10px 18px rgba(15,46,41,0.10);
+    box-shadow: 0 4px 0 #0f2e29, 0 6px 0 rgba(15, 46, 41, 0.12), 0 10px 18px rgba(15, 46, 41, 0.10);
 }
+
 @media (prefers-reduced-motion: reduce) {
-    .landing-testi-track { animation: none; }
+    .landing-testi-track {
+        animation: none;
+    }
 }
 
 /* â”€â”€â”€ KAD PAKEJ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -16007,12 +16391,14 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     background: #fffdf0;
     border: 3.5px solid #0f2e29;
 }
+
 .landing-pakej-head {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-bottom: 10px;
 }
+
 .landing-pakej-tag {
     border: 1.5px solid #0f2e29;
     border-radius: 7px;
@@ -16027,13 +16413,24 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     gap: 4px;
     color: #0f2e29;
 }
-.landing-pakej-tag svg { width: 0.9em; height: 0.9em; }
-.landing-tag-gratis { background: #ffffff; }
+
+.landing-pakej-tag svg {
+    width: 0.9em;
+    height: 0.9em;
+}
+
+.landing-tag-gratis {
+    background: #ffffff;
+}
+
 /* Semua pakej berbayar (Bulanan, 3 Bulanan Pro, Tahunan Pro) guna warna oren
    yang sama — hanya pakej PERCUMA kekal putih. */
 .landing-tag-biasa,
 .landing-tag-bulanan,
-.landing-tag-jimat { background: #ea580c; color: #ffffff !important; }
+.landing-tag-jimat {
+    background: #ea580c;
+    color: #ffffff !important;
+}
 
 /* Kad Pakej Pro — tiru reka bentuk modal Pakej Pro (.pro-pakej-card):
    kad krim, sempadan tebal, bayang keras, shine sweep, hover 3D & glow emas. */
@@ -16046,10 +16443,12 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     overflow: hidden;
     transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
 }
+
 .landing-pakej-card:hover {
     transform: translateY(-8px) rotateX(3deg) rotateY(-2deg) scale(1.02);
     box-shadow: 0 14px 0 #0f2e29, 0 22px 30px rgba(0, 0, 0, 0.22) !important;
 }
+
 .landing-pakej-card-inner {
     position: relative;
     z-index: 1;
@@ -16059,36 +16458,50 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     height: 100%;
     padding: 18px 16px;
 }
+
 .landing-pakej-card-unggul {
     border-color: #0e9f6e !important;
     box-shadow: 0 8px 0 #0e9f6e, 0 12px 20px rgba(14, 159, 110, 0.25) !important;
 }
+
 .landing-pakej-card-unggul:hover {
     box-shadow: 0 14px 0 #0e9f6e, 0 22px 30px rgba(14, 159, 110, 0.3) !important;
 }
+
 .landing-shine-sweep {
     position: absolute;
     top: 0;
     left: -150%;
     width: 60%;
     height: 100%;
-    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0) 100%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.55) 50%, rgba(255, 255, 255, 0) 100%);
     transform: skewX(-20deg);
     pointer-events: none;
     animation: landing-shine-sweep 3.5s infinite ease-in-out;
     z-index: 2;
 }
+
 @keyframes landing-shine-sweep {
-    0%   { left: -150%; }
-    60%  { left: 150%; }
-    100% { left: 150%; }
+    0% {
+        left: -150%;
+    }
+
+    60% {
+        left: 150%;
+    }
+
+    100% {
+        left: 150%;
+    }
 }
+
 .landing-pakej-nama {
     font-size: 1.15rem;
     font-weight: 700;
     color: #0f2e29;
     margin: 0 0 6px;
 }
+
 .landing-pakej-harga {
     font-size: 2.8rem;
     font-weight: 900;
@@ -16096,22 +16509,26 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     display: flex;
     align-items: baseline;
 }
+
 .landing-pakej-rm {
     font-size: 1.2rem;
     margin-right: 4px;
     font-weight: 700;
 }
+
 .landing-pakej-bulan {
     font-size: 1rem;
     font-weight: 600;
     color: #5a837a;
     margin-left: 4px;
 }
+
 .landing-pakej-note {
     color: #476b64;
     font-size: 0.92rem;
     margin: 0;
 }
+
 .landing-pakej-senarai {
     list-style: none;
     padding: 0;
@@ -16122,22 +16539,32 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     font-size: 0.95rem;
     font-weight: 500;
 }
+
 .landing-pakej-senarai li {
     color: #1e4b43;
     display: flex;
     align-items: center;
     gap: 8px;
 }
+
 .landing-pakej-senarai li svg {
     color: #10b981;
     flex-shrink: 0;
 }
+
 .landing-pakej .landing-btn,
-.landing-pakej-card-inner > .landing-btn {
+.landing-pakej-card-inner>.landing-btn {
     margin-top: auto;
 }
-.landing-pakej-card .landing-pakej-harga .landing-pakej-rm { margin-right: 4px; }
-.landing-pakej-card .landing-pakej-senarai { margin-bottom: 18px; }
+
+.landing-pakej-card .landing-pakej-harga .landing-pakej-rm {
+    margin-right: 4px;
+}
+
+.landing-pakej-card .landing-pakej-senarai {
+    margin-bottom: 18px;
+}
+
 /* ─── Seksyen Pakej Landing (gaya 100% sama seperti popup Pakej Pro) ───────
    Pembalut & tab sahaja ditambah di sini; kad guna kelas GLOBAL
    `.pro-pakej-card` / `.pakej-grid-container` / `.pakej-tab-btn` yang sama
@@ -16147,6 +16574,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     margin: 0 auto;
     text-align: center;
 }
+
 .landing-pakej-tabs {
     display: flex;
     gap: 10px;
@@ -16155,27 +16583,33 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     margin: 0 auto 20px auto;
     max-width: 620px;
 }
+
 .landing-pakej-tabs .pakej-tab-btn {
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 .landing-pakej-tabs .pakej-tab-btn:active {
     transform: translateY(2px) scale(0.98);
 }
+
 @media (max-width: 640px) {
     .landing-pakej-wrap {
         padding-left: 2px;
         padding-right: 2px;
     }
+
     .landing-pakej-tabs {
         gap: 6px;
         max-width: 100%;
     }
+
     .landing-pakej-tabs .pakej-tab-btn {
         font-size: 0.82rem !important;
         padding: 8px 6px !important;
         gap: 4px !important;
     }
+
     .landing-pakej-wrap .pakej-grid-container {
         grid-template-columns: 1fr !important;
     }
@@ -16190,6 +16624,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     flex-direction: column;
     gap: 14px;
 }
+
 .landing-faq-item {
     background: #fff;
     border: 3px solid #0f2e29;
@@ -16198,10 +16633,12 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     overflow: hidden;
     transition: box-shadow 0.15s ease;
 }
+
 .landing-faq-item.buka {
     box-shadow: 0 5px 0 #0e9f6e;
     border-color: #0e9f6e;
 }
+
 .landing-faq-soalan {
     width: 100%;
     display: flex;
@@ -16217,6 +16654,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     cursor: pointer;
     text-align: left;
 }
+
 .landing-faq-no {
     flex-shrink: 0;
     width: 34px;
@@ -16232,22 +16670,27 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     border: 2px solid #0e9f6e;
     transition: background 0.2s ease, color 0.2s ease;
 }
+
 .landing-faq-item.buka .landing-faq-no {
     background: #0e9f6e;
     color: #fff;
 }
+
 .landing-faq-q {
     flex: 1;
 }
+
 .landing-faq-arrow {
     transition: transform 0.25s ease;
     color: #0e9f6e;
     display: flex;
     flex-shrink: 0;
 }
+
 .landing-faq-arrow.buka {
     transform: rotate(180deg);
 }
+
 .landing-faq-jawapan {
     /* Animasi buka/tutup: max-height + opacity (stabil merentas browser). */
     padding: 0 22px;
@@ -16257,11 +16700,13 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     overflow: hidden;
     transition: max-height 0.35s ease, opacity 0.3s ease, visibility 0.35s ease;
 }
+
 .landing-faq-jawapan.buka {
     max-height: 640px;
     opacity: 1;
     visibility: visible;
 }
+
 .landing-faq-jawapan-inner {
     color: #3a6b62;
     font-size: 0.98rem;
@@ -16280,6 +16725,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     display: flex;
     justify-content: center;
 }
+
 /* Capsule putih — bingkai luar putih dengan kapsul hijau di dalamnya. */
 .landing-cta-inner {
     position: relative;
@@ -16295,10 +16741,11 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     padding: 30px 26px;
     border-radius: 46px;
     border: 3.5px solid #ffffff;
-    box-shadow: 0 10px 0 rgba(15,46,41,0.18), 0 16px 30px rgba(15,46,41,0.16);
+    box-shadow: 0 10px 0 rgba(15, 46, 41, 0.18), 0 16px 30px rgba(15, 46, 41, 0.16);
     overflow: hidden;
     background: #ffffff;
 }
+
 .landing-cta-card {
     position: relative;
     width: 100%;
@@ -16312,39 +16759,47 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     overflow: hidden;
     /* Kad putih (bukan hijau) — bersih dan lembut. */
     background:
-        radial-gradient(rgba(15,46,41,0.05) 1.5px, transparent 1.5px) 0 0 / 18px 18px,
+        radial-gradient(rgba(15, 46, 41, 0.05) 1.5px, transparent 1.5px) 0 0 / 18px 18px,
         linear-gradient(135deg, #ffffff 0%, #f6fffb 55%, #effcf6 100%);
-    box-shadow: 0 8px 0 rgba(15,46,41,0.14), 0 14px 26px rgba(15,46,41,0.12);
+    box-shadow: 0 8px 0 rgba(15, 46, 41, 0.14), 0 14px 26px rgba(15, 46, 41, 0.12);
     color: #0f2e29;
 }
+
 .landing-cta-avatars {
     display: flex;
     gap: 0;
     justify-content: center;
 }
+
 .landing-cta-avatar {
     width: 56px;
     height: 56px;
     object-fit: contain;
     border: 3px solid #fff;
     border-radius: 50%;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     margin-left: -10px;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
 }
-.landing-cta-avatar:first-child { margin-left: 0; }
+
+.landing-cta-avatar:first-child {
+    margin-left: 0;
+}
+
 .landing-cta-banner h2 {
     font-size: clamp(1.7rem, 4vw, 2.5rem);
     font-weight: 900;
     margin: 0;
     letter-spacing: -0.5px;
 }
+
 .landing-cta-banner p {
     font-size: 1.08rem;
     margin: 0;
     font-weight: 500;
     color: rgba(6, 48, 31, 0.85);
 }
+
 .landing-cta-badge {
     display: inline-flex;
     align-items: center;
@@ -16359,9 +16814,11 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     color: #3a2b00;
     box-shadow: 0 4px 0 #0f2e29;
 }
+
 .landing-cta-sub {
     max-width: 520px;
 }
+
 .landing-cta-trust {
     display: flex;
     flex-direction: column;
@@ -16369,6 +16826,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     gap: 12px;
     margin-top: 6px;
 }
+
 .landing-cta-trust-text {
     font-size: 0.9rem;
     font-weight: 600;
@@ -16381,6 +16839,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     color: #d7f0e8;
     padding: 48px 20px 20px;
 }
+
 .landing-footer-inner {
     max-width: 1160px;
     margin: 0 auto;
@@ -16388,15 +16847,17 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     grid-template-columns: 2fr 1fr 1fr 1fr;
     gap: 36px;
 }
+
 .landing-footer-logo {
     height: 42px;
     width: auto;
     margin-bottom: 14px;
     background: #ffffff;
-    border: 2px solid rgba(255,255,255,0.25);
+    border: 2px solid rgba(255, 255, 255, 0.25);
     border-radius: 12px;
     padding: 5px 10px;
 }
+
 .landing-footer-brand p {
     max-width: 320px;
     font-size: 0.92rem;
@@ -16404,21 +16865,25 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     margin: 0;
     line-height: 1.6;
 }
+
 /* Pastikan "Malaysia" sentiasa sebaya dengan "anak" (tidak terpisah ke baris sendiri) */
 .landing-footer-brand-line {
     display: inline-block;
 }
+
 .landing-footer-col {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
+
 .landing-footer-col h4 {
     margin: 0 0 8px;
     color: #fff;
     font-size: 1rem;
     font-weight: 700;
 }
+
 .landing-footer-col a,
 .landing-footer-link {
     color: #9fd4c6;
@@ -16432,13 +16897,18 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     font-family: inherit;
     transition: color 0.15s ease;
 }
+
 .landing-footer-col a:hover,
-.landing-footer-link:hover { color: #ffd93d; }
+.landing-footer-link:hover {
+    color: #ffd93d;
+}
+
 .landing-footer-social {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
 }
+
 .landing-social-btn {
     width: 44px;
     height: 44px;
@@ -16452,18 +16922,37 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     cursor: pointer;
     transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease;
 }
+
 .landing-social-btn svg {
     width: 22px;
     height: 22px;
 }
+
 .landing-social-btn:hover {
     transform: translateY(-2px);
     color: #fff;
 }
-.landing-social-web:hover { background: #0e9f6e; border-color: #0e9f6e; }
-.landing-social-telegram:hover { background: #229ed9; border-color: #229ed9; }
-.landing-social-play:hover { background: #1f2937; border-color: #1f2937; }
-.landing-social-apple:hover { background: #111827; border-color: #111827; }
+
+.landing-social-web:hover {
+    background: #0e9f6e;
+    border-color: #0e9f6e;
+}
+
+.landing-social-telegram:hover {
+    background: #229ed9;
+    border-color: #229ed9;
+}
+
+.landing-social-play:hover {
+    background: #1f2937;
+    border-color: #1f2937;
+}
+
+.landing-social-apple:hover {
+    background: #111827;
+    border-color: #111827;
+}
+
 .landing-footer-bottom {
     max-width: 1160px;
     margin: 32px auto 0;
@@ -16482,24 +16971,30 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         text-align: center;
         gap: 36px;
     }
+
     .landing-hero-text {
         align-items: center;
         text-align: center;
     }
+
     .landing-hero-art {
         order: -1;
     }
+
     .landing-stats-inner {
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
     }
+
     .landing-footer-inner {
         grid-template-columns: 1fr 1fr;
     }
+
     .landing-preview-layout {
         flex-direction: column;
         align-items: center;
     }
+
     .landing-preview-main {
         width: 300px;
         height: 320px;
@@ -16510,41 +17005,51 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     .landing-nav-desktop-only {
         display: none !important;
     }
+
     .landing-nav-links {
         display: flex !important;
         align-items: center !important;
         gap: 10px !important;
     }
+
     .landing-nav-links a {
         font-size: 0.88rem !important;
         font-weight: 700 !important;
         padding: 4px 6px !important;
         color: #0f2e29 !important;
     }
+
     /* Pada mobile, buang senarai kad putih "Rupa Dalam Aplikasi" —
        carousel swipe sudah memadai dan mengurangkan ruang yang panjang. */
     .landing-preview-feature-list {
         display: none !important;
     }
+
     .landing-section {
         padding: 40px 16px;
     }
+
     .landing-hero {
         padding: 24px 14px 16px !important;
     }
+
     .landing-stats-strip {
         padding: 18px 12px !important;
     }
+
     .landing-hero-cta {
         flex-direction: column;
     }
+
     .landing-hero-cta .landing-btn {
         width: 100%;
     }
+
     .landing-stats-inner {
         grid-template-columns: repeat(3, 1fr);
         gap: 8px;
     }
+
     .landing-stat-item {
         flex-direction: column;
         align-items: center;
@@ -16553,43 +17058,54 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         padding: 12px 6px;
         gap: 3px;
     }
+
     .landing-stat-label {
         font-size: 0.7rem;
         line-height: 1.15;
     }
+
     .landing-stat-angka {
         font-size: 1.5rem;
     }
+
     .landing-footer-inner {
         grid-template-columns: 1fr 1fr !important;
         gap: 20px 14px !important;
     }
+
     .landing-footer-brand {
         grid-column: 1 / -1 !important;
         text-align: center !important;
     }
+
     .landing-preview-main {
         width: 280px;
         height: 300px;
     }
+
     /* Kurangkan padding nav & saiz butang pada telefon kecil */
     .landing-nav-inner {
         padding: 10px 14px !important;
         gap: 8px !important;
     }
+
     .landing-brand-logo {
         height: 38px !important;
     }
+
     .landing-nav-actions {
         gap: 6px !important;
     }
+
     .landing-nav-actions .landing-btn {
         padding: 8px 12px !important;
         font-size: 0.85rem !important;
     }
+
     .landing-nav-actions .landing-btn-ghost {
         padding: 8px 4px !important;
     }
+
     .landing-pakej-card-inner {
         padding: 16px 14px;
     }
@@ -16600,25 +17116,30 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     .landing-faq {
         gap: 10px;
     }
+
     .landing-faq-item {
         border-width: 2px;
         border-radius: 13px;
         box-shadow: 0 3px 0 #0f2e29;
     }
+
     .landing-faq-soalan {
         padding: 11px 13px;
         gap: 10px;
         font-size: 0.86rem;
     }
+
     .landing-faq-no {
         width: 26px;
         height: 26px;
         border-radius: 8px;
         font-size: 0.7rem;
     }
+
     .landing-faq-jawapan {
         padding: 0 13px;
     }
+
     .landing-faq-jawapan-inner {
         font-size: 0.82rem;
         line-height: 1.5;
@@ -16628,38 +17149,47 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     .landing-footer {
         padding: 30px 16px 16px;
     }
+
     .landing-footer-inner {
         gap: 18px;
     }
+
     .landing-footer-logo {
         height: 32px;
         margin-bottom: 10px;
         padding: 4px 8px;
     }
+
     .landing-footer-brand p {
         font-size: 0.8rem;
         line-height: 1.5;
     }
+
     .landing-footer-brand-line {
         display: block;
         white-space: nowrap;
     }
+
     .landing-footer-col {
         gap: 7px;
     }
+
     .landing-footer-col h4 {
         font-size: 0.88rem;
         margin: 0 0 4px;
     }
+
     .landing-footer-col a,
     .landing-footer-link {
         font-size: 0.8rem;
     }
+
     .landing-social-btn {
         width: 36px;
         height: 36px;
         border-radius: 10px;
     }
+
     .landing-social-btn svg {
         width: 18px;
         height: 18px;
@@ -16670,41 +17200,51 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         border-width: 3px;
         gap: 8px;
     }
+
     .landing-pakej-card {
         border-width: 3px !important;
         border-radius: 14px;
     }
+
     .landing-pakej-head {
         gap: 6px;
         margin-bottom: 6px;
     }
+
     .landing-pakej-tag {
         font-size: 0.62rem;
         padding: 2px 8px;
     }
+
     .landing-pakej-nama {
         font-size: 1rem;
         margin: 0 0 4px;
     }
+
     .landing-pakej-harga {
         font-size: 2.1rem;
     }
+
     .landing-pakej-rm {
         font-size: 1rem;
     }
+
     .landing-pakej-bulan {
         font-size: 0.85rem;
     }
+
     .landing-pakej-note {
         font-size: 0.8rem;
     }
+
     .landing-pakej-senarai {
         font-size: 0.82rem;
         gap: 7px;
         margin: 6px 0 14px;
     }
+
     .landing-pakej .landing-btn,
-    .landing-pakej-card-inner > .landing-btn {
+    .landing-pakej-card-inner>.landing-btn {
         font-size: 0.85rem !important;
         padding: 9px 14px !important;
     }
@@ -16714,28 +17254,35 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         grid-template-columns: 1fr;
         gap: 12px;
     }
+
     .landing-grid-mod .landing-card-img {
         aspect-ratio: 16 / 11;
     }
+
     .landing-mod-info {
         padding: 10px 12px 2px !important;
     }
+
     .landing-grid-mod .landing-card-img-text h3 {
         font-size: 0.9rem;
         line-height: 1.15;
         margin: 0;
     }
+
     .landing-grid-mod .landing-mod-desc {
         font-size: 0.74rem;
         line-height: 1.3;
     }
+
     .landing-grid-mod .landing-mod-senarai {
         padding: 0 12px 10px;
         gap: 3px;
     }
+
     .landing-grid-mod .landing-mod-senarai li {
         font-size: 0.72rem;
     }
+
     .landing-mod-tag-img {
         top: 10px;
         right: 10px;
@@ -16760,6 +17307,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     align-items: center;
     animation: landing-scale-in 0.8s ease 0.2s both;
 }
+
 .landing-hero-logo {
     width: 100%;
     max-width: 470px;
@@ -16776,12 +17324,14 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
 .landing-grid-peta {
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
 }
+
 .landing-card-peta {
     position: relative;
     padding: 0;
     gap: 0;
     transition: box-shadow 0.15s ease;
 }
+
 .landing-card-peta:hover {
     box-shadow: 0 10px 0 #0f2e29;
 }
@@ -16790,12 +17340,14 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
 .landing-grid-mod {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
+
 .landing-card-mod {
     display: flex;
     flex-direction: column;
     gap: 10px;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
 .landing-card-mod:hover {
     box-shadow: 0 8px 0 #0f2e29;
 }
@@ -16809,29 +17361,34 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     justify-content: flex-end;
     align-items: stretch;
 }
+
 .landing-mod-overlay {
     background: linear-gradient(180deg,
-        rgba(15,46,41,0.05) 0%,
-        rgba(15,46,41,0.55) 45%,
-        rgba(15,46,41,0.94) 100%) !important;
+            rgba(15, 46, 41, 0.05) 0%,
+            rgba(15, 46, 41, 0.55) 45%,
+            rgba(15, 46, 41, 0.94) 100%) !important;
 }
+
 .landing-mod-info {
     padding: 0 16px 6px !important;
     gap: 10px !important;
 }
+
 .landing-mod-info-txt {
     display: flex;
     flex-direction: column;
     gap: 1px;
     min-width: 0;
 }
+
 .landing-grid-mod .landing-mod-desc {
     margin: 0;
-    color: rgba(255,255,255,0.9) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
     font-size: 0.8rem;
     line-height: 1.25;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
+
 .landing-grid-mod .landing-mod-senarai {
     position: relative;
     z-index: 2;
@@ -16842,21 +17399,24 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     flex-direction: column;
     gap: 4px;
 }
+
 .landing-grid-mod .landing-mod-senarai li {
     display: flex;
     align-items: flex-start;
     gap: 6px;
     font-size: 0.78rem;
     font-weight: 600;
-    color: rgba(255,255,255,0.95) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
     line-height: 1.3;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
+
 .landing-grid-mod .landing-mod-senarai li svg {
     color: #6ee7b7 !important;
     flex-shrink: 0;
     margin-top: 2px;
 }
+
 .landing-mod-tag-img {
     position: absolute;
     top: 14px;
@@ -16872,10 +17432,11 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     letter-spacing: 0.5px;
     line-height: 1;
     border: 2.5px solid #fff !important;
-    box-shadow: 0 3px 0 rgba(0,0,0,0.35) !important;
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35) !important;
     color: #fff !important;
     text-transform: uppercase;
 }
+
 .landing-mod-tag {
     border: 2px solid #0f2e29;
     border-radius: 8px;
@@ -16886,17 +17447,20 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     color: #fff;
     box-shadow: 2px 2px 0 #0f2e29;
 }
+
 .landing-card-mod h3 {
     margin: 0;
     font-size: 1.2rem;
     font-weight: 800;
 }
+
 .landing-mod-desc {
     margin: 0;
     color: #476b64;
     font-size: 0.92rem;
     line-height: 1.5;
 }
+
 .landing-mod-senarai {
     list-style: none;
     margin: 6px 0 0;
@@ -16905,6 +17469,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     flex-direction: column;
     gap: 8px;
 }
+
 .landing-mod-senarai li {
     display: flex;
     align-items: flex-start;
@@ -16913,6 +17478,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     color: #334155;
     line-height: 1.4;
 }
+
 .landing-mod-senarai li svg {
     color: #10b981;
     flex-shrink: 0;
@@ -16931,6 +17497,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         max-width: 300px;
         max-height: 240px;
     }
+
     .landing-footer-inner {
         grid-template-columns: 1fr 1fr;
         gap: 28px;
@@ -16938,24 +17505,30 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
 }
 
 @media (max-width: 640px) {
+
     .landing-grid-peta,
     .landing-grid-mod {
         grid-template-columns: 1fr;
     }
+
     .landing-hero-logo {
         max-width: 240px;
         max-height: 190px;
     }
+
     .landing-footer {
         padding: 36px 16px 18px;
     }
+
     .landing-footer-inner {
         grid-template-columns: 1fr 1fr;
         gap: 22px;
     }
+
     .landing-footer-brand {
         grid-column: 1 / -1;
     }
+
     .landing-footer-bottom {
         margin-top: 24px;
     }
@@ -16987,6 +17560,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     max-width: 1160px;
     margin: 0 auto;
 }
+
 .landing-cabaran-track {
     display: flex;
     gap: 18px;
@@ -16998,12 +17572,17 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     scrollbar-width: none;
     flex: 1 1 auto;
 }
-.landing-cabaran-track::-webkit-scrollbar { display: none; }
+
+.landing-cabaran-track::-webkit-scrollbar {
+    display: none;
+}
+
 .landing-cabaran-slide {
     scroll-snap-align: center;
     flex: 0 0 auto;
     width: 244px;
 }
+
 .landing-cabaran-card {
     background: #fff;
     border: 3px solid #0f2e29;
@@ -17015,9 +17594,11 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     flex-direction: column;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
 .landing-cabaran-card:hover {
     box-shadow: 0 8px 0 #0f2e29;
 }
+
 .landing-cabaran-thumb {
     position: relative;
     width: 100%;
@@ -17026,12 +17607,14 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     background: #e8fbf4;
     overflow: hidden;
 }
+
 .landing-cabaran-thumb img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
 }
+
 .landing-cabaran-badge {
     position: absolute;
     top: 8px;
@@ -17046,7 +17629,12 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     justify-content: center;
     box-shadow: 2px 2px 0 #0f2e29;
 }
-.landing-cabaran-badge svg { width: 18px; height: 18px; }
+
+.landing-cabaran-badge svg {
+    width: 18px;
+    height: 18px;
+}
+
 .landing-cabaran-meta {
     display: flex;
     flex-direction: column;
@@ -17054,16 +17642,19 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     padding: 12px 14px 16px;
     text-align: left;
 }
+
 .landing-cabaran-meta strong {
     font-size: 0.98rem;
     color: #0f2e29;
     line-height: 1.25;
 }
+
 .landing-cabaran-meta span {
     font-size: 0.8rem;
     color: #3a6b62;
     line-height: 1.35;
 }
+
 .landing-cabaran-arrow {
     flex: 0 0 auto;
     width: 42px;
@@ -17080,9 +17671,21 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     transition: transform 0.12s ease, background 0.12s ease;
     z-index: 2;
 }
-.landing-cabaran-arrow:hover { background: #ffc01e; transform: translate(-1px, -1px); }
-.landing-cabaran-arrow:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #0f2e29; }
-.landing-cabaran-arrow.kanan svg { transform: rotate(180deg); }
+
+.landing-cabaran-arrow:hover {
+    background: #ffc01e;
+    transform: translate(-1px, -1px);
+}
+
+.landing-cabaran-arrow:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #0f2e29;
+}
+
+.landing-cabaran-arrow.kanan svg {
+    transform: rotate(180deg);
+}
+
 .landing-cabaran-dots {
     display: flex;
     justify-content: center;
@@ -17090,6 +17693,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     gap: 8px;
     margin-top: 16px;
 }
+
 .landing-cabaran-dot {
     width: 10px;
     height: 10px;
@@ -17100,6 +17704,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     cursor: pointer;
     transition: background 0.15s ease, transform 0.15s ease;
 }
+
 .landing-cabaran-dot.aktif {
     background: #0e9f6e;
     transform: scale(1.35);
@@ -17112,6 +17717,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     gap: 8px;
     flex-wrap: wrap;
 }
+
 .landing-pakej-untuk {
     font-size: 0.66rem;
     font-weight: 800;
@@ -17126,36 +17732,83 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
 
 /* --- ITEM 10: layout mobile lebih kemas (2 lajur bila boleh) --- */
 @media (max-width: 640px) {
+
     .landing-grid-ciri,
     .landing-grid-cabaran {
         grid-template-columns: repeat(2, 1fr);
     }
+
     .landing-grid-peta {
         grid-template-columns: repeat(2, 1fr);
     }
+
     .landing-grid-pakej {
         grid-template-columns: repeat(2, 1fr);
     }
-    .landing-grid { gap: 14px !important; }
-    .landing-card-img-text { padding: 10px 12px; gap: 8px; }
-    .landing-card-img-text h3 { font-size: 0.93rem; }
-    .landing-card-img-pill { width: 32px; height: 32px; }
-    .landing-card-img-no { width: 30px; height: 30px; font-size: 0.92rem; top: 8px; right: 8px; }
-    .landing-cta-banner { padding: 32px 14px; }
-    .landing-cta-inner { padding: 18px 16px; border-radius: 34px; }
-    .landing-cta-card { padding: 26px 18px; border-radius: 26px; }
-    .landing-cta-avatar { width: 46px; height: 46px; }
+
+    .landing-grid {
+        gap: 14px !important;
+    }
+
+    .landing-card-img-text {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .landing-card-img-text h3 {
+        font-size: 0.93rem;
+    }
+
+    .landing-card-img-pill {
+        width: 32px;
+        height: 32px;
+    }
+
+    .landing-card-img-no {
+        width: 30px;
+        height: 30px;
+        font-size: 0.92rem;
+        top: 8px;
+        right: 8px;
+    }
+
+    .landing-cta-banner {
+        padding: 32px 14px;
+    }
+
+    .landing-cta-inner {
+        padding: 18px 16px;
+        border-radius: 34px;
+    }
+
+    .landing-cta-card {
+        padding: 26px 18px;
+        border-radius: 26px;
+    }
+
+    .landing-cta-avatar {
+        width: 46px;
+        height: 46px;
+    }
 }
+
 @media (max-width: 460px) {
-    .landing-grid-pakej { grid-template-columns: 1fr; }
-    .landing-card-img-text h3 { font-size: 0.86rem; }
+    .landing-grid-pakej {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-card-img-text h3 {
+        font-size: 0.86rem;
+    }
 }
+
 /* ═══════════════════════════════════════════════════════════════
    SWIPE 3D (lencana, aktiviti, peta, pratonton)
    ═══════════════════════════════════════════════════════════════ */
 .landing-swipe3d-stage {
     -webkit-tap-highlight-color: transparent;
 }
+
 .landing-swipe3d-card {
     position: relative;
     width: 100%;
@@ -17167,9 +17820,11 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     box-sizing: border-box;
     transition: box-shadow 0.3s ease;
 }
+
 .landing-swipe3d-card.is-active {
-    box-shadow: 0 8px 0 rgba(15,46,41,0.85), 0 16px 26px rgba(15,46,41,0.28);
+    box-shadow: 0 8px 0 rgba(15, 46, 41, 0.85), 0 16px 26px rgba(15, 46, 41, 0.28);
 }
+
 .landing-swipe3d-glow {
     position: absolute;
     left: 50%;
@@ -17196,6 +17851,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     position: relative;
     z-index: 1;
 }
+
 .landing-swipe3d-badge-img {
     flex: 1 1 auto;
     width: 100%;
@@ -17204,6 +17860,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     user-select: none;
     -webkit-user-drag: none;
 }
+
 .landing-swipe3d-badge-bar {
     flex: 0 0 auto;
     margin: 6px -10px 0;
@@ -17214,7 +17871,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     line-height: 1.2;
     text-align: center;
     letter-spacing: 0.2px;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 /* Kad media (aktiviti & pratonton) */
@@ -17224,6 +17881,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     height: 100%;
     z-index: 1;
 }
+
 .landing-swipe3d-media img {
     position: absolute;
     inset: 0;
@@ -17234,6 +17892,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     user-select: none;
     -webkit-user-drag: none;
 }
+
 .landing-swipe3d-media-bar {
     position: absolute;
     left: 0;
@@ -17245,22 +17904,24 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     font-size: 0.82rem;
     text-align: center;
     letter-spacing: 0.2px;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
     z-index: 2;
 }
+
 .landing-swipe3d-media-desc {
     position: absolute;
     left: 0;
     right: 0;
     top: 0;
     padding: 8px 10px;
-    background: linear-gradient(180deg, rgba(15,46,41,0.72), rgba(15,46,41,0));
+    background: linear-gradient(180deg, rgba(15, 46, 41, 0.72), rgba(15, 46, 41, 0));
     color: #fff;
     font-size: 0.72rem;
     font-weight: 600;
     text-align: center;
     z-index: 2;
 }
+
 .landing-swipe3d-chip {
     position: absolute;
     top: 8px;
@@ -17274,9 +17935,13 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     align-items: center;
     justify-content: center;
     color: #fff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
-.landing-swipe3d-chip svg { width: 17px; height: 17px; }
+
+.landing-swipe3d-chip svg {
+    width: 17px;
+    height: 17px;
+}
 
 /* Anak panah */
 .landing-lencana-arrow {
@@ -17299,6 +17964,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     cursor: pointer;
     box-shadow: 0 3px 0 #0f2e29;
 }
+
 .landing-lencana-arrow:hover {
     background: #ffb020;
 }
@@ -17311,6 +17977,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     gap: 9px;
     margin-top: 8px;
 }
+
 .landing-lencana-dot {
     width: 11px;
     height: 11px;
@@ -17321,16 +17988,31 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     cursor: pointer;
     transition: background 0.15s ease, transform 0.15s ease;
 }
+
 .landing-lencana-dot.aktif {
     background: #12b981;
     transform: scale(1.25);
 }
 
 @media (max-width: 560px) {
-    .landing-lencana-arrow { width: 34px; height: 34px; font-size: 1.15rem; }
-    .landing-swipe3d-media-bar { font-size: 0.72rem; padding: 5px 8px; }
-    .landing-card-img-text { padding: 10px 12px; }
-    .landing-card-img-text h3 { font-size: 0.92rem; }
+    .landing-lencana-arrow {
+        width: 34px;
+        height: 34px;
+        font-size: 1.15rem;
+    }
+
+    .landing-swipe3d-media-bar {
+        font-size: 0.72rem;
+        padding: 5px 8px;
+    }
+
+    .landing-card-img-text {
+        padding: 10px 12px;
+    }
+
+    .landing-card-img-text h3 {
+        font-size: 0.92rem;
+    }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -17344,23 +18026,28 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
    - Footer tersusun bersebelahan (2 lajur)
    ══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
+
     /* 1. TOP NAV MOBILE: HANYA CUBA PERCUMA & LOG MASUK (LAIN TAK PERLU) */
     .landing-nav-links {
         display: none !important;
     }
+
     .landing-nav-inner {
         padding: 10px 14px !important;
         justify-content: space-between !important;
     }
+
     .landing-brand-logo {
         height: 36px !important;
         max-width: 145px !important;
     }
+
     .landing-nav-actions {
         display: flex !important;
         align-items: center !important;
         gap: 8px !important;
     }
+
     .landing-nav-actions .landing-btn {
         padding: 7px 12px !important;
         font-size: 0.82rem !important;
@@ -17369,6 +18056,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         border-radius: 10px !important;
         display: inline-flex !important;
     }
+
     .landing-nav-actions .landing-btn-ghost {
         display: inline-flex !important;
         background: #ffffff !important;
@@ -17376,6 +18064,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         border: 2px solid #0f2e29 !important;
         box-shadow: 0 2.5px 0 #0f2e29 !important;
     }
+
     .landing-nav-actions .landing-btn-primary {
         display: inline-flex !important;
         background: #ffd93d !important;
@@ -17390,6 +18079,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         padding: 20px 14px 12px !important;
         min-height: 0 !important;
     }
+
     .landing-hero-inner {
         flex-direction: column !important;
         align-items: center !important;
@@ -17399,6 +18089,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         padding: 0 !important;
         min-height: 0 !important;
     }
+
     .landing-hero-art {
         order: -1 !important;
         flex: none !important;
@@ -17407,6 +18098,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         margin: 0 auto 4px !important;
         line-height: 0 !important;
     }
+
     .landing-hero-logo {
         display: block !important;
         width: auto !important;
@@ -17415,6 +18107,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         max-height: 105px !important;
         margin: 0 auto !important;
     }
+
     .landing-hero-text {
         order: 0 !important;
         flex: none !important;
@@ -17424,22 +18117,26 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         align-items: center !important;
         text-align: center !important;
     }
+
     .landing-badge {
         margin-bottom: 10px !important;
         font-size: 0.76rem !important;
         padding: 4px 12px !important;
     }
+
     .landing-hero-title {
         margin-bottom: 10px !important;
         font-size: clamp(1.75rem, 6.8vw, 2.25rem) !important;
         line-height: 1.08 !important;
     }
+
     .landing-hero-sub {
         margin-bottom: 12px !important;
         font-size: 0.88rem !important;
         line-height: 1.38 !important;
         max-width: 95% !important;
     }
+
     .landing-hero-cta {
         flex-direction: column !important;
         gap: 8px !important;
@@ -17447,11 +18144,13 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         width: 100% !important;
         max-width: 320px !important;
     }
+
     .landing-hero-cta .landing-btn {
         width: 100% !important;
         padding: 10px 18px !important;
         font-size: 0.92rem !important;
     }
+
     .landing-hero-note {
         margin: 0 !important;
         width: 100% !important;
@@ -17459,6 +18158,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         font-size: 0.8rem !important;
         line-height: 1.25 !important;
     }
+
     .landing-stats-strip {
         padding: 16px 12px !important;
     }
@@ -17467,6 +18167,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     .landing-testi-track {
         gap: 12px !important;
     }
+
     .landing-testi-track .landing-card-testimoni {
         width: 245px !important;
         max-width: 76vw !important;
@@ -17474,34 +18175,42 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         gap: 8px !important;
         border-left-width: 5px !important;
     }
+
     .landing-testi-top {
         gap: 6px !important;
     }
+
     .landing-testi-quote {
         font-size: 2.2rem !important;
         margin-top: 2px !important;
         line-height: 0.6 !important;
     }
+
     .landing-star-row svg {
         width: 0.92rem !important;
         height: 0.92rem !important;
     }
+
     .landing-testimoni-teks {
         font-size: 0.83rem !important;
         line-height: 1.42 !important;
     }
+
     .landing-testimoni-orang {
         gap: 8px !important;
         padding-top: 10px !important;
     }
+
     .landing-testi-avatar {
         width: 36px !important;
         height: 36px !important;
         border-width: 2px !important;
     }
+
     .landing-testimoni-orang strong {
         font-size: 0.86rem !important;
     }
+
     .landing-testimoni-orang span {
         font-size: 0.72rem !important;
     }
@@ -17511,48 +18220,58 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 10px !important;
     }
+
     .landing-grid-mod .landing-card-img {
         aspect-ratio: auto !important;
         min-height: 180px !important;
     }
+
     .landing-grid-mod .landing-card-img:nth-child(3) {
         grid-column: 1 / -1 !important;
         width: 100% !important;
         max-width: 320px !important;
         margin: 0 auto !important;
     }
+
     .landing-mod-tag-img {
         top: 8px !important;
         right: 8px !important;
         font-size: 0.58rem !important;
         padding: 2px 7px !important;
     }
+
     .landing-mod-info {
         padding: 6px 8px 2px !important;
         gap: 5px !important;
     }
+
     .landing-grid-mod .landing-card-img-pill {
         width: 26px !important;
         height: 26px !important;
     }
+
     .landing-grid-mod .landing-card-img-pill svg {
         width: 14px !important;
         height: 14px !important;
     }
+
     .landing-grid-mod .landing-card-img-text h3 {
         font-size: 0.85rem !important;
         line-height: 1.15 !important;
         margin: 0 !important;
     }
+
     .landing-grid-mod .landing-mod-desc {
         font-size: 0.68rem !important;
         line-height: 1.22 !important;
         margin-top: 1px !important;
     }
+
     .landing-grid-mod .landing-mod-senarai {
         padding: 0 8px 8px !important;
         gap: 2px !important;
     }
+
     .landing-grid-mod .landing-mod-senarai li {
         font-size: 0.68rem !important;
         line-height: 1.2 !important;
@@ -17564,49 +18283,58 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     #landing-screen #peta .landing-section-head {
         margin: 0 auto 16px !important;
     }
+
     #landing-screen #ciri .landing-kicker,
     #landing-screen #peta .landing-kicker {
         margin-bottom: 2px !important;
         font-size: 0.74rem !important;
         letter-spacing: 1.5px !important;
     }
+
     #landing-screen #ciri .landing-h2,
     #landing-screen #peta .landing-h2 {
         font-size: clamp(1.2rem, 4.4vw, 1.55rem) !important;
         line-height: 1.14 !important;
         margin: 0 0 4px !important;
     }
+
     #landing-screen #ciri .landing-h2::after,
     #landing-screen #peta .landing-h2::after {
         margin: 4px auto 6px !important;
         height: 3.5px !important;
         width: 44px !important;
     }
+
     #landing-screen #ciri .landing-section-sub,
     #landing-screen #peta .landing-section-sub {
         font-size: 0.82rem !important;
         line-height: 1.3 !important;
         margin: 0 !important;
     }
+
     #landing-screen .landing-grid-ciri,
     #landing-screen .landing-grid-peta {
         gap: 8px !important;
     }
+
     #landing-screen .landing-grid-ciri .landing-card-img,
     #landing-screen .landing-grid-peta .landing-card-img {
         aspect-ratio: 16 / 11 !important;
     }
+
     #landing-screen .landing-grid-ciri .landing-card-img-text,
     #landing-screen .landing-grid-peta .landing-card-img-text {
         padding: 6px 8px !important;
         gap: 6px !important;
     }
+
     #landing-screen .landing-grid-ciri .landing-card-img-text h3,
     #landing-screen .landing-grid-peta .landing-card-img-text h3 {
         font-size: 0.82rem !important;
         line-height: 1.15 !important;
         margin: 0 !important;
     }
+
     #landing-screen .landing-grid-peta .landing-card-img-no {
         width: 24px !important;
         height: 24px !important;
@@ -17620,6 +18348,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
         grid-template-columns: 1fr 1fr !important;
         gap: 18px 14px !important;
     }
+
     .landing-footer-brand {
         grid-column: 1 / -1 !important;
         text-align: center !important;
@@ -17646,7 +18375,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 0 #0f2e29, 0 6px 14px rgba(0,0,0,0.22);
+    box-shadow: 0 4px 0 #0f2e29, 0 6px 14px rgba(0, 0, 0, 0.22);
     animation: floating-cta-glow 1.8s infinite alternate;
     cursor: pointer;
     border: 3px solid #0f2e29;
@@ -17780,24 +18509,53 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
 
 
 /* --- Pagination bar (10 baris/halaman) --- */
-.pagination-bar{display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;padding:12px 4px 4px;}
-.pagination-dot,.pagination-nav-btn{transition:transform .12s ease, background .15s ease;}
-.pagination-dot:hover,.pagination-nav-btn:not(:disabled):hover{transform:translateY(-1px);}
-@media (max-width:480px){.pagination-bar{gap:4px;}.pagination-dot,.pagination-nav-btn{width:27px !important;height:27px !important;font-size:0.72rem !important;}}
+.pagination-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 12px 4px 4px;
+}
+
+.pagination-dot,
+.pagination-nav-btn {
+    transition: transform .12s ease, background .15s ease;
+}
+
+.pagination-dot:hover,
+.pagination-nav-btn:not(:disabled):hover {
+    transform: translateY(-1px);
+}
+
+@media (max-width:480px) {
+    .pagination-bar {
+        gap: 4px;
+    }
+
+    .pagination-dot,
+    .pagination-nav-btn {
+        width: 27px !important;
+        height: 27px !important;
+        font-size: 0.72rem !important;
+    }
+}
 
 /* --- Kad statistik Affiliate (gaya sama seperti kad mod guru) --- */
 .affiliate-stats-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
+
 @media (max-width: 900px) {
     .affiliate-stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: 12px !important;
     }
 }
+
 @media (max-width: 400px) {
-    .affiliate-stats-grid > div {
+    .affiliate-stats-grid>div {
         padding: 12px 12px !important;
         min-height: 100px !important;
     }
@@ -17805,11 +18563,12 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
 
 /* Kad admin: 3 kad sebaris pada mudah alih. */
 @media (max-width: 480px) {
-    body.admin-mode #admin-dashboard .ibubapa-stats-grid > div {
+    body.admin-mode #admin-dashboard .ibubapa-stats-grid>div {
         padding: 12px 10px !important;
         min-height: 100px !important;
     }
-    body.admin-mode #admin-dashboard .ibubapa-stats-grid > div > div:nth-child(2) {
+
+    body.admin-mode #admin-dashboard .ibubapa-stats-grid>div>div:nth-child(2) {
         width: 30px !important;
         height: 30px !important;
         font-size: 0.95rem !important;
@@ -17859,7 +18618,7 @@ body:has(#landing-screen.active) #guru-mobile-menu-btn {
     pointer-events: none;
 }
 
-.versi-pro-overlay > i {
+.versi-pro-overlay>i {
     font-size: 2rem;
     color: #ffffff;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85));
