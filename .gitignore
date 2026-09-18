@@ -18,6 +18,9 @@ supabase/.temp/
 skills-lock.json
 scratchX/
 
+# Sandbox worktree alat dev (.kilo) — salinan penuh projek, jangan commit.
+.kilo/
+
 # Fail sementara diagnostik Firebase CLI / deploy
 tmp-*
 
