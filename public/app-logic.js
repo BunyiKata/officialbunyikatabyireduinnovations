@@ -185,6 +185,26 @@ window.__paginasiJadual = function (pasangan) {
     return rawPlan;
 };
 
+// [KESELAMATAN S1] Bersihkan sisa kata laluan lama yang pernah disimpan dalam
+// localStorage oleh versi terdahulu. Dijalankan sekali sahaja setiap kali app dibuka.
+(function bersihkanKataLaluanLama() {
+    try {
+        const kunciLama = [
+            'bunyiKataAdminPassword',
+            'bunyiKataGuruPassword',
+            'bunyiKataIbubapaPassword',
+            'bunyiKataAffiliatePassword',
+        ];
+        kunciLama.forEach(function (k) {
+            if (localStorage.getItem(k) !== null) {
+                localStorage.removeItem(k);
+            }
+        });
+    } catch (e) { /* localStorage tidak tersedia — abaikan */ }
+})();
+
+// Kata laluan sementara (akaun baharu) boleh dipapar/sembunyi dalam panel admin.
+// Nilai sebenar datang dari atribut data-real pada elemen paparan (respons server sekali sahaja).
 window.toggleAdminPasswordVisibility = function () {
     const disp = document.getElementById('admin-pass-display');
     const icon = document.getElementById('admin-pass-toggle-icon');
@@ -406,7 +426,9 @@ window.showAdminInfo = function (type, nama, extra) {
     }
 
     const email = (extra && extra.email) || match.email || '';
-    const realPass = (extra && extra.password) ? extra.password : (match.password || '');
+    // [KESELAMATAN S1] Kata laluan hanya dipaparkan jika datang dari respons server
+    // (akaun baharu, sekali sahaja). JANGAN baca dari rekod tersimpan/cache.
+    const realPass = (extra && extra.password) ? extra.password : '';
     const rawLangganan = (extra && extra.langganan) || match.langganan || '1 Bulan (Pro)';
     const langganan = window.normalizeAdminPlanName ? window.normalizeAdminPlanName(rawLangganan) : rawLangganan;
     const profileId = (extra && extra.id) || match.id || '';
@@ -420,9 +442,13 @@ window.showAdminInfo = function (type, nama, extra) {
     const noTelefon = (extra && (extra.telefon || extra.no_telefon)) || match.no_telefon || '';
     const tempohStr = (extra && extra.tempoh) || (match.bakiHari !== undefined ? `${match.bakiHari} Hari (${langganan})` : `30 Hari (${langganan})`);
 
-    // Paparan status kata laluan
+    // [KESELAMATAN S1] Kata laluan tidak lagi dipaparkan dari simpanan.
+    // Hanya papar status "dilindungi" sahaja (atau paparan sekali untuk akaun baharu
+    // yang dibuat melalui modal _paparKataLaluanBaharu).
     let passHtml = '';
     if (realPass) {
+        // Kata laluan sementara akaun BAHARU — dipaparkan sekali sahaja untuk dihantar
+        // kepada pengguna (cth. melalui WhatsApp). Tidak disimpan di mana-mana.
         passHtml = `
             <div style="display:inline-flex; align-items:center; gap:8px; margin-top:4px;">
                 <span id="admin-pass-display" data-real="${realPass}" data-masked="••••••••" style="font-family:monospace; background:#e2e8f0; padding:4px 10px; border-radius:8px; font-weight:bold; font-size:0.95rem; color:#1e293b; border:1.5px solid #cbd5e1;">••••••••</span>
@@ -430,12 +456,17 @@ window.showAdminInfo = function (type, nama, extra) {
                     <i id="admin-pass-toggle-icon" class="fa-solid fa-eye"></i>
                 </button>
             </div>
+            <div style="margin-top:6px;">
+                <span style="background:#fef3c7; color:#92400e; border:1.5px solid #f59e0b; padding:3px 9px; border-radius:8px; font-weight:bold; font-size:0.72rem; display:inline-flex; align-items:center; gap:5px;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Kata laluan sementara — salin & hantar kepada pengguna sekarang
+                </span>
+            </div>
         `;
     } else {
         passHtml = `
             <div style="margin-top:4px;">
                 <span style="background:#ecfdf5; color:#065f46; border:1.5px solid #10b981; padding:4px 10px; border-radius:8px; font-weight:bold; font-size:0.82rem; display:inline-flex; align-items:center; gap:6px;">
-                    <i class="fa-solid fa-shield-halved" style="color:#10b981;"></i> Dilindungi (Pangkalan Data)
+                    <i class="fa-solid fa-shield-halved" style="color:#10b981;"></i> Dilindungi — kata laluan tidak dipaparkan atas sebab keselamatan
                 </span>
             </div>
         `;
@@ -1319,9 +1350,6 @@ window.renderAdminTable = function (type = 'guru') {
         const paparLaporan = (hasil) => {
             const ringkasan = (hasil && Array.isArray(hasil.ringkasan)) ? hasil.ringkasan : [];
             const sejarah = (hasil && Array.isArray(hasil.dibayar_sejarah)) ? hasil.dibayar_sejarah : [];
-            const belumMatangSen = (hasil && Array.isArray(hasil.belum_matang))
-                ? hasil.belum_matang.reduce((s, it) => s + (Number(it.komisen_sen) || 0), 0) : 0;
-            const tahanHari = (hasil && typeof hasil.tempoh_tahan_hari === 'number') ? hasil.tempoh_tahan_hari : 0;
 
             // --- Lapisan 1: ringkasan per-affiliate ---
             bayarTbody.innerHTML = "";
@@ -1332,7 +1360,6 @@ window.renderAdminTable = function (type = 'guru') {
                         <td colspan="8" style="padding: 36px 16px; text-align: center; color: #64748b; font-weight: bold; font-size: 0.95rem;">
                             <i class="fa-solid fa-file-invoice-dollar" style="font-size: 2rem; color: #cbd5e1; display: block; margin-bottom: 10px;"></i>
                             Tiada rekod pembayaran affiliate dalam pangkalan data.
-                            ${belumMatangSen > 0 ? '<br/><span style="font-size:0.8rem; color:#94a3b8; font-weight:normal; margin-top:6px; display:inline-block;">' + rmBayar(belumMatangSen) + " masih dalam tempoh tahan (" + tahanHari + " hari).</span>" : ""}
                         </td>
                     </tr>
                 `;
@@ -2723,14 +2750,11 @@ window.studentRecord = studentRecord;
             localStorage.removeItem('pdf_kelas');
         }
 
-        // Kod admin kini dipegang PELAYAN (ADMIN_CODE). Buang nilai localStorage
-        // basi (cth. "ADMIN#02") yang dulu digunakan untuk memaparkan/menyemak
-        // kod dalam modal Maklumat Admin — ia mengelirukan pengguna.
+        // Kod admin kini dipegang PELAYAN (ADMIN_CODE) dan TIDAK disimpan di
+        // pelayar. Buang apa-apa nilai localStorage basi supaya kod rahsia tidak
+        // pernah kekal dalam peranti pengguna.
         try {
-            const kodAdminLama = (localStorage.getItem('bunyiKataKodAdmin') || '').trim();
-            if (kodAdminLama && /[#]/.test(kodAdminLama)) {
-                localStorage.removeItem('bunyiKataKodAdmin');
-            }
+            localStorage.removeItem('bunyiKataKodAdmin');
         } catch (e) { }
 
         // Padam modul ujian lama dummy sahaja tanpa memadam bintang atau rekod kemajuan murid sah
@@ -9430,7 +9454,7 @@ window.renderAdminUrus = function (tab) {
                             </span>
                         </td>
                         <td style="padding:9px 10px; text-align:center; border-right:1px solid #e2e8f0;">
-                            <button class="neo-btn bg-white" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#ea580c; border:1.5px solid #ea580c; margin:0 auto;" data-id="${t.id}" data-name="${(t.nama || '').replace(/"/g, '&quot;')}" data-tempoh="${tempohText}" data-langganan="${langganan}" data-email="${(t.email || '').replace(/"/g, '&quot;')}" data-sekolah="${(t.sekolah || '').replace(/"/g, '&quot;')}" data-kod="${(t.kod_kelas || '').replace(/"/g, '&quot;')}" data-namakelas="${(t.nama_kelas || '').replace(/"/g, '&quot;')}" data-murid="${t.murid || 0}" data-telefon="${(t.no_telefon || '').replace(/"/g, '&quot;')}" data-pass="${(t.password || '').replace(/"/g, '&quot;')}" onclick="window.showAdminInfo('guru', this.getAttribute('data-name'), { id: this.getAttribute('data-id'), tempoh: this.getAttribute('data-tempoh'), langganan: this.getAttribute('data-langganan'), email: this.getAttribute('data-email'), sekolah: this.getAttribute('data-sekolah'), kodKelas: this.getAttribute('data-kod'), namaKelas: this.getAttribute('data-namakelas'), murid: this.getAttribute('data-murid'), telefon: this.getAttribute('data-telefon'), password: this.getAttribute('data-pass') })" title="Info">
+                            <button class="neo-btn bg-white" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#ea580c; border:1.5px solid #ea580c; margin:0 auto;" data-id="${t.id}" data-name="${(t.nama || '').replace(/"/g, '&quot;')}" data-tempoh="${tempohText}" data-langganan="${langganan}" data-email="${(t.email || '').replace(/"/g, '&quot;')}" data-sekolah="${(t.sekolah || '').replace(/"/g, '&quot;')}" data-kod="${(t.kod_kelas || '').replace(/"/g, '&quot;')}" data-namakelas="${(t.nama_kelas || '').replace(/"/g, '&quot;')}" data-murid="${t.murid || 0}" data-telefon="${(t.no_telefon || '').replace(/"/g, '&quot;')}" onclick="window.showAdminInfo('guru', this.getAttribute('data-name'), { id: this.getAttribute('data-id'), tempoh: this.getAttribute('data-tempoh'), langganan: this.getAttribute('data-langganan'), email: this.getAttribute('data-email'), sekolah: this.getAttribute('data-sekolah'), kodKelas: this.getAttribute('data-kod'), namaKelas: this.getAttribute('data-namakelas'), murid: this.getAttribute('data-murid'), telefon: this.getAttribute('data-telefon'), password: '' })" title="Info">
                                 <i class="fa-solid fa-circle-info"></i>
                             </button>
                         </td>
@@ -9524,7 +9548,7 @@ window.renderAdminUrus = function (tab) {
                             </span>
                         </td>
                         <td style="padding:9px 10px; text-align:center; border-right:1px solid #e2e8f0;">
-                            <button class="neo-btn bg-white" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#0284c7; border:1.5px solid #0284c7; margin:0 auto;" data-id="${p.id}" data-name="${(p.nama || '').replace(/"/g, '&quot;')}" data-tempoh="${tempohText}" data-langganan="${langganan}" data-email="${(p.email || '').replace(/"/g, '&quot;')}" data-kod="${(p.kod_keluarga || '').replace(/"/g, '&quot;')}" data-namakeluarga="${(p.nama_keluarga || '').replace(/"/g, '&quot;')}" data-anak="${p.anak || 0}" data-telefon="${(p.no_telefon || '').replace(/"/g, '&quot;')}" data-pass="${(p.password || '').replace(/"/g, '&quot;')}" onclick="window.showAdminInfo('ibubapa', this.getAttribute('data-name'), { id: this.getAttribute('data-id'), tempoh: this.getAttribute('data-tempoh'), langganan: this.getAttribute('data-langganan'), email: this.getAttribute('data-email'), kodKeluarga: this.getAttribute('data-kod'), namaKeluarga: this.getAttribute('data-namakeluarga'), anak: this.getAttribute('data-anak'), telefon: this.getAttribute('data-telefon'), password: this.getAttribute('data-pass') })" title="Info">
+                            <button class="neo-btn bg-white" style="padding:4px; width:30px; height:30px; border-radius:50%; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; color:#0284c7; border:1.5px solid #0284c7; margin:0 auto;" data-id="${p.id}" data-name="${(p.nama || '').replace(/"/g, '&quot;')}" data-tempoh="${tempohText}" data-langganan="${langganan}" data-email="${(p.email || '').replace(/"/g, '&quot;')}" data-kod="${(p.kod_keluarga || '').replace(/"/g, '&quot;')}" data-namakeluarga="${(p.nama_keluarga || '').replace(/"/g, '&quot;')}" data-anak="${p.anak || 0}" data-telefon="${(p.no_telefon || '').replace(/"/g, '&quot;')}" onclick="window.showAdminInfo('ibubapa', this.getAttribute('data-name'), { id: this.getAttribute('data-id'), tempoh: this.getAttribute('data-tempoh'), langganan: this.getAttribute('data-langganan'), email: this.getAttribute('data-email'), kodKeluarga: this.getAttribute('data-kod'), namaKeluarga: this.getAttribute('data-namakeluarga'), anak: this.getAttribute('data-anak'), telefon: this.getAttribute('data-telefon'), password: '' })" title="Info">
                                 <i class="fa-solid fa-circle-info"></i>
                             </button>
                         </td>

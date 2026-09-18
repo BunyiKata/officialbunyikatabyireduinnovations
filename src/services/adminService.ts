@@ -439,10 +439,8 @@ export interface RekodPembayaran {
 export interface HasilLaporanBayaran {
   berjaya: boolean;
   mesej?: string;
-  tempoh_tahan_hari?: number;
   ringkasan?: RingkasanBayaran[];
   layak?: BarisKomisen[];
-  belum_matang?: BarisKomisen[];
   dibayar_sejarah?: RekodPembayaran[];
   jumlah_layak_sen?: number;
 }

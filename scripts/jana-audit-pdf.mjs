@@ -463,7 +463,7 @@ function bahagianAffiliate() {
   h2("3.1 Kekuatan sedia ada");
   card("Sudah betul & selamat", [
     "Komisen 30% setiap pembelian berbayar (server.js: KOMISEN_PERSEN = 30).",
-    "Tempoh tahan 7 hari (KOMISEN_TAHAN_HARI = 7) sebelum komisen layak dibayar - mengelak masalah refund.",
+    "Pembayaran komisen dikendalikan secara MANUAL oleh admin — tiada tempoh tahan automatik.",
     "Kod affiliate diambil daripada token pengesahan, bukan daripada input pengguna.",
     "Ada endpoint berasingan untuk admin (list, create, status, delete, mark-paid, payments).",
     "Rules affiliates & referrals sudah mengunci bacaan kepada admin atau pemilik kod sahaja.",

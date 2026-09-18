@@ -307,13 +307,6 @@ const GRACE_HARI = 3;
 /** Peratus komisen untuk setiap pembelian berbayar yang dirujuk. */
 const KOMISEN_PERSEN = 30;
 
-/**
- * Tempoh tahan komisen (hari) sebelum layak dibayar.
- * Set ke 0 kerana model jualan ini manual/prabayar — tiada risiko refund
- * automatik. Semua komisen belum dibayar terus layak dibayar.
- */
-const KOMISEN_TAHAN_HARI = 0;
-
 /** Huruf yang digunakan untuk menjana kod affiliate (huruf + nombor). */
 const AKSARA_KOD = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // buang I,O,0,1 (mudah keliru)
 
@@ -1058,9 +1051,9 @@ async function startServer() {
   /**
    * Fasa 2: laporan pembayaran komisen (kitaran 2 minggu).
    *
-   * Hanya baris `pending` yang LEBIH TUA daripada tempoh tahan (7 hari) layak
-   * dibayar — ini melindungi daripada refund/chargeback sebelum komisen keluar.
-   * Baris `sah` (jika ada) juga dianggap layak.
+   * Pembayaran komisen adalah MANUAL sepenuhnya oleh admin — tiada tempoh
+   * tahan automatik. Semua baris komisen belum dibayar (status bukan `batal`
+   * atau `dibayar`) terus dianggap layak dibayar.
    */
   app.get("/api/admin/affiliate/payments", requireAdmin, async (req, res) => {
     try {
@@ -1102,7 +1095,6 @@ async function startServer() {
       }
 
       const layak = []; // baris komisen yang boleh dibayar sekarang.
-      const belumMatang = []; // sentiasa kosong (tiada tempoh tahan) — kekal untuk keserasian API.
       // Baki belum dibayar (semua baris pending layak kecuali yang telah dibayar).
       const bakiLayakSen = {}; // kod -> jumlah layak belum dibayar
       const bakiSemuaSen = {}; // kod -> jumlah komisen belum dibayar (semua peringkat)
@@ -1180,10 +1172,8 @@ async function startServer() {
 
       return res.json({
         success: true,
-        tempoh_tahan_hari: KOMISEN_TAHAN_HARI,
         ringkasan,
         layak,
-        belum_matang: belumMatang,
         dibayar_sejarah: dibayarSejarah,
         jumlah_layak_sen: jumlahLayakSen,
       });
@@ -1281,7 +1271,7 @@ async function startServer() {
 
       const tarikh = tarikhInput || new Date().toISOString();
 
-      // 1) Kira baris komisen yang layak untuk ditanda dibayar (tiada tempoh tahan).
+      // 1) Kira baris komisen yang layak untuk ditanda dibayar (pembayaran manual oleh admin).
       let bilDitanda = 0;
       let jumlahDitanda = 0;
       if (tandaKomisen) {
