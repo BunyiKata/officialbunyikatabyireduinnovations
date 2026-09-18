@@ -61,6 +61,7 @@ const PricingProModal = lazy(() => import("./components/modals/PricingProModal")
 const EditProfileModal = lazy(() => import("./components/modals/EditProfileModal").then(m => ({ default: m.EditProfileModal })));
 const EntryChoiceModal = lazy(() => import("./components/modals/EntryChoiceModal").then(m => ({ default: m.EntryChoiceModal })));
 const ModeChoiceModal = lazy(() => import("./components/modals/ModeChoiceModal").then(m => ({ default: m.ModeChoiceModal })));
+const TermsPrivacyModal = lazy(() => import("./components/modals/TermsPrivacyModal").then(m => ({ default: m.TermsPrivacyModal })));
 import { hubungiAdminWhatsapp, mesejDaftarPakej, mesejDaftarAffiliate } from "./config/contactAdmin";
 import "./utils/sijilGenerator";
 import "./index.css";
@@ -115,8 +116,8 @@ import {
   syncTeacherSessionFromFirebase,
   deleteStudentByNameFromFirebase,
   checkIsCodeAlreadyUsedInFirebase,
+  SISTEM_KOD_TERLARANG,
   naikTarafLanggananFirebase,
-  rekodPesananFirebase,
   semakLuputLanggananFirebase,
 } from "./services/firebaseService";
 
@@ -1504,6 +1505,8 @@ export default function App() {
 
   const effectiveAccessLevel: "trial" | "pro" = isEffectivePro ? "pro" : "trial";
   const [isEntryChoiceModalOpen, setIsEntryChoiceModalOpen] = React.useState(false);
+  const [isLegalModalOpen, setIsLegalModalOpen] = React.useState(false);
+  const [legalModalTab, setLegalModalTab] = React.useState<"terma" | "privasi">("terma");
   const [isProPricingModalOpen, setIsProPricingModalOpen] = React.useState(false);
   const [proPricingTab, setProPricingTab] = React.useState<"guru" | "ibubapa">("guru");
   const [joinCode, setJoinCode] = React.useState("");
@@ -2051,11 +2054,12 @@ export default function App() {
     const kGuru = (localStorage.getItem("bunyiKataKodKelas") || "").toUpperCase();
     const kGuru2 = (localStorage.getItem("bunyiKataKodKelas2") || "").toUpperCase();
     const kFam = (localStorage.getItem("bunyiKataKodKeluarga") || "").toUpperCase();
-    const kAdm = (localStorage.getItem("bunyiKataKodAdmin") || "").toUpperCase();
 
-    // Semak sekatan kod sistem / admin
+    // Semak sekatan kod sistem / admin.
+    // Kod admin sebenar kekal RAHSIA di pelayan (ADMIN_CODE) dan tidak pernah
+    // disimpan di pelayar — kita hanya tolak kod yang menyerupai kod sistem.
     if (currentRole !== "admin") {
-      if (code === "ADMIN" || (kAdm && code === kAdm)) {
+      if (SISTEM_KOD_TERLARANG.has(code)) {
         return { isUsed: true, usedBy: "Akaun Admin" };
       }
     }
@@ -3966,6 +3970,14 @@ export default function App() {
         setIsModeChoiceOpen={setIsModeChoiceOpen}
         setIsCodeModalOpen={setIsCodeModalOpen}
         setIsEntryChoiceModalOpen={setIsEntryChoiceModalOpen}
+        onOpenTerms={() => {
+          setLegalModalTab("terma");
+          setIsLegalModalOpen(true);
+        }}
+        onOpenPrivacy={() => {
+          setLegalModalTab("privasi");
+          setIsLegalModalOpen(true);
+        }}
       />
 
       <div id="main-menu-screen" className={getScreenClass("main-menu-screen")}>
@@ -9043,6 +9055,15 @@ export default function App() {
             setIsEditModalOpen={setIsEditModalOpen}
             setTeacherPlanName={setTeacherPlanName}
           />
+          </Suspense>
+
+          {/* Modal Terma Perkhidmatan & Dasar Privasi */}
+          <Suspense fallback={null}>
+            <TermsPrivacyModal
+              isOpen={isLegalModalOpen}
+              initialTab={legalModalTab}
+              onClose={() => setIsLegalModalOpen(false)}
+            />
           </Suspense>
 
           {/* Modal Pilih Mod -> Pakej Bunyi Kata */}

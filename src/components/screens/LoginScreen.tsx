@@ -15,6 +15,8 @@ interface LoginScreenProps {
   setIsModeChoiceOpen: (open: boolean) => void;
   setIsCodeModalOpen: (open: boolean) => void;
   setIsEntryChoiceModalOpen?: (open: boolean) => void;
+  onOpenTerms?: () => void;
+  onOpenPrivacy?: () => void;
 }
 
 export default function LoginScreen({
@@ -22,6 +24,8 @@ export default function LoginScreen({
   setIsModeChoiceOpen,
   setIsCodeModalOpen,
   setIsEntryChoiceModalOpen = () => {},
+  onOpenTerms = () => {},
+  onOpenPrivacy = () => {},
 }: LoginScreenProps) {
   return (
     <div
@@ -489,6 +493,61 @@ export default function LoginScreen({
               }}
             >
               Aplikasi Pembelajaran Suku Kata &amp; Literasi Bahasa Melayu.
+            </div>
+            <div
+              style={{
+                fontSize: "0.72rem",
+                fontWeight: "normal",
+                color: "#64748b",
+                marginTop: "4px",
+                lineHeight: "1.5",
+              }}
+            >
+              Dengan menggunakan Bunyi Kata, anda bersetuju dengan{" "}
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (typeof (window as any).playBubble === "function")
+                    (window as any).playBubble();
+                  onOpenTerms();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") onOpenTerms();
+                }}
+                style={{
+                  color: "#0284c7",
+                  textDecoration: "underline",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+              >
+                Terma Perkhidmatan
+              </span>{" "}
+              dan{" "}
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (typeof (window as any).playBubble === "function")
+                    (window as any).playBubble();
+                  onOpenPrivacy();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") onOpenPrivacy();
+                }}
+                style={{
+                  color: "#0284c7",
+                  textDecoration: "underline",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+              >
+                Dasar Privasi
+              </span>
+              .
             </div>
           </div>
         </footer>

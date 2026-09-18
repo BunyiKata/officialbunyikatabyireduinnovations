@@ -181,6 +181,23 @@ export function generateUniqueCode(prefix: 'GURU' | 'FAM' = 'GURU'): string {
 }
 
 /**
+ * Kod sistem yang DILARANG digunakan sebagai kod kelas/keluarga.
+ *
+ * Kod admin sebenar kekal RAHSIA di pelayan (ADMIN_CODE) dan tidak pernah
+ * disimpan di pelayar. Senarai ini hanya menolak kod yang jelas menyerupai
+ * kod sistem/admin supaya guru & ibu bapa tidak boleh "menyamar" sebagai
+ * admin dengan memilih kod sendiri.
+ */
+export const SISTEM_KOD_TERLARANG = new Set<string>([
+  'ADMIN',
+  'ADMINISTRATOR',
+  'SISTEM',
+  'SYSTEM',
+  'ROOT',
+  'SUPERADMIN',
+]);
+
+/**
  * Memeriksa sama ada sesuatu kod (kod kelas, kod keluarga, atau kod admin)
  * telah digunakan oleh guru lain atau keluarga lain di Firebase Realtime Database
  */
@@ -194,9 +211,11 @@ export async function checkIsCodeAlreadyUsedInFirebase(
   if (!code) return { isUsed: false };
 
   // 1. Sekatan Kod Sistem / Admin
-  const kAdm = (localStorage.getItem('bunyiKataKodAdmin') || '').toUpperCase();
+  //    Kod admin kekal RAHSIA di pelayan (ADMIN_CODE) dan TIDAK disimpan di
+  //    pelayar. Kita hanya tolak kod yang jelas menyerupai kod sistem supaya
+  //    guru/ibu bapa tidak boleh "menyamar" sebagai admin dengan kod sendiri.
   if (currentRole !== 'admin') {
-    if (code === 'ADMIN' || (kAdm && code === kAdm)) {
+    if (SISTEM_KOD_TERLARANG.has(code)) {
       return { isUsed: true, usedBy: 'Akaun Admin' };
     }
   }
@@ -3412,51 +3431,6 @@ export async function naikTarafLanggananFirebase(
 }
 
 /**
- * Merekodkan pesanan pembayaran yang TELAH disahkan (rekod pesanan manual/admin).
- *
- * Tujuan: audit trail & rekonsiliasi. Tanpa rekod ini, tiada cara untuk
- * menyemak semula aduan pelanggan atau mengesan bayaran berganda.
- * Kunci rekod menggunakan purchase_id supaya bayaran sama tidak berganda.
- */
-export async function rekodPesananFirebase(order: {
-  purchaseId: string;
-  email: string;
-  planName: string;
-  amount?: number;
-  currency?: string;
-}): Promise<boolean> {
-  if (!isFirebaseConfigured || !order?.purchaseId) return false;
-
-  try {
-    const safeKey = String(order.purchaseId).replace(/[.#$/[\]]/g, '_');
-    const orderRef = ref(db, `orders/${safeKey}`);
-
-    // Idempotent: jangan tulis semula jika rekod sudah wujud.
-    const existing = await get(orderRef);
-    if (existing.exists()) {
-      console.log('[Firebase RTDB] Pesanan sudah direkodkan sebelum ini:', order.purchaseId);
-      return true;
-    }
-
-    await set(orderRef, {
-      purchase_id: order.purchaseId,
-      email: (order.email || '').trim().toLowerCase(),
-      langganan: order.planName || '',
-      amount: order.amount ?? null,
-      currency: order.currency || 'MYR',
-      status: 'paid',
-      disahkan_pada: new Date().toISOString(),
-    });
-
-    console.log('[Firebase RTDB] Pesanan berjaya direkodkan:', order.purchaseId);
-    return true;
-  } catch (err) {
-    console.error('[Firebase RTDB] Ralat merekod pesanan:', err);
-    return false;
-  }
-}
-
-/**
  * Nama pelan langganan yang diseragamkan (versi modul-level).
  */
 function normalizePlanLocal(rawPlan?: string): string {
@@ -3604,7 +3578,6 @@ export async function getSubscriptionHistory(): Promise<SubscriptionHistoryRecor
 
 if (typeof window !== 'undefined') {
   (window as any).naikTarafLanggananFirebase = naikTarafLanggananFirebase;
-  (window as any).rekodPesananFirebase = rekodPesananFirebase;
   (window as any).getSubscriptionHistory = getSubscriptionHistory;
 }
 

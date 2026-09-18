@@ -464,9 +464,6 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         localStorage.getItem("bunyiKataKodKelas") || "";
                       const kodKelas2 =
                         localStorage.getItem("bunyiKataKodKelas2") || "";
-                      const kodAdmin =
-                        localStorage.getItem("bunyiKataKodAdmin") || "";
-
                       const entered = joinCode.trim().toUpperCase();
 
                       // Mod admin: kod TIDAK disemak di sini. Ia dihantar ke
@@ -1008,8 +1005,6 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         localStorage.getItem("bunyiKataKodKelas") || "";
                       const kodKelas2 =
                         localStorage.getItem("bunyiKataKodKelas2") || "";
-                      const kodAdmin =
-                        localStorage.getItem("bunyiKataKodAdmin") || "";
 
                       const entered = joinCode.trim().toUpperCase();
 

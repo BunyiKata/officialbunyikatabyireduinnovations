@@ -6,6 +6,7 @@ scratch/
 .DS_Store
 *.log
 *.bak
+*.bak-*
 .env*
 !.env.example
 .temp/
@@ -16,3 +17,9 @@ supabase/.temp/
 .agents/
 skills-lock.json
 scratchX/
+
+# Fail sementara diagnostik Firebase CLI / deploy
+tmp-*
+
+# Sandaran pangkalan data (jangan commit ke Git)
+backups/

@@ -2647,16 +2647,9 @@ export function EditProfileModal(props: EditProfileModalProps) {
                               justifyContent: "center",
                             }}
                             onClick={async () => {
+                              // [KESELAMATAN S1] JANGAN simpan kata laluan mentah dalam localStorage.
+                              // Kata laluan hanya dihantar terus ke Firebase Auth di bawah.
                               const passToSave = newPasswordInput.trim();
-                              if (isAffiliate) {
-                                localStorage.setItem("bunyiKataAffiliatePassword", passToSave);
-                              } else if (isAdmin) {
-                                localStorage.setItem("bunyiKataAdminPassword", passToSave);
-                              } else if (isParent) {
-                                localStorage.setItem("bunyiKataIbubapaPassword", passToSave);
-                              } else {
-                                localStorage.setItem("bunyiKataGuruPassword", passToSave);
-                              }
 
                               try {
                                 await updateUserPasswordInFirebase(passToSave);
