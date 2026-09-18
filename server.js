@@ -929,7 +929,11 @@ async function startServer() {
         await authAdmin.setCustomUserClaims(uid, { ...claimSediaAda, affiliate_kod: kod });
       } catch (err) {
         // Jika claim gagal, padam akaun supaya tidak wujud affiliate tanpa akses.
-        await authAdmin.deleteUser(uid).catch(() => {});
+        await authAdmin.deleteUser(uid).catch((delErr) => {
+          // Rollback gagal -> akaun Auth yatim tanpa claim affiliate_kod.
+          // Log supaya admin boleh padam manual (jangan telan senyap).
+          console.warn(`[Affiliate] Gagal padam akaun yatim ${uid}:`, delErr?.message || delErr);
+        });
         throw err;
       }
 

@@ -3332,10 +3332,17 @@ export async function naikTarafLanggananFirebase(
                 langganan: targetPlanName,
                 tarikh_tamat: expiryDateISO,
                 dikemaskini_pada: new Date().toISOString(),
-              }).catch(() => {});
+              }).catch((e) => {
+                // PENTING: kegagalan ini bermakna rekod keluarga TIDAK
+                // menunjukkan Pro walaupun bayaran sudah diterima. Jangan
+                // telan senyap — log supaya boleh dibaiki manual.
+                console.warn(`[Firebase RTDB] Gagal kemas kini tarikh_tamat families/${f.key}:`, e);
+              });
             });
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn(`[Firebase RTDB] Gagal kemas kini families untuk ${pKey}:`, e);
+        }
 
         // Kemas kini dokumen classes jika berkenaan
         try {
@@ -3347,10 +3354,16 @@ export async function naikTarafLanggananFirebase(
                 langganan: targetPlanName,
                 tarikh_tamat: expiryDateISO,
                 dikemaskini_pada: new Date().toISOString(),
-              }).catch(() => {});
+              }).catch((e) => {
+                // PENTING: kegagalan ini bermakna kelas TIDAK menunjukkan Pro
+                // walaupun bayaran sudah diterima. Log, jangan telan senyap.
+                console.warn(`[Firebase RTDB] Gagal kemas kini tarikh_tamat classes/${cl.key}:`, e);
+              });
             });
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn(`[Firebase RTDB] Gagal kemas kini classes untuk ${pKey}:`, e);
+        }
       }
     } else if (rawEmail) {
       // Tiada profil sepadan dengan emel pembayaran.
