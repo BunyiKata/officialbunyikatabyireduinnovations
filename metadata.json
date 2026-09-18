@@ -1,6 +1,6 @@
 {
-  "name": "OFFICIAL bunyikata2027",
-  "description": "Bunyi Kata",
+  "name": "Bunyi Kata",
+  "description": "Bunyi Kata - aplikasi pembelajaran interaktif Bahasa Melayu untuk murid sekolah rendah.",
   "requestFramePermissions": [
     "camera",
     "microphone",

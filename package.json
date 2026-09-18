@@ -1,7 +1,9 @@
 {
-  "name": "react-example",
+  "name": "bunyi-kata",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Bunyi Kata - aplikasi pembelajaran interaktif Bahasa Melayu (PWA + Firebase + Express).",
+  "license": "UNLICENSED",
   "type": "module",
   "engines": {
     "node": "22"
