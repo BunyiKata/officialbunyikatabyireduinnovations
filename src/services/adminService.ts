@@ -26,21 +26,27 @@ export async function dapatkanPenggunaAuth(): Promise<User | null> {
     if (typeof (auth as any).authStateReady === 'function') {
       await (auth as any).authStateReady();
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[AdminService] authStateReady gagal:', e);
+  }
   if (auth.currentUser) return auth.currentUser;
   return new Promise((resolve) => {
     let selesai = false;
     const unsub = onAuthStateChanged(auth, (user) => {
       if (!selesai) {
         selesai = true;
-        try { unsub(); } catch (e) {}
+        try { unsub(); } catch (e) {
+          console.warn('[AdminService] Gagal nyahdaftar onAuthStateChanged (1):', e);
+        }
         resolve(user);
       }
     });
     setTimeout(() => {
       if (!selesai) {
         selesai = true;
-        try { unsub(); } catch (e) {}
+        try { unsub(); } catch (e) {
+          console.warn('[AdminService] Gagal nyahdaftar onAuthStateChanged (2):', e);
+        }
         resolve(auth.currentUser);
       }
     }, 4000);
@@ -756,7 +762,9 @@ export function bersihkanSisaSesiAdminTempatan() {
     if (localStorage.getItem('bunyiKataUserRole') === 'admin') {
       localStorage.removeItem('bunyiKataUserRole');
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[AdminService] Gagal bersihkan sisa sesi admin tempatan:', e);
+  }
   if (typeof window !== 'undefined') {
     (window as any).adminClaimDisahkan = false;
     (window as any).modAdminAktif = false;

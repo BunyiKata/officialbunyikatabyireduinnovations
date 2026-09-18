@@ -391,7 +391,9 @@ export const CantumKataGame: React.FC<{ onClose: () => void }> = ({ onClose }) =
           const studentName = (window as any).namaMuridAktif || 'guest';
           const storageKey = `cantum_completed_${studentName}_${currentCategory.replace(/\s+/g, '_')}`;
           localStorage.setItem(storageKey, JSON.stringify(updated));
-        } catch (e) {}
+        } catch (e) {
+          console.warn('[CantumKata] Gagal simpan kemajuan perkataan selesai:', e);
+        }
         const count = Object.values(updated).filter(Boolean).length;
         setStars(count);
         return updated;
@@ -503,7 +505,9 @@ export const CantumKataGame: React.FC<{ onClose: () => void }> = ({ onClose }) =
       if (!dataStr) return;
       const piece: PiecePoolItem = JSON.parse(dataStr);
       placePieceIntoSlot(piece, slotIdx);
-    } catch (err) {}
+    } catch (err) {
+      console.warn('[CantumKata] Gagal memproses seret-lepas (data tidak sah):', err);
+    }
   };
 
   // Touch drag handlers

@@ -172,7 +172,7 @@ const blueCardContainerStyle = (isMobile: boolean): React.CSSProperties => ({
         try {
           activeActivityAudio.pause();
           activeActivityAudio.currentTime = 0;
-        } catch (e) {}
+        } catch (e) { console.warn('[PhonicsActivities] Gagal hentikan audio sebelumnya:', e); }
         activeActivityAudio = null;
       }
       const audio = new Audio(src);

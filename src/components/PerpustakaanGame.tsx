@@ -582,7 +582,9 @@ function generateAtlantaBadgeSvg(studentName: string) {
 
             return canvas.toDataURL('image/png');
         }
-    } catch (e) { }
+    } catch (e) {
+        console.warn('[Perpustakaan] Gagal jana imej nama murid (canvas), guna SVG:', e);
+    }
 
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='512' height='96'>
         <text x='256' y='55' font-family='sans-serif' font-size='40' font-weight='900' fill='#fbbf24' stroke='#78350f' stroke-width='2' text-anchor='middle'>${studentName}</text>
@@ -1321,7 +1323,9 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                     osc.stop(ctx.currentTime + idx * 0.1 + 0.4);
                 });
             }
-        } catch (e) { }
+        } catch (e) {
+            console.warn('[Perpustakaan] playSynthesizedSound gagal (Web Audio):', e);
+        }
     };
 
     // Pronounce word or syllable with full voice engine support & completion promise
@@ -1342,7 +1346,9 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
             if (typeof (window as any).sebutAudio === 'function') {
                 try {
                     (window as any).sebutAudio(text);
-                } catch (e) { }
+                } catch (e) {
+                    console.warn('[Perpustakaan] sebutAudio gagal:', e);
+                }
                 setTimeout(resolve, 1200);
                 return;
             }
@@ -1436,13 +1442,17 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
             try {
                 (window as any).currentVRStationAudio.pause();
                 (window as any).currentVRStationAudio.currentTime = 0;
-            } catch (e) { }
+            } catch (e) {
+                console.warn('[Perpustakaan] Gagal hentikan audio stesen:', e);
+            }
             (window as any).currentVRStationAudio = null;
         }
         if ('speechSynthesis' in window) {
             try {
                 window.speechSynthesis.cancel();
-            } catch (e) { }
+            } catch (e) {
+                console.warn('[Perpustakaan] speechSynthesis.cancel gagal:', e);
+            }
         }
 
         // Reset visual animations on card
@@ -1487,7 +1497,9 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                             if (typeof (window as any).logProgress === 'function') {
                                 (window as any).logProgress('perpustakaan', 'belajar', next.length * 15, 'perpustakaan');
                             }
-                        } catch (e) { }
+                        } catch (e) {
+                            console.warn('[Perpustakaan] logProgress gagal:', e);
+                        }
                         return next;
                     }
                     return prev;
@@ -1616,7 +1628,9 @@ export const PerpustakaanGame: React.FC<PerpustakaanGameProps> = ({ onClose, isH
                                     osc.start();
                                     osc.stop(ctx.currentTime + 0.08);
                                 }
-                            } catch (e) { }
+                            } catch (e) {
+                                console.warn('[Perpustakaan] Bunyi langkah gagal (Web Audio):', e);
+                            }
                         };
 
                         (window as any).perpJoystickInput = { x: 0, y: 0 };

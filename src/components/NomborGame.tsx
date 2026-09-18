@@ -962,7 +962,9 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
       const storageKey = getNomborStorageKey(currentConfig.progressKey);
       const saved = localStorage.getItem(storageKey);
       if (saved) return JSON.parse(saved);
-    } catch (e) { }
+    } catch (e) {
+      console.warn('[NomborGame] Gagal baca kemajuan tersimpan, guna permulaan:', e);
+    }
     const initial: ProgressRecord = {};
     currentDataset.forEach(item => {
       initial[item.id] = [false, false, false, false, false, false, false];
@@ -988,7 +990,9 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
         setProgress(JSON.parse(saved));
         return;
       }
-    } catch (e) { }
+    } catch (e) {
+      console.warn('[NomborGame] Gagal muat kemajuan tersimpan (muat semula), guna permulaan:', e);
+    }
     const initial: ProgressRecord = {};
     currentDataset.forEach(item => {
       initial[item.id] = [false, false, false, false, false, false, false];
@@ -1004,7 +1008,9 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
       try {
         const storageKey = getNomborStorageKey(currentConfig.progressKey);
         localStorage.setItem(storageKey, JSON.stringify(updated));
-      } catch (e) { }
+      } catch (e) {
+        console.warn('[NomborGame] Gagal simpan kemajuan aktiviti:', e);
+      }
       return updated;
     });
 
@@ -1128,7 +1134,9 @@ export function NomborGame({ onClose, initialMode = 'bilang_0_10' }: NomborGameP
       const arr: boolean[] = saved ? JSON.parse(saved) : [false, false, false, false, false, false];
       arr[actIndex] = true;
       localStorage.setItem(storageKey, JSON.stringify(arr));
-    } catch (e) { }
+    } catch (e) {
+      console.warn('[NomborGame] Gagal simpan kemajuan matematik:', e);
+    }
     setMathProgressTrigger(prev => prev + 1);
 
     const isTrial = !isUserAdminCheck() && typeof window !== 'undefined' && ((window as any).userAccessLevel === 'trial' || (window as any).isGuestMode);

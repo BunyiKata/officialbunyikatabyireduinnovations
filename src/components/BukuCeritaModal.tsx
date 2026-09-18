@@ -590,7 +590,9 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.04);
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[BukuCerita] playNavSound gagal (Web Audio):', e);
+    }
   };
 
   const handleOpenBook = (book: StoryBook) => {
@@ -625,7 +627,9 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
     setShowBookNotice(false);
     try {
       sessionStorage.setItem('rakBukuAudioNoticeSeen', '1');
-    } catch {}
+    } catch (e) {
+      console.warn('[BukuCerita] Gagal simpan pemberitahuan audio:', e);
+    }
   };
 
   useEffect(() => {

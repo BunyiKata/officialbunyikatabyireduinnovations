@@ -180,7 +180,9 @@ if (typeof window !== "undefined") {
               if ((window as any).studentData) (window as any).studentData[studentName] = data;
             }
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn("[App] Gagal parse bunyiKataStudentData:", e);
+        }
       }
       if (data && (!data.badges || data.badges.length === 0) && typeof (window as any).kiraLencanaMurid === 'function') {
         const earned = (window as any).kiraLencanaMurid(data);
@@ -427,7 +429,9 @@ export default function App() {
           currentPath = "login-screen";
           try {
             window.history.replaceState({ screenId: "login-screen" }, document.title, "/login-screen");
-          } catch (e) {}
+          } catch (e) {
+            console.warn("[Navigasi] Gagal replaceState ke login-screen:", e);
+          }
         }
       }
 
@@ -1122,7 +1126,9 @@ export default function App() {
       // 'admin-mode-change' di sini kerana pengendalinya (handleAdminSync)
       // memanggil fungsi ini semula -> gelung tak terhingga.
       window.dispatchEvent(new CustomEvent("akses-level-change"));
-    } catch (e) {}
+    } catch (e) {
+      console.warn("[App] Gagal segerakkan keadaan akses (akses-level-change):", e);
+    }
   }, []);
 
   React.useEffect(() => {
@@ -1146,7 +1152,9 @@ export default function App() {
         const aNav = document.getElementById("admin-sticky-nav");
         if (aNav) aNav.style.display = "none";
         setIsAdminActive(false);
-      } catch (e) {}
+      } catch (e) {
+        console.warn("[App] Gagal bersihkan mod admin selepas log keluar:", e);
+      }
     };
 
     const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
@@ -1433,7 +1441,9 @@ export default function App() {
   const [efektifTrialState, setEfektifTrialState] = React.useState<boolean>(() => {
     if (isAffiliateRole) return false;
     if (typeof (window as any).checkIsTrial === "function") {
-      try { return (window as any).checkIsTrial(); } catch (e) {}
+      try { return (window as any).checkIsTrial(); } catch (e) {
+        console.warn("[App] checkIsTrial gagal, guna fallback tempatan:", e);
+      }
     }
     return isGuestModeActive || (isPlanFree && !isUserAdmin() && !isAdminActive);
   });
@@ -1449,7 +1459,9 @@ export default function App() {
     if (!hasil) return;
     const papar = (window as any).paparBannerLuput;
     if (typeof papar === "function") {
-      try { papar(hasil); } catch (e) {}
+      try { papar(hasil); } catch (e) {
+        console.warn("[App] Gagal papar banner luput:", e);
+      }
     }
   }, []);
 
@@ -1657,7 +1669,9 @@ export default function App() {
         if (found && typeof found.bakiHari === "number") {
           days = found.bakiHari;
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn("[App] Gagal baca baki hari daripada cache admin:", e);
+      }
     }
 
     if (days === null || isNaN(days)) {
@@ -1717,7 +1731,9 @@ export default function App() {
     let list: string[] = [];
     try {
       list = JSON.parse(localStorage.getItem("bunyiKataDaftarKelas") || "[]");
-    } catch (e) {}
+    } catch (e) {
+      console.warn("[App] Gagal parse bunyiKataDaftarKelas (kelas 1):", e);
+    }
     if (!list.includes(clean)) {
       if (list.length > 0) list[0] = clean;
       else list.push(clean);
@@ -1842,7 +1858,9 @@ export default function App() {
     let list: string[] = [];
     try {
       list = JSON.parse(localStorage.getItem("bunyiKataDaftarKelas") || "[]");
-    } catch (e) {}
+    } catch (e) {
+      console.warn("[App] Gagal parse bunyiKataDaftarKelas (kelas 2):", e);
+    }
     if (!list.includes(clean)) {
       if (list.length >= 2) list[1] = clean;
       else list.push(clean);
@@ -2170,7 +2188,9 @@ export default function App() {
     if (typeof (window as any).renderAdminTable === "function") {
       try {
         (window as any).renderAdminTable("feedback");
-      } catch (e) {}
+      } catch (e) {
+        console.warn("[App] renderAdminTable(feedback) gagal:", e);
+      }
     }
   };
 
@@ -2178,7 +2198,9 @@ export default function App() {
     // Bersihkan sebarang sisa maklum balas dummy lama daripada storan tempatan
     try {
       localStorage.removeItem("bunyi_kata_feedbacks");
-    } catch (e) {}
+    } catch (e) {
+      console.warn("[App] Gagal buang bunyi_kata_feedbacks lama:", e);
+    }
 
     (window as any).isUserAdmin = isUserAdmin;
     (window as any).userAccessLevel = isEffectivePro ? "pro" : userAccessLevel;
@@ -2285,9 +2307,13 @@ export default function App() {
               localStorage.setItem("bunyiKataTeacherPlan", "Percuma");
               localStorage.setItem("bunyiKataParentPlan", "Percuma");
               localStorage.setItem("bunyiKataAccessLevel", "trial");
-            } catch (e) {}
+            } catch (e) {
+              console.warn("[App] Gagal set semula storan langganan ke trial:", e);
+            }
             setUserAccessLevel("trial");
-            try { window.dispatchEvent(new CustomEvent("akses-level-change")); } catch (e) {}
+            try { window.dispatchEvent(new CustomEvent("akses-level-change")); } catch (e) {
+              console.warn("[App] Gagal sebar akses-level-change selepas luput:", e);
+            }
           }
           // Fasa 1.5: papar banner amaran (luput atau hampir luput).
           // app-logic.js mungkin belum selesai dimuatkan, jadi kita cuba semula
@@ -2314,7 +2340,9 @@ export default function App() {
     script.onload = () => {
       try {
         window.dispatchEvent(new CustomEvent("akses-level-change"));
-      } catch (e) {}
+      } catch (e) {
+        console.warn("[App] Gagal sebar akses-level-change selepas app-logic.js dimuat:", e);
+      }
       // Fasa 1.5: app-logic.js kini sedia - papar banner jika hasil semakan
       // luput sudah tiba sebelum skrip ini dimuatkan.
       cubaPaparBannerLuput();

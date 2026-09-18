@@ -284,7 +284,9 @@ function playPopConfettiSound() {
       chimeOsc.start(now + 0.04 + idx * 0.06);
       chimeOsc.stop(now + 0.45 + idx * 0.06);
     });
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[CubaSebut] Gagal main kesan bunyi (Web Audio):', e);
+  }
 }
 
 function getNextKVSebutItems(rawPool: SebutItem[], mode: string): SebutItem[] {
@@ -293,7 +295,9 @@ function getNextKVSebutItems(rawPool: SebutItem[], mode: string): SebutItem[] {
   try {
     const saved = sessionStorage.getItem(STORAGE_KEY);
     if (saved) usedIds = JSON.parse(saved);
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[CubaSebut] Gagal baca senarai item terpakai:', e);
+  }
 
   let available = rawPool.filter(item => !usedIds.includes(item.id || item.text));
   if (available.length < 10) {
@@ -305,7 +309,9 @@ function getNextKVSebutItems(rawPool: SebutItem[], mode: string): SebutItem[] {
   const newUsed = [...usedIds, ...chosen.map(c => c.id || c.text)];
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newUsed));
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[CubaSebut] Gagal simpan senarai item terpakai:', e);
+  }
 
   return chosen;
 }
@@ -386,7 +392,9 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
       } else if (typeof (window as any).playBubble === 'function') {
         (window as any).playBubble();
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[CubaSebut] playSoundEffect gagal:', e);
+    }
   };
 
   // Play model pronunciation audio
@@ -471,7 +479,9 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
         recognitionRef.current.onerror = null;
         recognitionRef.current.onend = null;
         recognitionRef.current.abort();
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[CubaSebut] Gagal abort pengecaman suara:', e);
+      }
     }
 
     // Trigger rewards and floating +1 Bintang animation!
@@ -534,7 +544,7 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
     }
 
     if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch (e) {}
+      try { recognitionRef.current.stop(); } catch (e) { console.warn('[CubaSebut] Gagal hentikan pengecaman suara:', e); }
     }
 
     try {
@@ -622,7 +632,9 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[CubaSebut] Gagal hentikan pengecaman suara:', e);
+      }
     }
     setIsRecording(false);
   };
@@ -754,7 +766,7 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
     return () => {
       isProcessingSuccessRef.current = false;
       if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch (e) {}
+        try { recognitionRef.current.stop(); } catch (e) { console.warn('[CubaSebut] Gagal hentikan pengecaman suara semasa unmount:', e); }
       }
       if (currentAudioRef.current) {
         currentAudioRef.current.pause();
@@ -897,7 +909,7 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
         <button
           type="button"
           onClick={() => {
-            try { if (typeof (window as any).playBubble === 'function') (window as any).playBubble(); } catch (e) {}
+            try { if (typeof (window as any).playBubble === 'function') (window as any).playBubble(); } catch (e) { console.warn('[CubaSebut] playBubble gagal:', e); }
             setShowGuideModal(true);
           }}
           className="neo-btn bg-orange help-btn info-icon-btn cursor-pointer"
@@ -1579,7 +1591,9 @@ export const CubaSebutGame: React.FC<CubaSebutGameProps> = ({
                   if (typeof (window as any).playBubble === 'function') {
                     (window as any).playBubble();
                   }
-                } catch (e) {}
+                } catch (e) {
+                  console.warn('[CubaSebut] playBubble gagal:', e);
+                }
                 setShowGuideModal(false);
               }}
             >

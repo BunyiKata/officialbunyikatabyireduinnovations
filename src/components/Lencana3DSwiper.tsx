@@ -84,7 +84,9 @@ export function Lencana3DSwiper() {
               const parsed = JSON.parse(raw);
               if (parsed && parsed[studentName]) data = parsed[studentName];
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn('[Lencana3D] Gagal parse bunyiKataStudentData:', e);
+          }
         }
       }
     }
@@ -207,7 +209,9 @@ export function Lencana3DSwiper() {
         osc.start(now);
         osc.stop(now + 0.09);
       }
-    } catch (e) { }
+    } catch (e) {
+      console.warn("[Lencana3D] playPopSound gagal (Web Audio):", e);
+    }
   };
 
   const handleNext = () => {

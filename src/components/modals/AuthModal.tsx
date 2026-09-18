@@ -700,7 +700,9 @@ export function AuthModal({
                                 });
                                 localStorage.setItem("bunyiKataAdminTeachers", JSON.stringify(existingTeachers));
                               }
-                            } catch (e) {}
+                            } catch (e) {
+                              console.warn("[Auth] Gagal kemas kini cache guru admin:", e);
+                            }
 
                             const guruEl = document.getElementById("guru-dashboard-nama-guru-title");
                             if (guruEl) guruEl.innerText = gName;

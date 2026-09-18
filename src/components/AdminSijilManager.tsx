@@ -95,7 +95,9 @@ const playClick = () => {
         osc.stop(now + 0.08);
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[AdminSijil] Gagal main kesan bunyi (Web Audio):', e);
+  }
 };
 
 export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({

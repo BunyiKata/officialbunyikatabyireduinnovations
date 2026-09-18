@@ -657,7 +657,9 @@ export async function saveFamilyToFirebase(familyData: {
           nama_keluarga: familyData.namaKeluarga.trim().toUpperCase(),
           dikemaskini_pada: now,
         });
-      } catch (pErr) {}
+      } catch (pErr) {
+        console.warn('[Firebase RTDB] Gagal kemas kini profil ibu bapa:', pErr);
+      }
     }
 
     if (existingDocId) {
@@ -779,7 +781,9 @@ export async function getStudentsByCode(code: string): Promise<StudentRecord[]> 
           listMap.set(child.key!, { id: child.key!, ...child.val() });
         });
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[Firebase RTDB] Carian pelajar ikut kod_kelas gagal:', e);
+    }
 
     // 2. Cari mengikut kod_keluarga secara berindeks
     try {
@@ -790,7 +794,9 @@ export async function getStudentsByCode(code: string): Promise<StudentRecord[]> 
           listMap.set(child.key!, { id: child.key!, ...child.val() });
         });
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[Firebase RTDB] Carian pelajar ikut kod_keluarga gagal:', e);
+    }
 
     return Array.from(listMap.values()).filter(s => s.nama && !GHOST_NAMES.includes(s.nama.trim().toLowerCase()));
   } catch (err) {
@@ -805,7 +811,9 @@ export function isAffiliateActiveSession(): boolean {
     if (activeUserRole === 'affiliate') return true;
     if (typeof window !== 'undefined' && Boolean((window as any).modAffiliateAktif)) return true;
     if (typeof document !== 'undefined' && Boolean(document.body?.classList.contains('affiliate-mode'))) return true;
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[Firebase] isAffiliateActiveSession gagal membaca status:', e);
+  }
   return false;
 }
 
@@ -825,7 +833,9 @@ export function kiraSemulaBintang(rekod: any, jumlahMarkahFn?: (d: any) => numbe
       const t = Number(fn(rekod));
       if (Number.isFinite(t) && t > 0) return t;
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[Firebase] jumlahMarkah gagal dihitung dari fungsi luaran:', e);
+  }
   let total = 0;
   const stars = rekod.stars;
   if (stars && typeof stars === 'object') {
@@ -895,7 +905,9 @@ export async function syncStudentToFirebase(student: {
     let parentChildNamesRaw: string[] = [];
     try {
       parentChildNamesRaw = JSON.parse(localStorage.getItem('bunyiKataParentChildNames') || '[]');
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[Firebase] Gagal parse bunyiKataParentChildNames:', e);
+    }
 
     const isParentChild = student.isParentChild === true || 
       activeUserRole === 'ibubapa' || 
@@ -934,7 +946,9 @@ export async function syncStudentToFirebase(student: {
               if (!activeNamaKelas && cData.nama_kelas) activeNamaKelas = cData.nama_kelas;
             });
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn("[Firebase RTDB] Carian kelas ikut kod_kelas gagal:", e);
+        }
       } else if (targetGuruId) {
         try {
           const qKelas = query(ref(db, 'classes'), orderByChild('guru_id'), equalTo(targetGuruId));
@@ -947,7 +961,9 @@ export async function syncStudentToFirebase(student: {
               if (!activeNamaKelas) activeNamaKelas = cData.nama_kelas || '';
             });
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn("[Firebase RTDB] Carian kelas ikut guru_id gagal:", e);
+        }
       }
     } else {
       // 100% MOD IBU BAPA (ANAK KELUARGA) - Jangan sesekali ambil nama_kelas / kod_kelas
@@ -969,7 +985,9 @@ export async function syncStudentToFirebase(student: {
               if (!activeNamaFam && fData.nama_keluarga) activeNamaFam = fData.nama_keluarga;
             });
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn("[Firebase RTDB] Carian keluarga ikut kod_keluarga gagal:", e);
+        }
       } else if (targetParentId) {
         try {
           const qFam = query(ref(db, 'families'), orderByChild('parent_id'), equalTo(targetParentId));
@@ -982,7 +1000,9 @@ export async function syncStudentToFirebase(student: {
               if (!activeNamaFam) activeNamaFam = fData.nama_keluarga || '';
             });
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn("[Firebase RTDB] Carian keluarga ikut parent_id gagal:", e);
+        }
       }
     }
 
@@ -1008,7 +1028,9 @@ export async function syncStudentToFirebase(student: {
                 }
               });
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn("[Firebase RTDB] Carian pelajar ikut guru_id gagal:", e);
+          }
         }
         if (!existingDocId && targetKelasId) {
           try {
@@ -1021,7 +1043,9 @@ export async function syncStudentToFirebase(student: {
                 }
               });
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn("[Firebase RTDB] Carian pelajar ikut kelas_id gagal:", e);
+          }
         }
         if (!existingDocId && activeKodKelas) {
           try {
@@ -1034,7 +1058,9 @@ export async function syncStudentToFirebase(student: {
                 }
               });
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn("[Firebase RTDB] Carian pelajar ikut kod_kelas gagal:", e);
+          }
         }
       } else {
         if (targetParentId) {
@@ -1048,7 +1074,9 @@ export async function syncStudentToFirebase(student: {
                 }
               });
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn("[Firebase RTDB] Carian pelajar ikut parent_id gagal:", e);
+          }
         }
         if (!existingDocId && targetKeluargaId) {
           try {
@@ -1061,7 +1089,9 @@ export async function syncStudentToFirebase(student: {
                 }
               });
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn("[Firebase RTDB] Carian pelajar ikut keluarga_id gagal:", e);
+          }
         }
         if (!existingDocId && activeKodFam) {
           try {
@@ -1074,7 +1104,9 @@ export async function syncStudentToFirebase(student: {
                 }
               });
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn("[Firebase RTDB] Carian pelajar ikut kod_keluarga gagal:", e);
+          }
         }
       }
     }
@@ -1221,7 +1253,9 @@ export async function getStudentsForTeacher(params: {
         const q = query(ref(db, 'students'), orderByChild('guru_id'), equalTo(guruId));
         const snap = await get(q);
         addSnapToMap(snap);
-      } catch (e) {}
+      } catch (e) {
+        console.warn("[Firebase RTDB] Carian pelajar ikut guru_id gagal (fallback cuba sumber lain):", e);
+      }
     }
 
     // 2. Cari mengikut kelas_id
@@ -1230,7 +1264,9 @@ export async function getStudentsForTeacher(params: {
         const q = query(ref(db, 'students'), orderByChild('kelas_id'), equalTo(kelasId));
         const snap = await get(q);
         addSnapToMap(snap);
-      } catch (e) {}
+      } catch (e) {
+        console.warn("[Firebase RTDB] Carian pelajar ikut kelas_id gagal (fallback cuba sumber lain):", e);
+      }
     }
 
     // 3. Cari mengikut kod_kelas
@@ -1239,7 +1275,9 @@ export async function getStudentsForTeacher(params: {
         const q = query(ref(db, 'students'), orderByChild('kod_kelas'), equalTo(kodKelas));
         const snap = await get(q);
         addSnapToMap(snap);
-      } catch (e) {}
+      } catch (e) {
+        console.warn("[Firebase RTDB] Carian pelajar ikut kod_kelas gagal (fallback cuba sumber lain):", e);
+      }
     }
 
     // 4. Cari mengikut guru_email
@@ -1248,7 +1286,9 @@ export async function getStudentsForTeacher(params: {
         const q = query(ref(db, 'students'), orderByChild('guru_email'), equalTo(guruEmail));
         const snap = await get(q);
         addSnapToMap(snap);
-      } catch (e) {}
+      } catch (e) {
+        console.warn("[Firebase RTDB] Carian pelajar ikut guru_email gagal (fallback cuba sumber lain):", e);
+      }
     }
 
     // 5. Fallback scan jika indexed query belum dapat pulangkan murid
@@ -1306,7 +1346,9 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
             guruId = c.key!;
           });
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn("[Firebase RTDB] Carian guru_id ikut emel profil gagal:", e);
+      }
     }
 
     if (guruId) {
@@ -1345,7 +1387,9 @@ export async function syncTeacherSessionFromFirebase(guruIdOrEmail: string): Pro
             }
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Firebase] Gagal menyegerakkan pelan guru ke localStorage:', e);
+      }
     }
 
     // 1. Segerakkan kelas guru
@@ -1719,7 +1763,9 @@ export async function recordStudentBadge(studentId: string, badgeKey: string): P
           });
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[Firebase RTDB] Gagal menambah lencana pada rekod murid:', e);
+    }
     return true;
   } catch (err) {
     console.warn('[Firebase RTDB] Ralat recordStudentBadge:', err);
@@ -1786,7 +1832,9 @@ export async function fetchStudentProgressFromFirebase(studentName: string, stud
             kodKeluarga: sData.kod_keluarga,
           };
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Firebase RTDB] Gagal memuat rekod murid ikut studentId:', e);
+      }
     }
 
     // 2. Jika tiada studentId, cari mengikut nama & kod kelas semasa
@@ -2172,7 +2220,9 @@ export async function fetchAdminDataFromFirebase(): Promise<{ teachers: any[]; p
     }
 
     if (typeof (window as any).renderTeacherTable === 'function') {
-      try { (window as any).renderTeacherTable(); } catch (e) {}
+      try { (window as any).renderTeacherTable(); } catch (e) {
+        console.warn('[Firebase RTDB] renderTeacherTable gagal:', e);
+      }
     }
     if (typeof (window as any).renderAdminTable === 'function') {
       try {
@@ -2180,10 +2230,14 @@ export async function fetchAdminDataFromFirebase(): Promise<{ teachers: any[]; p
         // tanpa argumen akan menetapkan semula jadual ke 'guru' selepas setiap muat.
         const selEl = document.getElementById('admin-table-selector') as HTMLSelectElement | null;
         (window as any).renderAdminTable(selEl ? selEl.value : 'guru');
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Firebase RTDB] renderAdminTable gagal:', e);
+      }
     }
     if (typeof (window as any).renderAdminUrus === 'function') {
-      try { (window as any).renderAdminUrus(); } catch (e) {}
+      try { (window as any).renderAdminUrus(); } catch (e) {
+        console.warn('[Firebase RTDB] renderAdminUrus gagal:', e);
+      }
     }
 
     return { teachers: formattedTeachers, parents: formattedParents };
@@ -2308,7 +2362,9 @@ export async function updateProfileSubscription(profileId: string, daysToAdd: nu
       const parents = JSON.parse(localStorage.getItem('bunyiKataAdminParents') || '[]');
       kemasCache(parents);
       localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[Firebase RTDB] Gagal kemas kini cache admin selepas lanjut tarikh:', e);
+    }
 
     return true;
   } catch (err) {
@@ -2369,7 +2425,9 @@ export async function updateProfileSubscriptionPlan(profileId: string, newPlan: 
         parents[pIdx].bakiHari = isPercuma ? 0 : daysToAdd;
         localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[Firebase RTDB] Gagal kemas kini cache admin selepas tukar pelan:', e);
+    }
 
     const activeUserId = localStorage.getItem('bunyiKataUserId');
     const activeEmail = (localStorage.getItem('bunyiKataGuruEmail') || localStorage.getItem('bunyiKataIbubapaEmail') || '').toLowerCase();
@@ -2952,7 +3010,9 @@ export async function saveParentChildToFirebase(params: {
             });
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Firebase RTDB] Gagal menambah nama anak ke profil ibu bapa:', e);
+      }
     }
 
     return result;
@@ -3108,7 +3168,9 @@ export async function syncParentSessionFromFirebase(userIdOrEmail?: string): Pro
             }
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Firebase] Gagal menyegerakkan pelan ibu bapa ke localStorage:', e);
+      }
     }
 
     // 2. Ambil daripada koleksi families jika belum ada
@@ -3129,7 +3191,9 @@ export async function syncParentSessionFromFirebase(userIdOrEmail?: string): Pro
             }
           });
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Firebase RTDB] Carian keluarga ikut parent_id gagal (kod/nama keluarga):', e);
+      }
     }
 
     // 3. Ambil senarai anak daripada koleksi students
@@ -3139,23 +3203,31 @@ export async function syncParentSessionFromFirebase(userIdOrEmail?: string): Pro
         try {
           const s1 = await get(query(ref(db, 'students'), orderByChild('parent_id'), equalTo(parentId)));
           if (s1.exists()) stuSnaps.push(s1);
-        } catch (e) {}
+        } catch (e) {
+          console.warn("[Firebase RTDB] Carian anak ikut parent_id gagal:", e);
+        }
         try {
           const s2 = await get(query(ref(db, 'students'), orderByChild('keluarga_id'), equalTo(parentId)));
           if (s2.exists()) stuSnaps.push(s2);
-        } catch (e) {}
+        } catch (e) {
+          console.warn("[Firebase RTDB] Carian anak ikut keluarga_id gagal:", e);
+        }
       }
       if (parentEmail) {
         try {
           const s3 = await get(query(ref(db, 'students'), orderByChild('parent_email'), equalTo(parentEmail.toLowerCase())));
           if (s3.exists()) stuSnaps.push(s3);
-        } catch (e) {}
+        } catch (e) {
+          console.warn("[Firebase RTDB] Carian anak ikut parent_email gagal:", e);
+        }
       }
 
       let rawLocalData: any = {};
       try {
         rawLocalData = JSON.parse(localStorage.getItem('bunyiKataStudentData') || '{}');
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Firebase] Gagal parse bunyiKataStudentData:', e);
+      }
       const idMap: Record<string, string> = {};
 
       stuSnaps.forEach(snap => {
@@ -3193,7 +3265,9 @@ export async function syncParentSessionFromFirebase(userIdOrEmail?: string): Pro
         (window as any).studentData = rawLocalData;
         (window as any).studentFirebaseIds = idMap;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[Firebase RTDB] Gagal menyegerakkan senarai anak ibu bapa:', e);
+    }
 
     // Segerakkan ke DOM dan window & localStorage
     if (namaKeluarga) {
@@ -3265,7 +3339,9 @@ export async function naikTarafLanggananFirebase(
     if (typeof auth?.authStateReady === 'function') {
       try {
         await auth.authStateReady();
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Firebase] authStateReady gagal:', e);
+      }
     }
 
     // 1. Cari profil di Firebase Realtime Database
@@ -3304,7 +3380,9 @@ export async function naikTarafLanggananFirebase(
               }
             });
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn('[Firebase RTDB] Carian profil menyeluruh (fallback) gagal:', e);
+        }
       }
     }
 
@@ -3407,7 +3485,9 @@ export async function naikTarafLanggananFirebase(
           teachers[idx].bakiHari = durationDays;
           localStorage.setItem('bunyiKataAdminTeachers', JSON.stringify(teachers));
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Firebase] Gagal kemas kini cache guru selepas naik taraf:', e);
+      }
     } else {
       localStorage.setItem('bunyiKataParentPlan', targetPlanName);
       try {
@@ -3418,7 +3498,9 @@ export async function naikTarafLanggananFirebase(
           parents[idx].bakiHari = durationDays;
           localStorage.setItem('bunyiKataAdminParents', JSON.stringify(parents));
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Firebase] Gagal kemas kini cache ibu bapa selepas naik taraf:', e);
+      }
     }
 
     if (typeof window !== 'undefined') {
@@ -3577,7 +3659,9 @@ export async function getSubscriptionHistory(): Promise<SubscriptionHistoryRecor
         if (typeof (window as any).renderSejarahLangganan === 'function') {
           try {
             (window as any).renderSejarahLangganan(peranan);
-          } catch (e) {}
+          } catch (e) {
+            console.warn('[Firebase RTDB] renderSejarahLangganan gagal:', peranan, e);
+          }
         }
       });
     }

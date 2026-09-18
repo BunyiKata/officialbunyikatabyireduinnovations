@@ -191,7 +191,9 @@ export async function loginWithEmail(
       };
       try {
         await set(ref(db, `profiles/${cred.user.uid}`), profileData);
-      } catch (err) {}
+      } catch (err) {
+        console.warn('[Auth] Gagal cipta profil baharu di RTDB:', err);
+      }
     } else {
       // Pastikan node profiles/${uid} sentiasa dikemaskini dengan data terkini
       try {
@@ -201,7 +203,9 @@ export async function loginWithEmail(
           email: cleanEmail,
           dikemaskini_pada: new Date().toISOString(),
         });
-      } catch (err) {}
+      } catch (err) {
+        console.warn('[Auth] Gagal kemas kini profil di RTDB:', err);
+      }
     }
 
     // Seragamkan format nama langganan
@@ -307,7 +311,9 @@ export async function updateUserPasswordInFirebase(newPassword: string): Promise
         await update(ref(db, `profiles/${user.uid}`), {
           dikemaskini_pada: new Date().toISOString(),
         });
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Auth] Gagal tanda kemas kini kata laluan di RTDB:', e);
+      }
       return { success: true, message: 'Kata laluan baharu berjaya disimpan di pangkalan data Firebase!' };
     }
     return { success: true, message: 'Kata laluan disimpan ke peranti ini.' };

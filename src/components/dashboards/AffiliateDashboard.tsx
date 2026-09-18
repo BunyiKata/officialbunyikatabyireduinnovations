@@ -253,7 +253,9 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
     try {
       localStorage.removeItem("bunyiKataAffiliateStatus");
       (window as any).bunyiKataAffiliateStatus = "";
-    } catch {}
+    } catch (e) {
+      console.warn("[Affiliate] Gagal bersihkan status tersimpan:", e);
+    }
     // BEST-EFFORT: paksa token segar supaya claim `affiliate_kod` (yang mungkin
     // ditetapkan admin selepas pendaftaran) diterima. Kegagalan diabaikan —
     // pelayan masih boleh menyelesaikan kod melalui emel sebagai sandaran.
@@ -356,7 +358,9 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
       const status = String(profilAff?.status || "aktif").toLowerCase().trim() || "aktif";
       localStorage.setItem("bunyiKataAffiliateStatus", status);
       (window as any).bunyiKataAffiliateStatus = status;
-    } catch {}
+    } catch (e) {
+      console.warn("[Affiliate] Gagal simpan status affiliate:", e);
+    }
   };
 
   const pautanRujukan =
@@ -401,7 +405,9 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
         document.execCommand("copy");
         setSalin(label);
         setTimeout(() => setSalin(""), 2000);
-      } catch {}
+      } catch (e) {
+        console.warn("[Affiliate] Gagal salin teks (fallback execCommand):", e);
+      }
       document.body.removeChild(ta);
     }
   };

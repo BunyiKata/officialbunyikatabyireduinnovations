@@ -42,7 +42,9 @@ export function resumeCoreAudio(): AudioContext | null {
   const ctx = getCoreAudioContext();
   try {
     if (ctx && ctx.state === "suspended") ctx.resume().catch(() => { });
-  } catch (e) { }
+  } catch (e) {
+    console.warn("[coreAudio] resume AudioContext gagal:", e);
+  }
   return ctx;
 }
 
@@ -62,12 +64,16 @@ export function unlockCoreAudio(): void {
       src.connect(ctx.destination);
       try {
         src.start(0);
-      } catch (e) { }
+      } catch (e) {
+        console.warn("[coreAudio] Gagal main sampel buka-kunci:", e);
+      }
     }
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       if (window.speechSynthesis.paused) window.speechSynthesis.resume();
     }
-  } catch (e) { }
+  } catch (e) {
+    console.warn("[coreAudio] unlockCoreAudio gagal:", e);
+  }
 }
 
 /** Pasang listener unlock pada gesture pertama (dipanggil sekali di main/App). */
@@ -121,7 +127,9 @@ export function playTone(opts: ToneOptions): void {
       );
     osc.start(startAt);
     osc.stop(endAt + 0.02);
-  } catch (e) { }
+  } catch (e) {
+    console.warn("[coreAudio] playTone gagal (Web Audio):", e);
+  }
 }
 
 // ─── Bunyi standard (dikongsi seluruh app supaya konsisten & tak double) ───

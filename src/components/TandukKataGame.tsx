@@ -266,7 +266,9 @@ function getCategoryWords(category: string) {
         try {
             const saved = sessionStorage.getItem(STORAGE_KEY);
             if (saved) usedWords = JSON.parse(saved);
-        } catch (e) {}
+        } catch (e) {
+            console.warn('[TandukKata] Gagal baca senarai perkataan terpakai:', e);
+        }
 
         // Filter pool to pick words not yet learned in the current cycle
         let available = allWords.filter((item: any) => !usedWords.includes(item.word));
@@ -285,7 +287,9 @@ function getCategoryWords(category: string) {
         const newUsed = [...usedWords, ...chosen.map((c: any) => c.word)];
         try {
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newUsed));
-        } catch (e) {}
+        } catch (e) {
+            console.warn('[TandukKata] Gagal simpan senarai perkataan terpakai:', e);
+        }
 
         return chosen;
     }

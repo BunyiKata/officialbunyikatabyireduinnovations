@@ -109,7 +109,9 @@ function getActivePuzzleData(): PuzzleData | null {
         }
       }
     }
-  } catch (_) {}
+  } catch (_) {
+    console.warn('[SukuKataPuzzleBar] Gagal membaca suku kata daripada DOM:', _);
+  }
   return null;
 }
 
@@ -704,7 +706,9 @@ function playPuzzleChime() {
     gain.connect(ctx.destination);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.3);
-  } catch (_) {}
+  } catch (_) {
+    console.warn('[SukuKataPuzzleBar] Gagal main bunyi (Web Audio):', _);
+  }
 }
 
 export default SukuKataPuzzleBar;

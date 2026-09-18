@@ -85,13 +85,17 @@ function syncRemoteStudentsToLocal(remoteList: any[], isParent: boolean = false)
   try {
     const raw = localStorage.getItem("bunyiKataStudentData");
     if (raw) sData = { ...JSON.parse(raw), ...sData };
-  } catch (e) {}
+  } catch (e) {
+    console.warn("[EntryChoice] Gagal parse bunyiKataStudentData:", e);
+  }
 
   let idMap: Record<string, string> = {};
   try {
     const rawMap = localStorage.getItem("bunyiKataStudentFirebaseIds");
     if (rawMap) idMap = JSON.parse(rawMap);
-  } catch (e) {}
+  } catch (e) {
+    console.warn("[EntryChoice] Gagal parse bunyiKataStudentFirebaseIds:", e);
+  }
   if ((window as any).studentFirebaseIds) {
     idMap = { ...(window as any).studentFirebaseIds, ...idMap };
   }
@@ -323,7 +327,9 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         };
                         (window as any).studentData = sData;
                         (window as any).selectedAvatarIcon = "/images/avatar/avatar1.png";
-                      } catch (e) {}
+                      } catch (e) {
+                        console.warn("[EntryChoice] Gagal set semula data murid tetamu:", e);
+                      }
 
                       if (typeof (window as any).resetTrialGuestProgress === "function") {
                         (window as any).resetTrialGuestProgress();

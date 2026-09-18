@@ -247,7 +247,9 @@ export const PuzzleSukuKataGame: React.FC<{ onClose: () => void }> = ({ onClose 
 
     try {
       localStorage.removeItem('puzzle_sukukata_stars');
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[PuzzleSukuKata] Gagal buang kunci bintang lama (puzzle_sukukata_stars):', e);
+    }
 
     return () => {
       window.removeEventListener('buka-puzzle-kemahiran', handleOpen);
@@ -327,7 +329,9 @@ export const PuzzleSukuKataGame: React.FC<{ onClose: () => void }> = ({ onClose 
           const studentName = (window as any).currentUser || 'guest';
           const storageKey = `puzzle_completed_${studentName}_${currentCategory.replace(/\s+/g, '_')}`;
           localStorage.setItem(storageKey, JSON.stringify(updated));
-        } catch (e) {}
+        } catch (e) {
+          console.warn('[PuzzleSukuKata] Gagal simpan kemajuan perkataan selesai:', e);
+        }
         const count = Object.values(updated).filter(Boolean).length;
         setStars(count);
         return updated;

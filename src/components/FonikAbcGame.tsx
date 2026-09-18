@@ -816,7 +816,9 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
       const storageKey = getPhonicsStorageKey();
       const saved = localStorage.getItem(storageKey);
       if (saved) return JSON.parse(saved);
-    } catch (e) { }
+    } catch (e) {
+      console.warn('[FonikAbc] Gagal baca kemajuan tersimpan, guna permulaan:', e);
+    }
     const initial: ProgressRecord = {};
     PHONICS_DATABASE.forEach(item => {
       initial[item.letter] = [false, false, false, false, false, false];
@@ -842,7 +844,9 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
         setProgress(JSON.parse(saved));
         return;
       }
-    } catch (e) { }
+    } catch (e) {
+      console.warn('[FonikAbc] Gagal muat kemajuan tersimpan (muat semula), guna permulaan:', e);
+    }
     const initial: ProgressRecord = {};
     PHONICS_DATABASE.forEach(item => {
       initial[item.letter] = [false, false, false, false, false, false];
@@ -858,7 +862,9 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
       try {
         const storageKey = getPhonicsStorageKey();
         localStorage.setItem(storageKey, JSON.stringify(updated));
-      } catch (e) { }
+      } catch (e) {
+        console.warn('[FonikAbc] Gagal simpan kemajuan aktiviti:', e);
+      }
       return updated;
     });
 
@@ -908,7 +914,7 @@ export function FonikAbcGame({ onClose, initialMode }: FonikAbcGameProps) {
         try {
           activeAudioRef.current.pause();
           activeAudioRef.current.currentTime = 0;
-        } catch (e) { }
+        } catch (e) { console.warn('[FonikAbc] Gagal hentikan audio sebelumnya:', e); }
         activeAudioRef.current = null;
       }
       const audio = new Audio(src);

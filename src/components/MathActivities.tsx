@@ -125,7 +125,9 @@ function triggerPopConfetti() {
       origin: { y: 0.6 },
       colors: ['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#881337']
     });
-  } catch (e) { }
+  } catch (e) {
+    console.warn('[MathActivities] confetti gagal:', e);
+  }
 }
 
 function playNavSound() {
@@ -200,11 +202,13 @@ function speakMathAudio(textOrItem: string | any, onEnd?: () => void) {
       activeMathAudio.currentTime = 0;
       activeMathAudio.onended = null;
       activeMathAudio.onerror = null;
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[MathActivities] Gagal hentikan audio matematik:', e);
+    }
     activeMathAudio = null;
   }
   if ('speechSynthesis' in window) {
-    try { window.speechSynthesis.cancel(); } catch (e) {}
+    try { window.speechSynthesis.cancel(); } catch (e) { console.warn('[MathActivities] speechSynthesis.cancel gagal:', e); }
   }
 
   // Resolve audio path

@@ -315,7 +315,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
       ta.value = mesej;
       document.body.appendChild(ta);
       ta.select();
-      try { document.execCommand("copy"); setDisalin(true); } catch {}
+      try { document.execCommand("copy"); setDisalin(true); } catch (e) { console.warn("[CiptaAkaun] Gagal salin teks (fallback execCommand):", e); }
       document.body.removeChild(ta);
     }
   };

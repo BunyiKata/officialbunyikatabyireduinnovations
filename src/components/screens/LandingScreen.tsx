@@ -960,7 +960,7 @@ export default function LandingScreen({
       const top = el.getBoundingClientRect().top + window.scrollY - offset;
       window.scrollTo({ top, behavior: "smooth" });
     }
-    try { history.replaceState(null, "", "#" + id); } catch (_) {}
+    try { history.replaceState(null, "", "#" + id); } catch (_) { console.warn("[Landing] Gagal kemas kini hash URL:", _); }
   };
 
   const handleShortcutClick = (id: string) => (e: React.MouseEvent) => {

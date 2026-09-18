@@ -64,7 +64,9 @@ export const generateCertificateCanvas = async (
         document.fonts.load('500 38px "Poppins"')
       ]);
       await document.fonts.ready;
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[Sijil] Gagal muat fon Poppins, guna fon lalai:', e);
+    }
   }
 
   // Draw official template background

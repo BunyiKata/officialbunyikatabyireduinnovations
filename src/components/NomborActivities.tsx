@@ -1965,7 +1965,9 @@ export function Activity6SurihNombor({ item, mode, isMobile, onNext, onBack, onC
       const data = (window as any).studentData && namaMurid ? (window as any).studentData[namaMurid] : null;
       if (data && data.stars && Number(data.stars[kunci] || 0) > 0) return true;
       if (Number(localStorage.getItem('stars_' + kunci) || 0) > 0) return true;
-    } catch (e) { }
+    } catch (e) {
+      console.warn('[NomborActivities] sudahDisimpanSurih gagal membaca status:', e);
+    }
     return false;
   };
 
@@ -2107,7 +2109,9 @@ export function Activity6SurihNombor({ item, mode, isMobile, onNext, onBack, onC
     isDrawingRef.current = false;
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch { }
+    } catch (e2) {
+      console.warn('[NomborActivities] Gagal lepas pointer capture:', e2);
+    }
   };
 
   const handleSave = () => {

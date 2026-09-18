@@ -2206,11 +2206,13 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
       try {
         cabaranActiveAudioRef.current.pause();
         cabaranActiveAudioRef.current.currentTime = 0;
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[CabaranSukuKata] Gagal hentikan audio aktif:', e);
+      }
       cabaranActiveAudioRef.current = null;
     }
     if ('speechSynthesis' in window) {
-      try { window.speechSynthesis.cancel(); } catch (e) {}
+      try { window.speechSynthesis.cancel(); } catch (e) { console.warn('[CabaranSukuKata] speechSynthesis.cancel gagal:', e); }
     }
 
     if (cabaranId === 'fonik_abc' || cabaranId === 'fonik') {
@@ -2231,7 +2233,9 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
           console.warn("Cabaran phonics audio notice:", soundPath, err);
           if (cabaranActiveAudioRef.current === audio) cabaranActiveAudioRef.current = null;
         });
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[CabaranSukuKata] Gagal main audio fonik:', e);
+      }
       return;
     }
 
@@ -2251,7 +2255,9 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
           }
         });
         return;
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[CabaranSukuKata] Gagal main audio suku kata:', e);
+      }
     }
 
     if (text.startsWith('/audio/') || text.endsWith('.mp3') || text.endsWith('.mp3')) {
@@ -2262,7 +2268,9 @@ export const CabaranSukuKataGame: React.FC<GameProps> = ({ onClose }) => {
           if (cabaranActiveAudioRef.current === audio) cabaranActiveAudioRef.current = null;
         };
         audio.play().catch(() => {});
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[CabaranSukuKata] Gagal main audio (laluan generik):', e);
+      }
       return;
     }
 

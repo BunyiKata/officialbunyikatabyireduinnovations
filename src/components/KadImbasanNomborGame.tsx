@@ -157,7 +157,9 @@ export function KadImbasanNomborGame({ initialMode = 'bilang_0_10', onBack }: Ka
         osc.start();
         osc.stop(g.currentTime + 0.12);
       }
-    } catch {}
+    } catch (e) {
+      console.warn('[KadImbasanNombor] Gagal main kesan bunyi:', e);
+    }
   };
 
   const speakFallback = (text: string) => {
