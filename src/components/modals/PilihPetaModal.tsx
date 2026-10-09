@@ -25,6 +25,7 @@ export default function PilihPetaModal({
           <button
             className="neo-btn bg-red close-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               tutupModal();
             }}
             aria-label="Tutup"
@@ -66,6 +67,7 @@ export default function PilihPetaModal({
                 alignItems: "center",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 if (typeof (window as any).pilihPeta === "function") {
                   (window as any).pilihPeta(1);
                 } else if (typeof (window as any).bukaPeta === "function") {
@@ -109,6 +111,7 @@ export default function PilihPetaModal({
                 overflow: "hidden",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 if (isEffectiveTrial) {
                   (window as any).openPakejProModal?.("guru");
                   return;
@@ -198,6 +201,7 @@ export default function PilihPetaModal({
                 overflow: "hidden",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 if (isEffectiveTrial) {
                   (window as any).openPakejProModal?.("guru");
                   return;
@@ -287,6 +291,7 @@ export default function PilihPetaModal({
                 overflow: "hidden",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 if (isEffectiveTrial) {
                   (window as any).openPakejProModal?.("guru");
                   return;

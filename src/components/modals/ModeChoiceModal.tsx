@@ -35,6 +35,7 @@ export function ModeChoiceModal({ isOpen, onClose, onSelectMode }: ModeChoiceMod
             padding: "15px",
           }}
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             // Klik pada overlay hitam TIDAK menutup popup (wajib pilih mod)
             void e;
           }}
@@ -100,7 +101,7 @@ export function ModeChoiceModal({ isOpen, onClose, onSelectMode }: ModeChoiceMod
                   alignItems: "center",
                   gap: "8px",
                 }}
-                onClick={() => onSelectMode("guru")}
+                onClick={() => { (window as any).bkSfx?.press?.(); onSelectMode("guru"); }}
               >
                 <i className="fa-solid fa-person-chalkboard"></i> Guru
               </button>
@@ -117,7 +118,7 @@ export function ModeChoiceModal({ isOpen, onClose, onSelectMode }: ModeChoiceMod
                   alignItems: "center",
                   gap: "8px",
                 }}
-                onClick={() => onSelectMode("ibubapa")}
+                onClick={() => { (window as any).bkSfx?.press?.(); onSelectMode("ibubapa"); }}
               >
                 <i className="fa-solid fa-users"></i> Ibu Bapa
               </button>

@@ -91,6 +91,7 @@ export default function MapScreen({
             id="map-back-btn"
             className="neo-btn back-icon-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               kembaliKePilihPeta();
             }}
           >
@@ -136,6 +137,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-purple cara-belajar-btn untuk-huruf"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-surih");
                 if (modal) modal.style.display = "flex";
               }}
@@ -147,6 +149,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-blue cara-belajar-btn untuk-huruf"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 (window as any).bukaVR && (window as any).bukaVR();
               }}
             >
@@ -157,6 +160,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-green cara-belajar-btn untuk-huruf"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-ar");
                 if (modal) modal.style.display = "flex";
               }}
@@ -169,6 +173,7 @@ export default function MapScreen({
               className="neo-btn cara-belajar-btn untuk-huruf"
               style={{ backgroundColor: "#ec4899", color: "white" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
                 if (modal) modal.style.display = "flex";
               }}
@@ -180,6 +185,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-pink cara-belajar-btn untuk-sukukata"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 window.bukaTandukKata && window.bukaTandukKata();
               }}
             >
@@ -191,6 +197,7 @@ export default function MapScreen({
               className="neo-btn cara-belajar-btn untuk-sukukata"
               style={{ backgroundColor: "#f59e0b", color: "white" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 if (window.showPuzzleSukuKataModal) window.showPuzzleSukuKataModal();
                 else if (window.bukaPuzzleSukuKata) window.bukaPuzzleSukuKata();
               }}
@@ -203,6 +210,7 @@ export default function MapScreen({
               className="neo-btn cara-belajar-btn untuk-sukukata cursor-pointer"
               style={{ backgroundColor: "#8b5cf6", color: "white" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 if ((window as any).showCantumKataModal) (window as any).showCantumKataModal();
                 else if ((window as any).bukaCantumKata) (window as any).bukaCantumKata();
               }}
@@ -214,6 +222,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-cyan cara-belajar-btn untuk-sukukata"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 window.bukaPerpustakaan && window.bukaPerpustakaan();
               }}
               style={{ backgroundColor: "#06b6d4", color: "white" }}
@@ -227,6 +236,7 @@ export default function MapScreen({
             <button
               className="neo-btn cara-belajar-btn untuk-sukukata cursor-pointer"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 if ((window as any).showCubaSebutModal) (window as any).showCubaSebutModal();
                 else { const m = document.getElementById("modal-pilih-cuba-sebut-sukukata"); if (m) m.style.display = "flex"; }
               }}
@@ -239,6 +249,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-yellow cara-belajar-btn untuk-bacaan"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setShowBukuCeritaModal(true);
               }}
               style={{ backgroundColor: "#f59e0b", color: "white" }}
@@ -250,6 +261,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-purple cara-belajar-btn untuk-bacaan"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 (window as any).bukaVRBacaan && (window as any).bukaVRBacaan();
               }}
               style={{ backgroundColor: "#8b5cf6", color: "white" }}
@@ -261,6 +273,7 @@ export default function MapScreen({
             <button
               className="neo-btn cara-belajar-btn untuk-bacaan cursor-pointer"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 if ((window as any).showCubaBacaModal) (window as any).showCubaBacaModal();
                 else { const m = document.getElementById("modal-pilih-cuba-baca"); if (m) m.style.display = "flex"; }
               }}
@@ -321,7 +334,7 @@ export default function MapScreen({
           <div id="cabaran-lain-stage" className="cabaran-lain-stage-container">
             <button
               className="cabaran-lain-nav-btn prev-btn"
-              onClick={() => (window as any).cabaranLainPrev && (window as any).cabaranLainPrev()}
+              onClick={() => { (window as any).bkSfx?.press?.(); (window as any).cabaranLainPrev && (window as any).cabaranLainPrev(); }}
               aria-label="Sebelumnya"
             >
               <i className="fa-solid fa-chevron-left"></i>
@@ -333,7 +346,7 @@ export default function MapScreen({
 
             <button
               className="cabaran-lain-nav-btn next-btn"
-              onClick={() => (window as any).cabaranLainNext && (window as any).cabaranLainNext()}
+              onClick={() => { (window as any).bkSfx?.press?.(); (window as any).cabaranLainNext && (window as any).cabaranLainNext(); }}
               aria-label="Seterusnya"
             >
               <i className="fa-solid fa-chevron-right"></i>
@@ -354,6 +367,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-red close-btn"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-surih");
                 if (modal) modal.style.display = "none";
               }}
@@ -384,6 +398,7 @@ export default function MapScreen({
                   boxSizing: "border-box"
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   const modal = document.getElementById("modal-pilih-surih");
                   if (modal) modal.style.display = "none";
                   (window as any).bukaSurihHuruf && (window as any).bukaSurihHuruf();
@@ -521,6 +536,7 @@ export default function MapScreen({
                   boxSizing: "border-box"
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   const modal = document.getElementById("modal-pilih-surih");
                   if (modal) modal.style.display = "none";
                   (window as any).bukaSurihNombor && (window as any).bukaSurihNombor();
@@ -648,6 +664,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-red close-btn"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
                 if (modal) modal.style.display = "none";
               }}
@@ -679,6 +696,7 @@ export default function MapScreen({
                   position: "relative"
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
                   if (modal) modal.style.display = "none";
                   // Kad Imbasan Nombor kekal terbuka dalam mod Percuma (tiada kunci Pro).
@@ -820,6 +838,7 @@ export default function MapScreen({
                   position: "relative"
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
                   if (modal) modal.style.display = "none";
                   // Kad Imbasan Nombor kekal terbuka dalam mod Percuma (tiada kunci Pro).
@@ -950,6 +969,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-red close-btn"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-ar");
                 if (modal) modal.style.display = "none";
               }}
@@ -982,6 +1002,7 @@ export default function MapScreen({
                   position: "relative"
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   const modal = document.getElementById("modal-pilih-ar");
                   if (modal) modal.style.display = "none";
                   if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
@@ -1063,6 +1084,7 @@ export default function MapScreen({
                   position: "relative"
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   const modal = document.getElementById("modal-pilih-ar");
                   if (modal) modal.style.display = "none";
                   if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
@@ -1144,6 +1166,7 @@ export default function MapScreen({
                   position: "relative"
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   const modal = document.getElementById("modal-pilih-ar");
                   if (modal) modal.style.display = "none";
                   if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
@@ -1215,6 +1238,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-red close-btn"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-ar-sukukata");
                 if (modal) modal.style.display = "none";
               }}
@@ -1240,6 +1264,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-red close-btn cursor-pointer"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-puzzle-sukukata");
                 if (modal) modal.style.display = "none";
               }}
@@ -1265,6 +1290,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-red close-btn cursor-pointer"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-cantum-kata");
                 if (modal) modal.style.display = "none";
               }}
@@ -1290,6 +1316,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-red close-btn cursor-pointer"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-cuba-sebut-sukukata");
                 if (modal) modal.style.display = "none";
               }}
@@ -1315,6 +1342,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-red close-btn cursor-pointer"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-cuba-baca");
                 if (modal) modal.style.display = "none";
               }}
@@ -1343,6 +1371,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-purple cara-belajar-btn untuk-huruf"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setIsDialOpen(false);
                 const modal = document.getElementById("modal-pilih-surih");
                 if (modal) modal.style.display = "flex";
@@ -1354,6 +1383,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-blue cara-belajar-btn untuk-huruf"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setIsDialOpen(false);
                 (window as any).bukaVR && (window as any).bukaVR();
               }}
@@ -1364,6 +1394,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-green cara-belajar-btn untuk-huruf"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setIsDialOpen(false);
                 const modal = document.getElementById("modal-pilih-ar");
                 if (modal) modal.style.display = "flex";
@@ -1376,6 +1407,7 @@ export default function MapScreen({
               className="neo-btn cara-belajar-btn untuk-huruf"
               style={{ backgroundColor: "#ec4899", color: "white" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setIsDialOpen(false);
                 const modal = document.getElementById("modal-pilih-kad-imbasan-nombor");
                 if (modal) modal.style.display = "flex";
@@ -1387,6 +1419,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-pink cara-belajar-btn untuk-sukukata"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setIsDialOpen(false);
                 window.bukaTandukKata && window.bukaTandukKata();
               }}
@@ -1398,6 +1431,7 @@ export default function MapScreen({
               className="neo-btn cara-belajar-btn untuk-sukukata"
               style={{ backgroundColor: "#f59e0b", color: "white" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setIsDialOpen(false);
                 if (window.showPuzzleSukuKataModal) window.showPuzzleSukuKataModal();
                 else if (window.bukaPuzzleSukuKata) window.bukaPuzzleSukuKata();
@@ -1410,6 +1444,7 @@ export default function MapScreen({
               className="neo-btn cara-belajar-btn untuk-sukukata cursor-pointer"
               style={{ backgroundColor: "#8b5cf6", color: "white" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setIsDialOpen(false);
                 if ((window as any).showCantumKataModal) (window as any).showCantumKataModal();
                 else if ((window as any).bukaCantumKata) (window as any).bukaCantumKata();
@@ -1421,6 +1456,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-cyan cara-belajar-btn untuk-sukukata"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setIsDialOpen(false);
                 window.bukaPerpustakaan && window.bukaPerpustakaan();
               }}
@@ -1433,6 +1469,7 @@ export default function MapScreen({
               className="neo-btn cara-belajar-btn untuk-sukukata cursor-pointer"
               style={{ backgroundColor: "#ff751f", color: "white" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setIsDialOpen(false);
                 if ((window as any).showCubaSebutModal) (window as any).showCubaSebutModal();
                 else { const m = document.getElementById("modal-pilih-cuba-sebut-sukukata"); if (m) m.style.display = "flex"; }
@@ -1444,6 +1481,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-yellow cara-belajar-btn untuk-bacaan"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setIsDialOpen(false);
                 setShowBukuCeritaModal(true);
               }}
@@ -1455,6 +1493,7 @@ export default function MapScreen({
             <button
               className="neo-btn bg-purple cara-belajar-btn untuk-bacaan"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setIsDialOpen(false);
                 (window as any).bukaVRBacaan && (window as any).bukaVRBacaan();
               }}
@@ -1467,6 +1506,7 @@ export default function MapScreen({
               className="neo-btn cara-belajar-btn untuk-bacaan cursor-pointer"
               style={{ backgroundColor: "#10b981", color: "white" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 setIsDialOpen(false);
                 if ((window as any).showCubaBacaModal) (window as any).showCubaBacaModal();
                 else { const m = document.getElementById("modal-pilih-cuba-baca"); if (m) m.style.display = "flex"; }
@@ -1481,6 +1521,7 @@ export default function MapScreen({
             id="mobile-floating-cta"
             className="neo-btn bg-yellow"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               setIsDialOpen(!isDialOpen);
             }}
             aria-label="Cara Belajar"

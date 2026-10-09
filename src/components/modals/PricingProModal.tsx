@@ -140,7 +140,7 @@ export function PricingProModal({
           >
             <button
               className="neo-btn bg-red"
-              onClick={onClose}
+              onClick={() => { (window as any).bkSfx?.press?.(); onClose(); }}
               style={{
                 position: "absolute",
                 top: "12px",
@@ -202,7 +202,7 @@ export function PricingProModal({
                       : "var(--color-dark)",
                   border: "2.5px solid var(--color-dark)",
                 }}
-                onClick={() => setActivePakejCategory("guru")}
+                onClick={() => { (window as any).bkSfx?.press?.(); setActivePakejCategory("guru"); }}
               >
                 <i className="fa-solid fa-person-chalkboard"></i> Pakej Guru
               </button>
@@ -224,7 +224,7 @@ export function PricingProModal({
                       : "var(--color-dark)",
                   border: "2.5px solid var(--color-dark)",
                 }}
-                onClick={() => setActivePakejCategory("ibubapa")}
+                onClick={() => { (window as any).bkSfx?.press?.(); setActivePakejCategory("ibubapa"); }}
               >
                 <i className="fa-solid fa-users"></i> Pakej Ibu Bapa
               </button>
@@ -246,7 +246,7 @@ export function PricingProModal({
                       : "var(--color-dark)",
                   border: "2.5px solid var(--color-dark)",
                 }}
-                onClick={() => setActivePakejCategory("affiliate")}
+                onClick={() => { (window as any).bkSfx?.press?.(); setActivePakejCategory("affiliate"); }}
               >
                 <i className="fa-solid fa-handshake"></i> Pakej Affiliate
               </button>
@@ -439,6 +439,7 @@ export function PricingProModal({
                       justifyContent: "center",
                     }}
                     onClick={() => {
+                      (window as any).bkSfx?.press?.();
                       const planInfo: PlanInfo = {
                         id: activePakejCategory === "guru" ? "guru_1bulan" : "ibubapa_1bulan",
                         name: "Bulanan Biasa",
@@ -585,6 +586,7 @@ export function PricingProModal({
                       justifyContent: "center",
                     }}
                     onClick={() => {
+                      (window as any).bkSfx?.press?.();
                       const planInfo: PlanInfo = {
                         id: activePakejCategory === "guru" ? "guru_3bulan" : "ibubapa_3bulan",
                         name: "3 Bulanan Pro",
@@ -731,6 +733,7 @@ export function PricingProModal({
                       justifyContent: "center",
                     }}
                     onClick={() => {
+                      (window as any).bkSfx?.press?.();
                       const planInfo: PlanInfo = {
                         id: activePakejCategory === "guru" ? "guru_1tahun" : "ibubapa_1tahun",
                         name: "Tahunan Pro",
@@ -827,6 +830,7 @@ export function PricingProModal({
                         justifyContent: "center",
                       }}
                       onClick={() => {
+                        (window as any).bkSfx?.press?.();
                         if (onSelectAffiliateRegister) onSelectAffiliateRegister();
                         onClose();
                       }}
@@ -901,7 +905,7 @@ export function PricingProModal({
                     >
                       <button
                         type="button"
-                        onClick={() => setActiveFaqId(isExpanded ? null : faq.id)}
+                        onClick={() => { (window as any).bkSfx?.press?.(); setActiveFaqId(isExpanded ? null : faq.id); }}
                         style={{
                           width: "100%",
                           padding: "10px 14px",

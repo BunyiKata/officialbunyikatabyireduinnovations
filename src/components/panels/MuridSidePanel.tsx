@@ -23,6 +23,7 @@ export default function MuridSidePanel({
           background: "rgba(0,0,0,0.5)",
         }}
         onClick={(e) => {
+          (window as any).bkSfx?.press?.();
           if (e.target === e.currentTarget) tutupSidePanel();
         }}
       >
@@ -138,6 +139,7 @@ export default function MuridSidePanel({
                 minHeight: "auto",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 tutupSidePanel();
               }}
             >
@@ -164,6 +166,7 @@ export default function MuridSidePanel({
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 tutupSidePanel();
                 paparSkrin("lencana-screen");
               }}
@@ -179,6 +182,7 @@ export default function MuridSidePanel({
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 tutupSidePanel();
                 paparSkrin("leaderboard-screen");
               }}
@@ -214,6 +218,7 @@ export default function MuridSidePanel({
                   padding: "12px",
                 }}
                 onClick={(e) => {
+                  (window as any).bkSfx?.press?.();
                   tutupSidePanel();
                   paparSkrin("profile-screen");
                 }}
@@ -239,6 +244,7 @@ export default function MuridSidePanel({
                   fontSize: "1.1rem",
                 }}
                 onClick={(e) => {
+                  (window as any).bkSfx?.press?.();
                   tutupSidePanel();
                   paparSkrin("login-screen");
                 }}

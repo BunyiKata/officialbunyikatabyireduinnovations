@@ -57,6 +57,7 @@ export default function LoginScreen({
             animation: "glow-outline 2s infinite",
           }}
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             if (typeof (window as any).playBubble === "function") (window as any).playBubble();
             // PENTING: Butang bulat ini di sudut kanan atas skrin log masuk ialah
             // "Pilih Mod". Sebelum ini ia memanggil setIsEntryChoiceModalOpen(true)
@@ -157,6 +158,7 @@ export default function LoginScreen({
             cursor: "pointer",
           }}
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             setIsCodeModalOpen(true);
           }}
         >
@@ -197,6 +199,7 @@ export default function LoginScreen({
         >
           <button
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               backToModeSelection();
             }}
             className="neo-btn bg-white"
@@ -260,6 +263,7 @@ export default function LoginScreen({
             <div
               className="avatar-option"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 selectAvatar(
                   "/images/avatar/avatar1.png",
                   e.currentTarget,
@@ -289,6 +293,7 @@ export default function LoginScreen({
             <div
               className="avatar-option"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 selectAvatar(
                   "/images/avatar/avatar3.png",
                   e.currentTarget,
@@ -317,6 +322,7 @@ export default function LoginScreen({
             <div
               className="avatar-option"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 selectAvatar(
                   "/images/avatar/avatar4.png",
                   e.currentTarget,
@@ -345,6 +351,7 @@ export default function LoginScreen({
             <div
               className="avatar-option"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 selectAvatar(
                   "/images/avatar/avatar2.png",
                   e.currentTarget,
@@ -373,6 +380,7 @@ export default function LoginScreen({
             <div
               className="avatar-option"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 selectAvatar(
                   "/images/avatar/avatar5.png",
                   e.currentTarget,
@@ -401,6 +409,7 @@ export default function LoginScreen({
             <div
               className="avatar-option"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 selectAvatar(
                   "/images/avatar/avatar6.png",
                   e.currentTarget,
@@ -441,6 +450,7 @@ export default function LoginScreen({
               animation: "pulse-scale 4s infinite",
             }}
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               const select = document.getElementById(
                 "student-dropdown",
               ) as HTMLSelectElement;
@@ -508,6 +518,7 @@ export default function LoginScreen({
                 role="button"
                 tabIndex={0}
                 onClick={(e) => {
+                  (window as any).bkSfx?.press?.();
                   e.stopPropagation();
                   if (typeof (window as any).playBubble === "function")
                     (window as any).playBubble();
@@ -530,6 +541,7 @@ export default function LoginScreen({
                 role="button"
                 tabIndex={0}
                 onClick={(e) => {
+                  (window as any).bkSfx?.press?.();
                   e.stopPropagation();
                   if (typeof (window as any).playBubble === "function")
                     (window as any).playBubble();

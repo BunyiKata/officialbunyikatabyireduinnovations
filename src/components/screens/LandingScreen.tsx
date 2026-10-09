@@ -885,7 +885,7 @@ function Swipe3D<T>({ items, renderCard, keyOf, labelOf, accentOf, variant = "me
             aria-label={labelOf(it, i)}
             className={`landing-lencana-dot ${i === aktif ? "aktif" : ""}`}
             style={i === aktif && accentOf ? { background: accentOf(it) } : undefined}
-            onClick={() => goto(i)}
+            onClick={() => { (window as any).bkSfx?.press?.(); goto(i); }}
           />
         ))}
       </div>
@@ -1014,7 +1014,7 @@ export default function LandingScreen({
               <a href="#faq" className="landing-nav-desktop-only" onClick={pageScrollTo("faq")}>FAQ</a>
             </nav>
             <div className="landing-nav-actions">
-              <button className="landing-btn landing-btn-primary" onClick={onLogMasuk}>
+              <button className="landing-btn landing-btn-primary" onClick={() => { (window as any).bkSfx?.press?.(); onLogMasuk(); }}>
                 Log Masuk
               </button>
             </div>
@@ -1049,14 +1049,14 @@ export default function LandingScreen({
                 <button
                   className="landing-btn landing-btn-primary landing-btn-lg"
                   data-no-bubble="true"
-                  onClick={onCubaPercuma}
+                  onClick={() => { (window as any).bkSfx?.press?.(); onCubaPercuma(); }}
                 >
                   <IconRocket /> Cuba Percuma
                 </button>
                 <button
                   className="landing-btn landing-btn-outline landing-btn-lg"
                   data-no-bubble="true"
-                  onClick={onLogMasuk}
+                  onClick={() => { (window as any).bkSfx?.press?.(); onLogMasuk(); }}
                 >
                   Log Masuk
                 </button>
@@ -1353,7 +1353,7 @@ export default function LandingScreen({
                   color: activePakejCategory === "guru" ? "white" : "var(--color-dark)",
                   border: "2.5px solid var(--color-dark)",
                 }}
-                onClick={() => setActivePakejCategory("guru")}
+                onClick={() => { (window as any).bkSfx?.press?.(); setActivePakejCategory("guru"); }}
               >
                 <IconChalkboard /> Pakej Guru
               </button>
@@ -1372,7 +1372,7 @@ export default function LandingScreen({
                   color: activePakejCategory === "ibubapa" ? "white" : "var(--color-dark)",
                   border: "2.5px solid var(--color-dark)",
                 }}
-                onClick={() => setActivePakejCategory("ibubapa")}
+                onClick={() => { (window as any).bkSfx?.press?.(); setActivePakejCategory("ibubapa"); }}
               >
                 <IconUsersSolid /> Pakej Ibu Bapa
               </button>
@@ -1391,7 +1391,7 @@ export default function LandingScreen({
                   color: activePakejCategory === "affiliate" ? "white" : "var(--color-dark)",
                   border: "2.5px solid var(--color-dark)",
                 }}
-                onClick={() => setActivePakejCategory("affiliate")}
+                onClick={() => { (window as any).bkSfx?.press?.(); setActivePakejCategory("affiliate"); }}
               >
                 <IconHandshake /> Pakej Affiliate
               </button>
@@ -1550,7 +1550,7 @@ export default function LandingScreen({
                       fontWeight: "bold",
                       justifyContent: "center",
                     }}
-                    onClick={() => onDaftarPakej && onDaftarPakej(activePakejCategory, "Bulanan Biasa")}
+                    onClick={() => { (window as any).bkSfx?.press?.(); onDaftarPakej && onDaftarPakej(activePakejCategory, "Bulanan Biasa"); }}
                   >
                     <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
                   </button>
@@ -1660,7 +1660,7 @@ export default function LandingScreen({
                       fontWeight: "bold",
                       justifyContent: "center",
                     }}
-                    onClick={() => onDaftarPakej && onDaftarPakej(activePakejCategory, "3 Bulan")}
+                    onClick={() => { (window as any).bkSfx?.press?.(); onDaftarPakej && onDaftarPakej(activePakejCategory, "3 Bulan"); }}
                   >
                     <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
                   </button>
@@ -1769,7 +1769,7 @@ export default function LandingScreen({
                       fontWeight: "bold",
                       justifyContent: "center",
                     }}
-                    onClick={() => onDaftarPakej && onDaftarPakej(activePakejCategory, "1 Tahun")}
+                    onClick={() => { (window as any).bkSfx?.press?.(); onDaftarPakej && onDaftarPakej(activePakejCategory, "1 Tahun"); }}
                   >
                     <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
                   </button>
@@ -1855,7 +1855,7 @@ export default function LandingScreen({
                         fontWeight: "bold",
                         justifyContent: "center",
                       }}
-                      onClick={() => onDaftarAffiliate && onDaftarAffiliate()}
+                      onClick={() => { (window as any).bkSfx?.press?.(); onDaftarAffiliate && onDaftarAffiliate(); }}
                     >
                       <IconWhatsapp style={{ marginRight: "8px" }} />Daftar
                     </button>
@@ -1884,7 +1884,7 @@ export default function LandingScreen({
                 <button
                   className="landing-faq-soalan"
                   aria-expanded={faqBuka === i}
-                  onClick={() => setFaqBuka(faqBuka === i ? null : i)}
+                  onClick={() => { (window as any).bkSfx?.press?.(); setFaqBuka(faqBuka === i ? null : i); }}
                 >
                   <span className="landing-faq-no">{String(i + 1).padStart(2, "0")}</span>
                   <span className="landing-faq-q">{f.s}</span>
@@ -1956,7 +1956,7 @@ export default function LandingScreen({
                   className="landing-social-btn landing-social-web"
                   title="Laman Web Rasmi"
                   aria-label="Laman Web Rasmi"
-                  onClick={() => window.open("https://bunyikata.my", "_blank", "noopener")}
+                  onClick={() => { (window as any).bkSfx?.press?.(); window.open("https://bunyikata.my", "_blank", "noopener"); }}
                 >
                   <IconGlobe />
                 </button>
@@ -1965,7 +1965,7 @@ export default function LandingScreen({
                   className="landing-social-btn landing-social-telegram"
                   title="Telegram"
                   aria-label="Telegram"
-                  onClick={() => window.open("https://t.me/+YHsrwwqA-eE5N2Vl", "_blank", "noopener")}
+                  onClick={() => { (window as any).bkSfx?.press?.(); window.open("https://t.me/+YHsrwwqA-eE5N2Vl", "_blank", "noopener"); }}
                 >
                   <IconTelegram />
                 </button>
@@ -1974,7 +1974,7 @@ export default function LandingScreen({
                   className="landing-social-btn landing-social-play"
                   title="Google Play Store"
                   aria-label="Google Play Store"
-                  onClick={() => window.open("https://play.google.com/store/apps/details?id=com.bunyikatabacaan", "_blank", "noopener")}
+                  onClick={() => { (window as any).bkSfx?.press?.(); window.open("https://play.google.com/store/apps/details?id=com.bunyikatabacaan", "_blank", "noopener"); }}
                 >
                   <IconPlayStore />
                 </button>
@@ -1983,7 +1983,7 @@ export default function LandingScreen({
                   className="landing-social-btn landing-social-apple"
                   title="Apple App Store"
                   aria-label="Apple App Store"
-                  onClick={() => window.open("https://apps.apple.com/my/app/bunyi-kata/id6739794132", "_blank", "noopener")}
+                  onClick={() => { (window as any).bkSfx?.press?.(); window.open("https://apps.apple.com/my/app/bunyi-kata/id6739794132", "_blank", "noopener"); }}
                 >
                   <IconAppStore />
                 </button>
@@ -1998,7 +1998,7 @@ export default function LandingScreen({
         {/* ===== BUTANG TOGGLE & KOMPONEN SHORTCUT LANDING (MOBILE VIEW) ===== */}
         <div id="landing-mobile-dial-container" className={isShortcutOpen ? "open" : ""}>
           {isShortcutOpen && (
-            <div className="landing-shortcut-backdrop" onClick={() => setIsShortcutOpen(false)} />
+            <div className="landing-shortcut-backdrop" onClick={() => { (window as any).bkSfx?.press?.(); setIsShortcutOpen(false); }} />
           )}
           <div className="landing-shortcut-options" role="menu" aria-label="Navigasi Pantas">
             <div className="landing-shortcut-header">
@@ -2074,7 +2074,7 @@ export default function LandingScreen({
           <button
             id="landing-mobile-floating-cta"
             className="neo-btn bg-yellow"
-            onClick={() => setIsShortcutOpen(!isShortcutOpen)}
+            onClick={() => { (window as any).bkSfx?.press?.(); setIsShortcutOpen(!isShortcutOpen); }}
             aria-label="Pintas Landing Page"
             title="Menu Navigasi Pantas"
           >

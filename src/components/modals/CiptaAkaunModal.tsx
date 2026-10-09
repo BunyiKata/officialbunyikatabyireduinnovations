@@ -360,7 +360,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={tutup}
+          onClick={() => { (window as any).bkSfx?.press?.(); tutup(); }}
           style={{
             position: "fixed",
             inset: 0,
@@ -422,6 +422,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                         key={r}
                         type="button"
                         onClick={() => {
+                          (window as any).bkSfx?.press?.();
                           bunyiKlik();
                           setPeranan(r);
                         }}
@@ -550,7 +551,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                 <div style={{ display: "flex", gap: "10px" }}>
                   <button
                     type="button"
-                    onClick={tutup}
+                    onClick={() => { (window as any).bkSfx?.press?.(); tutup(); }}
                     disabled={sedangProses}
                     className="neo-btn"
                     style={{
@@ -568,7 +569,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                   </button>
                   <button
                     type="button"
-                    onClick={hantar}
+                    onClick={() => { (window as any).bkSfx?.press?.(); hantar(); }}
                     disabled={sedangProses}
                     className="neo-btn"
                     style={{
@@ -707,7 +708,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                   )}
                   <button
                     type="button"
-                    onClick={salinMesej}
+                    onClick={() => { (window as any).bkSfx?.press?.(); salinMesej(); }}
                     className="neo-btn"
                     title={disalin ? "Mesej Disalin!" : "Salin Mesej WhatsApp"}
                     aria-label="Salin Mesej WhatsApp"
@@ -737,7 +738,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                   <div style={{ display: "flex", gap: "9px", marginTop: "4px" }}>
                     <button
                       type="button"
-                      onClick={resetBorang}
+                      onClick={() => { (window as any).bkSfx?.press?.(); resetBorang(); }}
                       className="neo-btn"
                       style={{
                         flex: 1,
@@ -759,7 +760,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                     </button>
                     <button
                       type="button"
-                      onClick={tutup}
+                      onClick={() => { (window as any).bkSfx?.press?.(); tutup(); }}
                       className="neo-btn"
                       style={{
                         flex: 1,
@@ -847,7 +848,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                 <div style={{ display: "flex", flexDirection: "column", gap: "9px" }}>
                   <button
                     type="button"
-                    onClick={salinMesej}
+                    onClick={() => { (window as any).bkSfx?.press?.(); salinMesej(); }}
                     className="neo-btn"
                     title={disalin ? "Mesej Disalin!" : "Salin Mesej WhatsApp"}
                     aria-label="Salin Mesej WhatsApp"
@@ -877,7 +878,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                   <div style={{ display: "flex", gap: "9px", marginTop: "4px" }}>
                     <button
                       type="button"
-                      onClick={resetBorang}
+                      onClick={() => { (window as any).bkSfx?.press?.(); resetBorang(); }}
                       className="neo-btn"
                       style={{
                         flex: 1,
@@ -899,7 +900,7 @@ export function CiptaAkaunModal({ isOpen, onClose, perananAwal = "guru" }: Cipta
                     </button>
                     <button
                       type="button"
-                      onClick={tutup}
+                      onClick={() => { (window as any).bkSfx?.press?.(); tutup(); }}
                       className="neo-btn"
                       style={{
                         flex: 1,

@@ -143,7 +143,7 @@ function PaginationBar({
         className="neo-btn"
         style={btnIkon}
         disabled={aktif <= 1}
-        onClick={() => aktif > 1 && onTukar(aktif - 1)}
+        onClick={() => { (window as any).bkSfx?.press?.(); aktif > 1 && onTukar(aktif - 1); }}
         title="Sebelum"
         aria-label="Sebelum"
       >
@@ -158,7 +158,7 @@ function PaginationBar({
           <button
             key={it}
             className="neo-btn"
-            onClick={() => onTukar(it)}
+            onClick={() => { (window as any).bkSfx?.press?.(); onTukar(it); }}
             title={`Halaman ${it}`}
             aria-label={`Halaman ${it}`}
             style={{
@@ -185,7 +185,7 @@ function PaginationBar({
         className="neo-btn"
         style={btnIkonNext}
         disabled={aktif >= jumlahHalaman}
-        onClick={() => aktif < jumlahHalaman && onTukar(aktif + 1)}
+        onClick={() => { (window as any).bkSfx?.press?.(); aktif < jumlahHalaman && onTukar(aktif + 1); }}
         title="Seterusnya"
         aria-label="Seterusnya"
       >
@@ -521,6 +521,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
             >
               <button
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   if ((window as any).playBubble) (window as any).playBubble();
                   if (profil?.kod) {
                     localStorage.setItem("bunyiKataAffiliateKod", profil.kod);
@@ -598,6 +599,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
             <button
               className="neo-btn"
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 if ((window as any).playBubble) (window as any).playBubble();
                 const affKod = profil?.kod || localStorage.getItem("bunyiKataAffiliateKod") || "";
                 const affEmail = profil?.email || localStorage.getItem("bunyiKataAffiliateEmail") || "";
@@ -651,6 +653,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
             <button
               className="neo-btn"
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 if ((window as any).playBubble) (window as any).playBubble();
                 muatData();
               }}
@@ -674,6 +677,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
             <button
               className="neo-btn"
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 if ((window as any).playBubble) (window as any).playBubble();
                 const affKod = profil?.kod || localStorage.getItem("bunyiKataAffiliateKod") || "";
                 const affEmail = profil?.email || localStorage.getItem("bunyiKataAffiliateEmail") || "";
@@ -733,7 +737,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
                   {profil.kod}
                 </span>
                 <button
-                  onClick={() => salinTeks(profil.kod, "kod")}
+                  onClick={() => { (window as any).bkSfx?.press?.(); salinTeks(profil.kod, "kod"); }}
                   className="neo-btn affiliate-copy-btn"
                   title={salin === "kod" ? "Disalin!" : "Salin Kod"}
                   aria-label="Salin Kod"
@@ -762,7 +766,7 @@ export function AffiliateDashboard({ getScreenClass, onLogout, onEditProfile }: 
                   {pautanRujukan}
                 </span>
                 <button
-                  onClick={() => salinTeks(pautanRujukan, "pautan")}
+                  onClick={() => { (window as any).bkSfx?.press?.(); salinTeks(pautanRujukan, "pautan"); }}
                   className="neo-btn affiliate-copy-btn"
                   title={salin === "pautan" ? "Disalin!" : "Salin Pautan"}
                   aria-label="Salin Pautan"

@@ -188,6 +188,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                   boxSizing: "border-box",
                 }}
                 onClick={(e) => {
+                  (window as any).bkSfx?.press?.();
                   if (e.target === e.currentTarget) setIsEntryChoiceModalOpen(false);
                 }}
               >
@@ -214,7 +215,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                   <button
                     type="button"
                     className="neo-btn bg-red"
-                    onClick={() => setIsEntryChoiceModalOpen(false)}
+                    onClick={() => { (window as any).bkSfx?.press?.(); setIsEntryChoiceModalOpen(false); }}
                     style={{
                       position: "absolute",
                       top: "12px",
@@ -273,6 +274,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         "outlineGlowGold 2.5s infinite, pulse-scale 2.5s infinite ease-in-out",
                     }}
                     onClick={() => {
+                      (window as any).bkSfx?.press?.();
                       // Pelindung dwi-klik (double-fire).
                       if ((window as any).__bkKlikKunciEntryCuba) return;
                       (window as any).__bkKlikKunciEntryCuba = true;
@@ -449,6 +451,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                       cursor: "pointer",
                     }}
                     onClick={async () => {
+                      (window as any).bkSfx?.press?.();
                       if (!joinCode.trim()) {
                         if (typeof (window as any).showAppModalAlert === "function") {
                           (window as any).showAppModalAlert(
@@ -789,6 +792,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         fontWeight: "bold",
                       }}
                       onClick={() => {
+                        (window as any).bkSfx?.press?.();
                         setIsEntryChoiceModalOpen(false);
                         setPendingLoginMode("guru");
                         setAuthModalTab("login");
@@ -816,6 +820,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         fontWeight: "bold",
                       }}
                       onClick={() => {
+                        (window as any).bkSfx?.press?.();
                         setIsEntryChoiceModalOpen(false);
                         setPendingLoginMode("ibubapa");
                         setAuthModalTab("login");
@@ -846,6 +851,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         cursor: "pointer",
                       }}
                       onClick={() => {
+                        (window as any).bkSfx?.press?.();
                         if (typeof (window as any).playBubble === "function") (window as any).playBubble();
                         // Tutup kedua-dua modal supaya tiada popup bertindih.
                         setIsEntryChoiceModalOpen(false);
@@ -909,7 +915,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                 >
                   <button
                     className="neo-btn bg-red"
-                    onClick={() => setIsCodeModalOpen(false)}
+                    onClick={() => { (window as any).bkSfx?.press?.(); setIsCodeModalOpen(false); }}
                     style={{
                       position: "absolute",
                       top: "10px",
@@ -983,6 +989,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         "outlineGlowGold 2.5s infinite, pulse-scale 2.5s infinite ease-in-out",
                     }}
                     onClick={async () => {
+                      (window as any).bkSfx?.press?.();
                       // Pelindung dwi-klik (double-fire) — elak kod disahkan dua kali.
                       if ((window as any).__bkKlikKunciSahkanKod) return;
                       (window as any).__bkKlikKunciSahkanKod = true;
@@ -1351,6 +1358,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         color: "white",
                       }}
                       onClick={() => {
+                        (window as any).bkSfx?.press?.();
                         setIsCodeModalOpen(false);
                         setPendingLoginMode("guru");
                         setAuthModalTab("login");
@@ -1378,6 +1386,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         color: "white",
                       }}
                       onClick={() => {
+                        (window as any).bkSfx?.press?.();
                         setIsCodeModalOpen(false);
                         setPendingLoginMode("ibubapa");
                         setAuthModalTab("login");
@@ -1405,6 +1414,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         background: "#7c3aed",
                       }}
                       onClick={() => {
+                        (window as any).bkSfx?.press?.();
                         setIsCodeModalOpen(false);
                         setPendingLoginMode("affiliate");
                         setAuthModalTab("login");
@@ -1434,6 +1444,7 @@ export function EntryChoiceModal(props: EntryChoiceModalProps) {
                         cursor: "pointer",
                       }}
                       onClick={() => {
+                        (window as any).bkSfx?.press?.();
                         if (typeof (window as any).playBubble === "function") (window as any).playBubble();
                         // Tutup kedua-dua modal supaya tiada popup bertindih.
                         setIsCodeModalOpen(false);

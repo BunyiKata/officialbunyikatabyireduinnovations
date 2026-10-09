@@ -2394,6 +2394,7 @@ export default function App() {
           <button
             className="teacher-banner-btn"
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               if (
                 isAdminActive ||
                 (window as any).modAdminAktif ||
@@ -2487,6 +2488,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-dashboard"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("guru-dashboard");
           }}
           title="Dashboard Guru"
@@ -2496,6 +2498,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-statistik"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             (window as any).bukaModalStatistik &&
               (window as any).bukaModalStatistik();
           }}
@@ -2506,6 +2509,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-murid"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("guru-urus-murid");
           }}
           title="Urus Murid"
@@ -2515,6 +2519,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-perkataan"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("guru-senarai-perkataan");
           }}
           title="Senarai Perkataan"
@@ -2524,6 +2529,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-item-center-circle nav-btn-akses"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             bukaModalAksesGuru();
           }}
           title="Akses"
@@ -2556,6 +2562,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-dashboard"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("admin-dashboard");
           }}
           title="Dashboard Admin"
@@ -2565,6 +2572,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-statistik nav-btn-sijil"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("admin-sijil");
           }}
           title="Urus Sijil"
@@ -2574,6 +2582,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-urus"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("admin-urus");
           }}
           title="Urus"
@@ -2583,6 +2592,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-perkataan"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("admin-senarai-perkataan");
           }}
           title="Senarai Perkataan"
@@ -2592,6 +2602,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-item-center-circle nav-btn-akses"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             bukaModalAksesGuru();
           }}
           title="Akses"
@@ -2625,6 +2636,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-dashboard"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("ibubapa-dashboard");
           }}
           title="Dashboard Ibu Bapa"
@@ -2634,6 +2646,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-perkataan"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("ibubapa-senarai-perkataan");
           }}
           title="Senarai Perkataan"
@@ -2643,6 +2656,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-laporan mobile-nav-only"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             const modal = document.getElementById("modal-laporan-kemajuan");
             if (modal) modal.style.display = "flex";
           }}
@@ -2653,6 +2667,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-profil"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             const modal = document.getElementById("modal-pilih-anak");
             if (modal) {
               modal.style.display = "flex";
@@ -2667,6 +2682,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-item-center-circle nav-btn-akses"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             bukaModalAksesGuru();
           }}
           title="Akses"
@@ -2700,6 +2716,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-dashboard"
           onClick={() => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("affiliate-dashboard");
           }}
           title="Dashboard Affiliate"
@@ -2709,6 +2726,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-rujukan"
           onClick={() => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("affiliate-dashboard");
             setTimeout(() => {
               const t = document.getElementById("affiliate-rujukan");
@@ -2722,6 +2740,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-item-center-circle nav-btn-akses"
           onClick={() => {
+            (window as any).bkSfx?.press?.();
             bukaModalAksesGuru();
           }}
           title="Akses"
@@ -2731,6 +2750,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-laporan"
           onClick={() => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("affiliate-laporan-screen");
           }}
           title="Laporan"
@@ -2740,6 +2760,7 @@ export default function App() {
         <button
           className="neo-btn bg-white nav-btn-keluar mobile-nav-only"
           onClick={() => {
+            (window as any).bkSfx?.press?.();
             if (typeof (window as any).keluarModAffiliate === "function") {
               (window as any).keluarModAffiliate();
             } else {
@@ -2815,6 +2836,7 @@ export default function App() {
               <button
                 className="neo-btn bg-white"
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   if ((window as any).playBubble) (window as any).playBubble();
                   if ((window as any).renderParentDashboard) {
                     (window as any).renderParentDashboard();
@@ -2840,6 +2862,7 @@ export default function App() {
               <button
                 className="neo-btn bg-red"
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   const modal = document.getElementById("modal-laporan-kemajuan");
                   if (modal) modal.style.display = "none";
                 }}
@@ -2902,6 +2925,7 @@ export default function App() {
           <button
             className="neo-btn bg-red close-btn"
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               (window as any).tutupModalPilihAnak &&
                 (window as any).tutupModalPilihAnak();
             }}
@@ -2974,6 +2998,7 @@ export default function App() {
           <button
             className="neo-btn bg-red close-btn"
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               (window as any).tutupModalStatistik &&
                 (window as any).tutupModalStatistik();
             }}
@@ -3081,6 +3106,7 @@ export default function App() {
                 }}
                 title="Kemaskini AI"
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   (window as any).janaDiagnostikAI &&
                     (window as any).janaDiagnostikAI();
                 }}
@@ -3311,6 +3337,7 @@ export default function App() {
         <button
           className="nav-item nav-modern desktop-nav-only student-nav-info-btn"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             if ((window as any).playBubble) (window as any).playBubble();
             (window as any).bukaModalAppInfo && (window as any).bukaModalAppInfo();
           }}
@@ -3322,6 +3349,7 @@ export default function App() {
         <button
           className="nav-item nav-modern desktop-nav-only"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             if (typeof (window as any).playBubble === "function") (window as any).playBubble();
             paparSkrin("profile-screen");
           }}
@@ -3359,6 +3387,7 @@ export default function App() {
         <button
           className="nav-item bg-purple desktop-nav-only"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             if (typeof (window as any).playBubble === "function") (window as any).playBubble();
             paparSkrin("lencana-screen");
           }}
@@ -3369,6 +3398,7 @@ export default function App() {
         <button
           className="nav-item bg-yellow desktop-nav-only"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             if (typeof (window as any).playBubble === "function") (window as any).playBubble();
             paparSkrin("leaderboard-screen");
           }}
@@ -3379,6 +3409,7 @@ export default function App() {
         <button
           className="nav-item bg-red desktop-nav-only student-nav-exit-btn"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             if (typeof (window as any).playBubble === "function") (window as any).playBubble();
             if (typeof (window as any).paparSkrin === "function") {
               (window as any).paparSkrin("login-screen");
@@ -3402,6 +3433,7 @@ export default function App() {
         <button
           className="neo-btn bg-white mobile-nav-only"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("profile-screen");
           }}
           title="Profil Murid"
@@ -3412,6 +3444,7 @@ export default function App() {
         <button
           className="neo-btn bg-white mobile-nav-only"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("lencana-screen");
           }}
           title="Lencana"
@@ -3422,6 +3455,7 @@ export default function App() {
         <button
           className="neo-btn bg-white mobile-nav-only nav-item-center-circle"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("main-menu-screen");
           }}
           title="Menu Utama"
@@ -3432,6 +3466,7 @@ export default function App() {
         <button
           className="neo-btn bg-white mobile-nav-only"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             paparSkrin("leaderboard-screen");
           }}
           title="Kedudukan"
@@ -3442,6 +3477,7 @@ export default function App() {
         <button
           className="neo-btn bg-white mobile-nav-only"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             if ((window as any).playBubble) (window as any).playBubble();
             (window as any).bukaModalAppInfo && (window as any).bukaModalAppInfo();
           }}
@@ -3462,6 +3498,7 @@ export default function App() {
           display: "none",
         }}
         onClick={(e) => {
+          (window as any).bkSfx?.press?.();
           if (e.target === e.currentTarget)
             document.getElementById("admin-side-panel-overlay")!.style.display =
               "none";
@@ -3562,6 +3599,7 @@ export default function App() {
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById(
                   "admin-side-panel-overlay",
                 )!.style.display = "none";
@@ -3582,6 +3620,7 @@ export default function App() {
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById(
                   "admin-side-panel-overlay",
                 )!.style.display = "none";
@@ -3599,6 +3638,7 @@ export default function App() {
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById(
                   "admin-side-panel-overlay",
                 )!.style.display = "none";
@@ -3616,6 +3656,7 @@ export default function App() {
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById(
                   "admin-side-panel-overlay",
                 )!.style.display = "none";
@@ -3648,6 +3689,7 @@ export default function App() {
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById(
                   "admin-side-panel-overlay",
                 )!.style.display = "none";
@@ -3671,6 +3713,7 @@ export default function App() {
           display: "none",
         }}
         onClick={(e) => {
+          (window as any).bkSfx?.press?.();
           if (e.target === e.currentTarget)
             document.getElementById("guru-side-panel-overlay")!.style.display =
               "none";
@@ -3769,6 +3812,7 @@ export default function App() {
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById(
                   "guru-side-panel-overlay",
                 )!.style.display = "none";
@@ -3789,6 +3833,7 @@ export default function App() {
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById(
                   "guru-side-panel-overlay",
                 )!.style.display = "none";
@@ -3810,6 +3855,7 @@ export default function App() {
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById(
                   "guru-side-panel-overlay",
                 )!.style.display = "none";
@@ -3830,6 +3876,7 @@ export default function App() {
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById(
                   "guru-side-panel-overlay",
                 )!.style.display = "none";
@@ -3847,6 +3894,7 @@ export default function App() {
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById(
                   "guru-side-panel-overlay",
                 )!.style.display = "none";
@@ -3879,6 +3927,7 @@ export default function App() {
                 padding: "12px",
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById(
                   "guru-side-panel-overlay",
                 )!.style.display = "none";
@@ -3911,6 +3960,7 @@ export default function App() {
           color: "var(--color-dark)",
         }}
         onClick={() => {
+          (window as any).bkSfx?.press?.();
           if (
             document.getElementById("admin-sticky-nav")?.style.display ===
             "flex"
@@ -4017,6 +4067,7 @@ export default function App() {
           <div
             className="profile-card-avatar-box mobile-header-avatar-box"
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               if (typeof (window as any).paparSkrin === "function") {
                 (window as any).paparSkrin("profile-screen");
               }
@@ -4054,6 +4105,7 @@ export default function App() {
           <div
             className="mobile-header-info"
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               if (typeof (window as any).paparSkrin === "function") {
                 (window as any).paparSkrin("profile-screen");
               }
@@ -4078,6 +4130,7 @@ export default function App() {
             id="mobile-header-exit-btn"
             className="mobile-header-exit-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               e.stopPropagation();
               if (typeof (window as any).paparSkrin === "function") {
                 (window as any).paparSkrin("login-screen");
@@ -4116,6 +4169,7 @@ export default function App() {
           <button
             className="neo-btn ticket-btn-red main-menu-btn-anim-1"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               if (typeof (window as any).playBubble === "function") (window as any).playBubble();
               if (typeof (window as any).bukaModalPilihPeta === "function") {
                 (window as any).bukaModalPilihPeta("belajar");
@@ -4136,6 +4190,7 @@ export default function App() {
           <button
             className="neo-btn ticket-btn-red main-menu-btn-anim-2"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               if (typeof (window as any).playBubble === "function") (window as any).playBubble();
               if (typeof (window as any).bukaModalPilihPeta === "function") {
                 (window as any).bukaModalPilihPeta("latihan");
@@ -4196,6 +4251,7 @@ export default function App() {
               borderRadius: "10px",
             }}
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               tuntutGanjaranHarian();
             }}
           >
@@ -4220,7 +4276,7 @@ export default function App() {
           <div className="cabaran-tambahan-top-bar">
             <button
               className="neo-btn bg-purple back-icon-btn"
-              onClick={() => (window as any).closeCabaranLainGame && (window as any).closeCabaranLainGame()}
+              onClick={() => { (window as any).bkSfx?.press?.(); (window as any).closeCabaranLainGame && (window as any).closeCabaranLainGame(); }}
               aria-label="Kembali"
             >
               <i className="fa-solid fa-arrow-left"></i>
@@ -4245,6 +4301,7 @@ export default function App() {
           <button
             className="neo-btn bg-yellow back-icon-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               paparSkrin("main-menu-screen");
             }}
           >
@@ -4274,6 +4331,7 @@ export default function App() {
               className="neo-btn bg-yellow"
               style={{ flex: 1, padding: "8px 5px", fontSize: "0.85rem" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 (window as any).tukarCarta("harian");
               }}
             >
@@ -4284,6 +4342,7 @@ export default function App() {
               className="neo-btn bg-white"
               style={{ flex: 1, padding: "8px 5px", fontSize: "0.85rem" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 (window as any).tukarCarta("mingguan");
               }}
             >
@@ -4294,6 +4353,7 @@ export default function App() {
               className="neo-btn bg-white"
               style={{ flex: 1, padding: "8px 5px", fontSize: "0.85rem" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 (window as any).tukarCarta("bulanan");
               }}
             >
@@ -4304,6 +4364,7 @@ export default function App() {
               className="neo-btn bg-white"
               style={{ flex: 1, padding: "8px 5px", fontSize: "0.85rem" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 (window as any).tukarCarta("global");
               }}
             >
@@ -4327,6 +4388,7 @@ export default function App() {
           <button
             className="neo-btn bg-purple back-icon-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               paparSkrin("main-menu-screen");
             }}
           >
@@ -4470,6 +4532,7 @@ export default function App() {
               }}
               aria-label="Edit Profil"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 e.preventDefault();
                 e.stopPropagation();
                 if (typeof (window as any).bukaModalAvatar === "function") {
@@ -4592,6 +4655,7 @@ export default function App() {
           <button
             className="neo-btn bg-purple back-icon-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               paparSkrin("main-menu-screen");
             }}
           >
@@ -4612,6 +4676,7 @@ export default function App() {
             className="neo-btn bg-purple help-btn info-icon-btn"
             id="btn-info-lencana"
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               if ((window as any).playBubble) (window as any).playBubble();
               if (typeof (window as any).bukaModalInfoLencana === "function") {
                 (window as any).bukaModalInfoLencana();
@@ -4717,6 +4782,7 @@ export default function App() {
               cursor: "pointer",
             }}
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               const d = typeof (window as any).getCurrentProfileData === 'function' ? (window as any).getCurrentProfileData() : null;
               const allDone = typeof (window as any).isPetaCompleted === 'function' ? (window as any).isPetaCompleted('all', d) : false;
               const hasMaster = d && d.badges && d.badges.includes('badge_master');
@@ -5147,6 +5213,7 @@ export default function App() {
             padding: "10px 8px",
           }}
           onClick={() => {
+            (window as any).bkSfx?.press?.();
             if ((window as any).playBubble) (window as any).playBubble();
             setShowGuruSijilModal(false);
           }}
@@ -5230,6 +5297,7 @@ export default function App() {
         id="modal-bantuan"
         className="modal-overlay"
         onClick={(e) => {
+          (window as any).bkSfx?.press?.();
           tutupBantuan();
         }}
       >
@@ -5237,12 +5305,14 @@ export default function App() {
           className="modal-content bantuan-content"
           style={{ maxWidth: "450px" }}
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             e.stopPropagation();
           }}
         >
           <button
             className="neo-btn bg-red close-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               tutupBantuan();
             }}
           >
@@ -5281,6 +5351,7 @@ export default function App() {
             className="neo-btn bg-green"
             style={{ width: "100%", fontSize: "1.2rem" }}
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               tutupBantuan();
             }}
           >
@@ -5592,6 +5663,7 @@ export default function App() {
                 color: "#ffffff",
               }}
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 const celebration = document.getElementById("ganjaran-celebration");
                 if (celebration) celebration.style.display = "none";
                 if (typeof (window as any).tutupARSukuKata === "function") {
@@ -5651,6 +5723,7 @@ export default function App() {
           <button
             className="neo-btn bg-red close-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               document.getElementById("modal-pilih-avatar").style.display =
                 "none";
             }}
@@ -5745,6 +5818,7 @@ export default function App() {
               fontWeight: "bold",
             }}
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               simpanProfilEdit();
             }}
           >
@@ -5766,6 +5840,7 @@ export default function App() {
           <button
             className="neo-btn bg-red close-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               document.getElementById("modal-pilih-jenis-huruf").style.display =
                 "none";
             }}
@@ -5784,6 +5859,7 @@ export default function App() {
             <button
               className="neo-btn"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-jenis-huruf");
                 if (modal) modal.style.display = "none";
                 (window as any).phonicsMode = 'kenali_huruf';
@@ -5804,6 +5880,7 @@ export default function App() {
             <button
               className="neo-btn"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-jenis-huruf");
                 if (modal) modal.style.display = "none";
                 (window as any).phonicsMode = 'kenali_huruf';
@@ -5839,6 +5916,7 @@ export default function App() {
           <button
             className="neo-btn bg-red close-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               document.getElementById("modal-pilih-vokal-konsonan").style.display = "none";
             }}
           >
@@ -5856,6 +5934,7 @@ export default function App() {
             <button
               className="neo-btn"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-vokal-konsonan");
                 if (modal) modal.style.display = "none";
                 (window as any).phonicsMode = 'vokal_konsonan';
@@ -5878,6 +5957,7 @@ export default function App() {
             <button
               className="neo-btn"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-vokal-konsonan");
                 if (modal) modal.style.display = "none";
                 (window as any).phonicsMode = 'vokal_konsonan';
@@ -5920,6 +6000,7 @@ export default function App() {
           <button
             className="neo-btn bg-red close-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               document.getElementById("modal-pilih-jenis-nombor").style.display = "none";
             }}
           >
@@ -5954,6 +6035,7 @@ export default function App() {
                 position: "relative"
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById("modal-pilih-jenis-nombor").style.display = "none";
                 if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
                   if (typeof (window as any).kunciPro === "function") (window as any).kunciPro();
@@ -6100,6 +6182,7 @@ export default function App() {
                 position: "relative"
               }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 document.getElementById("modal-pilih-jenis-nombor").style.display = "none";
                 if ((window as any).isPercumaMode && (window as any).isPercumaMode()) {
                   if (typeof (window as any).kunciPro === "function") (window as any).kunciPro();
@@ -6287,6 +6370,7 @@ export default function App() {
                     color: "#ffffff",
                   }}
                   onClick={() => {
+                    (window as any).bkSfx?.press?.();
                     document.getElementById(
                       "modal-pilih-tanduk-kata",
                     ).style.display = "none";
@@ -6365,6 +6449,7 @@ export default function App() {
                   color: "#ffffff",
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   document.getElementById(
                     "modal-pilih-suku-kata-hero",
                   ).style.display = "none";
@@ -6385,6 +6470,7 @@ export default function App() {
           <button
             className="neo-btn bg-orange back-icon-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               paparSkrin("map-screen");
             }}
           >
@@ -6456,6 +6542,7 @@ export default function App() {
               className="neo-btn bg-blue"
               style={{ padding: "8px 16px", minWidth: "auto" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 window.surihNomborTukar && window.surihNomborTukar(-1);
               }}
             >
@@ -6488,6 +6575,7 @@ export default function App() {
               className="neo-btn bg-blue"
               style={{ padding: "8px 16px", minWidth: "auto" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 window.surihNomborTukar && window.surihNomborTukar(1);
               }}
             >
@@ -6551,6 +6639,7 @@ export default function App() {
               className="neo-btn bg-orange"
               style={{ flex: "1", minWidth: "140px" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 window.surihNomborTunjukCara && window.surihNomborTunjukCara();
               }}
             >
@@ -6560,6 +6649,7 @@ export default function App() {
               className="neo-btn bg-green"
               style={{ flex: "1", minWidth: "140px" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 window.surihNomborReset && window.surihNomborReset();
               }}
             >
@@ -6579,6 +6669,7 @@ export default function App() {
           <button
             className="neo-btn bg-orange back-icon-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               paparSkrin("map-screen");
             }}
           >
@@ -6650,6 +6741,7 @@ export default function App() {
               className="neo-btn bg-blue"
               style={{ padding: "8px 16px", minWidth: "auto" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 window.surihTukarHuruf && window.surihTukarHuruf(-1);
               }}
             >
@@ -6680,6 +6772,7 @@ export default function App() {
               className="neo-btn bg-blue"
               style={{ padding: "8px 16px", minWidth: "auto" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 window.surihTukarHuruf && window.surihTukarHuruf(1);
               }}
             >
@@ -6743,6 +6836,7 @@ export default function App() {
               className="neo-btn bg-orange"
               style={{ flex: "1", minWidth: "140px" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 window.surihTunjukCara && window.surihTunjukCara();
               }}
             >
@@ -6752,6 +6846,7 @@ export default function App() {
               className="neo-btn bg-green"
               style={{ flex: "1", minWidth: "140px" }}
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 window.surihReset && window.surihReset();
               }}
             >
@@ -6999,6 +7094,7 @@ export default function App() {
               flexShrink: 0
             }}
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               paparSkrin("map-screen");
             }}
             aria-label="Kembali"
@@ -7042,6 +7138,7 @@ export default function App() {
               flexShrink: 0
             }}
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               console.log("3D guide modal opened from button");
               setShowVRGuideModal(true);
             }}
@@ -7213,6 +7310,7 @@ export default function App() {
               type="button"
               className="neo-btn bg-red"
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 if ((window as any).closeVRStationPopup) {
                   (window as any).closeVRStationPopup();
                 }
@@ -7282,6 +7380,7 @@ export default function App() {
                 gap: "6px"
               }}
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 if ((window as any).playVRAutoAll) {
                   (window as any).playVRAutoAll();
                 }
@@ -7303,6 +7402,7 @@ export default function App() {
                 color: "white"
               }}
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 if ((window as any).closeVRStationPopup) {
                   (window as any).closeVRStationPopup();
                 }
@@ -7321,6 +7421,7 @@ export default function App() {
           <button
             className="neo-btn bg-orange back-icon-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               paparSkrin("map-screen");
             }}
           >
@@ -7351,6 +7452,7 @@ export default function App() {
           <button
             className="neo-btn bg-orange back-icon-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               paparSkrin("map-screen");
             }}
           >
@@ -7383,6 +7485,7 @@ export default function App() {
                 className="bs-arrow prev neo-btn bg-purple"
                 style={{ borderRadius: "12px", color: "white" }}
                 onClick={(e) => {
+                  (window as any).bkSfx?.press?.();
                   prevBelajarSukuKata();
                 }}
               >
@@ -7391,6 +7494,7 @@ export default function App() {
               <div
                 className="scene bs-scene"
                 onClick={(e) => {
+                  (window as any).bkSfx?.press?.();
                   window.flipFlashcard(e.currentTarget);
                 }}
                 style={{ position: "relative", borderRadius: "30px" }}
@@ -7412,6 +7516,7 @@ export default function App() {
                     zIndex: "10",
                   }}
                   onClick={(e) => {
+                    (window as any).bkSfx?.press?.();
                     e.stopPropagation();
                     if ((window as any).mainAudioSukuKataSemasa) {
                       (window as any).mainAudioSukuKataSemasa();
@@ -7466,6 +7571,7 @@ export default function App() {
                 className="bs-arrow next neo-btn bg-purple"
                 style={{ borderRadius: "12px", color: "white" }}
                 onClick={(e) => {
+                  (window as any).bkSfx?.press?.();
                   nextBelajarSukuKata();
                 }}
               >
@@ -7484,6 +7590,7 @@ export default function App() {
               <button
                 className="bs-list-btn neo-btn bg-yellow"
                 onClick={(e) => {
+                  (window as any).bkSfx?.press?.();
                   bukaModalSenaraiSukuKata();
                 }}
                 aria-label="Senarai Perkataan"
@@ -7511,6 +7618,7 @@ export default function App() {
                   overflow: "hidden",
                 }}
                 onClick={(e) => {
+                  (window as any).bkSfx?.press?.();
                   mainAudioSukuKataSemasa();
                 }}
               >
@@ -7528,6 +7636,7 @@ export default function App() {
                   className="neo-btn bg-purple"
                   style={{ borderRadius: "10px", color: "white" }}
                   onClick={(e) => {
+                    (window as any).bkSfx?.press?.();
                     prevBelajarSukuKata();
                   }}
                 >
@@ -7537,6 +7646,7 @@ export default function App() {
                   className="neo-btn bg-purple"
                   style={{ borderRadius: "10px", color: "white" }}
                   onClick={(e) => {
+                    (window as any).bkSfx?.press?.();
                     nextBelajarSukuKata();
                   }}
                 >
@@ -7588,6 +7698,7 @@ export default function App() {
           <button
             className="neo-btn bg-red"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               tutupModalSenaraiSukuKata();
             }}
             style={{
@@ -7641,6 +7752,7 @@ export default function App() {
           <button
             className="neo-btn bg-orange back-icon-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               (window as any).tutupARSukuKata && (window as any).tutupARSukuKata();
             }}
             aria-label="Kembali"
@@ -7685,7 +7797,7 @@ export default function App() {
           </div>
           <button
             className="neo-btn bg-orange help-btn info-icon-btn"
-            onClick={() => setShowARGuideModal(true)}
+            onClick={() => { (window as any).bkSfx?.press?.(); setShowARGuideModal(true); }}
             title="Panduan AR Suku Kata"
             aria-label="Panduan AR Suku Kata"
           >
@@ -7713,7 +7825,7 @@ export default function App() {
               type="button"
               id="btn_tukar_filter_camera"
               className="ar-camera-filter-btn neo-btn bg-yellow cursor-pointer hover:scale-110 transition-transform"
-              onClick={() => (window as any).tukarARFilter && (window as any).tukarARFilter()}
+              onClick={() => { (window as any).bkSfx?.press?.(); (window as any).tukarARFilter && (window as any).tukarARFilter(); }}
               title="Tukar Filter AR"
               aria-label="Tukar Filter AR"
             >
@@ -7725,7 +7837,7 @@ export default function App() {
           <div className="ar-content-panel">
             <div
               className="ar-score-pill neo-box cursor-pointer hover:scale-105 transition-transform"
-              onClick={() => (window as any).showARResultModal && (window as any).showARResultModal()}
+              onClick={() => { (window as any).bkSfx?.press?.(); (window as any).showARResultModal && (window as any).showARResultModal(); }}
               title="Paparan Bintang & Keputusan"
             >
               <i className="fa-solid fa-star text-2xl" style={{ color: "#ffc107" }}></i>
@@ -7741,7 +7853,7 @@ export default function App() {
             <div
               id="word_card_ar_sukukata"
               className="ar-word-card neo-box border-orange-200 cursor-pointer"
-              onClick={() => (window as any).sebutAudio && (window as any).currentARWord && (window as any).sebutAudio((window as any).currentARWord)}
+              onClick={() => { (window as any).bkSfx?.press?.(); (window as any).sebutAudio && (window as any).currentARWord && (window as any).sebutAudio((window as any).currentARWord); }}
               title="Klik untuk dengar sebutan"
             >
               <p id="word_display_ar_sukukata" className="ar-word-text">?</p>
@@ -7800,7 +7912,7 @@ export default function App() {
               <button
                 id="start_btn_ar_sukukata"
                 className="neo-btn ar-start-btn"
-                onClick={() => (window as any).toggleARPlay && (window as any).toggleARPlay()}
+                onClick={() => { (window as any).bkSfx?.press?.(); (window as any).toggleARPlay && (window as any).toggleARPlay(); }}
               >
                 MULA
               </button>
@@ -7808,7 +7920,7 @@ export default function App() {
                 type="button"
                 id="btn_tukar_filter"
                 className="ar-filter-btn neo-btn bg-yellow cursor-pointer hover:scale-110 transition-transform"
-                onClick={() => (window as any).tukarARFilter && (window as any).tukarARFilter()}
+                onClick={() => { (window as any).bkSfx?.press?.(); (window as any).tukarARFilter && (window as any).tukarARFilter(); }}
                 title="Tukar Filter AR"
                 aria-label="Tukar Filter AR"
               >
@@ -7833,7 +7945,7 @@ export default function App() {
                 padding: "16px",
                 fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
               }}
-              onClick={() => setShowARGuideModal(false)}
+              onClick={() => { (window as any).bkSfx?.press?.(); setShowARGuideModal(false); }}
             >
               <motion.div
                 initial={{ scale: 0.88, opacity: 0, y: 15 }}
@@ -7974,6 +8086,7 @@ export default function App() {
                     borderRadius: "16px",
                   }}
                   onClick={() => {
+                    (window as any).bkSfx?.press?.();
                     if (typeof (window as any).playBubble === "function") {
                       (window as any).playBubble();
                     }
@@ -8007,6 +8120,7 @@ export default function App() {
           <button
             className="neo-btn bg-orange back-icon-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               (window as any).tutupARKiraJari && (window as any).tutupARKiraJari();
             }}
             aria-label="Kembali"
@@ -8051,7 +8165,7 @@ export default function App() {
           </div>
           <button
             className="neo-btn bg-orange help-btn info-icon-btn"
-            onClick={() => setShowARKiraJariGuideModal(true)}
+            onClick={() => { (window as any).bkSfx?.press?.(); setShowARKiraJariGuideModal(true); }}
             title="Panduan AR Nombor"
             aria-label="Panduan AR Nombor"
           >
@@ -8101,7 +8215,7 @@ export default function App() {
                 zIndex: 30,
                 padding: 0,
               }}
-              onClick={() => (window as any).tukarARFilter && (window as any).tukarARFilter()}
+              onClick={() => { (window as any).bkSfx?.press?.(); (window as any).tukarARFilter && (window as any).tukarARFilter(); }}
               title="Tukar Filter AR"
               aria-label="Tukar Filter AR"
             >
@@ -8186,7 +8300,7 @@ export default function App() {
           <div className="ar-content-panel">
             <div
               className="ar-score-pill neo-box cursor-pointer hover:scale-105 transition-transform"
-              onClick={() => (window as any).showARKiraJariResultModal && (window as any).showARKiraJariResultModal()}
+              onClick={() => { (window as any).bkSfx?.press?.(); (window as any).showARKiraJariResultModal && (window as any).showARKiraJariResultModal(); }}
               title="Paparan Bintang & Keputusan"
             >
               <i className="fa-solid fa-star text-2xl" style={{ color: "#ffc107" }}></i>
@@ -8223,7 +8337,7 @@ export default function App() {
                 type="button"
                 id="btn_tukar_filter_kirajari"
                 className="ar-filter-btn neo-btn bg-yellow cursor-pointer hover:scale-110 transition-transform"
-                onClick={() => (window as any).tukarARFilter && (window as any).tukarARFilter()}
+                onClick={() => { (window as any).bkSfx?.press?.(); (window as any).tukarARFilter && (window as any).tukarARFilter(); }}
                 title="Tukar Filter AR"
                 aria-label="Tukar Filter AR"
               >
@@ -8233,7 +8347,7 @@ export default function App() {
                 type="button"
                 id="btn_refresh_kirajari"
                 className="ar-filter-btn neo-btn bg-yellow cursor-pointer hover:scale-110 transition-transform"
-                onClick={() => (window as any).nextARKiraJariQuestion && (window as any).nextARKiraJariQuestion()}
+                onClick={() => { (window as any).bkSfx?.press?.(); (window as any).nextARKiraJariQuestion && (window as any).nextARKiraJariQuestion(); }}
                 title="Soalan Seterusnya"
                 aria-label="Soalan Seterusnya"
               >
@@ -8257,7 +8371,7 @@ export default function App() {
               padding: "16px",
               fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
             }}
-            onClick={() => setShowARKiraJariGuideModal(false)}
+            onClick={() => { (window as any).bkSfx?.press?.(); setShowARKiraJariGuideModal(false); }}
           >
             <motion.div
               initial={{ scale: 0.85, opacity: 0, y: 20 }}
@@ -8400,6 +8514,7 @@ export default function App() {
                   borderRadius: "16px",
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   if (typeof (window as any).playBubble === "function") {
                     (window as any).playBubble();
                   }
@@ -8421,6 +8536,7 @@ export default function App() {
           <button
             className="neo-btn bg-orange back-icon-btn"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               if (window.speechSynthesis) window.speechSynthesis.cancel();
               if ((window as any).hentikanAudioSemasa) (window as any).hentikanAudioSemasa();
               (window as any).paparSkrin("map-screen");
@@ -8502,6 +8618,7 @@ export default function App() {
               <button
                 className="neo-btn bg-yellow"
                 onClick={(e) => {
+                  (window as any).bkSfx?.press?.();
                   if (typeof (window as any).hentikanAudioSemasa === "function") {
                     (window as any).hentikanAudioSemasa();
                   }
@@ -8545,6 +8662,7 @@ export default function App() {
               <div
                 id="bacaan-text-container"
                 onClick={(e) => {
+                  (window as any).bkSfx?.press?.();
                   (window as any).mainAudioBacaanSemasa &&
                     (window as any).mainAudioBacaanSemasa();
                 }}
@@ -8613,6 +8731,7 @@ export default function App() {
                 <div
                   className="bacaan-audio-btn"
                   onClick={(e) => {
+                    (window as any).bkSfx?.press?.();
                     e.stopPropagation();
                     (window as any).mainAudioBacaanSemasa &&
                       (window as any).mainAudioBacaanSemasa();
@@ -8657,6 +8776,7 @@ export default function App() {
                   id="btn-prev-bacaan"
                   className="neo-btn bg-purple"
                   onClick={(e) => {
+                    (window as any).bkSfx?.press?.();
                     if (window.speechSynthesis) window.speechSynthesis.cancel();
                     if (typeof (window as any).hentikanAudioSemasa === "function") {
                       (window as any).hentikanAudioSemasa();
@@ -8687,6 +8807,7 @@ export default function App() {
                   id="btn-next-bacaan"
                   className="neo-btn bg-purple"
                   onClick={(e) => {
+                    (window as any).bkSfx?.press?.();
                     if (window.speechSynthesis) window.speechSynthesis.cancel();
                     if (typeof (window as any).hentikanAudioSemasa === "function") {
                       (window as any).hentikanAudioSemasa();
@@ -8755,6 +8876,7 @@ export default function App() {
           <button
             className="neo-btn bg-red"
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               (window as any).tutupModalSenaraiBacaan &&
                 (window as any).tutupModalSenaraiBacaan();
             }}
@@ -8916,7 +9038,7 @@ export default function App() {
                     padding: "16px",
                     fontFamily: "'AtlantaRoundedBlack', 'AtlantaRounded', sans-serif",
                   }}
-                  onClick={() => setShowVRGuideModal(false)}
+                  onClick={() => { (window as any).bkSfx?.press?.(); setShowVRGuideModal(false); }}
                 >
                   <motion.div
                     initial={{ scale: 0.9, y: 20 }}
@@ -9017,7 +9139,7 @@ export default function App() {
                         justifyContent: "center",
                         textTransform: "none",
                       }}
-                      onClick={() => setShowVRGuideModal(false)}
+                      onClick={() => { (window as any).bkSfx?.press?.(); setShowVRGuideModal(false); }}
                     >
                       Mula Belajar
                     </button>

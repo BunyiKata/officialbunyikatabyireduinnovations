@@ -100,7 +100,7 @@ export function IbubapaDashboard({
                     const badge = getSubscriptionBadgeInfo("ibubapa");
                     return (
                       <span
-                        onClick={onOpenProPricing}
+                        onClick={() => { (window as any).bkSfx?.press?.(); onOpenProPricing(); }}
                         style={{
                           cursor: "pointer",
                           fontSize: "0.74rem",
@@ -170,6 +170,7 @@ export function IbubapaDashboard({
           >
             <button
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 if ((window as any).playBubble) (window as any).playBubble();
                 (window as any).bukaModalAppInfo && (window as any).bukaModalAppInfo();
               }}
@@ -197,7 +198,7 @@ export function IbubapaDashboard({
               <i className="fa-solid fa-circle-info"></i>
             </button>
             <button
-              onClick={onEditProfile}
+              onClick={() => { (window as any).bkSfx?.press?.(); onEditProfile(); }}
               className="neo-btn ibubapa-btn-edit"
               style={{
                 background: "rgba(255,255,255,0.3)",
@@ -224,6 +225,7 @@ export function IbubapaDashboard({
             <button
               className="neo-btn ibubapa-btn-tukar-anak"
               onClick={(e) => {
+                (window as any).bkSfx?.press?.();
                 const modal = document.getElementById("modal-pilih-anak");
                 if (modal) {
                   modal.style.display = "flex";
@@ -614,6 +616,7 @@ export function IbubapaDashboard({
               }}
               title="Kemaskini"
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 (window as any).renderParentDashboard &&
                   (window as any).renderParentDashboard();
               }}

@@ -251,6 +251,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
               <button
                 type="button"
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   const newAvatar = `https://api.dicebear.com/7.x/shapes/svg?seed=${Math.random().toString(36).substring(7)}&backgroundColor=ffffff`;
                   localStorage.setItem("bunyiKataSekolahAvatar", newAvatar);
                   const el = document.getElementById("guru-dashboard-avatar-sekolah");
@@ -307,7 +308,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                   const badge = getSubscriptionBadgeInfo("guru");
                   return (
                     <span
-                      onClick={() => setIsProPricingModalOpen(true)}
+                      onClick={() => { (window as any).bkSfx?.press?.(); setIsProPricingModalOpen(true); }}
                       style={{
                         cursor: "pointer",
                         fontSize: "0.74rem",
@@ -392,7 +393,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                       gap: "5px",
                       cursor: "pointer",
                     }}
-                    onClick={() => setIsProPricingModalOpen(true)}
+                    onClick={() => { (window as any).bkSfx?.press?.(); setIsProPricingModalOpen(true); }}
                     title="Langgan PRO untuk aktifkan Kod Kelas"
                   >
                     🔒 Kod Kelas: <span style={{ letterSpacing: "1px" }}>TERKUNCI (PRO)</span>
@@ -431,6 +432,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                         gap: "3px",
                       }}
                       onClick={() => {
+                        (window as any).bkSfx?.press?.();
                         const kod = document.getElementById("guru-dashboard-kod-kelas-title")?.textContent ||
                           localStorage.getItem("bunyiKataKodKelas") || "";
                         if (kod && kod !== "-") {
@@ -462,6 +464,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
           >
             <button
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 if ((window as any).playBubble) (window as any).playBubble();
                 (window as any).bukaModalAppInfo && (window as any).bukaModalAppInfo();
               }}
@@ -490,6 +493,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
             </button>
             <button
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 if ((window as any).playBubble) (window as any).playBubble();
                 if (typeof (window as any).bukaSetupModal === "function") {
                   (window as any).bukaSetupModal("guru", false);
@@ -1092,6 +1096,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
             <button
               className="neo-btn bg-yellow cara-belajar-btn"
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 setIsReportDialOpen(false);
                 if (isEffectiveTrial) {
                   // Akaun percuma — tunjuk modal naik taraf PRO
@@ -1125,6 +1130,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
             <button
               className="neo-btn bg-red cara-belajar-btn"
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 setIsReportDialOpen(false);
                 (window as any).bukaModalExport ? (window as any).bukaModalExport() : setShowExportModal(true);
               }}
@@ -1153,6 +1159,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
             id="guru-floating-cta"
             className="neo-btn bg-yellow"
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               setIsReportDialOpen((prev) => !prev);
             }}
             aria-label="Tindakan Guru"
@@ -1329,6 +1336,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                       flexShrink: 0,
                     }}
                     onClick={() => {
+                      (window as any).bkSfx?.press?.();
                       if (typeof (window as any).openPakejProModal === "function") {
                         (window as any).openPakejProModal("guru");
                       } else {
@@ -1377,6 +1385,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                       flexShrink: 0,
                     }}
                     onClick={() => {
+                      (window as any).bkSfx?.press?.();
                       if (typeof (window as any).openPakejProModal === "function") {
                         (window as any).openPakejProModal("guru");
                       } else {
@@ -1449,6 +1458,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                             fontSize: "0.95rem",
                           }}
                           onClick={() => {
+                            (window as any).bkSfx?.press?.();
                             setIsChangingClassName1(true);
                             setNewClassName1Input(editKelasTemp || "");
                           }}
@@ -1487,7 +1497,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                             type="button"
                             className="neo-btn bg-red"
                             style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
-                            onClick={() => setIsChangingClassName1(false)}
+                            onClick={() => { (window as any).bkSfx?.press?.(); setIsChangingClassName1(false); }}
                             title="Batal"
                           >
                             <i className="fa-solid fa-xmark"></i>
@@ -1496,7 +1506,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                             type="button"
                             className="neo-btn"
                             style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
-                            onClick={() => handleSaveClassName1(newClassName1Input)}
+                            onClick={() => { (window as any).bkSfx?.press?.(); handleSaveClassName1(newClassName1Input); }}
                             title="Sahkan Nama Kelas 1"
                           >
                             <i className="fa-solid fa-check"></i>
@@ -1550,6 +1560,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                               justifyContent: "center",
                             }}
                             onClick={() => {
+                              (window as any).bkSfx?.press?.();
                               navigator.clipboard.writeText(editKodTemp);
                               if ((window as any).showAppToast) {
                                 (window as any).showAppToast("Kod Disalin", "Kod Kelas 1 telah disalin!");
@@ -1578,6 +1589,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                             fontSize: "0.95rem",
                           }}
                           onClick={() => {
+                            (window as any).bkSfx?.press?.();
                             setIsChangingCode1(true);
                             setNewCode1Input(editKodTemp || "");
                           }}
@@ -1618,7 +1630,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                             type="button"
                             className="neo-btn bg-red"
                             style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
-                            onClick={() => setIsChangingCode1(false)}
+                            onClick={() => { (window as any).bkSfx?.press?.(); setIsChangingCode1(false); }}
                             title="Batal"
                           >
                             <i className="fa-solid fa-xmark"></i>
@@ -1627,7 +1639,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                             type="button"
                             className="neo-btn"
                             style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
-                            onClick={() => handleSaveClassCode1(newCode1Input)}
+                            onClick={() => { (window as any).bkSfx?.press?.(); handleSaveClassCode1(newCode1Input); }}
                             title="Gunakan Kod Ini"
                           >
                             <i className="fa-solid fa-check"></i>
@@ -1700,6 +1712,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                               fontSize: "0.95rem",
                             }}
                             onClick={() => {
+                              (window as any).bkSfx?.press?.();
                               setIsChangingClassName2(true);
                               setNewClassName2Input(editKelas2Temp || "");
                             }}
@@ -1738,7 +1751,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                               type="button"
                               className="neo-btn bg-red"
                               style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
-                              onClick={() => setIsChangingClassName2(false)}
+                              onClick={() => { (window as any).bkSfx?.press?.(); setIsChangingClassName2(false); }}
                               title="Batal"
                             >
                               <i className="fa-solid fa-xmark"></i>
@@ -1747,7 +1760,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                               type="button"
                               className="neo-btn"
                               style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
-                              onClick={() => handleSaveClassName2(newClassName2Input)}
+                              onClick={() => { (window as any).bkSfx?.press?.(); handleSaveClassName2(newClassName2Input); }}
                               title="Sahkan Nama Kelas 2"
                             >
                               <i className="fa-solid fa-check"></i>
@@ -1801,6 +1814,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                                 justifyContent: "center",
                               }}
                               onClick={() => {
+                                (window as any).bkSfx?.press?.();
                                 navigator.clipboard.writeText(editKod2Temp);
                                 if ((window as any).showAppToast) {
                                   (window as any).showAppToast("Kod Disalin", "Kod Kelas 2 telah disalin!");
@@ -1829,6 +1843,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                               fontSize: "0.95rem",
                             }}
                             onClick={() => {
+                              (window as any).bkSfx?.press?.();
                               setIsChangingCode2(true);
                               setNewCode2Input(editKod2Temp || "");
                             }}
@@ -1869,7 +1884,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                               type="button"
                               className="neo-btn bg-red"
                               style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
-                              onClick={() => setIsChangingCode2(false)}
+                              onClick={() => { (window as any).bkSfx?.press?.(); setIsChangingCode2(false); }}
                               title="Batal"
                             >
                               <i className="fa-solid fa-xmark"></i>
@@ -1879,6 +1894,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                               className="neo-btn"
                               style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
                               onClick={() => {
+                                (window as any).bkSfx?.press?.();
                                 if (newCode2Input.trim().toUpperCase() === editKodTemp) {
                                   (window as any).notify("Kod Kelas 2 tidak boleh sama dengan Kod Kelas 1!");
                                   return;
@@ -1929,6 +1945,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                           color: (localStorage.getItem("bunyiKataNamaKelas") || "") === editKelasTemp ? "#ffffff" : "#475569",
                         }}
                         onClick={() => {
+                          (window as any).bkSfx?.press?.();
                           if (typeof (window as any).tukarKelasAktif === "function") {
                             (window as any).tukarKelasAktif(editKelasTemp);
                           }
@@ -1947,6 +1964,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                           color: (localStorage.getItem("bunyiKataNamaKelas") || "") === editKelas2Temp ? "#ffffff" : "#475569",
                         }}
                         onClick={() => {
+                          (window as any).bkSfx?.press?.();
                           if (typeof (window as any).tukarKelasAktif === "function") {
                             (window as any).tukarKelasAktif(editKelas2Temp);
                           }
@@ -2043,6 +2061,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                     flexShrink: 0,
                   }}
                   onClick={() => {
+                    (window as any).bkSfx?.press?.();
                     if (typeof (window as any).openPakejProModal === "function") {
                       (window as any).openPakejProModal("guru");
                     } else {
@@ -2100,6 +2119,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                     boxSizing: "border-box",
                   }}
                   onClick={() => {
+                    (window as any).bkSfx?.press?.();
                     if (typeof (window as any).tambahMuridBaru === "function") {
                       (window as any).tambahMuridBaru();
                     }
@@ -2277,7 +2297,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
             justifyContent: "center",
             padding: "16px",
           }}
-          onClick={() => setShowExportModal(false)}
+          onClick={() => { (window as any).bkSfx?.press?.(); setShowExportModal(false); }}
         >
           <div
             className="modal-content neo-box"
@@ -2299,7 +2319,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
             {/* Butang X Merah Petak */}
             <button
               className="neo-btn bg-red close-btn"
-              onClick={() => setShowExportModal(false)}
+              onClick={() => { (window as any).bkSfx?.press?.(); setShowExportModal(false); }}
               aria-label="Tutup"
             >
               <i className="fa-solid fa-xmark"></i>
@@ -2370,7 +2390,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                     <button
                       key={scope.id}
                       type="button"
-                      onClick={() => setSelectedExportPeta(scope.id as any)}
+                      onClick={() => { (window as any).bkSfx?.press?.(); setSelectedExportPeta(scope.id as any); }}
                       style={{
                         gridColumn: scope.fullWidth ? "span 2" : "span 1",
                         display: "flex",
@@ -2537,6 +2557,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                   letterSpacing: "0.5px",
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   if (exportSchoolInput) localStorage.setItem('pdf_sekolah', exportSchoolInput);
                   if (exportClassInput) {
                     localStorage.setItem('bunyiKataNamaKelas', exportClassInput);
@@ -2571,6 +2592,7 @@ export function GuruDashboard(props: GuruDashboardProps) {
                   letterSpacing: "0.5px",
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   if (exportSchoolInput) localStorage.setItem('pdf_sekolah', exportSchoolInput);
                   if (exportClassInput) {
                     localStorage.setItem('bunyiKataNamaKelas', exportClassInput);

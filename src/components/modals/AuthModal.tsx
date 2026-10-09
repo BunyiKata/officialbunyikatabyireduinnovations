@@ -139,6 +139,7 @@ export function AuthModal({
             <button
               className="neo-btn bg-red"
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 onClose();
                 setAuthModalError("");
               }}
@@ -488,7 +489,7 @@ export function AuthModal({
                         />
                         <button
                           type="button"
-                          onClick={() => setShowLoginPassword((prev) => !prev)}
+                          onClick={() => { (window as any).bkSfx?.press?.(); setShowLoginPassword((prev) => !prev); }}
                           style={{
                             position: "absolute",
                             right: "10px",
@@ -525,6 +526,7 @@ export function AuthModal({
                           padding: "0",
                         }}
                         onClick={async () => {
+                          (window as any).bkSfx?.press?.();
                           const emailToSend =
                             loginEmail.trim() ||
                             window.prompt(
@@ -578,6 +580,7 @@ export function AuthModal({
                         cursor: isAuthLoading ? "not-allowed" : "pointer",
                       }}
                       onClick={async () => {
+                        (window as any).bkSfx?.press?.();
                         if (!loginEmail.trim() || !loginPassword.trim()) {
                           setAuthModalError("Sila masukkan emel dan kata laluan!");
                           return;
@@ -839,6 +842,7 @@ export function AuthModal({
                             gap: "5px",
                           }}
                           onClick={() => {
+                            (window as any).bkSfx?.press?.();
                             if (typeof (window as any).playBubble === "function") (window as any).playBubble();
                             // PENTING: Bagi mod Affiliate, butang ini TERUS ke WhatsApp
                             // admin dengan template khas affiliate (tiada popup pakej,

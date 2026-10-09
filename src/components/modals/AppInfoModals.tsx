@@ -44,6 +44,7 @@ export default function AppInfoModals({
               padding: "16px",
             }}
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               if (e.target === e.currentTarget) {
                 (window as any).tutupModalInfoLencana &&
                   (window as any).tutupModalInfoLencana();
@@ -97,6 +98,7 @@ export default function AppInfoModals({
                   zIndex: 10,
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   (window as any).tutupModalInfoLencana &&
                     (window as any).tutupModalInfoLencana();
                 }}
@@ -400,6 +402,7 @@ export default function AppInfoModals({
                   cursor: "pointer",
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   (window as any).tutupModalInfoLencana &&
                     (window as any).tutupModalInfoLencana();
                 }}
@@ -419,6 +422,7 @@ export default function AppInfoModals({
               backgroundColor: "rgba(0,0,0,0.85)",
             }}
             onClick={(e) => {
+              (window as any).bkSfx?.press?.();
               if (e.target === e.currentTarget) {
                 (window as any).tutupModalAppInfo &&
                   (window as any).tutupModalAppInfo();
@@ -461,6 +465,7 @@ export default function AppInfoModals({
                   zIndex: 10,
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   (window as any).tutupModalAppInfo &&
                     (window as any).tutupModalAppInfo();
                 }}
@@ -545,6 +550,7 @@ export default function AppInfoModals({
                   title="Laman Web Rasmi (bunyikata.my)"
                   aria-label="Laman Web Rasmi"
                   onClick={() => {
+                    (window as any).bkSfx?.press?.();
                     if (typeof (window as any).playBubble === "function") (window as any).playBubble();
                     window.open("https://bunyikata.my", "_blank");
                   }}
@@ -559,6 +565,7 @@ export default function AppInfoModals({
                   title="Saluran Telegram"
                   aria-label="Saluran Telegram"
                   onClick={() => {
+                    (window as any).bkSfx?.press?.();
                     if (typeof (window as any).playBubble === "function") (window as any).playBubble();
                     window.open("https://t.me/+YHsrwwqA-eE5N2Vl", "_blank");
                   }}
@@ -573,6 +580,7 @@ export default function AppInfoModals({
                   title="Google Play Store"
                   aria-label="Google Play Store"
                   onClick={() => {
+                    (window as any).bkSfx?.press?.();
                     if (typeof (window as any).playBubble === "function") (window as any).playBubble();
                     window.open("https://play.google.com/store/apps/details?id=com.bunyikatabacaan", "_blank");
                   }}
@@ -592,6 +600,7 @@ export default function AppInfoModals({
                   title="Apple App Store"
                   aria-label="Apple App Store"
                   onClick={() => {
+                    (window as any).bkSfx?.press?.();
                     if (typeof (window as any).playBubble === "function") (window as any).playBubble();
                     window.open("https://apps.apple.com/my/app/bunyi-kata/id6739794132", "_blank");
                   }}
@@ -710,7 +719,7 @@ export default function AppInfoModals({
                     <button
                       type="button"
                       className="neo-btn bg-blue"
-                      onClick={() => hantarFeedback()}
+                      onClick={() => { (window as any).bkSfx?.press?.(); hantarFeedback(); }}
                       title="Hantar Maklum Balas"
                       style={{
                         width: "48px",
@@ -773,6 +782,7 @@ export default function AppInfoModals({
                   color: "#ffffff",
                 }}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   try {
                     const modal = document.getElementById("app-info-modal");
                     if (modal) modal.style.display = "none";

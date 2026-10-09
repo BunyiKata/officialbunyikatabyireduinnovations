@@ -372,6 +372,7 @@ export function TermsPrivacyModal({
             padding: "16px",
           }}
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             if (e.target === e.currentTarget) onClose();
           }}
         >
@@ -423,7 +424,7 @@ export function TermsPrivacyModal({
                 cursor: "pointer",
                 zIndex: 10,
               }}
-              onClick={onClose}
+              onClick={() => { (window as any).bkSfx?.press?.(); onClose(); }}
               title="Tutup"
               aria-label="Tutup"
             >
@@ -482,7 +483,7 @@ export function TermsPrivacyModal({
                   border: "2.5px solid var(--color-dark, #10182f)",
                   boxShadow: "0 2.5px 0 var(--color-dark, #10182f)",
                 }}
-                onClick={() => setTab("terma")}
+                onClick={() => { (window as any).bkSfx?.press?.(); setTab("terma"); }}
               >
                 Terma
               </button>
@@ -500,7 +501,7 @@ export function TermsPrivacyModal({
                   border: "2.5px solid var(--color-dark, #10182f)",
                   boxShadow: "0 2.5px 0 var(--color-dark, #10182f)",
                 }}
-                onClick={() => setTab("privasi")}
+                onClick={() => { (window as any).bkSfx?.press?.(); setTab("privasi"); }}
               >
                 Privasi
               </button>
@@ -535,7 +536,7 @@ export function TermsPrivacyModal({
                 boxShadow: "0 3px 0 var(--color-dark, #10182f)",
                 cursor: "pointer",
               }}
-              onClick={onClose}
+              onClick={() => { (window as any).bkSfx?.press?.(); onClose(); }}
             >
               Saya Faham <i className="fa-solid fa-check"></i>
             </button>

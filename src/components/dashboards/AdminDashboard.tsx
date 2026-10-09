@@ -116,6 +116,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
                 <button
                   type="button"
                   onClick={() => {
+                    (window as any).bkSfx?.press?.();
                     const newAvatar = `https://api.dicebear.com/7.x/shapes/svg?seed=${Math.random().toString(36).substring(7)}&backgroundColor=ffffff`;
                     localStorage.setItem("bunyiKataSekolahAvatar", newAvatar);
                     const el = document.getElementById("admin-dashboard-avatar-sekolah");
@@ -201,6 +202,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
             >
               <button
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   if ((window as any).playBubble) (window as any).playBubble();
                   setModalCiptaAkaunTerbuka(true);
                 }}
@@ -230,6 +232,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
               </button>
               <button
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   if ((window as any).playBubble) (window as any).playBubble();
                   if (typeof (window as any).bukaSetupModal === "function") {
                     (window as any).bukaSetupModal("admin", false);
@@ -261,6 +264,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
               </button>
               <button
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   if ((window as any).playBubble) (window as any).playBubble();
                   (window as any).bukaModalAppInfo && (window as any).bukaModalAppInfo();
                 }}
@@ -701,6 +705,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
               cursor: "pointer",
             }}
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               const sel = document.getElementById("admin-table-selector") as HTMLSelectElement;
               if (sel) {
                 sel.value = "feedback";
@@ -1422,6 +1427,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
               gap: "8px",
             }}
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               if (typeof (window as any).tukarAdminUrusTab === "function") {
                 (window as any).tukarAdminUrusTab("guru");
               }
@@ -1446,6 +1452,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
               gap: "8px",
             }}
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               if (typeof (window as any).tukarAdminUrusTab === "function") {
                 (window as any).tukarAdminUrusTab("ibubapa");
               }
@@ -1470,6 +1477,7 @@ export function AdminDashboard({ getScreenClass }: AdminDashboardProps) {
               gap: "8px",
             }}
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               if (typeof (window as any).tukarAdminUrusTab === "function") {
                 (window as any).tukarAdminUrusTab("affiliate");
               }

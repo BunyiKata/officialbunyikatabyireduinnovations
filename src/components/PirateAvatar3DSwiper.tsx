@@ -284,7 +284,7 @@ export function PirateAvatar3DSwiper({
           {/* Left Arrow */}
           <button
             type="button"
-            onClick={handlePrev}
+            onClick={() => { (window as any).bkSfx?.press?.(); handlePrev(); }}
             disabled={activeIndex === 0}
             style={{
               position: "absolute",
@@ -315,7 +315,7 @@ export function PirateAvatar3DSwiper({
           {/* Right Arrow */}
           <button
             type="button"
-            onClick={handleNext}
+            onClick={() => { (window as any).bkSfx?.press?.(); handleNext(); }}
             disabled={activeIndex === characters.length - 1}
             style={{
               position: "absolute",
@@ -368,6 +368,7 @@ export function PirateAvatar3DSwiper({
                 key={char.id}
                 className={isSelected ? "gaming-card-glow" : ""}
                 onClick={() => {
+                  (window as any).bkSfx?.press?.();
                   if (activeIndex === idx) {
                     if (!char.unlocked) {
                       triggerProNotice(char.name);
@@ -482,6 +483,7 @@ export function PirateAvatar3DSwiper({
                   /* Locked Card: Inner Dark Slate Box Framed by White/Cream Border */
                   <div
                     onClick={(e) => {
+                      (window as any).bkSfx?.press?.();
                       e.stopPropagation();
                       if (activeIndex === idx) {
                         triggerProNotice(char.name);
@@ -574,7 +576,7 @@ export function PirateAvatar3DSwiper({
           {characters.map((char, idx) => (
             <div
               key={idx}
-              onClick={() => handleSelectIndex(idx)}
+              onClick={() => { (window as any).bkSfx?.press?.(); handleSelectIndex(idx); }}
               style={{
                 width: activeIndex === idx ? "22px" : "8px",
                 height: "8px",
@@ -610,7 +612,7 @@ export function PirateAvatar3DSwiper({
             letterSpacing: "0.5px",
             animation: "mulaBtnGoldPulse 2.2s infinite ease-in-out !important",
           }}
-          onClick={handleStartGame}
+          onClick={() => { (window as any).bkSfx?.press?.(); handleStartGame(); }}
         >
           <i className="fa-solid fa-play" style={{ marginRight: "8px" }}></i>
           Mula

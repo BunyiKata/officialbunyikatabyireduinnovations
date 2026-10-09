@@ -564,6 +564,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
             type="button"
             className="neo-btn bg-red"
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               playClick();
               onClose();
             }}
@@ -647,6 +648,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
               type="button"
               className="neo-btn"
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 playClick();
                 setActiveTab('individu');
               }}
@@ -673,6 +675,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
               type="button"
               className="neo-btn"
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 playClick();
                 setActiveTab('pukal');
               }}
@@ -929,7 +932,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
                   <button
                     type="button"
                     className="neo-btn"
-                    onClick={handleAddStudentRow}
+                    onClick={() => { (window as any).bkSfx?.press?.(); handleAddStudentRow(); }}
                     title="Tambah Murid"
                     style={{
                       border: '2px solid #0f172a',
@@ -986,7 +989,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
                     <button
                       type="button"
                       className="neo-btn"
-                      onClick={handleImportText}
+                      onClick={() => { (window as any).bkSfx?.press?.(); handleImportText(); }}
                       style={{
                         flex: 1,
                         backgroundColor: '#ea580c',
@@ -1009,7 +1012,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
                     <button
                       type="button"
                       className="neo-btn bg-white"
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => { (window as any).bkSfx?.press?.(); fileInputRef.current?.click(); }}
                       style={{
                         backgroundColor: '#ffffff',
                         color: '#0f172a',
@@ -1054,7 +1057,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
                         return (
                           <tr
                             key={st.id}
-                            onClick={() => handleSelectStudent(st)}
+                            onClick={() => { (window as any).bkSfx?.press?.(); handleSelectStudent(st); }}
                             style={{
                               backgroundColor: isSelected ? '#fff7ed' : (idx % 2 === 0 ? '#ffffff' : '#f8fafc'),
                               borderBottom: '1px solid #e2e8f0',
@@ -1118,7 +1121,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
                             <td style={{ padding: '6px 4px', textAlign: 'center' }}>
                               <button
                                 type="button"
-                                onClick={(e) => handleDeleteStudent(st.id, e)}
+                                onClick={(e) => { (window as any).bkSfx?.press?.(); handleDeleteStudent(st.id, e); }}
                                 title="Padam Murid"
                                 style={{
                                   border: 'none',
@@ -1149,7 +1152,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
                     type="button"
                     className="neo-btn"
                     disabled={isExporting}
-                    onClick={handleBulkDownloadPNG}
+                    onClick={() => { (window as any).bkSfx?.press?.(); handleBulkDownloadPNG(); }}
                     style={{
                       backgroundColor: '#ea580c',
                       color: '#ffffff',
@@ -1173,7 +1176,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
                     type="button"
                     className="neo-btn"
                     disabled={isExporting}
-                    onClick={handleBulkDownloadPDF}
+                    onClick={() => { (window as any).bkSfx?.press?.(); handleBulkDownloadPDF(); }}
                     style={{
                       backgroundColor: '#dc2626',
                       color: '#ffffff',
@@ -1238,6 +1241,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
                 <button
                   type="button"
                   onClick={() => {
+                    (window as any).bkSfx?.press?.();
                     playClick();
                     setZoomLevel(z => Math.max(70, z - 10));
                   }}
@@ -1250,6 +1254,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
                 <button
                   type="button"
                   onClick={() => {
+                    (window as any).bkSfx?.press?.();
                     playClick();
                     setZoomLevel(z => Math.min(130, z + 10));
                   }}
@@ -1260,7 +1265,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={handlePrint}
+                  onClick={() => { (window as any).bkSfx?.press?.(); handlePrint(); }}
                   title="Cetak Sijil"
                   style={{ border: '1.5px solid #cbd5e1', background: '#ffffff', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', fontWeight: '800' }}
                 >
@@ -1420,7 +1425,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
                 type="button"
                 className="neo-btn"
                 disabled={isExporting}
-                onClick={handleDownloadPNG}
+                onClick={() => { (window as any).bkSfx?.press?.(); handleDownloadPNG(); }}
                 style={{
                   backgroundColor: '#ea580c',
                   backgroundImage: 'linear-gradient(180deg, #f97316 0%, #ea580c 100%)',
@@ -1445,7 +1450,7 @@ export const AdminSijilManager: React.FC<AdminSijilManagerProps> = ({
                 type="button"
                 className="neo-btn"
                 disabled={isExporting}
-                onClick={handleDownloadPDF}
+                onClick={() => { (window as any).bkSfx?.press?.(); handleDownloadPDF(); }}
                 style={{
                   backgroundColor: '#dc2626',
                   backgroundImage: 'linear-gradient(180deg, #ef4444 0%, #dc2626 100%)',

@@ -813,6 +813,7 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
             <button
               type="button"
               onClick={() => {
+                (window as any).bkSfx?.press?.();
                 if (selectedBook) {
                   handleBackToShelf();
                 } else {
@@ -876,7 +877,7 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
                     transition={{ type: 'spring', stiffness: 380, damping: 20, delay: index * 0.08 }}
                     whileHover={{ scale: 1.03, y: -3 }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => handleOpenBook(book)}
+                    onClick={() => { (window as any).bkSfx?.press?.(); handleOpenBook(book); }}
                     style={{
                       background: '#ffffff',
                       borderRadius: isMobile ? '16px' : '22px',
@@ -1145,7 +1146,7 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
                         {/* Button "Mula" (Follows Book Theme Gradient) */}
                         <button
                           type="button"
-                          onClick={() => handlePageChange(1)}
+                          onClick={() => { (window as any).bkSfx?.press?.(); handlePageChange(1); }}
                           style={{
                             background: selectedBook.gradient,
                             color: '#ffffff',
@@ -1223,7 +1224,7 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
                           {/* Left (Previous) Button - WHITE DEFAULT, BOOK THEME COLOR ON ACTIVE */}
                           <button
                             type="button"
-                            onClick={() => handlePageChange(currentPageIndex - 1)}
+                            onClick={() => { (window as any).bkSfx?.press?.(); handlePageChange(currentPageIndex - 1); }}
                             aria-label="Sebelumnya"
                             title="Sebelumnya"
                             style={{
@@ -1297,7 +1298,7 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
                           {/* Right (Next) Button - WHITE DEFAULT, BOOK THEME COLOR ON ACTIVE */}
                           <button
                             type="button"
-                            onClick={() => handlePageChange(currentPageIndex + 1)}
+                            onClick={() => { (window as any).bkSfx?.press?.(); handlePageChange(currentPageIndex + 1); }}
                             aria-label="Seterusnya"
                             title="Seterusnya"
                             style={{
@@ -1391,7 +1392,7 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
                 {selectedBook.pages.map((_, pIdx) => (
                   <div
                     key={pIdx}
-                    onClick={() => handlePageChange(pIdx)}
+                    onClick={() => { (window as any).bkSfx?.press?.(); handlePageChange(pIdx); }}
                     style={{
                       width: pIdx === currentPageIndex ? (isMobile ? '20px' : '26px') : (isMobile ? '7px' : '9px'),
                       height: isMobile ? '7px' : '9px',
@@ -1415,6 +1416,7 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
         <div
           className="modal-overlay"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             e.stopPropagation();
             handleDismissNotice();
           }}
@@ -1485,7 +1487,7 @@ export function BukuCeritaModal({ onClose, initialBookId }: BukuCeritaModalProps
                 justifyContent: 'center',
                 gap: '8px'
               }}
-              onClick={handleDismissNotice}
+              onClick={() => { (window as any).bkSfx?.press?.(); handleDismissNotice(); }}
             >
               <i className="fa-solid fa-thumbs-up"></i> Faham!
             </button>

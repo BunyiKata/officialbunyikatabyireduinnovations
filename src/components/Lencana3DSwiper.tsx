@@ -309,6 +309,7 @@ export function Lencana3DSwiper() {
         <button
           type="button"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             e.stopPropagation();
             handlePrev();
           }}
@@ -342,6 +343,7 @@ export function Lencana3DSwiper() {
         <button
           type="button"
           onClick={(e) => {
+            (window as any).bkSfx?.press?.();
             e.stopPropagation();
             handleNext();
           }}
@@ -395,7 +397,7 @@ export function Lencana3DSwiper() {
           return (
             <div
               key={badge.id}
-              onClick={() => handleBadgeClick(badge, unlocked)}
+              onClick={() => { (window as any).bkSfx?.press?.(); handleBadgeClick(badge, unlocked); }}
               className={`badge-card-item ${unlocked ? "is-unlocked" : "is-locked"}`}
               style={{
                 position: "absolute",
@@ -511,6 +513,7 @@ export function Lencana3DSwiper() {
           <div
             key={pos}
             onClick={() => {
+              (window as any).bkSfx?.press?.();
               if (activeIndex !== pos) {
                 playSwipeSound();
                 setActiveIndex(pos);

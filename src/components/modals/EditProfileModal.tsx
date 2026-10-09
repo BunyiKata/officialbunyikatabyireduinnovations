@@ -292,6 +292,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                   <button
                     className="neo-btn bg-red"
                     onClick={() => {
+                      (window as any).bkSfx?.press?.();
                       if (isMandatorySetup) {
                         setEditModalError("Sila lengkapkan semua maklumat wajib bertanda (*) dan klik butang simpan.");
                         return;
@@ -555,6 +556,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                               cursor: "pointer",
                             }}
                             onClick={() => {
+                              (window as any).bkSfx?.press?.();
                               setIsChangingPassword(true);
                               setNewPasswordInput("");
                             }}
@@ -594,7 +596,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 />
                                 <button
                                   type="button"
-                                  onClick={() => setShowNewPassword((prev) => !prev)}
+                                  onClick={() => { (window as any).bkSfx?.press?.(); setShowNewPassword((prev) => !prev); }}
                                   style={{
                                     position: "absolute",
                                     right: "8px",
@@ -640,6 +642,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                   boxShadow: "0 2px 0 var(--color-dark)",
                                 }}
                                 onClick={() => {
+                                  (window as any).bkSfx?.press?.();
                                   setIsChangingPassword(false);
                                   setNewPasswordInput("");
                                 }}
@@ -667,6 +670,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                   boxShadow: "0 2px 0 var(--color-dark)",
                                 }}
                                 onClick={() => {
+                                  (window as any).bkSfx?.press?.();
                                   if (!newPasswordInput.trim()) {
                                     (window as any).notify("Sila masukkan kata laluan baharu!");
                                     return;
@@ -863,6 +867,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 whiteSpace: "nowrap",
                               }}
                               onClick={() => {
+                                (window as any).bkSfx?.press?.();
                                 setIsChangingPassword(true);
                                 setNewPasswordInput("");
                                 setPasswordToast("");
@@ -903,7 +908,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 />
                                 <button
                                   type="button"
-                                  onClick={() => setShowNewPassword((prev) => !prev)}
+                                  onClick={() => { (window as any).bkSfx?.press?.(); setShowNewPassword((prev) => !prev); }}
                                   style={{
                                     position: "absolute",
                                     right: "8px",
@@ -949,6 +954,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                   boxShadow: "0 2px 0 var(--color-dark)",
                                 }}
                                 onClick={() => {
+                                  (window as any).bkSfx?.press?.();
                                   setIsChangingPassword(false);
                                   setNewPasswordInput("");
                                 }}
@@ -976,6 +982,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                   boxShadow: "0 2px 0 var(--color-dark)",
                                 }}
                                 onClick={() => {
+                                  (window as any).bkSfx?.press?.();
                                   if (!newPasswordInput.trim()) {
                                     (window as any).notify("Sila masukkan kata laluan baharu!");
                                     return;
@@ -1070,6 +1077,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 borderRadius: "6px",
                               }}
                               onClick={() => {
+                                (window as any).bkSfx?.press?.();
                                 setEditNamaKeluargaTemp(localStorage.getItem("bunyiKataNamaKeluarga") || "");
                               }}
                             >
@@ -1089,6 +1097,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 gap: "5px",
                               }}
                               onClick={async () => {
+                                (window as any).bkSfx?.press?.();
                                 const finalName = editNamaKeluargaTemp.trim().toUpperCase();
                                 if (!finalName) {
                                   if ((window as any).showAppToast) {
@@ -1229,6 +1238,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 flexShrink: 0,
                               }}
                               onClick={() => {
+                                (window as any).bkSfx?.press?.();
                                 if (typeof (window as any).openPakejProModal === "function") {
                                   (window as any).openPakejProModal("ibubapa");
                                 } else {
@@ -1290,6 +1300,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                   justifyContent: "center",
                                 }}
                                 onClick={() => {
+                                  (window as any).bkSfx?.press?.();
                                   setIsChangingFamilyCode(true);
                                   setNewFamilyCodeInput(editKodTemp || "");
                                 }}
@@ -1330,7 +1341,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                   type="button"
                                   className="neo-btn bg-red"
                                   style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
-                                  onClick={() => setIsChangingFamilyCode(false)}
+                                  onClick={() => { (window as any).bkSfx?.press?.(); setIsChangingFamilyCode(false); }}
                                   title="Batal"
                                 >
                                   <i className="fa-solid fa-xmark"></i>
@@ -1339,7 +1350,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                   type="button"
                                   className="neo-btn"
                                   style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
-                                  onClick={() => handleSaveFamilyCode(newFamilyCodeInput)}
+                                  onClick={() => { (window as any).bkSfx?.press?.(); handleSaveFamilyCode(newFamilyCodeInput); }}
                                   title="Sahkan Kod Keluarga"
                                 >
                                   <i className="fa-solid fa-check"></i>
@@ -1458,6 +1469,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 whiteSpace: "nowrap",
                               }}
                               onClick={() => {
+                                (window as any).bkSfx?.press?.();
                                 setIsChangingPassword(true);
                                 setNewPasswordInput("");
                                 setPasswordToast("");
@@ -1498,7 +1510,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 />
                                 <button
                                   type="button"
-                                  onClick={() => setShowNewPassword((prev) => !prev)}
+                                  onClick={() => { (window as any).bkSfx?.press?.(); setShowNewPassword((prev) => !prev); }}
                                   style={{
                                     position: "absolute",
                                     right: "8px",
@@ -1544,6 +1556,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                   boxShadow: "0 2px 0 var(--color-dark)",
                                 }}
                                 onClick={() => {
+                                  (window as any).bkSfx?.press?.();
                                   setIsChangingPassword(false);
                                   setNewPasswordInput("");
                                 }}
@@ -1571,6 +1584,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                   boxShadow: "0 2px 0 var(--color-dark)",
                                 }}
                                 onClick={() => {
+                                  (window as any).bkSfx?.press?.();
                                   if (!newPasswordInput.trim()) {
                                     (window as any).notify("Sila masukkan kata laluan baharu!");
                                     return;
@@ -1700,6 +1714,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                               gap: "6px",
                             }}
                             onClick={async () => {
+                              (window as any).bkSfx?.press?.();
                               const s = editSekolahTemp.trim().toUpperCase();
                               const g = editGuruTemp.trim().toUpperCase();
                               if (!s || !g) {
@@ -1824,6 +1839,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 flexShrink: 0,
                               }}
                               onClick={() => {
+                                (window as any).bkSfx?.press?.();
                                 if (typeof (window as any).openPakejProModal === "function") {
                                   (window as any).openPakejProModal("guru");
                                 } else {
@@ -1891,6 +1907,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       justifyContent: "center",
                                     }}
                                     onClick={() => {
+                                      (window as any).bkSfx?.press?.();
                                       setIsChangingClassName1(true);
                                       setNewClassName1Input(editKelasTemp || "");
                                     }}
@@ -1929,7 +1946,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       type="button"
                                       className="neo-btn bg-red"
                                       style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
-                                      onClick={() => setIsChangingClassName1(false)}
+                                      onClick={() => { (window as any).bkSfx?.press?.(); setIsChangingClassName1(false); }}
                                       title="Batal"
                                     >
                                       <i className="fa-solid fa-xmark"></i>
@@ -1938,7 +1955,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       type="button"
                                       className="neo-btn"
                                       style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
-                                      onClick={() => handleSaveClassName1(newClassName1Input)}
+                                      onClick={() => { (window as any).bkSfx?.press?.(); handleSaveClassName1(newClassName1Input); }}
                                       title="Sahkan Nama Kelas 1"
                                     >
                                       <i className="fa-solid fa-check"></i>
@@ -1990,6 +2007,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       justifyContent: "center",
                                     }}
                                     onClick={() => {
+                                      (window as any).bkSfx?.press?.();
                                       setIsChangingCode1(true);
                                       setNewCode1Input(editKodTemp || "");
                                     }}
@@ -2030,7 +2048,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       type="button"
                                       className="neo-btn bg-red"
                                       style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
-                                      onClick={() => setIsChangingCode1(false)}
+                                      onClick={() => { (window as any).bkSfx?.press?.(); setIsChangingCode1(false); }}
                                       title="Batal"
                                     >
                                       <i className="fa-solid fa-xmark"></i>
@@ -2039,7 +2057,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       type="button"
                                       className="neo-btn"
                                       style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
-                                      onClick={() => handleSaveClassCode1(newCode1Input)}
+                                      onClick={() => { (window as any).bkSfx?.press?.(); handleSaveClassCode1(newCode1Input); }}
                                       title="Gunakan Kod Ini"
                                     >
                                       <i className="fa-solid fa-check"></i>
@@ -2111,6 +2129,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       justifyContent: "center",
                                     }}
                                     onClick={() => {
+                                      (window as any).bkSfx?.press?.();
                                       setIsChangingClassName2(true);
                                       setNewClassName2Input(editKelas2Temp || "");
                                     }}
@@ -2149,7 +2168,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       type="button"
                                       className="neo-btn bg-red"
                                       style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
-                                      onClick={() => setIsChangingClassName2(false)}
+                                      onClick={() => { (window as any).bkSfx?.press?.(); setIsChangingClassName2(false); }}
                                       title="Batal"
                                     >
                                       <i className="fa-solid fa-xmark"></i>
@@ -2158,7 +2177,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       type="button"
                                       className="neo-btn"
                                       style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
-                                      onClick={() => handleSaveClassName2(newClassName2Input)}
+                                      onClick={() => { (window as any).bkSfx?.press?.(); handleSaveClassName2(newClassName2Input); }}
                                       title="Sahkan Nama Kelas 2"
                                     >
                                       <i className="fa-solid fa-check"></i>
@@ -2208,6 +2227,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       justifyContent: "center",
                                     }}
                                     onClick={() => {
+                                      (window as any).bkSfx?.press?.();
                                       setIsChangingCode2(true);
                                       setNewCode2Input(editKod2Temp || "");
                                     }}
@@ -2248,7 +2268,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       type="button"
                                       className="neo-btn bg-red"
                                       style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
-                                      onClick={() => setIsChangingCode2(false)}
+                                      onClick={() => { (window as any).bkSfx?.press?.(); setIsChangingCode2(false); }}
                                       title="Batal"
                                     >
                                       <i className="fa-solid fa-xmark"></i>
@@ -2258,6 +2278,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                       className="neo-btn"
                                       style={{ width: "36px", height: "36px", padding: 0, minWidth: "36px", backgroundColor: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}
                                       onClick={() => {
+                                        (window as any).bkSfx?.press?.();
                                         if (newCode2Input.trim().toUpperCase() === editKodTemp) {
                                           (window as any).notify("Kod Kelas 2 tidak boleh sama dengan Kod Kelas 1!");
                                           return;
@@ -2315,6 +2336,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 flexShrink: 0,
                               }}
                               onClick={() => {
+                                (window as any).bkSfx?.press?.();
                                 if (typeof (window as any).openPakejProModal === "function") {
                                   (window as any).openPakejProModal("guru");
                                 } else {
@@ -2432,6 +2454,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 whiteSpace: "nowrap",
                               }}
                               onClick={() => {
+                                (window as any).bkSfx?.press?.();
                                 setIsChangingPassword(true);
                                 setNewPasswordInput("");
                                 setPasswordToast("");
@@ -2472,7 +2495,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                 />
                                 <button
                                   type="button"
-                                  onClick={() => setShowNewPassword((prev) => !prev)}
+                                  onClick={() => { (window as any).bkSfx?.press?.(); setShowNewPassword((prev) => !prev); }}
                                   style={{
                                     position: "absolute",
                                     right: "8px",
@@ -2518,6 +2541,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                   boxShadow: "0 2px 0 var(--color-dark)",
                                 }}
                                 onClick={() => {
+                                  (window as any).bkSfx?.press?.();
                                   setIsChangingPassword(false);
                                   setNewPasswordInput("");
                                 }}
@@ -2545,6 +2569,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                                   boxShadow: "0 2px 0 var(--color-dark)",
                                 }}
                                 onClick={() => {
+                                  (window as any).bkSfx?.press?.();
                                   if (!newPasswordInput.trim()) {
                                     if ((window as any).showAppToast) {
                                       (window as any).showAppToast("Amaran", "Sila masukkan kata laluan baharu!", "warning");
@@ -2631,7 +2656,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                               fontSize: "0.9rem",
                               justifyContent: "center",
                             }}
-                            onClick={() => setShowPasswordConfirmModal(false)}
+                            onClick={() => { (window as any).bkSfx?.press?.(); setShowPasswordConfirmModal(false); }}
                           >
                             Batal
                           </button>
@@ -2647,6 +2672,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                               justifyContent: "center",
                             }}
                             onClick={async () => {
+                              (window as any).bkSfx?.press?.();
                               // [KESELAMATAN S1] JANGAN simpan kata laluan mentah dalam localStorage.
                               // Kata laluan hanya dihantar terus ke Firebase Auth di bawah.
                               const passToSave = newPasswordInput.trim();
@@ -2686,6 +2712,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                       <button
                         type="button"
                         onClick={async () => {
+                          (window as any).bkSfx?.press?.();
                           if (!affiliateNamaTemp.trim()) {
                             setEditModalError("Sila masukkan Nama Affiliate!");
                             return;
@@ -2750,6 +2777,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                       <button
                         type="button"
                         onClick={async () => {
+                          (window as any).bkSfx?.press?.();
                           if (!editAdminNamaSistemTemp.trim()) {
                             setEditModalError("Sila lengkapkan ruangan Nama Sistem!");
                             return;
@@ -2820,6 +2848,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                       <button
                         type="button"
                         onClick={async () => {
+                          (window as any).bkSfx?.press?.();
                           const s = editSekolahTemp.trim().toUpperCase();
                           const g = editGuruTemp.trim().toUpperCase();
                           if (!s || !g) {
@@ -2894,6 +2923,7 @@ export function EditProfileModal(props: EditProfileModalProps) {
                       <button
                         type="button"
                         onClick={async () => {
+                          (window as any).bkSfx?.press?.();
                           const f = editNamaKeluargaTemp.trim().toUpperCase();
                           if (!f) {
                             setEditModalError("Sila masukkan Nama Keluarga!");
